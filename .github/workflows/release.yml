@@ -1,5 +1,6 @@
-# Pubblica una release quando si invia un'etichetta di versione, per esempio: git tag v1.0.0 && git push origin v1.0.0
-# Ricostruisce il programma, controlla che docs/ sia aggiornato e allega il file con la sua impronta SHA-256.
+# Pubblica una release quando si invia un'etichetta di versione, per esempio: git tag v1.3.0 && git push origin v1.3.0
+# Ricostruisce il programma, controlla che docs/ sia aggiornato, firma la provenienza del file
+# e lo allega alla release con la sua impronta SHA-256.
 name: Release
 
 on:
@@ -8,6 +9,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -19,11 +22,20 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Controlla che l'etichetta corrisponda alla versione del programma
+        run: test "v$(cat ufficio/VERSIONE)" = "$GITHUB_REF_NAME"
+
       - name: Costruisci Tassello Ufficio
         run: python ufficio/build.py
 
-      - name: Controlla che il file pubblicato corrisponda ai sorgenti
-        run: git diff --exit-code docs/tassello-ufficio.html
+      - name: Controlla che i file pubblicati corrispondano ai sorgenti
+        run: git diff --exit-code docs/tassello-ufficio.html docs/versioni.json
+
+      # Firma di provenienza (Sigstore): si verifica con gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello
+      - name: Firma la provenienza del file
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: docs/tassello-ufficio.html
 
       - name: Crea la release
         env:
@@ -35,7 +47,9 @@ jobs:
             echo
             echo "Impronta SHA-256: \`$sha\`"
             echo
-            echo "In Windows puoi verificarla con: \`certutil -hashfile tassello-ufficio.html SHA256\`"
+            echo "Per controllare una copia usa la pagina [Verifica una copia](https://svitatlco.github.io/tassello/verifica.html), oppure in Windows: \`certutil -hashfile tassello-ufficio.html SHA256\`"
+            echo
+            echo "Firma di provenienza: \`gh attestation verify tassello-ufficio.html --repo $GITHUB_REPOSITORY\`"
           } > note.md
           gh release create "$GITHUB_REF_NAME" docs/tassello-ufficio.html \
             --title "Tassello Ufficio ${GITHUB_REF_NAME#v}" --notes-file note.md

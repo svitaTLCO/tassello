@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="it" data-mode="word" data-theme="light" data-contrast="normal"><head>
 <meta charset="utf-8">
+<!-- Regola di sicurezza: il programma non può collegarsi a internet né caricare script o risorse da altri siti.
+     Dal sito ufficiale può usare le proprie icone e registrare l'app installabile (manifest e service worker). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; connect-src data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <title>Tassello Ufficio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">

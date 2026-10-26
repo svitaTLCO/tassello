@@ -5,7 +5,12 @@ async function start(){applyPrefs();try{document.execCommand('defaultParagraphSe
   if(!isWord()){renderGrid();renderCharts();updateExcelStats()}
   status('Pronto · i dati restano sul dispositivo')}
  catch(e){console.error('Avvio non riuscito',e);toast('Avvio non riuscito: '+e.message)}}
-start();
+// Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si può installare come app
+// che funziona anche senza rete e si aggiorna dal sito.
+function enableInstall(){if(location.protocol==='file:'||!('serviceWorker' in navigator))return;
+ document.head.append(Object.assign(document.createElement('link'),{rel:'manifest',href:'manifest.webmanifest'}));
+ navigator.serviceWorker.register('sw.js').catch(()=>{})}
+start().then(enableInstall);
 })();
 </script>
 </body></html>

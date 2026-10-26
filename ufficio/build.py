@@ -1,13 +1,20 @@
 """Costruisce Tassello Ufficio: unisce i sorgenti di src/ nell'ordine indicato e scrive docs/tassello-ufficio.html.
 
+Il numero di versione sta in ufficio/VERSIONE e sostituisce {{VERSIONE}} nei sorgenti.
+L'impronta SHA-256 del file costruito viene registrata in docs/versioni.json, l'elenco delle copie
+ufficiali che la pagina Verifica del sito usa per riconoscerle.
+
 Uso: python ufficio/build.py
 Non servono dipendenze: basta Python 3.8 o successivo.
 """
-import hashlib, pathlib, sys
+import datetime, hashlib, json, pathlib, sys
 
 HERE = pathlib.Path(__file__).parent
 SRC = HERE / 'src'
-DEST = HERE.parent / 'docs' / 'tassello-ufficio.html'
+DOCS = HERE.parent / 'docs'
+DEST = DOCS / 'tassello-ufficio.html'
+VERSIONS = DOCS / 'versioni.json'
+VERSION = (HERE / 'VERSIONE').read_text(encoding='utf-8').strip()
 
 # L'ordine conta: le costanti devono esistere prima del codice che le usa all'avvio.
 ORDER = [
@@ -27,7 +34,21 @@ if missing or extra:
     sys.exit(f'Sorgenti non allineati. Mancano: {missing}. Non elencati in ORDER: {extra}')
 
 out = '\n'.join((SRC / n).read_text(encoding='utf-8').rstrip('\n') for n in ORDER) + '\n'
-DEST.parent.mkdir(parents=True, exist_ok=True)
+out = out.replace('{{VERSIONE}}', VERSION)
+DOCS.mkdir(parents=True, exist_ok=True)
 DEST.write_bytes(out.encode('utf-8'))
 data = DEST.read_bytes()
-print(f'{DEST.relative_to(HERE.parent)}  {len(data):,} byte  SHA-256 {hashlib.sha256(data).hexdigest()}')
+digest = hashlib.sha256(data).hexdigest()
+
+# Una voce per versione, la più recente in cima. La voce della versione corrente segue il file
+# costruito: cambia solo se cambia l'impronta, così una build ripetuta non modifica nulla.
+listing = json.loads(VERSIONS.read_text(encoding='utf-8')) if VERSIONS.exists() else {'versioni': []}
+entries = [v for v in listing['versioni'] if v['versione'] != VERSION]
+current = next((v for v in listing['versioni'] if v['versione'] == VERSION), None)
+if not current or current['sha256'] != digest:
+    current = {'versione': VERSION, 'data': datetime.date.today().isoformat(), 'sha256': digest}
+entries.insert(0, current)
+listing = {'programma': 'Tassello Ufficio', 'file': DEST.name, 'ultima': VERSION, 'versioni': entries}
+VERSIONS.write_text(json.dumps(listing, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
+
+print(f'{DEST.relative_to(HERE.parent)}  versione {VERSION}  {len(data):,} byte  SHA-256 {digest}')

@@ -1,0 +1,20 @@
+{
+  "id": "./tassello-ufficio.html",
+  "name": "Tassello Ufficio",
+  "short_name": "Tassello",
+  "description": "Testo e Calcolo: documenti e fogli di calcolo nel browser, anche senza rete.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./tassello-ufficio.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2457c5",
+  "categories": ["productivity", "business", "education"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
