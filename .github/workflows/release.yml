@@ -19,23 +19,23 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Costruisci Tessera Ufficio
+      - name: Costruisci Tassello Ufficio
         run: python ufficio/build.py
 
       - name: Controlla che il file pubblicato corrisponda ai sorgenti
-        run: git diff --exit-code docs/tessera-ufficio.html
+        run: git diff --exit-code docs/tassello-ufficio.html
 
       - name: Crea la release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sha=$(sha256sum docs/tessera-ufficio.html | cut -d' ' -f1)
+          sha=$(sha256sum docs/tassello-ufficio.html | cut -d' ' -f1)
           {
-            echo "Scarica \`tessera-ufficio.html\` e aprilo con un doppio clic in Chrome o Edge recenti: funziona anche senza rete."
+            echo "Scarica \`tassello-ufficio.html\` e aprilo con un doppio clic in Chrome o Edge recenti: funziona anche senza rete."
             echo
             echo "Impronta SHA-256: \`$sha\`"
             echo
-            echo "In Windows puoi verificarla con: \`certutil -hashfile tessera-ufficio.html SHA256\`"
+            echo "In Windows puoi verificarla con: \`certutil -hashfile tassello-ufficio.html SHA256\`"
           } > note.md
-          gh release create "$GITHUB_REF_NAME" docs/tessera-ufficio.html \
-            --title "Tessera Ufficio ${GITHUB_REF_NAME#v}" --notes-file note.md
+          gh release create "$GITHUB_REF_NAME" docs/tassello-ufficio.html \
+            --title "Tassello Ufficio ${GITHUB_REF_NAME#v}" --notes-file note.md

@@ -1,4 +1,4 @@
-"""Costruisce Tessera Ufficio: unisce i sorgenti di src/ nell'ordine indicato e scrive docs/tessera-ufficio.html.
+"""Costruisce Tassello Ufficio: unisce i sorgenti di src/ nell'ordine indicato e scrive docs/tassello-ufficio.html.
 
 Uso: python ufficio/build.py
 Non servono dipendenze: basta Python 3.8 o successivo.
@@ -7,7 +7,7 @@ import hashlib, pathlib, sys
 
 HERE = pathlib.Path(__file__).parent
 SRC = HERE / 'src'
-DEST = HERE.parent / 'docs' / 'tessera-ufficio.html'
+DEST = HERE.parent / 'docs' / 'tassello-ufficio.html'
 
 # L'ordine conta: le costanti devono esistere prima del codice che le usa all'avvio.
 ORDER = [
