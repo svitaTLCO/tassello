@@ -1,0 +1,8 @@
+# Impostazioni locali degli editor e degli strumenti
+.claude/
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+__pycache__/

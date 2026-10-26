@@ -1,0 +1,2 @@
+# A capo in stile Unix in tutti i file di testo, anche su Windows: il programma costruito resta identico ovunque.
+* text=auto eol=lf

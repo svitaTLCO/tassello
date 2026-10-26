@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Tessera">
+  <rect width="46" height="46" rx="10" fill="#2457C5"/>
+  <path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/>
+  <path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/>
+  <rect y="54" width="46" height="46" rx="10" fill="#B35500"/>
+  <rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/>
+</svg>

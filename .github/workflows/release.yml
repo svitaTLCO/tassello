@@ -1,0 +1,41 @@
+# Pubblica una release quando si invia un'etichetta di versione, per esempio: git tag v1.0.0 && git push origin v1.0.0
+# Ricostruisce il programma, controlla che docs/ sia aggiornato e allega il file con la sua impronta SHA-256.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Costruisci Tessera Ufficio
+        run: python ufficio/build.py
+
+      - name: Controlla che il file pubblicato corrisponda ai sorgenti
+        run: git diff --exit-code docs/tessera-ufficio.html
+
+      - name: Crea la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(sha256sum docs/tessera-ufficio.html | cut -d' ' -f1)
+          {
+            echo "Scarica \`tessera-ufficio.html\` e aprilo con un doppio clic in Chrome o Edge recenti: funziona anche senza rete."
+            echo
+            echo "Impronta SHA-256: \`$sha\`"
+            echo
+            echo "In Windows puoi verificarla con: \`certutil -hashfile tessera-ufficio.html SHA256\`"
+          } > note.md
+          gh release create "$GITHUB_REF_NAME" docs/tessera-ufficio.html \
+            --title "Tessera Ufficio ${GITHUB_REF_NAME#v}" --notes-file note.md

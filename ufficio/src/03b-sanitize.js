@@ -1,0 +1,21 @@
+// Pulizia dell’HTML del documento: elenco chiuso di tag, attributi, classi e proprietà di stile.
+// Vale per bozze, progetti, incolla, file HTML e DOCX importati.
+const SAFE_TAGS=new Set('P DIV SPAN B STRONG I EM U S STRIKE SUB SUP H1 H2 H3 H4 H5 H6 UL OL LI BLOCKQUOTE BR HR TABLE THEAD TBODY TR TD TH A IMG FONT CAPTION FIGURE FIGCAPTION MATH MROW MI MN MO MS MTEXT MSPACE MFRAC MSUP MSUB MSUBSUP MSQRT MROOT MUNDER MOVER MUNDEROVER MTABLE MTR MTD MSTYLE MPADDED MPHANTOM'.split(' '));
+const DROP_TAGS=new Set('SCRIPT STYLE IFRAME OBJECT EMBED SVG FORM INPUT BUTTON SELECT TEXTAREA VIDEO AUDIO LINK META TEMPLATE NOSCRIPT CANVAS ANNOTATION ANNOTATION-XML SEMANTICS'.split(' '));
+const SAFE_CLASSES=new Set(('pagebreak toc toc-title toc-1 toc-2 toc-3 toc-4 toc-5 toc-6 footnotes fn fn-note fn-head endnotes en en-note en-head title subtitle cap-n lst-dash ml-legal tb-none tb-outer tb-h tb-full img-left img-center img-right cmt cmt-done mfield '+
+ 'tab ld-dot ld-dash ld-line dropcap sect sect-cont xref xr-label xr-text xr-page xr-pos xr-num bm xe idx idx-title idx-letter tof tof-title cite biblio biblio-title cc cc-check cc-drop cc-date cc-text textbox tbx-left tbx-right tbx-center eq tof-fig tof-tab idx-sub cc-empty').split(' '));
+const SAFE_STYLE=new Set(['font-size','font-family','font-weight','font-style','text-decoration','text-decoration-line','text-decoration-style','text-align','color','background-color','vertical-align','margin-left','margin-right','margin-top','margin-bottom','text-indent','line-height','width','list-style-type','font-variant','font-variant-caps','letter-spacing','text-transform','break-before','break-after','break-inside','orphans','widows','border','border-top','border-bottom','border-left','border-right','padding','--os-tabs']);
+const SAFE_ID=/^(?:(?:h|fn|fnr|en|enr|cap|bm|xe|sec|cc|bib)-[a-z0-9]{1,24}|cm-[a-z0-9]{1,24}(?:-\d{1,3})?)$/;
+const styleValueOk=v=>!/[<>{}\\]|url|expression|@import|javascript|behavior/i.test(v)&&!/[()]/.test(v.replace(/rgba?\(\s*[\d.]+%?\s*,\s*[\d.]+%?\s*,\s*[\d.]+%?\s*(?:,\s*[\d.]+%?\s*)?\)/gi,''));
+function sanitizeHTML(html){const tpl=document.createElement('template');tpl.innerHTML=String(html||'');
+ const walk=root=>{for(const n of Array.from(root.childNodes)){if(n.nodeType===8){n.remove();continue}if(n.nodeType!==1)continue;const tag=n.tagName.toUpperCase();if(!SAFE_TAGS.has(tag)){if(DROP_TAGS.has(tag)||n.namespaceURI==='http://www.w3.org/2000/svg'){n.remove();continue}walk(n);n.replaceWith(...Array.from(n.childNodes));continue}
+  for(const a of Array.from(n.attributes)){const k=a.name.toLowerCase(),v=a.value;let ok=false;
+   if(k==='title'||k==='class'||k==='style')ok=true;else if(k==='id')ok=SAFE_ID.test(v);else if(k==='href')ok=tag==='A'&&/^(https?:\/\/|mailto:|#[\w-]+$)/i.test(v);else if(k==='src')ok=tag==='IMG'&&/^(data:image\/(png|jpeg|gif|webp);base64,|https?:\/\/)/i.test(v);
+   else if(k==='alt')ok=tag==='IMG';else if(k==='scope')ok=tag==='TH'&&/^(col|row)$/.test(v);else if(k==='start')ok=tag==='OL'&&/^\d{1,4}$/.test(v);else if(k==='colspan'||k==='rowspan')ok=/^\d{1,3}$/.test(v);else if(k==='align')ok=/^(left|center|right|justify)$/i.test(v);
+   else if(k==='width'||k==='height')ok=tag==='IMG'&&/^\d{1,4}%?$/.test(v);else if(k==='color'||k==='face'||k==='size')ok=tag==='FONT'&&!/[<>"]/.test(v);else if(k==='contenteditable')ok=v==='false'&&['SPAN','SUP','A','DIV'].includes(tag);
+   else if(k==='display')ok=tag==='MATH'&&/^(block|inline)$/.test(v);else if(k==='mathvariant')ok=/^[a-z-]{1,24}$/.test(v);
+   if(!ok){n.removeAttribute(a.name);continue}
+   if(k==='class'){const keep=v.split(/\s+/).filter(x=>SAFE_CLASSES.has(x)||/^st-[a-z0-9]{1,12}$/.test(x)||/^lv-\d$/.test(x));if(keep.length)n.setAttribute('class',keep.join(' '));else n.removeAttribute('class')}
+   else if(k==='style'){const out=[];for(const part of v.split(';')){const j=part.indexOf(':');if(j<0)continue;const name=part.slice(0,j).trim().toLowerCase(),val=part.slice(j+1).trim();if(SAFE_STYLE.has(name)&&val&&val.length<200&&styleValueOk(val))out.push(name+':'+val)}if(out.length)n.setAttribute('style',out.join(';'));else n.removeAttribute('style')}
+   else if(k==='title'&&v.length>2000)n.setAttribute('title',v.slice(0,2000))}
+  walk(n)}};walk(tpl.content);return tpl.innerHTML}
