@@ -2,8 +2,11 @@ const ERR_XLSX={'#DIV/0!':'#DIV/0!','#NUM!':'#NUM!','#REF!':'#REF!','#RIF!':'#RE
 class FErr{constructor(m){this.m=m}}
 const isErr=x=>x instanceof FErr;
 const raise=x=>{if(isErr(x))throw Error(x.m);return x};
-function getSheetByName(name){return state.sheets.find(s=>s.name.toLowerCase()===String(name).toLowerCase())}
-function rawNumber(val){if(typeof val==='number')return val;if(typeof val==='boolean')return NaN;const s=String(val??'').trim();if(!s)return NaN;if(/^-?\d+(?:[.,]\d+)?%$/.test(s))return parseFloat(s.replace(',','.'))/100;if(/^-?\d+(?:[.,]\d+)?$/.test(s))return parseFloat(s.replace(',','.'));if(/^-?\d{1,3}(?:\.\d{3})+(?:,\d+)?$/.test(s))return parseFloat(s.replace(/\./g,'').replace(',','.'));return NaN}
+function getSheetByName(name){const want=String(name).toLowerCase();return state.sheets.find(sh=>sh.name.toLowerCase()===want)}
+// Testo → numero all'italiana: "3,5", "12%", "1.234,56". NaN se il testo non è un numero.
+function rawNumber(val){switch(typeof val){case 'number':return val;case 'boolean':return NaN}const t=String(val??'').trim();if(!t)return NaN;
+ const m=/^(-?\d+(?:[.,]\d+)?)(%?)$/.exec(t);if(m)return parseFloat(m[1].replace(',','.'))/(m[2]?100:1);
+ return /^-?\d{1,3}(?:\.\d{3})+(?:,\d+)?$/.test(t)?parseFloat(t.replace(/\./g,'').replace(',','.')):NaN}
 // Date e orari: numeri seriali come in Excel (1 = 31/12/1899 + 1 giorno; la parte decimale è l'ora).
 const EPOCH=Date.UTC(1899,11,30);
 const fromSerial=n=>new Date(EPOCH+Math.floor(n)*86400000);
@@ -54,31 +57,33 @@ function xfind(key,arr,mode,rev){const idx=[...arr.keys()];if(rev)idx.reverse();
 const LIFT=new Set(['ABS','INT','MOD','ROUND','ROUNDUP','ROUNDDOWN','TRUNC','MROUND','SIGN','SQRT','POWER','LEN','UPPER','LOWER','PROPER','TRIM','LEFT','RIGHT','MID','REPT','EXACT','FIND','SEARCH','SUBSTITUTE','REPLACE','TEXT','VALUE','DATE','TIME','YEAR','MONTH','DAY','HOUR','MINUTE','SECOND','WEEKDAY','WEEKNUM','ISOWEEKNUM','DAYS','DATEDIF','EOMONTH','EDATE','IF','IFERROR','IFNA','ISBLANK','ISNUMBER','ISTEXT','ISERROR','ISNA','NOT','CHOOSE','PMT','PV','FV']);
 function multiCrit(args,from){const list=[];for(let i=from;i<args.length;i+=2){const rng=[args[i]].flat(Infinity);list.push([rng,criteria(args[i+1])])}const len=list[0]?.[0].length??0;if(list.some(([r])=>r.length!==len))throw Error('#VALORE!');return i=>list.every(([r,t])=>t(r[i]))}
 function ifsValues(args){const vals=[args[0]].flat(Infinity),ok=multiCrit(args,1);if(vals.length!==[args[1]].flat(Infinity).length)throw Error('#VALORE!');const out=[];vals.forEach((v,i)=>{if(!ok(i))return;raise(v);const n=typeof v==='number'?v:rawNumber(v);if(!Number.isNaN(n))out.push(n)});return out}
+// Aiuti per le funzioni di riepilogo: media (errore se non ci sono numeri), minimo e massimo (0 se non ci sono numeri).
+const mean=list=>{if(!list.length)throw Error('#DIV/0!');return list.reduce((t,x)=>t+x,0)/list.length};
+const extreme=(name,list)=>list.length?list.reduce(name.startsWith('MIN')?(a,b)=>Math.min(a,b):(a,b)=>Math.max(a,b)):0;
+const truthy=x=>Boolean(numeric(x)),boolText=v=>v?'VERO':'FALSO',MATH_1={ABS:Math.abs,SIGN:Math.sign,INT:Math.floor};
 const workday=n=>{const w=fromSerial(n).getUTCDay();return w!==0&&w!==6};
-function excelFunc(name,args){const n0=fnCanon(name),n=CANON[n0]||n0;if(LIFT.has(n)&&args.some(isArr))return broadcast(args,a=>excelFunc(name,a));const flat=flatten(args);if(!LAZY.has(n)){const e=flat.find(isErr);if(e)throw Error(e.m)}const numbers=flat.map(rawNumber).filter(x=>!Number.isNaN(x)),sum=a=>a.reduce((s,x)=>s+x,0),need=k=>{if(args.length<k)throw Error('#VALORE!')};
+function excelFunc(name,args){const n0=fnCanon(name),n=CANON[n0]||n0;if(LIFT.has(n)&&args.some(isArr))return broadcast(args,a=>excelFunc(name,a));const flat=flatten(args);if(!LAZY.has(n)){const e=flat.find(isErr);if(e)throw Error(e.m)}const numbers=[];for(const x of flat){const v=rawNumber(x);if(!Number.isNaN(v))numbers.push(v)}const sum=a=>a.reduce((s,x)=>s+x,0),need=k=>{if(args.length<k)throw Error('#VALORE!')};
  switch(n){
  case 'SUM':return sum(numbers);
  case 'PRODUCT':return numbers.length?numbers.reduce((a,b)=>a*b,1):0;
  case 'SUMPRODUCT':{const arrs=args.map(a=>[a].flat(Infinity)),len=arrs[0]?.length||0;if(arrs.some(a=>a.length!==len))throw Error('#VALORE!');let t=0;for(let i=0;i<len;i++){let p=1;for(const a of arrs){const v=a[i];p*=typeof v==='number'?v:0}t+=p}return t}
- case 'AVERAGE':if(!numbers.length)throw Error('#DIV/0!');return sum(numbers)/numbers.length;
+ case 'AVERAGE':return mean(numbers);
  case 'MEDIAN':{if(!numbers.length)throw Error('#NUM!');const a=[...numbers].sort((x,y)=>x-y),h=a.length>>1;return a.length%2?a[h]:(a[h-1]+a[h])/2}
  case 'MODE.SNGL':{const cnt=new Map();let best=null,bc=1;for(const x of numbers){const c=(cnt.get(x)||0)+1;cnt.set(x,c);if(c>bc){bc=c;best=x}}if(best===null)throw Error('#N/D');return best}
- case 'MIN':return numbers.length?Math.min(...numbers):0;
- case 'MAX':return numbers.length?Math.max(...numbers):0;
+ case 'MIN':case 'MAX':return extreme(n,numbers);
  case 'LARGE':case 'SMALL':{const a=[args[0]].flat(Infinity).filter(v=>typeof v==='number').sort((x,y)=>n==='LARGE'?y-x:x-y),k=Math.trunc(numeric(args[1]));if(k<1||k>a.length)throw Error('#NUM!');return a[k-1]}
  case 'RANK.EQ':{const x=numeric(args[0]),a=[args[1]].flat(Infinity).filter(v=>typeof v==='number');if(!a.includes(x))throw Error('#N/D');return (args[2]!==undefined&&numeric(args[2])?a.filter(v=>v<x):a.filter(v=>v>x)).length+1}
  case 'STDEV.S':case 'STDEV.P':case 'VAR.S':case 'VAR.P':{const pop=n.endsWith('.P'),k=numbers.length;if(k<(pop?1:2))throw Error('#DIV/0!');const m=sum(numbers)/k,v=sum(numbers.map(x=>(x-m)**2))/(pop?k:k-1);return n.startsWith('VAR')?v:Math.sqrt(v)}
  case 'COUNT':return numbers.length;
- case 'COUNTA':return flat.filter(v=>v!==''&&v!==null&&v!==undefined).length;
+ case 'COUNTA':return flat.reduce((n,v)=>v===''||v==null?n:n+1,0);
  case 'COUNTBLANK':return flat.filter(v=>v===''||v===null||v===undefined).length;
  case 'COUNTIF':return [args[0]].flat(Infinity).filter(criteria(args[1])).length;
  case 'COUNTIFS':{const ok=multiCrit(args,0),len=[args[0]].flat(Infinity).length;let c=0;for(let i=0;i<len;i++)if(ok(i))c++;return c}
  case 'SUMIF':case 'AVERAGEIF':{const rng=[args[0]].flat(Infinity),sr=args[2]!==undefined?[args[2]].flat(Infinity):rng,t=criteria(args[1]),vals=[];rng.forEach((x,i)=>{if(!t(x))return;const v=raise(sr[i]),nv=typeof v==='number'?v:rawNumber(v);if(!Number.isNaN(nv))vals.push(nv)});if(n==='SUMIF')return sum(vals);if(!vals.length)throw Error('#DIV/0!');return sum(vals)/vals.length}
  case 'SUMIFS':return sum(ifsValues(args));
- case 'AVERAGEIFS':{const v=ifsValues(args);if(!v.length)throw Error('#DIV/0!');return sum(v)/v.length}
- case 'MAXIFS':{const v=ifsValues(args);return v.length?Math.max(...v):0}
- case 'MINIFS':{const v=ifsValues(args);return v.length?Math.min(...v):0}
- case 'IF':return numeric(args[0])?scalar(args[1]??true):scalar(args[2]??false);
+ case 'AVERAGEIFS':return mean(ifsValues(args));
+ case 'MAXIFS':case 'MINIFS':return extreme(n,ifsValues(args));
+ case 'IF':{const chosen=numeric(args[0])?args[1]??true:args[2]??false;return scalar(chosen)}
  case 'IFS':{for(let i=0;i+1<args.length;i+=2)if(numeric(args[i]))return scalar(args[i+1]);throw Error('#N/D')}
  case 'SWITCH':{need(3);const v=scalar(args[0]);let i=1;for(;i+1<args.length;i+=2)if(cmpVals(v,scalar(args[i]))===0)return scalar(args[i+1]);if(i<args.length)return scalar(args[i]);throw Error('#N/D')}
  case 'CHOOSE':{const i=Math.trunc(numeric(args[0]));if(i<1||i>=args.length)throw Error('#VALORE!');return scalar(args[i])}
@@ -90,17 +95,15 @@ function excelFunc(name,args){const n0=fnCanon(name),n=CANON[n0]||n0;if(LIFT.has
  case 'ISNUMBER':return typeof first0(args[0])==='number';
  case 'ISTEXT':{const v=first0(args[0]);return typeof v==='string'&&v!==''}
  case 'NA':throw Error('#N/D');
- case 'AND':return flat.every(x=>!!numeric(x));
- case 'OR':return flat.some(x=>!!numeric(x));
+ case 'AND':return flat.every(truthy);
+ case 'OR':return flat.some(truthy);
  case 'NOT':return !numeric(args[0]);
  case 'ROUND':case 'ROUNDUP':case 'ROUNDDOWN':case 'TRUNC':{const d=Math.max(-10,Math.min(10,Math.trunc(args[1]===undefined?0:numeric(args[1])))),f=Math.pow(10,d),x=numeric(args[0])*f;return (n==='ROUND'?Math.sign(x)*Math.round(Math.abs(x)+1e-9):n==='ROUNDUP'?Math.sign(x)*Math.ceil(Math.abs(x)-1e-9):Math.trunc(x))/f}
  case 'MROUND':{const x=numeric(args[0]),m=numeric(args[1]);if(!m)return 0;if(Math.sign(x)*Math.sign(m)<0)throw Error('#NUM!');return Math.round(x/m+1e-9*Math.sign(x/m))*m}
- case 'INT':return Math.floor(numeric(args[0]));
  case 'MOD':{const a=numeric(args[0]),b=numeric(args[1]);if(!b)throw Error('#DIV/0!');return a-b*Math.floor(a/b)}
- case 'ABS':return Math.abs(numeric(args[0]));
- case 'SIGN':return Math.sign(numeric(args[0]));
- case 'SQRT':{const x=numeric(args[0]);if(x<0)throw Error('#NUM!');return Math.sqrt(x)}
- case 'POWER':return Math.pow(numeric(args[0]),numeric(args[1]));
+ case 'ABS':case 'SIGN':case 'INT':return MATH_1[n](numeric(args[0]));
+ case 'SQRT':{const radicand=numeric(args[0]);if(radicand<0)throw Error('#NUM!');return Math.sqrt(radicand)}
+ case 'POWER':return numeric(args[0])**numeric(args[1]);
  case 'PI':return Math.PI;
  case 'RAND':return Math.random();
  case 'RANDBETWEEN':{const a=Math.ceil(numeric(args[0])),b=Math.floor(numeric(args[1]));if(b<a)throw Error('#NUM!');return a+Math.floor(Math.random()*(b-a+1))}
@@ -117,8 +120,8 @@ function excelFunc(name,args){const n0=fnCanon(name),n=CANON[n0]||n0;if(LIFT.has
  case 'FIND':case 'SEARCH':{const f=text(args[0]),w=text(args[1]),st=args[2]===undefined?1:Math.trunc(numeric(args[2]));if(st<1||st>w.length+1)throw Error('#VALORE!');let i;if(n==='FIND')i=w.indexOf(f,st-1);else{const re=new RegExp(escRe(f.toLowerCase()).replace(/\\\*/g,'[\\s\\S]*').replace(/\\\?/g,'.')),m=re.exec(w.toLowerCase().slice(st-1));i=m?m.index+st-1:-1}if(i<0)throw Error('#VALORE!');return i+1}
  case 'SUBSTITUTE':{const s=text(args[0]),o=text(args[1]),r=text(args[2]);if(!o)return s;if(args[3]===undefined)return s.split(o).join(r);const k=Math.trunc(numeric(args[3]));let i=-1;for(let j=0;j<k;j++){i=s.indexOf(o,i+1);if(i<0)return s}return s.slice(0,i)+r+s.slice(i+o.length)}
  case 'REPLACE':{const s=text(args[0]),st=Math.max(1,Math.trunc(numeric(args[1]))),k=Math.max(0,Math.trunc(numeric(args[2])));return s.slice(0,st-1)+text(args[3])+s.slice(st-1+k)}
- case 'CONCAT':return flat.map(v=>typeof v==='boolean'?(v?'VERO':'FALSO'):v).join('');
- case 'TEXTJOIN':{const d=text(args[0]),skip=!!numeric(args[1]);return flatten(args.slice(2)).map(v=>typeof v==='boolean'?(v?'VERO':'FALSO'):String(v??'')).filter(v=>!skip||v!=='').join(d)}
+ case 'CONCAT':return flat.map(v=>typeof v==='boolean'?boolText(v):v).join('');
+ case 'TEXTJOIN':{const d=text(args[0]),skip=!!numeric(args[1]);return flatten(args.slice(2)).map(v=>typeof v==='boolean'?boolText(v):String(v??'')).filter(v=>!skip||v!=='').join(d)}
  case 'TEXT':return formatText(scalar(args[0]),text(args[1]));
  case 'VALUE':{const v=scalar(args[0]);if(typeof v==='number')return v;const s=String(v).replace(/[€$\s]/g,''),x=numOf(s);if(Number.isNaN(x))throw Error('#VALORE!');return x}
  case 'TODAY':return Math.floor(nowSerial());
@@ -158,24 +161,61 @@ function excelFunc(name,args){const n0=fnCanon(name),n=CANON[n0]||n0;if(LIFT.has
  case 'FV':{const r=numeric(args[0]),k=numeric(args[1]),p=numeric(args[2]),pv=args[3]===undefined?0:numeric(args[3]),t=args[4]===undefined?0:numeric(args[4]);if(!r)return -(pv+p*k);const q=Math.pow(1+r,k);return -(pv*q+p*(1+r*t)*(q-1)/r)}
  case 'NPV':{const r=numeric(args[0]);return flatten(args.slice(1)).filter(v=>typeof v==='number').reduce((s,v,i)=>s+v/Math.pow(1+r,i+1),0)}
  default:throw Error('#NOME?')}}
-function evaluateFormula(formula,curSheet,stack){const source=formula.slice(1).replace(/^\s+/,'');if(/#REF!/i.test(source))throw Error('#REF!');let toks=[],i=0;
- const re=/^(?:\$?[A-Za-z]{1,3}\$?\d+#|\$?[A-Za-z]{1,3}:\$?[A-Za-z]{1,3}(?![A-Za-z0-9_.(])|\$?\d+:\$?\d+(?![\d.])|\$?[A-Za-z]{1,3}\$?\d+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|"(?:[^"]|"")*"|'(?:[^']|'')*'|[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_.]*|>=|<=|<>|[()+\-*\/^&%=<>:!,;])/;
- while(i<source.length){if(/\s/.test(source[i])){i++;continue}const m=re.exec(source.slice(i));if(!m)throw Error('#FORMULA!');toks.push(m[0]);i+=m[0].length}let p=0;const peek=()=>toks[p],take=()=>toks[p++],expect=t=>{if(take()!==t)throw Error('#FORMULA!')};
- const rank=op=>({'=':1,'<>':1,'>':1,'<':1,'>=':1,'<=':1,'&':2,'+':3,'-':3,'*':4,'/':4,'%':4,'^':5}[op]||0);
- const cellValue=(ref,s)=>{const xy=parseRef(ref);if(!xy)throw Error('#REF!');return evaluateCell(xy.r,xy.c,s,stack)};
- const safeCell=(r,c,s)=>{try{return evaluateCell(r,c,s,stack)}catch(e){if(String(e.message).startsWith('#')&&e.message!=='#CIRC!')return new FErr(e.message);throw e}};
- const block=(r1,r2,c1,c2,s)=>{if((r2-r1+1)*(c2-c1+1)>100000)throw Error('#RANGE!');const out=[];for(let r=r1;r<=r2;r++){const row=[];for(let c=c1;c<=c2;c++)row.push(safeCell(r,c,s));out.push(row)}return out};
- const area=(t,s)=>{if(/#$/.test(t)){const xy=parseRef(t.slice(0,-1));if(!xy)throw Error('#REF!');return spillArray(xy.r,xy.c,s,stack)}let m=/^\$?([A-Za-z]{1,3}):\$?([A-Za-z]{1,3})$/.exec(t);const used=()=>usedWithSpills(s,stack);if(m){let a=colNo(m[1]),b=colNo(m[2]);if(a>b)[a,b]=[b,a];if(b>=COLS)throw Error('#REF!');return block(0,used().r,a,b,s)}if((m=/^\$?(\d+):\$?(\d+)$/.exec(t))){let a=+m[1]-1,b=+m[2]-1;if(a>b)[a,b]=[b,a];if(a<0||b>=ROWS)throw Error('#REF!');return block(a,b,0,used().c,s)}return null};
- function expression(min=0){let x=primary();while(p<toks.length){const op=peek(),r=rank(op);if(r<min||!r)break;take();const y=expression(r+(op==='^'?0:1));x=isArr(x)||isArr(y)?broadcast([x,y],([u,v])=>binop(op,u,v)):binop(op,x,y)}return x}
- function primary(){let t=take();if(t===undefined)throw Error('#FORMULA!');if(t==='+'||t==='-'){const v=expression(6);return mapArr(v,x=>{const n=numeric(x);return t==='-'?-n:n})}if(t==='('){const v=expression();expect(')');return v}if(t[0]==='"')return t.slice(1,-1).replace(/""/g,'"');
-  const a0=area(t,curSheet);if(a0)return a0;
-  if(/^\d/.test(t)){const v=Number(t);if(peek()==='%'&&(p+1>=toks.length||[')',',',';','+','-','*','/','&','=','<','>','<>','<=','>='].includes(toks[p+1]))){take();return v/100}return v}
-  let sn=curSheet;if(peek()==='!'){take();sn=getSheetByName(t.startsWith("'")?t.slice(1,-1).replace(/''/g,"'"):t);if(!sn)throw Error('#REF!');t=take();if(!t)throw Error('#REF!');const a1=area(t,sn);if(a1)return a1}
-  if(parseRef(t)){if(peek()===':'){take();const other=take(),a=parseRef(t),b=parseRef(other);if(!b)throw Error('#REF!');return block(Math.min(a.r,b.r),Math.max(a.r,b.r),Math.min(a.c,b.c),Math.max(a.c,b.c),sn)}return cellValue(t,sn)}
-  if(peek()==='('){take();const args=[];if(peek()!==')'){while(true){const start=p;if(peek()===';'||peek()===','||peek()===')')args.push(undefined);else try{args.push(expression())}catch(e){if(!String(e.message).startsWith('#')||e.message==='#FORMULA!'||e.message==='#CIRC!')throw e;p=start;let depth=0;while(p<toks.length){const k=toks[p];if(k==='(')depth++;else if(k===')'){if(!depth)break;depth--}else if((k===','||k===';')&&!depth)break;p++}args.push(new FErr(e.message))}if(peek()===','||peek()===';'){take();continue}break}}expect(')');return excelFunc(t,args)}
-  const up=t.toUpperCase();if(up==='TRUE'||up==='VERO')return true;if(up==='FALSE'||up==='FALSO')return false;const nm=getName(t);if(nm)return nameValue(nm,stack);throw Error('#NOME?')}
- const result=expression();if(p!==toks.length)throw Error('#FORMULA!');return result}
-function binop(op,a,b){a=raise(a);b=raise(b);if(op==='&')return text(a)+text(b);if(['=','<>','>','>=','<','<='].includes(op)){const av=typeof a==='boolean'?NaN:numOf(a),bv=typeof b==='boolean'?NaN:numOf(b);if(!Number.isNaN(av)&&!Number.isNaN(bv)){a=av;b=bv}else if(typeof a==='string'&&typeof b==='string'){a=a.toLowerCase();b=b.toLowerCase()}switch(op){case '=':return a==b;case '<>':return a!=b;case '>':return a>b;case '>=':return a>=b;case '<':return a<b;default:return a<=b}}const av=numeric(a),bv=numeric(b);if(op==='+')return av+bv;if(op==='-')return av-bv;if(op==='*')return av*bv;if(op==='/'){if(!bv)throw Error('#DIV/0!');return av/bv}if(op==='%')return bv?av%bv:0;return Math.pow(av,bv)}
+// Scomposizione in simboli. L'ordine delle regole conta: prima i riferimenti speciali (matrice espansa A1#,
+// colonne intere A:B, righe intere 1:3), poi celle, numeri, testi, nomi di foglio tra apici, nomi e operatori.
+const FORMULA_TOKENS=[/\$?[A-Za-z]{1,3}\$?\d+#/y,/\$?[A-Za-z]{1,3}:\$?[A-Za-z]{1,3}(?![A-Za-z0-9_.(])/y,/\$?\d+:\$?\d+(?![\d.])/y,/\$?[A-Za-z]{1,3}\$?\d+/y,/\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/y,/"(?:[^"]|"")*"/y,/'(?:[^']|'')*'/y,/[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_.]*/y,/[<>]=|<>/y,/[()+\-*\/^&%=<>:!,;]/y];
+function formulaTokens(src){const out=[];let at=0;
+ while(at<src.length){if(/\s/.test(src[at])){at++;continue}let tok=null;for(const rule of FORMULA_TOKENS){rule.lastIndex=at;const m=rule.exec(src);if(m){tok=m[0];break}}if(tok===null)throw Error('#FORMULA!');out.push(tok);at+=tok.length}
+ return out}
+const BIN_RANK={'^':5,'*':4,'/':4,'%':4,'+':3,'-':3,'&':2,'=':1,'<>':1,'<':1,'>':1,'<=':1,'>=':1};
+const AFTER_PERCENT=new Set([')',',',';','+','-','*','/','&','=','<','>','<>','<=','>=']);
+// Un errore come #DIV/0! dentro un argomento diventa un valore: SE.ERRORE e simili possono gestirlo.
+const recoverable=e=>{const m=String(e.message);return m.startsWith('#')&&m!=='#FORMULA!'&&m!=='#CIRC!'};
+function evaluateFormula(formula,curSheet,stack){const body=formula.slice(1).replace(/^\s+/,'');if(/#REF!/i.test(body))throw Error('#REF!');
+ const toks=formulaTokens(body);let pos=0;
+ const look=()=>toks[pos],next=()=>toks[pos++],need=t=>{if(next()!==t)throw Error('#FORMULA!')};
+ const cellAt=(r,c,s)=>{try{return evaluateCell(r,c,s,stack)}catch(e){const m=String(e.message);if(m.startsWith('#')&&m!=='#CIRC!')return new FErr(m);throw e}};
+ const grid=(top,bottom,left,right,s)=>{if((bottom-top+1)*(right-left+1)>100000)throw Error('#RANGE!');return Array.from({length:bottom-top+1},(_,i)=>Array.from({length:right-left+1},(_,j)=>cellAt(top+i,left+j,s)))};
+ const span=(a,b)=>a<=b?[a,b]:[b,a];
+ function special(tok,s){
+  if(tok.endsWith('#')){const at=parseRef(tok.slice(0,-1));if(!at)throw Error('#REF!');return spillArray(at.r,at.c,s,stack)}
+  let m=/^\$?([A-Za-z]{1,3}):\$?([A-Za-z]{1,3})$/.exec(tok);
+  if(m){const [a,b]=span(colNo(m[1]),colNo(m[2]));if(b>=COLS)throw Error('#REF!');return grid(0,usedWithSpills(s,stack).r,a,b,s)}
+  m=/^\$?(\d+):\$?(\d+)$/.exec(tok);
+  if(m){const [a,b]=span(Number(m[1])-1,Number(m[2])-1);if(a<0||b>=ROWS)throw Error('#REF!');return grid(a,b,0,usedWithSpills(s,stack).c,s)}
+  return null}
+ function numberToken(tok){const v=Number(tok);if(look()==='%'&&(pos+1>=toks.length||AFTER_PERCENT.has(toks[pos+1]))){pos++;return v/100}return v}
+ function skipArgument(){let depth=0;for(;pos<toks.length;pos++){const k=toks[pos];if(k==='(')depth++;else if(k===')'){if(!depth)return;depth--}else if((k===','||k===';')&&!depth)return}}
+ function argumentList(){const args=[];if(look()===')'){pos++;return args}
+  for(;;){const t=look(),start=pos;if(t===';'||t===','||t===')')args.push(undefined);else{try{args.push(parseExpr())}catch(e){if(!recoverable(e))throw e;pos=start;skipArgument();args.push(new FErr(e.message))}}
+   if(look()===','||look()===';'){pos++;continue}break}
+  need(')');return args}
+ function parseUnit(){let tok=next();if(tok===undefined)throw Error('#FORMULA!');
+  if(tok==='+'||tok==='-'){const v=parseExpr(6),neg=tok==='-';return mapArr(v,x=>{const n=numeric(x);return neg?-n:n})}
+  if(tok==='('){const v=parseExpr();need(')');return v}
+  if(tok.startsWith('"'))return tok.slice(1,-1).replace(/""/g,'"');
+  const area=special(tok,curSheet);if(area)return area;
+  if(/^\d/.test(tok))return numberToken(tok);
+  let where=curSheet;
+  if(look()==='!'){pos++;const title=tok.startsWith("'")?tok.slice(1,-1).replace(/''/g,"'"):tok;where=getSheetByName(title);if(!where)throw Error('#REF!');tok=next();if(!tok)throw Error('#REF!');const other=special(tok,where);if(other)return other}
+  const at=parseRef(tok);
+  if(at){if(look()!==':')return evaluateCell(at.r,at.c,where,stack);pos++;const end=parseRef(next());if(!end)throw Error('#REF!');const [r1,r2]=span(at.r,end.r),[c1,c2]=span(at.c,end.c);return grid(r1,r2,c1,c2,where)}
+  if(look()==='('){pos++;return excelFunc(tok,argumentList())}
+  const word=tok.toUpperCase();if(word==='TRUE'||word==='VERO')return true;if(word==='FALSE'||word==='FALSO')return false;
+  const named=getName(tok);if(named)return nameValue(named,stack);throw Error('#NOME?')}
+ function parseExpr(minRank=0){let left=parseUnit();
+  while(pos<toks.length){const op=look(),rank=BIN_RANK[op]||0;if(!rank||rank<minRank)break;pos++;const right=parseExpr(op==='^'?rank:rank+1);left=isArr(left)||isArr(right)?broadcast([left,right],([u,v])=>binop(op,u,v)):binop(op,left,right)}
+  return left}
+ const result=parseExpr();if(look()!==undefined)throw Error('#FORMULA!');return result}
+// Operatori: & unisce testi; i confronti usano i numeri quando entrambi i lati lo sono, altrimenti il testo
+// senza distinguere maiuscole e minuscole; gli altri operatori sono aritmetici.
+const COMPARE={'=':(a,b)=>a==b,'<>':(a,b)=>a!=b,'>':(a,b)=>a>b,'>=':(a,b)=>a>=b,'<':(a,b)=>a<b,'<=':(a,b)=>a<=b};
+const ARITH={'+':(a,b)=>a+b,'-':(a,b)=>a-b,'*':(a,b)=>a*b,'/':(a,b)=>{if(!b)throw Error('#DIV/0!');return a/b},'%':(a,b)=>b?a%b:0,'^':(a,b)=>a**b};
+function binop(op,a,b){a=raise(a);b=raise(b);if(op==='&')return text(a)+text(b);
+ const compare=Object.hasOwn(COMPARE,op)?COMPARE[op]:null;
+ if(compare){const x=typeof a==='boolean'?NaN:numOf(a),y=typeof b==='boolean'?NaN:numOf(b);if(!Number.isNaN(x)&&!Number.isNaN(y))return compare(x,y);
+  return typeof a==='string'&&typeof b==='string'?compare(a.toLowerCase(),b.toLowerCase()):compare(a,b)}
+ const apply=Object.hasOwn(ARITH,op)?ARITH[op]:ARITH['^'];return apply(numeric(a),numeric(b))}
 // Espansione: la formula resta nella cella di partenza, le celle vicine mostrano il resto della matrice.
 const cellKey=(s,r,c)=>state.sheets.indexOf(s)+':'+toRef(r,c);
 const DYN_RE=/[:#]|SEQUENZA|SEQUENCE|MATR\.CASUALE|RANDARRAY|TESTO\.DIVIDI|TEXTSPLIT/i;
@@ -185,18 +225,27 @@ function anchorsOf(s){const mk='an:'+state.sheets.indexOf(s);if(calcMemo.has(mk)
 function spillAt(r,c,s,stack){for(const a of anchorsOf(s)){if(a.r>r)break;if(a.c>c||(a.r===r&&a.c===c)||stack.has(cellKey(s,a.r,a.c)))continue;let raw;try{raw=anchorRaw(a.r,a.c,s,stack)}catch(e){continue}if(!isArr(raw)||r>a.r+raw.length-1||c>a.c+raw[0].length-1)continue;if(spillOf(a.r,a.c,s,stack).blocked)continue;return{ar:a.r,ac:a.c,value:raw[r-a.r][c-a.c]}}return null}
 function spillArray(r,c,s,stack){const v=cellRaw(r,c,s);if(typeof v!=='string'||!v.startsWith('='))throw Error('#REF!');const raw=anchorRaw(r,c,s,stack);if(!isArr(raw))return [[raw]];if(spillOf(r,c,s,stack).blocked)throw Error('#ESPANDI!');return raw}
 function usedWithSpills(s,stack){const k='ub:'+state.sheets.indexOf(s);if(calcMemo.has(k))return calcMemo.get(k);const u={...usedBounds(s)};let skipped=false;for(const a of anchorsOf(s)){if(stack.has(cellKey(s,a.r,a.c))){skipped=true;continue}try{const raw=anchorRaw(a.r,a.c,s,stack);if(isArr(raw)){u.r=Math.max(u.r,Math.min(ROWS-1,a.r+raw.length-1));u.c=Math.max(u.c,Math.min(COLS-1,a.c+raw[0].length-1))}}catch(e){}}if(!skipped)calcMemo.set(k,u);return u}
-function evaluateCell(r,c,s=sheet(),stack=new Set()){const key=cellKey(s,r,c);if(calcMemo.has(key))return calcMemo.get(key);const v=cellRaw(r,c,s);let res;
- if(typeof v==='string'&&v.length>1&&v.startsWith('=')){const raw=anchorRaw(r,c,s,stack);if(isArr(raw)){if(spillOf(r,c,s,stack).blocked)throw Error('#ESPANDI!');res=raise(raw[0][0])}else res=raw}
- else if(v===''||v==null){const g=spillAt(r,c,s,stack);res=g?raise(g.value):''}
- else if(typeof v!=='string')res=v;else if(!v.trim())res='';else if(cell(r,c,s)?.s?.fmt==='Testo')res=v;else{const num=rawNumber(v);if(!Number.isNaN(num)&&!/^0\d/.test(v))res=num;else{const dt=parseDateText(v);res=dt?dt.v:v}}
- calcMemo.set(key,res);return res}
-function computed(r,c,s=sheet()){try{return evaluateCell(r,c,s)}catch(e){return e.message?.startsWith('#')?e.message:'#ERRORE!'}}
+// Valore di una cella: formula (la prima cella della sua matrice), valore espanso da una matrice vicina,
+// oppure il contenuto scritto letto come numero, data o testo. Il risultato resta in memoria fino alla modifica successiva.
+function literalValue(v,asText){if(typeof v!=='string')return v;if(!v.trim())return '';if(asText)return v;const num=rawNumber(v);if(!Number.isNaN(num)&&!/^0\d/.test(v))return num;const dt=parseDateText(v);return dt?dt.v:v}
+function evaluateCell(r,c,s=sheet(),stack=new Set()){const key=cellKey(s,r,c);if(!calcMemo.has(key)){const v=cellRaw(r,c,s);let res;
+  if(typeof v==='string'&&v.length>1&&v[0]==='='){const raw=anchorRaw(r,c,s,stack);if(!isArr(raw))res=raw;else if(spillOf(r,c,s,stack).blocked)throw Error('#ESPANDI!');else res=raise(raw[0][0])}
+  else if(v==null||v===''){const near=spillAt(r,c,s,stack);res=near?raise(near.value):''}
+  else res=literalValue(v,cell(r,c,s)?.s?.fmt==='Testo');
+  calcMemo.set(key,res)}
+ return calcMemo.get(key)}
+// Valore calcolato di una cella; un errore di calcolo diventa il suo codice (#DIV/0!, #RIF!…) o #ERRORE!.
+function computed(r,c,s=sheet()){let value;try{value=evaluateCell(r,c,s)}catch(err){const code=String(err?.message||'');value=code.startsWith('#')?code:'#ERRORE!'}return value}
 const DATE_KIND={d:'Data',t:'Ora',dt:'Data e ora'};
-function displayValue(r,c,s=sheet()){const v=computed(r,c,s),st=cell(r,c,s)?.s||{},raw=String(cellRaw(r,c,s));let fmt=st.fmt||'Generale';const dp=st.decimal??2;if(fmt==='Testo'&&!raw.startsWith('='))return raw;
- if(typeof v==='boolean')return v?'VERO':'FALSO';if(typeof v!=='number'||!Number.isFinite(v))return String(v??'');
- if(fmt==='Generale'&&!raw.startsWith('=')&&Number.isNaN(rawNumber(raw))){const dt=parseDateText(raw);if(dt)fmt=DATE_KIND[dt.kind]}
- if(fmt==='Percentuale')return (v*100).toLocaleString('it-IT',{maximumFractionDigits:dp,minimumFractionDigits:st.decimal===undefined?0:dp})+'%';
- if(fmt==='Valuta')return v.toLocaleString('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:st.decimal??2,maximumFractionDigits:st.decimal??2});
- if(fmt==='Numero')return v.toLocaleString('it-IT',{maximumFractionDigits:dp,minimumFractionDigits:dp});
- if(fmt==='Data')return fmtDate(v);if(fmt==='Ora')return fmtTime(v);if(fmt==='Data e ora')return v<0?'#DATA!':fmtDate(v)+' '+fmtTime(v);
- return Number.isInteger(v)?String(v):Number(v.toPrecision(12)).toLocaleString('it-IT',{maximumFractionDigits:10,useGrouping:false})}
+const CELL_FORMATS={
+ Percentuale:(v,st,dp)=>(v*100).toLocaleString('it-IT',{minimumFractionDigits:st.decimal===undefined?0:dp,maximumFractionDigits:dp})+'%',
+ Valuta:(v,st)=>{const d=st.decimal??2;return v.toLocaleString('it-IT',{currency:'EUR',style:'currency',maximumFractionDigits:d,minimumFractionDigits:d})},
+ Numero:(v,st,dp)=>v.toLocaleString('it-IT',{minimumFractionDigits:dp,maximumFractionDigits:dp}),
+ Data:v=>fmtDate(v),Ora:v=>fmtTime(v),'Data e ora':v=>v<0?'#DATA!':`${fmtDate(v)} ${fmtTime(v)}`};
+function displayValue(r,c,s=sheet()){const v=computed(r,c,s),st=cell(r,c,s)?.s||{},raw=String(cellRaw(r,c,s)),isFormula=raw.startsWith('=');let fmt=st.fmt||'Generale';
+ if(fmt==='Testo'&&!isFormula)return raw;
+ if(typeof v==='boolean')return boolText(v);
+ if(!Number.isFinite(v))return String(v??'');
+ if(!isFormula&&fmt==='Generale'&&Number.isNaN(rawNumber(raw))){const dt=parseDateText(raw);if(dt)fmt=DATE_KIND[dt.kind]}
+ const show=CELL_FORMATS[fmt];if(show)return show(v,st,st.decimal??2);
+ return Number.isInteger(v)?String(v):Number(v.toPrecision(12)).toLocaleString('it-IT',{useGrouping:false,maximumFractionDigits:10})}

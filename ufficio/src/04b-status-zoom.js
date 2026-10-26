@@ -1,2 +1,8 @@
-function status(s){$('statusText').textContent=s||'Pronto'}
-function setZoom(n){const oldZoom=Number(getComputedStyle(document.documentElement).getPropertyValue('--zoom'))||1;const newZoom=Math.min(160,Math.max(60,Number(n)||100))/100;state.zoom=Math.round(newZoom*100);if(state.mode==='excel'&&$('gridInput').style.display==='block')finishCell();const sc=$('gridScroll');const scale=newZoom/oldZoom;const wasExcel=state.mode==='excel';const oldTop=sc.scrollTop,oldLeft=sc.scrollLeft;$('zoomSlider').value=state.zoom;$('zoomText').textContent=state.zoom+'%';$('zoomSlider').setAttribute('aria-valuetext',state.zoom+'%');document.documentElement.style.setProperty('--zoom',newZoom);if(wasExcel){sc.scrollTop=oldTop*scale;sc.scrollLeft=oldLeft*scale;renderedFirst=-1;renderGrid(true);syncChartViewport()}schedulePersist()}
+// Barra di stato e zoom. Lo zoom è la variabile CSS --zoom; nel foglio la posizione di scorrimento segue la nuova scala.
+function status(text){$('statusText').textContent=text||'Pronto'}
+function setZoom(value){const pct=Math.round(Math.min(160,Math.max(60,Number(value)||100))),root=document.documentElement,before=parseFloat(getComputedStyle(root).getPropertyValue('--zoom'))||1,after=pct/100,calc=state.mode==='excel';
+ state.zoom=pct;if(calc&&cellEditorOpen())finishCell();
+ const box=$('gridScroll'),top=box.scrollTop,left=box.scrollLeft,slider=$('zoomSlider');
+ slider.value=pct;slider.setAttribute('aria-valuetext',pct+'%');$('zoomText').textContent=pct+'%';root.style.setProperty('--zoom',after);
+ if(calc){const k=after/before;box.scrollTop=top*k;box.scrollLeft=left*k;renderedFirst=-1;renderGrid(true);syncChartViewport()}
+ schedulePersist()}

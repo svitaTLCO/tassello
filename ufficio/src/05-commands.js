@@ -1,5 +1,5 @@
 // Registro unico dei comandi: barra multifunzione, ricerca comandi, menu e guida alle scorciatoie leggono da qui.
-const inEditor=()=>{const s=getSelection();return !!(s.rangeCount&&$('wordEditor').contains(s.anchorNode))};
+const inEditor=()=>{const sel=getSelection();return sel.rangeCount>0&&$('wordEditor').contains(sel.anchorNode)};
 const qs=cmd=>{if(!inEditor())return false;try{return document.queryCommandState(cmd)}catch(e){return false}};
 const blockTag=()=>{if(!inEditor())return '';try{return String(document.queryCommandValue('formatBlock')||'').toLowerCase()}catch(e){return ''}};
 const cs=key=>!!cell(state.sel.r,state.sel.c)?.s?.[key];

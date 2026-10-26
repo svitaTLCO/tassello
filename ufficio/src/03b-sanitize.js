@@ -1,21 +1,35 @@
-// Pulizia dell’HTML del documento: elenco chiuso di tag, attributi, classi e proprietà di stile.
-// Vale per bozze, progetti, incolla, file HTML e DOCX importati.
-const SAFE_TAGS=new Set('P DIV SPAN B STRONG I EM U S STRIKE SUB SUP H1 H2 H3 H4 H5 H6 UL OL LI BLOCKQUOTE BR HR TABLE THEAD TBODY TR TD TH A IMG FONT CAPTION FIGURE FIGCAPTION MATH MROW MI MN MO MS MTEXT MSPACE MFRAC MSUP MSUB MSUBSUP MSQRT MROOT MUNDER MOVER MUNDEROVER MTABLE MTR MTD MSTYLE MPADDED MPHANTOM'.split(' '));
-const DROP_TAGS=new Set('SCRIPT STYLE IFRAME OBJECT EMBED SVG FORM INPUT BUTTON SELECT TEXTAREA VIDEO AUDIO LINK META TEMPLATE NOSCRIPT CANVAS ANNOTATION ANNOTATION-XML SEMANTICS'.split(' '));
-const SAFE_CLASSES=new Set(('pagebreak toc toc-title toc-1 toc-2 toc-3 toc-4 toc-5 toc-6 footnotes fn fn-note fn-head endnotes en en-note en-head title subtitle cap-n lst-dash ml-legal tb-none tb-outer tb-h tb-full img-left img-center img-right cmt cmt-done mfield '+
- 'tab ld-dot ld-dash ld-line dropcap sect sect-cont xref xr-label xr-text xr-page xr-pos xr-num bm xe idx idx-title idx-letter tof tof-title cite biblio biblio-title cc cc-check cc-drop cc-date cc-text textbox tbx-left tbx-right tbx-center eq tof-fig tof-tab idx-sub cc-empty').split(' '));
-const SAFE_STYLE=new Set(['font-size','font-family','font-weight','font-style','text-decoration','text-decoration-line','text-decoration-style','text-align','color','background-color','vertical-align','margin-left','margin-right','margin-top','margin-bottom','text-indent','line-height','width','list-style-type','font-variant','font-variant-caps','letter-spacing','text-transform','break-before','break-after','break-inside','orphans','widows','border','border-top','border-bottom','border-left','border-right','padding','--os-tabs']);
+// Pulizia dell'HTML del documento con elenchi chiusi di elementi, attributi, classi e proprietà di stile.
+// Vale per bozze, progetti, testo incollato e file HTML o DOCX aperti.
+const words=s=>s.trim().split(/\s+/);
+const SAFE_TAGS=new Set([...words('P DIV SPAN BR HR A IMG FONT'),...words('B STRONG I EM U S STRIKE SUB SUP'),...words('H1 H2 H3 H4 H5 H6 BLOCKQUOTE UL OL LI'),...words('TABLE CAPTION THEAD TBODY TR TH TD FIGURE FIGCAPTION'),
+ ...words('MATH MROW MI MN MO MS MTEXT MSPACE MFRAC MSUP MSUB MSUBSUP MSQRT MROOT MUNDER MOVER MUNDEROVER MTABLE MTR MTD MSTYLE MPADDED MPHANTOM')]);
+// Elementi eliminati con tutto il contenuto; gli altri non ammessi lasciano solo il loro contenuto.
+const DROP_TAGS=new Set(words('SCRIPT STYLE TEMPLATE NOSCRIPT LINK META IFRAME OBJECT EMBED CANVAS SVG VIDEO AUDIO FORM INPUT BUTTON SELECT TEXTAREA ANNOTATION ANNOTATION-XML SEMANTICS'));
+const SAFE_CLASSES=new Set(words(`pagebreak toc toc-title toc-1 toc-2 toc-3 toc-4 toc-5 toc-6 footnotes fn fn-note fn-head endnotes en en-note en-head title subtitle cap-n lst-dash ml-legal
+ tb-none tb-outer tb-h tb-full img-left img-center img-right cmt cmt-done mfield tab ld-dot ld-dash ld-line dropcap sect sect-cont xref xr-label xr-text xr-page xr-pos xr-num
+ bm xe idx idx-title idx-letter idx-sub tof tof-title tof-fig tof-tab cite biblio biblio-title cc cc-check cc-drop cc-date cc-text cc-empty textbox tbx-left tbx-right tbx-center eq`));
+const SAFE_STYLE=new Set([...words('color background-color font-family font-size font-weight font-style font-variant font-variant-caps letter-spacing text-transform'),...words('text-decoration text-decoration-line text-decoration-style text-align text-indent vertical-align line-height list-style-type'),
+ ...words('margin-top margin-right margin-bottom margin-left padding width border border-top border-right border-bottom border-left'),...words('break-before break-after break-inside orphans widows --os-tabs')]);
 const SAFE_ID=/^(?:(?:h|fn|fnr|en|enr|cap|bm|xe|sec|cc|bib)-[a-z0-9]{1,24}|cm-[a-z0-9]{1,24}(?:-\d{1,3})?)$/;
 const styleValueOk=v=>!/[<>{}\\]|url|expression|@import|javascript|behavior/i.test(v)&&!/[()]/.test(v.replace(/rgba?\(\s*[\d.]+%?\s*,\s*[\d.]+%?\s*,\s*[\d.]+%?\s*(?:,\s*[\d.]+%?\s*)?\)/gi,''));
-function sanitizeHTML(html){const tpl=document.createElement('template');tpl.innerHTML=String(html||'');
- const walk=root=>{for(const n of Array.from(root.childNodes)){if(n.nodeType===8){n.remove();continue}if(n.nodeType!==1)continue;const tag=n.tagName.toUpperCase();if(!SAFE_TAGS.has(tag)){if(DROP_TAGS.has(tag)||n.namespaceURI==='http://www.w3.org/2000/svg'){n.remove();continue}walk(n);n.replaceWith(...Array.from(n.childNodes));continue}
-  for(const a of Array.from(n.attributes)){const k=a.name.toLowerCase(),v=a.value;let ok=false;
-   if(k==='title'||k==='class'||k==='style')ok=true;else if(k==='id')ok=SAFE_ID.test(v);else if(k==='href')ok=tag==='A'&&/^(https?:\/\/|mailto:|#[\w-]+$)/i.test(v);else if(k==='src')ok=tag==='IMG'&&/^(data:image\/(png|jpeg|gif|webp);base64,|https?:\/\/)/i.test(v);
-   else if(k==='alt')ok=tag==='IMG';else if(k==='scope')ok=tag==='TH'&&/^(col|row)$/.test(v);else if(k==='start')ok=tag==='OL'&&/^\d{1,4}$/.test(v);else if(k==='colspan'||k==='rowspan')ok=/^\d{1,3}$/.test(v);else if(k==='align')ok=/^(left|center|right|justify)$/i.test(v);
-   else if(k==='width'||k==='height')ok=tag==='IMG'&&/^\d{1,4}%?$/.test(v);else if(k==='color'||k==='face'||k==='size')ok=tag==='FONT'&&!/[<>"]/.test(v);else if(k==='contenteditable')ok=v==='false'&&['SPAN','SUP','A','DIV'].includes(tag);
-   else if(k==='display')ok=tag==='MATH'&&/^(block|inline)$/.test(v);else if(k==='mathvariant')ok=/^[a-z-]{1,24}$/.test(v);
-   if(!ok){n.removeAttribute(a.name);continue}
-   if(k==='class'){const keep=v.split(/\s+/).filter(x=>SAFE_CLASSES.has(x)||/^st-[a-z0-9]{1,12}$/.test(x)||/^lv-\d$/.test(x));if(keep.length)n.setAttribute('class',keep.join(' '));else n.removeAttribute('class')}
-   else if(k==='style'){const out=[];for(const part of v.split(';')){const j=part.indexOf(':');if(j<0)continue;const name=part.slice(0,j).trim().toLowerCase(),val=part.slice(j+1).trim();if(SAFE_STYLE.has(name)&&val&&val.length<200&&styleValueOk(val))out.push(name+':'+val)}if(out.length)n.setAttribute('style',out.join(';'));else n.removeAttribute('style')}
-   else if(k==='title'&&v.length>2000)n.setAttribute('title',v.slice(0,2000))}
-  walk(n)}};walk(tpl.content);return tpl.innerHTML}
+// Regola per ogni attributo ammesso: riceve valore ed elemento e dice se l'attributo resta.
+const imgOnly=re=>(v,tag)=>tag==='IMG'&&re.test(v),fontOnly=(v,tag)=>tag==='FONT'&&!/[<>"]/.test(v),smallInt=v=>/^\d{1,3}$/.test(v);
+const ATTR_RULES=new Map(Object.entries({title:()=>true,class:()=>true,style:()=>true,id:v=>SAFE_ID.test(v),
+ href:(v,tag)=>tag==='A'&&/^(https?:\/\/|mailto:|#[\w-]+$)/i.test(v),src:imgOnly(/^(?:https?:\/\/|data:image\/(?:png|jpeg|gif|webp);base64,)/i),alt:(v,tag)=>tag==='IMG',width:imgOnly(/^\d{1,4}%?$/),height:imgOnly(/^\d{1,4}%?$/),
+ scope:(v,tag)=>tag==='TH'&&/^(col|row)$/.test(v),start:(v,tag)=>tag==='OL'&&/^\d{1,4}$/.test(v),colspan:smallInt,rowspan:smallInt,align:v=>/^(left|center|right|justify)$/i.test(v),
+ color:fontOnly,face:fontOnly,size:fontOnly,contenteditable:(v,tag)=>v==='false'&&['SPAN','SUP','A','DIV'].includes(tag),
+ display:(v,tag)=>tag==='MATH'&&/^(block|inline)$/.test(v),mathvariant:v=>/^[a-z-]{1,24}$/.test(v)}));
+const keepClasses=v=>v.split(/\s+/).filter(x=>SAFE_CLASSES.has(x)||/^st-[a-z0-9]{1,12}$/.test(x)||/^lv-\d$/.test(x)).join(' ');
+function keepStyle(v){const kept=[];for(const decl of v.split(';')){const at=decl.indexOf(':');if(at<0)continue;const prop=decl.slice(0,at).trim().toLowerCase(),val=decl.slice(at+1).trim();if(SAFE_STYLE.has(prop)&&val&&val.length<200&&styleValueOk(val))kept.push(prop+':'+val)}return kept.join(';')}
+function cleanAttributes(el,tag){for(const {name,value} of [...el.attributes]){const key=name.toLowerCase(),rule=ATTR_RULES.get(key);if(!rule||!rule(value,tag)){el.removeAttribute(name);continue}
+ if(key==='class'||key==='style'){const kept=key==='class'?keepClasses(value):keepStyle(value);if(kept)el.setAttribute(key,kept);else el.removeAttribute(key)}
+ else if(key==='title'&&value.length>2000)el.setAttribute('title',value.slice(0,2000))}}
+const SVG_NS='http://www.w3.org/2000/svg';
+function cleanTree(parent){for(const node of [...parent.childNodes]){
+ if(node.nodeType===Node.COMMENT_NODE){node.remove();continue}
+ if(node.nodeType!==Node.ELEMENT_NODE)continue;
+ const tag=node.tagName.toUpperCase();
+ if(SAFE_TAGS.has(tag)){cleanAttributes(node,tag);cleanTree(node);continue}
+ if(DROP_TAGS.has(tag)||node.namespaceURI===SVG_NS){node.remove();continue}
+ cleanTree(node);node.replaceWith(...node.childNodes)}}
+function sanitizeHTML(html){const holder=document.createElement('template');holder.innerHTML=String(html||'');cleanTree(holder.content);return holder.innerHTML}

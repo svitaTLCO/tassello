@@ -1,5 +1,9 @@
-function invalidate(){calcVersion++;calcMemo.clear()}
-function bump(){invalidate();renderGrid();syncFormula();updateExcelStats();schedulePersist();refreshToggles();renderCharts()}
-function eachSelected(fn){const a=state.sel,rs=Math.min(a.r,a.r2),re=Math.max(a.r,a.r2),cs=Math.min(a.c,a.c2),ce=Math.max(a.c,a.c2);if((re-rs+1)*(ce-cs+1)>60000){toast('Selezione troppo grande: massimo 60.000 celle per operazione');return}for(let r=rs;r<=re;r++)for(let c=cs;c<=ce;c++)fn(r,c)}
-function selectedBounds(){let a=state.sel;return{r1:Math.min(a.r,a.r2),r2:Math.max(a.r,a.r2),c1:Math.min(a.c,a.c2),c2:Math.max(a.c,a.c2)}}
-function applyCellsStyle(key,value,mode='set'){storeHistory();eachSelected((r,c)=>{let s=ensureCell(r,c).s;if(mode==='toggle')s[key]=!s[key];else s[key]=value});bump()}
+// Ricalcolo del foglio e operazioni sulle celle selezionate.
+function invalidate(){calcMemo.clear();calcVersion+=1}
+function bump(){invalidate();syncFormula();renderGrid();renderCharts();updateExcelStats();refreshToggles();schedulePersist()}
+function selectedBounds(){const {r,c,r2,c2}=state.sel;return{r1:Math.min(r,r2),r2:Math.max(r,r2),c1:Math.min(c,c2),c2:Math.max(c,c2)}}
+const areaSize=b=>(b.r2-b.r1+1)*(b.c2-b.c1+1),TOO_MANY_CELLS='Troppe celle selezionate: il limite è 60.000 per operazione';
+function eachSelected(fn){const b=selectedBounds();if(areaSize(b)>60000){toast(TOO_MANY_CELLS);return}for(let r=b.r1;r<=b.r2;r++)for(let c=b.c1;c<=b.c2;c++)fn(r,c)}
+function applyCellsStyle(prop,val,how='set'){storeHistory();const flip=how==='toggle';eachSelected((r,c)=>{const look=ensureCell(r,c).s;look[prop]=flip?!look[prop]:val});bump()}
+// Area usata dal foglio (celle scritte e matrici espanse), con un minimo di righe e colonne.
+function sheetExtent(s,minRow=0,minCol=0){const pts=spillCorners(s).slice();for(const ref of Object.keys(s.cells)){const at=parseRef(ref);if(at)pts.push(at)}return{rows:Math.min(ROWS-1,Math.max(minRow,...pts.map(p=>p.r))),cols:Math.min(COLS-1,Math.max(minCol,...pts.map(p=>p.c)))}}

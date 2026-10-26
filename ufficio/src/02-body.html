@@ -110,7 +110,7 @@
 <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
 </defs></svg>
 <a class="skip" href="#docRegion" id="skipDoc">Vai al documento</a><a class="skip" href="#tabs" id="skipRibbon">Vai alla barra multifunzione</a>
-<div id="app" class="word">
+<div class="word" id="app">
 <header class="titlebar" id="titlebar" aria-label="Barra del titolo">
 <button type="button" class="brand" id="brandBtn" aria-label="Tassello Ufficio: informazioni" data-tip="Informazioni su Tassello Ufficio"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#fff"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#fff"></path><path d="M86 0V8Q86 14 92 14H100Z" fill="var(--accent)" fill-opacity=".55"></path><rect y="54" width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect></svg><span class="brand-name">Tassello Ufficio</span></button>
 <div class="app-switch" role="group" aria-label="Applicazione">
@@ -145,17 +145,17 @@
 <div class="read-bar" id="readBar" role="group" aria-label="Strumenti di lettura" hidden><b class="rb-title">Modalità lettura</b><label>Larghezza <select id="rdWidth"><option value="narrow">Stretta</option><option value="medium">Media</option><option value="wide">Ampia</option></select></label><label>Spaziatura <select id="rdSpace"><option value="normal">Normale</option><option value="wide">Ampia</option></select></label><label class="check"><input type="checkbox" id="rdFont"> Carattere ad alta leggibilità</label><span class="rd-size" role="group" aria-label="Dimensione del testo"><button type="button" class="btn sm" id="rdSmaller" aria-label="Testo più piccolo">A−</button><output id="rdSize" aria-live="polite">14 pt</output><button type="button" class="btn sm" id="rdBigger" aria-label="Testo più grande">A+</button></span><label>Colore pagina <select id="rdColor"><option value="white">Bianco</option><option value="sepia">Seppia</option><option value="dark">Scuro</option></select></label><label class="check"><input type="checkbox" id="rdLine"> Evidenzia la riga corrente</label><button type="button" class="btn sm" id="rdSpeak">Leggi ad alta voce</button><button type="button" class="btn sm primary" id="rdExit">Esci dalla lettura</button></div>
 <main class="main" id="docRegion" tabindex="-1" aria-label="Area di lavoro">
 <div class="editor-pane" id="wordPane"><aside class="nav-pane" id="navPane" aria-labelledby="navTitle" hidden><div class="nav-head"><h2 id="navTitle">Spostamento</h2><span class="nav-count" id="navCount"></span><button type="button" class="btn icon" id="navClose" aria-label="Chiudi il riquadro di spostamento" data-tip="Chiudi il riquadro"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button></div><p class="nav-hint" id="navHint">Frecce per scorrere i titoli, Invio per raggiungerli, Esc per tornare al documento.</p><ul class="nav-list" id="navList" aria-describedby="navHint"></ul></aside><div class="word-scroll" id="wordScroll"><div class="page" id="page" data-paper="a4"><div class="page-deco" id="pageDeco" aria-hidden="true"></div><div class="hf hf-head empty" id="hfHead" aria-hidden="true" data-tip="Intestazione: fai clic per modificarla"></div><div class="page-marks" id="pageMarks" aria-hidden="true"></div><div id="wordEditor" class="word-content empty" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Corpo del documento" aria-describedby="editorHint" aria-placeholder="Inizia a scrivere qui…" data-placeholder="Inizia a scrivere qui…" spellcheck="true"><p><br></p></div><div class="hf hf-foot empty" id="hfFoot" aria-hidden="true" data-tip="Piè di pagina: fai clic per modificarlo"></div></div><div class="line-focus" id="lineFocus" aria-hidden="true" hidden></div></div><aside class="cmt-pane" id="cmtPane" aria-labelledby="cmtTitle" hidden><div class="nav-head"><h2 id="cmtTitle">Commenti</h2><span class="nav-count" id="cmtCount"></span><button type="button" class="btn icon" id="cmtClose" aria-label="Chiudi il riquadro dei commenti" data-tip="Chiudi il riquadro"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="cmt-tools"><button type="button" class="btn sm" id="cmtAdd" aria-keyshortcuts="Control+Alt+M">Nuovo commento</button></div><ol class="cmt-list" id="cmtList"></ol></aside></div>
-<div class="editor-pane hidden" id="excelPane">
+<div id="excelPane" class="editor-pane hidden">
 <div class="formula-line" id="formulaLine" role="group" aria-label="Barra della formula"><label class="sr-only" for="nameBox">Casella nome, vai alla cella o all’intervallo</label><input id="nameBox" class="namebox" value="A1" autocomplete="off" spellcheck="false" aria-keyshortcuts="Control+G"><span class="fx" aria-hidden="true">ƒx</span><label class="sr-only" for="formulaInput">Contenuto della cella attiva</label><input id="formulaInput" autocomplete="off" spellcheck="false" placeholder="Valore o formula, es. =SOMMA(A1:A10)"></div>
-<div class="grid-area"><div class="grid-scroll" id="gridScroll" tabindex="0" role="grid" aria-label="Foglio" aria-multiselectable="true" aria-describedby="gridHint"><table class="sheetgrid" id="grid" role="presentation"></table></div><div class="chart-viewport" id="chartViewport"><div class="chart-pan" id="chartPan"><div class="chart-zoom" id="chartLayer" role="region" aria-label="Grafici del foglio" hidden></div></div></div></div>
+<div class="grid-area"><div id="gridScroll" class="grid-scroll" role="grid" tabindex="0" aria-label="Foglio" aria-multiselectable="true" aria-describedby="gridHint"><table class="sheetgrid" id="grid" role="presentation"></table></div><div class="chart-viewport" id="chartViewport"><div class="chart-pan" id="chartPan"><div class="chart-zoom" id="chartLayer" role="region" aria-label="Grafici del foglio" hidden></div></div></div></div>
 <div class="sheet-bar" id="sheetBar"><div class="sheet-tabs" id="sheetTabs" role="tablist" aria-label="Fogli di lavoro"></div><button type="button" class="sheet-add" id="addSheet" aria-label="Nuovo foglio" aria-keyshortcuts="Shift+F11" data-tip="Nuovo foglio (Maiusc+F11)"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
 <div id="excelPrint" class="print-sheet"></div>
 </div>
 </main>
 <footer class="status" id="statusbar" aria-label="Barra di stato">
-<span id="statusText">Pronto</span><span class="status-word" id="wordStats"></span><span class="status-excel" id="excelStats"></span><span class="grow"></span>
+<span id="statusText">Pronto</span><span class="status-word" id="wordStats"></span><span id="excelStats" class="status-excel"></span><span class="grow"></span>
 <button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
-<div class="zoom" role="group" aria-label="Zoom"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="zoomSlider" type="range" min="60" max="160" step="10" value="100" aria-label="Livello di zoom" aria-valuetext="100%"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true">100%</output></div>
+<div class="zoom" role="group" aria-label="Zoom"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="100" min="60" max="160" step="10" aria-label="Livello di zoom" aria-valuetext="100%"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true">100%</output></div>
 </footer>
 </div>
 <p id="editorHint" class="sr-only">F6 passa all’area successiva, Alt+Q cerca un comando, F1 elenca le scorciatoie. Maiusc+F10 apre il menu del documento, con i comandi di tabelle e immagini. Alt+Maiusc+PgGiù e PgSu passano tra i titoli. Tab rientra negli elenchi e passa tra le celle delle tabelle; premi Esc e poi Tab per uscire dal documento. Ctrl+clic segue collegamenti, note, riferimenti incrociati e citazioni; F9 aggiorna indici e riferimenti; Alt+↓ compila il campo del modulo al cursore.</p>
@@ -186,10 +186,10 @@
 <dl class="file-details" id="fileDetails"></dl>
 </section>
 </div>
-<div id="gridInput" class="grid-input" contenteditable="true" spellcheck="false" role="textbox" aria-multiline="true" aria-label="Modifica cella"></div>
-<div id="toast" class="msg" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="grid-input" id="gridInput" role="textbox" contenteditable="true" spellcheck="false" aria-multiline="true" aria-label="Modifica cella"></div>
+<div class="msg" id="toast" role="status" aria-atomic="true" aria-live="polite"></div>
 <div id="srLive" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-<div class="modalbg" id="modalbg" hidden><div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" aria-describedby="dlgBody"></div></div>
+<div class="modalbg" id="modalbg" hidden><div id="modal" class="modal" role="dialog" aria-labelledby="dlgTitle" aria-describedby="dlgBody" aria-modal="true"></div></div>
 <div class="modalbg" id="palettebg" hidden><div class="palette" role="dialog" aria-modal="true" aria-label="Cerca comando">
 <input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. grassetto, tabella, somma" autocomplete="off" spellcheck="false">
 <div id="palList" role="listbox" aria-label="Comandi"></div>
@@ -198,7 +198,7 @@
 <div id="menu" class="ctxmenu" role="menu" hidden></div>
 <div id="tip" class="tip" aria-hidden="true" hidden></div>
 <div id="fxHint" class="fx-hint" aria-hidden="true" hidden></div>
-<input type="file" id="fileInput" accept=".docx,.xlsx,.csv,.tsv,.txt,.html,.htm,.json" class="hidden" tabindex="-1" aria-hidden="true">
-<input type="file" id="imageInput" accept="image/png,image/jpeg,image/gif,image/webp" class="hidden" tabindex="-1" aria-hidden="true">
+<input id="fileInput" class="hidden" type="file" accept=".docx,.xlsx,.csv,.tsv,.json,.html,.htm,.txt" tabindex="-1" aria-hidden="true">
+<input id="imageInput" class="hidden" type="file" accept="image/png,image/jpeg,image/webp,image/gif" tabindex="-1" aria-hidden="true">
 <script>
 (()=>{'use strict';
