@@ -10,8 +10,8 @@ const INK_DIV={pen:216,pencil:180,brush:45,eraser:36};
 const inkSize=t=>prefs.drawInk?.[t]||Math.max(1,Math.round(Math.min(Dw.p.w,Dw.p.h)/INK_DIV[t]));
 const inkColor=()=>prefs.drawInk?.color||'#1b1b1b';
 function setInk(k,v){(prefs.drawInk??={})[k]=v;savePrefs()}
-const kindName=it=>it.tool==='brush'?'Pennellata':it.tool==='pencil'?'Tratto di matita':KIND_NAME[it.kind];
-const kindIcon=it=>it.tool==='brush'?'brush':it.tool==='pencil'?'pencil':KIND_ICON[it.kind];
+const kindName=it=>it.tool==='brush'?'Pennellata':it.tool==='pencil'?'Tratto di matita':it.kind==='poly'&&it.star?'Stella':KIND_NAME[it.kind];
+const kindIcon=it=>it.tool==='brush'?'brush':it.tool==='pencil'?'pencil':it.kind==='poly'&&it.star?'star':KIND_ICON[it.kind];
 // Ramer-Douglas-Peucker: toglie i punti che si discostano dalla linea meno di tol. Con w conta anche il terzo valore
 // (la pressione), pesato w: dove la pressione cambia, il punto resta anche se la linea è dritta.
 function rdp(pts,tol,w=0){if(pts.length<3)return pts;const keep=new Uint8Array(pts.length),st=[[0,pts.length-1]];keep[0]=keep[pts.length-1]=1;

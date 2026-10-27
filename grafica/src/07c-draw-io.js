@@ -23,7 +23,7 @@ function alignItem(how){const many=needSel();if(!many.length)return;if(units(man
  if(editD('Allinea',()=>{for(const it of ok){it.x=n2(it.x+dx);it.y=n2(it.y+dy)}}))announce(`${what} è allineato ${say}`);else toast(`${what} è già allineato ${say}`)}
 function itemMenu(x,y){const many=selItems(),it=selItem();
  const items=many.length>1?[mi('groupItems'),mi('ungroupItems'),mi('lockItems'),mi('hideItems'),'-',mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('sendBack'),'-',mi('alignLeft'),mi('alignCenter'),mi('alignTop'),mi('alignMiddle'),mi('distH'),mi('distV'),'-',mi('deleteItem')]
-  :it?[mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('forward'),mi('backward'),mi('sendBack'),'-',mi('alignCenter'),mi('alignMiddle'),'-',mi('lockItems'),mi('hideItems'),...(it.g?[mi('ungroupItems')]:[]),'-',mi('deleteItem')]:[mi('addText'),mi('addRect'),mi('addImage'),mi('paste'),mi('selectAll'),'-',mi('sheetSize')];
+  :it?[mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('forward'),mi('backward'),mi('sendBack'),'-',mi('alignCenter'),mi('alignMiddle'),'-',...(SHAPE_SUBS[it.kind]?[mi('toPath')]:it.kind==='path'?[mi('toolNodes')]:[]),mi('lockItems'),mi('hideItems'),...(it.g?[mi('ungroupItems')]:[]),'-',mi('deleteItem')]:[mi('addText'),mi('addRect'),mi('addImage'),mi('paste'),mi('selectAll'),'-',mi('sheetSize')];
  openMenu(items,x,y,many.length>1?`Menu di ${many.length} oggetti`:it?'Menu di '+it.name:'Menu del foglio')}
 // Zoom: 0 vuol dire che il foglio entra tutto nello spazio disponibile.
 function zoomDraw(f){const k=f?clamp(sheetScale()*f,.05,8):0;Dw.zoom=k;renderSheet();announce(k?`Zoom ${fmtInt(k*100)}%`:'Si vede tutto il foglio')}
@@ -60,7 +60,7 @@ function lumOf(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return null
 const contrastRatio=(a,b)=>{const x=lumOf(a),y=lumOf(b);return x==null||y==null?null:(Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
 const covers=(a,b)=>a.x<=b.x&&a.y<=b.y&&a.x+a.w>=b.x+b.w&&a.y+a.h>=b.y+b.h,overlaps=(a,b)=>a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h;
 // Che cosa c'è sotto un testo: il colore di una forma piena che lo contiene, un'immagine, oppure lo sfondo del foglio.
-function behind(it){const items=Dw.p.items,b=box(it);for(let i=items.indexOf(it)-1;i>=0;i--){const o=items[i];if(o.hidden)continue;const ob=box(o);if(!overlaps(ob,b))continue;if(o.kind==='image')return {image:o};if((o.kind==='rect'||o.kind==='ellipse')&&o.fill!=='none'&&!o.rot&&o.opacity===100&&covers(ob,b))return {color:o.fill,by:o}}return Dw.p.bg==='none'?{none:true}:{color:Dw.p.bg}}
+function behind(it){const items=Dw.p.items,b=box(it);for(let i=items.indexOf(it)-1;i>=0;i--){const o=items[i];if(o.hidden)continue;const ob=box(o);if(!overlaps(ob,b))continue;if(o.kind==='image')return {image:o};if(['rect','ellipse','poly','arrow','bubble'].includes(o.kind)&&o.fill!=='none'&&!o.rot&&o.opacity===100&&covers(ob,b))return {color:o.fill,by:o}}return Dw.p.bg==='none'?{none:true}:{color:Dw.p.bg}}
 function drawIssues(){const p=Dw.p,out=[];if(!p.desc.trim())out.push({msg:'Manca la descrizione del disegno: serve a chi non lo vede e diventa il testo alternativo quando lo pubblichi.',fix:'desc'});
  for(const it of p.items){if(it.kind!=='text'||it.hidden||!it.text.trim())continue;const big=it.size>=p.w/22||(it.bold&&it.size>=p.w/28),need=big?3:4.5,bg=behind(it);
   if(bg.image)out.push({it,msg:`«${it.name}» è sopra l’immagine «${bg.image.name}»: controlla a occhio che si legga, o mettici sotto una forma piena.`});

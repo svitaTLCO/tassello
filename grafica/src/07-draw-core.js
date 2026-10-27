@@ -4,10 +4,10 @@
 const SHEETS=[['post','Post 4:5, 1080 × 1350',1080,1350],['quadrato','Quadrato, 1080 × 1080',1080,1080],['storia','Storia 9:16, 1080 × 1920',1080,1920],['video','Orizzontale 16:9, 1920 × 1080',1920,1080],['banner','Banner, 1500 × 500',1500,500],['a4','A4 verticale, 2480 × 3508 (300 dpi)',2480,3508],['a4o','A4 orizzontale, 3508 × 2480 (300 dpi)',3508,2480],['icona','Icona, 512 × 512',512,512]];
 const sheetPreset=p=>(SHEETS.find(s=>s[2]===p.w&&s[3]===p.h)||[''])[0];
 const FONTS=[['system-ui, sans-serif','Senza grazie del sistema'],["'Segoe UI', sans-serif",'Segoe UI'],['Arial, sans-serif','Arial'],['Verdana, sans-serif','Verdana'],["'Trebuchet MS', sans-serif",'Trebuchet MS'],['Georgia, serif','Georgia'],["'Times New Roman', serif",'Times New Roman'],["'Courier New', monospace",'Courier New']];
-const KIND_NAME={rect:'Rettangolo',ellipse:'Ellisse',line:'Linea',text:'Testo',image:'Immagine',path:'Tracciato'};
-const KIND_ICON={rect:'rect',ellipse:'ellipse',line:'lineI',text:'textI',image:'image',path:'pathI'};
+const KIND_NAME={rect:'Rettangolo',ellipse:'Ellisse',line:'Linea',text:'Testo',image:'Immagine',path:'Tracciato',poly:'Poligono',arrow:'Freccia',bubble:'Fumetto'};
+const KIND_ICON={rect:'rect',ellipse:'ellipse',line:'lineI',text:'textI',image:'image',path:'pathI',poly:'polygon',arrow:'arrowR',bubble:'bubble'};
 // Quello che si aggiunge alla descrizione di un oggetto, secondo il tipo.
-const KIND_SAY={path:it=>it.tool?`, tratto a mano libera di ${nodeList(it).length} nodi`:`, ${pathSummary(it)}`};
+const KIND_SAY={path:it=>(it.tool?`, tratto a mano libera di ${nodeList(it).length} nodi`:`, ${pathSummary(it)}`)+endsSay(it)};
 const newDrawing=()=>({title:'Senza titolo',w:1080,h:1350,bg:'#ffffff',desc:'',items:[]});
 // Il disegno aperto, l'oggetto scelto, la cronologia e le immagini (file originali, indirizzi per l'anteprima).
 // Dw.sel è l'oggetto principale, quello delle proprietà; Dw.multi gli altri scelti con lui. tool è lo strumento del foglio.

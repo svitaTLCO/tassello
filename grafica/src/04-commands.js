@@ -89,7 +89,14 @@ def('d','Tracciato',[
  ['nodeDelete','Togli il nodo scelto','minus','',{short:'Togli nodo'}],
  ['nodeType','Nodo d’angolo o curvo','nodeType','',{short:'Angolo o curva'}],
  ['pathClose','Chiudi o apri il tracciato','pathClose','',{short:'Chiudi o apri'}],
- ['readPath','Descrivi il tracciato','speak','Alt+Maiusc+P',{g:1,short:'Descrivi'}]]);
+ ['readPath','Descrivi il tracciato','speak','Alt+Maiusc+P',{g:1,short:'Descrivi'}],
+ ['toPath','Converti in tracciato','toPath','',{short:'Converti in tracciato'}]]);
+def('d','Inserisci',[
+ ['addPolygon','Inserisci un poligono','polygon','',{short:'Poligono'}],
+ ['addStar','Inserisci una stella','star','',{short:'Stella'}],
+ ['addArrow','Inserisci una freccia','arrowR','',{short:'Freccia'}],
+ ['addBubble','Inserisci un fumetto','bubble','',{short:'Fumetto'}],
+ ['addArrowLine','Inserisci una linea con la freccia','arrowLine','',{short:'Linea con freccia'}]]);
 def('id','Generale',[
  ['filePanel','Apri il menu File','file','',{}],
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],
