@@ -1,6 +1,7 @@
 # Pubblica una release quando si invia un'etichetta di versione:
 #   Tassello Ufficio  git tag v1.3.0 && git push origin v1.3.0
 #   Tassello Media    git tag media-v1.0.0 && git push origin media-v1.0.0
+#   Tassello Grafica  git tag grafica-v1.0.0 && git push origin grafica-v1.0.0
 # Ricostruisce il programma, controlla che docs/ sia aggiornato, firma la provenienza del file
 # e lo allega alla release con la sua impronta SHA-256. La release più recente segnalata da GitHub resta
 # quella di Tassello Ufficio, a cui puntano i collegamenti esistenti a releases/latest.
@@ -8,7 +9,7 @@ name: Release
 
 on:
   push:
-    tags: ['v*', 'media-v*']
+    tags: ['v*', 'media-v*', 'grafica-v*']
 
 permissions:
   contents: write
@@ -31,6 +32,9 @@ jobs:
             media-v*) echo "DIR=media" >> "$GITHUB_ENV"; echo "FILE=tassello-media.html" >> "$GITHUB_ENV"
                       echo "LIST=versioni-media.json" >> "$GITHUB_ENV"; echo "NAME=Tassello Media" >> "$GITHUB_ENV"
                       echo "VERSION=${GITHUB_REF_NAME#media-v}" >> "$GITHUB_ENV"; echo "LATEST=false" >> "$GITHUB_ENV" ;;
+            grafica-v*) echo "DIR=grafica" >> "$GITHUB_ENV"; echo "FILE=tassello-grafica.html" >> "$GITHUB_ENV"
+                      echo "LIST=versioni-grafica.json" >> "$GITHUB_ENV"; echo "NAME=Tassello Grafica" >> "$GITHUB_ENV"
+                      echo "VERSION=${GITHUB_REF_NAME#grafica-v}" >> "$GITHUB_ENV"; echo "LATEST=false" >> "$GITHUB_ENV" ;;
             *)        echo "DIR=ufficio" >> "$GITHUB_ENV"; echo "FILE=tassello-ufficio.html" >> "$GITHUB_ENV"
                       echo "LIST=versioni.json" >> "$GITHUB_ENV"; echo "NAME=Tassello Ufficio" >> "$GITHUB_ENV"
                       echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"; echo "LATEST=true" >> "$GITHUB_ENV" ;;

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="it" data-mode="immagini" data-theme="light" data-contrast="normal"><head>
+<meta charset="utf-8">
+<!-- Regola di sicurezza: il programma non può collegarsi a internet né caricare script o risorse da altri siti.
+     Mostra solo le immagini aperte dall'utente (indirizzi blob: e data: creati nella pagina).
+     Dal sito ufficiale può usare le proprie icone e registrare l'app installabile (manifest e service worker). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Tassello Grafica</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='46' height='46' rx='10' fill='%232457C5'/%3E%3Cpath d='M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z' fill='%231E7A46'/%3E%3Cpath d='M86 0V8Q86 14 92 14H100Z' fill='%23fff' fill-opacity='.55'/%3E%3Crect y='54' width='46' height='46' rx='10' fill='%23B35500'/%3E%3Crect x='54' y='54' width='46' height='46' rx='10' fill='%237A3DB8'/%3E%3C/svg%3E">
+<style>
+:root{--accent:#b0306a;--accent-strong:#8c2453;--accent-text:#8c2453;--accent-soft:#fbeaf2;--sel-tint:rgba(176,48,106,.18);
+--bg:#f3f3f3;--chrome:#f7f7f7;--surface:#fff;--surface-2:#f3f3f3;--hover:#e8e8e8;--pressed:#dcdcdc;--line:#e1e1e1;--line-strong:#b3b3b3;--text:#1b1b1b;--text-2:#3d3d3d;--text-3:#575757;--canvas:#e6e6e6;--focus:#1b1b1b;--danger:#b10e1c;
+--hist-bg:#ffffff;--hist-l:#6b6b6b;--hist-r:#d13438;--hist-g:#2e8b3d;--hist-b:#2f6fd6;--hist-clip:#c50f1f;
+--shadow:0 12px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08);color-scheme:light;
+font-family:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--text)}
+html[data-theme=dark]{color-scheme:dark;--bg:#1c1c1c;--chrome:#242424;--surface:#2c2c2c;--surface-2:#303030;--hover:#3a3a3a;--pressed:#464646;--line:#3d3d3d;--line-strong:#6a6a6a;--text:#f3f3f3;--text-2:#d9d9d9;--text-3:#bdbdbd;--canvas:#141414;--focus:#fff;--accent-text:#f59ac2;--accent-soft:#3f1a2c;
+--hist-bg:#1f1f1f;--hist-l:#bdbdbd;--hist-r:#ff7b7f;--hist-g:#6fd37f;--hist-b:#7fa8ff;--hist-clip:#ff6b6b;--shadow:0 12px 32px rgba(0,0,0,.55)}
+html[data-contrast=high]{--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#5e1638;--hist-l:#000;--hist-clip:#b10e1c}
+html[data-contrast=high][data-theme=dark]{--line:#fff;--line-strong:#fff;--text-2:#fff;--text-3:#fff;--hover:#4a4a4a;--accent-text:#ffc2dc;--hist-l:#fff;--hist-clip:#ff8080}
+@media (forced-colors:active){:root{--hist-bg:Canvas;--hist-l:CanvasText;--hist-r:CanvasText;--hist-g:CanvasText;--hist-b:CanvasText;--hist-clip:Highlight}}
+html[data-contrast=high] .tool,html[data-contrast=high] .tab,html[data-contrast=high] .btn{border:1px solid var(--line-strong)}
+html[data-contrast=high] :focus-visible{outline-width:3px}
+*,*::before,*::after{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--text)}
+[hidden],.hidden{display:none!important}
+button,select,input,textarea{color:inherit;font:inherit}
+button{cursor:pointer}button:disabled,[aria-disabled=true]{opacity:.45;cursor:not-allowed}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding:3px 6px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:4px;background:var(--surface);color:var(--text-2);white-space:nowrap}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:fixed;left:10px;top:-80px;z-index:1000;background:var(--surface);color:var(--text);padding:10px 16px;border-radius:8px;box-shadow:var(--shadow);font-weight:600;text-decoration:none}
+.skip:focus{top:10px}
+.ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:block}
+.ti-text{font-weight:600;font-size:15px;line-height:1;min-width:18px;text-align:center;font-family:'Segoe UI',system-ui,sans-serif;white-space:nowrap}
+#app{display:flex;flex-direction:column;height:100dvh;min-width:0}
+/* Barra del titolo */
+.titlebar{height:46px;flex-shrink:0;background:var(--accent);color:#fff;display:flex;align-items:center;gap:6px;padding:0 10px}
+.titlebar :focus-visible{outline-color:#fff}
+.brand{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 6px;margin-right:4px;border:0;border-radius:8px;background:transparent;color:#fff;font:inherit;cursor:pointer}
+.brand:hover{background:rgba(255,255,255,.14)}
+.brand-mark{width:22px;height:22px;flex:none}
+.brand-name{font-weight:700;font-size:14px;letter-spacing:.01em;white-space:nowrap}
+@media (max-width:980px){.brand-name{display:none}.brand{padding:0 6px}}
+.app-switch{display:flex;background:rgba(0,0,0,.2);border-radius:9px;padding:3px;gap:2px}
+.app-switch button{display:flex;align-items:center;gap:7px;height:28px;padding:0 10px 0 6px;border:0;border-radius:7px;background:transparent;color:#fff;font-weight:600}
+.app-switch button:hover{background:rgba(255,255,255,.14)}
+.app-switch button[aria-pressed=true]{background:#fff;color:var(--accent-strong)}
+.app-logo{width:19px;height:19px;border-radius:5px;display:grid;place-items:center;background:rgba(255,255,255,.22);color:#fff}
+.app-logo svg{display:block}
+.app-switch button[aria-pressed=true] .app-logo{background:var(--accent);color:#fff}
+.tb-group{display:flex;gap:2px;margin-left:4px}
+.tb-btn{border:0;background:transparent;color:#fff;width:34px;height:34px;border-radius:7px;display:grid;place-items:center}
+.tb-btn:hover{background:rgba(255,255,255,.16)}.tb-btn:active{background:rgba(255,255,255,.26)}
+.title-center{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-width:120px}
+.title-center input{width:min(300px,100%);min-width:0;text-align:center;background:rgba(255,255,255,.14);border:1px solid transparent;border-radius:7px;color:#fff;height:30px;padding:0 10px;font-weight:600}
+.title-center input:hover{border-color:rgba(255,255,255,.55)}
+.title-center input:focus{background:#fff;color:#1b1b1b;outline:2px solid #fff;outline-offset:1px}
+.save-state{font-size:12px;opacity:.92;white-space:nowrap}
+.cmd-search{display:flex;align-items:center;gap:8px;height:32px;min-width:210px;border-radius:7px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;padding:0 6px 0 10px;text-align:left}
+.cmd-search:hover{background:rgba(255,255,255,.22)}
+.cmd-search span{flex:1}
+.cmd-search kbd{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)}
+.top-action{height:32px;border-radius:7px;padding:0 12px;border:1px solid rgba(255,255,255,.6);background:transparent;color:#fff;display:flex;align-items:center;gap:7px;font-weight:600;white-space:nowrap}
+.top-action:hover{background:rgba(255,255,255,.14)}
+.top-action.primary{border-color:#fff;background:#fff;color:var(--accent-strong)}
+/* Schede */
+.tabrow{display:flex;align-items:flex-end;gap:6px;background:var(--chrome);padding:5px 10px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.filebtn{height:30px;margin-bottom:4px;padding:0 15px;border:0;border-radius:7px;background:var(--accent);color:#fff;font-weight:600;flex-shrink:0}
+.filebtn:hover{background:var(--accent-strong)}
+.tabs{display:flex;gap:2px}
+.tab{border:0;background:transparent;color:var(--text-2);height:36px;padding:0 13px;border-radius:7px 7px 0 0;position:relative;white-space:nowrap;font-weight:500}
+.tab:hover{background:var(--hover);color:var(--text)}
+.tab[aria-selected=true]{color:var(--accent-text);font-weight:600}
+.tab[aria-selected=true]::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
+.tab:focus-visible{outline-offset:-2px}
+/* Barra multifunzione */
+.ribbon{flex-shrink:0;background:var(--chrome);overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;border-bottom:1px solid var(--line)}
+.ribbon-inner{display:flex;align-items:stretch;min-height:102px;padding:6px 6px 4px;margin:0 8px 8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);width:max-content;min-width:calc(100% - 16px)}
+.rbgroup{display:flex;flex-direction:column;padding:0 9px;position:relative;flex-shrink:0}
+.rbgroup+.rbgroup::before{content:'';position:absolute;left:0;top:6px;bottom:24px;width:1px;background:var(--line)}
+.rbitems{display:flex;align-items:flex-start;gap:3px;flex:1}
+.rbstack{display:flex;flex-direction:column;gap:5px;padding-top:2px}
+.rbrow{display:flex;align-items:center;gap:2px}
+.rb-label{font-size:11px;color:var(--text-3);text-align:center;padding-top:4px;white-space:nowrap}
+.tool{display:inline-flex;justify-content:center;align-items:center;gap:5px;position:relative;height:30px;min-width:30px;padding:0 6px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);white-space:nowrap}
+.tool:hover{background:var(--hover)}.tool:active{background:var(--pressed)}
+.tool[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.tool.lg{flex-direction:column;justify-content:flex-start;height:70px;min-width:54px;max-width:98px;padding:6px 6px 4px;white-space:normal;font-size:12px;line-height:1.2;gap:5px;text-align:center}
+.tool.lg .ico{width:26px;height:26px;stroke-width:1.5}
+.tool.lg .ti-text{font-size:21px;height:26px;display:flex;align-items:center;justify-content:center}
+.tool .lbl{font-size:12px}
+.chev{width:10px;height:10px;display:inline-block;vertical-align:middle;margin-left:2px;stroke-width:2}
+.tool[aria-expanded=true]{background:var(--pressed)}
+.rb-select{height:28px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);padding:0 4px}
+.rb-select:hover{border-color:var(--text-3)}
+.btn{display:inline-flex;justify-content:center;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn.primary{color:#fff;font-weight:600;background:var(--accent);border-color:var(--accent)}
+.btn.primary:hover{background:var(--accent-strong)}
+.btn.icon{width:30px;padding:0}
+.btn.sm{height:26px;padding:0 8px;font-size:12px}
+.check{display:inline-flex;align-items:center;gap:6px;font-weight:400!important}
+.check input{width:16px;height:16px;accent-color:var(--accent)}
+/* Area di lavoro */
+.main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.main:focus-visible{outline-offset:-3px}
+.editor-pane{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
+.btn[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.side-pane{width:270px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.pane-head{display:flex;align-items:center;gap:8px;padding:10px 10px 4px 14px}.pane-head h2{font-size:14px;margin:0;flex:1}
+.pane-count{font-size:12px;color:var(--text-3)}
+.pane-hint{font-size:12px;color:var(--text-3);margin:0 14px 8px;line-height:1.35}
+.pane-tools{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px}
+.lb{list-style:none;margin:0;padding:4px 6px 12px;overflow:auto;flex:1;min-height:0}
+.lb:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.lb-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:13px;line-height:1.3;cursor:pointer;border:1px solid transparent}
+.lb-item:hover{background:var(--hover)}
+.lb-item[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent)}
+.lb:focus-visible .lb-item.active,.lb-item.active{box-shadow:inset 3px 0 0 var(--accent)}
+.lb-item .t{font:12px 'Cascadia Mono',Consolas,monospace;color:var(--text-3);flex-shrink:0}
+.lb-item[aria-selected=true] .t{color:inherit}
+.lb-item .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-empty{padding:8px 10px;color:var(--text-3);font-size:12.5px}
+.insp-body{overflow:auto;padding:0 14px 16px;flex:1;min-height:0}
+.insp-body h3{font-size:13px;margin:14px 0 4px;color:var(--text-2)}
+.insp-body label{display:block;margin:10px 0 3px;font-weight:600;font-size:12.5px}
+.insp-body label.check{display:flex;margin-top:10px}
+.insp-body input:not([type=checkbox]):not([type=range]):not([type=color]),.insp-body select,.insp-body textarea{width:100%;padding:6px 8px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text)}
+.insp-body input[type=range]{width:100%;accent-color:var(--accent)}
+.insp-body input[type=color]{width:52px;height:30px;padding:2px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface)}
+.insp-body .row2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.insp-body .hint{display:block;color:var(--text-3);font-size:11.5px;margin-top:3px}
+.insp-body dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:8px 0 0}
+.insp-body dt{color:var(--text-3)}.insp-body dd{margin:0;font-weight:600}
+.insp-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+/* Barra di stato */
+.status{flex-shrink:0;min-height:30px;background:var(--chrome);border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;color:var(--text-2);font-size:12px;padding:0 10px}
+.status .grow{flex:1}
+.st-btn{border:0;background:transparent;color:var(--text-2);height:26px;padding:0 8px;border-radius:5px;display:inline-flex;align-items:center;gap:6px}
+.st-btn:hover{background:var(--hover)}
+.st-btn.icon{width:26px;padding:0;justify-content:center}
+.st-btn .ico{width:15px;height:15px}
+.zoom{display:flex;align-items:center;gap:2px}
+.zoom input[type=range]{width:110px;accent-color:var(--accent)}
+.zoom output{min-width:62px;text-align:right}
+/* Immagini: i piani a sinistra, la foto al centro, le regolazioni a destra */
+#photoPane{display:grid;grid-template-columns:240px minmax(0,1fr) 310px;flex:1;min-height:0}
+.plans{border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.plan-item{flex-direction:column;align-items:flex-start;gap:2px}
+.plan-item .d{font-size:11.5px;color:var(--text-3);white-space:normal}
+.plan-item[aria-selected=true] .d{color:inherit}
+.viewer{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--canvas)}
+.stage{flex:1;min-height:160px;position:relative;display:grid;place-items:center;overflow:hidden}
+.stage canvas{display:block;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.stage canvas.alpha{background:repeating-conic-gradient(#c8c8c8 0 25%,#fff 0 50%) 0 0/16px 16px}
+.stage canvas:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.stage-badge{position:absolute;left:12px;top:10px;background:var(--surface);color:var(--text);border:1px solid var(--line-strong);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600}
+.photo-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--text-2)}
+.photo-empty b{display:block;font-size:17px;color:var(--text);margin-bottom:6px}
+.photo-empty .row{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.viewbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;background:var(--chrome);border-top:1px solid var(--line);flex-shrink:0;font-size:12px;color:var(--text-2)}
+.viewbar .grow{flex:1}
+.adjust{border-left:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0;min-width:0}
+.hist-box{padding:0 14px 8px}
+.hist{width:100%;height:92px;display:block;border-radius:6px;background:var(--hist-bg);border:1px solid var(--line);forced-color-adjust:none}
+.hist-text{margin:6px 0 0;font-size:12px;color:var(--text-2);line-height:1.35}
+.hist-text.warn{color:var(--danger)}
+html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
+.step-head{padding:6px 14px 8px;border-bottom:1px solid var(--line)}
+.step-head h3{margin:0;font-size:14px}
+.step-head p{margin:4px 0 0;font-size:12px;color:var(--text-2);line-height:1.4}
+.step-nav{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.step-nav .grow{flex:1}
+.step-nav .btn.primary{margin-left:auto}
+.step-count{font-size:12px;color:var(--text-3)}
+.adj{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:0 6px;margin:10px 0 0}
+.insp-body .adj label{margin:0;grid-column:1}
+.adj output{font-variant-numeric:tabular-nums;font-size:12px;color:var(--text-2);min-width:58px;text-align:right}
+.adj input[type=range]{grid-column:1/-1}
+.adj .btn.icon{width:24px;height:24px}
+.adj .btn.icon .ico{width:14px;height:14px}
+.adj.changed label::after{content:' •';color:var(--accent-text)}
+@media (max-width:1100px){#photoPane{grid-template-columns:200px minmax(0,1fr) 270px}}
+@media (max-width:860px){#photoPane{grid-template-columns:1fr;grid-template-rows:minmax(240px,1fr) auto auto;overflow:auto}.plans{grid-row:2;border-right:0;border-top:1px solid var(--line);max-height:220px}.adjust{grid-row:3;border-left:0;border-top:1px solid var(--line)}}
+/* Finestre e menu */
+.modalbg{display:flex;justify-content:center;align-items:center;position:fixed;inset:0;z-index:350;padding:18px;background:rgba(0,0,0,.42)}
+.modal{background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);max-width:520px;width:100%;max-height:calc(100dvh - 36px);overflow:auto;padding:22px 24px}
+.modal.wide{max-width:820px}
+.modal h2{margin:0 0 12px;font-size:20px;font-weight:600}
+.modal h3{font-size:14px;margin:18px 0 6px}
+.dlg-body{line-height:1.5;color:var(--text-2)}
+.dlg-body p{margin:0 0 10px}
+.modal label{display:block;margin:12px 0 5px;font-weight:600}
+.modal label.check{display:flex;margin-top:12px}
+.modal input:not([type=checkbox]):not([type=range]):not([type=color]),.modal select,.modal textarea{width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text)}
+.modal input[type=range]{width:100%;accent-color:var(--accent)}
+.modal input[type=color]{width:60px;height:34px;padding:2px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface)}
+.modal .rangebox{display:flex;align-items:center;gap:10px}.modal .rangebox output{min-width:76px;text-align:right;font-variant-numeric:tabular-nums}
+.modal textarea{resize:vertical}
+.modal .hint{display:block;color:var(--text-3);margin-top:4px}
+.modal-actions{margin-top:20px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.modal-actions .left{margin-right:auto}
+.modal table{border-collapse:collapse;width:100%;font-size:12.5px}
+.modal th,.modal td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-weight:400}
+.modal caption{text-align:left;font-weight:600;font-size:14px;padding:14px 0 6px;color:var(--text)}
+.modal td kbd{margin:1px 2px}
+.kcols{columns:2 340px;column-gap:28px}.kcols table{break-inside:avoid;margin-bottom:6px}
+.progress{width:100%;height:12px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin:10px 0 6px}
+.progress>div{height:100%;width:0;background:var(--accent)}
+.issue-list{list-style:none;margin:8px 0 0;padding:0}
+.issue-list li{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
+.ok-msg{color:var(--accent-text);font-weight:600}
+.stats{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:6px 0 0}.stats dt{color:var(--text-3)}.stats dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.filepanel{position:fixed;inset:0;z-index:300;display:flex;background:var(--surface);color:var(--text)}
+.file-side{width:250px;background:var(--accent);color:#fff;padding:14px 10px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.file-side button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:14px;text-align:left}
+.file-side button:hover{background:rgba(255,255,255,.16)}
+.file-side :focus-visible{outline-color:#fff;outline-offset:-2px}
+.file-side .file-back{font-weight:600;margin-bottom:10px}
+.file-info{padding:40px 48px;overflow:auto;flex:1}
+.file-info h2{font-size:28px;font-weight:600;margin:0 0 6px}
+.file-info>p{color:var(--text-2);margin:0 0 24px}
+.file-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;max-width:900px}
+.file-tile{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:128px}
+.file-tile:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);border-color:var(--accent)}
+.file-tile .ico{width:28px;height:28px;color:var(--accent-text);margin-bottom:4px}
+.file-tile b{font-size:15px}.file-tile span{color:var(--text-2);font-size:12.5px;line-height:1.4}
+.file-details{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:28px 0 0;max-width:600px}
+.file-details dt{color:var(--text-3)}.file-details dd{margin:0;font-weight:600}
+.palette{background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);width:min(620px,100%);align-self:flex-start;margin-top:9vh;overflow:hidden;display:flex;flex-direction:column;max-height:72vh}
+.palette input{border:0;border-bottom:1px solid var(--line);padding:16px 18px;font-size:16px;background:var(--surface);color:var(--text)}
+.palette input:focus-visible{outline:none;box-shadow:inset 0 -2px 0 var(--accent)}
+#palList{overflow:auto;padding:6px}
+.pal-opt{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer}
+.pal-opt .ico,.pal-opt .ti-text{color:var(--text-2)}
+.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 3px 0 0 var(--accent)}
+.pal-label{flex:1}.pal-cat{font-size:11.5px;color:var(--text-3)}
+.pal-empty{padding:16px;color:var(--text-3)}
+.pal-hint{margin:0;padding:8px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--text-3)}
+.ctxmenu{position:fixed;z-index:420;min-width:230px;max-width:440px;max-height:72vh;overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:5px}
+.ctxmenu [role^=menuitem]{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:7px 10px;border-radius:6px;text-align:left}
+.ctxmenu [role^=menuitem]:hover,.ctxmenu [role^=menuitem]:focus{background:var(--accent-soft);color:var(--accent-text);outline:none}
+.ctxmenu [role^=menuitem]:focus-visible{box-shadow:inset 0 0 0 2px var(--focus)}
+.ctxmenu .mi-text{flex:1;display:flex;flex-direction:column;gap:1px;min-width:0}.ctxmenu kbd{font-size:10.5px}
+.ctxmenu .mi-label{font-weight:500}.ctxmenu .mi-desc{font-size:11.5px;color:var(--text-3);white-space:normal;line-height:1.3}
+.ctxmenu [role^=menuitem]:focus .mi-desc,.ctxmenu [role^=menuitem]:hover .mi-desc{color:inherit}
+.ctxmenu .mi-check{width:18px;display:inline-flex;justify-content:center;font-weight:700;flex-shrink:0}
+.menu-sep{height:1px;background:var(--line);margin:4px 6px}
+.tip{position:fixed;z-index:500;background:#1f1f1f;color:#fff;font-size:12px;padding:6px 9px;border-radius:6px;max-width:300px;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.25);line-height:1.35}
+html[data-theme=dark] .tip{background:#f3f3f3;color:#111}
+.msg{position:fixed;left:50%;bottom:46px;transform:translateX(-50%);color:#fff;background:#262626;padding:11px 18px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.3);z-index:400;max-width:min(560px,90vw);opacity:0;pointer-events:none;transition:opacity .15s}
+.msg.show{opacity:1}
+html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
+.drop-over::after{content:'Rilascia per aprire';position:fixed;inset:12px;border:3px dashed var(--accent);border-radius:14px;background:var(--sel-tint);display:grid;place-items:center;font-size:22px;font-weight:600;color:var(--accent-text);z-index:600;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+/* Nelle finestre strette i testi dei pulsanti spariscono alla vista ma restano agli screen reader: sono il loro nome. */
+@media (max-width:1100px){.top-action span,.cmd-search span,.save-state{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.cmd-search{min-width:0}}
+@media (forced-colors:active){.tool[aria-pressed=true],.tab[aria-selected=true],.pal-opt[aria-selected=true],.lb-item[aria-selected=true]{outline:2px solid Highlight}}
+@media (max-width:720px){.titlebar{gap:3px;padding:0 4px}.app-switch button{padding:0 6px}.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.tb-group{display:none}.cmd-search kbd{display:none}.file-side{width:180px}.file-info{padding:22px}.status #helpBtn span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></symbol>
+<symbol id="i-open" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="i-new" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6m-3-3h6"/></symbol>
+<symbol id="i-export" viewBox="0 0 24 24"><path d="M12 15V3m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+<symbol id="i-import" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 .5c0 1.5-2.5 2-2.5 3.5M12 17h.01"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></symbol>
+<symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+<symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-zoomFit" viewBox="0 0 24 24"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4M8 12h8"/></symbol>
+<symbol id="i-speak" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
+<symbol id="i-light" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
+<symbol id="i-flip" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7 3 12l5 5zM16 7l5 5-5 5z"/></symbol>
+<symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14M2 6h14a2 2 0 0 1 2 2v14"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><circle cx="9" cy="10" r="5"/><circle cx="15" cy="10" r="5"/><circle cx="12" cy="15" r="5"/></symbol>
+<symbol id="i-stats" viewBox="0 0 24 24"><path d="M3 20h18M6 20V11M11 20V5M16 20v-6M20 20V9"/></symbol>
+<symbol id="i-fit" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><rect x="7" y="8" width="10" height="8"/></symbol>
+<symbol id="i-rotateL" viewBox="0 0 24 24"><path d="M4 11a8 8 0 1 1 2.3 5.7"/><path d="M4 4v7h7"/></symbol>
+<symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 11-11"/><path d="m13 7 4 4"/><path d="M18 3v3M16.5 4.5h3M20 10v2M19 11h2M9 3v2M8 4h2"/></symbol>
+<symbol id="i-compare" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M12 3v18"/><path d="M12 5h7.5a1.5 1.5 0 0 1 1.5 1.5v11a1.5 1.5 0 0 1-1.5 1.5H12z" fill="currentColor" opacity=".35"/></symbol>
+<symbol id="i-plan" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.5"/><circle cx="4.5" cy="12" r="1.5"/><circle cx="4.5" cy="18" r="1.5"/></symbol>
+<symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></symbol>
+<symbol id="i-level" viewBox="0 0 24 24"><path d="M3 17 21 7"/><path d="M3 12h18" stroke-dasharray="2 2"/></symbol>
+<symbol id="i-draw" viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="m14 7 3 3"/></symbol>
+</defs></svg>
+<a class="skip" href="#workRegion" id="skipWork">Vai all’area di lavoro</a><a class="skip" href="#tabs" id="skipRibbon">Vai alla barra multifunzione</a>
+<div class="immagini" id="app">
+<header class="titlebar" id="titlebar" aria-label="Barra del titolo">
+<button type="button" class="brand" id="brandBtn" aria-label="Tassello Grafica: informazioni" data-tip="Informazioni su Tassello Grafica"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#fff" fill-opacity=".82"></path><rect y="54" width="46" height="46" rx="10" fill="#fff"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#fff"></rect><path d="M86 0V8Q86 14 92 14H100Z" fill="var(--accent)" fill-opacity=".55"></path></svg><span class="brand-name">Tassello Grafica</span></button>
+<div class="app-switch" role="group" aria-label="Applicazione">
+<button type="button" id="switchImmagini" aria-pressed="true" aria-keyshortcuts="Control+Alt+I" data-tip="Immagini (Ctrl+Alt+I)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M4 5h16v14H4z"></path><path d="m4 17 5-5 4 4 2-2 5 5" stroke-width="2"></path></svg></span><span class="app-name">Immagini</span></button>
+<button type="button" id="switchDisegno" aria-pressed="false" aria-disabled="true" aria-describedby="disegnoNote" data-tip="Disegno: in preparazione"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M5 19l3-1 10-10-2-2L6 16z"></path></svg></span><span class="app-name">Disegno</span></button>
+<span class="sr-only" id="disegnoNote">In preparazione</span>
+</div>
+<div class="tb-group" role="group" aria-label="Accesso rapido">
+<button type="button" class="tb-btn" id="quickUndo" aria-label="Annulla" aria-keyshortcuts="Control+Z" data-tip="Annulla (Ctrl+Z)"><svg class="ico" aria-hidden="true"><use href="#i-undo"/></svg></button>
+<button type="button" class="tb-btn" id="quickRedo" aria-label="Ripeti" aria-keyshortcuts="Control+Y" data-tip="Ripeti (Ctrl+Y)"><svg class="ico" aria-hidden="true"><use href="#i-redo"/></svg></button>
+</div>
+<div class="title-center"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Foto" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
+<button type="button" class="cmd-search" id="paletteBtn" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Cerca comandi</span><kbd aria-hidden="true">Alt+Q</kbd></button>
+<button type="button" class="top-action" id="openTop" aria-keyshortcuts="Control+O" data-tip="Apri una foto (Ctrl+O)"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><span>Apri</span></button>
+<button type="button" class="top-action primary" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta la foto (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
+<button type="button" class="tb-btn" id="kbdBtn" aria-label="Scorciatoie da tastiera" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg></button>
+</header>
+<div class="tabrow" id="tabrow">
+<button type="button" class="filebtn" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
+<div class="tabs" id="tabs" role="tablist" aria-label="Schede della barra multifunzione"></div>
+</div>
+<div class="ribbon" id="ribbon" role="tabpanel" aria-labelledby="tab-Inizio"></div>
+<main class="main" id="workRegion" tabindex="-1" aria-label="Area di lavoro">
+<div class="editor-pane" id="photoPane">
+<aside class="plans" aria-labelledby="planTitle">
+<div class="pane-head"><h2 id="planTitle">Piani</h2></div>
+<p class="pane-hint" id="planHint">Scegli che cosa vuoi ottenere: il piano mostra un passo alla volta solo i controlli che servono.</p>
+<div class="lb" id="planList" role="listbox" aria-labelledby="planTitle" aria-describedby="planKeys" tabindex="0"></div>
+</aside>
+<section class="viewer" aria-labelledby="viewTitle">
+<h2 class="sr-only" id="viewTitle">Foto</h2>
+<div class="stage" id="stage">
+<canvas id="photo" tabindex="0" role="img" aria-label="Foto" aria-describedby="photoHint" hidden></canvas>
+<span class="stage-badge" id="compareBadge" hidden>Originale</span>
+<div class="photo-empty" id="photoEmpty"><div><b>Apri una foto per iniziare</b>JPEG, PNG, WebP, AVIF o GIF: puoi anche trascinarla qui. La foto resta sul tuo dispositivo e l’originale non viene mai modificato.<div class="row"><button type="button" class="btn primary" data-action="open">Apri una foto…</button></div></div></div>
+</div>
+<div class="viewbar" id="viewbar" role="toolbar" aria-label="Vista della foto">
+<button type="button" class="btn sm" data-action="compare" aria-pressed="false" aria-keyshortcuts="\" data-tip="Mostra l’originale (\)"><svg class="ico" aria-hidden="true"><use href="#i-compare"/></svg>Originale</button>
+<button type="button" class="btn sm" data-action="auto" data-tip="Regolazione automatica (Ctrl+Maiusc+U)"><svg class="ico" aria-hidden="true"><use href="#i-wand"/></svg>Automatica</button>
+<span class="grow"></span><span id="photoInfo" aria-hidden="true"></span>
+</div>
+</section>
+<aside class="adjust" aria-labelledby="adjTitle">
+<div class="pane-head"><h2 id="adjTitle">Regolazioni</h2><button type="button" class="btn sm" data-action="resetAll">Ripristina</button></div>
+<div class="hist-box"><canvas class="hist" id="hist" aria-hidden="true"></canvas><p class="hist-text" id="histText">Nessuna foto aperta.</p></div>
+<div class="step-head" id="stepHead" hidden></div>
+<div class="insp-body" id="adjBody"></div>
+</aside>
+</div>
+</main>
+<footer class="status" id="statusbar" aria-label="Barra di stato">
+<span id="statusText">Pronto</span><span id="docInfo"></span><span class="grow"></span>
+<button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
+</footer>
+</div>
+<p id="photoHint" class="sr-only">Foto con le regolazioni applicate. Alt+Maiusc+I descrive la foto e la sua luce, la barra rovesciata mostra l’originale, Maiusc+F10 apre il menu.</p>
+<p id="planKeys" class="sr-only">Frecce su e giù per scegliere un piano, Invio per iniziarlo dal primo passo.</p>
+<div class="msg" id="toast" role="status" aria-atomic="true" aria-live="polite"></div>
+<div id="srLive" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<div id="filepanel" class="filepanel" role="dialog" aria-modal="true" aria-labelledby="fileTitle" hidden>
+<nav class="file-side" aria-label="Menu File" id="fileSide"></nav>
+<section class="file-info"><h2 id="fileTitle">File</h2><p id="fileIntro"></p>
+<div class="file-tiles" id="fileTiles"></div>
+<dl class="file-details" id="fileDetails"></dl>
+</section>
+</div>
+<div class="modalbg" id="modalbg" hidden><div id="modal" class="modal" role="dialog" aria-labelledby="dlgTitle" aria-describedby="dlgBody" aria-modal="true"></div></div>
+<div class="modalbg" id="palettebg" hidden><div class="palette" role="dialog" aria-modal="true" aria-label="Cerca comando">
+<input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. esposizione, ruota, bianco e nero" autocomplete="off" spellcheck="false">
+<div id="palList" role="listbox" aria-label="Comandi"></div>
+<p class="pal-hint" aria-hidden="true">↑ ↓ per scegliere · Invio per eseguire · Esc per chiudere</p>
+</div></div>
+<div id="menu" class="ctxmenu" role="menu" hidden></div>
+<div id="tip" class="tip" aria-hidden="true" hidden></div>
+<input id="fileInput" class="hidden" type="file" accept="image/*,.heic,.heif,.avif,.webp" tabindex="-1" aria-hidden="true">
+<input id="lutInput" class="hidden" type="file" accept=".cube" tabindex="-1" aria-hidden="true">
+<script>
+(()=>{'use strict';
+// Strumenti di base usati in tutto il programma: DOM, testo sicuro in HTML, nomi dei file scaricati,
+// numeri scritti e letti all'italiana.
+const $=id=>document.getElementById(id);
+const $$=(sel,root=document)=>[...root.querySelectorAll(sel)];
+const HTML_ESC={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'};
+const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>HTML_ESC[ch]);
+const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
+const uid=()=>Math.random().toString(36).slice(2,10);
+// Nomi dei file: niente caratteri vietati da Windows, al massimo 80 caratteri, estensione corretta.
+const IMG_EXT=/\.(?:jpe?g|png|webp|avif|gif|bmp|heic|heif|tiff?|cube|json)$/i;
+function safeFileName(name){const s=String(name||'').replace(/[\x00-\x1f\\/:*?"<>|]/g,'_').trim().slice(0,80);return s||'Senza titolo'}
+const baseName=name=>String(name||'').replace(IMG_EXT,'');
+const extName=(name,ext)=>`${safeFileName(baseName(name))}.${ext}`;
+function download(content,fileName,mime){const payload=content instanceof Blob?content:new Blob([content],{type:mime||'application/octet-stream'}),url=URL.createObjectURL(payload),link=Object.assign(document.createElement('a'),{href:url,download:fileName});link.style.display='none';document.body.append(link);link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);link.remove()}
+// Numeri all'italiana: quelli scritti dall'utente con la virgola o il punto, quelli mostrati con la virgola,
+// il segno meno tipografico e, per le regolazioni, il segno più.
+const num=v=>{const s=String(v??'').trim().replace(/\s/g,'').replace(/−/g,'-').replace(',','.');return s===''?NaN:Number(s)};
+const fmtNum=(n,d=1)=>Number(n).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).replace(/^-/,'−');
+const fmtInt=n=>Math.round(n).toLocaleString('it-IT');
+const fmtSigned=(n,d=0)=>(n>0?'+':'')+fmtNum(n,d);
+const fmtPct=(f,d=0)=>fmtNum(f*100,d)+'%';
+const fmtBytes=n=>n>=1e9?fmtNum(n/1e9,2)+' GB':n>=1e6?fmtNum(n/1e6,1)+' MB':fmtInt(n/1e3)+' kB';
+// Annunci per screen reader, finestre di dialogo accessibili, tooltip e preferenze di visualizzazione.
+const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
+let toastTimer;
+// Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
+function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),4200)}
+// Con join il messaggio si aggiunge a quello appena annunciato invece di sostituirlo (per esempio un avviso dopo Annulla).
+let liveTimer,lastSaid={t:0,msg:''};function announce(msg,{join=false}={}){const el=$('srLive');if(join&&Date.now()-lastSaid.t<800)msg=lastSaid.msg+' '+msg;lastSaid={t:Date.now(),msg};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
+const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
+function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden],.hidden')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
+function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body)t.focus({preventScroll:true})}
+function trapTab(e,root){if(e.key!=='Tab')return;const f=focusables(root);if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&i<=0){e.preventDefault();f.at(-1).focus()}else if(!e.shiftKey&&(i===f.length-1||i<0)){e.preventDefault();f[0].focus()}}
+// Finestra di dialogo modale con campi etichettati. Campi: text, number, select, textarea, checkbox, range, color.
+// opts.buttons aggiunge pulsanti (per esempio Anteprima) che ricevono i valori correnti; opts.validate può rifiutare
+// i valori con un messaggio, che resta nella finestra ed è annunciato.
+function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new Promise(resolve=>{const pane=$('modal'),bg=$('modalbg'),prev=document.activeElement;
+ const field=x=>{const id='dlg_'+x.id,hint=x.hint?`<small class="hint" id="${id}_h">${esc(x.hint)}</small>`:'',desc=x.hint?` aria-describedby="${id}_h"`:'';
+  if(x.type==='checkbox')return `<label class="check"><input type="checkbox" id="${id}"${x.value?' checked':''}${desc}> ${esc(x.label)}</label>${hint}`;
+  const lab=`<label for="${id}">${esc(x.label)}</label>`;
+  if(x.type==='select')return lab+`<select id="${id}"${desc}>${x.options.map(opt=>{const [v,l]=Array.isArray(opt)?opt:[opt.value,opt.label];return `<option value="${esc(v)}"${String(v)===String(x.value??'')?' selected':''}>${esc(l)}</option>`}).join('')}</select>`+hint;
+  if(x.type==='textarea')return lab+`<textarea id="${id}" rows="${x.rows||3}"${desc}>${esc(x.value||'')}</textarea>`+hint;
+  if(x.type==='range'){const f=x.fmt||String;return lab+`<div class="rangebox"><input type="range" id="${id}" min="${x.min}" max="${x.max}" step="${x.step||1}" value="${esc(x.value)}" aria-valuetext="${esc(f(Number(x.value)))}"${desc}><output id="${id}_o" aria-hidden="true">${esc(f(Number(x.value)))}</output></div>`+hint}
+  // I numeri sono campi di testo: si possono scrivere con la virgola, come si usa in italiano.
+  const decimal=x.type==='number',type=decimal?'text':x.type||'text',value=x.type==='number'&&typeof x.value==='number'?fmtNum(x.value,x.value%1?Math.min(3,String(x.value).split('.')[1]?.length||1):0).replace(/\./g,''):x.value;
+  return lab+`<input id="${id}" type="${type}" value="${esc(value??'')}" autocomplete="off" spellcheck="false"${decimal?' inputmode="decimal"':''}${desc}>`+hint};
+ pane.className='modal'+(opts.wide?' wide':'');
+ const extra=(opts.buttons||[]).map((b,i)=>`<button type="button" class="btn${i?'':' left'}" id="dlgBtn${i}">${esc(b.label)}</button>`).join('');
+ pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="hint" id="dlgErr" role="alert"></p><div class="modal-actions">${extra}${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
+ bg.hidden=false;
+ const values=()=>{const obj={};for(const x of fields){const el=$('dlg_'+x.id);obj[x.id]=x.type==='checkbox'?el.checked:el.value}return obj};
+ for(const x of fields)if(x.type==='range'){const el=$('dlg_'+x.id),f=x.fmt||String;el.addEventListener('input',()=>{const t=f(Number(el.value));$('dlg_'+x.id+'_o').textContent=t;el.setAttribute('aria-valuetext',t)})}
+ const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
+ if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
+ (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad;$('dlgErr').textContent=err.msg;if(err.field)$('dlg_'+err.field)?.focus();return}finish(v)};
+ bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
+ bg.onmousedown=e=>{if(e.target===bg)finish(null)};
+ opts.onOpen?.(pane,finish);
+ setTimeout(()=>{const f=fields[0]?$('dlg_'+fields[0].id):(pane.querySelector('[data-autofocus]')||$('okDlg'));f?.focus({preventScroll:!fields[0]});pane.scrollTop=0;if(f?.select&&f.type==='text')f.select()},0);
+});}
+async function confirmAction(message,label='Continua'){return (await modal('Conferma',esc(message),[],label))!==null}
+const overlayOpen=()=>!$('modalbg').hidden||!$('palettebg').hidden||!$('filepanel').hidden||!$('menu').hidden;
+const tip=$('tip');let tipTimer;
+function showTip(el){const t=el.dataset.tip;if(!t||!el.isConnected)return;tip.textContent=t;tip.hidden=false;const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;let x=Math.min(innerWidth-w-6,Math.max(6,r.left+r.width/2-w/2)),y=r.bottom+6;if(y+h>innerHeight-4)y=r.top-h-6;tip.style.left=x+'px';tip.style.top=y+'px'}
+function hideTip(){clearTimeout(tipTimer);tip.hidden=true}
+// Preferenze: tema, contrasto e ultime scelte di esportazione.
+const prefs={theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',contrast:matchMedia('(prefers-contrast: more)').matches,exportFormat:'jpeg',exportQuality:90,exportSize:'orig'};
+const PREFS_KEY='tassello-grafica.preferenze';
+try{Object.assign(prefs,JSON.parse(localStorage.getItem(PREFS_KEY)||'{}'))}catch(e){}
+function savePrefs(){try{localStorage.setItem(PREFS_KEY,JSON.stringify(prefs))}catch(e){}}
+function applyPrefs(){document.documentElement.dataset.theme=prefs.theme==='dark'?'dark':'light';document.documentElement.dataset.contrast=prefs.contrast?'high':'normal';themeChanged()}
+// Colori del tema letti dalle variabili CSS, per disegnare l'istogramma anche in contrasto elevato.
+let palette={};
+function themeChanged(){const probe=document.createElement('span');document.body.append(probe);const read=v=>{probe.style.color=`var(${v})`;return getComputedStyle(probe).color};palette=Object.fromEntries(['--hist-bg','--hist-l','--hist-r','--hist-g','--hist-b','--hist-clip','--accent','--text-3','--line'].map(v=>[v.slice(2),read(v)]));probe.remove();redrawAll?.()}
+let redrawAll=null;
+// Lavori lunghi: messaggio nella barra di stato e cursore di attesa; gli errori diventano un messaggio leggibile.
+async function work(label,fn){status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{document.body.style.cursor='';status()}}
+function status(text){$('statusText').textContent=text||'Pronto'}
+// Bozze nel browser con IndexedDB: la foto aperta, le sue regolazioni e il piano in corso restano sul dispositivo
+// e tornano alla prossima apertura. Ogni app salva solo quando è cambiata, SAVE_DELAY dopo l'ultima modifica.
+const DRAFT_DB='tassello-grafica';
+const SAVE_DELAY=1200;
+const state={mode:'immagini'};
+let db=null,draftTimer=null,suppressAutosave=false;
+const dirtyApps=new Set();
+function openStore(){return new Promise(done=>{let open;try{open=indexedDB.open(DRAFT_DB,1)}catch(e){done(null);return}open.addEventListener('upgradeneeded',()=>open.result.createObjectStore('docs'));open.addEventListener('success',()=>done(open.result));open.addEventListener('error',()=>done(null));open.addEventListener('blocked',()=>done(null))})}
+// Una richiesta sull'archivio 'docs' dentro una transazione; si risolve quando la transazione è conclusa.
+function storeCall(mode,work){return new Promise((ok,fail)=>{if(!db){ok(undefined);return}let tx;try{tx=db.transaction('docs',mode)}catch(e){fail(e);return}const req=work(tx.objectStore('docs'));tx.addEventListener('complete',()=>ok(req?.result));tx.addEventListener('error',()=>fail(tx.error));tx.addEventListener('abort',()=>fail(tx.error||Error('Archivio non disponibile')))})}
+const dbGet=key=>storeCall('readonly',st=>st.get(key));
+const dbPut=(key,value)=>storeCall('readwrite',st=>st.put(value,key));
+const dbDel=key=>storeCall('readwrite',st=>st.delete(key));
+// Le modifiche ravvicinate producono un solo salvataggio. Le funzioni di salvataggio di ogni app stanno nel suo modulo.
+function schedulePersist(app=state.mode){if(suppressAutosave)return;dirtyApps.add(app);clearTimeout(draftTimer);$('saveState').textContent='Salvataggio bozza…';draftTimer=setTimeout(persistNow,SAVE_DELAY)}
+async function persistNow(){clearTimeout(draftTimer);const label=$('saveState'),apps=[...dirtyApps];dirtyApps.clear();let note='';
+ try{for(const app of apps)if(app==='immagini')note=(await persistPhoto())||note;await dbPut('ui',{mode:state.mode});
+  label.textContent=note||'Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(note)status(note)}
+ catch(e){console.warn('Bozza non salvata',e);label.textContent='Bozza non salvata';status('Bozza non salvata: esporta la foto per non perdere il lavoro')}}
+addEventListener('pagehide',()=>{if(dirtyApps.size)persistNow()});
+// Registro unico dei comandi: barra multifunzione, ricerca comandi, menu, scorciatoie e guida leggono da qui.
+// modes: 'i' Immagini; Disegno userà 'd' e i comandi comuni 'id'. g: la scorciatoia vale anche dentro i campi di testo.
+// ctx: la scorciatoia vale solo con il focus in quell'area (photo, list).
+const C={};
+function def(modes,cat,list){for(const [id,label,icon,keys,extra] of list)C[id]={id,label,icon,keys:keys||'',modes,cat,...(extra||{})}}
+const isImmagini=()=>state.mode==='immagini';
+def('i','File',[
+ ['open','Apri una foto','open','Ctrl+O',{g:1,short:'Apri'}],
+ ['export','Esporta la foto (JPEG, PNG o WebP)','save','Ctrl+S',{g:1,short:'Esporta'}],
+ ['closePhoto','Chiudi la foto','close','',{short:'Chiudi'}],
+ ['filePanel','Apri il menu File','file','',{}]]);
+def('i','Foto',[
+ ['auto','Regolazione automatica della luce e del colore','wand','Ctrl+Maiusc+U',{g:1,short:'Automatica'}],
+ ['compare','Mostra l’originale','compare','\\',{short:'Originale',toggle:()=>I.compare}],
+ ['resetAll','Ripristina la foto com’era','history','Ctrl+Maiusc+R',{g:1,short:'Ripristina tutto'}],
+ ['readStatus','Descrivi la foto e la sua luce','speak','Alt+Maiusc+I',{g:1,short:'Descrivi'}]]);
+def('i','Inquadratura',[
+ ['rotateLeft','Ruota a sinistra di 90 gradi','rotateL','',{short:'Ruota a sinistra'}],
+ ['rotateRight','Ruota a destra di 90 gradi','rotate','',{short:'Ruota a destra'}],
+ ['flipH','Rifletti da sinistra a destra','flip','',{short:'Rifletti',toggle:()=>I.r.flip}],
+ ['ratioMenu','Formato dell’inquadratura','crop','',{menu:1,short:'Formato'}],
+ ['straighten','Raddrizza…','level','',{short:'Raddrizza'}],
+ ['resetGeometry','Togli rotazione, ritaglio e raddrizzamento','fit','',{short:'Inquadratura originale'}]]);
+def('i','Look',[
+ ['lookMenu','Scegli un look','filter','',{menu:1,short:'Look'}],
+ ['lutImport','Importa un look da un file LUT (.cube)…','cube','',{short:'Importa LUT'}],
+ ['lookAmount','Intensità del look…','gear','',{short:'Intensità'}],
+ ['lookOff','Togli il look','close','',{short:'Nessun look'}]]);
+def('i','Piani',[
+ ['planMenu','Scegli un piano','plan','',{menu:1,short:'Piano'}],
+ ['stepNext','Passo successivo del piano','right','Ctrl+Invio',{g:1,short:'Avanti'}],
+ ['stepPrev','Passo precedente del piano','left','Ctrl+Maiusc+Invio',{g:1,short:'Indietro'}],
+ ['stepAuto','Applica di nuovo la proposta del passo','wand','',{short:'Proposta'}],
+ ['planFree','Tutti i controlli, senza piano','gear','',{short:'Tutti i controlli'}]]);
+def('i','Generale',[
+ ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],
+ ['shortcuts','Scorciatoie da tastiera','keyboard','F1 / Ctrl+/',{g:1,short:'Scorciatoie'}],
+ ['help','Informazioni e limiti','info','',{short:'Informazioni'}],
+ ['nextRegion','Vai all’area successiva','','F6',{g:1}],
+ ['prevRegion','Vai all’area precedente','','Maiusc+F6',{g:1}],
+ ['switchImmagini','Passa a Immagini','image','Ctrl+Alt+I',{g:1}],
+ ['undo','Annulla','undo','Ctrl+Z',{short:'Annulla'}],
+ ['redo','Ripeti','redo','Ctrl+Y / Ctrl+Maiusc+Z',{short:'Ripeti'}],
+ ['themeDark','Tema scuro','moon','',{short:'Tema scuro',toggle:()=>prefs.theme==='dark'}],
+ ['contrast','Contrasto elevato','contrast','',{short:'Contrasto elevato',toggle:()=>prefs.contrast}]]);
+const KEYNAME={Invio:'enter',Spazio:' ',Canc:'delete',Esc:'escape',PgSu:'pageup',PgGiù:'pagedown',Home:'home',Fine:'end','←':'arrowleft','→':'arrowright','↑':'arrowup','↓':'arrowdown',Tab:'tab'};
+const keyCache=new Map();
+function parseKey(s){let key,mods;if(s.endsWith('++')){key='+';mods=s.slice(0,-2).split('+')}else{const p=s.split('+');key=p.pop();mods=p}return{ctrl:mods.includes('Ctrl'),alt:mods.includes('Alt'),shift:mods.includes('Maiusc'),key:(KEYNAME[key]||key).toLowerCase()}}
+const keysOf=c=>c.keys;
+function parsedKeys(spec){if(!keyCache.has(spec))keyCache.set(spec,spec?spec.split(' / ').map(parseKey):[]);return keyCache.get(spec)}
+function keyMatch(e,k){if((e.ctrlKey||e.metaKey)!==k.ctrl||e.altKey!==k.alt)return false;const sym=k.key.length===1&&!/[a-z0-9 ]/.test(k.key);if(!sym&&e.shiftKey!==k.shift)return false;const ek=e.key.toLowerCase();if(ek===k.key)return true;if(/^[a-z0-9]$/.test(k.key)&&(!(e.ctrlKey&&e.altKey)||/\d/.test(k.key)))return e.code===(/\d/.test(k.key)?'Digit':'Key')+k.key.toUpperCase();if(k.key===' '&&e.code==='Space')return true;return false}
+function ariaKeys(spec){const M={Ctrl:'Control',Maiusc:'Shift',Alt:'Alt',Invio:'Enter',Spazio:'Space',Canc:'Delete',PgSu:'PageUp',PgGiù:'PageDown','←':'ArrowLeft','→':'ArrowRight','↑':'ArrowUp','↓':'ArrowDown',Esc:'Escape'};return spec.split(' / ').map(s=>s.split('+').map(p=>M[p]||p).join('+')).join(' ')}
+const kbdHtml=spec=>spec.split(' / ').map(s=>s.split('+').map(p=>`<kbd>${esc(p)}</kbd>`).join('+')).join(' o ');
+const available=c=>c.modes.includes(state.mode[0]);
+function focusContext(){const a=document.activeElement;if(!a||a===document.body)return 'other';if(a.id==='photo')return 'photo';if(a.classList.contains('lb'))return 'list';if(a.matches('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select'))return 'input';return 'other'}
+function findShortcut(e,ctx){let fallback=null;for(const c of Object.values(C)){const spec=keysOf(c);if(!spec||!available(c))continue;if(c.ctx&&c.ctx!==ctx)continue;if(ctx==='input'&&!c.g)continue;if(parsedKeys(spec).some(k=>keyMatch(e,k))){if(c.ctx===ctx)return c;fallback??=c}}return fallback}
+const safe=fn=>{try{return fn()}catch(e){return false}};
+async function runCommand(id){const c=C[id];if(!c)return;if(!available(c)){toast('«'+c.label+'» non è disponibile in Immagini');return}hideTip();
+ try{await handleAction(id)}catch(e){console.error(e);toast(e.message||String(e));return}
+ if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}
+let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#ribbon [aria-pressed][data-action],#viewbar [aria-pressed][data-action],#adjBody [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}},40)}
+// Ricerca comandi (Alt+Q): combobox con elenco filtrato, navigabile con le frecce.
+let palItems=[],palIdx=0,palPrev=null;
+const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function openPalette(){palPrev=document.activeElement;$('palettebg').hidden=false;$('palInput').value='';renderPalette();$('palInput').focus()}
+function closePalette(restore=true){$('palettebg').hidden=true;if(restore)refocus(palPrev)}
+function renderPalette(){const q=norm($('palInput').value.trim()),all=Object.values(C).filter(c=>available(c)&&c.id!=='palette');palItems=(q?all.map(c=>{const hay=norm(c.label+' '+(c.short||'')+' '+c.cat+' '+c.id);const sc=norm(c.label).startsWith(q)?4:hay.includes(q)?3:q.split(/\s+/).every(w=>hay.includes(w))?2:0;return[c,sc]}).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]):all).slice(0,80);palIdx=0;
+ $('palList').innerHTML=palItems.length?palItems.map((c,i)=>{const k=keysOf(c),on=c.toggle?safe(c.toggle):null;return `<div role="option" id="pal-${i}" class="pal-opt" data-i="${i}" aria-selected="${i===0}">${ICON(c.icon)}<span class="pal-label">${esc(c.label)}${on===null?'':`<span class="sr-only">, ${on?'attivo':'non attivo'}</span>`}${k?`<span class="sr-only">, scorciatoia ${esc(k)}</span>`:''}</span><span class="pal-cat" aria-hidden="true">${esc(c.cat)}</span>${k?`<kbd aria-hidden="true">${esc(k)}</kbd>`:''}</div>`}).join(''):'<div class="pal-empty" role="option" aria-disabled="true" aria-selected="false" id="pal-empty">Nessun comando trovato</div>';palActive()}
+function palActive(){$$('#palList [role=option]').forEach((o,i)=>o.setAttribute('aria-selected',i===palIdx&&!!palItems.length));const id=palItems.length?'pal-'+palIdx:'pal-empty';$('palInput').setAttribute('aria-activedescendant',id);$(id)?.scrollIntoView({block:'nearest'})}
+function palRun(i){const c=palItems[i];if(!c)return;closePalette(true);setTimeout(()=>runCommand(c.id),0)}
+// Menu contestuale generico (ruolo menu, frecce, Invio, Esc).
+let menuState=null;
+function openMenu(items,x,y,label='Menu',opener=null){closeMenu(false);const m=$('menu'),prev=document.activeElement;opener?.setAttribute('aria-expanded','true');m.setAttribute('aria-label',label);m.innerHTML=items.map((it,i)=>it==='-'?'<div class="menu-sep" role="separator"></div>':`<button type="button" role="${it.checked===undefined?'menuitem':'menuitemradio'}"${it.checked===undefined?'':` aria-checked="${!!it.checked}"`} tabindex="-1" data-i="${i}"${it.disabled?' aria-disabled="true"':''}>${it.checked===undefined?ICON(it.icon):`<span class="mi-check" aria-hidden="true">${it.checked?'✓':''}</span>`}<span class="mi-text"><span class="mi-label">${esc(it.label)}</span>${it.desc?`<span class="mi-desc">${esc(it.desc)}</span>`:''}</span>${it.keys?`<kbd aria-hidden="true">${esc(it.keys)}</kbd>`:''}</button>`).join('');m.hidden=false;const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(4,Math.min(x,innerWidth-w-4))+'px';m.style.top=Math.max(4,Math.min(y,innerHeight-h-4))+'px';menuState={items,prev,opener};(m.querySelector('[aria-checked=true]:not([aria-disabled])')||m.querySelector('[role^=menuitem]:not([aria-disabled])'))?.focus()}
+function closeMenu(restore=true){if(!menuState)return;const p=menuState.prev;menuState.opener?.setAttribute('aria-expanded','false');menuState=null;$('menu').hidden=true;if(restore)refocus(p)}
+function menuRun(i){const it=menuState?.items[i];if(!it||it.disabled)return;closeMenu(true);setTimeout(()=>it.run(),0)}
+const mi=(id,run)=>{const c=C[id];return{label:c.label,icon:c.icon,keys:keysOf(c),run:run||(()=>runCommand(id))}};
+// Posizione per un menu aperto da un pulsante della barra, o dall'elemento con il focus.
+function menuAnchor(action){const el=document.querySelector(`#ribbon [data-action="${action}"]`)||document.activeElement,r=el?.getBoundingClientRect?.()||{left:200,bottom:200};return{x:r.left,y:r.bottom,el:el?.closest?.('#ribbon')?el:null}}
+// Scorciatoie che dipendono dall'area con il focus: non passano dal registro, ma la guida le elenca.
+const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Schede della barra multifunzione','← → poi Invio o ↓'],['Torna alla scheda dalla barra','Esc o ↑'],['Chiudi finestre e menu','Esc']]]],
+ i:[['Sulla foto',[['Descrivi la foto e la sua luce','Alt+Maiusc+I'],['Mostra l’originale finché non premi di nuovo','\\'],['Menu della foto','Maiusc+F10']]],['Nei piani',[['Scegli un piano','↑ ↓'],['Primo o ultimo piano','Home / Fine'],['Inizia il piano dal primo passo','Invio']]],['Nei cursori delle regolazioni',[['Cambia il valore di un passo','← → o ↑ ↓'],['Cambia il valore di un passo ampio','PgSu / PgGiù'],['Valore minimo o massimo','Home / Fine'],['Riporta a zero','Canc']]]]};
+function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per Immagini. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
+async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
+async function help(){await modal('Tassello Grafica',`<p><b>Tassello Grafica 0.1.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Questa è una versione di prova: contiene <b>Immagini</b>, per migliorare le foto passo per passo; <b>Disegno</b>, per comporre immagini e grafica vettoriale, è in preparazione. Le foto restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Grafica non sostituisce i programmi di fotoritocco professionali e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (una foto per i social, un ritratto, un documento da rendere leggibile) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie. Alt+Maiusc+I descrive la foto: dimensioni, inquadratura, luminosità media, quanta parte è bruciata nelle luci o chiusa nelle ombre, e le regolazioni cambiate. Ogni regolazione è un cursore con il suo nome e il suo valore; Canc la riporta a zero. L’istogramma è descritto a parole sotto il grafico, e se una modifica brucia le luci o chiude le ombre lo senti subito.</p><p><b>Immagini:</b> i <b>piani</b> ti guidano secondo quello che vuoi ottenere (foto per i social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro): un passo alla volta, solo i controlli che servono, con una proposta automatica da accettare o ritoccare. Con <b>Tutti i controlli</b> lavori senza piano. Inquadratura: rotazione, riflessione, raddrizzamento e formati pronti (quadrato, 4:5, 9:16, 3:2, 16:9, A4). Luce: esposizione, contrasto, alte luci, ombre, bianchi e neri. Colore: temperatura, tinta, vividezza e saturazione. Vignettatura. Look pronti (bianco e nero, seppia, caldo, freddo, pellicola, vivace, tenue) e look importati da file LUT .cube, con la loro intensità. Apre JPEG, PNG, WebP, AVIF, GIF e BMP; esporta JPEG, PNG o WebP alla dimensione che scegli.</p><p><b>Privacy:</b> la foto resta nel browser e sul tuo computer; l’originale non viene mai modificato. Il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Immagini lavora su una foto alla volta. Le foto HEIC degli iPhone e i file RAW delle fotocamere non si aprono: esportale prima in JPEG. Non ci sono ancora pennelli, ritocchi locali, nitidezza e riduzione del rumore; l’anteprima è ridotta alla dimensione dello schermo e la foto intera viene calcolata all’esportazione. Il file esportato è in sRGB, a 8 bit per canale. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+// Aree raggiungibili con F6 e Maiusc+F6.
+function regions(){const l=[$('titlebar'),$('tabrow'),$('ribbon'),$('planList').closest('.plans'),$('stage'),$('viewbar'),$('adjBody').closest('.adjust'),$('statusbar')];return l.filter(el=>el.offsetWidth||el.offsetHeight)}
+const REGION_NAME={titlebar:'Barra del titolo',tabrow:'Schede della barra multifunzione',ribbon:'Barra multifunzione',viewbar:'Vista della foto',statusbar:'Barra di stato'};
+function focusRegion(el){if(el.id==='tabrow'){$('tab-'+slug(currentTab))?.focus();return}if(el.classList.contains('plans')){$('planList').focus();return}if(el.id==='stage'){(I.bmp?$('photo'):focusables(el)[0])?.focus();return}if(el.classList.contains('adjust')){(focusables($('stepHead'))[0]||focusables($('adjBody'))[0]||focusables(el)[0])?.focus();announce('Regolazioni');return}focusables(el)[0]?.focus()}
+function cycleRegion(dir){const list=regions(),a=document.activeElement;let i=list.findIndex(r=>r.contains(a));i=i<0?(dir>0?0:list.length-1):(i+dir+list.length)%list.length;focusRegion(list[i]);const name=REGION_NAME[list[i].id];if(name)announce(name)}
+// Barra multifunzione: "!" pulsante grande, "/" nuova riga di pulsanti piccoli, suffisso "+" mostra l'etichetta.
+const RIBBON={
+ i:{Inizio:[['Foto','!open !export'],['Regolazioni','!auto !compare / resetAll+ / readStatus+'],['Piano','!planMenu stepPrev+ / stepNext+ / planFree+'],['Cronologia','!undo !redo']],
+  Inquadra:[['Ruota','!rotateLeft !rotateRight / flipH+'],['Formato','!ratioMenu !straighten / resetGeometry+']],
+  Look:[['Look','!lookMenu !lutImport / lookAmount+ / lookOff+']],
+  Vista:[['Confronto','!compare'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]}};
+const TABS={i:Object.keys(RIBBON.i)};
+let currentTab='Inizio';
+const slug=s=>s.replace(/\s+/g,'-');
+function tipText(c){const k=keysOf(c);return c.label+(k?' ('+k+')':'')}
+function cmdButton(id,size,showLabel){const c=C[id];if(!c||!available(c))return '';const pressed=c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:'',k=keysOf(c),keys=(k?` aria-keyshortcuts="${esc(ariaKeys(k))}"`:'')+(c.menu?' aria-haspopup="menu" aria-expanded="false"':'');
+ if(size==='lg')return `<button type="button" class="tool lg" data-action="${id}"${pressed}${keys} data-tip="${esc(tipText(c))}">${ICON(c.icon)}<span class="lbl">${esc(c.short||c.label)}${c.menu?ICON('down','ico chev'):''}</span>${c.short&&c.short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}</button>`;
+ return `<button type="button" class="tool" data-action="${id}"${pressed}${keys} data-tip="${esc(tipText(c))}"${showLabel?'':` aria-label="${esc(c.label)}"`}>${ICON(c.icon)}${showLabel?`<span class="lbl">${esc(c.short||c.label)}</span>${c.short&&c.short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}`:''}</button>`}
+function renderGroup([name,spec],gi){let out='',stack=[[]];const flush=()=>{const rows=stack.filter(r=>r.length);if(rows.length)out+=`<div class="rbstack">${rows.map(r=>`<div class="rbrow">${r.join('')}</div>`).join('')}</div>`;stack=[[]]};
+ for(const tok of spec.split(' ')){if(tok==='/'){stack.push([]);continue}if(tok[0]==='!'){flush();out+=cmdButton(tok.slice(1),'lg')}else stack.at(-1).push(cmdButton(tok.replace(/\+$/,''),'sm',tok.endsWith('+')))}
+ flush();return `<div class="rbgroup" role="group" aria-labelledby="rbg${gi}"><div class="rbitems">${out}</div><div class="rb-label" id="rbg${gi}">${esc(name)}</div></div>`}
+function renderTabs(){const t=TABS[state.mode[0]];if(!t.includes(currentTab))currentTab=t[0];$('tabs').innerHTML=t.map(x=>`<button type="button" role="tab" class="tab" id="tab-${slug(x)}" data-tab="${esc(x)}" aria-selected="${x===currentTab}" aria-controls="ribbon" tabindex="${x===currentTab?0:-1}">${esc(x)}</button>`).join('')}
+function renderRibbon(){const groups=RIBBON[state.mode[0]][currentTab]||[];$('ribbon').setAttribute('aria-labelledby','tab-'+slug(currentTab));$('ribbon').innerHTML=`<div class="ribbon-inner">${groups.map(renderGroup).join('')}</div>`}
+function selectTab(name,focus=true){currentTab=name;renderTabs();renderRibbon();if(focus)$('tab-'+slug(name))?.focus()}
+// Apertura delle foto: il browser decodifica JPEG, PNG, WebP, AVIF, GIF e BMP e raddrizza la foto secondo
+// l'orientamento scritto dalla fotocamera. HEIC e RAW non si possono aprire: si spiega che cosa fare.
+const isHeic=f=>/\.(?:heic|heif)$/i.test(f.name)||/^image\/hei[cf]/i.test(f.type);
+const isRaw=f=>/\.(?:cr2|cr3|nef|nrw|arw|srf|sr2|orf|rw2|raf|dng|pef|srw|x3f|3fr|iiq)$/i.test(f.name);
+const isPhotoFile=f=>/^image\//i.test(f.type)||/\.(?:jpe?g|png|webp|avif|gif|bmp|heic|heif)$/i.test(f.name)||isRaw(f);
+// Oltre questa dimensione la foto non si apre: l'esportazione a piena risoluzione richiederebbe troppa memoria.
+const MAX_PIXELS=60e6;
+async function decodePhoto(file){
+ if(isHeic(file))throw Error('Le foto HEIC degli iPhone non si aprono in Chrome ed Edge. Sul telefono scegli Impostazioni › Fotocamera › Formati › Più compatibile, oppure condividi la foto come JPEG.');
+ if(isRaw(file))throw Error('I file RAW delle fotocamere non si aprono ancora: esporta prima la foto in JPEG dalla fotocamera o dal suo programma.');
+ if(/svg/i.test(file.type)||/\.svg$/i.test(file.name))throw Error('I disegni SVG si apriranno in Disegno: Immagini lavora sulle foto.');
+ let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){throw Error(`«${file.name}» non è un’immagine che il browser sa aprire`)}
+ if(bmp.width*bmp.height>MAX_PIXELS){const w=bmp.width,h=bmp.height;bmp.close();throw Error(`La foto è troppo grande (${fmtInt(w)} × ${fmtInt(h)} pixel): il limite è di ${fmtInt(MAX_PIXELS/1e6)} milioni di pixel.`)}
+ return bmp}
+// Immagini: una foto alla volta, modificata senza toccare l'originale. Il file aperto resta com'è; le modifiche
+// sono una ricetta (inquadratura, regolazioni, look) che si applica all'anteprima e, all'esportazione, alla foto intera.
+// Regolazioni: [id, nome, gruppo, minimo, massimo, passo, formato del valore, spiegazione letta con il cursore].
+const warmth=(v,plus,minus)=>v?fmtSigned(v)+', '+(v>0?plus:minus):'0';
+const ADJ=[
+ ['exposure','Esposizione','Luce',-4,4,.05,v=>fmtSigned(v,2)+' EV','Schiarisce o scurisce tutta la foto: un EV raddoppia o dimezza la luce.'],
+ ['contrast','Contrasto','Luce',-100,100,1,fmtSigned,'Allontana o avvicina le zone chiare e quelle scure.'],
+ ['highlights','Alte luci','Luce',-100,100,1,fmtSigned,'A sinistra recupera i dettagli nelle zone chiare, a destra le schiarisce.'],
+ ['shadows','Ombre','Luce',-100,100,1,fmtSigned,'A destra apre le zone scure, a sinistra le chiude.'],
+ ['whites','Bianchi','Luce',-100,100,1,fmtSigned,'Sposta il punto più chiaro: a destra il bianco diventa pieno.'],
+ ['blacks','Neri','Luce',-100,100,1,fmtSigned,'Sposta il punto più scuro: a sinistra il nero diventa pieno.'],
+ ['temp','Temperatura','Colore',-100,100,1,v=>warmth(v,'più calda','più fredda'),'A destra la luce diventa più calda (gialla), a sinistra più fredda (azzurra).'],
+ ['tint','Tinta','Colore',-100,100,1,v=>warmth(v,'verso il magenta','verso il verde'),'Corregge una dominante verde (a destra) o magenta (a sinistra).'],
+ ['vibrance','Vividezza','Colore',-100,100,1,fmtSigned,'Ravviva soprattutto i colori spenti e rispetta i toni della pelle.'],
+ ['saturation','Saturazione','Colore',-100,100,1,fmtSigned,'Rende tutti i colori più intensi; a −100 la foto è in bianco e nero.'],
+ ['vignette','Vignettatura','Effetti',-100,100,1,fmtSigned,'A sinistra scurisce i bordi e porta l’attenzione al centro, a destra li schiarisce.']];
+const ADJ_BY=Object.fromEntries(ADJ.map(([id,label,group,min,max,step,fmt,hint])=>[id,{id,label,group,min,max,step,fmt,hint}]));
+// Formati dell'inquadratura come larghezza diviso altezza; 0 tiene il formato della foto.
+const RATIOS=[['orig','Formato della foto',0],['1:1','Quadrato 1:1',1],['4:5','Verticale 4:5, post',4/5],['9:16','Verticale 9:16, storie',9/16],['2:3','Verticale 2:3',2/3],['3:2','Orizzontale 3:2',3/2],['4:3','Orizzontale 4:3',4/3],['16:9','Panoramico 16:9',16/9],['a4','Foglio A4 verticale',210/297]];
+const ratioName=id=>(RATIOS.find(x=>x[0]===id)||RATIOS[0])[1];
+const newRecipe=()=>({adj:Object.fromEntries(ADJ.map(a=>[a[0],0])),rot:0,flip:false,angle:0,ratio:'orig',cx:.5,cy:.5,look:'none',lookAmt:100});
+// La foto aperta: il file originale, l'immagine decodificata e la ricetta, con la cronologia per Annulla e Ripeti.
+// base è la ricetta dell'ultima modifica conclusa: i cursori cambiano r mentre si trascinano e la modifica entra
+// nella cronologia solo quando si rilasciano.
+const I={file:null,name:'',bmp:null,r:newRecipe(),base:'',hist:[],redo:[],luts:{},plan:'libera',step:0,seen:new Set(),compare:false,stats:null};
+const snap=()=>JSON.stringify(I.r);
+I.base=snap();
+function settle(label,opts){const now=snap();if(now===I.base)return false;I.hist.push({label,r:I.base});if(I.hist.length>200)I.hist.shift();I.redo=[];I.base=now;recipeChanged(opts);return true}
+function edit(label,fn,opts){if(!I.bmp){toast('Apri prima una foto');return false}fn(I.r);return settle(label,opts)}
+function photoUndo(redo){const from=redo?I.redo:I.hist,to=redo?I.hist:I.redo,e=from.pop();if(!e){toast(redo?'Niente da ripetere':'Niente da annullare');return}to.push({label:e.label,r:snap()});I.r=JSON.parse(e.r);I.base=e.r;recipeChanged({panel:true});announce((redo?'Ripetuto: ':'Annullato: ')+e.label)}
+// Dopo ogni modifica: anteprima, pannello, pulsanti attivi e bozza.
+function recipeChanged({panel=false}={}){requestRender();if(panel)renderPanel();else syncPanel();refreshToggles();schedulePersist('immagini')}
+const changedAdj=r=>ADJ.filter(a=>r.adj[a[0]]);
+const hasEdits=()=>snap()!==JSON.stringify(newRecipe());
+// Apertura: la foto nuova riparte da una ricetta vuota e dal primo passo del piano scelto.
+async function openPhoto(file){const bmp=await work('Apertura della foto',()=>decodePhoto(file));if(!bmp)return false;
+ I.bmp?.close();Object.assign(I,{file,name:file.name,bmp,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false});I.base=snap();
+ $('docTitle').value=baseName(file.name);updateTitle();showPhoto();renderPanel();renderPlans();refreshToggles();schedulePersist('immagini');
+ const intro=enterStep();announce(`Aperta «${file.name}», ${fmtInt(bmp.width)} per ${fmtInt(bmp.height)} pixel.${intro?' '+intro:''}`);$('photo').focus();return true}
+async function closePhoto(){if(!I.bmp)return;if(hasEdits()&&!(await confirmAction('Le modifiche non esportate andranno perse. L’originale resta com’è sul tuo computer. Vuoi chiudere la foto?','Chiudi la foto')))return;
+ I.bmp.close();Object.assign(I,{file:null,name:'',bmp:null,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false,stats:null});I.base=snap();
+ $('docTitle').value='Foto';updateTitle();showPhoto();renderPanel();refreshToggles();schedulePersist('immagini');announce('Foto chiusa');$('photoEmpty').querySelector('button')?.focus()}
+// Bozza: il file originale si salva una volta sola, la ricetta a ogni modifica.
+let fileSaved=null;
+async function persistPhoto(){if(!I.file){await dbDel('photo');await dbDel('photoFile');fileSaved=null;return}
+ if(fileSaved!==I.file){await dbPut('photoFile',I.file);fileSaved=I.file}
+ await dbPut('photo',{name:I.name,title:$('docTitle').value,r:I.r,luts:I.luts,plan:I.plan,step:I.step,seen:[...I.seen]})}
+async function restorePhoto(){const meta=await dbGet('photo'),file=await dbGet('photoFile');if(meta?.plan&&PLANS.some(p=>p.id===meta.plan))I.plan=meta.plan;if(meta?.luts)I.luts=meta.luts;if(!meta||!file)return;
+ let bmp;try{bmp=await decodePhoto(file)}catch(e){console.warn('Foto della bozza non leggibile',e);return}
+ const r=Object.assign(newRecipe(),meta.r);r.adj=Object.assign(newRecipe().adj,meta.r?.adj);
+ Object.assign(I,{file,name:meta.name||file.name,bmp,r,step:clamp(meta.step|0,0,Math.max(0,planSteps().length-1)),seen:new Set(meta.seen||[])});I.base=snap();fileSaved=file;
+ $('docTitle').value=meta.title||baseName(I.name)}
+function updateTitle(){document.title=($('docTitle').value.trim()||'Senza titolo')+' — Immagini · Tassello Grafica'}
+// Sviluppo dei pixel: la stessa ricetta vale per l'anteprima e per la foto intera che si esporta.
+// 1. inquadratura: rotazione di 90 gradi, riflessione, raddrizzamento e ritaglio, disegnati su un canvas;
+// 2. luce: per ogni canale una tabella di 256 valori con esposizione e bilanciamento del bianco (in luce lineare),
+//    poi neri, bianchi, ombre, alte luci e contrasto (in valori percepiti); 3. vividezza e saturazione;
+// 4. vignettatura; 5. look, come tabella di colori 3D (LUT) mescolata con l'intensità scelta.
+const S2L=new Float32Array(256).map((_,i)=>{const c=i/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4});
+const l2s=v=>v<=.0031308?v*12.92:1.055*v**(1/2.4)-.055;
+const smooth=x=>x*x*(3-2*x);
+// Inquadratura nel riferimento della foto ruotata di 90 gradi: dimensioni del riquadro e del ritaglio, angolo del ritaglio.
+function cropRect(r,W,H){const q=r.rot%180!==0,RW=q?H:W,RH=q?W:H,k=(RATIOS.find(x=>x[0]===r.ratio)||RATIOS[0])[2];let cw=RW,ch=RH;if(k){if(RW/RH>k)cw=RH*k;else ch=RW/k}return{RW,RH,cw,ch,x:(RW-cw)*r.cx,y:(RH-ch)*r.cy}}
+const outSize=(r,W,H)=>{const c=cropRect(r,W,H);return [Math.max(1,Math.round(c.cw)),Math.max(1,Math.round(c.ch))]};
+// La foto si ruota intorno al centro e si ingrandisce quanto basta perché il raddrizzamento non lasci angoli vuoti.
+function drawGeometry(ctx,bmp,r,outW,outH){const W=bmp.width,H=bmp.height,c=cropRect(r,W,H),kx=outW/c.cw,ky=outH/c.ch,a=r.angle*Math.PI/180,co=Math.abs(Math.cos(a)),si=Math.abs(Math.sin(a)),s=Math.max((c.RW*co+c.RH*si)/c.RW,(c.RW*si+c.RH*co)/c.RH);
+ ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(kx,0,0,ky,-c.x*kx,-c.y*ky);ctx.translate(c.RW/2,c.RH/2);ctx.rotate(a);ctx.scale(s,s);if(r.flip)ctx.scale(-1,1);ctx.rotate(r.rot*Math.PI/180);ctx.drawImage(bmp,-W/2,-H/2);ctx.restore()}
+// Tabelle della luce: ogni valore del file (0-255) diventa un valore percepito tra 0 e 1, già regolato.
+function toneTables(a){const g=2**a.exposure,t=a.temp/100,n=a.tint/100;let wr=(1+.3*t)*(1+.12*n),wg=1-.25*n,wb=(1-.3*t)*(1+.12*n);const y=.2126*wr+.7152*wg+.0722*wb;
+ const b0=-a.blacks*.0012,w0=1-a.whites*.0012,sh=a.shadows/100*1.69,hi=a.highlights/100*1.69,c=a.contrast/100;
+ const curve=v=>{let x=clamp((v-b0)/(w0-b0),0,1);x+=sh*x*(1-x)*(1-x)+hi*x*x*(1-x);x=clamp(x,0,1);x=c>=0?x+c*(smooth(x)-x):.5+(x-.5)*(1+c*.5);return clamp(x,0,1)};
+ return [wr/y,wg/y,wb/y].map(w=>{const tab=new Float32Array(256);for(let i=0;i<256;i++)tab[i]=curve(l2s(Math.min(1,S2L[i]*g*w)));return tab})}
+// Applica la ricetta ai pixel di src (già inquadrati) e scrive in dst, della stessa misura; src e dst possono coincidere.
+// Il ciclo sui pixel non chiama funzioni: con un'anteprima di qualche milione di pixel ogni chiamata si sente.
+function develop(src,dst,r,lut){const [TR,TG,TB]=toneTables(r.adj),w=src.width,h=src.height,s=src.data,d=dst.data,sat=1+r.adj.saturation/100,vib=r.adj.vibrance/100,vg=r.adj.vignette/100*.75,amt=clamp(r.lookAmt/100,0,1),L=lut&&amt>0?lut:null,color=sat!==1||vib!==0;
+ // Solo luce: bastano tre tabelle di byte.
+ if(!color&&!vg&&!L){const BR=Uint8ClampedArray.from(TR,v=>v*255+.5),BG=Uint8ClampedArray.from(TG,v=>v*255+.5),BB=Uint8ClampedArray.from(TB,v=>v*255+.5);for(let i=0;i<s.length;i+=4){d[i]=BR[s[i]];d[i+1]=BG[s[i+1]];d[i+2]=BB[s[i+2]];d[i+3]=s[i+3]}return dst}
+ const cx=w/2,cy=h/2,rad=1/Math.hypot(cx,cy),N=L?L.size:2,n=N-1,D=L?.data,SY=N*3,SZ=N*N*3,lx=L?L.min[0]:0,ly=L?L.min[1]:0,lz=L?L.min[2]:0,kx=L?n/(L.max[0]-lx):0,ky=L?n/(L.max[1]-ly):0,kz=L?n/(L.max[2]-lz):0;
+ for(let y=0,i=0;y<h;y++){const dy=(y+.5-cy)*rad,dy2=dy*dy;for(let x=0;x<w;x++,i+=4){let R=TR[s[i]],G=TG[s[i+1]],B=TB[s[i+2]];
+  if(color){const Y=.2126*R+.7152*G+.0722*B,mx=R>G?(R>B?R:B):(G>B?G:B),mn=R<G?(R<B?R:B):(G<B?G:B),k=sat*(1+vib*(1-(mx-mn)));R=Y+(R-Y)*k;G=Y+(G-Y)*k;B=Y+(B-Y)*k}
+  if(vg){const dx=(x+.5-cx)*rad;let t=(dx*dx+dy2-.2)*1.25;t=t<0?0:t>1?1:t;const f=1+vg*t*t*(3-2*t);R*=f;G*=f;B*=f}
+  // Look: tabella di colori 3D (come nei file .cube il rosso cambia più in fretta, poi il verde, poi il blu)
+  // con interpolazione tetraedrica: dal vertice di partenza si va verso l'asse con la frazione più grande.
+  if(L){let u=(R-lx)*kx,v=(G-ly)*ky,q=(B-lz)*kz;u=u<0?0:u>n?n:u;v=v<0?0:v>n?n:v;q=q<0?0:q>n?n:q;let u0=u|0,v0=v|0,q0=q|0;if(u0===n)u0--;if(v0===n)v0--;if(q0===n)q0--;
+   const fu=u-u0,fv=v-v0,fq=q-q0,i0=((q0*N+v0)*N+u0)*3,i1=i0+3+SY+SZ;let f1,f2,f3,ia,ib;
+   if(fu>=fv){if(fv>=fq){f1=fu;f2=fv;f3=fq;ia=i0+3;ib=ia+SY}else if(fu>=fq){f1=fu;f2=fq;f3=fv;ia=i0+3;ib=ia+SZ}else{f1=fq;f2=fu;f3=fv;ia=i0+SZ;ib=ia+3}}
+   else{if(fq>=fv){f1=fq;f2=fv;f3=fu;ia=i0+SZ;ib=ia+SY}else if(fq>=fu){f1=fv;f2=fq;f3=fu;ia=i0+SY;ib=ia+SZ}else{f1=fv;f2=fu;f3=fq;ia=i0+SY;ib=ia+3}}
+   R+=(D[i0]+f1*(D[ia]-D[i0])+f2*(D[ib]-D[ia])+f3*(D[i1]-D[ib])-R)*amt;
+   G+=(D[i0+1]+f1*(D[ia+1]-D[i0+1])+f2*(D[ib+1]-D[ia+1])+f3*(D[i1+1]-D[ib+1])-G)*amt;
+   B+=(D[i0+2]+f1*(D[ia+2]-D[i0+2])+f2*(D[ib+2]-D[ia+2])+f3*(D[i1+2]-D[ib+2])-B)*amt}
+  d[i]=R*255+.5;d[i+1]=G*255+.5;d[i+2]=B*255+.5;d[i+3]=s[i+3]}}
+ return dst}
+// Look pronti: funzioni sul colore percepito, trasformate in tabelle 3D al primo uso.
+const sCurve=(x,c)=>x+c*(smooth(clamp(x,0,1))-x);
+const luma=(r,g,b)=>.2126*r+.7152*g+.0722*b;
+const satur=(r,g,b,k)=>{const y=luma(r,g,b);return [y+(r-y)*k,y+(g-y)*k,y+(b-y)*k]};
+const LOOKS=[{id:'none',name:'Nessun look'},
+ {id:'bn',name:'Bianco e nero',fn:(r,g,b)=>{const v=sCurve(.3*r+.59*g+.11*b,.25);return [v,v,v]}},
+ {id:'seppia',name:'Seppia',fn:(r,g,b)=>{const v=sCurve(.3*r+.59*g+.11*b,.15);return [v*1.07+.02,v*.97+.01,v*.8+.01]}},
+ {id:'caldo',name:'Caldo',fn:(r,g,b)=>[r*1.06+.01,g*1.01,b*.9]},
+ {id:'freddo',name:'Freddo',fn:(r,g,b)=>[r*.92,g*.99,b*1.07+.01]},
+ {id:'pellicola',name:'Pellicola',fn:(r,g,b)=>{const f=v=>.05+.9*sCurve(v,.3),[R,G,B]=satur(r,g,b,.85);return [f(R)*1.03,f(G),f(B)*.92+.04]}},
+ {id:'vivace',name:'Vivace',fn:(r,g,b)=>satur(r,g,b,1.35).map(v=>sCurve(v,.2))},
+ {id:'tenue',name:'Tenue',fn:(r,g,b)=>satur(r,g,b,.7).map(v=>.04+.9*v)}];
+function bakeLook(fn,N=17){const D=new Float32Array(N*N*N*3);let i=0;for(let b=0;b<N;b++)for(let g=0;g<N;g++)for(let r=0;r<N;r++){const o=fn(r/(N-1),g/(N-1),b/(N-1));D[i++]=o[0];D[i++]=o[1];D[i++]=o[2]}return {size:N,data:D,min:[0,0,0],max:[1,1,1]}}
+const lookList=()=>[...LOOKS.map(l=>[l.id,l.name]),...Object.entries(I.luts).map(([id,l])=>[id,l.name+' (LUT)'])];
+const lookName=id=>(lookList().find(x=>x[0]===id)||[0,'Nessun look'])[1];
+function lutOf(id){if(I.luts[id])return I.luts[id];const l=LOOKS.find(x=>x.id===id);return l?.fn?(l.baked??=bakeLook(l.fn)):null}
+// File .cube (Adobe/Resolve): TITLE, LUT_3D_SIZE, DOMAIN_MIN e DOMAIN_MAX facoltativi, poi una riga "r g b" per colore.
+function parseCube(text,fileName){let size=0,title='',min=[0,0,0],max=[1,1,1];const vals=[];
+ for(const raw of text.split(/\r?\n/)){const l=raw.trim();if(!l||l[0]==='#')continue;const p=l.split(/\s+/),k=p[0].toUpperCase();
+  if(k==='TITLE'){title=l.slice(5).trim().replace(/^"|"$/g,'');continue}
+  if(k==='LUT_1D_SIZE')throw Error('Questo file contiene una tabella a una dimensione: servono le tabelle 3D (LUT_3D_SIZE).');
+  if(k==='LUT_3D_SIZE'){size=parseInt(p[1],10);continue}
+  if(k==='DOMAIN_MIN'){min=p.slice(1,4).map(Number);continue}if(k==='DOMAIN_MAX'){max=p.slice(1,4).map(Number);continue}
+  if(/^[A-Z_]/.test(k))continue;vals.push(Number(p[0]),Number(p[1]),Number(p[2]))}
+ if(!(size>=2&&size<=129))throw Error('File .cube non valido: manca la riga LUT_3D_SIZE.');
+ if(vals.length!==size**3*3||vals.some(v=>!Number.isFinite(v)))throw Error(`File .cube non valido: servono ${fmtInt(size**3)} righe di colori, ce ne sono ${fmtInt(vals.length/3)}.`);
+ if([0,1,2].some(k=>!(max[k]>min[k])))throw Error('File .cube non valido: DOMAIN_MAX deve essere maggiore di DOMAIN_MIN.');
+ return {name:title||baseName(fileName),size,data:new Float32Array(vals),min,max}}
+// Istogramma e misure della luce: luminosità per l'istogramma, rosso, verde e blu, parti bruciate e chiuse, trasparenza.
+function measure(img){const d=img.data,H=[new Uint32Array(256),new Uint32Array(256),new Uint32Array(256),new Uint32Array(256)],[HY,HR,HG,HB]=H;let n=0,sum=0,hi=0,lo=0,alpha=false;
+ for(let i=0;i<d.length;i+=4){if(d[i+3]<250)alpha=true;if(d[i+3]<8)continue;const r=d[i],g=d[i+1],b=d[i+2],y=(54*r+183*g+19*b)>>8;HY[y]++;HR[r]++;HG[g]++;HB[b]++;sum+=y;n++;if(r>=253&&g>=253&&b>=253)hi++;else if(r<=2&&g<=2&&b<=2)lo++}
+ return {H,n,mean:n?sum/n/255:0,high:n?hi/n:0,low:n?lo/n:0,alpha}}
+function pctl(st,p){const HY=st.H[0],t=st.n*p;let acc=0;for(let i=0;i<256;i++){acc+=HY[i];if(acc>=t)return i/255}return 1}
+// Regolazione automatica, dai pixel inquadrati e non ancora regolati: luce media verso il grigio medio,
+// bianchi e neri verso i bordi dell'istogramma, ombre e alte luci se servono, bilanciamento del bianco attenuato.
+function autoValues(src){const st=measure(src),p=q=>pctl(st,q),med=p(.5),lo=p(.005),hi=p(.995),toLin=v=>S2L[Math.round(clamp(v,0,1)*255)];
+ const ev=Math.round(clamp(Math.log2(toLin(.46)/Math.max(.002,toLin(med)))*.8,-2.5,2.5)*20)/20,g=2**ev,shift=v=>l2s(Math.min(1,toLin(v)*g)),hi2=shift(hi),lo2=shift(lo);
+ const out={exposure:Math.abs(ev)<.01?0:ev,whites:Math.round(clamp((1-hi2/.97)/.0012,-40,60)),blacks:Math.round(clamp((.02-lo2)/.0012,-50,40)),
+  contrast:Math.round(clamp((.75-(hi2-lo2))*40,0,25)),shadows:Math.round(clamp((.3-shift(p(.25)))*120,0,40)),highlights:-Math.round(clamp((shift(p(.9))-.85)*250,0,50))};
+ // Bilanciamento del bianco con la media dei colori (mondo grigio), a metà forza: le scene di un solo colore non si stravolgono.
+ const d=src.data;let mr=0,mg=0,mb=0,k=0;for(let i=0;i<d.length;i+=16){const r=d[i],gg=d[i+1],b=d[i+2];if(d[i+3]<8||Math.max(r,gg,b)>=250||Math.max(r,gg,b)<8)continue;mr+=S2L[r];mg+=S2L[gg];mb+=S2L[b];k++}
+ if(k>100){out.temp=Math.round(clamp((mb-mr)/(mr+mb)*120,-25,25));out.tint=Math.round(clamp((mg-(mr+mb)/2)/mg*120,-20,20))}else{out.temp=0;out.tint=0}
+ return out}
+// Anteprima: la foto inquadrata alla misura dello schermo, al massimo PREVIEW_MAX pixel sul lato lungo.
+// Mentre si trascina un cursore basta un'anteprima rapida di PREVIEW_FAST pixel; quella piena arriva al rilascio.
+// I pixel inquadrati restano in memoria finché non cambiano inquadratura o misura: le regolazioni ripartono da lì.
+const PREVIEW_MAX=2048,PREVIEW_FAST=1024;
+const photoCv=$('photo'),photoCtx=photoCv.getContext('2d');
+const srcCache={full:{key:'',px:null},fast:{key:'',px:null}};
+let outPx=null,renderQueued=false,renderFast=false;
+function previewSize(fast){const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),st=$('stage'),dpr=devicePixelRatio||1,lim=clamp(Math.round(Math.max(st.clientWidth,st.clientHeight)*dpr),640,fast?PREVIEW_FAST:PREVIEW_MAX),k=Math.min(1,lim/Math.max(w,h));return [Math.max(1,Math.round(w*k)),Math.max(1,Math.round(h*k))]}
+function geometryPixels(fast=false){const [w,h]=previewSize(fast),r=I.r,key=JSON.stringify([r.rot,r.flip,r.angle,r.ratio,r.cx,r.cy,w,h]),slot=srcCache[fast?'fast':'full'];if(key===slot.key&&slot.px)return slot.px;
+ const cv=new OffscreenCanvas(w,h),ctx=cv.getContext('2d',{willReadFrequently:true});drawGeometry(ctx,I.bmp,r,w,h);slot.px=ctx.getImageData(0,0,w,h);slot.key=key;return slot.px}
+// Le richieste nello stesso fotogramma diventano un solo disegno, rapido solo se lo erano tutte.
+function requestRender(fast=false){renderFast=(renderQueued?renderFast:true)&&fast;if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderPhoto(renderFast)})}
+function renderPhoto(fast){if(!I.bmp){I.stats=null;drawHist();return}const src=geometryPixels(fast);if(!outPx||outPx.width!==src.width||outPx.height!==src.height)outPx=new ImageData(src.width,src.height);
+ const img=I.compare?src:develop(src,outPx,I.r,lutOf(I.r.look));if(photoCv.width!==img.width||photoCv.height!==img.height){photoCv.width=img.width;photoCv.height=img.height}photoCtx.putImageData(img,0,0);fitStage();
+ const prev=I.stats;I.stats=measure(img);photoCv.classList.toggle('alpha',I.stats.alpha);drawHist();warnClipping(prev,I.stats);photoCv.setAttribute('aria-label',photoLabel());$('photoInfo').textContent=photoInfo()}
+// La foto occupa lo spazio disponibile senza deformarsi e senza superare la sua misura reale.
+function fitStage(){if(!I.bmp)return;const st=$('stage'),pad=24,[w,h]=outSize(I.r,I.bmp.width,I.bmp.height),k=Math.min((st.clientWidth-pad)/w,(st.clientHeight-pad)/h,1);photoCv.style.width=Math.max(1,Math.floor(w*k))+'px';photoCv.style.height=Math.max(1,Math.floor(h*k))+'px'}
+function showPhoto(){const has=!!I.bmp;photoCv.hidden=!has;$('photoEmpty').hidden=has;$('compareBadge').hidden=!(has&&I.compare);if(!has){for(const slot of Object.values(srcCache))Object.assign(slot,{key:'',px:null});$('photoInfo').textContent='';$('docInfo').textContent=''}requestRender()}
+const photoInfo=()=>{const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height);return `${fmtInt(w)} × ${fmtInt(h)} px`+(I.r.ratio!=='orig'?' · '+I.r.ratio.replace('a4','A4'):'')};
+function photoLabel(){const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),n=changedAdj(I.r).length+(I.r.look!=='none'?1:0);return `${I.compare?'Originale di ':'Foto '}«${I.name}», ${fmtInt(w)} per ${fmtInt(h)} pixel${I.r.ratio!=='orig'?', '+ratioName(I.r.ratio):''}${I.compare?'':n?`, ${n===1?'una modifica':n+' modifiche'}`:', senza modifiche'}`}
+// Istogramma: luminosità come area, rosso, verde e blu come linee; segni ai bordi se ci sono luci bruciate o ombre chiuse.
+const histCv=$('hist');
+function drawHist(){const dpr=devicePixelRatio||1,W=Math.max(1,Math.round(histCv.clientWidth*dpr)),H=Math.max(1,Math.round(histCv.clientHeight*dpr));if(histCv.width!==W||histCv.height!==H){histCv.width=W;histCv.height=H}const ctx=histCv.getContext('2d');ctx.fillStyle=palette['hist-bg']||'#fff';ctx.fillRect(0,0,W,H);
+ const st=I.stats,txt=$('histText');if(!st||!st.n){txt.textContent=I.bmp?'':'Nessuna foto aperta.';txt.classList.remove('warn');return}
+ let top=1;for(const h of st.H)for(let i=2;i<254;i++)top=Math.max(top,h[i]);const scale=v=>H-2-Math.min(1,Math.sqrt(v/top))*(H-6),x=i=>i/255*(W-1);
+ ctx.beginPath();ctx.moveTo(0,H);for(let i=0;i<256;i++)ctx.lineTo(x(i),scale(st.H[0][i]));ctx.lineTo(W,H);ctx.closePath();ctx.globalAlpha=.45;ctx.fillStyle=palette['hist-l'];ctx.fill();ctx.globalAlpha=1;
+ if(!matchMedia('(forced-colors: active)').matches)[['hist-r',1],['hist-g',2],['hist-b',3]].forEach(([c,k])=>{ctx.beginPath();for(let i=0;i<256;i++)ctx[i?'lineTo':'moveTo'](x(i),scale(st.H[k][i]));ctx.strokeStyle=palette[c];ctx.lineWidth=dpr;ctx.globalAlpha=.8;ctx.stroke();ctx.globalAlpha=1});
+ const mark=(left)=>{const s=7*dpr;ctx.beginPath();if(left){ctx.moveTo(2,2);ctx.lineTo(2+s,2);ctx.lineTo(2,2+s)}else{ctx.moveTo(W-2,2);ctx.lineTo(W-2-s,2);ctx.lineTo(W-2,2+s)}ctx.closePath();ctx.fillStyle=palette['hist-clip'];ctx.fill()};
+ if(st.low>=CLIP_WARN)mark(true);if(st.high>=CLIP_WARN)mark(false);
+ txt.textContent=histSentence(st);txt.classList.toggle('warn',st.low>=CLIP_WARN||st.high>=CLIP_WARN)}
+// Oltre l'1% di pixel completamente bianchi o neri la foto perde dettagli: si scrive e, al primo passaggio, si annuncia.
+const CLIP_WARN=.01;
+function histSentence(st){const parts=[`Luminosità media ${fmtPct(st.mean)}.`];if(st.high>=CLIP_WARN)parts.push(`Luci bruciate: ${fmtPct(st.high,1)} della foto, prova ad abbassare Esposizione, Alte luci o Bianchi.`);if(st.low>=CLIP_WARN)parts.push(`Ombre chiuse: ${fmtPct(st.low,1)} della foto, prova ad alzare Ombre o Neri.`);if(st.high<CLIP_WARN&&st.low<CLIP_WARN)parts.push('Nessuna parte bruciata o chiusa.');return parts.join(' ')}
+let clipSaid=0;
+function warnClipping(prev,st){if(!prev||I.compare||Date.now()-clipSaid<1500)return;const msg=[];if(st.high>=CLIP_WARN&&prev.high<CLIP_WARN)msg.push(`luci bruciate, ${fmtPct(st.high,1)}`);if(st.low>=CLIP_WARN&&prev.low<CLIP_WARN)msg.push(`ombre chiuse, ${fmtPct(st.low,1)}`);if(msg.length){clipSaid=Date.now();announce('Attenzione: '+msg.join(' e '),{join:true})}}
+// Piani nel riquadro di sinistra: elenco con la scelta attiva, Invio per iniziare.
+let planCursor=0;
+function renderPlans(){const list=$('planList');planCursor=clamp(planCursor,0,PLANS.length-1);list.innerHTML=PLANS.map((p,i)=>`<div role="option" id="plan-${p.id}" class="lb-item plan-item${i===planCursor?' active':''}" data-plan="${p.id}" aria-selected="${p.id===I.plan}"><span class="n">${esc(p.name)}</span><span class="d">${esc(p.desc)}</span></div>`).join('');list.setAttribute('aria-activedescendant','plan-'+PLANS[planCursor].id)}
+function movePlanCursor(i){planCursor=clamp(i,0,PLANS.length-1);renderPlans();$('plan-'+PLANS[planCursor].id)?.scrollIntoView({block:'nearest'})}
+// Pannello delle regolazioni: tutti i gruppi senza piano, solo i controlli del passo con un piano.
+const GROUPS=[['Inquadratura',['rotate','ratio','cx','cy','angle']],['Luce',ADJ.filter(a=>a[2]==='Luce').map(a=>a[0])],['Colore',ADJ.filter(a=>a[2]==='Colore').map(a=>a[0])],['Effetti',['vignette']],['Look',['look','lookAmt']]];
+// Cursori dell'inquadratura e del look, con lo stesso aspetto delle regolazioni. Le posizioni vanno da 0 a 100.
+const posText=(v,start,end,from)=>v===50?'al centro':v===0?'tutto '+start:v===100?'tutto '+end:`${fmtInt(v)}% ${from}`;
+const GEO={cx:{label:'Posizione orizzontale',min:0,max:100,step:1,get:r=>Math.round(r.cx*100),set:(r,v)=>{r.cx=v/100},fmt:v=>posText(v,'a sinistra','a destra','da sinistra'),hint:'Sposta il ritaglio a sinistra o a destra.'},
+ cy:{label:'Posizione verticale',min:0,max:100,step:1,get:r=>Math.round(r.cy*100),set:(r,v)=>{r.cy=v/100},fmt:v=>posText(v,'in alto','in basso','dall’alto'),hint:'Sposta il ritaglio in alto o in basso.'},
+ angle:{label:'Raddrizza',min:-15,max:15,step:.1,get:r=>r.angle,set:(r,v)=>{r.angle=v},fmt:v=>v?fmtSigned(v,1)+' gradi, '+(v>0?'in senso orario':'in senso antiorario'):'0 gradi',hint:'Ruota di poco la foto per raddrizzare l’orizzonte o un documento; i bordi si ritagliano da soli.'},
+ lookAmt:{label:'Intensità del look',min:0,max:100,step:1,get:r=>r.lookAmt,set:(r,v)=>{r.lookAmt=v},fmt:v=>fmtInt(v)+'%',hint:'Quanto il look cambia la foto.',zero:100}};
+const ctlDef=id=>ADJ_BY[id]?{...ADJ_BY[id],get:r=>r.adj[id],set:(r,v)=>{r.adj[id]=v}}:GEO[id];
+const zeroOf=id=>id==='cx'||id==='cy'?50:GEO[id]?.zero??0;
+// Le posizioni servono solo nella direzione in cui il ritaglio si può spostare, l'intensità solo con un look.
+function shown(id){if(id==='lookAmt')return I.r.look!=='none';if(id!=='cx'&&id!=='cy')return true;if(!I.bmp||I.r.ratio==='orig')return false;const c=cropRect(I.r,I.bmp.width,I.bmp.height);return id==='cx'?c.RW-c.cw>1:c.RH-c.ch>1}
+function rangeHtml(id,showHint){const c=ctlDef(id),v=c.get(I.r),changed=v!==zeroOf(id);return `<div class="adj${changed?' changed':''}" data-ctl="${id}"><label for="ctl-${id}">${esc(c.label)}</label><output id="ctl-${id}-o" aria-hidden="true">${esc(c.fmt(v))}</output><button type="button" class="btn icon" data-reset="${id}" aria-label="${esc(c.label)}: riporta al valore iniziale" data-tip="Riporta al valore iniziale (Canc sul cursore)"${changed?'':' disabled'}>${ICON('history')}</button><input type="range" id="ctl-${id}" data-ctl="${id}" min="${c.min}" max="${c.max}" step="${c.step}" value="${v}" aria-valuetext="${esc(c.fmt(v))}" aria-describedby="ctl-${id}-h"${I.bmp?'':' disabled'}><small class="hint${showHint?'':' sr-only'}" id="ctl-${id}-h">${esc(c.hint)}</small></div>`}
+function controlHtml(id,showHint){const off=I.bmp?'':' disabled';
+ if(id==='rotate')return `<div class="insp-actions" role="group" aria-label="Rotazione"><button type="button" class="btn sm" data-action="rotateLeft"${off}>${ICON('rotateL')}Ruota a sinistra</button><button type="button" class="btn sm" data-action="rotateRight"${off}>${ICON('rotate')}Ruota a destra</button><button type="button" class="btn sm" data-action="flipH" aria-pressed="${I.r.flip}"${off}>${ICON('flip')}Rifletti</button></div>`;
+ if(id==='ratio')return `<label for="ctl-ratio">Formato</label><select id="ctl-ratio" data-ctl="ratio"${off}>${RATIOS.map(([v,l])=>`<option value="${v}"${v===I.r.ratio?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
+ if(id==='look')return `<label for="ctl-look">Look</label><select id="ctl-look" data-ctl="look"${off}>${lookList().map(([v,l])=>`<option value="${esc(v)}"${v===I.r.look?' selected':''}>${esc(l)}</option>`).join('')}</select><div class="insp-actions"><button type="button" class="btn sm" data-action="lutImport"${off}>${ICON('cube')}Importa un LUT…</button></div>`;
+ if(!shown(id))return '';
+ return rangeHtml(id,showHint)}
+function renderPanel(){const plan=planOf(),body=$('adjBody'),head=$('stepHead'),focusId=document.activeElement?.closest?.('#adjBody,#stepHead')?(document.activeElement.id||document.activeElement.dataset.action):null;
+ if(plan.steps){const steps=plan.steps,i=I.step,s=steps[i],last=i===steps.length-1;head.hidden=false;
+  head.innerHTML=`<p class="step-count">${esc(plan.name)} · passo ${i+1} di ${steps.length}</p><h3 id="stepTitle">${esc(s.title)}</h3><p id="stepText">${esc(s.text)}</p><div class="step-nav"><button type="button" class="btn sm" data-action="stepPrev"${i?'':' disabled'}>${ICON('left')}Indietro</button>${s.auto?`<button type="button" class="btn sm" data-action="stepAuto"${I.bmp?'':' disabled'}>${ICON('wand')}Proposta</button>`:''}<span class="grow"></span>${last?`<button type="button" class="btn sm primary" data-action="export"${I.bmp?'':' disabled'}>${ICON('save')}Esporta…</button>`:`<button type="button" class="btn sm primary" data-action="stepNext">Avanti${ICON('right')}</button>`}</div>`;
+  body.innerHTML=(s.controls||[]).map(id=>controlHtml(id,true)).join('')+(s.export?`<dl><dt>Formato</dt><dd>${esc(exportLabel(s.export))}</dd><dt>Dati della foto</dt><dd>Fotocamera e posizione non vengono copiate</dd></dl>`:'')}
+ else{head.hidden=true;head.innerHTML='';body.innerHTML=GROUPS.map(([g,ids])=>`<h3>${esc(g)}</h3>`+ids.map(id=>controlHtml(id,false)).join('')).join('')}
+ if(focusId){const el=$(focusId)||body.querySelector(`[data-action="${focusId}"]`)||head.querySelector(`[data-action="${focusId}"]`);if(el&&!el.disabled)el.focus();else (focusables(head)[0]||focusables(body)[0])?.focus()}}
+// Aggiorna valori e stati senza ricostruire il pannello, così il cursore che si sta usando non perde il focus.
+function syncPanel(){for(const el of $$('#adjBody [data-ctl]')){const id=el.dataset.ctl;if(el.tagName==='SELECT'){if(el.value!==I.r[id]){renderPanel();return}continue}if(el.tagName!=='INPUT')continue;const c=ctlDef(id),v=c.get(I.r),t=c.fmt(v);if(Number(el.value)!==v)el.value=v;el.setAttribute('aria-valuetext',t);$(`ctl-${id}-o`).textContent=t;const box=el.closest('.adj'),changed=v!==zeroOf(id);box.classList.toggle('changed',changed);box.querySelector('[data-reset]').disabled=!changed}
+ const flip=$('adjBody').querySelector('[data-action=flipH]');flip?.setAttribute('aria-pressed',I.r.flip);
+ // Se il formato o il look sono cambiati, compaiono o spariscono le posizioni del ritaglio e l'intensità.
+ const stale=(['cx','cy'].some(id=>$('ctl-ratio')&&shown(id)!==!!$('ctl-'+id)))||($('ctl-look')&&shown('lookAmt')!==!!$('ctl-lookAmt'));if(stale)renderPanel()}
+redrawAll=()=>{drawHist();if(I.bmp)fitStage()};
+// Piani: percorsi guidati secondo quello che si vuole ottenere. Sono dati, non codice: ogni passo dice quali
+// controlli mostrare, che cosa spiegare e quale proposta applicare la prima volta che ci si arriva.
+// auto: 'light' (luce automatica), 'color' (bilanciamento del bianco automatico), 'all', valori della ricetta,
+// oppure un elenco di questi applicati in ordine. export: le scelte proposte nella finestra Esporta.
+const PLANS=[
+ {id:'libera',name:'Tutti i controlli',desc:'Nessun piano: inquadratura, luce, colore, effetti e look insieme.'},
+ {id:'social',name:'Foto per i social',desc:'Il formato giusto, una luce viva e un file leggero.',steps:[
+  {title:'Formato',text:'Scegli il formato: 4:5 per i post, 9:16 per le storie, quadrato per tutto il resto. Poi sposta il ritaglio sul soggetto.',controls:['ratio','cx','cy'],auto:{ratio:'4:5'}},
+  {title:'Luce',text:'La proposta porta la luce a un livello medio e recupera le zone troppo chiare o troppo scure. Ritocca a occhio.',controls:['exposure','contrast','highlights','shadows'],auto:'light'},
+  {title:'Colore',text:'Vividezza ravviva i colori spenti senza esagerare con la pelle; un look dà carattere a tutta la foto.',controls:['vibrance','temp','look','lookAmt'],auto:{adj:{vibrance:20}}},
+  {title:'Esporta',text:'JPEG di 2048 pixel sul lato lungo: nitido sui telefoni e leggero da inviare.',export:{format:'jpeg',size:'2048',quality:85}}]},
+ {id:'ritratto',name:'Ritratto',desc:'Pelle naturale, volto in luce, sfondo che non distrae.',steps:[
+  {title:'Inquadratura',text:'Il formato verticale 4:5 o 2:3 lascia spazio al volto. Raddrizza se la foto è storta.',controls:['ratio','cx','cy','angle'],auto:{ratio:'4:5'}},
+  {title:'Luce sul volto',text:'Apri le ombre per schiarire il viso senza bruciare le parti chiare.',controls:['exposure','shadows','highlights','contrast'],auto:['light',{adj:{contrast:0}}]},
+  {title:'Pelle',text:'Temperatura e tinta tolgono le dominanti: la pelle deve sembrare naturale. Meglio la vividezza della saturazione.',controls:['temp','tint','vibrance','saturation'],auto:'color'},
+  {title:'Rifinitura',text:'Una vignettatura leggera porta lo sguardo al centro.',controls:['vignette','look','lookAmt'],auto:{adj:{vignette:-20}}},
+  {title:'Esporta',text:'JPEG alla dimensione originale, di alta qualità.',export:{format:'jpeg',size:'orig',quality:92}}]},
+ {id:'paesaggio',name:'Paesaggio',desc:'Orizzonte dritto, cielo e ombre con i loro dettagli, colori vivi.',steps:[
+  {title:'Orizzonte',text:'Raddrizza l’orizzonte e scegli il formato: il panoramico 16:9 o il 3:2 danno respiro.',controls:['angle','ratio','cx','cy']},
+  {title:'Luce',text:'Abbassa le alte luci per ritrovare il cielo e apri le ombre per i dettagli a terra.',controls:['exposure','highlights','shadows','whites','blacks'],auto:['light',{adj:{highlights:-30,shadows:20}}]},
+  {title:'Colore',text:'Vividezza e una temperatura un po’ più calda o più fredda cambiano l’atmosfera.',controls:['vibrance','saturation','temp','look','lookAmt'],auto:{adj:{vibrance:25}}},
+  {title:'Esporta',text:'JPEG alla dimensione originale, di alta qualità.',export:{format:'jpeg',size:'orig',quality:92}}]},
+ {id:'documento',name:'Documento o scontrino',desc:'Dritto, ritagliato e leggibile, in bianco e nero.',steps:[
+  {title:'Raddrizza',text:'Ruota la foto finché il testo è orizzontale; Raddrizza corregge di pochi gradi.',controls:['rotate','angle']},
+  {title:'Ritaglia',text:'Il formato A4 va bene per i fogli; per uno scontrino lascia il formato della foto.',controls:['ratio','cx','cy']},
+  {title:'Leggibilità',text:'La proposta toglie il colore, rende bianco il fondo e scuro il testo. Se le lettere si perdono, abbassa Bianchi o Contrasto.',controls:['exposure','contrast','whites','blacks'],auto:{adj:{saturation:-100,contrast:40,whites:45,blacks:-25}}},
+  {title:'Esporta',text:'PNG: le lettere restano nitide. Per un file più leggero scegli JPEG.',export:{format:'png',size:'orig'}}]},
+ {id:'prodotto',name:'Prodotto su fondo chiaro',desc:'Fondo bianco pulito e colori fedeli, per un negozio online.',steps:[
+  {title:'Formato',text:'I negozi online preferiscono il quadrato: centra il prodotto.',controls:['ratio','cx','cy'],auto:{ratio:'1:1'}},
+  {title:'Fondo bianco',text:'Alza Bianchi ed Esposizione finché il fondo è bianco, senza bruciare il prodotto.',controls:['exposure','whites','highlights','shadows'],auto:['light',{adj:{whites:40}}]},
+  {title:'Colori fedeli',text:'Togli le dominanti con Temperatura e Tinta: il colore deve essere quello vero.',controls:['temp','tint','vibrance'],auto:'color'},
+  {title:'Esporta',text:'JPEG quadrato di 2000 pixel, adatto alla maggior parte dei negozi online.',export:{format:'jpeg',size:'2000',quality:90}}]}];
+const planOf=()=>PLANS.find(p=>p.id===I.plan)||PLANS[0];
+const planSteps=()=>planOf().steps||[];
+const LIGHT_KEYS=['exposure','contrast','highlights','shadows','whites','blacks'];
+function proposalValues(auto){const out={adj:{}};for(const p of [].concat(auto)){if(typeof p==='string'){const v=autoValues(geometryPixels()),keys=p==='light'?LIGHT_KEYS:p==='color'?['temp','tint']:[...LIGHT_KEYS,'temp','tint'];for(const k of keys)out.adj[k]=v[k]}else for(const [k,v] of Object.entries(p))if(k==='adj')Object.assign(out.adj,v);else out[k]=v}return out}
+function describeChanges(a,b){const out=[];if(a.ratio!==b.ratio)out.push('formato '+ratioName(b.ratio));for(const [id,label,,,,,fmt] of ADJ)if(a.adj[id]!==b.adj[id])out.push(label+' '+fmt(b.adj[id]));if(a.look!==b.look)out.push('look '+lookName(b.look));return out.join(', ')}
+// Applica una proposta come una sola modifica, che si annulla con Ctrl+Z; restituisce che cosa è cambiato.
+function applyProposal(auto,label){if(!I.bmp)return '';const before=JSON.parse(snap()),p=proposalValues(auto);edit(label,r=>{Object.assign(r.adj,p.adj);for(const [k,v] of Object.entries(p))if(k!=='adj')r[k]=v},{panel:true});return describeChanges(before,I.r)}
+function applyAuto(){if(!I.bmp){toast('Apri prima una foto');return}const said=applyProposal('all','Regolazione automatica');announce(said?'Regolazione automatica: '+said:'La foto non ha bisogno di correzioni automatiche')}
+const stepIntro=()=>{const p=planOf(),s=p.steps[I.step];return `${p.name}, passo ${I.step+1} di ${p.steps.length}: ${s.title}. ${s.text}`};
+// Arrivando a un passo per la prima volta con questa foto si applica la sua proposta.
+function enterStep(){const p=planOf(),s=p.steps?.[I.step];if(!s)return '';let said='';const key=p.id+':'+I.step;if(I.bmp&&s.auto&&!I.seen.has(key)){I.seen.add(key);said=applyProposal(s.auto,'Proposta: '+s.title)}return stepIntro()+(said?' Proposta applicata: '+said+'.':'')}
+function choosePlan(id){const p=PLANS.find(x=>x.id===id);if(!p)return;I.plan=id;I.step=0;planCursor=PLANS.indexOf(p);renderPlans();renderPanel();refreshToggles();schedulePersist('immagini');announce(p.steps?enterStep():'Tutti i controlli, senza piano')}
+function stepGo(dir){const steps=planSteps();if(!steps.length){toast('Scegli prima un piano: Foto per i social, Ritratto, Documento…');return}const i=clamp(I.step+dir,0,steps.length-1);if(i===I.step){toast(dir>0?'È l’ultimo passo: esporta la foto':'È il primo passo');return}I.step=i;renderPanel();schedulePersist('immagini');announce(enterStep())}
+function stepAuto(){const s=planSteps()[I.step];if(!s?.auto){toast('Questo passo non ha una proposta');return}if(!I.bmp){toast('Apri prima una foto');return}const said=applyProposal(s.auto,'Proposta: '+s.title);announce(said?'Proposta applicata: '+said:'La proposta è già applicata')}
+function planMenu(){const a=menuAnchor('planMenu');openMenu(PLANS.map(p=>({label:p.name,desc:p.desc,checked:p.id===I.plan,run:()=>choosePlan(p.id)})),a.x,a.y,'Piani',a.el)}
+// Esportazione: la ricetta si applica alla foto intera, alla dimensione scelta. Il file nuovo nasce da un canvas,
+// quindi non porta con sé i dati della fotocamera né la posizione GPS dell'originale.
+const FORMATS={jpeg:{label:'JPEG',mime:'image/jpeg',ext:'jpg',lossy:true},png:{label:'PNG',mime:'image/png',ext:'png'},webp:{label:'WebP',mime:'image/webp',ext:'webp',lossy:true}};
+const SIZES=[['orig','Dimensione piena'],['4096','4096 pixel sul lato lungo'],['2048','2048 pixel sul lato lungo, per i social'],['2000','2000 pixel sul lato lungo'],['1080','1080 pixel sul lato lungo'],['custom','Altra misura…']];
+function exportLabel(x){const f=FORMATS[x.format]||FORMATS.jpeg;return f.label+(f.lossy?`, qualità ${x.quality||90}`:'')+', '+(x.size==='orig'?'dimensione piena':x.size+' pixel sul lato lungo')}
+function exportDims(size,custom){const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),long=size==='orig'?Math.max(w,h):size==='custom'?custom:Number(size),k=Math.min(1,long/Math.max(w,h));return [Math.max(1,Math.round(w*k)),Math.max(1,Math.round(h*k))]}
+async function exportDialog(){if(!I.bmp){toast('Apri prima una foto');return}const step=planSteps()[I.step],pre=step?.export||{format:prefs.exportFormat,quality:prefs.exportQuality,size:prefs.exportSize},[fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
+ const r=await modal('Esporta la foto',`<p>La foto ha ${fmtInt(fw)} × ${fmtInt(fh)} pixel con l’inquadratura scelta. L’originale resta com’è; il file nuovo non contiene i dati della fotocamera né la posizione.</p>`,[
+  {id:'name',label:'Nome del file',value:$('docTitle').value.trim()||baseName(I.name)},
+  {id:'format',label:'Formato',type:'select',value:pre.format,options:Object.entries(FORMATS).map(([k,f])=>[k,f.label+(k==='jpeg'?', per le foto':k==='png'?', senza perdita di qualità':', più leggero')])},
+  {id:'quality',label:'Qualità (JPEG e WebP)',type:'range',min:50,max:100,step:1,value:pre.quality||90,fmt:v=>v+(v>=90?', alta':v>=75?', buona':', file leggero'),hint:'Più bassa, più leggero il file. Sotto 75 si possono vedere difetti.'},
+  {id:'size',label:'Dimensione',type:'select',value:SIZES.some(s=>s[0]===String(pre.size))?String(pre.size):'orig',options:SIZES},
+  {id:'custom',label:'Lato lungo in pixel (per Altra misura)',type:'number',value:Math.max(fw,fh),hint:'Si può solo rimpicciolire: la foto non viene ingrandita.'}],'Esporta',{validate:v=>{if(v.size!=='custom')return null;const n=num(v.custom);return n>=16&&n<=30000?null:{msg:'Scrivi un numero di pixel tra 16 e 30.000',field:'custom'}}});
+ if(!r)return;Object.assign(prefs,{exportFormat:r.format,exportQuality:Number(r.quality),exportSize:r.size});savePrefs();const f=FORMATS[r.format],[w,h]=exportDims(r.size,Math.round(num(r.custom)));
+ const blob=await work('Esportazione',()=>renderFull(w,h,f.mime,Number(r.quality)/100));if(!blob)return;
+ if(blob.type!==f.mime){toast(`Il browser non sa scrivere ${f.label}: niente è stato salvato`);return}
+ download(blob,extName(r.name||I.name,f.ext),f.mime);toast(`Esportata in ${f.label}, ${fmtInt(w)} × ${fmtInt(h)} pixel, ${fmtBytes(blob.size)}`)}
+async function renderFull(w,h,mime,quality){const cv=new OffscreenCanvas(w,h),ctx=cv.getContext('2d',{willReadFrequently:true});drawGeometry(ctx,I.bmp,I.r,w,h);const src=ctx.getImageData(0,0,w,h);ctx.putImageData(develop(src,src,I.r,lutOf(I.r.look)),0,0);
+ // Il JPEG non ha trasparenza: le parti trasparenti diventano bianche invece che nere.
+ if(mime==='image/jpeg'){ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h)}
+ return cv.convertToBlob({type:mime,quality})}
+// Inquadratura: rotazioni, riflessione, formato e raddrizzamento.
+function rotate(deg){edit(deg>0?'Ruota a destra':'Ruota a sinistra',r=>{r.rot=(r.rot+deg+360)%360},{panel:true})&&announce(`Ruotata: ${I.r.rot?I.r.rot+' gradi rispetto all’originale':'come l’originale'}`)}
+function flipH(){edit('Rifletti',r=>{r.flip=!r.flip})}
+function setRatio(id){edit('Formato '+ratioName(id),r=>{r.ratio=id;r.cx=r.cy=.5},{panel:true})&&announce('Formato '+ratioName(id))}
+function ratioMenu(){if(!I.bmp){toast('Apri prima una foto');return}const a=menuAnchor('ratioMenu');openMenu(RATIOS.map(([id,label])=>({label,checked:id===I.r.ratio,run:()=>setRatio(id)})),a.x,a.y,'Formato',a.el)}
+function resetGeometry(){edit('Inquadratura originale',r=>{Object.assign(r,{rot:0,flip:false,angle:0,ratio:'orig',cx:.5,cy:.5})},{panel:true})&&announce('Inquadratura come l’originale')}
+// Finestra con un cursore che cambia la foto mentre si sposta; Annulla rimette il valore di prima.
+async function liveRange(title,id){if(!I.bmp){toast('Apri prima una foto');return}const c=ctlDef(id),before=c.get(I.r);
+ const res=await modal(title,`<p>${esc(c.hint)}</p>`,[{id:'v',label:c.label,type:'range',min:c.min,max:c.max,step:c.step,value:before,fmt:c.fmt}],'Applica',{onOpen:pane=>pane.querySelector('#dlg_v').addEventListener('input',e=>{c.set(I.r,Number(e.target.value));requestRender(true)})});
+ if(!res){c.set(I.r,before);requestRender();return}c.set(I.r,Number(res.v));settle(c.label)}
+// Look: pronti o importati da un file .cube, con la loro intensità.
+function setLook(id){edit(id==='none'?'Togli il look':'Look '+lookName(id),r=>{r.look=id;if(id!=='none'&&!r.lookAmt)r.lookAmt=100},{panel:true})&&announce(id==='none'?'Nessun look':'Look '+lookName(id))}
+function lookMenu(){if(!I.bmp){toast('Apri prima una foto');return}const a=menuAnchor('lookMenu');openMenu([...lookList().map(([id,label])=>({label,checked:id===I.r.look,run:()=>setLook(id)})),'-',{label:C.lutImport.label,icon:'cube',run:()=>$('lutInput').click()}],a.x,a.y,'Look',a.el)}
+async function importLut(file){let lut;try{lut=parseCube(await file.text(),file.name)}catch(e){toast(e.message);return}const id='lut-'+uid();I.luts[id]=lut;schedulePersist('immagini');if(I.bmp)setLook(id);else{renderPanel();toast(`Look «${lut.name}» importato`)}}
+// Descrizione a voce della foto: dimensioni, inquadratura, luce e modifiche.
+function readPhotoStatus(){if(!I.bmp){toast('Nessuna foto aperta: Ctrl+O per aprirne una');return}const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),r=I.r,ch=changedAdj(r).map(([id,label,,,,,fmt])=>label+' '+fmt(r.adj[id])),geo=[];
+ if(r.ratio!=='orig')geo.push('formato '+ratioName(r.ratio));if(r.rot)geo.push('ruotata di '+r.rot+' gradi');if(r.flip)geo.push('riflessa');if(r.angle)geo.push('raddrizzata di '+fmtNum(r.angle,1)+' gradi');
+ const plan=planOf();toast(`«${I.name}», ${fmtInt(w)} per ${fmtInt(h)} pixel${geo.length?', '+geo.join(', '):''}${I.compare?'. Stai guardando l’originale':''}. ${I.stats?histSentence(I.stats):''} ${ch.length?'Regolazioni: '+ch.join(', ')+'.':'Nessuna regolazione.'}${r.look!=='none'?` Look ${lookName(r.look)} al ${fmtInt(r.lookAmt)}%.`:''}${plan.steps?` Piano ${plan.name}, passo ${I.step+1} di ${plan.steps.length}: ${plan.steps[I.step].title}.`:''}`)}
+function toggleCompare(){if(!I.bmp){toast('Apri prima una foto');return}I.compare=!I.compare;$('compareBadge').hidden=!I.compare;requestRender()}
+async function resetAll(){if(!I.bmp||!hasEdits()){toast('La foto è già com’era');return}edit('Ripristina tutto',r=>{Object.assign(r,newRecipe())},{panel:true});announce('Foto ripristinata com’era: Ctrl+Z per tornare indietro')}
+function photoMenu(x,y){const items=[mi('auto',applyAuto),mi('compare'),'-',mi('rotateLeft'),mi('rotateRight'),mi('ratioMenu'),mi('lookMenu'),'-',mi('readStatus'),mi('export')];openMenu(items,x,y,'Menu della foto')}
+// Ogni comando del registro corrisponde a una funzione: prima quelle dell'app attiva, poi quelle comuni.
+const I_ACTIONS={open:()=>pickFile(),export:exportDialog,closePhoto,auto:applyAuto,compare:toggleCompare,resetAll,readStatus:readPhotoStatus,
+ rotateLeft:()=>rotate(-90),rotateRight:()=>rotate(90),flipH,ratioMenu,straighten:()=>liveRange('Raddrizza','angle'),resetGeometry,
+ lookMenu,lutImport:()=>$('lutInput').click(),lookAmount:()=>I.r.look==='none'?toast('Scegli prima un look'):liveRange('Intensità del look','lookAmt'),lookOff:()=>setLook('none'),
+ planMenu,stepNext:()=>stepGo(1),stepPrev:()=>stepGo(-1),stepAuto,planFree:()=>choosePlan('libera'),
+ undo:()=>photoUndo(false),redo:()=>photoUndo(true)};
+const COMMON_ACTIONS={filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
+ switchImmagini:()=>setMode('immagini'),
+ themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};
+async function handleAction(id){const f=(isImmagini()?I_ACTIONS[id]:null)??COMMON_ACTIONS[id];if(!f){toast('Comando non disponibile');return}await f()}
+// Passa da un'app all'altra. Per ora c'è solo Immagini: Disegno è in preparazione.
+function setMode(mode,{focus=true}={}){if(mode!=='immagini'){toast('Disegno arriverà in una prossima versione di Tassello Grafica');return}if(mode===state.mode){if(focus)(I.bmp?$('photo'):$('planList')).focus();return}}
+// Apertura dei file: una foto per volta; un file .cube diventa un look.
+function pickFile(){$('fileInput').click()}
+async function openFiles(files){files=[...files];if(!files.length)return;const cube=files.find(f=>/\.cube$/i.test(f.name));if(cube&&files.length===1){await importLut(cube);return}
+ const photo=files.find(isPhotoFile);if(!photo){toast('Scegli una foto: JPEG, PNG, WebP, AVIF, GIF o BMP');return}if(files.length>1)toast('Immagini apre una foto alla volta: aperta la prima');
+ if(I.bmp&&hasEdits()&&!(await confirmAction(`Aprire «${photo.name}»? Le modifiche alla foto attuale non esportate andranno perse; l’originale resta com’è.`,'Apri')))return;await openPhoto(photo)}
+// Pannello File a schermo intero, gestito come finestra di dialogo.
+const FILE_MENU={i:[['open','open','Apri una foto'],['export','save','Esporta la foto'],['lutImport','cube','Importa un look (LUT .cube)'],['closePhoto','close','Chiudi la foto'],['shortcuts','keyboard','Scorciatoie da tastiera'],['help','info','Informazioni e limiti']]};
+const FILE_TILES={i:[['open','open','Apri','Una foto JPEG, PNG, WebP, AVIF, GIF o BMP'],['export','save','Esporta','JPEG, PNG o WebP, alla dimensione che scegli'],['planMenu','plan','Scegli un piano','Social, ritratto, paesaggio, documento, prodotto'],['lutImport','cube','Importa un look','Un file LUT .cube']]};
+let filePrev=null;
+function openFilePanel(){filePrev=document.activeElement;const m=state.mode[0],dd=(k,v)=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`;
+ $('fileSide').innerHTML=`<button type="button" class="file-back" data-file-action="close">${ICON('back')}Torna alla foto</button>`+FILE_MENU[m].map(([id,icon,label])=>`<button type="button" data-file-action="${id}">${ICON(icon)}${esc(label)}</button>`).join('');
+ $('fileTiles').innerHTML=FILE_TILES[m].map(([id,icon,b,s])=>`<button type="button" class="file-tile" data-file-action="${id}">${ICON(icon)}<b>${esc(b)}</b><span>${esc(s)}</span></button>`).join('');
+ $('fileIntro').textContent='La foto resta sul tuo dispositivo e l’originale non viene mai modificato: la bozza con le regolazioni è salvata nel browser; esporta la foto per avere il file finito.';
+ const [w,h]=I.bmp?outSize(I.r,I.bmp.width,I.bmp.height):[0,0];
+ $('fileDetails').innerHTML=I.bmp?dd('Foto',I.name)+dd('Originale',`${fmtInt(I.bmp.width)} × ${fmtInt(I.bmp.height)} pixel${I.file?.size?', '+fmtBytes(I.file.size):''}`)+dd('Inquadratura',`${fmtInt(w)} × ${fmtInt(h)} pixel, ${ratioName(I.r.ratio).toLowerCase()}`)+dd('Regolazioni',changedAdj(I.r).length?changedAdj(I.r).map(a=>a[1]).join(', '):'nessuna')+dd('Look',lookName(I.r.look))+dd('Piano',planOf().name)+dd('Bozza',$('saveState').textContent):dd('Foto','nessuna foto aperta')+dd('Piano',planOf().name);
+ $('filepanel').hidden=false;$('fileBtn').setAttribute('aria-expanded','true');$('fileSide').querySelector('button')?.focus()}
+function closeFilePanel(restore=true){if($('filepanel').hidden)return;$('filepanel').hidden=true;$('fileBtn').setAttribute('aria-expanded','false');if(restore)(filePrev?.isConnected?filePrev:$('fileBtn')).focus()}
+// Scorciatoie globali: intercettate in cattura, prima dei gestori dei singoli controlli.
+window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;const ctx=focusContext();if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key==='/'){e.preventDefault();runCommand('shortcuts');return}const c=findShortcut(e,ctx);if(!c)return;e.preventDefault();e.stopPropagation();runCommand(c.id)},true);
+$('skipWork').onclick=e=>{e.preventDefault();(I.bmp?$('photo'):$('planList')).focus()};
+$('skipRibbon').onclick=e=>{e.preventDefault();$('tab-'+slug(currentTab))?.focus()};
+// Pulsanti con data-action in tutta la pagina: barra multifunzione, vista, pannello e foto vuota.
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.closest('#menu'))return;runCommand(b.dataset.action)});
+// Barra del titolo
+$('switchImmagini').onclick=()=>setMode('immagini');$('switchDisegno').onclick=()=>setMode('disegno');
+$('docTitle').addEventListener('input',()=>{updateTitle();schedulePersist()});
+$('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();(I.bmp?$('photo'):$('planList')).focus()});
+$('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand('export');$('openTop').onclick=()=>runCommand('open');
+$('paletteBtn').onclick=()=>runCommand('palette');$('kbdBtn').onclick=()=>runCommand('shortcuts');$('helpBtn').onclick=()=>runCommand('help');$('brandBtn').onclick=()=>runCommand('help');$('fileBtn').onclick=openFilePanel;
+$('fileBtn').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('tab-'+slug(currentTab))?.focus()}});
+// Schede (tablist con attivazione automatica)
+$('tabs').addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t&&t.dataset.tab!==currentTab)selectTab(t.dataset.tab)});
+$('tabs').addEventListener('keydown',e=>{const t=e.target.closest('[role=tab]');if(!t)return;const list=$$('#tabs [role=tab]'),i=list.indexOf(t);let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft'){if(i===0){e.preventDefault();$('fileBtn').focus();return}j=i-1}else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();selectTab(list[j].dataset.tab);return}if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){e.preventDefault();focusables($('ribbon'))[0]?.focus()}});
+// Barra multifunzione: frecce tra i pulsanti, Esc o freccia su per tornare alla scheda.
+$('ribbon').addEventListener('keydown',e=>{const t=e.target,list=focusables($('ribbon')),i=list.indexOf(t);if(e.key==='Escape'||(e.key==='ArrowUp'&&!t.matches('select,input'))){e.preventDefault();$('tab-'+slug(currentTab))?.focus();return}if(i<0||t.matches('select'))return;let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft')j=(i-1+list.length)%list.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();list[j].focus()}});
+// Vista della foto: frecce tra i pulsanti, come una barra degli strumenti.
+$('viewbar').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const list=focusables($('viewbar')).filter(el=>el.matches('button')),i=list.indexOf(e.target);if(i<0)return;e.preventDefault();const j=e.key==='Home'?0:e.key==='End'?list.length-1:(i+(e.key==='ArrowRight'?1:-1)+list.length)%list.length;list[j].focus()});
+// Tooltip (si chiudono con Esc e non coprono il puntatore)
+document.addEventListener('pointerover',e=>{if(e.target.closest?.('#tip'))return;const el=e.target.closest?.('[data-tip]');clearTimeout(tipTimer);if(!el){tip.hidden=true;return}tipTimer=setTimeout(()=>showTip(el),450)});
+document.addEventListener('focusin',e=>{const el=e.target.closest?.('[data-tip]');clearTimeout(tipTimer);tip.hidden=true;if(el&&el.matches(':focus-visible'))tipTimer=setTimeout(()=>showTip(el),350)});
+document.addEventListener('pointerdown',hideTip,true);document.addEventListener('keydown',e=>{if(e.key==='Escape')hideTip()},true);
+// Ricerca comandi
+$('palInput').addEventListener('input',renderPalette);
+$('palInput').addEventListener('keydown',e=>{const n=palItems.length;if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(n){palIdx=(palIdx+(e.key==='ArrowDown'?1:-1)+n)%n;palActive()}}else if(e.key==='Home'&&n){e.preventDefault();palIdx=0;palActive()}else if(e.key==='End'&&n){e.preventDefault();palIdx=n-1;palActive()}else if(e.key==='Enter'){e.preventDefault();palRun(palIdx)}else if(e.key==='Escape'){e.preventDefault();closePalette(true)}else if(e.key==='Tab')e.preventDefault()});
+$('palList').addEventListener('click',e=>{const o=e.target.closest('[data-i]');if(o)palRun(Number(o.dataset.i))});
+$('palettebg').addEventListener('mousedown',e=>{if(e.target===$('palettebg'))closePalette(true)});
+// Menu contestuale
+$('menu').addEventListener('keydown',e=>{const items=$$('#menu [role^=menuitem]:not([aria-disabled])'),i=items.indexOf(document.activeElement);if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();items[(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length]?.focus()}else if(e.key==='Home'){e.preventDefault();items[0]?.focus()}else if(e.key==='End'){e.preventDefault();items.at(-1)?.focus()}else if(e.key==='Escape'||e.key==='Tab'){e.preventDefault();closeMenu(true)}else if(e.key==='Enter'||e.key===' '){e.preventDefault();const b=document.activeElement.closest('[data-i]');if(b)menuRun(Number(b.dataset.i))}else if(e.key.length===1){const k=e.key.toLowerCase(),start=i+1,hit=[...items.slice(start),...items.slice(0,start)].find(b=>b.textContent.trim().toLowerCase().startsWith(k));hit?.focus()}});
+$('menu').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)menuRun(Number(b.dataset.i))});
+document.addEventListener('mousedown',e=>{if(menuState&&!e.target.closest('#menu'))closeMenu(false)},true);
+// File
+const takeFiles=input=>{const files=[...input.files];input.value='';return files};
+$('fileInput').onchange=async e=>{const files=takeFiles(e.target);closeFilePanel(false);await openFiles(files)};
+$('lutInput').onchange=async e=>{const [f]=takeFiles(e.target);closeFilePanel(false);if(f)await importLut(f)};
+$('filepanel').addEventListener('click',e=>{const action=e.target.closest('[data-file-action]')?.dataset.fileAction;if(!action)return;closeFilePanel(true);if(action!=='close')runCommand(action)});
+$('filepanel').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeFilePanel(true);return}if((e.key==='ArrowDown'||e.key==='ArrowUp')&&e.target.closest('.file-side')){e.preventDefault();const l=$$('.file-side button'),i=l.indexOf(e.target);l[(i+(e.key==='ArrowDown'?1:-1)+l.length)%l.length].focus();return}trapTab(e,$('filepanel'))});
+// Trascinare una foto sulla finestra la apre; un file .cube diventa un look.
+let dragDepth=0;
+addEventListener('dragenter',e=>{if(![...(e.dataTransfer?.types||[])].includes('Files'))return;e.preventDefault();if(++dragDepth===1)document.body.classList.add('drop-over')});
+addEventListener('dragleave',()=>{if(--dragDepth<=0){dragDepth=0;document.body.classList.remove('drop-over')}});
+addEventListener('dragover',e=>{if([...(e.dataTransfer?.types||[])].includes('Files'))e.preventDefault()});
+addEventListener('drop',e=>{dragDepth=0;document.body.classList.remove('drop-over');const files=[...(e.dataTransfer?.files||[])];if(!files.length)return;e.preventDefault();if(overlayOpen())return;openFiles(files)});
+// Piani: elenco con la voce attiva, Invio o clic per iniziare.
+$('planList').addEventListener('keydown',e=>{const n=PLANS.length;let j=null;if(e.key==='ArrowDown')j=Math.min(n-1,planCursor+1);else if(e.key==='ArrowUp')j=Math.max(0,planCursor-1);else if(e.key==='Home')j=0;else if(e.key==='End')j=n-1;if(j!==null){e.preventDefault();movePlanCursor(j);return}if(e.key==='Enter'||e.key===' '){e.preventDefault();choosePlan(PLANS[planCursor].id)}});
+$('planList').addEventListener('click',e=>{const o=e.target.closest('[data-plan]');if(!o)return;planCursor=PLANS.findIndex(p=>p.id===o.dataset.plan);choosePlan(o.dataset.plan);$('planList').focus()});
+// Pannello delle regolazioni: il cursore cambia l'anteprima mentre si sposta e diventa una modifica quando si rilascia.
+$('adjBody').addEventListener('input',e=>{const el=e.target;if(el.type!=='range'||!el.dataset.ctl||!I.bmp)return;ctlDef(el.dataset.ctl).set(I.r,Number(el.value));syncPanel();requestRender(true)});
+$('adjBody').addEventListener('change',e=>{const el=e.target,id=el.dataset.ctl;if(!id||!I.bmp)return;if(el.tagName==='SELECT'){if(id==='ratio')setRatio(el.value);else setLook(el.value);return}settle(ctlDef(id).label)});
+$('adjBody').addEventListener('keydown',e=>{const el=e.target;if(el.type!=='range'||!(e.key==='Delete'||e.key==='Backspace'))return;e.preventDefault();resetControl(el.dataset.ctl)});
+$('adjBody').addEventListener('click',e=>{const b=e.target.closest('[data-reset]');if(b){const id=b.dataset.reset;resetControl(id);$('ctl-'+id)?.focus()}});
+$('adjBody').addEventListener('dblclick',e=>{const l=e.target.closest('.adj label');if(l)resetControl(l.closest('.adj').dataset.ctl)});
+function resetControl(id){const c=ctlDef(id);if(!c||!I.bmp||c.get(I.r)===zeroOf(id))return;c.set(I.r,zeroOf(id));settle(c.label+' al valore iniziale');announce(`${c.label}: ${c.fmt(zeroOf(id))}`)}
+// La foto: menu con Maiusc+F10, il tasto Menu o il clic destro.
+photoCv.addEventListener('keydown',e=>{if((e.shiftKey&&e.key==='F10')||e.key==='ContextMenu'){e.preventDefault();const r=photoCv.getBoundingClientRect();photoMenu(r.left+20,r.top+20)}});
+photoCv.addEventListener('contextmenu',e=>{e.preventDefault();photoMenu(e.clientX,e.clientY)});
+// Se cambia lo spazio disponibile, l'anteprima si ricalcola alla nuova misura.
+new ResizeObserver(()=>{if(I.bmp)requestRender();drawHist()}).observe($('stage'));
+// Avvio: preferenze, archivio delle bozze, ultima foto con la sua ricetta, poi il disegno dell'interfaccia.
+async function start(){applyPrefs();
+ suppressAutosave=true;try{db=await openStore();await restorePhoto().catch(e=>console.warn('Bozza della foto non recuperabile',e))}
+ catch(e){console.error('Avvio non riuscito',e);toast('Avvio non riuscito: '+e.message)}finally{suppressAutosave=false}
+ planCursor=Math.max(0,PLANS.findIndex(p=>p.id===I.plan));updateTitle();renderTabs();renderRibbon();renderPlans();renderPanel();showPhoto();refreshToggles();
+ status(db?'Pronto · le foto restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze: esporta la foto prima di chiudere')}
+// Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si potrà installare come app;
+// il manifest e la copia senza rete si aggiungono quando Tassello Grafica viene pubblicato.
+start();
+})();
+</script>
+</body></html>

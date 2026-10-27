@@ -120,7 +120,9 @@ docs/                 sito pubblicato con GitHub Pages
   en/, fr/, es/       le stesse pagine in inglese, francese e spagnolo (generate da sito/)
   versioni.json       versioni ufficiali con le impronte SHA-256
   versioni-media.json versioni ufficiali di Tassello Media
+  versioni-grafica.json versioni di Tassello Grafica (in preparazione, non ancora pubblicato)
   tassello-ufficio.html, tassello-media.html  i programmi, già costruiti
+  tassello-grafica.html  Tassello Grafica in preparazione: per ora solo Immagini
   manifest.webmanifest, manifest-media.webmanifest, sw.js  app installabili e uso senza rete
   stile.css, icon*    stile del sito e marchio
 ufficio/
@@ -130,6 +132,10 @@ ufficio/
 media/
   VERSIONE            numero di versione di Tassello Media
   build.py            costruisce docs/tassello-media.html e aggiorna docs/versioni-media.json
+  src/                sorgenti: HTML, CSS e JavaScript senza dipendenze
+grafica/
+  VERSIONE            numero di versione di Tassello Grafica
+  build.py            costruisce docs/tassello-grafica.html e aggiorna docs/versioni-grafica.json
   src/                sorgenti: HTML, CSS e JavaScript senza dipendenze
 sito/
   build.py            costruisce le pagine del sito in ogni lingua
@@ -142,6 +148,7 @@ Per ricostruire un programma o il sito dopo una modifica serve solo Python 3.8 o
 ```
 python ufficio/build.py
 python media/build.py
+python grafica/build.py
 python sito/build.py
 ```
 
@@ -149,11 +156,11 @@ Le pagine del sito non si modificano direttamente in `docs/`: si cambiano il mod
 
 L'ordine dei file è indicato in ogni `build.py`. Tutto il codice gira dentro un'unica funzione: non ci sono librerie esterne né richieste di rete, e la regola di sicurezza in `src/01-head.html` le vieta.
 
-Ogni build registra l'impronta del file nel suo elenco (`docs/versioni.json` o `docs/versioni-media.json`) per la versione scritta nel suo `VERSIONE`. Quando pubblichi una modifica del programma sul sito, aumenta prima il numero di versione: così ogni file pubblicato resta riconoscibile come ufficiale. La release si crea inviando l'etichetta corrispondente: `v` per Tassello Ufficio, per esempio `git tag v1.3.0 && git push origin v1.3.0`, e `media-v` per Tassello Media, per esempio `git tag media-v1.0.0 && git push origin media-v1.0.0`.
+Ogni build registra l'impronta del file nel suo elenco (`docs/versioni.json`, `docs/versioni-media.json` o `docs/versioni-grafica.json`) per la versione scritta nel suo `VERSIONE`. Quando pubblichi una modifica del programma sul sito, aumenta prima il numero di versione: così ogni file pubblicato resta riconoscibile come ufficiale. La release si crea inviando l'etichetta corrispondente: `v` per Tassello Ufficio, per esempio `git tag v1.3.0 && git push origin v1.3.0`, e `media-v` per Tassello Media, per esempio `git tag media-v1.0.0 && git push origin media-v1.0.0`, e `grafica-v` per Tassello Grafica.
 
 ## Contribuire
 
-Segnalazioni e proposte sono benvenute nelle [issue](https://github.com/svitaTLCO/tassello/issues), in italiano o in inglese, e quelle sull'accessibilità hanno la precedenza. Per una modifica al codice apri una pull request che tocchi i file in `ufficio/src/` o `media/src/` e includa il file ricostruito. Correzioni alle traduzioni del sito, o una lingua nuova, si propongono in `sito/testi/`.
+Segnalazioni e proposte sono benvenute nelle [issue](https://github.com/svitaTLCO/tassello/issues), in italiano o in inglese, e quelle sull'accessibilità hanno la precedenza. Per una modifica al codice apri una pull request che tocchi i file in `ufficio/src/`, `media/src/` o `grafica/src/` e includa il file ricostruito. Correzioni alle traduzioni del sito, o una lingua nuova, si propongono in `sito/testi/`.
 
 ## Licenza
 
