@@ -20,7 +20,7 @@ function maskEdit(label,fn){const m=activeMask();if(!m){toast('Non c’è una ma
 const afterMaskEdit=say=>{drawAnts();drawOver();if(say)announce(say)};
 // Strumenti delle maschere: pennello (aggiunge o toglie), sfumatura lineare (da dove l'effetto è pieno a dove finisce)
 // e radiale (dal centro all'angolo del riquadro dell'ellisse).
-Object.assign(TOOLS,{
+Object.assign(PHOTO_TOOLS,{
  mbrush:{label:'Pennello della maschera',kind:'paint',modes:[['add','Aggiungi'],['sub','Togli']],color:'#2d8cff',keys:'Dipingi dove la maschera deve agire; con Togli si cancella. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta. Parentesi quadre cambiano la dimensione, con Maiusc la durezza.',
   done:(p,mode)=>{maskEdit(mode==='sub'?'Pennello della maschera: togli':'Pennello della maschera',m=>{m.ops=[...m.ops,{...brushOp(p),mode:mode==='sub'?'sub':'add'}]})&&afterMaskEdit(maskSummary())}},
  linear:{label:'Sfumatura lineare',kind:'two',first:'Inizio, dove l’effetto è pieno',second:'dove l’effetto finisce',keys:'Trascina da dove l’effetto è pieno a dove finisce. Da tastiera: Invio dove l’effetto è pieno, poi Invio dove finisce.',
@@ -33,12 +33,12 @@ function gradientDone(kind,a,b){let op;if(kind==='linear'){const [x1,y1]=uvUnits
  if(redraw){maskEdit('Ridisegna '+m.name,x=>{x.ops=[{...op,f:x.ops[0]?.f??op.f}]});afterMaskEdit(`${m.name} ridisegnata. `+maskSummary())}
  else{const n=newMask(kind,[op]);if(n)afterMaskEdit(`${n.name} creata: ${kind==='linear'?'l’effetto è pieno dal primo punto e finisce al secondo':'l’effetto è pieno al centro e sfuma verso il bordo'}. Sposta i cursori della maschera nel riquadro Regolazioni.`)}}
 // Comandi delle maschere.
-function maskFromSel(){if(!needSel())return;const m=newMask('sel',structuredClone(I.r.sel.ops));if(m)afterMaskEdit(`${m.name} creata dalla selezione. Sposta i cursori della maschera nel riquadro Regolazioni.`)}
-function maskBrushNew(){const m=newMask('brush',[]);if(m){setTool('mbrush');T.mode='add';renderToolOpts();announce(`${m.name} creata, ancora vuota: dipingi dove deve agire. ${TOOLS.mbrush.keys}`)}}
-function maskGradient(kind){if(!I.bmp){toast('Apri prima una foto');return}T.redraw=false;setTool(kind)}
-function maskRedraw(){const m=activeMask();if(!m||!(m.kind==='linear'||m.kind==='radial')){toast('Scegli prima una sfumatura lineare o radiale');return}setTool(m.kind);T.redraw=true;announce(`Ridisegna ${m.name}. ${TOOLS[m.kind].keys}`)}
-function maskPaint(){if(!activeMask()){toast('Non c’è una maschera: creane una dalla selezione o con il pennello');return}if(T.tool==='mbrush'){endTool();return}setTool('mbrush');if(!['add','sub'].includes(T.mode)){T.mode='add';renderToolOpts()}}
-function maskWithSel(mode){if(!needSel())return;maskEdit(mode==='sub'?'Togli la selezione dalla maschera':'Aggiungi la selezione alla maschera',m=>{m.ops=[...m.ops,{t:'group',ops:structuredClone(I.r.sel.ops),mode}]})&&afterMaskEdit(maskSummary())}
+function maskFromSel(){if(!needPhotoSel())return;const m=newMask('sel',structuredClone(I.r.sel.ops));if(m)afterMaskEdit(`${m.name} creata dalla selezione. Sposta i cursori della maschera nel riquadro Regolazioni.`)}
+function maskBrushNew(){const m=newMask('brush',[]);if(m){setPhotoTool('mbrush');T.mode='add';renderToolOpts();announce(`${m.name} creata, ancora vuota: dipingi dove deve agire. ${PHOTO_TOOLS.mbrush.keys}`)}}
+function maskGradient(kind){if(!I.bmp){toast('Apri prima una foto');return}T.redraw=false;setPhotoTool(kind)}
+function maskRedraw(){const m=activeMask();if(!m||!(m.kind==='linear'||m.kind==='radial')){toast('Scegli prima una sfumatura lineare o radiale');return}setPhotoTool(m.kind);T.redraw=true;announce(`Ridisegna ${m.name}. ${PHOTO_TOOLS[m.kind].keys}`)}
+function maskPaint(){if(!activeMask()){toast('Non c’è una maschera: creane una dalla selezione o con il pennello');return}if(T.tool==='mbrush'){endTool();return}setPhotoTool('mbrush');if(!['add','sub'].includes(T.mode)){T.mode='add';renderToolOpts()}}
+function maskWithSel(mode){if(!needPhotoSel())return;maskEdit(mode==='sub'?'Togli la selezione dalla maschera':'Aggiungi la selezione alla maschera',m=>{m.ops=[...m.ops,{t:'group',ops:structuredClone(I.r.sel.ops),mode}]})&&afterMaskEdit(maskSummary())}
 function maskToggle(key,on,off){maskEdit(activeMask()?.[key]?off:on,m=>{m[key]=!m[key]})&&afterMaskEdit(maskSummary())}
 async function maskRename(){const m=activeMask();if(!m){toast('Non c’è una maschera');return}const v=await modal('Rinomina la maschera','',[{id:'name',label:'Nome',value:m.name}],'Rinomina',{validate:x=>x.name.trim()?null:{msg:'Scrivi un nome',field:'name'}});if(v)maskEdit('Rinomina la maschera',x=>{x.name=v.name.trim().slice(0,60)})&&announce('Maschera rinominata «'+v.name.trim()+'»')}
 function maskDelete(){const m=activeMask();if(!m){toast('Non c’è una maschera');return}edit('Elimina '+m.name,r=>{r.masks=r.masks.filter(x=>x.id!==m.id)},{panel:true});I.maskSel=null;activeMask();renderPanel();afterMaskEdit(`${m.name} eliminata: Ctrl+Z per riaverla.`)}

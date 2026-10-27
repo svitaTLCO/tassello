@@ -162,7 +162,7 @@ const needCut=()=>{if(!I.bmp){toast('Apri prima una foto');return false}if(!I.r.
 // I tratti con il fondo uniforme non cambiano il calcolo: si aggiungono subito. Con GrabCut il calcolo si ripete.
 function cutStroke(kind,p){const c=structuredClone(I.r.cut||newCut()),s={t:'brush',p:p.map(uvUnits),d:U5(T.size),h:.8};c[kind]=[...c[kind],s];const label=kind==='keep'?'Tratto tieni':'Tratto togli';
  if(I.r.cut&&I.r.cut.used==='uniform'){edit(label,r=>{r.cut=c},{panel:true});announce(label+'. '+cutSummary())}else cutRun({...c,method:I.r.cut?.used||c.method},label,rasters.get(I.r.cut?.raster))}
-Object.assign(TOOLS,{
+Object.assign(PHOTO_TOOLS,{
  cutBox:{label:'Riquadro del soggetto',kind:'two',keys:'Trascina un riquadro intorno al soggetto, con un po’ di sfondo intorno: quello che resta fuori è sfondo. Da tastiera: Invio su un angolo, poi su quello opposto.',two:(a,b)=>{const box=rectOp(a,b).p;endTool(false);cutRun({...(I.r.cut?structuredClone(I.r.cut):newCut()),box,method:'grabcut',keep:I.r.cut?.keep||[],drop:I.r.cut?.drop||[]},'Riquadro del soggetto')}},
  cutKeep:{label:'Tieni',kind:'paint',color:'#20c060',keys:'Dipingi sulle parti del soggetto che sono state tolte. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta.',opts:['size'],done:p=>cutStroke('keep',p)},
  cutDrop:{label:'Togli',kind:'paint',color:'#ff3050',keys:'Dipingi sulle parti di sfondo rimaste. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta.',opts:['size'],done:p=>cutStroke('drop',p)}});
@@ -182,5 +182,5 @@ PANEL_HTML.cutout=()=>{const c=I.r.cut,off=I.bmp?'':' disabled',sel=(id,label,op
   <div class="insp-actions" role="group" aria-label="Sfondo">${['cutBgNone','cutBgColor','cutBgBlur'].map(id=>cmdButton(id)).join('')}</div>${c.bg==='color'?`<div class="insp-actions">${cmdButton('cutColor')}</div>`:''}${c.bg==='blur'?rangeHtml('cut:blur',false):''}
   ${sel('cutMethod','Metodo per Ricalcola',Object.entries(CUT_METHODS),prefs.cutMethod||'auto')}${c.bg==='none'?sel('cutMatte','Anteprima della trasparenza',MATTES,prefs.matte||'checker'):''}`};
 $('adjBody').addEventListener('change',e=>{if(e.target.id==='cutMethod'){prefs.cutMethod=e.target.value;savePrefs();announce('Metodo: '+CUT_METHODS[e.target.value])}else if(e.target.id==='cutMatte')setMatte(e.target.value)});
-Object.assign(PHOTO_TOOL_ACTIONS,{cutAuto,cutBox:()=>setTool('cutBox'),cutKeep:()=>{if(needCut())setTool('cutKeep')},cutDrop:()=>{if(needCut())setTool('cutDrop')},cutRecalc,cutRemove,
+Object.assign(PHOTO_TOOL_ACTIONS,{cutAuto,cutBox:()=>setPhotoTool('cutBox'),cutKeep:()=>{if(needCut())setPhotoTool('cutKeep')},cutDrop:()=>{if(needCut())setPhotoTool('cutDrop')},cutRecalc,cutRemove,
  cutBgNone:()=>cutSetBg('none'),cutBgColor:()=>cutSetBg('color'),cutBgBlur:()=>cutSetBg('blur'),cutColor,cutDescribe:()=>toast(cutSummary()),cutMatte:()=>{const i=MATTES.findIndex(x=>x[0]===(prefs.matte||'checker'));setMatte(MATTES[(i+1)%MATTES.length][0])}});

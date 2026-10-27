@@ -3,7 +3,7 @@
 // tastiera punto per punto), poly (un punto alla volta), paint (pennello) e click (un punto solo), e la funzione che
 // riceve i punti, in coordinate dell'inquadratura da 0 a 1, con il modo scelto (new, add, sub, int).
 const SEL_MODES=[['new','Nuova'],['add','Aggiungi'],['sub','Sottrai'],['int','Interseca']];
-const TOOLS={
+const PHOTO_TOOLS={
  rect:{label:'Selezione rettangolare',kind:'two',sel:1,keys:'Trascina da un angolo all’altro. Da tastiera: Invio sul primo angolo, poi sul secondo.',two:(a,b,m)=>commitSel(rectOp(a,b),m,'Selezione rettangolare')},
  ellipse:{label:'Selezione ellittica',kind:'two',sel:1,keys:'Trascina da un angolo all’altro del riquadro dell’ellisse. Da tastiera: Invio su un angolo, poi su quello opposto.',two:(a,b,m)=>commitSel(ellipseOp(a,b),m,'Selezione ellittica')},
  lasso:{label:'Lazo',kind:'lasso',sel:1,keys:'Disegna il contorno tenendo premuto il pulsante. Da tastiera: Invio aggiunge un punto, Maiusc+Invio chiude il contorno, Backspace toglie l’ultimo punto.',done:(p,m)=>commitSel({t:'poly',p:p.map(uvUnits)},m,'Lazo')},
@@ -24,7 +24,7 @@ function ellipseOp(a,b){const cu=(a[0]+b[0])/2,cv=(a[1]+b[1])/2,[cx,cy]=unitsAt(
 const brushOp=p=>({t:'brush',p:p.map(uvUnits),d:U5(T.size),h:T.hard});
 // La selezione è una maschera nella ricetta: si annulla con Ctrl+Z e torna con la bozza. Con il modo Nuova sostituisce
 // quella che c'era; il pennello dopo il primo tratto continua ad aggiungere.
-function commitSel(op,mode,label){op.mode=mode==='new'?'add':mode;if(!edit(label,r=>{r.sel={ops:mode==='new'||!r.sel?[op]:[...r.sel.ops,op]}}))return;if(TOOLS[T.tool]?.kind==='paint'&&T.mode==='new'){T.mode='add';renderToolOpts()}announce(selSummary())}
+function commitSel(op,mode,label){op.mode=mode==='new'?'add':mode;if(!edit(label,r=>{r.sel={ops:mode==='new'||!r.sel?[op]:[...r.sel.ops,op]}}))return;if(PHOTO_TOOLS[T.tool]?.kind==='paint'&&T.mode==='new'){T.mode='add';renderToolOpts()}announce(selSummary())}
 // La maschera della selezione alla misura dell'anteprima, e la sua descrizione breve o completa.
 function selMask(){return I.bmp&&I.r.sel&&lastMc?maskOf(I.r.sel.ops,lastMc):null}
 const shownPx=()=>I.compare||!outPx||outPx.width!==lastMc.w||outPx.height!==lastMc.h?lastMc.px:outPx;
@@ -37,9 +37,9 @@ const posSay=([u,v])=>`${fmtPct(u)} da sinistra, ${fmtPct(v)} dall’alto`;
 function sayCursor(){const p=[T.u,T.v],m=selMask(),i=m?Math.min(lastMc.h-1,Math.floor(p[1]*lastMc.h))*lastMc.w+Math.min(lastMc.w-1,Math.floor(p[0]*lastMc.w)):-1;
  announce(`${posSay(p)}: ${colorName(...colorAt(p))}${m?m[i]>=128?', nella selezione':', fuori dalla selezione':''}${T.down?', pennello giù':''}`)}
 // Scelta dello strumento: la foto diventa un'area interattiva (le frecce muovono il cursore) finché lo strumento è attivo.
-function setTool(id){if(!I.bmp){toast('Apri prima una foto');return}if(T.tool===id){endTool();return}const t=TOOLS[id];T.tool=id;T.pts=[];if(t.sel)T.mode=T.selMode||'new';else if(t.modes&&!t.modes.some(([v])=>v===T.mode))T.mode=t.modes[0][0];T.drag=T.down=false;toolChanged();photoCv.focus();announce(`${TOOLS[id].label}. ${TOOLS[id].keys} Esc chiude lo strumento.`)}
-function endTool(say=true){if(!T.tool)return;const t=TOOLS[T.tool];T.tool=null;T.pts=[];T.drag=T.down=false;toolChanged();if(say)announce(t.label+': chiuso')}
-function toolChanged(){const t=T.tool&&TOOLS[T.tool];photoCv.setAttribute('role',t?'application':'img');if(t)photoCv.setAttribute('aria-roledescription','foto');else photoCv.removeAttribute('aria-roledescription');
+function setPhotoTool(id){if(!I.bmp){toast('Apri prima una foto');return}if(T.tool===id){endTool();return}const t=PHOTO_TOOLS[id];T.tool=id;T.pts=[];if(t.sel)T.mode=T.selMode||'new';else if(t.modes&&!t.modes.some(([v])=>v===T.mode))T.mode=t.modes[0][0];T.drag=T.down=false;toolChanged();photoCv.focus();announce(`${PHOTO_TOOLS[id].label}. ${PHOTO_TOOLS[id].keys} Esc chiude lo strumento.`)}
+function endTool(say=true){if(!T.tool)return;const t=PHOTO_TOOLS[T.tool];T.tool=null;T.pts=[];T.drag=T.down=false;toolChanged();if(say)announce(t.label+': chiuso')}
+function toolChanged(){const t=T.tool&&PHOTO_TOOLS[T.tool];photoCv.setAttribute('role',t?'application':'img');if(t)photoCv.setAttribute('aria-roledescription','foto');else photoCv.removeAttribute('aria-roledescription');
  $('toolHint').textContent=t?`${t.label}. ${t.keys} Le frecce muovono il cursore (con Maiusc di più, con Ctrl di un pixel) e dicono il colore sotto il cursore. Esc annulla il punto in corso o chiude lo strumento.`:'';
  photoCv.setAttribute('aria-describedby',t?'toolHint':'photoHint');photoCv.classList.toggle('tooling',!!t);renderToolOpts();refreshToggles();drawOver()}
 // Opzioni dello strumento sotto la foto: modo della selezione, dimensione e durezza del pennello, tolleranze.
@@ -49,29 +49,29 @@ const TOOL_OPTS={size:{label:'Dimensione',min:0,max:100,get:()=>sizeToV(T.size),
  tol:{label:'Tolleranza',min:0,max:128,get:()=>T.tol,set:v=>{T.tol=v},fmt:()=>fmtInt(T.tol)},
  range:{label:'Tolleranza',min:5,max:150,get:()=>T.range,set:v=>{T.range=v},fmt:()=>fmtInt(T.range)}};
 const TOOL_CHECKS={contig:'Solo i pixel collegati',heal:'Ripara: adatta il colore ai dintorni'};
-function toolOptsOf(id){const t=TOOLS[id];return t.opts||(t.kind==='paint'?['size','hard']:id==='wand'?['tol','contig']:id==='range'?['range']:[])}
-function renderToolOpts(){const box=$('toolOpts'),t=T.tool&&TOOLS[T.tool];box.hidden=!t;if(!t){box.innerHTML='';return}
+function toolOptsOf(id){const t=PHOTO_TOOLS[id];return t.opts||(t.kind==='paint'?['size','hard']:id==='wand'?['tol','contig']:id==='range'?['range']:[])}
+function renderToolOpts(){const box=$('toolOpts'),t=T.tool&&PHOTO_TOOLS[T.tool];box.hidden=!t;if(!t){box.innerHTML='';return}
  const modes=t.modes||(t.sel?SEL_MODES:null);let h=`<b id="toolName">${esc(t.label)}</b>`;
  if(modes)h+=`<span class="seg" role="group" aria-label="Modo">${modes.map(([v,l])=>`<button type="button" data-tool-mode="${v}" aria-pressed="${v===T.mode}">${esc(l)}</button>`).join('')}</span>`;
  for(const o of toolOptsOf(T.tool)){if(TOOL_CHECKS[o]){h+=`<label class="check"><input type="checkbox" data-tool-opt="${o}"${T[o]?' checked':''}> ${TOOL_CHECKS[o]}</label>`;continue}const d=TOOL_OPTS[o],v=d.get();
   h+=`<span class="opt"><label for="to-${o}">${esc(d.label)}</label><input type="range" id="to-${o}" data-tool-opt="${o}" min="${d.min}" max="${d.max}" step="1" value="${v}" aria-valuetext="${esc(d.fmt())}"><output id="to-${o}-o" aria-hidden="true">${esc(d.fmt())}</output></span>`}
  box.innerHTML=h+`<span class="grow"></span><button type="button" class="btn sm" data-tool-end>${ICON('close')}Fine</button>`}
-$('toolOpts').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.toolMode){T.mode=b.dataset.toolMode;if(TOOLS[T.tool]?.sel)T.selMode=T.mode;renderToolOpts();$('toolOpts').querySelector(`[data-tool-mode="${T.mode}"]`)?.focus();announce('Modo: '+b.textContent)}else if(b.hasAttribute('data-tool-end')){endTool();photoCv.focus()}});
+$('toolOpts').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.toolMode){T.mode=b.dataset.toolMode;if(PHOTO_TOOLS[T.tool]?.sel)T.selMode=T.mode;renderToolOpts();$('toolOpts').querySelector(`[data-tool-mode="${T.mode}"]`)?.focus();announce('Modo: '+b.textContent)}else if(b.hasAttribute('data-tool-end')){endTool();photoCv.focus()}});
 $('toolOpts').addEventListener('input',e=>{const el=e.target,o=el.dataset.toolOpt;if(!o)return;if(TOOL_CHECKS[o])T[o]=el.checked;else{const d=TOOL_OPTS[o];d.set(Number(el.value));el.setAttribute('aria-valuetext',d.fmt());$('to-'+o+'-o').textContent=d.fmt()}saveTool();drawOver()});
 // Cambia dimensione o durezza del pennello da tastiera, sulla foto.
 function brushKey(bigger,hard){if(hard)T.hard=clamp(Math.round(T.hard*10+(bigger?1:-1))/10,0,1);else T.size=clamp(T.size*(bigger?1.25:.8),.001,.25);saveTool();renderToolOpts();drawOver();announce(hard?'Durezza '+TOOL_OPTS.hard.fmt():'Dimensione '+TOOL_OPTS.size.fmt())}
 // Fine di un'operazione con i punti raccolti.
-function finishTwo(a,b,mode){const t=TOOLS[T.tool];T.pts=[];drawOver();const [fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
+function finishTwo(a,b,mode){const t=PHOTO_TOOLS[T.tool];T.pts=[];drawOver();const [fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
  if(Math.abs(b[0]-a[0])*fw<2&&Math.abs(b[1]-a[1])*fh<2&&!t.point){if(t.sel&&mode==='new'&&I.r.sel){selNone();return}announce('Troppo piccolo: sposta il cursore prima del secondo punto');return}t.two(a,b,mode)}
-function finishPoly(mode){const t=TOOLS[T.tool],p=T.pts;T.pts=[];drawOver();if(p.length<3){announce('Servono almeno tre punti');return}t.done(p,mode)}
-function finishPaint(mode){const t=TOOLS[T.tool],p=T.pts;T.pts=[];T.down=false;drawOver();if(p.length)t.done(p,mode)}
-function keyEnter(shift){const t=TOOLS[T.tool],p=[T.u,T.v],m=T.mode;
+function finishPoly(mode){const t=PHOTO_TOOLS[T.tool],p=T.pts;T.pts=[];drawOver();if(p.length<3){announce('Servono almeno tre punti');return}t.done(p,mode)}
+function finishPaint(mode){const t=PHOTO_TOOLS[T.tool],p=T.pts;T.pts=[];T.down=false;drawOver();if(p.length)t.done(p,mode)}
+function keyEnter(shift){const t=PHOTO_TOOLS[T.tool],p=[T.u,T.v],m=T.mode;
  if(t.kind==='click'){t.at(p,m);return}
  if(t.kind==='two'){if(!T.pts.length){T.pts=[p];drawOver();announce(`${t.first||'Primo punto'}: ${posSay(p)}. Sposta il cursore e premi Invio ${t.second||'sul secondo'}; Esc annulla.`)}else finishTwo(T.pts[0],p,m);return}
  if(t.kind==='poly'||t.kind==='lasso'){if(shift||(T.pts.length>=3&&Math.hypot(p[0]-T.pts[0][0],p[1]-T.pts[0][1])<.005)){finishPoly(m);return}T.pts.push(p);drawOver();announce(`Punto ${T.pts.length}: ${posSay(p)}${T.pts.length>=3?'. Maiusc+Invio chiude il contorno':''}`);return}
  if(t.kind==='paint'){if(T.down)penToggle();else{T.pts=[p];finishPaint(m)}}}
 function penToggle(){if(!T.down){T.down=true;T.pts=[[T.u,T.v]];drawOver();announce('Pennello giù: le frecce dipingono, Spazio lo alza')}else finishPaint(T.mode)}
-photoCv.addEventListener('keydown',e=>{const t=T.tool&&TOOLS[T.tool];if(!t||!I.bmp||overlayOpen())return;const k=e.key;
+photoCv.addEventListener('keydown',e=>{const t=T.tool&&PHOTO_TOOLS[T.tool];if(!t||!I.bmp||overlayOpen())return;const k=e.key;
  if(k.startsWith('Arrow')&&!e.altKey){e.preventDefault();const [fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height),sx=e.ctrlKey?1/fw:e.shiftKey?.1:.01,sy=e.ctrlKey?1/fh:e.shiftKey?.1:.01;
   T.u=clamp(T.u+(k==='ArrowRight'?sx:k==='ArrowLeft'?-sx:0),0,1);T.v=clamp(T.v+(k==='ArrowDown'?sy:k==='ArrowUp'?-sy:0),0,1);T.kbd=true;if(T.down)T.pts.push([T.u,T.v]);drawOver();sayCursor();return}
  if(k==='Enter'&&!e.ctrlKey){e.preventDefault();keyEnter(e.shiftKey);return}
@@ -82,13 +82,13 @@ photoCv.addEventListener('keydown',e=>{const t=T.tool&&TOOLS[T.tool];if(!t||!I.b
 // Mouse e penna: Maiusc aggiunge, Alt sottrae, tutti e due intersecano.
 const eventUV=e=>{const r=photoCv.getBoundingClientRect();return [clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1)]};
 const dispDist=(a,b)=>{const r=photoCv.getBoundingClientRect();return Math.hypot((a[0]-b[0])*r.width,(a[1]-b[1])*r.height)};
-photoCv.addEventListener('pointerdown',e=>{const t=T.tool&&TOOLS[T.tool];if(!t||e.button!==0)return;e.preventDefault();photoCv.focus({preventScroll:true});const p=eventUV(e),mode=e.shiftKey&&e.altKey?'int':e.shiftKey?'add':e.altKey?'sub':T.mode;[T.u,T.v]=p;T.kbd=false;T.pmode=mode;
+photoCv.addEventListener('pointerdown',e=>{const t=T.tool&&PHOTO_TOOLS[T.tool];if(!t||e.button!==0)return;e.preventDefault();photoCv.focus({preventScroll:true});const p=eventUV(e),mode=e.shiftKey&&e.altKey?'int':e.shiftKey?'add':e.altKey?'sub':T.mode;[T.u,T.v]=p;T.kbd=false;T.pmode=mode;
  if(t.kind==='click'){t.at(p,mode);return}
  if(t.kind==='poly'){if(T.pts.length>=3&&dispDist(p,T.pts[0])<8)finishPoly(mode);else{T.pts.push(p);drawOver()}return}
  photoCv.setPointerCapture(e.pointerId);T.pts=[p];T.drag=true;drawOver()});
-photoCv.addEventListener('pointermove',e=>{if(!T.tool||!I.bmp)return;const p=eventUV(e);[T.u,T.v]=p;T.kbd=false;if(T.drag){const t=TOOLS[T.tool];if(t.kind==='two')T.pts[1]=p;else if(dispDist(p,T.pts.at(-1))>=Math.max(2,t.kind==='paint'?brushDisp()*.2:0))T.pts.push(p)}drawOver()});
-photoCv.addEventListener('pointerup',()=>{if(!T.drag)return;T.drag=false;const t=TOOLS[T.tool];if(!t)return;if(t.kind==='two')finishTwo(T.pts[0],T.pts[1]||T.pts[0],T.pmode);else if(t.kind==='lasso')finishPoly(T.pmode);else if(t.kind==='paint'){T.pts.push([T.u,T.v]);finishPaint(T.pmode)}});
-photoCv.addEventListener('dblclick',()=>{if(T.tool&&TOOLS[T.tool].kind==='poly'&&T.pts.length>=3)finishPoly(T.pmode)});
+photoCv.addEventListener('pointermove',e=>{if(!T.tool||!I.bmp)return;const p=eventUV(e);[T.u,T.v]=p;T.kbd=false;if(T.drag){const t=PHOTO_TOOLS[T.tool];if(t.kind==='two')T.pts[1]=p;else if(dispDist(p,T.pts.at(-1))>=Math.max(2,t.kind==='paint'?brushDisp()*.2:0))T.pts.push(p)}drawOver()});
+photoCv.addEventListener('pointerup',()=>{if(!T.drag)return;T.drag=false;const t=PHOTO_TOOLS[T.tool];if(!t)return;if(t.kind==='two')finishTwo(T.pts[0],T.pts[1]||T.pts[0],T.pmode);else if(t.kind==='lasso')finishPoly(T.pmode);else if(t.kind==='paint'){T.pts.push([T.u,T.v]);finishPaint(T.pmode)}});
+photoCv.addEventListener('dblclick',()=>{if(T.tool&&PHOTO_TOOLS[T.tool].kind==='poly'&&T.pts.length>=3)finishPoly(T.pmode)});
 photoCv.addEventListener('pointerleave',()=>{if(T.tool&&!T.drag)drawOver(false)});
 // Il contorno della selezione e i segni degli strumenti stanno su due canvas sopra la foto, della stessa misura.
 function placeOverlays(){for(const cv of [antsCv,overCv]){cv.style.left=photoCv.offsetLeft+'px';cv.style.top=photoCv.offsetTop+'px';cv.style.width=photoCv.style.width;cv.style.height=photoCv.style.height}overCv.hidden=photoCv.hidden;drawOver()}
@@ -113,7 +113,7 @@ const brushDisp=()=>{if(!I.bmp)return 0;const f=fullMatrix(),r=photoCv.getBoundi
 function drawOver(cursor=true){if(overCv.hidden)return;const r=photoCv.getBoundingClientRect(),dpr=devicePixelRatio||1,W=Math.max(1,Math.round(r.width*dpr)),H=Math.max(1,Math.round(r.height*dpr));if(overCv.width!==W||overCv.height!==H){overCv.width=W;overCv.height=H}
  const c=overCv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,W,H);if(!I.bmp)return;c.lineJoin='round';c.lineCap='round';
  const P=([u,v])=>[u*W,v*H],line=(draw,dash=true)=>{c.beginPath();draw();c.setLineDash([]);c.strokeStyle='#fff';c.lineWidth=3*dpr;c.stroke();c.setLineDash(dash?[5*dpr,4*dpr]:[]);c.strokeStyle='#000';c.lineWidth=1.4*dpr;c.stroke();c.setLineDash([])};
- const t=T.tool&&TOOLS[T.tool];
+ const t=T.tool&&PHOTO_TOOLS[T.tool];
  for(const g of overGuides)g(c,P,line,W,H,dpr);
  if(!t)return;const pts=T.pts,cur=[T.u,T.v];
  if(t.kind==='two'&&pts.length){const a=P(pts[0]),b=P(pts[1]||(T.drag?pts[0]:cur));if(t.drawTwo)t.drawTwo(c,a,b,line,dpr);else if(T.tool==='ellipse')line(()=>c.ellipse((a[0]+b[0])/2,(a[1]+b[1])/2,Math.abs(b[0]-a[0])/2,Math.abs(b[1]-a[1])/2,0,0,Math.PI*2));else line(()=>c.rect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1])))}
@@ -125,14 +125,14 @@ function drawOver(cursor=true){if(overCv.hidden)return;const r=photoCv.getBoundi
 // Altri segni da disegnare sopra la foto (maniglie delle sfumature, riquadro dello scontorno…): funzioni aggiunte dagli altri moduli.
 const overGuides=[];
 // Operazioni sulla selezione.
-const needSel=()=>{if(!I.bmp){toast('Apri prima una foto');return false}if(!I.r.sel){toast('Non c’è una selezione: scegli prima una zona della foto');return false}return true};
+const needPhotoSel=()=>{if(!I.bmp){toast('Apri prima una foto');return false}if(!I.r.sel){toast('Non c’è una selezione: scegli prima una zona della foto');return false}return true};
 function selAll(){if(!I.bmp){toast('Apri prima una foto');return}edit('Seleziona tutto',r=>{r.sel={ops:[{t:'all'}]}});announce('Selezionata tutta la foto')}
 function selNone(){if(!I.r.sel){toast('Non c’è una selezione');return}edit('Deseleziona',r=>{r.sel=null});announce('Selezione tolta')}
-function selModify(op,label){if(!needSel())return false;edit(label,r=>{r.sel={ops:[...r.sel.ops,op]}});announce(label+'. '+selSummary());return true}
+function selModify(op,label){if(!needPhotoSel())return false;edit(label,r=>{r.sel={ops:[...r.sel.ops,op]}});announce(label+'. '+selSummary());return true}
 function selInvert(){selModify({t:'invert'},'Selezione invertita')}
 // Finestre per sfumare, espandere o contrarre e rifinire: le misure sono pixel della foto.
 const photoLong=()=>Math.max(I.bmp.width,I.bmp.height);
-async function selPixels(title,text,label,value,min,max,make,extra=[]){if(!needSel())return;const v=await modal(title,`<p>${esc(text)}</p>`,[{id:'px',label,type:'number',value},...extra],'Applica',{validate:x=>{const n=num(x.px);return Number.isFinite(n)&&n>=min&&n<=max?null:{msg:`Scrivi un numero tra ${fmtInt(min)} e ${fmtInt(max)}`,field:'px'}}});
+async function selPixels(title,text,label,value,min,max,make,extra=[]){if(!needPhotoSel())return;const v=await modal(title,`<p>${esc(text)}</p>`,[{id:'px',label,type:'number',value},...extra],'Applica',{validate:x=>{const n=num(x.px);return Number.isFinite(n)&&n>=min&&n<=max?null:{msg:`Scrivi un numero tra ${fmtInt(min)} e ${fmtInt(max)}`,field:'px'}}});
  if(v)selModify(make(num(v.px)/photoLong(),v),title.replace('…',''))}
 const selFeather=()=>selPixels('Sfuma la selezione…','Il bordo della selezione passa gradualmente da dentro a fuori: utile perché una regolazione locale non lasci un segno netto.','Raggio della sfumatura in pixel',20,1,1000,r=>({t:'feather',r:U5(r)}));
 const selGrow=()=>selPixels('Espandi o contrai la selezione…','Con un numero positivo il bordo si allarga, con uno negativo si stringe; gli angoli si arrotondano e i buchi piccoli si chiudono.','Pixel, positivi per espandere e negativi per contrarre',5,-500,500,r=>({t:'grow',r:U5(r)}));
@@ -147,11 +147,11 @@ async function selMeasure(){if(!I.bmp){toast('Apri prima una foto');return}const
  if(!v)return;const x=dim(v.x,fw),y=dim(v.y,fh),a=[x/fw,y/fh],b=[(x+dim(v.w,fw))/fw,(y+dim(v.h,fh))/fh];commitSel(v.shape==='ellipse'?ellipseOp(a,b):rectOp(a,b),v.mode,v.shape==='ellipse'?'Ellisse con le misure':'Rettangolo con le misure')}
 function toggleQuickMask(){prefs.quickMask=!prefs.quickMask;savePrefs();drawAnts()}
 // Gruppo Selezione nel pannello: strumenti, operazioni e descrizione della selezione.
-const SEL_TOOL_CMDS=['toolRect','toolEllipse','toolLasso','toolPoly','toolBrush','toolWand','toolRange'];
+const SEL_TOOL_CMDS=['toolRect','toolEllipse','toolLasso','toolPoly','toolSelBrush','toolWand','toolRange'];
 const cmdButton=(id,cls='btn sm')=>{const c=C[id];return `<button type="button" class="${cls}" data-action="${id}"${c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:''}${I.bmp?'':' disabled'}>${ICON(c.icon)}${esc(c.short||c.label)}</button>`};
 const PANEL_HTML={selection:()=>`<div class="tool-grid" role="group" aria-label="Strumenti di selezione">${SEL_TOOL_CMDS.map(id=>cmdButton(id)).join('')}</div><div class="insp-actions" role="group" aria-label="Operazioni sulla selezione">${['selAll','selNone','selInvert','selFeather','selGrow','selRefine','selMeasure','selDescribe','selShow'].map(id=>cmdButton(id)).join('')}</div><p class="sel-desc" id="selDesc">${esc(ants.text||selSummary())}</p>`};
 // Comandi di questo modulo e dei successivi, uniti a quelli di Immagini in 08-actions.js.
 // Tasti sulla foto quando uno strumento è attivo, elencati nella guida delle scorciatoie.
 STATIC_KEYS.i.push(['Sulla foto con uno strumento',[['Muovi il cursore (con Maiusc di più, con Ctrl di un pixel)','← → ↑ ↓'],['Usa il punto: angolo, punto del lazo, colore','Invio'],['Chiudi il lazo','Maiusc+Invio'],['Togli l’ultimo punto del lazo','Backspace'],['Abbassa o alza il pennello','Spazio'],['Pennello più piccolo o più grande (con Maiusc la durezza)','[ / ]'],['Annulla il punto in corso o chiudi lo strumento','Esc']]]);
-const PHOTO_TOOL_ACTIONS={toolRect:()=>setTool('rect'),toolEllipse:()=>setTool('ellipse'),toolLasso:()=>setTool('lasso'),toolPoly:()=>setTool('poly'),toolBrush:()=>setTool('brush'),toolWand:()=>setTool('wand'),toolRange:()=>setTool('range'),
+const PHOTO_TOOL_ACTIONS={toolRect:()=>setPhotoTool('rect'),toolEllipse:()=>setPhotoTool('ellipse'),toolLasso:()=>setPhotoTool('lasso'),toolPoly:()=>setPhotoTool('poly'),toolSelBrush:()=>setPhotoTool('brush'),toolWand:()=>setPhotoTool('wand'),toolRange:()=>setPhotoTool('range'),
  selAll,selNone,selInvert,selFeather,selGrow,selRefine,selMeasure,selDescribe,selShow:toggleQuickMask};

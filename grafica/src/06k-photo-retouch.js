@@ -30,10 +30,10 @@ function retouchLast(){if(!I.r.heal?.length){toast('Non ci sono ritocchi');retur
 function retouchClear(){if(!I.r.heal?.length){toast('Non ci sono ritocchi');return}edit('Togli tutti i ritocchi',r=>{r.heal=[]},{panel:true});announce('Tolti tutti i ritocchi: Ctrl+Z per riaverli')}
 function retouchSay(r=I.r){const l=r.heal||[],n=t=>l.filter(o=>o.t===t).length,pl=(k,one,many)=>k===1?one:k+' '+many;
  return l.length?`Ritocchi: ${[[n('heal'),'una riparazione','riparazioni'],[n('clone'),'un timbro','timbri'],[n('eye'),'un occhio rosso','occhi rossi']].filter(x=>x[0]).map(x=>pl(...x)).join(', ')}.`:'Nessun ritocco.'}
-Object.assign(TOOLS,{
+Object.assign(PHOTO_TOOLS,{
  spot:{label:'Correttivo puntuale',kind:'click',opts:['size'],keys:'Clic su una macchia, un brufolo o un granello di polvere: si copre con una zona vicina simile e il colore si adatta. Da tastiera: Invio sul punto. Parentesi quadre cambiano la dimensione del cerchio.',at:p=>retouchSpot(p)},
  clone:{label:'Timbro clone',kind:'two',opts:['size','hard','heal'],first:'Zona da copiare',second:'dove incollarla',keys:'Trascina dalla zona da copiare al punto dove incollarla. Da tastiera: Invio sulla zona da copiare, poi Invio dove incollarla. Con Ripara il colore si adatta ai dintorni. Parentesi quadre cambiano la dimensione.',
   drawTwo:(c,a,b,line,dpr)=>{const R=Math.max(3,brushDisp()*dpr);line(()=>c.arc(a[0],a[1],R,0,Math.PI*2));line(()=>{c.moveTo(...a);c.lineTo(...b)});line(()=>c.arc(b[0],b[1],R,0,Math.PI*2),false)},two:(a,b)=>retouchClone(a,b)},
  redeye:{label:'Occhi rossi',kind:'click',opts:['size'],keys:'Clic al centro di un occhio rosso, con il cerchio grande come l’occhio. Da tastiera: Invio sul punto. Parentesi quadre cambiano la dimensione del cerchio.',at:p=>retouchEye(p)}});
 PANEL_HTML.retouch=()=>`<div class="tool-grid" role="group" aria-label="Strumenti di ritocco">${['toolSpot','toolClone','toolRedEye'].map(id=>cmdButton(id)).join('')}</div><div class="insp-actions">${['retouchLast','retouchClear'].map(id=>cmdButton(id)).join('')}</div><p class="sel-desc">${esc(retouchSay())}</p>`;
-Object.assign(PHOTO_TOOL_ACTIONS,{adjCopy,adjPaste,toolSpot:()=>setTool('spot'),toolClone:()=>setTool('clone'),toolRedEye:()=>setTool('redeye'),retouchLast,retouchClear});
+Object.assign(PHOTO_TOOL_ACTIONS,{adjCopy,adjPaste,toolSpot:()=>setPhotoTool('spot'),toolClone:()=>setPhotoTool('clone'),toolRedEye:()=>setPhotoTool('redeye'),retouchLast,retouchClear});
