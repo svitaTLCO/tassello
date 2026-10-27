@@ -4,8 +4,8 @@ const FORMATS={jpeg:{label:'JPEG',mime:'image/jpeg',ext:'jpg',lossy:true},png:{l
 const SIZES=[['orig','Dimensione piena'],['4096','4096 pixel sul lato lungo'],['2048','2048 pixel sul lato lungo, per i social'],['2000','2000 pixel sul lato lungo'],['1080','1080 pixel sul lato lungo'],['custom','Altra misura…']];
 function exportLabel(x){const f=FORMATS[x.format]||FORMATS.jpeg;return f.label+(f.lossy?`, qualità ${x.quality||90}`:'')+', '+(x.size==='orig'?'dimensione piena':x.size+' pixel sul lato lungo')}
 function exportDims(size,custom){const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),long=size==='orig'?Math.max(w,h):size==='custom'?custom:Number(size),k=Math.min(1,long/Math.max(w,h));return [Math.max(1,Math.round(w*k)),Math.max(1,Math.round(h*k))]}
-async function exportDialog(){if(!I.bmp){toast('Apri prima una foto');return}const step=planSteps()[I.step],pre=step?.export||{format:prefs.exportFormat,quality:prefs.exportQuality,size:prefs.exportSize},[fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
- const r=await modal('Esporta la foto',`<p>La foto ha ${fmtInt(fw)} × ${fmtInt(fh)} pixel con l’inquadratura scelta. L’originale resta com’è; il file nuovo non contiene i dati della fotocamera né la posizione.</p>`,[
+async function exportDialog(){if(!I.bmp){toast('Apri prima una foto');return}const step=planSteps()[I.step],transp=I.r.cut?.bg==='none',[fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);let pre=step?.export||{format:prefs.exportFormat,quality:prefs.exportQuality,size:prefs.exportSize};if(transp&&pre.format==='jpeg')pre={...pre,format:'png'};
+ const r=await modal('Esporta la foto',`<p>La foto ha ${fmtInt(fw)} × ${fmtInt(fh)} pixel con l’inquadratura scelta. L’originale resta com’è; il file nuovo non contiene i dati della fotocamera né la posizione.${transp?' Lo sfondo è trasparente: PNG e WebP conservano la trasparenza, il JPEG la riempie di bianco.':''}</p>`,[
   {id:'name',label:'Nome del file',value:I.title.trim()||baseName(I.name)},
   {id:'format',label:'Formato',type:'select',value:pre.format,options:Object.entries(FORMATS).map(([k,f])=>[k,f.label+(k==='jpeg'?', per le foto':k==='png'?', senza perdita di qualità':', più leggero')])},
   {id:'quality',label:'Qualità (JPEG e WebP)',type:'range',min:50,max:100,step:1,value:pre.quality||90,fmt:v=>v+(v>=90?', alta':v>=75?', buona':', file leggero'),hint:'Più bassa, più leggero il file. Sotto 75 si possono vedere difetti.'},
@@ -16,7 +16,7 @@ async function exportDialog(){if(!I.bmp){toast('Apri prima una foto');return}con
  if(blob.type!==f.mime){toast(`Il browser non sa scrivere ${f.label}: niente è stato salvato`);return}
  download(blob,extName(r.name||I.name,f.ext),f.mime);toast(`Esportata in ${f.label}, ${fmtInt(w)} × ${fmtInt(h)} pixel, ${fmtBytes(blob.size)}`)}
 async function renderFull(w,h,mime,quality){const cv=new OffscreenCanvas(w,h),ctx=cv.getContext('2d',{willReadFrequently:true});drawGeometry(ctx,I.bmp,I.r,w,h);const src=ctx.getImageData(0,0,w,h),mc=prepareMasks(I.r,maskCtx(I.r,w,h,src));ctx.putImageData(develop(src,src,I.r,lutOf(I.r.look),mc),0,0);
- // Il JPEG non ha trasparenza: le parti trasparenti diventano bianche invece che nere.
+ // Il JPEG non ha trasparenza: le parti trasparenti (anche quelle dello scontorno) diventano bianche invece che nere.
  if(mime==='image/jpeg'){ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h)}
  return cv.convertToBlob({type:mime,quality})}
 // Inquadratura: rotazioni, riflessione, formato e raddrizzamento.

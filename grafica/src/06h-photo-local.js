@@ -45,10 +45,12 @@ function maskDelete(){const m=activeMask();if(!m){toast('Non c’è una maschera
 function maskNext(dir){const l=I.r.masks||[];if(!l.length){toast('Non ci sono maschere');return}const i=l.indexOf(activeMask()),m=l[(i+dir+l.length)%l.length];I.maskSel=m.id;renderPanel();afterMaskEdit(maskSummary(m))}
 function maskOverlayToggle(){prefs.maskOverlay=!prefs.maskOverlay;savePrefs();drawAnts()}
 // Cursori della maschera scelta, con gli stessi gestori delle regolazioni di tutta la foto (ctlDef in 06c).
-function extraCtl(id){if(!id.startsWith('m:'))return null;const k=id.slice(2);
+const CTL_EXT=[];
+function extraCtl(id){for(const f of CTL_EXT){const c=f(id);if(c)return c}return null}
+CTL_EXT.push(id=>{if(!id.startsWith('m:'))return null;const k=id.slice(2);
  if(k==='amt')return {label:'Intensità della maschera',min:0,max:100,step:1,get:r=>maskIn(r)?.amt??100,set:(r,v)=>{const x=maskIn(r);if(x)x.amt=v},fmt:v=>fmtInt(v)+'%',hint:'Quanto la maschera applica le sue regolazioni: a 0% è come se non ci fosse.',zero:100};
  if(k==='f')return {label:'Sfumatura del bordo',min:0,max:100,step:1,get:r=>Math.round((maskIn(r)?.ops[0]?.f??.5)*100),set:(r,v)=>{const o=maskIn(r)?.ops[0];if(o)o.f=v/100},fmt:v=>fmtInt(v)+'%',hint:'Quanta parte dell’ellisse passa gradualmente dall’effetto pieno a nessun effetto.',zero:50};
- const a=ADJ_BY[k];return a?{...a,hint:a.hint.replace('tutta la foto','la zona della maschera').replace('la foto è in','la zona è in'),get:r=>maskIn(r)?.adj[k]??0,set:(r,v)=>{const x=maskIn(r);if(x)x.adj[k]=v}}:null}
+ const a=ADJ_BY[k];return a?{...a,hint:a.hint.replace('tutta la foto','la zona della maschera').replace('la foto è in','la zona è in'),get:r=>maskIn(r)?.adj[k]??0,set:(r,v)=>{const x=maskIn(r);if(x)x.adj[k]=v}}:null});
 // Gruppo Maschere nel pannello: come crearne una, l'elenco, poi i comandi e i cursori della maschera scelta.
 PANEL_HTML.masks=()=>{const list=I.r.masks||[],a=activeMask(),off=I.bmp?'':' disabled';
  let h=`<div class="insp-actions" role="group" aria-label="Nuova maschera">${['maskFromSel','maskBrush','maskLinear','maskRadial'].map(id=>cmdButton(id)).join('')}</div>`;

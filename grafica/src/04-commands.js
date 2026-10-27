@@ -67,6 +67,19 @@ def('i','Maschere',[
  ['maskNext','Maschera successiva','down','',{short:'Successiva'}],
  ['maskPrev','Maschera precedente','up','',{short:'Precedente'}],
  ['maskDescribe','Descrivi la maschera','speak','Alt+Maiusc+M',{g:1,short:'Descrivi'}]]);
+def('i','Sfondo',[
+ ['cutAuto','Togli lo sfondo','cutout','Ctrl+Maiusc+B',{g:1,short:'Togli lo sfondo'}],
+ ['cutBox','Riquadro intorno al soggetto','selRect','',{short:'Riquadro del soggetto',quiet:1,toggle:()=>T.tool==='cutBox'}],
+ ['cutKeep','Tieni: dipingi le parti del soggetto da tenere','keep','',{short:'Tieni',quiet:1,toggle:()=>T.tool==='cutKeep'}],
+ ['cutDrop','Togli: dipingi lo sfondo rimasto','drop','',{short:'Togli',quiet:1,toggle:()=>T.tool==='cutDrop'}],
+ ['cutRecalc','Ricalcola lo scontorno','history','',{short:'Ricalcola'}],
+ ['cutRemove','Rimetti lo sfondo','undo','',{short:'Rimetti lo sfondo'}],
+ ['cutBgNone','Sfondo trasparente','checker','',{short:'Trasparente',quiet:1,toggle:()=>I.r.cut?.bg==='none'}],
+ ['cutBgColor','Sfondo di un colore pieno','fill','',{short:'Colore pieno',quiet:1,toggle:()=>I.r.cut?.bg==='color'}],
+ ['cutBgBlur','Sfondo con la foto sfocata','blurBg','',{short:'Sfocato',quiet:1,toggle:()=>I.r.cut?.bg==='blur'}],
+ ['cutColor','Colore dello sfondo…','fill','',{short:'Colore…'}],
+ ['cutMatte','Anteprima della trasparenza su scacchiera, bianco, nero o grigio','checker','',{short:'Anteprima su'}],
+ ['cutDescribe','Descrivi lo scontorno','speak','Alt+Maiusc+B',{g:1,short:'Descrivi'}]]);
 def('d','File',[
  ['openDraw','Apri un disegno SVG o inserisci immagini','open','Ctrl+O',{g:1,short:'Apri'}],
  ['saveSvg','Salva il disegno (SVG, si riapre modificabile)','save','Ctrl+S',{g:1,short:'Salva'}],

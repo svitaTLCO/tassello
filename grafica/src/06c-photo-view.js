@@ -38,7 +38,7 @@ let planCursor=0;
 function renderPlans(){const list=$('planList');planCursor=clamp(planCursor,0,PLANS.length-1);list.innerHTML=PLANS.map((p,i)=>`<div role="option" id="plan-${p.id}" class="lb-item plan-item${i===planCursor?' active':''}" data-plan="${p.id}" aria-selected="${p.id===I.plan}"><span class="n">${esc(p.name)}</span><span class="d">${esc(p.desc)}</span></div>`).join('');list.setAttribute('aria-activedescendant','plan-'+PLANS[planCursor].id)}
 function movePlanCursor(i){planCursor=clamp(i,0,PLANS.length-1);renderPlans();$('plan-'+PLANS[planCursor].id)?.scrollIntoView({block:'nearest'})}
 // Pannello delle regolazioni: tutti i gruppi senza piano, solo i controlli del passo con un piano.
-const GROUPS=[['Inquadratura',['rotate','ratio','cx','cy','angle']],['Luce',ADJ.filter(a=>a[2]==='Luce').map(a=>a[0])],['Colore',ADJ.filter(a=>a[2]==='Colore').map(a=>a[0])],['Effetti',['vignette']],['Look',['look','lookAmt']],['Selezione',['selection']],['Maschere',['masks']]];
+const GROUPS=[['Inquadratura',['rotate','ratio','cx','cy','angle']],['Luce',ADJ.filter(a=>a[2]==='Luce').map(a=>a[0])],['Colore',ADJ.filter(a=>a[2]==='Colore').map(a=>a[0])],['Effetti',['vignette']],['Look',['look','lookAmt']],['Selezione',['selection']],['Maschere',['masks']],['Sfondo',['cutout']]];
 // Cursori dell'inquadratura e del look, con lo stesso aspetto delle regolazioni. Le posizioni vanno da 0 a 100.
 const posText=(v,start,end,from)=>v===50?'al centro':v===0?'tutto '+start:v===100?'tutto '+end:`${fmtInt(v)}% ${from}`;
 const GEO={cx:{label:'Posizione orizzontale',min:0,max:100,step:1,get:r=>Math.round(r.cx*100),set:(r,v)=>{r.cx=v/100},fmt:v=>posText(v,'a sinistra','a destra','da sinistra'),hint:'Sposta il ritaglio a sinistra o a destra.'},

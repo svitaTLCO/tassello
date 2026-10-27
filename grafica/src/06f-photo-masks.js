@@ -127,6 +127,9 @@ function rasterOps(ops,mc,from=null,start=0){let m=from;for(let i=start;i<ops.le
  return m||new Uint8Array(mc.w*mc.h)}
 // Maschere dell'anteprima ricordate per chiave: aggiungere un tratto ricalcola solo l'ultima operazione.
 const maskCache=new Map();
+// Foto nuova o chiusa: si dimenticano i pixel, le maschere e le maschere calcolate della foto di prima (le chiavi dicono
+// misura e inquadratura, non quale foto: due foto della stessa fotocamera avrebbero la stessa chiave).
+function photoChanged(){for(const slot of Object.values(srcCache))Object.assign(slot,{key:'',px:null});maskCache.clear();rasters.clear();I.maskSel=null;lastMc=null;endTool(false)}
 function maskOf(ops,mc){if(!mc.key)return mc.memo?.get(JSON.stringify(ops))??rasterOps(ops,mc);const key=mc.key+JSON.stringify(ops);let m=maskCache.get(key);if(m){maskCache.delete(key);maskCache.set(key,m);return m}
  const prev=ops.length>1&&maskCache.get(mc.key+JSON.stringify(ops.slice(0,-1)));m=prev?rasterOps(ops,mc,prev.slice(),ops.length-1):rasterOps(ops,mc);
  maskCache.set(key,m);while(maskCache.size>24)maskCache.delete(maskCache.keys().next().value);return m}
