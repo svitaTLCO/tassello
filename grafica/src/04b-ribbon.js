@@ -1,7 +1,7 @@
 // Barra: gli strumenti di tutti i giorni restano in vista, le categorie sono cassetti che si aprono sopra il lavoro
 // e si richiudono dopo il comando. Ogni cassetto elenca per gruppi i comandi del registro.
 const RIBBON={
- i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll readStatus'],['Piano','planMenu stepPrev stepNext planFree'],['Cronologia','undo redo']],
+ i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll readStatus'],['Piano','planMenu stepPrev stepNext planFree'],['Appunti','adjCopy adjPaste'],['Cronologia','undo redo']],
   Inquadra:[['Ruota','rotateLeft rotateRight flipH'],['Formato','ratioMenu straighten resetGeometry']],
   Look:[['Look','lookMenu lutImport lookAmount lookOff']],
   Dettaglio:[['Curve','curveS curveAdd curveDel curveReset'],['Dettaglio','fxClarity fxDehaze fxSharpen fxNoise'],['Colore','bwToggle']],

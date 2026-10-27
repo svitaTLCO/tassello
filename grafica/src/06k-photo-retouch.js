@@ -36,4 +36,4 @@ Object.assign(TOOLS,{
   drawTwo:(c,a,b,line,dpr)=>{const R=Math.max(3,brushDisp()*dpr);line(()=>c.arc(a[0],a[1],R,0,Math.PI*2));line(()=>{c.moveTo(...a);c.lineTo(...b)});line(()=>c.arc(b[0],b[1],R,0,Math.PI*2),false)},two:(a,b)=>retouchClone(a,b)},
  redeye:{label:'Occhi rossi',kind:'click',opts:['size'],keys:'Clic al centro di un occhio rosso, con il cerchio grande come l’occhio. Da tastiera: Invio sul punto. Parentesi quadre cambiano la dimensione del cerchio.',at:p=>retouchEye(p)}});
 PANEL_HTML.retouch=()=>`<div class="tool-grid" role="group" aria-label="Strumenti di ritocco">${['toolSpot','toolClone','toolRedEye'].map(id=>cmdButton(id)).join('')}</div><div class="insp-actions">${['retouchLast','retouchClear'].map(id=>cmdButton(id)).join('')}</div><p class="sel-desc">${esc(retouchSay())}</p>`;
-Object.assign(PHOTO_TOOL_ACTIONS,{toolSpot:()=>setTool('spot'),toolClone:()=>setTool('clone'),toolRedEye:()=>setTool('redeye'),retouchLast,retouchClear});
+Object.assign(PHOTO_TOOL_ACTIONS,{adjCopy,adjPaste,toolSpot:()=>setTool('spot'),toolClone:()=>setTool('clone'),toolRedEye:()=>setTool('redeye'),retouchLast,retouchClear});
