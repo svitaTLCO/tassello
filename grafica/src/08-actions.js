@@ -4,6 +4,7 @@ const I_ACTIONS={open:()=>pickFile(),export:exportDialog,closePhoto,auto:applyAu
  lookMenu,lutImport:()=>$('lutInput').click(),lookAmount:()=>I.r.look==='none'?toast('Scegli prima un look'):liveRange('Intensità del look','lookAmt'),lookOff:()=>setLook('none'),
  planMenu,stepNext:()=>stepGo(1),stepPrev:()=>stepGo(-1),stepAuto,planFree:()=>choosePlan('libera'),
  undo:()=>photoUndo(false),redo:()=>photoUndo(true)};
+Object.assign(I_ACTIONS,PHOTO_TOOL_ACTIONS);
 const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newDraw:newDrawingCmd,
  addRect:()=>addItem('rect'),addEllipse:()=>addItem('ellipse'),addLine:()=>addItem('line'),addText:()=>{addItem('text');$('pr-text')?.focus();$('pr-text')?.select()},addImage:()=>{pickMode='image';$('drawInput').click()},
  duplicateItem,deleteItem,cut:()=>copyItem(true),copy:()=>copyItem(false),paste:pasteItem,
@@ -11,6 +12,10 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  alignLeft:()=>alignItem('left'),alignCenter:()=>alignItem('center'),alignRight:()=>alignItem('right'),alignTop:()=>alignItem('top'),alignMiddle:()=>alignItem('middle'),alignBottom:()=>alignItem('bottom'),
  readDraw:readDrawStatus,sheetSize:()=>focusSheetProp('pr-preset'),sheetDesc:()=>focusSheetProp('pr-desc'),a11yCheck:drawA11yCheck,
  zoomIn:()=>zoomDraw(1.25),zoomOut:()=>zoomDraw(.8),zoomFit:()=>zoomDraw(0),
+ selectAll,groupItems,ungroupItems,lockItems,hideItems,distH:()=>distribute('h'),distV:()=>distribute('v'),smartGuides:()=>{prefs.drawSmart=!smartOn();savePrefs()},
+ toolSelect:()=>setTool('select'),toolNodes:()=>setTool('nodes'),toolPen:()=>setTool('pen'),toolPencil:()=>setTool('pencil'),toolBrush:()=>setTool('brush'),toolEraser:()=>setTool('eraser'),nodeAdd,nodeDelete:deleteNode,nodeType:nodeToggle,pathClose,readPath,toPath,gradientItem:toggleGrad,shadowItem:toggleShadow,textOnPath,textOffPath,
+ boolUnion:()=>boolOp('union'),boolSubtract:()=>boolOp('subtract'),boolIntersect:()=>boolOp('intersect'),boolExclude:()=>boolOp('exclude'),
+ addPolygon:()=>addItem('poly'),addStar:()=>addItem('poly',{star:true,sides:5,inner:45,fill:'#e8a33d',name:nextName('poly','Stella')}),addArrow:()=>addItem('arrow'),addBubble:()=>addItem('bubble'),addArrowLine:()=>addItem('line',{end:'arrow',name:nextName('line','Linea con freccia')}),
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
 const COMMON_ACTIONS={filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
  switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),layoutMenu,layoutReset,showPlans:()=>paneToggle('planPane'),showAdjust:()=>paneToggle('adjPane'),showLayers:()=>paneToggle('layPane'),showProps:()=>paneToggle('propPane'),
@@ -43,6 +48,6 @@ function openFilePanel(){filePrev=document.activeElement;const m=state.mode[0],d
   const [w,h]=I.bmp?outSize(I.r,I.bmp.width,I.bmp.height):[0,0];
   $('fileDetails').innerHTML=I.bmp?dd('Foto',I.name)+dd('Originale',`${fmtInt(I.bmp.width)} × ${fmtInt(I.bmp.height)} pixel${I.file?.size?', '+fmtBytes(I.file.size):''}`)+dd('Inquadratura',`${fmtInt(w)} × ${fmtInt(h)} pixel, ${ratioName(I.r.ratio).toLowerCase()}`)+dd('Regolazioni',changedAdj(I.r).length?changedAdj(I.r).map(a=>a[1]).join(', '):'nessuna')+dd('Look',lookName(I.r.look))+dd('Piano',planOf().name)+dd('Bozza',$('saveState').textContent):dd('Foto','nessuna foto aperta')+dd('Piano',planOf().name)}
  else{const p=Dw.p,count=k=>p.items.filter(x=>x.kind===k).length;$('fileIntro').textContent='Il disegno resta sul tuo dispositivo: la bozza e le immagini sono salvate nel browser; salvalo in SVG per conservarlo o riaprirlo altrove, esportalo in PNG o JPEG per pubblicarlo.';
-  $('fileDetails').innerHTML=dd('Nome',p.title)+dd('Foglio',`${fmtInt(p.w)} × ${fmtInt(p.h)} pixel${p.bg==='none'?', trasparente':''}`)+dd('Oggetti',p.items.length?`${p.items.length}: ${count('text')} testi, ${count('image')} immagini, ${count('rect')+count('ellipse')+count('line')} forme`:'nessuno')+dd('Descrizione',p.desc||'mancante')+dd('Bozza',$('saveState').textContent)}
+  $('fileDetails').innerHTML=dd('Nome',p.title)+dd('Foglio',`${fmtInt(p.w)} × ${fmtInt(p.h)} pixel${p.bg==='none'?', trasparente':''}`)+dd('Oggetti',p.items.length?`${p.items.length}: ${count('text')} testi, ${count('image')} immagini, ${p.items.filter(x=>!['text','image','path'].includes(x.kind)).length} forme, ${count('path')} tracciati e tratti`:'nessuno')+dd('Descrizione',p.desc||'mancante')+dd('Bozza',$('saveState').textContent)}
  $('filepanel').hidden=false;$('fileBtn').setAttribute('aria-expanded','true');$('fileSide').querySelector('button')?.focus()}
 function closeFilePanel(restore=true){if($('filepanel').hidden)return;$('filepanel').hidden=true;$('fileBtn').setAttribute('aria-expanded','false');if(restore)(filePrev?.isConnected?filePrev:$('fileBtn')).focus()}

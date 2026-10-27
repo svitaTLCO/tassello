@@ -9,22 +9,34 @@ const smooth=x=>x*x*(3-2*x);
 // Inquadratura nel riferimento della foto ruotata di 90 gradi: dimensioni del riquadro e del ritaglio, angolo del ritaglio.
 function cropRect(r,W,H){const q=r.rot%180!==0,RW=q?H:W,RH=q?W:H,k=(RATIOS.find(x=>x[0]===r.ratio)||RATIOS[0])[2];let cw=RW,ch=RH;if(k){if(RW/RH>k)cw=RH*k;else ch=RW/k}return{RW,RH,cw,ch,x:(RW-cw)*r.cx,y:(RH-ch)*r.cy}}
 const outSize=(r,W,H)=>{const c=cropRect(r,W,H);return [Math.max(1,Math.round(c.cw)),Math.max(1,Math.round(c.ch))]};
-// La foto si ruota intorno al centro e si ingrandisce quanto basta perché il raddrizzamento non lasci angoli vuoti.
-function drawGeometry(ctx,bmp,r,outW,outH){const W=bmp.width,H=bmp.height,c=cropRect(r,W,H),kx=outW/c.cw,ky=outH/c.ch,a=r.angle*Math.PI/180,co=Math.abs(Math.cos(a)),si=Math.abs(Math.sin(a)),s=Math.max((c.RW*co+c.RH*si)/c.RW,(c.RW*si+c.RH*co)/c.RH);
- ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(kx,0,0,ky,-c.x*kx,-c.y*ky);ctx.translate(c.RW/2,c.RH/2);ctx.rotate(a);ctx.scale(s,s);if(r.flip)ctx.scale(-1,1);ctx.rotate(r.rot*Math.PI/180);ctx.drawImage(bmp,-W/2,-H/2);ctx.restore()}
+// Matrice dalla foto originale (pixel del file) all'inquadratura di misura w×h, per la foto e per le maschere: la foto
+// si ruota intorno al centro e si ingrandisce quanto basta perché il raddrizzamento non lasci angoli vuoti.
+function geoMatrix(r,W,H,outW,outH){const c=cropRect(r,W,H),a=r.angle*Math.PI/180,co=Math.abs(Math.cos(a)),si=Math.abs(Math.sin(a)),s=Math.max((c.RW*co+c.RH*si)/c.RW,(c.RW*si+c.RH*co)/c.RH),kx=outW/c.cw,ky=outH/c.ch;
+ let m=new DOMMatrix([kx,0,0,ky,-c.x*kx,-c.y*ky]).translate(c.RW/2,c.RH/2).rotate(r.angle).scale(s);if(r.flip)m=m.scale(-1,1);return m.rotate(r.rot).translate(-W/2,-H/2)}
+function drawGeometry(ctx,bmp,r,outW,outH){ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(geoMatrix(r,bmp.width,bmp.height,outW,outH));ctx.drawImage(bmp,0,0);ctx.restore()}
 // Tabelle della luce: ogni valore del file (0-255) diventa un valore percepito tra 0 e 1, già regolato.
 function toneTables(a){const g=2**a.exposure,t=a.temp/100,n=a.tint/100;let wr=(1+.3*t)*(1+.12*n),wg=1-.25*n,wb=(1-.3*t)*(1+.12*n);const y=.2126*wr+.7152*wg+.0722*wb;
  const b0=-a.blacks*.0012,w0=1-a.whites*.0012,sh=a.shadows/100*1.69,hi=a.highlights/100*1.69,c=a.contrast/100;
  const curve=v=>{let x=clamp((v-b0)/(w0-b0),0,1);x+=sh*x*(1-x)*(1-x)+hi*x*x*(1-x);x=clamp(x,0,1);x=c>=0?x+c*(smooth(x)-x):.5+(x-.5)*(1+c*.5);return clamp(x,0,1)};
  return [wr/y,wg/y,wb/y].map(w=>{const tab=new Float32Array(256);for(let i=0;i<256;i++)tab[i]=curve(l2s(Math.min(1,S2L[i]*g*w)));return tab})}
 // Applica la ricetta ai pixel di src (già inquadrati) e scrive in dst, della stessa misura; src e dst possono coincidere.
+// Con il contesto mc (vedi maskCtx) seguono le maschere della foto: regolazioni locali e scontorno. Le regolazioni di r.fx
+// (06j) si aggiungono: ritocchi (06k), rumore e foschia prima, tinte, bianco e nero e curve nel ciclo, chiarezza e nitidezza dopo.
 // Il ciclo sui pixel non chiama funzioni: con un'anteprima di qualche milione di pixel ogni chiamata si sente.
-function develop(src,dst,r,lut){const [TR,TG,TB]=toneTables(r.adj),w=src.width,h=src.height,s=src.data,d=dst.data,sat=1+r.adj.saturation/100,vib=r.adj.vibrance/100,vg=r.adj.vignette/100*.75,amt=clamp(r.lookAmt/100,0,1),L=lut&&amt>0?lut:null,color=sat!==1||vib!==0;
+function develop(src,dst,r,lut,mc){if(mc&&(r.heal?.length||r.fx&&(r.fx.noise||r.fx.noiseC||r.fx.dehaze)))src=fxPre(src,dst,r,mc);const X=fxTables(r.fx),[TR,TG,TB]=toneTables(r.adj),w=src.width,h=src.height,s=src.data,d=dst.data,sat=1+r.adj.saturation/100,vib=r.adj.vibrance/100,vg=r.adj.vignette/100*.75,amt=clamp(r.lookAmt/100,0,1),L=lut&&amt>0?lut:null,color=sat!==1||vib!==0;
  // Solo luce: bastano tre tabelle di byte.
- if(!color&&!vg&&!L){const BR=Uint8ClampedArray.from(TR,v=>v*255+.5),BG=Uint8ClampedArray.from(TG,v=>v*255+.5),BB=Uint8ClampedArray.from(TB,v=>v*255+.5);for(let i=0;i<s.length;i+=4){d[i]=BR[s[i]];d[i+1]=BG[s[i+1]];d[i+2]=BB[s[i+2]];d[i+3]=s[i+3]}return dst}
+ if(!color&&!vg&&!L&&!X){const BR=Uint8ClampedArray.from(TR,v=>v*255+.5),BG=Uint8ClampedArray.from(TG,v=>v*255+.5),BB=Uint8ClampedArray.from(TB,v=>v*255+.5);for(let i=0;i<s.length;i+=4){d[i]=BR[s[i]];d[i+1]=BG[s[i+1]];d[i+2]=BB[s[i+2]];d[i+3]=s[i+3]}if(mc)developLocal(dst,r,mc);return dst}
  const cx=w/2,cy=h/2,rad=1/Math.hypot(cx,cy),N=L?L.size:2,n=N-1,D=L?.data,SY=N*3,SZ=N*N*3,lx=L?L.min[0]:0,ly=L?L.min[1]:0,lz=L?L.min[2]:0,kx=L?n/(L.max[0]-lx):0,ky=L?n/(L.max[1]-ly):0,kz=L?n/(L.max[2]-lz):0;
  for(let y=0,i=0;y<h;y++){const dy=(y+.5-cy)*rad,dy2=dy*dy;for(let x=0;x<w;x++,i+=4){let R=TR[s[i]],G=TG[s[i+1]],B=TB[s[i+2]];
   if(color){const Y=.2126*R+.7152*G+.0722*B,mx=R>G?(R>B?R:B):(G>B?G:B),mn=R<G?(R<B?R:B):(G<B?G:B),k=sat*(1+vib*(1-(mx-mn)));R=Y+(R-Y)*k;G=Y+(G-Y)*k;B=Y+(B-Y)*k}
+  // Colori per tinta in HSV (o grigio con il miscelatore), poi le curve già composte.
+  if(X){if(X.hsl||X.bw){const mx=R>G?(R>B?R:B):(G>B?G:B),mn=R<G?(R<B?R:B):(G<B?G:B),c=mx-mn;let hh=0,sv=0;if(c>1e-5&&mx>0){hh=mx===R?(G-B)/c:mx===G?(B-R)/c+2:(R-G)/c+4;if(hh<0)hh+=6;sv=c/mx}const k=(hh*60)|0;
+    if(X.bw){const g=(.2126*R+.7152*G+.0722*B)*(1+X.MX[k]*sv);R=G=B=g}
+    // La tinta gira in HSV; saturazione e luminosità si cambiano intorno alla luminosità, come la saturazione di tutta la foto.
+    else if(sv){if(X.DH[k]){const h2=(hh*60+X.DH[k]+360)%360/60,i6=h2|0,f=h2-i6,p=mx*(1-sv),q=mx*(1-sv*f),t=mx*(1-sv*(1-f));
+      if(i6===0){R=mx;G=t;B=p}else if(i6===1){R=q;G=mx;B=p}else if(i6===2){R=p;G=mx;B=t}else if(i6===3){R=p;G=q;B=mx}else if(i6===4){R=t;G=p;B=mx}else{R=mx;G=p;B=q}}
+     const Y=.2126*R+.7152*G+.0722*B,s2=X.DS[k],l2=1+X.DL[k]*sv*.8;R=(Y+(R-Y)*s2)*l2;G=(Y+(G-Y)*s2)*l2;B=(Y+(B-Y)*s2)*l2}}
+   if(X.C){const C=X.C;let j=R*1023;j=j<0?0:j>1023?1023:j|0;R=C[0][j];j=G*1023;j=j<0?0:j>1023?1023:j|0;G=C[1][j];j=B*1023;j=j<0?0:j>1023?1023:j|0;B=C[2][j]}}
   if(vg){const dx=(x+.5-cx)*rad;let t=(dx*dx+dy2-.2)*1.25;t=t<0?0:t>1?1:t;const f=1+vg*t*t*(3-2*t);R*=f;G*=f;B*=f}
   // Look: tabella di colori 3D (come nei file .cube il rosso cambia più in fretta, poi il verde, poi il blu)
   // con interpolazione tetraedrica: dal vertice di partenza si va verso l'asse con la frazione più grande.
@@ -36,7 +48,7 @@ function develop(src,dst,r,lut){const [TR,TG,TB]=toneTables(r.adj),w=src.width,h
    G+=(D[i0+1]+f1*(D[ia+1]-D[i0+1])+f2*(D[ib+1]-D[ia+1])+f3*(D[i1+1]-D[ib+1])-G)*amt;
    B+=(D[i0+2]+f1*(D[ia+2]-D[i0+2])+f2*(D[ib+2]-D[ia+2])+f3*(D[i1+2]-D[ib+2])-B)*amt}
   d[i]=R*255+.5;d[i+1]=G*255+.5;d[i+2]=B*255+.5;d[i+3]=s[i+3]}}
- return dst}
+ if(mc)developLocal(dst,r,mc);return dst}
 // Look pronti: funzioni sul colore percepito, trasformate in tabelle 3D al primo uso.
 const sCurve=(x,c)=>x+c*(smooth(clamp(x,0,1))-x);
 const luma=(r,g,b)=>.2126*r+.7152*g+.0722*b;

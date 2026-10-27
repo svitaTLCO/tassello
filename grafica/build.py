@@ -20,8 +20,9 @@ VERSION = (HERE / 'VERSIONE').read_text(encoding='utf-8').strip()
 ORDER = [
     '01-head.html', '02-body.html', '02b-base.js', '03-store.js', '04-commands.js', '04b-ribbon.js', '04c-tasselli.js',
     '05-decode.js',
-    '06-photo-core.js', '06b-photo-pipeline.js', '06c-photo-view.js', '06d-photo-plans.js', '06e-photo-export.js',
+    '06-photo-core.js', '06b-photo-pipeline.js', '06c-photo-view.js', '06d-photo-plans.js', '06e-photo-export.js', '06f-photo-masks.js', '06g-photo-select.js', '06h-photo-local.js', '06i-photo-cutout.js', '06j-photo-fx.js', '06k-photo-retouch.js',
     '07-draw-core.js', '07b-draw-view.js', '07c-draw-io.js',
+    '07d-draw-select.js', '07e-draw-path.js', '07f-draw-brush.js', '07g-draw-shapes.js', '07h-draw-style.js', '07i-draw-bool.js',
     '08-actions.js', '09-events.js', '10-start.js',
 ]
 

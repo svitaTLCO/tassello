@@ -226,6 +226,17 @@ html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 #overlay .handle{pointer-events:all;fill:#fff;stroke:var(--accent)}
 #overlay .h-n,#overlay .h-s{cursor:ns-resize}#overlay .h-e,#overlay .h-w{cursor:ew-resize}#overlay .h-nw,#overlay .h-se{cursor:nwse-resize}#overlay .h-ne,#overlay .h-sw{cursor:nesw-resize}#overlay .h-p1,#overlay .h-p2{cursor:move}
 #sheet [data-id]{cursor:move}
+#overlay .sel-all{stroke:var(--accent)}#overlay .g-smart{stroke:#e0218a}#overlay .marq{fill:var(--sel-tint);stroke:var(--accent)}
+.insp-body .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+@media (forced-colors:active){#overlay .sel-all,#overlay .g-smart,#overlay .marq{stroke:Highlight}#overlay .marq{fill:none}}
+/* Tracciati: nodi, maniglie, tratti da cliccare e cursore da tastiera degli strumenti che disegnano */
+.sheet-wrap:not([data-tool=select]){cursor:crosshair}.sheet-wrap:not([data-tool=select]) #sheet [data-id]{cursor:crosshair}.sheet-wrap[data-tool=nodes] #sheet [data-id]{cursor:default}
+#overlay .n-path,#overlay .n-arm,#overlay .n-rubber{stroke:var(--accent)}#overlay .n-seg{pointer-events:stroke;stroke:transparent;cursor:copy}
+#overlay .node{pointer-events:all;fill:#fff;stroke:var(--accent);cursor:move}#overlay .node.cur{fill:var(--accent)}#overlay .n-h{pointer-events:all;fill:var(--accent);cursor:move}
+#overlay .k-cur{fill:none;stroke:var(--accent)}
+.node-list{max-height:180px;overflow:auto;border:1px solid var(--line-strong);border-radius:6px;padding:2px;margin-top:4px}
+#drawbar .tool-btn.btn[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent)}
+@media (forced-colors:active){#overlay .n-path,#overlay .n-arm,#overlay .node,#overlay .k-cur{stroke:Highlight}#overlay .node.cur,#overlay .n-h{fill:Highlight}#drawbar .tool-btn[aria-pressed=true]{outline:2px solid Highlight}}
 .layer-item .ico{width:16px;height:16px;color:var(--text-3)}
 .layer-item[aria-selected=true] .ico{color:inherit}
 @media (forced-colors:active){#overlay .sel-box{stroke:Highlight}#overlay .handle{fill:Canvas;stroke:Highlight}}
@@ -317,4 +328,30 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 @media (max-width:1200px){.status .st-btn:not(.lead) span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
 @media (forced-colors:active){.tb[aria-pressed=true],.tb[aria-expanded=true],.ditem[aria-pressed=true],.pal-opt[aria-selected=true],.lb-item[aria-selected=true]{outline:2px solid Highlight}}
 @media (max-width:720px){.bar{gap:6px;padding:6px 6px 0}.brand{display:none}.save-state,.search-tile kbd{display:none}.bar>.doc-tile{flex-basis:140px;min-width:90px}.primary-tile span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.primary-tile{padding:0 16px}.file-side{width:180px}.file-info{padding:22px}.drawer-grid{grid-template-columns:1fr!important}.status{overflow-x:auto;scrollbar-width:none}#docInfo{display:none}}
+/* Immagini: strumenti sulla foto. Il contorno della selezione è bianco e nero e resta così anche con i colori forzati. */
+.stage canvas.overlay{position:absolute;pointer-events:none;box-shadow:none;forced-color-adjust:none}
+.stage canvas.tooling{cursor:crosshair;touch-action:none}
+.toolopts{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;padding:6px 10px;background:var(--surface);border-top:1px solid var(--line);font-size:12px;flex-shrink:0}
+.toolopts>b{font-size:12.5px;margin-right:4px}.toolopts .grow{flex:1}
+.toolopts .opt{display:inline-flex;align-items:center;gap:6px}
+.toolopts input[type=range]{width:110px;accent-color:var(--accent)}
+.toolopts output{min-width:52px;font-variant-numeric:tabular-nums;color:var(--text-2)}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;flex-shrink:0}
+.seg button{border:0;border-right:1px solid var(--line);background:var(--surface);height:26px;padding:0 9px;font-size:12px}
+.seg button:last-child{border-right:0}.seg button:hover{background:var(--hover)}
+.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+.seg button:focus-visible{outline-offset:-3px}
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:4px;margin-top:8px}
+.tool-grid .btn{justify-content:flex-start;overflow:hidden;text-overflow:ellipsis}
+.sel-desc{font-size:12px;color:var(--text-2);margin:8px 0 0;line-height:1.4}
+.stage canvas.alpha[data-matte=white]{background:#fff}.stage canvas.alpha[data-matte=black]{background:#000}.stage canvas.alpha[data-matte=gray]{background:#808080}
+.curve-cv{display:block;width:100%;aspect-ratio:1;max-width:280px;margin:8px 0 4px;border:1px solid var(--line);border-radius:6px;touch-action:none;cursor:crosshair;forced-color-adjust:none}
+.insp-body .seg{margin-top:8px}
+.mask-list{display:flex;flex-direction:column;gap:3px;margin-top:10px}
+.mask-item{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--text);text-align:left}
+.mask-item:hover{background:var(--hover)}.mask-item .n{font-weight:600}.mask-item .d{font-size:11.5px;color:var(--text-3)}
+.mask-item[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-text)}.mask-item[aria-pressed=true] .d{color:inherit}
+.insp-body h4.mask-head{margin:14px 0 0;font-size:12.5px}
+@media (forced-colors:active){.mask-item[aria-pressed=true]{outline:2px solid Highlight}}
+@media (forced-colors:active){.seg button[aria-pressed=true]{outline:2px solid Highlight;outline-offset:-2px}}
 </style></head>

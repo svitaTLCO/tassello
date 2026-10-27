@@ -1,7 +1,8 @@
 // Piani: percorsi guidati secondo quello che si vuole ottenere. Sono dati, non codice: ogni passo dice quali
 // controlli mostrare, che cosa spiegare e quale proposta applicare la prima volta che ci si arriva.
 // auto: 'light' (luce automatica), 'color' (bilanciamento del bianco automatico), 'all', valori della ricetta,
-// oppure un elenco di questi applicati in ordine. export: le scelte proposte nella finestra Esporta.
+// oppure un elenco di questi applicati in ordine. Proposte speciali (SPECIAL_AUTO): 'face' crea una maschera radiale
+// sul volto, 'cutWhite' e 'cutBlur' tolgono lo sfondo e mettono dietro un bianco pieno o la foto sfocata. export: le scelte proposte nella finestra Esporta.
 const PLANS=[
  {id:'libera',name:'Tutti i controlli',desc:'Nessun piano: inquadratura, luce, colore, effetti e look insieme.'},
  {id:'social',name:'Foto per i social',desc:'Il formato giusto, una luce viva e un file leggero.',steps:[
@@ -11,8 +12,10 @@ const PLANS=[
   {title:'Esporta',text:'JPEG di 2048 pixel sul lato lungo: nitido sui telefoni e leggero da inviare.',export:{format:'jpeg',size:'2048',quality:85}}]},
  {id:'ritratto',name:'Ritratto',desc:'Pelle naturale, volto in luce, sfondo che non distrae.',steps:[
   {title:'Inquadratura',text:'Il formato verticale 4:5 o 2:3 lascia spazio al volto. Raddrizza se la foto è storta.',controls:['ratio','cx','cy','angle'],auto:{ratio:'4:5'}},
-  {title:'Luce sul volto',text:'Apri le ombre per schiarire il viso senza bruciare le parti chiare.',controls:['exposure','shadows','highlights','contrast'],auto:['light',{adj:{contrast:0}}]},
+  {title:'Luce',text:'Apri le ombre per schiarire il viso senza bruciare le parti chiare.',controls:['exposure','shadows','highlights','contrast'],auto:['light',{adj:{contrast:0}}]},
+  {title:'Volto in luce',text:'La proposta mette una sfumatura radiale sul volto, un po’ più luminosa del resto. Ridisegnala o trascina le maniglie se il volto non è al centro.',controls:['masks'],auto:'face'},
   {title:'Pelle',text:'Temperatura e tinta tolgono le dominanti: la pelle deve sembrare naturale. Meglio la vividezza della saturazione.',controls:['temp','tint','vibrance','saturation'],auto:'color'},
+  {title:'Sfondo',text:'Lo sfondo sfocato fa risaltare la persona, come con un obiettivo luminoso. Se il bordo sbaglia correggi con Tieni e Togli; Rimetti lo sfondo lo riporta com’era.',controls:['cutout'],auto:'cutBlur'},
   {title:'Rifinitura',text:'Una vignettatura leggera porta lo sguardo al centro.',controls:['vignette','look','lookAmt'],auto:{adj:{vignette:-20}}},
   {title:'Esporta',text:'JPEG alla dimensione originale, di alta qualità.',export:{format:'jpeg',size:'orig',quality:92}}]},
  {id:'paesaggio',name:'Paesaggio',desc:'Orizzonte dritto, cielo e ombre con i loro dettagli, colori vivi.',steps:[
@@ -27,16 +30,22 @@ const PLANS=[
   {title:'Esporta',text:'PNG: le lettere restano nitide. Per un file più leggero scegli JPEG.',export:{format:'png',size:'orig'}}]},
  {id:'prodotto',name:'Prodotto su fondo chiaro',desc:'Fondo bianco pulito e colori fedeli, per un negozio online.',steps:[
   {title:'Formato',text:'I negozi online preferiscono il quadrato: centra il prodotto.',controls:['ratio','cx','cy'],auto:{ratio:'1:1'}},
-  {title:'Fondo bianco',text:'Alza Bianchi ed Esposizione finché il fondo è bianco, senza bruciare il prodotto.',controls:['exposure','whites','highlights','shadows'],auto:['light',{adj:{whites:40}}]},
+  {title:'Fondo bianco',text:'La proposta toglie lo sfondo e mette dietro un bianco pieno. Se un bordo è sbagliato dipingi con Tieni o Togli; con Ricalcola o un riquadro intorno al prodotto il risultato cambia.',controls:['cutout'],auto:'cutWhite'},
+  {title:'Luce sul prodotto',text:'Porta la luce del prodotto a un livello medio senza bruciare le sue parti chiare.',controls:['exposure','highlights','shadows','whites'],auto:'light'},
   {title:'Colori fedeli',text:'Togli le dominanti con Temperatura e Tinta: il colore deve essere quello vero.',controls:['temp','tint','vibrance'],auto:'color'},
   {title:'Esporta',text:'JPEG quadrato di 2000 pixel, adatto alla maggior parte dei negozi online.',export:{format:'jpeg',size:'2000',quality:90}}]}];
 const planOf=()=>PLANS.find(p=>p.id===I.plan)||PLANS[0];
 const planSteps=()=>planOf().steps||[];
 const LIGHT_KEYS=['exposure','contrast','highlights','shadows','whites','blacks'];
-function proposalValues(auto){const out={adj:{}};for(const p of [].concat(auto)){if(typeof p==='string'){const v=autoValues(geometryPixels()),keys=p==='light'?LIGHT_KEYS:p==='color'?['temp','tint']:[...LIGHT_KEYS,'temp','tint'];for(const k of keys)out.adj[k]=v[k]}else for(const [k,v] of Object.entries(p))if(k==='adj')Object.assign(out.adj,v);else out[k]=v}return out}
+function proposalValues(auto){const out={adj:{}};for(const p of [].concat(auto)){if(SPECIAL_AUTO[p])continue;if(typeof p==='string'){const v=autoValues(geometryPixels()),keys=p==='light'?LIGHT_KEYS:p==='color'?['temp','tint']:[...LIGHT_KEYS,'temp','tint'];for(const k of keys)out.adj[k]=v[k]}else for(const [k,v] of Object.entries(p))if(k==='adj')Object.assign(out.adj,v);else out[k]=v}return out}
 function describeChanges(a,b){const out=[];if(a.ratio!==b.ratio)out.push('formato '+ratioName(b.ratio));for(const [id,label,,,,,fmt] of ADJ)if(a.adj[id]!==b.adj[id])out.push(label+' '+fmt(b.adj[id]));if(a.look!==b.look)out.push('look '+lookName(b.look));return out.join(', ')}
 // Applica una proposta come una sola modifica, che si annulla con Ctrl+Z; restituisce che cosa è cambiato.
-function applyProposal(auto,label){if(!I.bmp)return '';const before=JSON.parse(snap()),p=proposalValues(auto);edit(label,r=>{Object.assign(r.adj,p.adj);for(const [k,v] of Object.entries(p))if(k!=='adj')r[k]=v},{panel:true});return describeChanges(before,I.r)}
+// Proposte che non sono solo valori: una maschera sul volto, lo scontorno (che si calcola a parte e si annuncia alla fine).
+const SPECIAL_AUTO={face:()=>{if(I.r.masks.some(m=>m.name==='Volto'))return '';const e=ellipseOp([.36,.2],[.64,.62]),m={id:uid(),name:'Volto',kind:'radial',ops:[{t:'radial',cx:e.cx,cy:e.cy,rx:e.rx,ry:e.ry,a:e.a,f:.6}],adj:{...zeroAdj(),exposure:.25,shadows:15},amt:100,inv:false,off:false};I.maskSel=m.id;edit('Proposta: volto più luminoso',r=>{r.masks=[...r.masks,m]},{panel:true});return 'maschera Volto più luminosa'},
+ cutWhite:()=>{cutRun({...newCut(),method:prefs.cutMethod||'auto',bg:'color',color:'#ffffff'},'Proposta: fondo bianco');return 'scontorno in corso, con il fondo bianco'},
+ cutBlur:()=>{cutRun({...newCut(),method:prefs.cutMethod||'auto',bg:'blur'},'Proposta: sfondo sfocato');return 'scontorno in corso, con lo sfondo sfocato'}};
+function applyProposal(auto,label){if(!I.bmp)return '';const list=[].concat(auto),special=list.filter(p=>SPECIAL_AUTO[p]);if(special.length&&special.length===list.length)return special.map(p=>SPECIAL_AUTO[p]()).filter(Boolean).join(', ');
+ const before=JSON.parse(snap()),p=proposalValues(auto);edit(label,r=>{Object.assign(r.adj,p.adj);for(const [k,v] of Object.entries(p))if(k!=='adj')r[k]=v},{panel:true});return [describeChanges(before,I.r),...special.map(q=>SPECIAL_AUTO[q]())].filter(Boolean).join(', ')}
 function applyAuto(){if(!I.bmp){toast('Apri prima una foto');return}const said=applyProposal('all','Regolazione automatica');announce(said?'Regolazione automatica: '+said:'La foto non ha bisogno di correzioni automatiche')}
 const stepIntro=()=>{const p=planOf(),s=p.steps[I.step];return `${p.name}, passo ${I.step+1} di ${p.steps.length}: ${s.title}. ${s.text}`};
 // Arrivando a un passo per la prima volta con questa foto si applica la sua proposta.
