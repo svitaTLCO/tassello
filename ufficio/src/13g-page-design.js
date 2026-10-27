@@ -32,12 +32,13 @@ function pgSnapStep(ax,ay){const items=pgMovable(pgSelItems());if(!items.length)
  for(const [v,lab] of ax?L.X:L.Y)for(const [e,elab] of edges){const d=v-e;if(d*dir>.5&&(!best||Math.abs(d)<Math.abs(best.d)))best={d,lab,elab}}
  if(!best){toast('Nessuna guida in quella direzione');return}pgEdit('Aggancia alla guida',()=>{for(const it of items){if(ax)it.x+=best.d;else it.y+=best.d}});announce(`${items.length>1?'Le cornici scelte':'«'+items[0].name+'»'}: ${best.elab} è allineato al ${best.lab}`)}
 // Adatta a un altro formato: le misure passano dal vecchio al nuovo formato tratto per tratto (margine, area dei
-// margini, margine), così le cornici restano allineate ai margini; i testi cambiano corpo come il corpo del testo.
+// margini, margine), così le cornici restano allineate ai margini; i testi cambiano corpo come il corpo del testo, ma
+// non scendono sotto la misura che la verifica dell'accessibilità considera troppo piccola nel formato nuovo.
 async function pgAdaptDialog(){const p=Pg.p,opts=PG_PRESETS.filter(x=>x[0]!==p.preset).map(([value,label])=>({value,label:label+' · '+PG_PRESET_DESC[value]}));
  const v=await modal('Adatta a un altro formato','<p>Impagina rifà il documento nel formato che scegli: le cornici si spostano e si ridimensionano rispetto ai nuovi margini, i testi cambiano corpo in proporzione e scorrono di nuovo nelle cornici. Il documento di adesso torna con Ctrl+Z; puoi anche salvarne prima una copia.</p>',[{id:'preset',label:'Nuovo formato',type:'select',value:opts[0].value,options:opts},{id:'save',label:'Salva prima il progetto di adesso',type:'checkbox',value:false}],'Adatta');if(!v)return;if(v.save)await pageSave();pgAdaptTo(v.preset)}
 function pgAdaptTo(id){const src=Pg.p,pr=PG_PRESETS.find(x=>x[0]===id),base=newPub(id),p=JSON.parse(JSON.stringify(src));
  Object.assign(p,{preset:id,w:base.w,h:base.h,unit:base.unit,m:base.m,cols:base.cols,gut:base.gut,step:base.step,tiles:base.tiles,title:`${src.title} · ${pr[1].replace(/ \(.*$|,.*$/g,'')}`});
- const f=base.ps.corpo.size/(src.ps.corpo?.size||base.ps.corpo.size);for(const s of Object.values(p.ps)){s.size=r1(s.size*f);s.before=r1(s.before*f);s.after=r1(s.after*f)}
+ const f=base.ps.corpo.size/(src.ps.corpo?.size||base.ps.corpo.size),least=base.unit==='mm'?12:Math.ceil(base.w/60);for(const s of Object.values(p.ps)){s.size=Math.max(r1(s.size*f),least);s.before=r1(s.before*f);s.after=r1(s.after*f)}
  const Si=pgInner(src),Ti=pgInner(p),seg=(v,a,b,len,A,B,LEN)=>v<=a?v*(A/Math.max(a,1e-6)):v<=b?A+(v-a)*(B-A)/Math.max(b-a,1e-6):B+(v-b)*(LEN-B)/Math.max(len-b,1e-6),mx=v=>seg(v,Si.x,Si.x+Si.w,src.w,Ti.x,Ti.x+Ti.w,p.w),my=v=>seg(v,Si.y,Si.y+Si.h,src.h,Ti.y,Ti.y+Ti.h,p.h),s=Math.min(Ti.w/Si.w,Ti.h/Si.h);
  for(const it of pgAllItems(p)){const full=it.x<=1&&it.y<=1&&it.x+it.w>=src.w-1&&it.y+it.h>=src.h-1;if(full){Object.assign(it,{x:0,y:0,w:p.w,h:p.h});continue}
   const x0=mx(it.x),y0=my(it.y),x1=mx(it.x+it.w),y1=my(it.y+it.h);let nw=x1-x0,nh=y1-y0;
