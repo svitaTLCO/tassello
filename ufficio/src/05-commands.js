@@ -330,6 +330,9 @@ def('p','Inserisci',[
  ['pgAddRect','Inserisci un rettangolo','rect','',{short:'Rettangolo'}],
  ['pgAddEllipse','Inserisci un’ellisse','ellipse','',{short:'Ellisse'}],
  ['pgAddLine','Inserisci una linea','lineI','',{short:'Linea'}],
+ ['pgAddTri','Inserisci un triangolo','triangle','',{short:'Triangolo'}],
+ ['pgAddSign','Inserisci un’insegna, una scritta d’effetto','sign','',{short:'Insegna'}],
+ ['pgSignStyles','Stili delle insegne','down','',{menu:1,short:'Stili delle insegne'}],
  ['pgPageNum','Numero di pagina nel mastro','t:#','',{short:'Numero di pagina'}],
  ['pgHeader','Intestazione nel mastro','header','',{short:'Intestazione'}],
  ['pgLogo','Logo nel mastro','image','',{short:'Logo'}],
@@ -371,7 +374,10 @@ def('p','Pagina e griglia',[
  ['pgMasterEdit','Modifica il mastro della pagina','rename','',{short:'Modifica mastro'}],
  ['pgMasterNew','Nuovo mastro','new','',{short:'Nuovo mastro'}],
  ['pgStyles','Stili di paragrafo e di carattere','styles','',{short:'Stili'}],
- ['pgZoomFit','Mostra tutta la pagina','zoomFit','',{short:'Tutta la pagina'}]]);
+ ['pgZoomFit','Mostra tutta la pagina','zoomFit','',{short:'Tutta la pagina'}],
+ ['pgTiles','Stampa a tessere su più fogli da incollare','tiles','',{short:'Stampa a tessere',toggle:()=>!!Pg.p?.tiles?.on}],
+ ['pgTileSetup','Fogli, margini e sovrapposizione delle tessere','margins','',{short:'Fogli e margini'}],
+ ['pgFestone','Festone di lettere, una per foglio','festone','',{short:'Festone'}]]);
 def('p','Fonti',[
  ['pgFolder','Collega una cartella del computer','folder','',{short:'Collega cartella'}],
  ['pgRefresh','Aggiorna dalle fonti','refresh','Alt+F5',{g:1,short:'Aggiorna dalle fonti'}],

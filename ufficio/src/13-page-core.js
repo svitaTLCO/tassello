@@ -13,9 +13,13 @@ const PG_PRESETS=[
  ['a5','Volantino A5 (148 × 210 mm)',148*MM,210*MM,'mm',[12,12,12,12].map(v=>v*MM),1,4*MM,1,13.3],
  ['brochure','Brochure A4 a due colonne, 4 pagine',210*MM,297*MM,'mm',[18,16,22,16].map(v=>v*MM),2,6*MM,4,13.3],
  ['newsletter','Newsletter A4, 2 pagine',210*MM,297*MM,'mm',[22,15,20,15].map(v=>v*MM),3,5*MM,2,12.7],
+ ['a2','Poster A2 (420 × 594 mm)',420*MM,594*MM,'mm',[20,20,20,20].map(v=>v*MM),1,8*MM,1,28],
+ ['a1','Poster A1 (594 × 841 mm)',594*MM,841*MM,'mm',[28,28,28,28].map(v=>v*MM),1,10*MM,1,40],
+ ['a0','Poster A0 (841 × 1189 mm)',841*MM,1189*MM,'mm',[40,40,40,40].map(v=>v*MM),1,14*MM,1,56],
+ ['striscione','Striscione 300 × 50 cm',3000*MM,500*MM,'mm',[40,60,40,60].map(v=>v*MM),1,20*MM,1,110],
  ['slide','Presentazione 16:9 (1920 × 1080 px)',1920,1080,'px',[96,120,120,120],1,48,3,40]];
-const PG_KIND={text:'Testo',image:'Immagine',rect:'Rettangolo',ellipse:'Ellisse',line:'Linea'};
-const PG_ICON={text:'textbox',image:'image',rect:'rect',ellipse:'ellipse',line:'lineI'};
+const PG_KIND={text:'Testo',image:'Immagine',sign:'Insegna',rect:'Rettangolo',ellipse:'Ellisse',tri:'Triangolo',line:'Linea'};
+const PG_ICON={text:'textbox',image:'image',sign:'sign',rect:'rect',ellipse:'ellipse',tri:'triangle',line:'lineI'};
 // Caratteri: quelli del sistema, con la famiglia generica di riserva.
 const fontStack=f=>`'${String(f).replace(/['"]/g,'')}', ${/^(Georgia|Cambria|Times New Roman)$/.test(f)?'serif':f==='Consolas'?'monospace':'sans-serif'}`;
 const r1=v=>Math.round(v*10)/10,pr2=v=>Math.round(v*100)/100,clampV=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -34,14 +38,14 @@ const pgSnap=()=>JSON.stringify(Pg.p);
 const P=(ps,t)=>({ps,runs:[{t,cs:''}]});
 const pgInner=p=>({x:p.m.l,y:p.m.t,w:p.w-p.m.l-p.m.r,h:p.h-p.m.t-p.m.b});
 function newPub(id){const [pid,label,w,h,unit,m,cols,gut,npages,b]=PG_PRESETS.find(x=>x[0]===id)||PG_PRESETS[0];
- const p={v:1,title:label.replace(/ \(.*$|,.*$/g,''),preset:pid,w,h,unit,m:{t:m[0],r:m[1],b:m[2],l:m[3]},cols,gut,step:unit==='mm'?5*MM:Math.round(w/36),snap:false,bg:'#ffffff',...pgStyles(b),stories:{},masters:[{id:uid(),name:'Mastro A',items:[],read:[]}],pages:[],data:null,folder:''};
+ const p={v:1,title:label.replace(/ \(.*$|,.*$/g,''),preset:pid,w,h,unit,m:{t:m[0],r:m[1],b:m[2],l:m[3]},cols,gut,step:unit==='mm'?5*MM:Math.round(w/36),snap:false,bg:'#ffffff',tiles:pgTilesDefault(PG_TILED.has(pid)),...pgStyles(b),stories:{},masters:[{id:uid(),name:'Mastro A',items:[],read:[]}],pages:[],data:null,folder:''};
  for(let i=0;i<npages;i++)p.pages.push(pgBlankPage(p));return p}
 const pgBlankPage=p=>({id:uid(),master:p.masters[0]?.id||'',items:[],read:[],data:false,alt:''});
 // Nomi delle cornici: «Testo 1», «Immagine 2»… unici in tutto il documento.
 function pgNextName(p,kind){const base=PG_KIND[kind],used=new Set(pgAllItems(p).map(x=>x.name));let n=1;while(used.has(base+' '+n))n++;return base+' '+n}
 const pgAllItems=p=>[...p.masters,...p.pages].flatMap(h=>h.items);
-const PG_DEF={text:p=>({story:'',cols:1,gut:p.gut,pad:0,valign:'top'}),image:()=>({img:'',fit:'fill',fx:50,fy:50,field:'',file:''}),rect:()=>({fill:'#f6e8da'}),ellipse:()=>({fill:'#f6e8da'}),line:p=>({h:0,sw:Math.max(1,Math.round(p.w/400))})};
-function pgMk(p,kind,o={}){return {id:uid(),kind,name:o.name||pgNextName(p,kind),x:0,y:0,w:100,h:100,fill:'none',stroke:'#1b1b1b',sw:0,radius:0,opacity:100,alt:'',deco:kind!=='text'&&kind!=='image',...PG_DEF[kind](p),...o}}
+const PG_DEF={text:p=>({story:'',cols:1,gut:p.gut,pad:0,valign:'top'}),image:()=>({img:'',fit:'fill',fx:50,fy:50,field:'',file:''}),sign:()=>({...pgSignStyle('classica'),style:'classica',text:'Scrivi qui',fit:true,size:48,img:''}),rect:()=>({fill:'#f6e8da'}),ellipse:()=>({fill:'#f6e8da'}),tri:()=>({fill:'#f6e8da'}),line:p=>({h:0,sw:Math.max(1,Math.round(p.w/400))})};
+function pgMk(p,kind,o={}){return {id:uid(),kind,name:o.name||pgNextName(p,kind),x:0,y:0,w:100,h:100,fill:'none',stroke:'#1b1b1b',sw:0,radius:0,opacity:100,alt:'',deco:!['text','image','sign'].includes(kind),...PG_DEF[kind](p),...o}}
 function pgPut(holder,it){holder.items.push(it);holder.read.push(it.id);return it}
 function pgNewStory(p,paras){const id=uid();p.stories[id]={paras:paras.length?paras:[P('corpo','')],chain:[],src:''};return id}
 function pgPutText(p,holder,o,paras){const it=pgPut(holder,pgMk(p,'text',{...o,story:pgNewStory(p,paras)}));p.stories[it.story].chain.push(it.id);return it}
@@ -67,6 +71,9 @@ function pgStarter(p){const i=pgInner(p),M=p.masters[0],pg=p.pages,b=p.ps.corpo.
    pgPutText(p,pg[0],{name:'Testata',x:i.x,y:i.y,w:i.w,h:i.h*.12},[P('titolo','Il nome della newsletter')]);pgPut(pg[0],pgMk(p,'line',{name:'Filetto',x:i.x,y:i.y+i.h*.125,w:i.w}));img(pg[0],{name:'Foto in apertura',x:i.x,y:i.y+i.h*.14,w:i.w,h:i.h*.3});
    const first=pgPutText(p,pg[0],{name:'Articolo',x:i.x,y:i.y+i.h*.47,w:i.w,h:i.h*.53,cols:3},[P('titoletto','La notizia del mese'),...body(),P('titoletto','Dalla redazione'),...body(),P('titoletto','Appuntamenti'),P('elenco','Lunedì: riunione'),P('elenco','Giovedì: presentazione'),...body(),...body()]);
    pgPutLinked(p,pg[1],first,{name:'Articolo, seguito',x:i.x,y:i.y,w:i.w,h:i.h,cols:3});break}
+  case 'a2':case 'a1':case 'a0':pgPut(pg[0],pgMk(p,'sign',{...pgSignStyle('tramonto'),style:'tramonto',name:'Titolo',text:'Il titolo del poster',x:i.x,y:i.y,w:i.w,h:i.h*.16}));img(pg[0],{name:'Foto',x:i.x,y:i.y+i.h*.19,w:i.w,h:i.h*.5});
+   pgPutText(p,pg[0],{name:'Testo',x:i.x,y:i.y+i.h*.73,w:i.w,h:i.h*.2,cols:2,gut:p.gut},[P('titoletto','Dove e quando'),P('corpo',PG_SAMPLE[0])]);pgPutText(p,pg[0],{name:'Contatti',x:i.x,y:i.y+i.h*.95,w:i.w,h:i.h*.05},[P('note','Indirizzo · telefono · sito')]);break;
+  case 'striscione':pgPut(pg[0],pgMk(p,'sign',{...pgSignStyle('tramonto'),style:'tramonto',name:'Scritta',text:'Benvenuti!',x:i.x,y:i.y,w:i.w,h:i.h}));break;
   case 'slide':num({x:p.w-p.m.r-300,y:p.h-p.m.b+40,w:300,h:b*1.4});pgPutText(p,pg[0],{name:'Titolo',x:i.x,y:i.y,w:i.w,h:i.h,valign:'middle'},[P('titolo','Il titolo della presentazione'),P('sottotitolo','Nome, data, occasione')]);
    pgPutText(p,pg[1],{name:'Punti',x:i.x,y:i.y,w:i.w,h:i.h},[P('titoletto','Tre punti da ricordare'),P('elenco','Il primo punto, in una riga'),P('elenco','Il secondo punto'),P('elenco','Il terzo punto')]);
    pgPutText(p,pg[2],{name:'Testo',x:i.x,y:i.y,w:i.w*.48,h:i.h},[P('titoletto','Un’immagine e il suo commento'),P('corpo',PG_SAMPLE[0])]);img(pg[2],{name:'Foto',x:i.x+i.w*.52,y:i.y,w:i.w*.48,h:i.h});break}
@@ -84,7 +91,7 @@ function pgWhere(id){const p=Pg.p;for(const [i,pg] of p.pages.entries()){const i
 // Ordine di lettura della pagina: quello scritto in read, con in coda le cornici che mancano.
 function pgReadOrder(h){const byId=new Map(h.items.map(x=>[x.id,x])),out=[];for(const id of h.read||[]){const it=byId.get(id);if(it){out.push(it);byId.delete(id)}}return out.concat([...byId.values()])}
 // Le copie delle pagine che finiscono nel PDF e nei PNG: una per pagina, oppure una per riga dei dati se la pagina si ripete.
-function pgInstances(p){const out=[],rows=p.data?.rows||[];p.pages.forEach((pg,i)=>{if(pg.data&&rows.length)rows.forEach((row,ri)=>out.push({pg,i,row,ri}));else out.push({pg,i,row:null,ri:-1})});out.forEach((I,k)=>{I.n=k+1});out.total=out.length;return out}
+function pgInstances(p){const out=[],rows=p.data?.rows||[];p.pages.forEach((pg,i)=>{if(pg.data&&rows.length)rows.forEach((row,ri)=>out.push({pg,i,row,ri}));else out.push({pg,i,row:null,ri:-1})});out.forEach((I,k)=>{I.n=k+1;I.total=out.length});out.total=out.length;return out}
 // Nell'editor ogni pagina compare una volta: le pagine dai dati con la riga in anteprima.
 function pgViewInstances(p){const all=pgInstances(p),rows=p.data?.rows.length||0,r=Math.min(Pg.row,Math.max(0,rows-1)),out=all.filter(I=>I.ri<0||I.ri===r);out.total=all.total;return out}
 // Campi nel testo: «Pagina», «Pagine», «Titolo del documento», «Data di oggi» e i campi dei dati. Un campo è un nome breve
@@ -153,9 +160,11 @@ function pgItemSvg(it,L,ctx,href){if(it.hidden)return '';const op=it.opacity<100
   case 'ellipse':return `<ellipse cx="${pr2(it.x+it.w/2)}" cy="${pr2(it.y+it.h/2)}" rx="${pr2(Math.abs(it.w/2))}" ry="${pr2(Math.abs(it.h/2))}" ${paint}${op}/>`;
   case 'line':return `<line x1="${pr2(it.x)}" y1="${pr2(it.y)}" x2="${pr2(it.x+it.w)}" y2="${pr2(it.y+it.h)}" stroke="${esc(it.stroke)}" stroke-width="${pr2(Math.max(it.sw,.5))}" stroke-linecap="round"${op}/>`;
   case 'text':return `<g${op}>${bg}${pgTextSvg(L?.lines||[])}</g>`;
+  case 'tri':return `<polygon points="${pr2(it.x)},${pr2(it.y)} ${pr2(it.x+it.w)},${pr2(it.y)} ${pr2(it.x+it.w/2)},${pr2(it.y+it.h)}" ${paint} stroke-linejoin="round"${op}/>`;
+  case 'sign':return pgSignSvg(it,ctx,href);
   case 'image':{const m=pgImgFor(it,ctx);if(!m)return bg?`<g${op}>${bg}</g>`:'';const [ox,oy,dw,dh]=pgFitBox(it,m);return `<g${op}>${bg}<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg></g>`}}
  return ''}
-function pgPageSvg(p,I,ii,lay,href=m=>m.url){const m=pgMasterOf(I.pg),ctx={row:I.row};return (p.bg&&p.bg!=='none'?`<rect width="${pr2(p.w)}" height="${pr2(p.h)}" fill="${esc(p.bg)}"/>`:'')+[...(m?m.items:[]),...I.pg.items].map(it=>pgItemSvg(it,lay.get(ii+'|'+it.id),ctx,href)).join('')}
+function pgPageSvg(p,I,ii,lay,href=m=>m.url){const m=pgMasterOf(I.pg),ctx={row:I.row,n:I.n,total:I.total,title:p.title,date:pgToday()};return (p.bg&&p.bg!=='none'?`<rect width="${pr2(p.w)}" height="${pr2(p.h)}" fill="${esc(p.bg)}"/>`:'')+[...(m?m.items:[]),...I.pg.items].map(it=>pgItemSvg(it,lay.get(ii+'|'+it.id),ctx,href)).join('')}
 // Misure per l'interfaccia: millimetri e punti nei documenti da stampa, pixel in quelli per lo schermo.
 const pgMM=()=>Pg.p?.unit==='mm';
 const toU=v=>pgMM()?v/MM:v,fromU=v=>pgMM()?v*MM:v,pgToPt=v=>pgMM()?v*.75:v,pgFromPt=v=>pgMM()?v/.75:v;
