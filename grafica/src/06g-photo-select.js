@@ -12,7 +12,7 @@ const TOOLS={
  wand:{label:'Bacchetta magica',kind:'click',sel:1,keys:'Clic su un colore: si scelgono i pixel simili. Da tastiera: Invio sceglie il colore sotto il cursore.',at:([u,v],m)=>{const [x,y]=uvUnits([u,v]);commitSel({t:'wand',x,y,tol:T.tol,c:T.contig},m,'Bacchetta magica')}},
  range:{label:'Intervallo di colore',kind:'click',sel:1,keys:'Clic su un colore: si scelgono in tutta la foto i colori vicini. Da tastiera: Invio sceglie il colore sotto il cursore.',at:(p,m)=>commitSel({t:'range',c:colorAt(p,true).map(Math.round),tol:T.range},m,'Intervallo di colore')}};
 // Stato dello strumento: modo, opzioni (dimensione del pennello in unità della foto, durezza, tolleranze), cursore, punti in corso.
-const T={tool:null,mode:'new',size:.03,hard:.5,tol:32,contig:true,range:40,u:.5,v:.5,pts:[],drag:false,down:false,kbd:false,pmode:'new',...(prefs.photoTool||{})};
+const T={tool:null,mode:'new',selMode:'new',size:.03,hard:.5,tol:32,contig:true,range:40,u:.5,v:.5,pts:[],drag:false,down:false,kbd:false,pmode:'new',...(prefs.photoTool||{})};
 const saveTool=()=>{prefs.photoTool={size:T.size,hard:T.hard,tol:T.tol,contig:T.contig,range:T.range};savePrefs()};
 const antsCv=$('photoAnts'),overCv=$('photoOver');
 let lastMc=null;
@@ -28,7 +28,7 @@ function commitSel(op,mode,label){op.mode=mode==='new'?'add':mode;if(!edit(label
 // La maschera della selezione alla misura dell'anteprima, e la sua descrizione breve o completa.
 function selMask(){return I.bmp&&I.r.sel&&lastMc?maskOf(I.r.sel.ops,lastMc):null}
 const shownPx=()=>I.compare||!outPx||outPx.width!==lastMc.w||outPx.height!==lastMc.h?lastMc.px:outPx;
-function selSummary(){const m=selMask();return m?describeMask(m,lastMc.w,lastMc.h,null).replace(/: da .*$/,'.'):'Nessuna selezione: le operazioni valgono per tutta la foto.'}
+function selSummary(){const m=selMask();return m?describeMask(m,lastMc.w,lastMc.h,null,'La selezione',true):'Nessuna selezione: le operazioni valgono per tutta la foto.'}
 function selDescribe(){const m=selMask();toast(m?describeMask(m,lastMc.w,lastMc.h,shownPx()):'Nessuna selezione: le operazioni valgono per tutta la foto.')}
 // Colore sotto un punto: della foto originale (per scegliere) o di quella regolata che si vede (per descrivere).
 function colorAt([u,v],orig=false){const px=orig?lastMc.px:shownPx(),w=px.width,h=px.height,X=Math.min(w-1,Math.floor(u*w)),Y=Math.min(h-1,Math.floor(v*h)),d=px.data;let r=0,g=0,b=0,n=0;
@@ -37,7 +37,7 @@ const posSay=([u,v])=>`${fmtPct(u)} da sinistra, ${fmtPct(v)} dall’alto`;
 function sayCursor(){const p=[T.u,T.v],m=selMask(),i=m?Math.min(lastMc.h-1,Math.floor(p[1]*lastMc.h))*lastMc.w+Math.min(lastMc.w-1,Math.floor(p[0]*lastMc.w)):-1;
  announce(`${posSay(p)}: ${colorName(...colorAt(p))}${m?m[i]>=128?', nella selezione':', fuori dalla selezione':''}${T.down?', pennello giù':''}`)}
 // Scelta dello strumento: la foto diventa un'area interattiva (le frecce muovono il cursore) finché lo strumento è attivo.
-function setTool(id){if(!I.bmp){toast('Apri prima una foto');return}if(T.tool===id){endTool();return}T.tool=id;T.pts=[];T.drag=T.down=false;toolChanged();photoCv.focus();announce(`${TOOLS[id].label}. ${TOOLS[id].keys} Esc chiude lo strumento.`)}
+function setTool(id){if(!I.bmp){toast('Apri prima una foto');return}if(T.tool===id){endTool();return}const t=TOOLS[id];T.tool=id;T.pts=[];if(t.sel)T.mode=T.selMode||'new';else if(t.modes&&!t.modes.some(([v])=>v===T.mode))T.mode=t.modes[0][0];T.drag=T.down=false;toolChanged();photoCv.focus();announce(`${TOOLS[id].label}. ${TOOLS[id].keys} Esc chiude lo strumento.`)}
 function endTool(say=true){if(!T.tool)return;const t=TOOLS[T.tool];T.tool=null;T.pts=[];T.drag=T.down=false;toolChanged();if(say)announce(t.label+': chiuso')}
 function toolChanged(){const t=T.tool&&TOOLS[T.tool];photoCv.setAttribute('role',t?'application':'img');if(t)photoCv.setAttribute('aria-roledescription','foto');else photoCv.removeAttribute('aria-roledescription');
  $('toolHint').textContent=t?`${t.label}. ${t.keys} Le frecce muovono il cursore (con Maiusc di più, con Ctrl di un pixel) e dicono il colore sotto il cursore. Esc annulla il punto in corso o chiude lo strumento.`:'';
@@ -55,7 +55,7 @@ function renderToolOpts(){const box=$('toolOpts'),t=T.tool&&TOOLS[T.tool];box.hi
  for(const o of toolOptsOf(T.tool)){if(o==='contig'){h+=`<label class="check"><input type="checkbox" data-tool-opt="contig"${T.contig?' checked':''}> Solo i pixel collegati</label>`;continue}const d=TOOL_OPTS[o],v=d.get();
   h+=`<span class="opt"><label for="to-${o}">${esc(d.label)}</label><input type="range" id="to-${o}" data-tool-opt="${o}" min="${d.min}" max="${d.max}" step="1" value="${v}" aria-valuetext="${esc(d.fmt())}"><output id="to-${o}-o" aria-hidden="true">${esc(d.fmt())}</output></span>`}
  box.innerHTML=h+`<span class="grow"></span><button type="button" class="btn sm" data-tool-end>${ICON('close')}Fine</button>`}
-$('toolOpts').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.toolMode){T.mode=b.dataset.toolMode;renderToolOpts();$('toolOpts').querySelector(`[data-tool-mode="${T.mode}"]`)?.focus();announce('Modo: '+b.textContent)}else if(b.hasAttribute('data-tool-end')){endTool();photoCv.focus()}});
+$('toolOpts').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.toolMode){T.mode=b.dataset.toolMode;if(TOOLS[T.tool]?.sel)T.selMode=T.mode;renderToolOpts();$('toolOpts').querySelector(`[data-tool-mode="${T.mode}"]`)?.focus();announce('Modo: '+b.textContent)}else if(b.hasAttribute('data-tool-end')){endTool();photoCv.focus()}});
 $('toolOpts').addEventListener('input',e=>{const el=e.target,o=el.dataset.toolOpt;if(!o)return;if(o==='contig')T.contig=el.checked;else{const d=TOOL_OPTS[o];d.set(Number(el.value));el.setAttribute('aria-valuetext',d.fmt());$('to-'+o+'-o').textContent=d.fmt()}saveTool();drawOver()});
 // Cambia dimensione o durezza del pennello da tastiera, sulla foto.
 function brushKey(bigger,hard){if(hard)T.hard=clamp(Math.round(T.hard*10+(bigger?1:-1))/10,0,1);else T.size=clamp(T.size*(bigger?1.25:.8),.001,.25);saveTool();renderToolOpts();drawOver();announce(hard?'Durezza '+TOOL_OPTS.hard.fmt():'Dimensione '+TOOL_OPTS.size.fmt())}
@@ -93,15 +93,19 @@ photoCv.addEventListener('pointerleave',()=>{if(T.tool&&!T.drag)drawOver(false)}
 function placeOverlays(){for(const cv of [antsCv,overCv]){cv.style.left=photoCv.offsetLeft+'px';cv.style.top=photoCv.offsetTop+'px';cv.style.width=photoCv.style.width;cv.style.height=photoCv.style.height}overCv.hidden=photoCv.hidden;drawOver()}
 // Contorno: pixel bianchi e neri a tratti che scorrono (formiche in marcia), visibili su ogni colore; con il contrasto
 // elevato la linea è più spessa. Con «Mostra in rosso» la parte non scelta si copre di rosso.
-const ants={m:null,key:'',edges:null,base:null,img:null,phase:0,timer:0,text:''};
-function drawAnts(){const m=selMask(),show=!!m&&!photoCv.hidden;antsCv.hidden=!show;
- if(!show){ants.m=null;clearInterval(ants.timer);ants.timer=0;ants.text='';const el=$('selDesc');if(el)el.textContent=selSummary();return}
- const {w,h}=lastMc,key=`${!!prefs.quickMask},${!!prefs.contrast}`;if(antsCv.width!==w||antsCv.height!==h){antsCv.width=w;antsCv.height=h}
- if(ants.m!==m||ants.key!==key){const img=new ImageData(w,h),d=img.data;if(prefs.quickMask)for(let i=0,j=3;i<m.length;i++,j+=4){const a=(255-m[i])*.55;if(a>=1){d[j-3]=220;d[j-2]=20;d[j-1]=60;d[j]=a}}
-  let e=edgesOf(m,w,h);if(prefs.contrast){const s=new Set(e);for(const i of e){if((i+1)%w)s.add(i+1);if(i+w<w*h)s.add(i+w)}e=Int32Array.from(s)}
+const ants={m:null,mm:null,key:'',edges:null,base:null,img:null,phase:0,timer:0,text:''};
+function drawAnts(){const m=selMask(),am=prefs.maskOverlay&&I.bmp&&lastMc&&typeof activeMask==='function'?activeMask():null,mm=am&&!am.off&&am.ops.length?maskOf(am.ops,lastMc):null,show=(!!m||!!mm)&&!photoCv.hidden;antsCv.hidden=!show;
+ if(!m){ants.text='';const el=$('selDesc');if(el)el.textContent=selSummary()}
+ if(!show){ants.m=ants.mm=null;clearInterval(ants.timer);ants.timer=0;return}
+ const {w,h}=lastMc,key=`${!!prefs.quickMask},${!!prefs.contrast},${am?.inv}`;if(antsCv.width!==w||antsCv.height!==h){antsCv.width=w;antsCv.height=h}
+ if(ants.m!==m||ants.mm!==mm||ants.key!==key){const img=new ImageData(w,h),d=img.data;
+  if(mm)for(let i=0,j=3;i<mm.length;i++,j+=4){const a=(am.inv?255-mm[i]:mm[i])*.5;if(a>=1){d[j-3]=235;d[j-2]=30;d[j-1]=60;d[j]=a}}
+  else if(m&&prefs.quickMask)for(let i=0,j=3;i<m.length;i++,j+=4){const a=(255-m[i])*.55;if(a>=1){d[j-3]=220;d[j-2]=20;d[j-1]=60;d[j]=a}}
+  let e=m?edgesOf(m,w,h):new Int32Array(0);if(prefs.contrast){const s=new Set(e);for(const i of e){if((i+1)%w)s.add(i+1);if(i+w<w*h)s.add(i+w)}e=Int32Array.from(s)}
   const base=new Uint8Array(e.length);for(let k=0;k<e.length;k++){const i=e[k];base[k]=(i%w+((i/w)|0))&7}
-  Object.assign(ants,{m,key,edges:e,base,img,text:describeMask(m,w,h,null).replace(/: da .*$/,'.')});const el=$('selDesc');if(el)el.textContent=ants.text}
- paintAnts();if(!ants.timer&&!matchMedia('(prefers-reduced-motion: reduce)').matches)ants.timer=setInterval(()=>{if(document.hidden||antsCv.hidden||!ants.img)return;ants.phase=(ants.phase+1)&7;paintAnts()},180)}
+  if(m&&ants.m!==m){ants.text=describeMask(m,w,h,null,'La selezione',true);const el=$('selDesc');if(el)el.textContent=ants.text}
+  Object.assign(ants,{m,mm,key,edges:e,base,img})}
+ paintAnts();if(!ants.timer&&ants.edges.length&&!matchMedia('(prefers-reduced-motion: reduce)').matches)ants.timer=setInterval(()=>{if(document.hidden||antsCv.hidden||!ants.img)return;ants.phase=(ants.phase+1)&7;paintAnts()},180)}
 function paintAnts(){const {edges:e,base,img,phase}=ants,d=img.data;for(let k=0;k<e.length;k++){const j=e[k]*4,v=((base[k]+8-phase)&7)<4?0:255;d[j]=d[j+1]=d[j+2]=v;d[j+3]=255}antsCv.getContext('2d').putImageData(img,0,0)}
 // Segni degli strumenti: forma in corso, cursore della tastiera, cerchio del pennello. Linea bianca sotto, nera sopra.
 const brushDisp=()=>{if(!I.bmp)return 0;const f=fullMatrix(),r=photoCv.getBoundingClientRect();return T.size/2*Math.hypot(f.U.a,f.U.b)*r.width/f.fw};

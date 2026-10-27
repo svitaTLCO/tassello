@@ -76,9 +76,8 @@ function gridRow(a,gw,gh,y,s,out){let v=(y+.5)/s-.5;v=v<0?0:v>gh-1?gh-1:v;const 
 // Sfocatura di una maschera (deviazione sig) in valori a 16 bit; restituisce anche la deviazione ottenuta. Con un raggio
 // grande si sfoca una copia ridotta e la si riporta alla misura piena: lo stesso risultato in una frazione del tempo.
 function blurField(m,w,h,sig){const f=Math.max(1,Math.floor(sig/4));if(f===1){const b=boxR(sig);return {a:blur3(to16(m),w,h,b),s:Math.sqrt(b*(b+1))}}
- const gw=Math.ceil(w/f),gh=Math.ceil(h/f),n=gw*gh,g=new Float32Array(n),cnt=new Float32Array(n),xi=new Int32Array(w);for(let x=0;x<w;x++)xi[x]=(x/f)|0;
- for(let y=0,i=0;y<h;y++){const row=((y/f)|0)*gw;for(let x=0;x<w;x++,i++){const j=row+xi[x];g[j]+=m[i];cnt[j]++}}
- const g16=new Uint16Array(n);for(let j=0;j<n;j++)g16[j]=g[j]/cnt[j]*257+.5;const b=boxR(sig/f);blur3(g16,gw,gh,b);
+ const gw=Math.ceil(w/f),gh=Math.ceil(h/f),n=gw*gh,acc=new Int32Array(gw),xi=new Int32Array(w),g16=new Uint16Array(n);for(let x=0;x<w;x++)xi[x]=(x/f)|0;
+ for(let gy=0;gy<gh;gy++){acc.fill(0);const y0=gy*f,y1=Math.min(h,y0+f);for(let y=y0;y<y1;y++)for(let x=0,i=y*w;x<w;x++,i++)acc[xi[x]]+=m[i];for(let j=0,q=gy*gw;j<gw;j++,q++)g16[q]=(acc[j]*257/((y1-y0)*Math.min(f,w-j*f))+.5)|0}const b=boxR(sig/f);blur3(g16,gw,gh,b);
  const a=new Uint16Array(w*h),{x0,x1,fx}=gridCols(w,gw,f),row=new Float32Array(gw);
  for(let y=0,i=0;y<h;y++){gridRow(g16,gw,gh,y,f,row);for(let x=0;x<w;x++,i++){const p=row[x0[x]];a[i]=(p+(row[x1[x]]-p)*fx[x]+.5)|0}}
  return {a,s:Math.hypot(f*Math.sqrt(b*(b+1)),Math.sqrt((f*f-1)/12))}}
@@ -98,9 +97,11 @@ function boxMean(f,w,h,r){const t=new Float32Array(f.length),cs=new Float64Array
 // la maschera diventa una funzione lineare dei colori della foto, così il bordo segue i contorni veri, capelli e foglie
 // compresi, invece della linea tracciata. I coefficienti si calcolano su una copia ridotta e si applicano a ogni pixel.
 function guidedRefine(m,px,w,h,R,eps=1e-3){const s=Math.max(1,Math.floor(R/4),Math.ceil(Math.sqrt(w*h/6e5))),gw=Math.ceil(w/s),gh=Math.ceil(h/s),n=gw*gh,r=Math.max(1,Math.round(R/s)),d=px.data;
- const F=()=>new Float32Array(n),Ir=F(),Ig=F(),Ib=F(),P=F(),cnt=F(),xi=new Int32Array(w);for(let x=0;x<w;x++)xi[x]=(x/s)|0;
- for(let y=0,i=0;y<h;y++){const row=((y/s)|0)*gw;for(let x=0;x<w;x++,i++){const j=row+xi[x],o=i*4;Ir[j]+=d[o];Ig[j]+=d[o+1];Ib[j]+=d[o+2];P[j]+=m[i];cnt[j]++}}
- for(let j=0;j<n;j++){const c=cnt[j];Ir[j]/=255*c;Ig[j]/=255*c;Ib[j]/=255*c;P[j]/=255*c}
+ const F=()=>new Float32Array(n),Ir=F(),Ig=F(),Ib=F(),P=F(),xi=new Int32Array(w),aR=new Int32Array(gw),aG=new Int32Array(gw),aB=new Int32Array(gw),aP=new Int32Array(gw);for(let x=0;x<w;x++)xi[x]=(x/s)|0;
+ // Medie dei blocchi s×s, sommate per righe in interi: molto più veloce che accumulare direttamente nella griglia.
+ for(let gy=0;gy<gh;gy++){aR.fill(0);aG.fill(0);aB.fill(0);aP.fill(0);const y0=gy*s,y1=Math.min(h,y0+s);
+  for(let y=y0;y<y1;y++)for(let x=0,i=y*w,o=i*4;x<w;x++,i++,o+=4){const j=xi[x];aR[j]+=d[o];aG[j]+=d[o+1];aB[j]+=d[o+2];aP[j]+=m[i]}
+  for(let j=0,q=gy*gw;j<gw;j++,q++){const c=255*(y1-y0)*Math.min(s,w-j*s);Ir[q]=aR[j]/c;Ig[q]=aG[j]/c;Ib[q]=aB[j]/c;P[q]=aP[j]/c}}
  const prod=(a,b)=>{const o=F();for(let j=0;j<n;j++)o[j]=a[j]*b[j];return boxMean(o,gw,gh,r)},rp=prod(Ir,P),gp=prod(Ig,P),bp=prod(Ib,P),rr=prod(Ir,Ir),rg=prod(Ir,Ig),rb=prod(Ir,Ib),gg=prod(Ig,Ig),gb=prod(Ig,Ib),bb=prod(Ib,Ib);
  for(const a of [Ir,Ig,Ib,P])boxMean(a,gw,gh,r);
  const Ar=F(),Ag=F(),Ab=F(),Bq=F();
@@ -150,13 +151,13 @@ function colorName(r,g,b){const mx=Math.max(r,g,b)/255,mn=Math.min(r,g,b)/255,l=
 // Dove sta una zona della foto: posizione del centro in terzi.
 function placeName(cx,cy){const v=cy<1/3?'in alto':cy>2/3?'in basso':'',o=cx<1/3?'a sinistra':cx>2/3?'a destra':'';return v&&o?v+' '+o:v||o||'al centro'}
 // Descrizione a parole di una maschera: quanta parte copre, dove, quante zone, quanto morbido è il bordo, quali colori.
-function describeMask(m,w,h,px,what='La selezione'){let sum=0,cnt=0,sx=0,sy=0,x0=w,y0=h,x1=-1,y1=-1,soft=0;const col=new Map(),d=px?.data,step=Math.max(1,Math.floor(Math.sqrt(w*h/60000)));
+function describeMask(m,w,h,px,what='La selezione',short=false){let sum=0,cnt=0,sx=0,sy=0,x0=w,y0=h,x1=-1,y1=-1,soft=0;const col=new Map(),d=px?.data,step=Math.max(1,Math.floor(Math.sqrt(w*h/60000)));
  for(let y=0;y<h;y++)for(let x=0,i=y*w;x<w;x++,i++){const v=m[i];if(!v)continue;sum+=v;if(v<250)soft++;if(v>=128){cnt++;sx+=x;sy+=y;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
   if(d&&v>=128&&x%step===0&&y%step===0){const o=i*4,n=colorName(d[o],d[o+1],d[o+2]);col.set(n,(col.get(n)||0)+1)}}
  const cover=sum/255/(w*h);if(cover<.0005)return `${what} è vuota.`;if(cover>.995)return `${what} copre tutta la foto.`;
- const parts=countParts(m,w,h),tot=[...col.values()].reduce((a,b)=>a+b,0),top=[...col].sort((a,b)=>b[1]-a[1]).filter(([,n])=>n/tot>=.08).slice(0,3).map(([k,n])=>`${k} ${fmtPct(n/tot)}`);
- const pc=v=>fmtPct(v,0);
- return `${what} copre ${fmtPct(cover,cover<.1?1:0)} della foto, ${cnt?placeName(sx/cnt/w,sy/cnt/h):'al centro'}${parts>1?`, in ${parts} zone separate`:''}: da ${pc(x0/w)} a ${pc((x1+1)/w)} della larghezza e da ${pc(y0/h)} a ${pc((y1+1)/h)} dell’altezza. ${soft/Math.max(1,cnt)>.2?'Bordi morbidi. ':''}${top.length?'Colori: '+top.join(', ')+'.':''}`}
+ const parts=countParts(m,w,h),head=`${what} copre ${fmtPct(cover,cover<.1?1:0)} della foto, ${cnt?placeName(sx/cnt/w,sy/cnt/h):'al centro'}${parts>1?`, in ${parts} zone separate`:''}`;if(short)return head+'.';
+ const tot=[...col.values()].reduce((a,b)=>a+b,0),top=[...col].sort((a,b)=>b[1]-a[1]).filter(([,n])=>n/tot>=.08).slice(0,3).map(([k,n])=>`${k} ${fmtPct(n/tot)}`),pc=v=>fmtPct(v,0);
+ return `${head}: da ${pc(x0/w)} a ${pc((x1+1)/w)} della larghezza e da ${pc(y0/h)} a ${pc((y1+1)/h)} dell’altezza. ${soft/Math.max(1,cnt)>.2?'Bordi morbidi. ':''}${top.length?'Colori: '+top.join(', ')+'.':''}`}
 // Zone separate, contate su una copia ridotta; quelle sotto lo 0,2% della foto non contano.
 function countParts(m,w,h){const s=Math.max(1,Math.ceil(Math.max(w,h)/256)),gw=Math.ceil(w/s),gh=Math.ceil(h/s),g=new Uint8Array(gw*gh);for(let y=0;y<h;y+=s)for(let x=0;x<w;x+=s)if(m[y*w+x]>=128)g[(y/s)*gw+x/s]=1;
  let parts=0;const min=gw*gh*.002,st=[];for(let i=0;i<g.length;i++){if(g[i]!==1)continue;let n=0;st.push(i);g[i]=2;while(st.length){const j=st.pop(),x=j%gw;n++;for(const k of [x>0?j-1:-1,x<gw-1?j+1:-1,j-gw,j+gw])if(k>=0&&k<g.length&&g[k]===1){g[k]=2;st.push(k)}}if(n>=min)parts++}return parts}

@@ -18,7 +18,7 @@ const ADJ_BY=Object.fromEntries(ADJ.map(([id,label,group,min,max,step,fmt,hint])
 // Formati dell'inquadratura come larghezza diviso altezza; 0 tiene il formato della foto.
 const RATIOS=[['orig','Formato della foto',0],['1:1','Quadrato 1:1',1],['4:5','Verticale 4:5, post',4/5],['9:16','Verticale 9:16, storie',9/16],['2:3','Verticale 2:3',2/3],['3:2','Orizzontale 3:2',3/2],['4:3','Orizzontale 4:3',4/3],['16:9','Panoramico 16:9',16/9],['a4','Foglio A4 verticale',210/297]];
 const ratioName=id=>(RATIOS.find(x=>x[0]===id)||RATIOS[0])[1];
-const newRecipe=()=>({adj:Object.fromEntries(ADJ.map(a=>[a[0],0])),rot:0,flip:false,angle:0,ratio:'orig',cx:.5,cy:.5,look:'none',lookAmt:100,sel:null});
+const newRecipe=()=>({adj:Object.fromEntries(ADJ.map(a=>[a[0],0])),rot:0,flip:false,angle:0,ratio:'orig',cx:.5,cy:.5,look:'none',lookAmt:100,sel:null,masks:[]});
 // La foto aperta: il file originale, l'immagine decodificata e la ricetta, con la cronologia per Annulla e Ripeti.
 // base è la ricetta dell'ultima modifica conclusa: i cursori cambiano r mentre si trascinano e la modifica entra
 // nella cronologia solo quando si rilasciano.
@@ -47,7 +47,7 @@ async function persistPhoto(){if(!I.file){await dbDel('photo');await dbDel('phot
  await dbPut('photo',{name:I.name,title:I.title,r:I.r,luts:I.luts,plan:I.plan,step:I.step,seen:[...I.seen]})}
 async function restorePhoto(){const meta=await dbGet('photo'),file=await dbGet('photoFile');if(meta?.plan&&PLANS.some(p=>p.id===meta.plan))I.plan=meta.plan;if(meta?.luts)I.luts=meta.luts;if(!meta||!file)return;
  let bmp;try{bmp=await decodePhoto(file)}catch(e){console.warn('Foto della bozza non leggibile',e);return}
- const r=Object.assign(newRecipe(),meta.r);r.adj=Object.assign(newRecipe().adj,meta.r?.adj);
+ const r=Object.assign(newRecipe(),meta.r);r.adj=Object.assign(newRecipe().adj,meta.r?.adj);r.masks=(r.masks||[]).map(m=>({...m,adj:{...zeroAdj(),...m.adj}}));
  Object.assign(I,{file,name:meta.name||file.name,bmp,r,step:clamp(meta.step|0,0,Math.max(0,planSteps().length-1)),seen:new Set(meta.seen||[])});I.base=snap();fileSaved=file;
  I.title=meta.title||baseName(I.name)}
 function updateTitle(){document.title=($('docTitle').value.trim()||'Senza titolo')+' — '+appName()+' · Tassello Grafica'}

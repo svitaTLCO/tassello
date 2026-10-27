@@ -50,6 +50,23 @@ def('i','Selezione',[
  ['selMeasure','Selezione con le misure…','ruler','',{short:'Con le misure'}],
  ['selDescribe','Descrivi la selezione','speak','Alt+Maiusc+S',{g:1,short:'Descrivi'}],
  ['selShow','Mostra in rosso la parte non selezionata','eye','',{short:'Mostra in rosso',toggle:()=>!!prefs.quickMask}]]);
+def('i','Maschere',[
+ ['maskFromSel','Nuova maschera dalla selezione','mask','',{short:'Dalla selezione'}],
+ ['maskBrush','Nuova maschera a pennello','brush','',{short:'A pennello'}],
+ ['maskLinear','Nuova sfumatura lineare','gradL','',{short:'Sfumatura lineare',quiet:1,toggle:()=>T.tool==='linear'}],
+ ['maskRadial','Nuova sfumatura radiale','gradR','',{short:'Sfumatura radiale',quiet:1,toggle:()=>T.tool==='radial'}],
+ ['maskPaint','Dipingi sulla maschera','brush','',{short:'Dipingi',quiet:1,toggle:()=>T.tool==='mbrush'}],
+ ['maskRedraw','Ridisegna la sfumatura','gradL','',{short:'Ridisegna'}],
+ ['maskAddSel','Aggiungi la selezione alla maschera','plus','',{short:'Aggiungi la selezione'}],
+ ['maskSubSel','Togli la selezione dalla maschera','minus','',{short:'Togli la selezione'}],
+ ['maskInvert','Inverti la maschera','invert','',{short:'Inverti',quiet:1,toggle:()=>!!maskIn()?.inv}],
+ ['maskHide','Nascondi la maschera','eye','',{short:'Nascondi',quiet:1,toggle:()=>!!maskIn()?.off}],
+ ['maskOverlay','Mostra in rosso dove agisce la maschera','eye','',{short:'Mostra in rosso',toggle:()=>!!prefs.maskOverlay}],
+ ['maskRename','Rinomina la maschera…','textI','',{short:'Rinomina'}],
+ ['maskDelete','Elimina la maschera','trash','',{short:'Elimina'}],
+ ['maskNext','Maschera successiva','down','',{short:'Successiva'}],
+ ['maskPrev','Maschera precedente','up','',{short:'Precedente'}],
+ ['maskDescribe','Descrivi la maschera','speak','Alt+Maiusc+M',{g:1,short:'Descrivi'}]]);
 def('d','File',[
  ['openDraw','Apri un disegno SVG o inserisci immagini','open','Ctrl+O',{g:1,short:'Apri'}],
  ['saveSvg','Salva il disegno (SVG, si riapre modificabile)','save','Ctrl+S',{g:1,short:'Salva'}],
