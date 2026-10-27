@@ -3,19 +3,23 @@ const inEditor=()=>{const sel=getSelection();return sel.rangeCount>0&&$('wordEdi
 const qs=cmd=>{if(!inEditor())return false;try{return document.queryCommandState(cmd)}catch(e){return false}};
 const blockTag=()=>{if(!inEditor())return '';try{return String(document.queryCommandValue('formatBlock')||'').toLowerCase()}catch(e){return ''}};
 const cs=key=>!!cell(state.sel.r,state.sel.c)?.s?.[key];
-const isWord=()=>state.mode==='word';
+// Le tre app: Testo ('word', lettera w), Calcolo ('excel', x) e Impagina ('impagina', p). Ogni comando dichiara in modes le lettere delle app in cui vale.
+const isWord=()=>state.mode==='word',isCalc=()=>state.mode==='excel',isPage=()=>state.mode==='impagina';
+const MODE_KEY={word:'w',excel:'x',impagina:'p'},APP_NAME={word:'Testo',excel:'Calcolo',impagina:'Impagina'};
+const modeKey=()=>MODE_KEY[state.mode],appName=()=>APP_NAME[state.mode];
 const C={};
 function def(modes,cat,list){for(const [id,label,icon,keys,extra] of list)C[id]={id,label,icon,keys:keys||'',modes,cat,...(extra||{})}}
 def('wx','File',[
  ['save','Salva file (DOCX o XLSX)','save','Ctrl+S',{g:1,short:'Salva'}],
+ ['backup','Salva progetto completo (JSON)','backup','',{short:'Progetto JSON'}]]);
+def('wxp','File',[
  ['open','Apri file','open','Ctrl+O',{g:1,short:'Apri'}],
  ['new','Nuovo file','new','Ctrl+Alt+N',{g:1,short:'Nuovo'}],
- ['backup','Salva progetto completo (JSON)','backup','',{short:'Progetto JSON'}],
  ['print','Stampa o salva come PDF','print','Ctrl+P',{g:1,short:'Stampa / PDF'}],
  ['filePanel','Apri il menu File','file','',{}]]);
 def('w','File',[['exportHtml','Esporta come pagina HTML','export','',{short:'Esporta HTML'}]]);
 def('x','File',[['exportCSV','Esporta il foglio in CSV','export','',{short:'Esporta CSV'}],['importCSV','Importa un file CSV','import','',{short:'Importa CSV'}]]);
-def('wx','Generale',[
+def('wxp','Generale',[
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],
  ['shortcuts','Scorciatoie da tastiera','keyboard','F1 / Ctrl+/',{g:1,short:'Scorciatoie'}],
  ['help','Informazioni e limiti','info','',{short:'Informazioni'}],
@@ -23,25 +27,27 @@ def('wx','Generale',[
  ['prevRegion','Vai all’area precedente','','Maiusc+F6',{g:1}],
  ['switchWord','Passa a Testo','t:T','Ctrl+Alt+W',{g:1}],
  ['switchExcel','Passa a Calcolo','t:C','Ctrl+Alt+X',{g:1}],
- ['readStatus','Leggi posizione e formattazione','speak','Alt+Maiusc+I',{g:1,short:'Leggi stato'}],
+ ['switchPage','Passa a Impagina','t:I','Ctrl+Alt+I',{g:1}],
  ['undo','Annulla','undo','Ctrl+Z',{short:'Annulla'}],
  ['redo','Ripeti','redo','Ctrl+Y / Ctrl+Maiusc+Z',{short:'Ripeti'}],
+ ['zoomUp','Aumenta zoom','zoomIn','',{short:'Zoom avanti'}],
+ ['zoomDown','Riduci zoom','zoomOut','',{short:'Zoom indietro'}],
+ ['zoomReset','Zoom al 100%','t:1:1','',{short:'100%'}],
+ ['themeDark','Tema scuro','moon','',{short:'Tema scuro',toggle:()=>prefs.theme==='dark'}],
+ ['contrast','Contrasto elevato','contrast','',{short:'Contrasto elevato',toggle:()=>prefs.contrast}]]);
+def('wx','Generale',[
+ ['readStatus','Leggi posizione e formattazione','speak','Alt+Maiusc+I',{g:1,short:'Leggi stato'}],
  ['cut','Taglia','cut','Ctrl+X',{native:1}],
  ['copy','Copia','copy','Ctrl+C',{native:1}],
  ['paste','Incolla','paste','Ctrl+V',{native:1,short:'Incolla'}],
  ['find','Trova','search','Ctrl+F',{g:1,short:'Trova'}],
  ['replace','Sostituisci','replace','Ctrl+H',{g:1,short:'Sostituisci'}],
  ['findNext','Trova successivo','down','F3',{g:1}],
- ['findPrev','Trova precedente','up','Maiusc+F3',{g:1}],
- ['zoomUp','Aumenta zoom','zoomIn','',{short:'Zoom avanti'}],
- ['zoomDown','Riduci zoom','zoomOut','',{short:'Zoom indietro'}],
- ['zoomReset','Zoom al 100%','t:1:1','',{short:'100%'}],
- ['themeDark','Tema scuro','moon','',{short:'Tema scuro',toggle:()=>prefs.theme==='dark'}],
- ['contrast','Contrasto elevato','contrast','',{short:'Contrasto elevato',toggle:()=>prefs.contrast}]]);
+ ['findPrev','Trova precedente','up','Maiusc+F3',{g:1}]]);
 def('wx','Formato carattere',[
- ['bold','Grassetto','t:<b>G</b>','Ctrl+B',{toggle:()=>isWord()?qs('bold'):cs('bold')}],
- ['italic','Corsivo','t:<i>C</i>','Ctrl+I',{toggle:()=>isWord()?qs('italic'):cs('italic')}],
- ['underline','Sottolineato','t:<u>S</u>','Ctrl+U',{toggle:()=>isWord()?qs('underline'):cs('underline')}],
+ ['bold','Grassetto','t:<b>G</b>','Ctrl+B',{toggle:()=>isWord()?qs('bold'):isCalc()&&cs('bold')}],
+ ['italic','Corsivo','t:<i>C</i>','Ctrl+I',{toggle:()=>isWord()?qs('italic'):isCalc()&&cs('italic')}],
+ ['underline','Sottolineato','t:<u>S</u>','Ctrl+U',{toggle:()=>isWord()?qs('underline'):isCalc()&&cs('underline')}],
  ['fontGrow','Aumenta dimensione carattere','t:A<sup>+</sup>','Ctrl+>',{}],
  ['fontShrink','Riduci dimensione carattere','t:A<sup>−</sup>','Ctrl+<',{}],
  ['fontColorApply','Applica il colore del carattere','t:A','',{}]]);
@@ -51,7 +57,7 @@ def('w','Formato carattere',[
  ['superscript','Apice','t:x<sup>2</sup>','',{toggle:()=>qs('superscript')}],
  ['hiliteColorApply','Applica il colore di evidenziazione','highlight','',{}],
  ['clearFormat','Cancella formattazione','eraser','Ctrl+Spazio',{say:'Formattazione del carattere rimossa'}]]);
-const al=(v,cmd)=>()=>isWord()?qs(cmd):(cell(state.sel.r,state.sel.c)?.s?.align||'')===v;
+const al=(v,cmd)=>()=>isWord()?qs(cmd):isCalc()&&(cell(state.sel.r,state.sel.c)?.s?.align||'')===v;
 def('wx','Paragrafo e allineamento',[
  ['justifyLeft','Allinea a sinistra','alignLeft','Ctrl+L',{kx:'',toggle:al('left','justifyLeft'),say:'Allineato a sinistra'}],
  ['justifyCenter','Centra','alignCenter','Ctrl+E',{kx:'',toggle:al('center','justifyCenter'),say:'Centrato'}],
@@ -306,6 +312,78 @@ def('x','Fogli',[
  ['moveSheetRight','Sposta foglio a destra','right','',{}],
  ['prevSheet','Foglio precedente','','Alt+PgSu',{}],
  ['nextSheet','Foglio successivo','','Alt+PgGiù',{}]]);
+def('p','File',[
+ ['pgSave','Salva il progetto di Impagina (un file da riaprire)','save','Ctrl+S',{g:1,short:'Salva progetto'}],
+ ['pgExportPng','Esporta le pagine in PNG','image','Ctrl+Maiusc+E',{g:1,short:'Esporta PNG'}]]);
+def('p','Pagine',[
+ ['pgAddPage','Nuova pagina dopo quella attuale','new','Ctrl+Invio',{short:'Nuova pagina'}],
+ ['pgDupPage','Duplica la pagina','copy','',{short:'Duplica pagina'}],
+ ['pgDelPage','Elimina la pagina','trash','',{short:'Elimina pagina'}],
+ ['pgPrevPage','Pagina precedente','up','Alt+PgSu',{short:'Pagina precedente'}],
+ ['pgNextPage','Pagina successiva','down','Alt+PgGiù',{short:'Pagina successiva'}],
+ ['pgDataRepeat','Ripeti la pagina per ogni riga dei dati','sheet','',{short:'Una pagina per riga',toggle:()=>!!pgCurPage()?.data}],
+ ['pgRowPrev','Anteprima della riga dei dati precedente','left','',{short:'Riga precedente'}],
+ ['pgRowNext','Anteprima della riga dei dati successiva','right','',{short:'Riga successiva'}]]);
+def('p','Inserisci',[
+ ['pgAddText','Inserisci una cornice di testo','textbox','',{short:'Testo'}],
+ ['pgAddImage','Inserisci una cornice per immagine','image','',{short:'Immagine'}],
+ ['pgAddRect','Inserisci un rettangolo','rect','',{short:'Rettangolo'}],
+ ['pgAddEllipse','Inserisci un’ellisse','ellipse','',{short:'Ellisse'}],
+ ['pgAddLine','Inserisci una linea','lineI','',{short:'Linea'}],
+ ['pgPageNum','Numero di pagina nel mastro','t:#','',{short:'Numero di pagina'}],
+ ['pgHeader','Intestazione nel mastro','header','',{short:'Intestazione'}],
+ ['pgLogo','Logo nel mastro','image','',{short:'Logo'}],
+ ['pgField','Inserisci un campo nel testo (dati, pagina, titolo)','t:«»','',{menu:1,short:'Campo'}]]);
+def('p','Cornice',[
+ ['pgEditText','Modifica il testo della cornice','rename','',{short:'Modifica testo'}],
+ ['pgDup','Duplica la cornice','duplicate','Ctrl+D',{ctx:'page',short:'Duplica'}],
+ ['pgDelete','Elimina la cornice','trash','Canc',{ctx:'page',short:'Elimina'}],
+ ['pgCut','Taglia la cornice','cut','Ctrl+X',{ctx:'page',short:'Taglia'}],
+ ['pgCopy','Copia la cornice','copy','Ctrl+C',{ctx:'page',short:'Copia'}],
+ ['pgPaste','Incolla la cornice','paste','Ctrl+V',{ctx:'page',short:'Incolla'}],
+ ['pgFront','Porta in primo piano','front','',{short:'In primo piano'}],
+ ['pgBack','Porta in fondo','backL','',{short:'In fondo'}],
+ ['pgForward','Porta avanti di un livello','up','',{short:'Avanti'}],
+ ['pgBackward','Porta indietro di un livello','down','',{short:'Indietro'}],
+ ['pgAlignL','Allinea al margine sinistro','alignL','',{short:'A sinistra'}],
+ ['pgAlignC','Centra in orizzontale tra i margini','alignC','',{short:'Al centro'}],
+ ['pgAlignR','Allinea al margine destro','alignR','',{short:'A destra'}],
+ ['pgAlignT','Allinea al margine superiore','alignT','',{short:'In alto'}],
+ ['pgAlignM','Centra in verticale tra i margini','alignM','',{short:'In mezzo'}],
+ ['pgAlignB','Allinea al margine inferiore','alignB','',{short:'In basso'}],
+ ['pgReadUp','Sposta prima nell’ordine di lettura','up','',{short:'Leggi prima'}],
+ ['pgReadDown','Sposta dopo nell’ordine di lettura','down','',{short:'Leggi dopo'}],
+ ['pgReadAuto','Ordine di lettura dalla disposizione (dall’alto, per colonne)','readOrder','',{short:'Ordine automatico'}],
+ ['pgLink','Fai continuare il testo in una nuova cornice','chain','',{short:'Continua in nuova cornice'}],
+ ['pgLinkTo','Fai continuare il testo in una cornice esistente','chain','',{menu:1,short:'Collega a…'}],
+ ['pgUnlink','Togli la cornice dalla catena del testo','unchain','',{short:'Scollega'}],
+ ['pgOverflow','Vai al testo che non entra nelle cornici','overflow','',{short:'Testo in eccesso'}],
+ ['pgChooseImage','Scegli l’immagine della cornice','image','',{short:'Scegli immagine'}],
+ ['pgFit','Adatta l’immagine alla cornice','fit','',{short:'Adatta',toggle:()=>pgSel()?.fit==='fit'}],
+ ['pgFill','Riempi la cornice con l’immagine','fill','',{short:'Riempi',toggle:()=>pgSel()?.fit==='fill'}]]);
+def('p','Pagina e griglia',[
+ ['pgFormat','Formato del documento','page','',{short:'Formato'}],
+ ['pgMargins','Margini, colonne e griglia','margins','',{short:'Margini e colonne'}],
+ ['pgGuides','Mostra margini e colonne','columns','',{short:'Guide',toggle:()=>Pg.guides}],
+ ['pgGrid','Mostra la griglia','grid','',{short:'Griglia',toggle:()=>Pg.grid}],
+ ['pgSnap','Aggancia alla griglia','grid','',{short:'Aggancia',toggle:()=>!!Pg.p.snap}],
+ ['pgMasterApply','Mastro della pagina','header','',{menu:1,short:'Applica mastro'}],
+ ['pgMasterEdit','Modifica il mastro della pagina','rename','',{short:'Modifica mastro'}],
+ ['pgMasterNew','Nuovo mastro','new','',{short:'Nuovo mastro'}],
+ ['pgStyles','Stili di paragrafo e di carattere','styles','',{short:'Stili'}],
+ ['pgZoomFit','Mostra tutta la pagina','zoomFit','',{short:'Tutta la pagina'}]]);
+def('p','Fonti',[
+ ['pgFolder','Collega una cartella del computer','folder','',{short:'Collega cartella'}],
+ ['pgRefresh','Aggiorna dalle fonti','refresh','Alt+F5',{g:1,short:'Aggiorna dalle fonti'}],
+ ['pgSources','Fonti collegate','sources','',{short:'Fonti collegate'}],
+ ['pgData','Dati da un file CSV, XLSX o JSON','sheet','',{short:'Dati da file'}],
+ ['pgDataSheet','Dati da un foglio di Calcolo','grid','',{short:'Dati da Calcolo'}],
+ ['pgFeed','Notizie da un feed RSS o Atom salvato','feed','',{short:'Feed da file'}],
+ ['pgFeedPaste','Incolla un feed RSS o Atom','paste','',{short:'Incolla feed'}],
+ ['pgDocx','Importa il testo da un DOCX o da un file di testo','import','',{short:'Testo da DOCX'}]]);
+def('p','Verifica',[
+ ['pgCheck','Verifica dell’accessibilità','a11y','',{short:'Verifica accessibilità'}],
+ ['pgDescribe','Descrivi la pagina e la cornice scelta','speak','Alt+Maiusc+I',{g:1,short:'Descrivi pagina'}]]);
 const KEYNAME={Invio:'enter',Spazio:' ',Canc:'delete',Esc:'escape',PgSu:'pageup',PgGiù:'pagedown',Home:'home',Fine:'end','←':'arrowleft','→':'arrowright','↑':'arrowup','↓':'arrowdown',Tab:'tab'};
 const keyCache=new Map();
 function parseKey(s){let key,mods;if(s.endsWith('++')){key='+';mods=s.slice(0,-2).split('+')}else{const p=s.split('+');key=p.pop();mods=p}return{ctrl:mods.includes('Ctrl'),alt:mods.includes('Alt'),shift:mods.includes('Maiusc'),key:(KEYNAME[key]||key).toLowerCase()}}
@@ -314,8 +392,8 @@ function parsedKeys(spec){if(!keyCache.has(spec))keyCache.set(spec,spec?spec.spl
 function keyMatch(e,k){if((e.ctrlKey||e.metaKey)!==k.ctrl||e.altKey!==k.alt)return false;const sym=k.key.length===1&&!/[a-z0-9 ]/.test(k.key);if(!sym&&e.shiftKey!==k.shift)return false;const ek=e.key.toLowerCase();if(ek===k.key)return true;if(k.key==='+'&&(e.code==='NumpadAdd'||(e.shiftKey&&(ek==='='||e.code==='Equal'))))return true;if(k.key==='-'&&e.code==='NumpadSubtract')return true;if(/^[a-z0-9]$/.test(k.key)&&(!(e.ctrlKey&&e.altKey)||/\d/.test(k.key)))return e.code===(/\d/.test(k.key)?'Digit':'Key')+k.key.toUpperCase();return false}
 function ariaKeys(spec){const M={Ctrl:'Control',Maiusc:'Shift',Alt:'Alt',Invio:'Enter',Spazio:'Space',Canc:'Delete',PgSu:'PageUp',PgGiù:'PageDown','←':'ArrowLeft','→':'ArrowRight','↑':'ArrowUp','↓':'ArrowDown',Esc:'Escape'};return spec.split(' / ').map(s=>(s.endsWith('++')?[...s.slice(0,-2).split('+'),'Plus']:s.split('+')).map(p=>M[p]||p).join('+')).join(' ')}
 const kbdHtml=spec=>spec.split(' / ').map(s=>(s.endsWith('++')?[...s.slice(0,-2).split('+'),'+']:s.split('+')).map(p=>`<kbd>${esc(p)}</kbd>`).join('+')).join(' o ');
-const available=c=>c.modes.includes(isWord()?'w':'x');
-function focusContext(){const a=document.activeElement;if(!a||a===document.body)return 'other';if(a.closest('#wordEditor'))return 'editor';if(a===$('gridScroll'))return 'grid';if(a===$('gridInput'))return 'cell';if(a.matches('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select,[contenteditable="true"]'))return 'input';return 'other'}
+const available=c=>c.modes.includes(modeKey());
+function focusContext(){const a=document.activeElement;if(!a||a===document.body)return 'other';if(a.closest('#wordEditor'))return 'editor';if(a.id==='pgStage'||a.id==='pgFrames')return 'page';if(a.id==='pgPages')return 'pages';if(a===$('gridScroll'))return 'grid';if(a===$('gridInput'))return 'cell';if(a.matches('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select,[contenteditable="true"]'))return 'input';return 'other'}
 function findShortcut(e,ctx){let fallback=null;for(const c of Object.values(C)){const spec=keysOf(c);if(!spec||c.native||!available(c))continue;if(c.ctx&&c.ctx!==ctx)continue;if((ctx==='input'||ctx==='cell')&&!c.g)continue;if(parsedKeys(spec).some(k=>keyMatch(e,k))){if(c.ctx===ctx)return c;fallback??=c}}return fallback}
 const safe=fn=>{try{return fn()}catch(e){return false}};
-async function runCommand(id){const c=C[id];if(!c)return;if(isWord()&&document.activeElement===$('wordEditor')&&inEditor())wordSelectionSave();if(reading&&isWord()&&!READ_OK.has(id)){toast('«'+c.label+'» non è disponibile in modalità lettura: premi Esc per tornare alla modifica');return}if(formMode&&isWord()&&!READ_OK.has(id)&&!['formFill','ccEdit','controlsMenu','save','print','exportHtml'].includes(id)){toast('«'+c.label+'» non è disponibile durante la compilazione del modulo: premi Esc per uscire');return}if(!available(c)){toast('«'+c.label+'» non è disponibile in '+(isWord()?'Testo':'Calcolo'));return}if(!isWord()&&id!=='editCell')finishCell();hideTip();await handleAction(id);if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}
+async function runCommand(id){const c=C[id];if(!c)return;if(isWord()&&document.activeElement===$('wordEditor')&&inEditor())wordSelectionSave();if(reading&&isWord()&&!READ_OK.has(id)){toast('«'+c.label+'» non è disponibile in modalità lettura: premi Esc per tornare alla modifica');return}if(formMode&&isWord()&&!READ_OK.has(id)&&!['formFill','ccEdit','controlsMenu','save','print','exportHtml'].includes(id)){toast('«'+c.label+'» non è disponibile durante la compilazione del modulo: premi Esc per uscire');return}if(!available(c)){toast('«'+c.label+'» non è disponibile in '+appName());return}if(isCalc()&&id!=='editCell')finishCell();hideTip();await handleAction(id);if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}

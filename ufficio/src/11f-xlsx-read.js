@@ -46,7 +46,7 @@ function readSheetCells(doc,shared,styleOf){const cells={},covered=new Set();let
   cells[ref]={v:xlsxCellValue(c,shared),s:styleOf(attr(c,'s'))}}
  return{cells,skipped}}
 // Dopo un'importazione si passa al foglio di calcolo, senza cronologia, e si ridisegna tutto.
-function showWorkbook(){hist=[];redo=[];invalidate();if(isWord())setMode('excel');renderSheetTabs();bump()}
+function showWorkbook(){hist=[];redo=[];invalidate();if(!isCalc())setMode('excel');renderSheetTabs();bump()}
 function importXlsx(entries){const part=name=>xml(zipText(entries,name)),book=part('xl/workbook.xml'),list=first(book,'sheets');if(!list)throw Error('Il file non contiene una cartella di lavoro XLSX');
  const relmap=Object.fromEntries(nodes(part('xl/_rels/workbook.xml.rels'),'Relationship').map(r=>[attr(r,'Id'),attr(r,'Target')]));
  const sst=zipText(entries,'xl/sharedStrings.xml'),shared=sst?nodes(xml(sst),'si').map(si=>nodes(si,'t').map(t=>t.textContent).join('')):[];
@@ -58,6 +58,15 @@ function importXlsx(entries){const part=name=>xml(zipText(entries,name)),book=pa
  if(!sheets.length)throw Error('Nel file non c\'è nessun foglio leggibile');
  Object.assign(state,{sheets,names:importNames(book),sheet:0});if(sheets.some(s=>s.pivots.length))setTimeout(()=>pivotRefreshAll(true),0);showWorkbook();
  toast('Importati '+plural(sheets.length,'foglio','fogli')+(skipped?` · ${skipped} celle oltre i limiti della griglia lasciate fuori`:''))}
+// Tabella di dati dal primo foglio di un XLSX, per Impagina: i valori come sono salvati, le formule con il loro ultimo
+// risultato, i numeri con la virgola e le date in italiano.
+function xlsxTable(entries){const part=name=>xml(zipText(entries,name)),book=part('xl/workbook.xml'),sh=nodes(first(book,'sheets'),'sheet')[0];if(!sh)throw Error('Il file non contiene una cartella di lavoro XLSX');
+ const relmap=Object.fromEntries(nodes(part('xl/_rels/workbook.xml.rels'),'Relationship').map(r=>[attr(r,'Id'),attr(r,'Target')]));
+ const sst=zipText(entries,'xl/sharedStrings.xml'),shared=sst?nodes(xml(sst),'si').map(si=>nodes(si,'t').map(t=>t.textContent).join('')):[],styleOf=xlsxStyleReader(part('xl/styles.xml')),raw=zipText(entries,sheetPath(relmap[attr(sh,'id')]||'worksheets/sheet1.xml'));if(!raw)throw Error('Nel file non c’è nessun foglio leggibile');
+ const grid=[];for(const c of nodes(xml(raw),'c')){const at=parseRef(attr(c,'r'));if(!at||at.r>5000||at.c>=60)continue;const t=attr(c,'t'),v=textNode(first(c,'v'));let val=t==='s'?shared[+v]||'':t==='inlineStr'?nodes(c,'t').map(x=>x.textContent).join(''):t==='b'?(v==='1'?'VERO':'FALSO'):v;
+  if(!t&&v!==''&&isFinite(+v))val=/^Data/.test(styleOf(attr(c,'s'))?.fmt||'')?new Date(Math.round((+v-25569)*864e5)).toLocaleDateString('it-IT',{timeZone:'UTC'}):(+v).toLocaleString('it-IT',{maximumFractionDigits:10,useGrouping:false});
+  (grid[at.r]??=[])[at.c]=val}
+ return{name:attr(sh,'name'),rows:Array.from(grid,r=>Array.from(r||[],x=>x??''))}}
 // CSV: separatore riconosciuto dalla prima riga (tabulazione, punto e virgola o virgola), campi tra virgolette con "" per le virgolette.
 function csvSeparator(text){const line=text.split(/\r?\n/,1)[0]||'';if(line.includes('\t'))return '\t';const count=ch=>line.split(ch).length-1;return count(';')>count(',')?';':','}
 function parseCSV(text){const sep=csvSeparator(text),rows=[[]];let cur='',quoted=false;
@@ -76,19 +85,19 @@ function exportCSV(){const s=sheet(),{rows,cols}=sheetExtent(s),field=t=>/[;"\n]
  const lines=Array.from({length:rows+1},(_,r)=>Array.from({length:cols+1},(_,c)=>field(String(displayValue(r,c,s)))).join(';'));
  const text='\uFEFF'+lines.join('\r\n');toast('Esportato in CSV solo il foglio attivo');download(text,extName(state.excelTitle,'csv'),CSV_MIME)}
 // Apertura di un file: il tipo si riconosce dall'estensione (DOCX, XLSX, CSV e TSV, HTML e testo, backup JSON).
-const currentTitle=()=>isWord()?state.wordTitle:state.excelTitle;
+const currentTitle=()=>isWord()?state.wordTitle:isCalc()?state.excelTitle:Pg.p?.title??'';
 async function openText(file,base,ext){const body=await file.text();$('wordEditor').innerHTML=ext==='txt'?`<p>${esc(body).replace(/\n/g,'<br>')}</p>`:sanitizeHTML(body);wordHistReset();wordChanged();setMode('word');state.wordTitle=base;toast('Documento aperto'+altNotice())}
 async function openSheetTable(file,base){importCSV(await file.text());state.excelTitle=base}
 const OPENERS=new Map([
  ['xlsx',async(file,base)=>{importXlsx(await zipEntries(await file.arrayBuffer()));state.excelTitle=base}],
  ['docx',async(file,base)=>{importDocx(await zipEntries(await file.arrayBuffer()));state.wordTitle=base}],
- ['json',async file=>loadProject(JSON.parse(await file.text()))],
+ ['json',async file=>{const o=JSON.parse(await file.text());if(o?.programma==='Tassello Impagina'){setMode('impagina',{focus:false});await pageLoadProject(o,file.name);return}loadProject(o)}],
  ['csv',openSheetTable],['tsv',openSheetTable],['html',openText],['htm',openText],['txt',openText]]);
-async function openFile(file){if(!file)return;const name=file.name||'file',ext=name.split('.').pop().toLowerCase(),base=name.replace(/\.[^.]+$/,'');
+async function openFile(file){if(!file)return;if(isPage()){await pageOpenFiles([file]);return}const name=file.name||'file',ext=name.split('.').pop().toLowerCase(),base=name.replace(/\.[^.]+$/,'');
  try{status(`Apertura di ${name}…`);const open=OPENERS.get(ext);if(!open)throw Error('Formato non supportato');await open(file,base,ext);
   if(ext!=='json')$('docTitle').value=currentTitle();schedulePersist();updateTitle();status('Aperto: '+name)}
  catch(err){console.error(err);toast('Impossibile aprire il file: '+err.message);status('Errore: '+err.message)}}
-async function fileSave(){try{(isWord()?exportDocx:exportXlsx)();await persist()}catch(err){console.error(err);toast('Impossibile salvare: '+err.message)}}
+async function fileSave(){if(isPage()){pageSave();return}try{(isWord()?exportDocx:exportXlsx)();await persist()}catch(err){console.error(err);toast('Impossibile salvare: '+err.message)}}
 function projectBackup(){download(JSON.stringify(snapshot(),null,2),extName(currentTitle(),'json'),'application/json');toast('Copia di sicurezza del progetto scaricata')}
 // Pagina HTML autonoma con il documento e uno stile essenziale.
 function htmlExport(){const body=sanitizeHTML($('wordEditor').innerHTML).replace(/ contenteditable="false"/g,'');

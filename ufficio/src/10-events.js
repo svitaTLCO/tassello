@@ -1,13 +1,13 @@
 // Scorciatoie globali: intercettate in cattura, prima dei gestori dei singoli controlli.
-window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;const ctx=focusContext();if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key==='/'){e.preventDefault();runCommand('shortcuts');return}if(e.key==='F5'&&!isWord()&&ctx==='grid'&&!e.ctrlKey&&!e.shiftKey){e.preventDefault();runCommand('goto');return}const c=findShortcut(e,ctx);if(!c)return;e.preventDefault();e.stopPropagation();runCommand(c.id)},true);
-$('skipDoc').onclick=e=>{e.preventDefault();isWord()?restoreWordFocus():$('gridScroll').focus()};
+window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;const ctx=focusContext();if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key==='/'){e.preventDefault();runCommand('shortcuts');return}if(e.key==='F5'&&isCalc()&&ctx==='grid'&&!e.ctrlKey&&!e.shiftKey){e.preventDefault();runCommand('goto');return}const c=findShortcut(e,ctx);if(!c)return;e.preventDefault();e.stopPropagation();runCommand(c.id)},true);
+$('skipDoc').onclick=e=>{e.preventDefault();focusDocument()};
 $('skipRibbon').onclick=e=>{e.preventDefault();$('tab-'+slug(currentTab))?.focus()};
 // Barra del titolo
-for(const [id,mode] of [['switchWord','word'],['switchExcel','excel']])$(id).onclick=()=>setMode(mode);
-$('docTitle').addEventListener('input',e=>{state[isWord()?'wordTitle':'excelTitle']=e.target.value;updateTitle();schedulePersist()});
-$('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();if(isWord())restoreWordFocus();else $('gridScroll').focus()});
+for(const [mode,a] of Object.entries(APPS))$(a.button).onclick=()=>setMode(mode);
+$('docTitle').addEventListener('input',e=>{if(isPage())pageRetitle(e.target.value);else state[isWord()?'wordTitle':'excelTitle']=e.target.value;updateTitle();schedulePersist()});
+$('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();focusDocument()});
 for(const id of ['quickUndo','quickRedo','saveTop'])$(id).addEventListener('mousedown',e=>{if(isWord())e.preventDefault()});
-$('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand('save');$('openTop').onclick=()=>runCommand('open');
+$('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand(isPage()?'pgSave':'save');$('openTop').onclick=()=>runCommand('open');
 $('paletteBtn').onclick=()=>runCommand('palette');$('kbdBtn').onclick=()=>runCommand('shortcuts');$('helpBtn').onclick=()=>runCommand('help');$('fileBtn').onclick=openFilePanel;
 $('fileBtn').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('tab-'+slug(currentTab))?.focus()}});
 // Schede (tablist con attivazione automatica)
@@ -29,8 +29,9 @@ document.addEventListener('pointerdown',hideTip,true);document.addEventListener(
 const takeFile=input=>{const file=input.files[0];input.value='';return file};
 $('fileInput').onchange=async e=>{const file=takeFile(e.target);closeFilePanel(false);if(file)await openFile(file)};
 $('imageInput').onchange=e=>{const file=takeFile(e.target);if(file)readImage(file)};
-const FILE_PANEL_ACTIONS={new:()=>runCommand('new'),open:()=>$('fileInput').click(),save:()=>runCommand('save'),backup:()=>projectBackup(),export:()=>runCommand(isWord()?'exportHtml':'exportCSV'),
- print:()=>window.print(),shortcuts:()=>runCommand('shortcuts'),templates:()=>runCommand('templates'),versions:()=>runCommand('versionHistory'),help:()=>runCommand('help')};
+const FILE_PANEL_ACTIONS={new:()=>runCommand('new'),open:()=>runCommand('open'),save:()=>runCommand('save'),backup:()=>projectBackup(),export:()=>runCommand(isWord()?'exportHtml':isCalc()?'exportCSV':'pgExportPng'),
+ pgSave:()=>runCommand('pgSave'),pgFolder:()=>runCommand('pgFolder'),pgCheck:()=>runCommand('pgCheck'),
+ print:()=>runCommand('print'),shortcuts:()=>runCommand('shortcuts'),templates:()=>runCommand('templates'),versions:()=>runCommand('versionHistory'),help:()=>runCommand('help')};
 $('filepanel').addEventListener('click',e=>{const action=e.target.closest('[data-file-action]')?.dataset.fileAction;if(action===undefined)return;closeFilePanel(true);if(Object.hasOwn(FILE_PANEL_ACTIONS,action))FILE_PANEL_ACTIONS[action]()});
 $('filepanel').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeFilePanel(true);return}if((e.key==='ArrowDown'||e.key==='ArrowUp')&&e.target.closest('.file-side')){e.preventDefault();const l=$$('.file-side button'),i=l.indexOf(e.target);l[(i+(e.key==='ArrowDown'?1:-1)+l.length)%l.length].focus();return}trapTab(e,$('filepanel'))});
 // Stato e zoom
@@ -72,7 +73,7 @@ $('grid').addEventListener('mouseover',e=>{const td=sheetDrag&&e.target.closest(
 addEventListener('mouseup',()=>{sheetDrag=false});
 $('grid').addEventListener('dblclick',({target})=>{const td=target.closest('td[data-r]');if(!td)return;const {r,c}=cellOf(td);editCell(r,c)});
 $('grid').addEventListener('contextmenu',e=>{const td=e.target.closest('td[data-r]');if(!td)return;e.preventDefault();const r=+td.dataset.r,c=+td.dataset.c,b=selectedBounds();if(r<b.r1||r>b.r2||c<b.c1||c>b.c2)setSelection(r,c);gs.focus({preventScroll:true});cellMenu(e.clientX,e.clientY)});
-gs.addEventListener('keydown',e=>{if(isWord()||e.target!==gs||e.defaultPrevented)return;const k=e.key,shift=e.shiftKey,ctrl=e.ctrlKey||e.metaKey,altgr=e.getModifierState?.('AltGraph')||(e.ctrlKey&&e.altKey),{r,c}=state.sel;
+gs.addEventListener('keydown',e=>{if(!isCalc()||e.target!==gs||e.defaultPrevented)return;const k=e.key,shift=e.shiftKey,ctrl=e.ctrlKey||e.metaKey,altgr=e.getModifierState?.('AltGraph')||(e.ctrlKey&&e.altKey),{r,c}=state.sel;
  if(k==='Tab'&&tabExitArmed){tabExitArmed=false;return}if(k!=='Escape'&&k!=='Shift')tabExitArmed=false;
  const nav={ArrowDown:[1,0],ArrowUp:[-1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[k];
  if(nav&&!e.altKey){e.preventDefault();ctrl?jump(nav[0],nav[1],shift):moveCell(nav[0],nav[1],shift);return}
@@ -125,4 +126,4 @@ document.addEventListener('pointerdown',e=>{if(menuState&&!e.target.closest('#me
 // File trascinati sulla pagina (fuori dal documento): si aprono come con Apri.
 const carriesFiles=e=>[...(e.dataTransfer?.types||[])].includes('Files');
 document.addEventListener('dragover',e=>{if(carriesFiles(e))e.preventDefault()});
-document.addEventListener('drop',e=>{const file=e.dataTransfer?.files?.[0];if(!file||e.target.closest('#wordEditor'))return;e.preventDefault();openFile(file)});
+document.addEventListener('drop',e=>{const files=e.dataTransfer?.files,file=files?.[0];if(!file||e.target.closest('#wordEditor'))return;e.preventDefault();if(isPage())pageOpenFiles(files);else openFile(file)});

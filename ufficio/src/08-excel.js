@@ -39,7 +39,7 @@ function gridRow(r,{s,b,multi,fz,lefts,cover},top=null){const pinned=top!==null,
   const fx=pinned||leftPinned?{cls:' '+joinClasses(pinned&&'fz-r',leftPinned&&'fz-c',lastPinned&&'fz-lastr',c===fz.c-1&&'fz-lastc'),style:(pinned?`top:${top}px;`:'')+(leftPinned?`left:${lefts[c]}px`:'')}:null;
   h+=cv?cellHtml(cv.m.r1,cv.m.c1,s,b,multi,` rowspan="${cv.rs}" colspan="${cv.cs}"`,cv.m,fx):cellHtml(r,c,s,b,multi,'',null,fx)}
  return h+'</tr>'}
-function renderGrid(force=true){if(isWord())return;
+function renderGrid(force=true){if(!isCalc())return;
  const s=sheet(),g=$('gridScroll'),rows=visibleRows(),fz=frozen(s),pinnedRows=fz.r?rows.filter(r=>r<fz.r):[],scrollRows=fz.r?rows.filter(r=>r>=fz.r):rows,{first,last}=gridWindow(g,scrollRows.length);
  if(!force&&renderedFirst===first&&g.querySelector('tbody')){paintSelection();return}
  renderedFirst=first;curSpill=spillRect(state.sel.r,state.sel.c);

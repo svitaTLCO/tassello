@@ -29,9 +29,9 @@ function loadProject(o,silent=false){const ok=o&&Array.isArray(o.sheets)&&o.shee
  state.zoom=Number(o.zoom)||100;state.paper=PAPERS.includes(o.paper)?o.paper:'a4';state.doc={...DOC_DEFAULT,...(o.doc||{})};state.doc.font=safeFont(state.doc.font);
  Object.assign(state,{styles:cleanStyles(o.styles),layout:cleanLayout(o.layout),comments:cleanComments(o.comments),sections:cleanSections(o.sections),biblio:cleanBiblio(o.biblio),cc:cleanCc(o.cc),merge:typeof o.merge?.sheet==='string'?{sheet:o.merge.sheet.slice(0,31)}:null,spell:o.spell!==false});
  mergeIdx=-1;wordHistReset();setPaper(state.paper);applyDocStyle();
- const target=o.mode==='excel'?'excel':'word';state.mode=target==='word'?'excel':'word';hist=[];redo=[];invalidate();setMode(target,{focus:!silent});setZoom(state.zoom);
+ const target=APPS[o.mode]?o.mode:'word';state.mode=target==='word'?'excel':'word';hist=[];redo=[];invalidate();setMode(target,{focus:!silent});setZoom(state.zoom);
  suppressAutosave=false;if(silent)return;schedulePersist();toast('Progetto ripristinato')}
 function resetWordDocument(){$('wordEditor').innerHTML='<p><br></p>';state.wordHTML='<p><br></p>';wordHistReset();state.layout={...LAYOUT_DEFAULT,nav:state.layout.nav,marks:state.layout.marks};Object.assign(state,{comments:{},sections:{},biblio:{style:'apa',sources:[]},cc:{},styles:{}});if(formMode)toggleFormMode(false);applyDocStyle();mergeIdx=-1;applyLayout();renderComments()}
-async function newDocument(){const word=state.mode==='word';if(!(await confirmAction(`Creare un nuovo ${word?'documento':'foglio di calcolo'}? Salva prima le modifiche importanti.`)))return;
- if(word){resetWordDocument();state.wordTitle='Documento1';wordChanged()}else{Object.assign(state,{sheets:[blankSheet()],names:[],sheet:0,excelTitle:'Calcolo1'});hist=[];redo=[];bump();renderSheetTabs()}
+async function newDocument(){if(isPage()){pageNewDialog();return}const word=isWord();if(!(await confirmAction(`Creare un nuovo ${word?'documento':'foglio di calcolo'}? Salva prima le modifiche importanti.`)))return;
+ if(word){resetWordDocument();state.wordTitle='Documento1';wordChanged()}else if(isCalc()){Object.assign(state,{sheets:[blankSheet()],names:[],sheet:0,excelTitle:'Calcolo1'});hist=[];redo=[];bump();renderSheetTabs()}
  $('docTitle').value=currentTitle();schedulePersist();updateTitle();toast('Nuovo file creato')}

@@ -22,16 +22,20 @@ function wbSnap(){return JSON.stringify({sheets:state.sheets,sheet:state.sheet,n
 function trimHist(a){let total=a.reduce((s,x)=>s+x.length,0);while(a.length>1&&(a.length>60||total>40e6))total-=a.shift().length}
 function storeHistory(){hist.push(wbSnap());trimHist(hist);redo=[]}
 function restoreHistory(which){const undoing=which==='undo',from=undoing?hist:redo,to=undoing?redo:hist;if(!from.length){toast(undoing?'Niente da annullare':'Niente da ripetere');return}to.push(wbSnap());const saved=JSON.parse(from.pop());Object.assign(state,{sheets:saved.sheets,sheet:Math.min(saved.sheet,saved.sheets.length-1),names:saved.names||[]});renderedFirst=-1;renderSheetTabs();bump();announce(undoing?'Operazione annullata':'Operazione ripetuta')}
-function updateTitle(){const w=state.mode==='word';document.title=($('docTitle').value.trim()||'Senza titolo')+' — '+(w?'Testo':'Calcolo')+' · Tassello Ufficio'}
-// Passa da Testo a Calcolo e viceversa: conserva il lavoro dell'app che si lascia e ridisegna l'interfaccia dell'altra.
-function setMode(mode,{focus=true}={}){const leaving=state.mode;if(mode===leaving)return;
- if(leaving==='word'){const html=$('wordEditor').innerHTML;state.wordHTML=sanitizeHTML(html)}else finishCell();
+function updateTitle(){document.title=($('docTitle').value.trim()||'Senza titolo')+' — '+appName()+' · Tassello Ufficio'}
+// Passa a un'altra app (Testo, Calcolo o Impagina): conserva il lavoro dell'app che si lascia e ridisegna l'interfaccia dell'altra.
+// Ogni app ha il suo riquadro, il suo pulsante nella barra del titolo e la sua etichetta di esportazione nel menu File.
+const APPS={word:{pane:'wordPane',button:'switchWord',export:'Esporta HTML'},excel:{pane:'excelPane',button:'switchExcel',export:'Esporta CSV'},impagina:{pane:'pagePane',button:'switchPage',export:'Esporta PNG'}};
+function setMode(mode,{focus=true}={}){const leaving=state.mode;if(mode===leaving||!APPS[mode])return;
+ if(leaving==='word')state.wordHTML=sanitizeHTML($('wordEditor').innerHTML);else if(leaving==='excel')finishCell();else if(leaving==='impagina')pageLeave();
  closeFind(false);if(speaking){speechSynthesis.cancel();speaking=false}
- state.mode=mode;const word=mode==='word';$('app').className=mode;document.documentElement.dataset.mode=mode;
- $('wordPane').classList.toggle('hidden',!word);$('excelPane').classList.toggle('hidden',word);$('switchWord').setAttribute('aria-pressed',word);$('switchExcel').setAttribute('aria-pressed',!word);
- $('docTitle').value=word?state.wordTitle:state.excelTitle;$('exportLabel').textContent=word?'Esporta HTML':'Esporta CSV';updateTitle();
+ state.mode=mode;$('app').className=mode;document.documentElement.dataset.mode=mode;
+ for(const [m,a] of Object.entries(APPS)){$(a.pane).classList.toggle('hidden',m!==mode);$(a.button).setAttribute('aria-pressed',m===mode)}
+ $('docTitle').value=currentTitle();$('exportLabel').textContent=APPS[mode].export;updateTitle();
  currentTab='Inizio';renderTabs();renderRibbon();
- if(word){updateWordStats();scheduleWordTidy(0)}else{renderSheetTabs();renderedFirst=-1;renderGrid(true);setSelection(state.sel.r,state.sel.c);renderCharts()}
- printStyle();if(focus){$(word?'wordEditor':'gridScroll').focus();announce(word?'Testo: documento':'Calcolo: foglio '+sheet().name)}schedulePersist()}
+ if(mode==='word'){updateWordStats();scheduleWordTidy(0)}else if(mode==='excel'){renderSheetTabs();renderedFirst=-1;renderGrid(true);setSelection(state.sel.r,state.sel.c);renderCharts()}else pageShow();
+ printStyle();if(focus){if(mode==='impagina')pageFocus();else $(mode==='word'?'wordEditor':'gridScroll').focus();announce(mode==='word'?'Testo: documento':mode==='excel'?'Calcolo: foglio '+sheet().name:'Impagina: '+pageSummary())}schedulePersist()}
+// Porta il focus sull'area di lavoro dell'app attiva: il documento, il foglio o la pagina.
+function focusDocument(){if(isWord())restoreWordFocus();else if(isCalc())$('gridScroll').focus();else pageFocus()}
 function applyDocStyle(){const ed=$('wordEditor'),d=state.doc;ed.style.setProperty('--doc-font',`'${d.font}',Calibri,'Segoe UI',Arial,sans-serif`);ed.style.setProperty('--doc-line',d.line);ed.style.setProperty('--doc-space',d.space+'pt');ed.spellcheck=state.spell;renderDocStyles()}
 function setPaper(p){state.paper=p;$('page').dataset.paper=p;applyLayout();updateWordStats();schedulePersist();refreshToggles()}

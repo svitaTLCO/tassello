@@ -6,8 +6,8 @@ function restoreWordFocus(){$('wordEditor').focus({preventScroll:true});const sa
 function wordCmd(command,value=null){restoreWordFocus();wordHistPush();let done=true;try{document.execCommand(command,false,value)}catch(e){done=false}if(!done)toast('Il browser non supporta questo comando');wordChanged();wordSelectionSave()}
 const formatWordTag=tag=>wordCmd('formatBlock',String(tag).toLowerCase());
 // Dimensione in punti: il browser applica la dimensione 7 provvisoria, poi diventa uno span con font-size.
-function changeFontSize(pt){if(state.mode==='excel'){applyCellsStyle('size',Number(pt));return}restoreWordFocus();wordHistPush();expandCollapsed();document.execCommand('fontSize',false,'7');for(const tag of $$('font[size="7"]',$('wordEditor'))){const wrap=document.createElement('span');wrap.style.fontSize=`${pt}pt`;wrap.append(...tag.childNodes);tag.replaceWith(wrap)}wordChanged()}
-function changeFont(name){return state.mode==='excel'?applyCellsStyle('font',name):wordCmd('fontName',name)}
-function changeColor(kind,color){const ink=kind==='fontColor';return state.mode==='excel'?applyCellsStyle(ink?'color':'fill',color):wordCmd(ink?'foreColor':'hiliteColor',color)}
+function changeFontSize(pt){if(isPage())return;if(isCalc()){applyCellsStyle('size',Number(pt));return}restoreWordFocus();wordHistPush();expandCollapsed();document.execCommand('fontSize',false,'7');for(const tag of $$('font[size="7"]',$('wordEditor'))){const wrap=document.createElement('span');wrap.style.fontSize=`${pt}pt`;wrap.append(...tag.childNodes);tag.replaceWith(wrap)}wordChanged()}
+function changeFont(name){return isCalc()?applyCellsStyle('font',name):isWord()?wordCmd('fontName',name):undefined}
+function changeColor(kind,color){const ink=kind==='fontColor';return isCalc()?applyCellsStyle(ink?'color':'fill',color):isWord()?wordCmd(ink?'foreColor':'hiliteColor',color):undefined}
 function wordChanged(){const ed=$('wordEditor');state.wordHTML=sanitizeHTML(ed.innerHTML);updateWordStats();scheduleWordTidy();schedulePersist()}
 function insertHtmlAtSelection(markup){restoreWordFocus();wordHistPush();document.execCommand('insertHTML',false,markup);wordChanged()}

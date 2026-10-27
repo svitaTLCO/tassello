@@ -50,16 +50,17 @@ Ogni file ufficiale contiene anche una regola di sicurezza del browser (Content 
 
 ## Tassello Ufficio
 
-Il primo tassello contiene due app per i documenti di tutti i giorni:
+Il primo tassello contiene tre app per i documenti di tutti i giorni:
 
 - **Testo**, per scrivere: stili modificabili, elenchi a più livelli, tabelle, immagini e didascalie, sezioni con orientamento e intestazioni proprie, note a piè di pagina e di chiusura, sommario, indice analitico, riferimenti incrociati, citazioni e bibliografia (APA o Chicago), moduli compilabili, equazioni, commenti, stampa unione. Apre e salva **DOCX**.
 - **Calcolo**, per i fogli di calcolo: più di cento funzioni in italiano o in inglese, matrici dinamiche, tabelle pivot con campi calcolati, formattazione condizionale, convalida dati, nomi definiti, note e dodici tipi di grafico. Apre e salva **XLSX** e **CSV**.
+- **Impagina**, per comporre pagine: post e caroselli per i social, storie, volantini, brochure, newsletter e presentazioni, con formati pronti, margini, colonne, griglia e pagine mastro. Il testo scorre da una cornice all'altra, anche tra pagine, con stili di paragrafo e di carattere; le immagini si adattano o riempiono la cornice attorno a un punto focale. Le fonti sono locali: una cartella del computer (anche quella sincronizzata da Google Drive, OneDrive o Dropbox) che si rilegge con *Aggiorna dalle fonti*, dati CSV, XLSX o JSON per creare una pagina per riga come in una stampa unione, feed RSS o Atom salvati o incollati, testo da DOCX. Esporta **PNG** per i social e **PDF** con la stampa del browser.
 
 ### Come si usa
 
 1. Scarica `tassello-ufficio.html` da un canale ufficiale: il [sito](https://svitatlco.github.io/tassello/) o la [pagina delle release](https://github.com/svitaTLCO/tassello/releases/latest).
 2. Aprilo con un doppio clic in Chrome o Edge recenti. Funziona anche senza rete.
-3. Le bozze restano salvate nel browser; con **Salva** ottieni un file DOCX o XLSX.
+3. Le bozze restano salvate nel browser; con **Salva** ottieni un file DOCX o XLSX, in Impagina il progetto da riaprire.
 
 ## Tassello Media
 
@@ -99,13 +100,13 @@ Ogni tassello copre un tipo di lavoro sui file e resta indipendente dagli altri:
 
 | Strumento | File | App | Stato |
 | --- | --- | --- | --- |
-| Tassello Ufficio | `tassello-ufficio.html` | Testo, Calcolo | Disponibile |
+| Tassello Ufficio | `tassello-ufficio.html` | Testo, Calcolo, Impagina | Disponibile |
 | Tassello Media | `tassello-media.html` | Audio, Video | Disponibile |
 | Tassello Grafica | `tassello-grafica.html` | Immagini, Disegno | In progetto |
 
 ## Limiti
 
-Tassello Ufficio copre il lavoro di base, non tutto. Macro, revisioni (modifiche tracciate), slicer delle tabelle pivot e grafici combinati non sono supportati; l'apertura di DOCX e XLSX copre un sottoinsieme dei formati.
+Tassello Ufficio copre il lavoro di base, non tutto. Macro, revisioni (modifiche tracciate), slicer delle tabelle pivot e grafici combinati non sono supportati; l'apertura di DOCX e XLSX copre un sottoinsieme dei formati. In Impagina le cornici non si ruotano, il testo va a capo senza sillabazione e usa i caratteri installati sul computer; la cartella collegata si autorizza di nuovo a ogni sessione.
 
 Tassello Media copre il lavoro di base. In Audio le tracce sono solo audio (niente strumenti virtuali né MIDI), gli effetti di traccia sono semplici, la latenza della registrazione è stimata e regolabile, e i progetti molto lunghi richiedono molta memoria. In Video l'esportazione procede un fotogramma alla volta e la sua velocità dipende dal computer; se un file del montaggio usa un formato che il browser non sa decodificare, l'esportazione avviene invece in tempo reale, quindi dura quanto il montaggio e la scheda va lasciata in primo piano; MP4 dipende dal browser, altrimenti si ottiene WebM; non ci sono fotogrammi chiave né più tracce video sovrapposte; si importano solo i formati che il browser sa riprodurre.
 
@@ -178,7 +179,7 @@ The website is available in [English](https://svitatlco.github.io/tassello/en/),
 
 **Only use official copies.** Download Tassello only from the [website](https://svitatlco.github.io/tassello/) or from the [releases of this repository](https://github.com/svitaTLCO/tassello/releases). Because it is a single file, anyone could alter a copy and pass it around: do not open copies you receive by email, chat or USB stick, and share the link instead of the file. Tassello never connects to the internet (dictation uses the browser's own service) and never asks for passwords, accounts or payments. The [verification page](https://svitatlco.github.io/tassello/verifica.html) tells you whether a file is identical to an official version, and in Chrome or Edge you can install each tool as an app that always comes from the official website and works offline.
 
-**Tassello Ufficio** contains **Testo**, a word processor, and **Calcolo**, a spreadsheet. It opens and saves DOCX, XLSX and CSV files and works offline in recent Chrome and Edge. **Tassello Media** contains **Audio**, a multitrack recorder and editor with per-track volume, pan, mute, solo, EQ, compression and reverb, regions, tempo grid, metronome, cycle and overdubbing, plus a waveform editor with markers, noise reduction and loudness normalization (WAV, M4A and WebM export), and **Video**, a timeline editor with titles, a music and voice-over track, captions in SRT and WebVTT and an accessibility check for captions, contrast and flashing (MP4 or WebM export). Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is currently in Italian.
+**Tassello Ufficio** contains **Testo**, a word processor, **Calcolo**, a spreadsheet, and **Impagina**, a multi-page layout editor for social posts, flyers, brochures, newsletters and slides, with text threaded across frames and pages, master pages, and local sources only (a linked folder, CSV, XLSX or JSON data merged into pages, saved RSS or Atom feeds, DOCX text). It opens and saves DOCX, XLSX and CSV files, exports PNG and PDF, and works offline in recent Chrome and Edge. **Tassello Media** contains **Audio**, a multitrack recorder and editor with per-track volume, pan, mute, solo, EQ, compression and reverb, regions, tempo grid, metronome, cycle and overdubbing, plus a waveform editor with markers, noise reduction and loudness normalization (WAV, M4A and WebM export), and **Video**, a timeline editor with titles, a music and voice-over track, captions in SRT and WebVTT and an accessibility check for captions, contrast and flashing (MP4 or WebM export). Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is currently in Italian.
 
 To rebuild them from source, run `python ufficio/build.py` and `python media/build.py`; the website pages are built with `python sito/build.py` from the templates in `sito/pagine/` and the texts in `sito/testi/`.
 

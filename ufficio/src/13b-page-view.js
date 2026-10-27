@@ -1,0 +1,211 @@
+// Vista di Impagina: a sinistra le pagine (con i mastri) e le cornici della pagina in ordine di lettura, al centro la
+// pagina con guide e maniglie, a destra le proprietà. Ogni modifica passa da pgChanged, che ridisegna e salva la bozza.
+const pgStage=$('pgStage'),pgSvg=$('pgSvg'),pgOver=$('pgOver'),pgScroll=$('pgScroll');
+let pgLay=null,pgLayKey='',pgViewI=[],pgMLay=null,pgMLayKey='';
+function pgChanged({props=false,story=false}={}){Pg.ver++;if(!isPage()||!Pg.p)return pgPersistSoon();pgRenderAll({props,story});refreshToggles();pgPersistSoon()}
+// Impaginazione della vista attuale: la pagina (con la riga dei dati in anteprima) o il mastro con i campi scritti per esteso.
+function pgPagesLay(){const key=Pg.ver+'|'+Pg.row;if(pgLayKey!==key){pgViewI=pgViewInstances(Pg.p);pgLay=pgLayout(Pg.p,pgViewI);pgLayKey=key}return pgLay}
+function pgCur(){const p=Pg.p;if(Pg.mid){const key=Pg.ver+'|'+Pg.mid;if(pgMLayKey!==key){const m=pgHolder(),I={pg:{id:'_m',master:'',items:m.items},i:-1,row:null,ri:-1,n:1},list=Object.assign([I],{total:1});pgMLay={I,ii:0,lay:pgLayout(p,list,{raw:true})};pgMLayKey=key}return pgMLay}
+ pgPagesLay();const ii=Math.max(0,pgViewI.findIndex(I=>I.i===Pg.pi));return{I:pgViewI[ii],ii,lay:pgLay}}
+const pgFrameLay=it=>{const c=pgCur();return c.lay.get(c.ii+'|'+it.id)};
+function pgRenderAll({props=false,story=false}={}){const p=Pg.p;$('pgStart').hidden=!!p;$('pgWork').hidden=!p;if(!p){pgStats();return}if(Pg.pi>=p.pages.length)Pg.pi=p.pages.length-1;
+ pgRenderStage();pgRenderPages();pgRenderFrames();if(props)pgRenderProps({story});else pgSyncProps();pgStats()}
+function pgStats(){const p=Pg.p;$('pgStats').textContent=!p?'Nessun documento':Pg.mid?`${pgHolder().name} · ${pgHolder().items.length} cornici`:`Pagina ${Pg.pi+1} di ${p.pages.length} · ${pgHolder().items.length} cornici${p.data?` · dati: ${plural(p.data.rows.length,'riga','righe')}`:''}`}
+// La pagina in scala: entra tutta nello spazio disponibile, o alla scala scelta.
+function pgScale(){if(Pg.zoom)return Pg.zoom;const p=Pg.p;return Math.max(.05,Math.min(2,(pgScroll.clientWidth-40)/p.w,(pgScroll.clientHeight-40)/p.h))}
+function pgRenderStage(){const p=Pg.p,k=pgScale(),c=pgCur();for(const s of [pgSvg,pgOver]){s.setAttribute('viewBox',`0 0 ${pr2(p.w)} ${pr2(p.h)}`);s.style.width=Math.round(p.w*k)+'px';s.style.height=Math.round(p.h*k)+'px'}
+ pgSvg.innerHTML=Pg.mid?(p.bg!=='none'?`<rect width="${pr2(p.w)}" height="${pr2(p.h)}" fill="${esc(p.bg)}"/>`:'')+c.I.pg.items.map(it=>pgItemSvg(it,c.lay.get('0|'+it.id),{},m=>m.url)).join(''):pgPageSvg(p,c.I,c.ii,c.lay);
+ pgRenderOverlay();pgStage.setAttribute('aria-label',pgStageLabel());$('pgZoomInfo').textContent=`${pgFmt(toU(p.w),0)} × ${pgFmt(toU(p.h),0)} ${unitName()} · ${Math.round(k*100)}%`;
+ const pg=pgCurPage(),rows=p.data?.rows.length||0;$('pgPageInfo').textContent=Pg.mid?pgHolder().name:`Pagina ${Pg.pi+1} di ${p.pages.length}`;$('pgRowBar').hidden=!(pg?.data&&rows);if(pg?.data&&rows)$('pgRowInfo').textContent=`Riga ${Math.min(Pg.row,rows-1)+1} di ${rows}`}
+// Guide, griglia, contorni delle cornici, catene del testo, testo in eccesso e maniglie della cornice scelta.
+function pgRenderOverlay(){const p=Pg.p,k=pgScale(),sw=pr2(1/k),h=pgHolder(),sel=pgSel(),c=pgCur();let s='';
+ if(Pg.grid){const st=Math.max(2,p.step);let d='';for(let x=st;x<p.w;x+=st)d+=`M${pr2(x)} 0V${pr2(p.h)}`;for(let y=st;y<p.h;y+=st)d+=`M0 ${pr2(y)}H${pr2(p.w)}`;s+=`<path class="g-grid" d="${d}" stroke-width="${sw}"/>`}
+ if(Pg.guides){const i=pgInner(p);s+=`<rect class="g-margin" x="${pr2(i.x)}" y="${pr2(i.y)}" width="${pr2(i.w)}" height="${pr2(i.h)}" fill="none" stroke-width="${sw}"/>`;if(p.cols>1){const cw=(i.w-(p.cols-1)*p.gut)/p.cols;let d='';for(let n=1;n<p.cols;n++){const x=i.x+n*cw+(n-1)*p.gut;d+=`M${pr2(x)} ${pr2(i.y)}V${pr2(i.y+i.h)}M${pr2(x+p.gut)} ${pr2(i.y)}V${pr2(i.y+i.h)}`}s+=`<path class="g-col" d="${d}" stroke-width="${sw}"/>`}
+  for(const it of h.items){if(it.kind==='text'||it.kind==='image')s+=`<rect class="g-frame" x="${pr2(it.x)}" y="${pr2(it.y)}" width="${pr2(Math.max(it.w,.01))}" height="${pr2(Math.max(it.h,.01))}" fill="none" stroke-width="${sw}" stroke-dasharray="${pr2(4/k)} ${pr2(3/k)}"/>`;
+   if(it.kind==='image'&&!pgImgFor(it,{row:c.I.row}))s+=`<path class="g-empty" d="M${pr2(it.x)} ${pr2(it.y)}L${pr2(it.x+it.w)} ${pr2(it.y+it.h)}M${pr2(it.x+it.w)} ${pr2(it.y)}L${pr2(it.x)} ${pr2(it.y+it.h)}" stroke-width="${sw}"/><text class="g-label" x="${pr2(it.x+it.w/2)}" y="${pr2(it.y+it.h/2)}" font-size="${pr2(13/k)}" text-anchor="middle">${esc(it.field?'Immagine dal campo «'+it.field+'»':'Immagine: Invio per sceglierla')}</text>`}}
+ // Testo in eccesso: un quadratino rosso con il più nell'angolo in basso a destra della cornice.
+ for(const it of h.items){const L=it.kind==='text'&&c.lay.get(c.ii+'|'+it.id);if(L?.over){const z=pr2(14/k),x=pr2(it.x+it.w-14/k),y=pr2(it.y+it.h-14/k);s+=`<g class="g-over"><rect x="${x}" y="${y}" width="${z}" height="${z}" stroke-width="${sw}"/><path d="M${pr2(x+z/2)} ${pr2(y+3/k)}V${pr2(y+z-3/k)}M${pr2(x+3/k)} ${pr2(y+z/2)}H${pr2(x+z-3/k)}" stroke-width="${pr2(2/k)}"/></g>`}}
+ if(sel){const b=sel,hs=pr2(10/k);
+  if(sel.kind==='text'){const ch=p.stories[sel.story]?.chain||[],i=ch.indexOf(sel.id);for(const [a,bId] of [[ch[i-1],sel.id],[sel.id,ch[i+1]]]){const A=a&&h.items.find(x=>x.id===a),B=bId&&h.items.find(x=>x.id===bId);if(A&&B)s+=`<path class="g-chain" d="M${pr2(A.x+A.w)} ${pr2(A.y+A.h)}L${pr2(B.x)} ${pr2(B.y)}" stroke-width="${pr2(1.5/k)}" stroke-dasharray="${pr2(6/k)} ${pr2(4/k)}"/>`}
+   const nx=ch[i+1]&&pgWhere(ch[i+1]);if(nx&&nx.holder!==h)s+=`<text class="g-label" x="${pr2(b.x+b.w)}" y="${pr2(b.y+b.h+16/k)}" font-size="${pr2(12/k)}" text-anchor="end">continua a pagina ${nx.pi+1} →</text>`}
+  s+=`<rect class="sel-box" x="${pr2(Math.min(b.x,b.x+b.w))}" y="${pr2(Math.min(b.y,b.y+b.h))}" width="${pr2(Math.max(Math.abs(b.w),.01))}" height="${pr2(Math.max(Math.abs(b.h),.01))}" fill="none" stroke-width="${pr2(1.5/k)}" stroke-dasharray="${pr2(5/k)} ${pr2(3/k)}"/>`;
+  const handle=(x,y,n)=>`<rect class="handle h-${n}" data-h="${n}" x="${pr2(x-hs/2)}" y="${pr2(y-hs/2)}" width="${hs}" height="${hs}" stroke-width="${sw}"/>`;
+  if(sel.kind==='line')s+=handle(b.x,b.y,'p1')+handle(b.x+b.w,b.y+b.h,'p2');else for(const [n,x,y] of [['nw',b.x,b.y],['n',b.x+b.w/2,b.y],['ne',b.x+b.w,b.y],['e',b.x+b.w,b.y+b.h/2],['se',b.x+b.w,b.y+b.h],['s',b.x+b.w/2,b.y+b.h],['sw',b.x,b.y+b.h],['w',b.x,b.y+b.h/2]])s+=handle(x,y,n)}
+ pgOver.innerHTML=s}
+// Descrizioni a parole, per lo screen reader e per Alt+Maiusc+I.
+const pgU=v=>fmtU(v)+' '+unitName();
+function pgItemInfo(it){const p=Pg.p;if(it.kind==='text'){const s=p.stories[it.story],ch=s?.chain||[],L=pgFrameLay(it),t=s?storyText(s).replace(/\s+/g,' ').trim():'';return `${t?'«'+(t.length>90?t.slice(0,90)+'…':t)+'»':'vuota'}${ch.length>1?`, cornice ${ch.indexOf(it.id)+1} di ${ch.length} del testo`:''}${L?.over?', il testo non entra':''}`}
+ if(it.kind==='image'){const m=pgImgFor(it,{row:pgCur().I.row});return `${m?(it.file||m.name||'immagine'):it.field?'dal campo «'+it.field+'»':'vuota'}, ${it.fit==='fit'?'adattata':'riempie la cornice'}${it.deco?', decorativa':it.alt?`, testo alternativo «${it.alt.slice(0,80)}»`:', senza testo alternativo'}`}
+ return it.deco?'decorativa':it.alt?`testo alternativo «${it.alt.slice(0,80)}»`:''}
+function pgDescribeItem(it){const info=pgItemInfo(it);return `${it.name}, ${PG_KIND[it.kind].toLowerCase()}${info?', '+info:''}, x ${pgU(it.x)}, y ${pgU(it.y)}, ${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`}
+function pgStageLabel(){const h=pgHolder(),sel=pgSel();return `${Pg.mid?'Mastro '+h.name:`Pagina ${Pg.pi+1} di ${Pg.p.pages.length}`}, ${h.items.length===1?'una cornice':h.items.length+' cornici'}. ${sel?'Scelta: '+pgDescribeItem(sel):'Nessuna cornice scelta.'}`}
+// Il focus in Impagina: la pagina, oppure il primo formato da scegliere se non c'è ancora un documento.
+const pageFocus=()=>Pg.p?pgStage.focus():$('pgPresets').querySelector('button')?.focus();
+const pageSummary=()=>Pg.p?`${Pg.p.title}, ${pgStageLabel()}`:'scegli il formato del documento';
+// Elenco delle pagine, con le miniature, e dei mastri.
+function pgThumb(i){const p=Pg.p;pgPagesLay();const ii=pgViewI.findIndex(I=>I.i===i);return ii<0?'':pgPageSvg(p,pgViewI[ii],ii,pgLay)}
+function pgRenderPages(){const p=Pg.p,list=$('pgPages'),use=id=>p.pages.filter(x=>x.master===id).length;
+ const opt=(id,sel,label,desc,thumb)=>`<div role="option" id="${id}" class="lb-item pg-page-item${sel?' active':''}" aria-selected="${sel}">${thumb}<span class="n">${esc(label)}<span class="d">${esc(desc)}</span></span></div>`;
+ list.innerHTML=p.pages.map((pg,i)=>opt('pgp-'+pg.id,!Pg.mid&&i===Pg.pi,`Pagina ${i+1}`,[pgMasterOf(pg)?.name||'senza mastro',pg.data&&p.data?`una per riga (${p.data.rows.length})`:'',`${pg.items.length} cornici`].filter(Boolean).join(' · '),`<svg class="pg-thumb" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" aria-hidden="true" focusable="false">${pgThumb(i)}</svg>`)).join('')+
+  `<div role="group" aria-labelledby="pgMastersLbl"><div class="pg-list-sep" id="pgMastersLbl">Mastri</div>${p.masters.map(m=>opt('pgm-'+m.id,Pg.mid===m.id,m.name,`usato da ${use(m.id)===1?'una pagina':use(m.id)+' pagine'} · ${m.items.length} cornici`,'')).join('')}</div>`;
+ $('pgPageCount').textContent=p.pages.length;const act=Pg.mid?'pgm-'+Pg.mid:'pgp-'+p.pages[Pg.pi].id;list.setAttribute('aria-activedescendant',act);$(act)?.scrollIntoView({block:'nearest'})}
+const pgPageOpts=()=>$$('#pgPages [role=option]');
+function pgGoPage(i,{say=true,mid=''}={}){const p=Pg.p;if(mid){Pg.mid=mid}else{Pg.mid='';Pg.pi=clampV(i,0,p.pages.length-1)}Pg.sel=null;pgRenderAll({props:true,story:true});if(say)announce(Pg.mid?`${pgHolder().name}: le sue cornici compaiono su tutte le pagine che lo usano, ${pgHolder().items.length} cornici`:`Pagina ${Pg.pi+1} di ${p.pages.length}, ${pgHolder().items.length===1?'una cornice':pgHolder().items.length+' cornici'}${pgCurPage().data&&p.data?', ripetuta per ogni riga dei dati':''}`)}
+// Elenco delle cornici nell'ordine di lettura: è anche il modo per sceglierle e riordinarle da tastiera.
+function pgRenderFrames(){const h=pgHolder(),list=$('pgFrames'),items=pgReadOrder(h);$('pgFramesTitle').textContent=Pg.mid?'Cornici del mastro':'Cornici, in ordine di lettura';$('pgFrameCount').textContent=items.length||'';
+ list.innerHTML=items.length?items.map((it,k)=>{const L=it.kind==='text'&&pgFrameLay(it),warn=L?.over?'il testo non entra':it.kind==='image'&&!it.deco&&!it.alt?'senza testo alternativo':'';return `<div role="option" id="pgf-${it.id}" class="lb-item pg-frame-item${it.id===Pg.sel?' active':''}${it.deco?' deco':''}" aria-selected="${it.id===Pg.sel}">${ICON(PG_ICON[it.kind])}<span class="n">${esc(it.name)}<span class="d">${esc([PG_KIND[it.kind],it.deco?'decorativa':'',warn].filter(Boolean).join(' · '))}</span></span><span class="t" aria-hidden="true">${it.deco?'–':k+1}</span></div>`}).join(''):`<div class="lb-empty" role="option" aria-disabled="true" aria-selected="false" id="pgf-empty">${Pg.mid?'Mastro vuoto: inserisci il numero di pagina o un’intestazione dalla scheda Inserisci.':'Pagina vuota: inserisci una cornice dalla scheda Inserisci.'}</div>`;
+ const act=Pg.sel&&$('pgf-'+Pg.sel)?'pgf-'+Pg.sel:items.length?'pgf-'+items[0].id:'pgf-empty';list.setAttribute('aria-activedescendant',act);$(act)?.scrollIntoView({block:'nearest'})}
+function pgSelect(id,{say=true}={}){Pg.sel=id&&pgHolder().items.some(x=>x.id===id)?id:null;Pg.last={label:'',t:0};pgRenderOverlay();pgRenderFrames();pgRenderProps({story:true});refreshToggles();pgStage.setAttribute('aria-label',pgStageLabel());if(say)announce(Pg.sel?pgDescribeItem(pgSel()):Pg.mid?'Nessuna cornice scelta: le proprietà sono quelle del mastro':'Nessuna cornice scelta: le proprietà sono quelle della pagina e del documento')}
+function pgSelectStep(dir){const items=pgReadOrder(pgHolder());if(!items.length){toast('Non ci sono cornici in questa pagina');return}const i=items.findIndex(x=>x.id===Pg.sel),j=i<0?(dir>0?0:items.length-1):clampV(i+dir,0,items.length-1);pgSelect(items[j].id)}
+// Proprietà: della pagina e del documento se non c'è una cornice scelta, della cornice altrimenti.
+const ppF=(id,label,value,mode='decimal',hint='')=>`<label for="pp-${id}">${esc(label)}</label><input id="pp-${id}" data-prop="${id}" type="text" inputmode="${mode}" autocomplete="off" spellcheck="false" value="${esc(value)}"${hint?` aria-describedby="pp-${id}-h"`:''}>${hint?`<small class="hint" id="pp-${id}-h">${esc(hint)}</small>`:''}`;
+const ppC=(id,label,value,none)=>`<label for="pp-${id}">${esc(label)}</label><input id="pp-${id}" data-prop="${id}" type="color" value="${esc(value==='none'||!/^#[0-9a-f]{6}$/i.test(value)?'#ffffff':value)}"${value==='none'?' disabled':''}>${none?` <label class="check"><input type="checkbox" data-prop="${id}None"${value==='none'?' checked':''}> ${esc(none)}</label>`:''}`;
+const ppS=(id,label,value,opts,hint='')=>`<label for="pp-${id}">${esc(label)}</label><select id="pp-${id}" data-prop="${id}"${hint?` aria-describedby="pp-${id}-h"`:''}>${opts.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(value)?' selected':''}>${esc(l)}</option>`).join('')}</select>${hint?`<small class="hint" id="pp-${id}-h">${esc(hint)}</small>`:''}`;
+const ppR=(id,label,min,max,value,fmt)=>`<div class="adj"><label for="pp-${id}">${esc(label)}</label><output id="pp-${id}-o" aria-hidden="true">${esc(fmt(value))}</output><input type="range" id="pp-${id}" data-prop="${id}" min="${min}" max="${max}" step="1" value="${value}" aria-valuetext="${esc(fmt(value))}"></div>`;
+const ppK=(id,label,on,hint='')=>`<label class="check"><input type="checkbox" data-prop="${id}"${on?' checked':''}${hint?` aria-describedby="pp-${id}-h"`:''}> ${esc(label)}</label>${hint?`<small class="hint" id="pp-${id}-h">${esc(hint)}</small>`:''}`;
+const ppT=(id,label,value,hint,rows=3)=>`<label for="pp-${id}">${esc(label)}</label><textarea id="pp-${id}" data-prop="${id}" rows="${rows}"${hint?` aria-describedby="pp-${id}-h"`:''}>${esc(value)}</textarea>${hint?`<small class="hint" id="pp-${id}-h">${esc(hint)}</small>`:''}`;
+const row2=(a,b)=>`<div class="row2"><div>${a}</div><div>${b}</div></div>`;
+const ppBtn=(action,label)=>`<button type="button" class="btn sm" data-action="${action}">${esc(label)}</button>`;
+function pgRenderProps({story=false}={}){const b=$('pgProps'),p=Pg.p,it=pgSel(),h=pgHolder(),u=unitName(),focusId=document.activeElement?.closest?.('#pgProps')?document.activeElement.id:null;
+ if(!story&&focusId==='pgStory'&&it?.kind==='text')return pgSyncProps();
+ $('pgPropTitle').textContent=it?'Proprietà di '+it.name:Pg.mid?'Proprietà del mastro':'Pagina e documento';let s='';
+ if(!it){if(Pg.mid)s+=ppF('mname','Nome del mastro',h.name,'text')+`<p class="hint">Le cornici del mastro compaiono su tutte le pagine che lo usano: mettici il numero di pagina, l’intestazione, il logo.</p>`;
+  else{const pg=h,rows=p.data?.rows.length||0;s+=`<h3>Pagina ${Pg.pi+1}</h3>`+ppS('master','Mastro',pg.master,[['','Nessuno'],...p.masters.map(m=>[m.id,m.name])])+ppK('data','Ripeti per ogni riga dei dati',pg.data,p.data?`${plural(rows,'riga','righe')} da «${p.data.name}»: nel PDF e nei PNG questa pagina diventa ${rows===1?'una pagina':rows+' pagine'}.`:'Prima scegli i dati dalla scheda Fonti.')+ppT('alt','Descrizione della pagina',pg.alt||'','Per chi non vede: è il testo alternativo da usare quando pubblichi il PNG della pagina.')}
+  s+=`<h3>Documento</h3>`+ppS('preset','Formato',p.preset,[...PG_PRESETS.map(x=>[x[0],x[1]]),['','Personalizzato']])+row2(ppF('dw',`Larghezza (${u})`,fmtU(p.w)),ppF('dh',`Altezza (${u})`,fmtU(p.h)))+
+   row2(ppF('mt',`Margine sopra (${u})`,fmtU(p.m.t)),ppF('mb',`Margine sotto (${u})`,fmtU(p.m.b)))+row2(ppF('ml',`Margine a sinistra (${u})`,fmtU(p.m.l)),ppF('mr',`Margine a destra (${u})`,fmtU(p.m.r)))+
+   row2(ppF('cols','Colonne',p.cols,'numeric'),ppF('gut',`Spazio tra colonne (${u})`,fmtU(p.gut)))+ppF('step',`Passo della griglia (${u})`,fmtU(p.step))+ppC('bg','Colore della pagina',p.bg)+
+   (p.data?`<h3>Dati</h3><dl><dt>Fonte</dt><dd>${esc(p.data.name)}</dd><dt>Righe</dt><dd>${p.data.rows.length}</dd><dt>Campi</dt><dd>${esc(p.data.fields.join(', '))}</dd></dl>`:'')}
+ else{const L=it.kind==='line';s+=ppF('name','Nome',it.name,'text')+row2(ppF('x',`X (${u})`,fmtU(it.x)),ppF('y',`Y (${u})`,fmtU(it.y)))+row2(ppF('w',L?`Lunghezza orizzontale (${u})`:`Larghezza (${u})`,fmtU(it.w)),ppF('h',L?`Lunghezza verticale (${u})`:`Altezza (${u})`,fmtU(it.h)));
+  if(it.kind==='text'){const st=p.stories[it.story],ch=st.chain,i=ch.indexOf(it.id);
+   s+=row2(ppF('cols','Colonne',it.cols||1,'numeric'),ppF('gut',`Spazio tra colonne (${u})`,fmtU(it.gut||0)))+row2(ppF('pad',`Margine interno (${u})`,fmtU(it.pad||0)),ppS('valign','In verticale',it.valign||'top',[['top','In alto'],['middle','Al centro'],['bottom','In basso']]))+ppC('fill','Sfondo della cornice',it.fill,'Trasparente');
+   s+=`<h3 id="pgStoryLbl">Testo${ch.length>1?`, cornice ${i+1} di ${ch.length}`:''}</h3><div class="pg-story-tools">${ppS('ps','Stile del paragrafo','',[['','Scegli…'],...Object.entries(p.ps).map(([k,v])=>[k,v.name])])}${ppS('cs','Stile del carattere','',[['','Scegli…'],...Object.entries(p.cs).map(([k,v])=>[k,v.name]),['-','Nessuno (togli lo stile)']])}</div>`+
+    `<div id="pgStory" class="pg-story" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="pgStoryLbl" aria-describedby="pgStoryHint" spellcheck="true" lang="it">${pgStoryHtml(st)}</div>`+
+    `<div class="pg-btns">${ppBtn('pgField','Campo…')}${ppBtn('pgLink','Continua in nuova cornice')}${ch.length>1?ppBtn('pgUnlink','Scollega'):''}${ppBtn('pgDocx','Importa testo…')}</div>`+(st.src?`<p class="hint">Collegato a «${esc(st.src)}»: Aggiorna dalle fonti lo rilegge.</p>`:'')}
+  if(it.kind==='image'){const files=pgFolderImages(),fields=p.data?.fields||[];s+=`<div class="pg-btns">${ppBtn('pgChooseImage','Scegli immagine…')}</div>`+(it.file?`<p class="hint">Dalla cartella: «${esc(it.file)}»</p>`:'')+
+   (files.length?ppS('file','Immagine dalla cartella collegata',it.file||'',[['','—'],...files.map(f=>[f,f])]):'')+(fields.length?ppS('field','Immagine dal campo dei dati',it.field||'',[['','Nessuno'],...fields.map(f=>[f,f])],'Il campo contiene il nome del file, che si cerca nella cartella collegata.'):'')+
+   ppS('fit','Adattamento',it.fit,[['fill','Riempi la cornice (si taglia ai bordi)'],['fit','Adatta alla cornice (si vede tutta)']])+ppR('fx','Punto focale, da sinistra',0,100,it.fx??50,v=>v+'%')+ppR('fy','Punto focale, dall’alto',0,100,it.fy??50,v=>v+'%')+ppC('fill','Sfondo della cornice',it.fill,'Trasparente')}
+  if(it.kind==='rect'||it.kind==='ellipse')s+=ppC('fill','Riempimento',it.fill,'Nessun riempimento')+ppC('stroke','Contorno',it.stroke)+ppF('sw',`Spessore del contorno (${u})`,fmtU(it.sw))+(it.kind==='rect'?ppF('radius',`Angoli arrotondati (${u})`,fmtU(it.radius||0)):'');
+  if(L)s+=ppC('stroke','Colore',it.stroke)+ppF('sw',`Spessore (${u})`,fmtU(it.sw));
+  s+=ppR('opacity','Opacità',0,100,it.opacity,v=>v+'%');
+  if(it.kind!=='text')s+=`<h3>Per chi non vede</h3>`+ppK('deco','Decorativa: non serve descriverla',it.deco)+(it.deco?'':ppT('alt','Testo alternativo',it.alt,it.kind==='image'?'Che cosa mostra l’immagine, in una o due frasi. Puoi usare i campi dei dati, per esempio «Nome».':'Che cosa comunica la forma.'))}
+ b.innerHTML=s;pgStoryCss();if(focusId&&$(focusId))$(focusId).focus()}
+// Aggiorna i valori senza ricostruire il pannello, così il campo che si sta usando non perde il focus.
+function pgSyncProps(){const it=pgSel(),a=document.activeElement;if(!it){if(!$('pp-dw'))pgRenderProps({story:true});return}if(!$('pp-name')||$('pgPropTitle').textContent!=='Proprietà di '+it.name){pgRenderProps({story:true});return}
+ for(const [k,v] of [['x',fmtU(it.x)],['y',fmtU(it.y)],['w',fmtU(it.w)],['h',fmtU(it.h)]]){const el=$('pp-'+k);if(el&&el!==a)el.value=v}}
+// Valori scritti nei campi: si controllano e diventano una modifica.
+const PG_PROP={name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',cols:'Colonne',gut:'Spazio tra colonne',pad:'Margine interno',valign:'Allineamento verticale',fill:'Colore',fillNone:'Sfondo',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',alt:'Testo alternativo',deco:'Decorativa',fit:'Adattamento',fx:'Punto focale',fy:'Punto focale',file:'Immagine',field:'Campo dell’immagine',mname:'Nome del mastro',master:'Mastro della pagina',data:'Ripeti per ogni riga',preset:'Formato',dw:'Larghezza della pagina',dh:'Altezza della pagina',mt:'Margini',mb:'Margini',ml:'Margini',mr:'Margini',step:'Passo della griglia',bg:'Colore della pagina',bgNone:'Colore della pagina'};
+function pgApplyProp(key,el){const p=Pg.p,it=pgSel(),v=el.type==='checkbox'?el.checked:el.value,n=pgNum(v);
+ const need=(lo,hi,conv=fromU)=>{const x=conv(n);if(!(x>=lo&&x<=hi))throw Error(`Scrivi un numero tra ${pgFmt(toU(lo))} e ${pgFmt(toU(hi))}`);return x};
+ if(!it){const pg=pgCurPage();switch(key){case 'mname':pgHolder().name=String(v).trim().slice(0,40)||pgHolder().name;return;case 'master':pg.master=v;return;case 'data':pg.data=!!v;return;case 'alt':pg.alt=String(v).slice(0,2000);return;
+  case 'preset':{const pr=PG_PRESETS.find(x=>x[0]===v);p.preset=v;if(pr)pgResize(p,pr[2],pr[3],pr[4]);return}case 'dw':pgResize(p,need(20,20000),p.h);p.preset='';return;case 'dh':pgResize(p,p.w,need(20,20000));p.preset='';return;
+  case 'mt':case 'mb':case 'ml':case 'mr':p.m[key[1]]=need(0,Math.min(p.w,p.h)/2);return;case 'cols':p.cols=Math.round(need(1,12,x=>x));return;case 'gut':p.gut=need(0,p.w/4);return;case 'step':p.step=need(1,p.w/2);return;case 'bg':p.bg=v;return}return}
+ switch(key){case 'name':it.name=String(v).trim().slice(0,60)||pgNextName(p,it.kind);break;
+  case 'x':it.x=need(-1e5,1e5);break;case 'y':it.y=need(-1e5,1e5);break;case 'w':it.w=need(it.kind==='line'?-1e5:1,1e5);break;case 'h':it.h=need(it.kind==='line'?-1e5:1,1e5);break;
+  case 'cols':it.cols=Math.round(need(1,12,x=>x));break;case 'gut':it.gut=need(0,1e4);break;case 'pad':it.pad=need(0,Math.min(it.w,it.h)/2);break;case 'sw':it.sw=need(0,1e3);break;case 'radius':it.radius=need(0,1e4);break;
+  case 'opacity':case 'fx':case 'fy':it[key]=Number(v);break;case 'fillNone':it.fill=v?'none':'#ffffff';break;case 'deco':it.deco=!!v;break;case 'alt':it.alt=String(v).slice(0,2000);break;
+  case 'file':it.file=v;if(v)pgLoadFolderImage(it);break;default:it[key]=v}}
+// Un formato nuovo: le cornici restano dove sono, la verifica segnala quelle che escono dalla pagina.
+function pgResize(p,w,h,unit){p.w=w;p.h=h;if(unit)p.unit=unit}
+$('pgProps').addEventListener('input',e=>{const el=e.target,key=el.dataset.prop;if(!key||!(el.type==='range'||el.type==='color'))return;try{pgApplyProp(key,el)}catch(err){return}
+ if(el.type==='range'){const t=v=>v+'%';el.setAttribute('aria-valuetext',t(el.value));$('pp-'+key+'-o').textContent=t(el.value)}Pg.ver++;pgRenderStage()});
+$('pgProps').addEventListener('change',e=>{const el=e.target,key=el.dataset.prop;if(!key)return;if(key==='ps'){pgApplyParaStyle(el.value);return}if(key==='cs'){pgApplyCharStyle(el.value);return}const it=pgSel();
+ try{pgApplyProp(key,el)}catch(err){toast(err.message);el.value=el.defaultValue;el.focus();return}
+ const label=PG_PROP[key]||'Proprietà';pgSettle(it?`${label} di ${it.name}`:label,{props:['fillNone','deco','preset','name','mname','cols','file','field','fit','bgNone','data','master'].includes(key)});if(key==='data'&&el.checked&&!Pg.p.data)toast('Ora scegli i dati dalla scheda Fonti: CSV, XLSX, JSON, un feed o un foglio di Calcolo')});
+$('pgProps').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)runCommand(b.dataset.action)});
+$('pgProps').addEventListener('keydown',e=>{if(e.key==='Escape'&&e.target.id!=='pgStory'){e.preventDefault();(Pg.sel?$('pgFrames'):pgStage).focus()}});
+// Editor del testo: un paragrafo per riga, con lo stile del paragrafo e quello del carattere come attributi.
+function pgStoryHtml(s){return s.paras.map(pa=>`<p data-ps="${esc(pa.ps)}">${pa.runs.map(r=>r.cs?`<span data-cs="${esc(r.cs)}">${esc(r.t)}</span>`:esc(r.t)).join('')||'<br>'}</p>`).join('')}
+// Aspetto degli stili nell'editor: proporzioni rispetto al corpo del testo e colori leggibili sul bianco.
+function pgStoryCss(){const p=Pg.p,base=p.ps.corpo?.size||16,css=[];for(const [k,s] of Object.entries(p.ps))css.push(`#pgStory p[data-ps="${CSS.escape(k)}"]{font-family:${fontStack(s.font)};font-size:${clampV(s.size/base,.8,2).toFixed(2)}em;font-weight:${s.bold?700:400};font-style:${s.italic?'italic':'normal'};${s.caps?'text-transform:uppercase;':''}color:${(pgContrast(s.color,'#ffffff')||1)<3?'#1b1b1b':s.color};text-align:${s.align==='justify'?'left':s.align}${s.bullet?';padding-left:1.1em;text-indent:-1.1em':''}}${s.bullet?`#pgStory p[data-ps="${CSS.escape(k)}"]::before{content:'• '}`:''}`);
+ for(const [k,c] of Object.entries(p.cs))css.push(`#pgStory span[data-cs="${CSS.escape(k)}"]{${c.bold?'font-weight:700;':''}${c.italic?'font-style:italic;':''}${c.under?'text-decoration:underline;':''}${c.color&&(pgContrast(c.color,'#ffffff')||1)>=3?'color:'+c.color:''}}`);$('pgStoryCss').textContent=css.join('\n')}
+// Dal contenuto dell'editor ai paragrafi della storia.
+function pgParseStory(root){const paras=[];const blockOf=(el,ps)=>{const runs=[];const walk=(n,cs)=>{for(const c of n.childNodes){if(c.nodeType===3){if(c.data)runs.push({t:c.data.replace(/[\n\r​]/g,''),cs})}else if(c.nodeType===1){if(c.tagName==='BR')continue;const t=c.tagName,ncs=c.dataset?.cs&&Pg.p.cs[c.dataset.cs]?c.dataset.cs:t==='B'||t==='STRONG'?'forte':t==='I'||t==='EM'?'enfasi':cs;walk(c,ncs)}}};walk(el,'');paras.push({ps,runs:pgMergeRuns(runs)})};
+ for(const c of root.childNodes){if(c.nodeType===3){if(c.data.trim())paras.push({ps:'corpo',runs:[{t:c.data,cs:''}]})}else if(c.nodeType===1){const ps=c.dataset?.ps&&Pg.p.ps[c.dataset.ps]?c.dataset.ps:'corpo';if(/^(P|DIV|H\d|LI|BLOCKQUOTE)$/.test(c.tagName))blockOf(c,ps);else if(c.tagName!=='BR')blockOf(c,'corpo')}}
+ return paras.length?paras:[P('corpo','')]}
+function pgMergeRuns(runs){const out=[];for(const r of runs){if(!r.t)continue;const last=out.at(-1);if(last&&last.cs===r.cs)last.t+=r.t;else out.push({t:r.t,cs:r.cs})}return out}
+let pgStoryTimer=0;
+function pgStorySync(){clearTimeout(pgStoryTimer);const ed=$('pgStory'),it=pgSel();if(!ed||it?.kind!=='text')return;const paras=pgParseStory(ed);pgEdit('Testo di '+it.name,p=>{p.stories[it.story].paras=paras},{merge:true})}
+// Posizione nel testo come paragrafo e carattere, per applicare gli stili sul modello e ritrovare il cursore.
+function pgPosOf(ed,node,off){const blocks=[...ed.children];if(!blocks.length)return{p:0,o:0};if(node===ed){const b=blocks[Math.min(off,blocks.length-1)];return{p:blocks.indexOf(b),o:off>=blocks.length?b.textContent.length:0}}
+ let b=node;while(b&&b.parentNode!==ed)b=b.parentNode;if(!b)return{p:0,o:0};const r=document.createRange();r.setStart(b,0);r.setEnd(node,off);return{p:Math.max(0,blocks.indexOf(b)),o:r.toString().length}}
+function pgDomAt(ed,pos){const b=ed.children[pos.p];if(!b)return{node:ed,off:ed.childNodes.length};let o=pos.o;const w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT);for(let t=w.nextNode();t;t=w.nextNode()){if(o<=t.data.length)return{node:t,off:o};o-=t.data.length}return{node:b,off:b.childNodes.length}}
+let pgRange=null;
+document.addEventListener('selectionchange',()=>{const ed=$('pgStory'),s=getSelection();if(ed&&s.rangeCount&&ed.contains(s.anchorNode)){const r=s.getRangeAt(0);pgRange={a:pgPosOf(ed,r.startContainer,r.startOffset),b:pgPosOf(ed,r.endContainer,r.endOffset)}}});
+function pgRestoreRange(){const ed=$('pgStory');if(!ed||!pgRange)return;const a=pgDomAt(ed,pgRange.a),b=pgDomAt(ed,pgRange.b),r=document.createRange();try{r.setStart(a.node,a.off);r.setEnd(b.node,b.off);ed.focus();const s=getSelection();s.removeAllRanges();s.addRange(r)}catch(e){ed.focus()}}
+// Stile del paragrafo: vale per i paragrafi toccati dalla selezione o da quello del cursore.
+function pgApplyParaStyle(ps){if(!ps)return;const it=pgSel();if(it?.kind!=='text'||!Pg.p.ps[ps])return;pgStorySync();const r=pgRange||{a:{p:0,o:0},b:{p:0,o:0}},paras=Pg.p.stories[it.story].paras;
+ pgEdit('Stile del paragrafo',()=>{for(let i=r.a.p;i<=Math.min(r.b.p,paras.length-1);i++)paras[i].ps=ps});$('pgStory').innerHTML=pgStoryHtml(Pg.p.stories[it.story]);$('pp-ps').value='';pgRestoreRange();announce(`Stile ${Pg.p.ps[ps].name}${r.b.p>r.a.p?` su ${r.b.p-r.a.p+1} paragrafi`:''}`)}
+// Stile del carattere: sul testo scelto; «-» lo toglie.
+function pgApplyCharStyle(cs,toggle=false){if(!cs)return;const it=pgSel();if(it?.kind!=='text')return;pgStorySync();const r=pgRange;if(!r||(r.a.p===r.b.p&&r.a.o===r.b.o)){toast('Scegli prima il testo nell’editor, poi lo stile del carattere');$('pp-cs')&&($('pp-cs').value='');pgRestoreRange();return}
+ const s=Pg.p.stories[it.story];let on=cs==='-'?'':cs;if(toggle&&pgAllHas(s,r,cs))on='';pgEdit('Stile del carattere',()=>pgSetCs(s,r,on));$('pgStory').innerHTML=pgStoryHtml(s);if($('pp-cs'))$('pp-cs').value='';pgRestoreRange();announce(on?'Stile '+Pg.p.cs[on].name:'Stile del carattere tolto')}
+function pgSplitAt(pa,o){let acc=0;for(let i=0;i<pa.runs.length;i++){const r=pa.runs[i],L=r.t.length;if(o>acc&&o<acc+L){pa.runs.splice(i,1,{t:r.t.slice(0,o-acc),cs:r.cs},{t:r.t.slice(o-acc),cs:r.cs});return}acc+=L}}
+function pgEachRun(s,r,fn){for(let pi=r.a.p;pi<=r.b.p;pi++){const pa=s.paras[pi];if(!pa)continue;const from=pi===r.a.p?r.a.o:0,to=pi===r.b.p?r.b.o:Infinity;pgSplitAt(pa,from);if(to!==Infinity)pgSplitAt(pa,to);let acc=0;for(const run of pa.runs){const L=run.t.length;if(acc>=from&&acc+L<=to&&L)fn(run);acc+=L}}}
+function pgSetCs(s,r,cs){pgEachRun(s,r,run=>{run.cs=cs});for(const pa of s.paras)pa.runs=pgMergeRuns(pa.runs)}
+function pgAllHas(s,r,cs){const copy=JSON.parse(JSON.stringify(s));let all=true;pgEachRun(copy,r,run=>{if(run.cs!==cs)all=false});return all}
+// Tastiera nell'editor: Ctrl+B e Ctrl+I per Forte ed Enfasi, Esc per tornare alla pagina; incolla solo testo.
+document.addEventListener('keydown',e=>{const ed=$('pgStory');if(!ed||e.target!==ed)return;if((e.ctrlKey||e.metaKey)&&!e.altKey&&/^[bi]$/i.test(e.key)){e.preventDefault();pgApplyCharStyle(e.key.toLowerCase()==='b'?'forte':'enfasi',true);return}if(e.key==='Escape'){e.preventDefault();pgStorySync();pgStage.focus();announce('Pagina. '+pgStageLabel())}});
+document.addEventListener('paste',e=>{const ed=$('pgStory');if(!ed||!ed.contains(e.target))return;e.preventDefault();const t=e.clipboardData?.getData('text/plain')||'';document.execCommand('insertText',false,t)});
+document.addEventListener('input',e=>{const ed=$('pgStory');if(!ed||e.target!==ed)return;
+ // A capo dopo un titolo: il nuovo paragrafo prende lo stile che segue (per esempio il Corpo del testo).
+ if(e.inputType==='insertParagraph'){const s=getSelection();let b=s.anchorNode;while(b&&b.parentNode!==ed)b=b.parentNode;const prev=b?.previousElementSibling,st=prev&&Pg.p.ps[prev.dataset.ps];if(b&&st?.next&&b.dataset.ps===prev.dataset.ps&&!b.textContent)b.dataset.ps=st.next}
+ if(!ed.firstElementChild||[...ed.childNodes].some(n=>n.nodeType===3&&n.data.trim()))document.execCommand('formatBlock',false,'p');
+ clearTimeout(pgStoryTimer);pgStoryTimer=setTimeout(pgStorySync,250)});
+document.addEventListener('focusout',e=>{if(e.target.id==='pgStory')pgStorySync()});
+// Puntatore sulla pagina: un clic sceglie la cornice più in alto in quel punto, le maniglie la ridimensionano;
+// con Maiusc le immagini e le forme mantengono le proporzioni; il doppio clic su un testo apre l'editor.
+const pgPt=e=>{const r=pgSvg.getBoundingClientRect(),k=pgScale();return{x:(e.clientX-r.left)/k,y:(e.clientY-r.top)/k}};
+function pgHit(pt){const items=pgHolder().items,tol=6/pgScale();for(let i=items.length-1;i>=0;i--){const it=items[i];if(it.hidden)continue;if(it.kind==='line'){const dx=it.w,dy=it.h,L=Math.hypot(dx,dy)||1,t=clampV(((pt.x-it.x)*dx+(pt.y-it.y)*dy)/(L*L),0,1);if(Math.hypot(it.x+t*dx-pt.x,it.y+t*dy-pt.y)<=Math.max(tol,it.sw))return it;continue}if(pt.x>=it.x&&pt.x<=it.x+it.w&&pt.y>=it.y&&pt.y<=it.y+it.h)return it}return null}
+const pgSnapV=v=>Pg.p.snap?Math.round(v/Pg.p.step)*Pg.p.step:v;
+let pgDrag=null;
+pgStage.addEventListener('pointerdown',e=>{if(e.button!==0||!Pg.p)return;pgStage.focus({preventScroll:true});const pt=pgPt(e),hd=e.target.closest?.('[data-h]');
+ if(hd&&pgSel())pgDrag={mode:'resize',h:hd.dataset.h,o:{...pgSel()},pt};
+ else{const it=pgHit(pt);if(!it){if(Pg.sel)pgSelect(null,{say:false});return}if(it.id!==Pg.sel)pgSelect(it.id,{say:false});pgDrag={mode:'move',o:{...it},pt}}
+ pgStage.setPointerCapture(e.pointerId);e.preventDefault()});
+pgStage.addEventListener('pointermove',e=>{if(!pgDrag)return;const it=pgSel();if(!it)return;const pt=pgPt(e),dx=pt.x-pgDrag.pt.x,dy=pt.y-pgDrag.pt.y,o=pgDrag.o;if(!pgDrag.moved&&Math.hypot(dx,dy)*pgScale()<3)return;pgDrag.moved=true;
+ if(pgDrag.mode==='move'){it.x=pgSnapV(o.x+dx);it.y=pgSnapV(o.y+dy)}
+ else{const H=pgDrag.h;if(it.kind==='line'){if(H==='p1'){it.x=pgSnapV(o.x+dx);it.y=pgSnapV(o.y+dy);it.w=o.x+o.w-it.x;it.h=o.y+o.h-it.y}else{it.w=pgSnapV(o.x+o.w+dx)-o.x;it.h=pgSnapV(o.y+o.h+dy)-o.y}}
+  else{let x=o.x,y=o.y,w=o.w,h=o.h;if(H.includes('e'))w=pgSnapV(o.x+o.w+dx)-o.x;if(H.includes('s'))h=pgSnapV(o.y+o.h+dy)-o.y;if(H.includes('w')){x=pgSnapV(o.x+dx);w=o.x+o.w-x}if(H.includes('n')){y=pgSnapV(o.y+dy);h=o.y+o.h-y}
+   if(e.shiftKey&&H.length===2){const k=Math.max(w/o.w,h/o.h);w=o.w*k;h=o.h*k;if(H.includes('w'))x=o.x+o.w-w;if(H.includes('n'))y=o.y+o.h-h}Object.assign(it,{x,y,w:Math.max(2,w),h:Math.max(2,h)})}}
+ Pg.ver++;pgRenderStage();pgSyncProps()});
+const pgEndDrag=()=>{if(!pgDrag)return;const d=pgDrag;pgDrag=null;if(d.moved&&pgSettle(d.mode==='move'?'Sposta':'Ridimensiona'))announce(pgDescribeItem(pgSel()))};
+pgStage.addEventListener('pointerup',pgEndDrag);pgStage.addEventListener('pointercancel',pgEndDrag);
+pgStage.addEventListener('dblclick',e=>{const it=pgHit(pgPt(e));if(it)pgOpenItem(it)});
+pgStage.addEventListener('contextmenu',e=>{e.preventDefault();const it=pgHit(pgPt(e));if(it&&it.id!==Pg.sel)pgSelect(it.id,{say:false});pgItemMenu(e.clientX,e.clientY)});
+// Invio su una cornice: il testo va all'editor, l'immagine vuota alla scelta del file, le altre alle proprietà.
+function pgOpenItem(it){if(it.kind==='text'){$('pgStory')?.focus();announce('Testo di '+it.name+': '+($('pgStory')?.textContent.slice(0,80)||'vuoto'));return}if(it.kind==='image'&&!it.img&&!it.field){runCommand('pgChooseImage');return}focusables($('pgProps'))[0]?.focus()}
+// Tastiera sulla pagina: frecce per spostare, Ctrl+frecce per ridimensionare (con Maiusc dieci volte tanto),
+// PgSu e PgGiù per la cornice precedente o successiva nell'ordine di lettura, Invio per lavorarci, Esc per non sceglierne nessuna.
+pgStage.addEventListener('keydown',e=>{if(!Pg.p)return;const it=pgSel(),arrows={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+ if(arrows[e.key]&&!e.altKey){e.preventDefault();if(!it){toast('Scegli prima una cornice: PgGiù e PgSu, oppure l’elenco delle cornici');return}const [ax,ay]=arrows[e.key],step=(Pg.p.snap?Pg.p.step:pgMM()?MM:1)*(e.shiftKey?10:1);
+  if(e.ctrlKey||e.metaKey){pgEdit('Ridimensiona',()=>{it.w=it.kind==='line'?it.w+ax*step:Math.max(2,it.w+ax*step);it.h=it.kind==='line'?it.h+ay*step:Math.max(2,it.h+ay*step)},{merge:true});announce(`${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`)}
+  else{pgEdit('Sposta',()=>{it.x+=ax*step;it.y+=ay*step},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}`)}return}
+ if(e.key==='PageUp'||e.key==='PageDown'){if(e.altKey||e.ctrlKey)return;e.preventDefault();pgSelectStep(e.key==='PageDown'?1:-1);return}
+ if(e.key==='Escape'&&Pg.sel){e.preventDefault();pgSelect(null);return}
+ if(e.key==='Enter'){e.preventDefault();if(it)pgOpenItem(it);else focusables($('pgProps'))[0]?.focus();return}
+ if(!e.ctrlKey&&!e.altKey&&(e.key==='+'||e.key==='-'||e.key==='0')){e.preventDefault();runCommand(e.key==='+'?'zoomUp':e.key==='-'?'zoomDown':'pgZoomFit');return}
+ if((e.shiftKey&&e.key==='F10')||e.key==='ContextMenu'){e.preventDefault();const r=pgStage.getBoundingClientRect();pgItemMenu(r.left+20,r.top+20)}});
+// Elenco delle pagine: frecce per scegliere, Alt+Maiusc+frecce per spostare la pagina, Invio per andare alla pagina.
+$('pgPages').addEventListener('keydown',e=>{const opts=pgPageOpts(),cur=opts.findIndex(o=>o.id===$('pgPages').getAttribute('aria-activedescendant'));if(!opts.length)return;
+ if(e.altKey&&e.shiftKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();if(!Pg.mid)pgMovePage(e.key==='ArrowUp'?-1:1);return}
+ let j=null;if(e.key==='ArrowDown')j=Math.min(opts.length-1,cur+1);else if(e.key==='ArrowUp')j=Math.max(0,cur-1);else if(e.key==='Home')j=0;else if(e.key==='End')j=opts.length-1;
+ if(j!==null){e.preventDefault();pgPickOption(opts[j]);return}
+ if(e.key==='Enter'){e.preventDefault();pgStage.focus();announce(pgStageLabel());return}
+ if(e.key==='Delete'){e.preventDefault();if(Pg.mid)pgDelMaster();else runCommand('pgDelPage');return}
+ if((e.shiftKey&&e.key==='F10')||e.key==='ContextMenu'){e.preventDefault();const r=$(opts[cur]?.id)?.getBoundingClientRect()||$('pgPages').getBoundingClientRect();pgPageMenu(r.left+20,r.bottom)}});
+function pgPickOption(o){if(o.id.startsWith('pgm-'))pgGoPage(0,{mid:o.id.slice(4)});else pgGoPage(Pg.p.pages.findIndex(x=>'pgp-'+x.id===o.id))}
+$('pgPages').addEventListener('click',e=>{const o=e.target.closest('[role=option]');if(o)pgPickOption(o);$('pgPages').focus()});
+// Elenco delle cornici: la scelta segue le frecce; Alt+Maiusc+frecce cambia l'ordine di lettura.
+$('pgFrames').addEventListener('keydown',e=>{const items=pgReadOrder(pgHolder()),i=items.findIndex(x=>x.id===Pg.sel);if(!items.length)return;
+ if(e.altKey&&e.shiftKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();runCommand(e.key==='ArrowUp'?'pgReadUp':'pgReadDown');return}
+ let j=null;if(e.key==='ArrowDown')j=Math.min(items.length-1,i+1);else if(e.key==='ArrowUp')j=Math.max(0,i<0?0:i-1);else if(e.key==='Home')j=0;else if(e.key==='End')j=items.length-1;if(j!==null){e.preventDefault();pgSelect(items[j].id);return}
+ if(e.key==='Enter'){e.preventDefault();if(!Pg.sel)pgSelect(items[0].id,{say:false});pgOpenItem(pgSel());return}
+ if(e.key==='F2'){e.preventDefault();if(!Pg.sel)pgSelect(items[0].id,{say:false});$('pp-name')?.focus();$('pp-name')?.select();return}
+ if(e.key==='Escape'&&Pg.sel){e.preventDefault();pgSelect(null);return}
+ if((e.shiftKey&&e.key==='F10')||e.key==='ContextMenu'){e.preventDefault();const r=$('pgf-'+Pg.sel)?.getBoundingClientRect()||$('pgFrames').getBoundingClientRect();pgItemMenu(r.left+20,r.bottom)}});
+$('pgFrames').addEventListener('click',e=>{const o=e.target.closest('[id^=pgf-]');if(o&&o.id!=='pgf-empty')pgSelect(o.id.slice(4),{say:false});$('pgFrames').focus()});
+$('pgBar').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)runCommand(b.dataset.action)});
+$('pgStart').addEventListener('click',e=>{const b=e.target.closest('[data-preset]');if(b)pgStartWith(b.dataset.preset);else if(e.target.closest('[data-pg-open]'))runCommand('open')});
+new ResizeObserver(()=>{if(isPage()&&Pg.p&&!Pg.zoom)pgRenderStage()}).observe(pgScroll);
+// Menu della cornice e della pagina (Maiusc+F10 o clic destro).
+function pgItemMenu(x,y){const it=pgSel();openMenu(it?[...(it.kind==='text'?[mi('pgEditText'),mi('pgLink'),mi('pgUnlink')]:it.kind==='image'?[mi('pgChooseImage'),mi('pgFit'),mi('pgFill')]:[]),'-',mi('pgDup'),mi('pgCopy'),mi('pgCut'),mi('pgPaste'),'-',mi('pgFront'),mi('pgForward'),mi('pgBackward'),mi('pgBack'),'-',mi('pgReadUp'),mi('pgReadDown'),'-',mi('pgDelete')]:[mi('pgAddText'),mi('pgAddImage'),mi('pgAddRect'),mi('pgPaste'),'-',mi('pgMasterApply'),mi('pgFormat')],x,y,it?'Menu di '+it.name:'Menu della pagina')}
+function pgPageMenu(x,y){openMenu(Pg.mid?[mi('pgMasterNew'),{label:'Elimina il mastro',icon:'trash',run:()=>pgDelMaster()}]:[mi('pgAddPage'),mi('pgDupPage'),{label:'Sposta la pagina prima',icon:'up',run:()=>pgMovePage(-1)},{label:'Sposta la pagina dopo',icon:'down',run:()=>pgMovePage(1)},mi('pgMasterApply'),mi('pgDataRepeat'),'-',mi('pgDelPage')],x,y,Pg.mid?'Menu del mastro':`Menu della pagina ${Pg.pi+1}`)}
