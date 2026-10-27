@@ -32,7 +32,8 @@ const PG_V='post quadrato storia a4 letter a5 a3 a2 a1 a0';
 // stampa, con - solo in quelli per lo schermo. Opzioni: n nome, f sfondo, r angoli (frazione del lato corto), v allineamento
 // verticale m/b, c colonne, pad margine interno (in corpi del testo), k catena (le cornici con la stessa k si passano il
 // testo), q quadrata al centro, i rientro (frazione del lato corto), m sagoma, d decorativa, a testo alternativo, s colore
-// del contorno delle forme, w spessore della linea o del contorno (in corpi del testo); nelle insegne st stile e c1, c2, oc, oc2, shc, gc colori, x altre proprietà.
+// del contorno delle forme, w spessore della linea o del contorno (in corpi del testo), rot rotazione in gradi (le linee la ignorano);
+// nelle insegne st stile e c1, c2, oc, oc2, shc, gc colori, x altre proprietà.
 // Un gruppo {rep:[volte,dx,dy],g:[cornici…]} si ripete spostato di dx e dy: nei testi {n} è il numero della copia.
 const PG_NUM=['t',.5,1.25,1,1.8,'k:«Pagina» / «Pagine»',{n:'Numero di pagina'}];
 const PG_TEMPLATES=[
@@ -248,13 +249,13 @@ function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_
  const name=s=>{let v=s,k=2;while(used.has(v))v=s+' '+k++;used.add(v);return v};
  const ax=(v,a,n,len)=>v<0?a*(v+1):v>1?a+n+(len-a-n)*(v-1):a+v*n;
  const box=(e,o)=>{let x=ax(e[1],I.x,I.w,p.w),y=ax(e[2],I.y,I.h,p.h),w=ax(e[3],I.x,I.w,p.w)-x,h=ax(e[4],I.y,I.h,p.h)-y;if(o.q){const s=Math.min(w,h);x+=(w-s)/2;y+=(h-s)/2;w=h=s}if(o.i){const d=Math.min(w,h)*o.i;x+=d;y+=d;w-=2*d;h-=2*d}return{x,y,w,h}};
- const put=(h,e,n,pi)=>{const k=e[0],a=e[5],o=[e[5],e[6]].find(v=>v&&typeof v==='object')||{},B=box(e,o),nm=d=>name(o.n?fill(o.n,n,pi):d),rad=o.r?Math.min(B.w,B.h)*o.r:0;
+ const put=(h,e,n,pi)=>{const k=e[0],a=e[5],o=[e[5],e[6]].find(v=>v&&typeof v==='object')||{},B={...box(e,o),...(o.rot?{rot:pgRotNorm(o.rot)}:{})},nm=d=>name(o.n?fill(o.n,n,pi):d),rad=o.r?Math.min(B.w,B.h)*o.r:0;
   if(k==='t'){const x={name:nm(PG_TPL_NAME[(a.replace(/^[+-]/,'')[0]||'c').toLowerCase()]||'Testo'),...B,valign:{m:'middle',b:'bottom'}[o.v]||'top',cols:o.c||1,gut:p.gut,pad:(o.pad||0)*b,fill:o.f?tok(o.f):'none',radius:rad};
    if(o.k&&chains[o.k])return pgPutLinked(p,h,chains[o.k],x);const it=pgPutText(p,h,x,paras(a,n,pi));if(o.k)chains[o.k]=it;return it}
   if(k==='i')return pgPut(h,pgMk(p,'image',{name:nm('Foto'),...B,fill:o.f?tok(o.f):'none',radius:rad,deco:!!o.d,...(o.m?{mask:o.m}:{})}));
   if(k==='s'){const st=o.st||'classica',c={};for(const z of ['c1','c2','oc','oc2','shc','gc'])if(o[z])c[z]=tok(o[z]);return pgPut(h,pgMk(p,'sign',{...pgSignStyle(st),style:st,name:nm('Scritta'),text:fill(a,n,pi),...B,c1:T.head,...c,...o.x}))}
-  if(k==='l')return pgPut(h,pgMk(p,'line',{name:nm('Linea'),...B,stroke:tok(a||'accent'),...(o.w?{sw:b*o.w}:{})}));
-  if(k==='g'){const cells=PG_GRIDS.find(x=>x[0]===a)[2],g=p.gut*.6,gid=uid(),e6=1e-6;return cells.map(([u,v,cw,ch])=>{const l=u>e6?g/2:0,r=u+cw<1-e6?g/2:0,tp=v>e6?g/2:0,bt=v+ch<1-e6?g/2:0;return pgPut(h,pgMk(p,'image',{name:nm(o.n||'Foto'),x:B.x+u*B.w+l,y:B.y+v*B.h+tp,w:cw*B.w-l-r,h:ch*B.h-tp-bt,fill:o.f?tok(o.f):'none',g:gid,...(o.m?{mask:o.m}:{})}))})}
+  if(k==='l')return pgPut(h,pgMk(p,'line',{name:nm('Linea'),x:B.x,y:B.y,w:B.w,h:B.h,stroke:tok(a||'accent'),...(o.w?{sw:b*o.w}:{})}));
+  if(k==='g'){const cells=PG_GRIDS.find(x=>x[0]===a)[2],g=p.gut*.6,gid=uid(),e6=1e-6;return cells.map(([u,v,cw,ch])=>{const l=u>e6?g/2:0,r=u+cw<1-e6?g/2:0,tp=v>e6?g/2:0,bt=v+ch<1-e6?g/2:0;return pgPut(h,pgMk(p,'image',{name:nm(o.n||'Foto'),...B,x:B.x+u*B.w+l,y:B.y+v*B.h+tp,w:cw*B.w-l-r,h:ch*B.h-tp-bt,fill:o.f?tok(o.f):'none',g:gid,...(o.m?{mask:o.m}:{})}))})}
   const kind={r:'rect',e:'ellipse',v:'tri'}[k];return pgPut(h,pgMk(p,kind,{name:nm(PG_KIND[kind]),...B,fill:tok(a||'soft'),radius:rad,opacity:o.op||100,...(o.s?{stroke:tok(o.s),sw:b*(o.w||.1)}:{}),...(o.a?{alt:o.a,deco:false}:{})}))};
  // Un gruppo {rep:[volte,dx,dy],g:[…]} ripete le sue cornici spostandole: così l'ordine di lettura va copia per copia.
  const fillHolder=(h,list,pi)=>{for(const e of list){if(Array.isArray(e)){put(h,e,1,pi);continue}const [cnt,dx,dy]=e.rep;for(let j=0;j<cnt;j++)for(const x of e.g)put(h,[x[0],x[1]+j*dx,x[2]+j*dy,x[3]+j*dx,x[4]+j*dy,...x.slice(5)],j+1,pi)}};
@@ -269,7 +270,7 @@ function pgTplEntries(fmt,mine){const own=mine.filter(m=>m.preset===fmt).map(m=>
 // Anteprime: le pagine del modello disegnate come la pagina vera, con il documento del modello al posto di quello aperto.
 // Le cornici per le foto ancora vuote si vedono come un riquadro grigio con un paesaggio stilizzato.
 const pgTplCache=new Map();
-function pgTplPhoto(it){const s=Math.min(Math.abs(it.w),Math.abs(it.h))*.32,cx=it.x+it.w/2,cy=it.y+it.h/2,X=u=>pr2(cx+u*s),Y=v=>pr2(cy+v*s);return `<path d="M${X(-.5)} ${Y(.32)}L${X(-.16)} ${Y(-.1)}L${X(.06)} ${Y(.14)}L${X(.2)} ${Y(0)}L${X(.5)} ${Y(.32)}Z" fill="#a9b1bb"/><circle cx="${X(.26)}" cy="${Y(-.24)}" r="${pr2(s*.1)}" fill="#a9b1bb"/>`}
+function pgTplPhoto(it){const s=Math.min(Math.abs(it.w),Math.abs(it.h))*.32,cx=it.x+it.w/2,cy=it.y+it.h/2,X=u=>pr2(cx+u*s),Y=v=>pr2(cy+v*s);return `<g${pgRotT(it)}><path d="M${X(-.5)} ${Y(.32)}L${X(-.16)} ${Y(-.1)}L${X(.06)} ${Y(.14)}L${X(.2)} ${Y(0)}L${X(.5)} ${Y(.32)}Z" fill="#a9b1bb"/><circle cx="${X(.26)}" cy="${Y(-.24)}" r="${pr2(s*.1)}" fill="#a9b1bb"/></g>`}
 function pgTplPreview(e,fmt){const key=fmt+'|'+e.id;let v=pgTplCache.get(key);if(v)return v;const p=e.make(),old=Pg.p,empty=pgAllItems(p).filter(x=>x.kind==='image'&&!x.img&&!x.hidden);for(const it of empty)if(it.fill==='none')it.fill='#dde1e6';Pg.p=p;
  try{const all=pgInstances(p),insts=Object.assign(all.slice(0,6),{total:all.length}),lay=pgLayout(p,insts);v={n:p.pages.length,svg:insts.map((I,ii)=>`<svg viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" width="${Math.round(p.w)}" height="${Math.round(p.h)}" aria-hidden="true" focusable="false">${pgPageSvg(p,I,ii,lay)}${[...(pgMasterOf(I.pg)?.items||[]),...I.pg.items].filter(x=>empty.includes(x)).map(pgTplPhoto).join('')}</svg>`)}}finally{Pg.p=old}
  pgTplCache.set(key,v);return v}

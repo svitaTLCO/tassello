@@ -167,7 +167,14 @@ function pgFitBox(it,m){const k=it.fit==='fit'?Math.min(it.w/m.w,it.h/m.h):Math.
  return it.fit==='fit'?[(it.w-dw)*fx,(it.h-dh)*fy,dw,dh]:[clampV(it.w/2-dw*fx,it.w-dw,0),clampV(it.h/2-dh*fy,it.h-dh,0),dw,dh]}
 // Disegno in SVG: una pagina è lo sfondo, le cornici del mastro e quelle della pagina, una sopra l'altra.
 function pgTextSvg(lines){return lines.filter(l=>l.pieces.length).map(l=>`<text xml:space="preserve">${l.pieces.map(pc=>{const st=pc.st;return `<tspan x="${pr2(pc.x)}" y="${pr2(l.base)}" font-family="${esc(fontStack(st.font))}" font-size="${pr2(st.size)}"${st.bold?' font-weight="700"':''}${st.italic?' font-style="italic"':''} fill="${esc(st.color)}"${st.under?' text-decoration="underline"':''}>${esc(pc.t)}</tspan>`}).join('')}</text>`).join('')}
-function pgItemSvg(it,L,ctx,href){if(it.hidden)return '';const op=it.opacity<100?` opacity="${it.opacity/100}"`:'',paint=`fill="${it.fill==='none'?'none':esc(it.fill)}"${it.sw>0&&it.stroke!=='none'?` stroke="${esc(it.stroke)}" stroke-width="${pr2(it.sw)}"`:''}`,box=`x="${pr2(it.x)}" y="${pr2(it.y)}" width="${pr2(Math.max(0,it.w))}" height="${pr2(Math.max(0,it.h))}"`,bg=it.fill!=='none'||it.sw>0?`<rect ${box}${it.radius?` rx="${pr2(it.radius)}"`:''} ${paint}/>`:'';
+// Rotazione: in gradi in senso orario, da -180 a 180, attorno al centro della cornice. Le linee non la usano: girano
+// spostando i due capi attorno al punto di mezzo.
+const pgRot=it=>it.kind==='line'?0:+it.rot||0,pgRotNorm=a=>{a=((a%360)+540)%360-180;return a===-180?180:Math.round(a*10)/10||0};
+const pgRotT=it=>{const r=pgRot(it);return r?` transform="rotate(${pr2(r)} ${pr2(it.x+it.w/2)} ${pr2(it.y+it.h/2)})"`:''};
+// Un punto della cornice com'è disegnato sulla pagina (back: dalla pagina alla cornice diritta).
+function pgTurn(it,x,y,back=false){const r=pgRot(it)*Math.PI/180*(back?-1:1);if(!r)return{x,y};const cx=it.x+it.w/2,cy=it.y+it.h/2,c=Math.cos(r),s=Math.sin(r),dx=x-cx,dy=y-cy;return{x:cx+dx*c-dy*s,y:cy+dx*s+dy*c}}
+function pgItemSvg(it,L,ctx,href){const s=pgItemBody(it,L,ctx,href),t=s&&pgRotT(it);return t?`<g${t}>${s}</g>`:s}
+function pgItemBody(it,L,ctx,href){if(it.hidden)return '';const op=it.opacity<100?` opacity="${it.opacity/100}"`:'',paint=`fill="${it.fill==='none'?'none':esc(it.fill)}"${it.sw>0&&it.stroke!=='none'?` stroke="${esc(it.stroke)}" stroke-width="${pr2(it.sw)}"`:''}`,box=`x="${pr2(it.x)}" y="${pr2(it.y)}" width="${pr2(Math.max(0,it.w))}" height="${pr2(Math.max(0,it.h))}"`,bg=it.fill!=='none'||it.sw>0?`<rect ${box}${it.radius?` rx="${pr2(it.radius)}"`:''} ${paint}/>`:'';
  switch(it.kind){
   case 'rect':return `<rect ${box}${it.radius?` rx="${pr2(it.radius)}"`:''} ${paint}${op}/>`;
   case 'ellipse':return `<ellipse cx="${pr2(it.x+it.w/2)}" cy="${pr2(it.y+it.h/2)}" rx="${pr2(Math.abs(it.w/2))}" ry="${pr2(Math.abs(it.h/2))}" ${paint}${op}/>`;

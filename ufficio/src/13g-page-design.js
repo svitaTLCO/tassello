@@ -6,7 +6,18 @@ Pg.multi={for:null,ids:[]};
 function pgSelIds(){const h=pgHolder(),it=pgSel();if(!it)return [];const ids=new Set([it.id,...(Pg.multi.for===Pg.sel?Pg.multi.ids:[])]);return h.items.filter(x=>ids.has(x.id)).map(x=>x.id)}
 const pgSelItems=()=>{const ids=new Set(pgSelIds());return pgHolder()?.items.filter(x=>ids.has(x.id))||[]};
 const pgGroupIds=it=>it?.g?pgHolder().items.filter(x=>x.g===it.g).map(x=>x.id):it?[it.id]:[];
-const pgBoxOf=it=>({x:Math.min(it.x,it.x+it.w),y:Math.min(it.y,it.y+it.h),w:Math.abs(it.w),h:Math.abs(it.h)});
+// Il riquadro della cornice diritta, e quello che la contiene com'è sulla pagina, anche ruotata.
+const pgRectOf=it=>({x:Math.min(it.x,it.x+it.w),y:Math.min(it.y,it.y+it.h),w:Math.abs(it.w),h:Math.abs(it.h)});
+function pgBoxOf(it){const b=pgRectOf(it);if(!pgRot(it))return b;const P=[[b.x,b.y],[b.x+b.w,b.y],[b.x,b.y+b.h],[b.x+b.w,b.y+b.h]].map(([x,y])=>pgTurn(it,x,y)),X=P.map(q=>q.x),Y=P.map(q=>q.y),x=Math.min(...X),y=Math.min(...Y);return{x,y,w:Math.max(...X)-x,h:Math.max(...Y)-y}}
+// Rotazione di una cornice, e per le linee l'inclinazione: le linee girano attorno al punto di mezzo.
+const pgRotOf=it=>it.kind==='line'?(it.w||it.h?pgRotNorm(Math.atan2(it.h,it.w)*180/Math.PI):0):pgRot(it);
+function pgSetRot(it,a){a=pgRotNorm(a);if(it.kind!=='line'){if(a)it.rot=a;else delete it.rot;return}const L=Math.hypot(it.w,it.h),cx=it.x+it.w/2,cy=it.y+it.h/2,r=a*Math.PI/180;it.w=L*Math.cos(r);it.h=L*Math.sin(r);if(Math.abs(it.w)<1e-6)it.w=0;if(Math.abs(it.h)<1e-6)it.h=0;it.x=cx-it.w/2;it.y=cy-it.h/2}
+const pgRotSay=it=>{const r=pgRotOf(it);return r?`ruotata di ${pgFmt(Math.abs(r))} gradi in senso ${r>0?'orario':'antiorario'}`:it.kind==='line'?'orizzontale':'diritta'};
+// Nuove misure di una cornice ruotata: l'angolo in alto a sinistra resta dov'è sulla pagina.
+function pgSizeTo(it,w,h){if(!pgRot(it)){it.w=w;it.h=h;return}const c=pgTurn(it,it.x+w/2,it.y+h/2);Object.assign(it,{x:c.x-w/2,y:c.y-h/2,w,h})}
+function pgRotate(d,abs=false){const all=pgSelItems();if(!all.length){pgNeed();return}const items=pgMovable(all,'ruotarla');if(!items.length)return;
+ if(!pgEdit(abs?'Raddrizza':'Ruota',()=>{for(const it of items)pgSetRot(it,abs?d:pgRotOf(it)+d)},{merge:!abs,props:false})){toast(items.length>1?'Le cornici scelte sono già diritte':`«${items[0].name}» è già ${pgRotSay(items[0])}`);return}
+ announce(items.length>1?`${items.length} cornici ${abs?'raddrizzate':`ruotate di ${pgFmt(Math.abs(d))} gradi in senso ${d>0?'orario':'antiorario'}, ognuna attorno al suo centro`}`:`${items[0].name}: ${pgRotSay(items[0])}`)}
 function pgBox(items){const b=items.map(pgBoxOf),x=Math.min(...b.map(v=>v.x)),y=Math.min(...b.map(v=>v.y));return{x,y,w:Math.max(...b.map(v=>v.x+v.w))-x,h:Math.max(...b.map(v=>v.y+v.h))-y}}
 function pgSelChanged({say=true}={}){Pg.last={label:'',t:0};pgRenderOverlay();pgRenderFrames();pgRenderProps({story:true});refreshToggles();pgStage.setAttribute('aria-label',pgStageLabel());const list=pgSelItems();if(say)announce(list.length>1?`${list.length} cornici scelte: ${list.map(x=>x.name).join(', ')}`:list[0]?pgDescribeItem(list[0]):'Nessuna cornice scelta')}
 // Aggiunge o toglie una cornice (con il suo gruppo) dalla scelta.
@@ -41,9 +52,11 @@ function pgAdaptTo(id){const src=Pg.p,pr=PG_PRESETS.find(x=>x[0]===id),base=newP
  const f=base.ps.corpo.size/(src.ps.corpo?.size||base.ps.corpo.size),least=base.unit==='mm'?12:Math.ceil(base.w/60);for(const s of Object.values(p.ps)){s.size=Math.max(r1(s.size*f),least);s.before=r1(s.before*f);s.after=r1(s.after*f)}
  const Si=pgInner(src),Ti=pgInner(p),seg=(v,a,b,len,A,B,LEN)=>v<=a?v*(A/Math.max(a,1e-6)):v<=b?A+(v-a)*(B-A)/Math.max(b-a,1e-6):B+(v-b)*(LEN-B)/Math.max(len-b,1e-6),mx=v=>seg(v,Si.x,Si.x+Si.w,src.w,Ti.x,Ti.x+Ti.w,p.w),my=v=>seg(v,Si.y,Si.y+Si.h,src.h,Ti.y,Ti.y+Ti.h,p.h),s=Math.min(Ti.w/Si.w,Ti.h/Si.h);
  for(const it of pgAllItems(p)){const full=it.x<=1&&it.y<=1&&it.x+it.w>=src.w-1&&it.y+it.h>=src.h-1;if(full){Object.assign(it,{x:0,y:0,w:p.w,h:p.h});continue}
-  const x0=mx(it.x),y0=my(it.y),x1=mx(it.x+it.w),y1=my(it.y+it.h);let nw=x1-x0,nh=y1-y0;
+  const x0=mx(it.x),y0=my(it.y),x1=mx(it.x+it.w),y1=my(it.y+it.h),keep=(it.kind==='ellipse'||it.kind==='tri'||(it.kind==='image'&&it.fit==='fit'))&&it.w&&it.h;let nw=x1-x0,nh=y1-y0;
+  // Una cornice ruotata mantiene le proporzioni: il riquadro che occupa sulla pagina passa al nuovo formato e lei ci entra.
+  if(pgRot(it)){const b=pgBoxOf(it),k=Math.min((mx(b.x+b.w)-mx(b.x))/b.w,(my(b.y+b.h)-my(b.y))/b.h),cx=(mx(b.x)+mx(b.x+b.w))/2,cy=(my(b.y)+my(b.y+b.h))/2;nw=it.w*k;nh=it.h*k;Object.assign(it,{x:cx-nw/2,y:cy-nh/2,w:nw,h:nh})}
   // Forme tonde, triangoli e immagini adattate mantengono le proporzioni, al centro del nuovo riquadro.
-  if((it.kind==='ellipse'||it.kind==='tri'||(it.kind==='image'&&it.fit==='fit'))&&it.w&&it.h){const k=Math.min(Math.abs(nw/it.w),Math.abs(nh/it.h)),cx=(x0+x1)/2,cy=(y0+y1)/2;nw=it.w*k;nh=it.h*k;Object.assign(it,{x:cx-nw/2,y:cy-nh/2,w:nw,h:nh})}else Object.assign(it,{x:x0,y:y0,w:nw,h:nh});
+  else if(keep){const k=Math.min(Math.abs(nw/it.w),Math.abs(nh/it.h)),cx=(x0+x1)/2,cy=(y0+y1)/2;nw=it.w*k;nh=it.h*k;Object.assign(it,{x:cx-nw/2,y:cy-nh/2,w:nw,h:nh})}else Object.assign(it,{x:x0,y:y0,w:nw,h:nh});
   for(const k of ['sw','radius','pad'])if(it[k])it[k]=it[k]*s;if(it.gut)it.gut=it.gut*Ti.w/Si.w;if(it.kind==='sign'&&it.fit===false)it.size=it.size*f}
  pgUseNew(p,'Adatta al formato');const over=[...pgLayout(p,pgInstances(p)).values()].filter(v=>v.over).map(v=>v.it.name);
  announce(`Documento adattato a ${pr[1]}: ${p.pages.length===1?'una pagina':p.pages.length+' pagine'}.${over.length?` Il testo non entra in ${[...new Set(over)].join(', ')}: ingrandisci le cornici o accorcia il testo.`:' Tutto il testo entra nelle cornici.'} Ctrl+Z torna al formato di prima.`)}
@@ -74,7 +87,7 @@ function pgApplyTheme(key){const [name,,T]=PG_THEMES[key],p=Pg.p,lum=c=>pgLum(c)
  pgStoryCss();announce(`Tema ${name} applicato a tutto il documento${fixed?`; corretti ${fixed===1?'uno sfondo':fixed+' sfondi'} o colori per il contrasto`:''}.${left?` ${left===1?'Un testo':left+' testi'} da controllare con la verifica dell’accessibilità.`:''} Ctrl+Z torna ai colori di prima.`)}
 // Sagome per le immagini: il ritaglio della foto e il suo contorno seguono la forma scelta.
 const PG_MASKS=[['rect','Rettangolo'],['round','Angoli arrotondati'],['pill','Pillola'],['circle','Cerchio o ellisse'],['arch','Arco'],['hexagon','Esagono'],['star','Stella'],['heart','Cuore'],['blob','Forma morbida']];
-function pgMaskPath(it){const {x,y,w,h}=pgBoxOf(it),m=it.mask||'rect',X=u=>pr2(x+u*w),Y=v=>pr2(y+v*h),poly=a=>a.map(([u,v],i)=>`${i?'L':'M'}${X(u)} ${Y(v)}`).join('')+'Z';
+function pgMaskPath(it){const {x,y,w,h}=pgRectOf(it),m=it.mask||'rect',X=u=>pr2(x+u*w),Y=v=>pr2(y+v*h),poly=a=>a.map(([u,v],i)=>`${i?'L':'M'}${X(u)} ${Y(v)}`).join('')+'Z';
  switch(m){case 'round':case 'pill':{const r=pr2(m==='pill'?Math.min(w,h)/2:Math.min(w,h)*.12);return `M${pr2(x+r)} ${pr2(y)}H${pr2(x+w-r)}A${r} ${r} 0 0 1 ${pr2(x+w)} ${pr2(y+r)}V${pr2(y+h-r)}A${r} ${r} 0 0 1 ${pr2(x+w-r)} ${pr2(y+h)}H${pr2(x+r)}A${r} ${r} 0 0 1 ${pr2(x)} ${pr2(y+h-r)}V${pr2(y+r)}A${r} ${r} 0 0 1 ${pr2(x+r)} ${pr2(y)}Z`}
   case 'circle':return `M${pr2(x)} ${Y(.5)}A${pr2(w/2)} ${pr2(h/2)} 0 1 0 ${pr2(x+w)} ${Y(.5)}A${pr2(w/2)} ${pr2(h/2)} 0 1 0 ${pr2(x)} ${Y(.5)}Z`;
   case 'arch':{const r=Math.min(w/2,h);return `M${pr2(x)} ${pr2(y+h)}V${pr2(y+r)}A${pr2(w/2)} ${pr2(r)} 0 0 1 ${pr2(x+w)} ${pr2(y+r)}V${pr2(y+h)}Z`}
@@ -88,6 +101,6 @@ function pgMaskMenu(){const it=pgNeed('image');if(!it)return;const a=document.qu
 const PG_GRIDS=[['2o','Due affiancate',[[0,0,.5,1],[.5,0,.5,1]]],['2v','Due una sopra l’altra',[[0,0,1,.5],[0,.5,1,.5]]],['3a','Una grande e due piccole',[[0,0,.62,1],[.62,0,.38,.5],[.62,.5,.38,.5]]],['3c','Tre in fila',[[0,0,1/3,1],[1/3,0,1/3,1],[2/3,0,1/3,1]]],
  ['4','Quattro, due per due',[[0,0,.5,.5],[.5,0,.5,.5],[0,.5,.5,.5],[.5,.5,.5,.5]]],['5','Una grande sopra e quattro sotto',[[0,0,1,.58],[0,.58,.25,.42],[.25,.58,.25,.42],[.5,.58,.25,.42],[.75,.58,.25,.42]]],['6','Sei, tre per due',[[0,0,1/3,.5],[1/3,0,1/3,.5],[2/3,0,1/3,.5],[0,.5,1/3,.5],[1/3,.5,1/3,.5],[2/3,.5,1/3,.5]]]];
 function pgGridMenu(){const a=document.querySelector('#ribbon [data-action="pgPhotoGrid"]'),r=(a||pgStage).getBoundingClientRect();openMenu(PG_GRIDS.map(([k,l,c])=>({label:l,desc:`${c.length} foto${pgSel()?.kind==='image'?', al posto della cornice scelta':''}`,run:()=>pgPhotoGrid(k)})),r.left,r.bottom,'Griglia di foto',a)}
-function pgPhotoGrid(k){const p=Pg.p,[,label,cells]=PG_GRIDS.find(x=>x[0]===k),sel=pgSel(),A=sel?.kind==='image'&&!sel.lock?pgBoxOf(sel):pgInner(p),g=p.gut*.6,gid=uid(),made=[],e=1e-6;
+function pgPhotoGrid(k){const p=Pg.p,[,label,cells]=PG_GRIDS.find(x=>x[0]===k),sel=pgSel(),A=sel?.kind==='image'&&!sel.lock?pgRectOf(sel):pgInner(p),g=p.gut*.6,gid=uid(),made=[],e=1e-6;
  pgEdit('Griglia di foto',q=>{const h=pgHolder(),keep=sel?.kind==='image'&&!sel.lock?sel:null;if(keep)pgRemove(q,h,keep);cells.forEach(([u,v,cw,ch],i)=>{const l=u>e?g/2:0,r=u+cw<1-e?g/2:0,t=v>e?g/2:0,b=v+ch<1-e?g/2:0,it=pgMk(q,'image',{x:A.x+u*A.w+l,y:A.y+v*A.h+t,w:cw*A.w-l-r,h:ch*A.h-t-b,fit:'fill',g:gid,img:i===0&&keep?keep.img:'',alt:i===0&&keep?keep.alt:'',mask:keep?.mask||'rect'});pgPut(h,it);made.push(it)})},{props:true});
  Pg.sel=made[0].id;Pg.multi={for:Pg.sel,ids:made.map(x=>x.id)};pgSelChanged({say:false});announce(`Griglia «${label}»: ${made.length} cornici per immagine, raggruppate. Scegli le foto: entrano nelle cornici vuote nell’ordine di lettura.`);$('pgImgInput').click()}
