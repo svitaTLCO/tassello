@@ -18,7 +18,7 @@ Código fuente
 Tassello: lo necesario para trabajar con archivos
 
 [pagina.descrizione]
-Tassello: herramientas libres y gratuitas para escribir, hacer cuentas, grabar y editar audio y vídeo sin instalar suites pesadas. Cada herramienta es un solo archivo HTML, accesible y sin conexión. Descárgalo solo desde el sitio oficial.
+Tassello: herramientas libres y gratuitas para escribir, hacer cuentas, maquetar, grabar y editar audio y vídeo sin instalar suites pesadas. Cada herramienta es un solo archivo HTML, accesible y sin conexión. Descárgalo solo desde el sitio oficial.
 
 [nav.etichetta]
 Secciones de la página
@@ -42,10 +42,10 @@ Gratis · Software libre · Accesible
 Lo necesario para trabajar con tus archivos.
 
 [hero.testo]
-Tassello es una familia de pequeñas herramientas libres para la productividad básica: escribir, rellenar formularios, hacer cuentas, grabar y editar audio y vídeo. Cada una cabe en un solo archivo HTML que se abre en el navegador, sin suites pesadas que instalar y sin cuentas. Una navaja suiza, ordenada y ligera.
+Tassello es una familia de pequeñas herramientas libres para la productividad básica: escribir, rellenar formularios, hacer cuentas, maquetar, grabar y editar audio y vídeo. Cada una cabe en un solo archivo HTML que se abre en el navegador, sin suites pesadas que instalar y sin cuentas. Una navaja suiza, ordenada y ligera.
 
 [hero.ufficio]
-Testo y Calcolo, para documentos y cuentas
+Testo, Calcolo e Impagina, para documentos, cuentas y maquetación
 
 [hero.media]
 Audio y Video, para grabar y editar
@@ -69,13 +69,13 @@ Tassello pone en manos de cualquiera, de la forma más sencilla posible, la capa
 Lo necesario
 
 [perche.necessario]
-Las funciones que de verdad hacen falta para documentos, hojas de cálculo, audio y vídeo, elegidas una a una y bien ordenadas.
+Las funciones que de verdad hacen falta para documentos, hojas de cálculo, páginas para imprimir o publicar, audio y vídeo, elegidas una a una y bien ordenadas.
 
 [perche.leggero_titolo]
 Ligero
 
 [perche.leggero]
-Ninguna suite que instalar y ninguna cuenta: un archivo de menos de un megabyte que se abre en el navegador, incluso sin conexión. Si lo prefieres, puedes instalarlo como aplicación.
+Ninguna suite que instalar y ninguna cuenta: un archivo de alrededor de un megabyte que se abre en el navegador, incluso sin conexión. Si lo prefieres, puedes instalarlo como aplicación.
 
 [perche.tuoi_titolo]
 Tus archivos son tuyos
@@ -90,13 +90,13 @@ Accesible por principio
 Se usa con un lector de pantalla y solo con el teclado. Sin eso, ningún tassello sale.
 
 [perche.non_e]
-<b>Lo que no es.</b> Tassello no sustituye a las herramientas profesionales: si tu trabajo requiere macros, control de cambios, edición de vídeo profesional o instrumentos virtuales y MIDI, sigue usando el programa adecuado. Tampoco es un clon de las aplicaciones famosas: abre y guarda sus formatos para intercambiar archivos con todo el mundo, pero tiene un diseño propio, con funciones elegidas para el trabajo de todos los días y todas accesibles desde el teclado.
+<b>Lo que no es.</b> Tassello no sustituye a las herramientas profesionales: si tu trabajo requiere macros, control de cambios, maquetación editorial profesional, edición de vídeo profesional o instrumentos virtuales y MIDI, sigue usando el programa adecuado. Tampoco es un clon de las aplicaciones famosas: abre y guarda sus formatos para intercambiar archivos con todo el mundo, pero tiene un diseño propio, con funciones elegidas para el trabajo de todos los días y todas accesibles desde el teclado.
 
 [ufficio.titolo]
-Tassello Ufficio: Testo y Calcolo
+Tassello Ufficio: Testo, Calcolo e Impagina
 
 [ufficio.intro]
-Para los documentos y las hojas de cálculo de todos los días. Abre y guarda DOCX y XLSX, para que puedas intercambiar archivos con quien usa otros programas. La interfaz está en italiano.
+Para los documentos, las hojas de cálculo y las páginas de todos los días. Abre y guarda DOCX y XLSX, para que puedas intercambiar archivos con quien usa otros programas; Impagina exporta PNG para las redes sociales y PDF para imprimir. La interfaz está en italiano.
 
 [testo.per]
 El procesador de textos, para cartas, informes, tesis y formularios.
@@ -118,6 +118,18 @@ La hoja de cálculo, para cuentas, listas y análisis.
           <li>Doce tipos de gráfico, que también se pueden leer como tabla o escuchar como sonidos</li>
           <li>Abre y guarda XLSX y CSV</li>
 
+[impagina.per]
+El maquetador, para publicaciones y carruseles, historias, folletos, carteles, trípticos, boletines y presentaciones.
+
+[impagina.elenco]
+          <li>Formatos listos, márgenes, columnas, cuadrícula y páginas maestras con número de página y logotipo</li>
+          <li>Texto que fluye entre marcos y páginas, estilos de párrafo y de carácter, textos con efectos</li>
+          <li>Datos de CSV, XLSX, JSON o de una hoja de Calcolo para crear una página por fila; feeds RSS y texto de DOCX</li>
+          <li>Una carpeta del ordenador enlazada, también la de Google Drive, OneDrive o Dropbox, que se vuelve a leer con un comando</li>
+          <li>Temas de color, formas para las imágenes, cuadrículas de fotos, guías inteligentes y adaptación a otro formato</li>
+          <li>Carteles y pancartas impresos en mosaico en hojas A4 o A3; exporta PNG y PDF</li>
+          <li>Orden de lectura, texto alternativo y comprobación de accesibilidad para cada página</li>
+
 [ufficio.scarica]
 Descargar Tassello Ufficio
 
@@ -128,7 +140,7 @@ Probar Tassello Ufficio en el navegador
 Instalar como aplicación
 
 [ufficio.limiti]
-Un archivo de unos 800 KB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico, no todo: no admite macros, control de cambios, segmentaciones de tablas dinámicas ni gráficos combinados. Conserva siempre una copia de los originales.
+Un archivo de alrededor de 1 MB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico, no todo: no admite macros, control de cambios, segmentaciones de tablas dinámicas ni gráficos combinados, e Impagina no sustituye a un programa de maquetación profesional. Conserva siempre una copia de los originales.
 
 [media.titolo]
 Tassello Media: Audio y Video
@@ -188,7 +200,7 @@ Roles ARIA estándar y avisos para celdas, estados y mensajes, pensados para NVD
 Lectura
 
 [accessibilita.lettura]
-Modo lectura, alto contraste, tema oscuro, lectura en voz alta y comprobación de accesibilidad de los documentos.
+Modo lectura, alto contraste, tema oscuro, lectura en voz alta y comprobación de accesibilidad de documentos y páginas; en Impagina el orden de lectura de los marcos es explícito y <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>I</kbd> describe la página.
 
 [accessibilita.ascolto_titolo]
 Escucha
@@ -204,6 +216,7 @@ Privacidad
 
 [privacy.testo]
       <p>Tus documentos se quedan en tu navegador y en tu ordenador. La única función que usa un servicio externo es el dictado por voz de Tassello Ufficio: en Chrome el audio se envía a los servidores de Google, en Edge a los de Microsoft. Si no lo usas, nada sale de tu dispositivo.</p>
+      <p>Impagina lee la carpeta que enlazas solo cuando se lo pides y nunca la modifica; no descarga nada, ni siquiera las imágenes indicadas en un feed.</p>
       <p>Tassello Media usa el micrófono solo cuando tú lo pides, y las grabaciones, los archivos y los vídeos exportados se quedan en tu ordenador.</p>
       <p>Esto vale para la copia oficial. Una copia modificada por otros puede comportarse de otra manera: un motivo más para <a href="#sicurezza">descargar Tassello solo desde aquí</a>.</p>
 

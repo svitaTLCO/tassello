@@ -19,7 +19,7 @@ Code source
 Tassello&nbsp;: l’essentiel pour travailler sur vos fichiers
 
 [pagina.descrizione]
-Tassello&nbsp;: des outils libres et gratuits pour écrire, faire vos calculs, enregistrer et monter de l’audio et de la vidéo sans installer de suites encombrantes. Chaque outil est un seul fichier HTML, accessible et utilisable hors ligne. Téléchargez-le uniquement depuis le site officiel.
+Tassello&nbsp;: des outils libres et gratuits pour écrire, faire vos calculs, mettre en page, enregistrer et monter de l’audio et de la vidéo sans installer de suites encombrantes. Chaque outil est un seul fichier HTML, accessible et utilisable hors ligne. Téléchargez-le uniquement depuis le site officiel.
 
 [nav.etichetta]
 Sections de la page
@@ -43,10 +43,10 @@ Gratuit · Logiciel libre · Accessible
 L’essentiel pour travailler sur vos fichiers.
 
 [hero.testo]
-Tassello est une famille de petits outils libres pour la productivité de tous les jours&nbsp;: écrire, remplir des formulaires, faire des calculs, enregistrer et monter de l’audio et de la vidéo. Chacun tient dans un seul fichier HTML qui s’ouvre dans le navigateur, sans suite encombrante à installer et sans compte. Un couteau suisse, ordonné et léger.
+Tassello est une famille de petits outils libres pour la productivité de tous les jours&nbsp;: écrire, remplir des formulaires, faire des calculs, mettre en page, enregistrer et monter de l’audio et de la vidéo. Chacun tient dans un seul fichier HTML qui s’ouvre dans le navigateur, sans suite encombrante à installer et sans compte. Un couteau suisse, ordonné et léger.
 
 [hero.ufficio]
-Testo et Calcolo, pour documents et calculs
+Testo, Calcolo et Impagina, pour documents, calculs et mise en page
 
 [hero.media]
 Audio et Video, pour enregistrer et monter
@@ -70,13 +70,13 @@ Tassello met entre les mains de chacun, le plus simplement possible, la capacit�
 L’essentiel
 
 [perche.necessario]
-Les fonctions vraiment utiles pour les documents, les tableurs, l’audio et la vidéo, choisies une à une et bien rangées.
+Les fonctions vraiment utiles pour les documents, les tableurs, les pages à imprimer ou à publier, l’audio et la vidéo, choisies une à une et bien rangées.
 
 [perche.leggero_titolo]
 Léger
 
 [perche.leggero]
-Aucune suite à installer et aucun compte&nbsp;: un fichier de moins d’un mégaoctet qui s’ouvre dans le navigateur, même hors ligne. Si vous préférez, vous pouvez l’installer comme une application.
+Aucune suite à installer et aucun compte&nbsp;: un fichier d’environ un mégaoctet qui s’ouvre dans le navigateur, même hors ligne. Si vous préférez, vous pouvez l’installer comme une application.
 
 [perche.tuoi_titolo]
 Vos fichiers restent à vous
@@ -91,13 +91,13 @@ Accessible par principe
 Il s’utilise avec un lecteur d’écran et au clavier seul. Sans cela, aucun tassello ne sort.
 
 [perche.non_e]
-<b>Ce qu’il n’est pas.</b> Tassello ne remplace pas les outils professionnels&nbsp;: si votre travail demande des macros, le suivi des modifications, un montage professionnel ou des instruments virtuels et du MIDI, continuez à utiliser le programme adapté. Ce n’est pas non plus un clone des applications célèbres&nbsp;: il en ouvre et enregistre les formats pour échanger des fichiers avec tout le monde, mais il a sa propre conception, avec des fonctions choisies pour le travail de tous les jours et toutes accessibles au clavier.
+<b>Ce qu’il n’est pas.</b> Tassello ne remplace pas les outils professionnels&nbsp;: si votre travail demande des macros, le suivi des modifications, une mise en page éditoriale professionnelle, un montage professionnel ou des instruments virtuels et du MIDI, continuez à utiliser le programme adapté. Ce n’est pas non plus un clone des applications célèbres&nbsp;: il en ouvre et enregistre les formats pour échanger des fichiers avec tout le monde, mais il a sa propre conception, avec des fonctions choisies pour le travail de tous les jours et toutes accessibles au clavier.
 
 [ufficio.titolo]
-Tassello Ufficio&nbsp;: Testo et Calcolo
+Tassello Ufficio&nbsp;: Testo, Calcolo et Impagina
 
 [ufficio.intro]
-Pour les documents et les tableurs de tous les jours. Il ouvre et enregistre les formats DOCX et XLSX, pour échanger des fichiers avec ceux qui utilisent d’autres programmes. L’interface est en italien.
+Pour les documents, les tableurs et les pages de tous les jours. Il ouvre et enregistre les formats DOCX et XLSX, pour échanger des fichiers avec ceux qui utilisent d’autres programmes&nbsp;; Impagina exporte en PNG pour les réseaux sociaux et en PDF pour l’impression. L’interface est en italien.
 
 [testo.per]
 Le traitement de texte, pour les lettres, les rapports, les mémoires et les formulaires.
@@ -119,6 +119,18 @@ Le tableur, pour les comptes, les listes et les analyses.
           <li>Douze types de graphiques, que l’on peut aussi lire sous forme de tableau ou écouter sous forme de sons</li>
           <li>Ouvre et enregistre XLSX et CSV</li>
 
+[impagina.per]
+La mise en page, pour les publications et carrousels, stories, flyers, affiches, brochures, lettres d’information et présentations.
+
+[impagina.elenco]
+          <li>Formats prêts à l’emploi, marges, colonnes, grille et gabarits avec numéro de page et logo</li>
+          <li>Texte qui s’écoule d’un bloc à l’autre et d’une page à l’autre, styles de paragraphe et de caractère, textes à effets</li>
+          <li>Données CSV, XLSX, JSON ou d’une feuille de Calcolo pour créer une page par ligne&nbsp;; flux RSS et texte DOCX</li>
+          <li>Un dossier de l’ordinateur relié, y compris celui de Google Drive, OneDrive ou Dropbox, relu en une commande</li>
+          <li>Thèmes de couleurs, formes d’image, grilles de photos, repères intelligents et adaptation à un autre format</li>
+          <li>Affiches et banderoles imprimées en mosaïque sur des feuilles A4 ou A3&nbsp;; export en PNG et PDF</li>
+          <li>Ordre de lecture, texte alternatif et vérification de l’accessibilité pour chaque page</li>
+
 [ufficio.scarica]
 Télécharger Tassello Ufficio
 
@@ -129,7 +141,7 @@ Essayer Tassello Ufficio dans le navigateur
 Installer comme application
 
 [ufficio.limiti]
-Un fichier d’environ 800&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base, pas tout&nbsp;: les macros, le suivi des modifications, les segments des tableaux croisés dynamiques et les graphiques combinés ne sont pas pris en charge. Conservez toujours une copie des originaux.
+Un fichier d’environ 1&nbsp;Mo pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base, pas tout&nbsp;: les macros, le suivi des modifications, les segments des tableaux croisés dynamiques et les graphiques combinés ne sont pas pris en charge, et Impagina ne remplace pas un logiciel de mise en page professionnel. Conservez toujours une copie des originaux.
 
 [media.titolo]
 Tassello Media&nbsp;: Audio et Video
@@ -189,7 +201,7 @@ Rôles ARIA standard et annonces pour les cellules, les états et les messages, 
 Lecture
 
 [accessibilita.lettura]
-Mode lecture, contraste élevé, thème sombre, lecture à voix haute et vérification de l’accessibilité des documents.
+Mode lecture, contraste élevé, thème sombre, lecture à voix haute et vérification de l’accessibilité des documents et des pages&nbsp;; dans Impagina, l’ordre de lecture des blocs est explicite et <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>I</kbd> décrit la page.
 
 [accessibilita.ascolto_titolo]
 Écoute
@@ -205,6 +217,7 @@ Confidentialité
 
 [privacy.testo]
       <p>Vos documents restent dans votre navigateur et sur votre ordinateur. La seule fonction qui utilise un service externe est la dictée vocale de Tassello Ufficio&nbsp;: dans Chrome, l’audio est envoyé aux serveurs de Google, dans Edge à ceux de Microsoft. Si vous ne l’utilisez pas, rien ne quitte votre appareil.</p>
+      <p>Impagina ne lit le dossier que vous reliez que lorsque vous le demandez et ne le modifie jamais&nbsp;; il ne télécharge rien, pas même les images indiquées dans un flux.</p>
       <p>Tassello Media n’utilise le microphone que lorsque vous le demandez, et les enregistrements, les fichiers et les vidéos exportées restent sur votre ordinateur.</p>
       <p>Cela vaut pour la copie officielle. Une copie modifiée par d’autres peut se comporter autrement&nbsp;: raison de plus pour <a href="#sicurezza">télécharger Tassello uniquement ici</a>.</p>
 

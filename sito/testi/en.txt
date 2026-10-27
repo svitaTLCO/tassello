@@ -18,7 +18,7 @@ Source code
 Tassello: the essentials for working on files
 
 [pagina.descrizione]
-Tassello: free tools for writing, doing the numbers, recording and editing audio and video without installing bulky suites. Each tool is a single HTML file, accessible and offline. Download it only from the official website.
+Tassello: free tools for writing, doing the numbers, laying out pages, recording and editing audio and video without installing bulky suites. Each tool is a single HTML file, accessible and offline. Download it only from the official website.
 
 [nav.etichetta]
 Page sections
@@ -42,10 +42,10 @@ Free · Open source · Accessible
 The essentials for working on files.
 
 [hero.testo]
-Tassello is a family of small free tools for everyday productivity: writing, filling in forms, doing the numbers, recording and editing audio and video. Each one is a single HTML file that opens in your browser, with no bulky suite to install and no account. A Swiss Army knife: tidy and lightweight.
+Tassello is a family of small free tools for everyday productivity: writing, filling in forms, doing the numbers, laying out pages, recording and editing audio and video. Each one is a single HTML file that opens in your browser, with no bulky suite to install and no account. A Swiss Army knife: tidy and lightweight.
 
 [hero.ufficio]
-Testo and Calcolo, for documents and spreadsheets
+Testo, Calcolo and Impagina, for documents, spreadsheets and page layout
 
 [hero.media]
 Audio and Video, for recording and editing
@@ -69,13 +69,13 @@ Tassello puts the ability to work on your own files in everyone’s hands, as si
 Just what you need
 
 [perche.necessario]
-The features you actually need for documents, spreadsheets, audio and video, chosen one by one and kept in order.
+The features you actually need for documents, spreadsheets, pages to print or publish, audio and video, chosen one by one and kept in order.
 
 [perche.leggero_titolo]
 Lightweight
 
 [perche.leggero]
-No suite to install and no account: a file of less than one megabyte that opens in your browser, even offline. If you prefer, you can install it as an app.
+No suite to install and no account: a file of about one megabyte that opens in your browser, even offline. If you prefer, you can install it as an app.
 
 [perche.tuoi_titolo]
 Your files stay yours
@@ -90,13 +90,13 @@ Accessible by principle
 It works with a screen reader and with the keyboard alone. Without that, no tassello is released.
 
 [perche.non_e]
-<b>What it is not.</b> Tassello does not replace professional tools: if your work needs macros, tracked changes, professional video editing or virtual instruments and MIDI, keep using the right program. Nor is it a clone of famous apps: it opens and saves their formats so you can exchange files with anyone, but it has its own design, with features chosen for everyday work and all reachable from the keyboard.
+<b>What it is not.</b> Tassello does not replace professional tools: if your work needs macros, tracked changes, professional publishing layout, professional video editing or virtual instruments and MIDI, keep using the right program. Nor is it a clone of famous apps: it opens and saves their formats so you can exchange files with anyone, but it has its own design, with features chosen for everyday work and all reachable from the keyboard.
 
 [ufficio.titolo]
-Tassello Ufficio: Testo and Calcolo
+Tassello Ufficio: Testo, Calcolo and Impagina
 
 [ufficio.intro]
-For everyday documents and spreadsheets. It opens and saves DOCX and XLSX, so you can exchange files with people who use other programs. The interface is in Italian.
+For everyday documents, spreadsheets and pages. It opens and saves DOCX and XLSX, so you can exchange files with people who use other programs; Impagina exports PNG for social media and PDF for print. The interface is in Italian.
 
 [testo.per]
 The word processor, for letters, reports, theses and forms.
@@ -118,6 +118,18 @@ The spreadsheet, for budgets, lists and analysis.
           <li>Twelve chart types, which you can also read as a table or hear as sounds</li>
           <li>Opens and saves XLSX and CSV</li>
 
+[impagina.per]
+The layout editor, for posts and carousels, stories, flyers, posters, brochures, newsletters and slides.
+
+[impagina.elenco]
+          <li>Ready-made formats, margins, columns, grid and master pages with page numbers and logo</li>
+          <li>Text that flows across frames and pages, paragraph and character styles, eye-catching text effects</li>
+          <li>Data from CSV, XLSX, JSON or a Calcolo sheet to make one page per row; RSS feeds and text from DOCX</li>
+          <li>A linked folder on your computer, including a Google Drive, OneDrive or Dropbox folder, refreshed with one command</li>
+          <li>Colour themes, image shapes, photo grids, smart guides and resizing to another format</li>
+          <li>Posters and banners printed as tiles on A4 or A3 sheets; exports PNG and PDF</li>
+          <li>Reading order, alternative text and an accessibility check for every page</li>
+
 [ufficio.scarica]
 Download Tassello Ufficio
 
@@ -128,7 +140,7 @@ Try Tassello Ufficio in your browser
 Install as an app
 
 [ufficio.limiti]
-A file of about 800 KB for recent Chrome and Edge, even offline. It covers the basics, not everything: macros, tracked changes, pivot table slicers and combo charts are not supported. Always keep a copy of your originals.
+A file of about 1 MB for recent Chrome and Edge, even offline. It covers the basics, not everything: macros, tracked changes, pivot table slicers and combo charts are not supported, and Impagina does not replace professional publishing software. Always keep a copy of your originals.
 
 [media.titolo]
 Tassello Media: Audio and Video
@@ -188,7 +200,7 @@ Standard ARIA roles and announcements for cells, states and messages, designed f
 Reading
 
 [accessibilita.lettura]
-Reading mode, high contrast, dark theme, read aloud and a document accessibility checker.
+Reading mode, high contrast, dark theme, read aloud and an accessibility checker for documents and pages; in Impagina the reading order of frames is explicit and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd> describes the page.
 
 [accessibilita.ascolto_titolo]
 Listening
@@ -204,6 +216,7 @@ Privacy
 
 [privacy.testo]
       <p>Your documents stay in your browser and on your computer. The only feature that uses an external service is voice dictation in Tassello Ufficio: in Chrome the audio is sent to Google’s servers, in Edge to Microsoft’s. If you do not use it, nothing leaves your device.</p>
+      <p>Impagina reads the folder you link only when you ask it to and never changes it; it downloads nothing, not even the images listed in a feed.</p>
       <p>Tassello Media uses the microphone only when you ask it to, and your recordings, files and exported videos stay on your computer.</p>
       <p>This applies to the official copy. A copy modified by someone else may behave differently: one more reason to <a href="#sicurezza">download Tassello only from here</a>.</p>
 

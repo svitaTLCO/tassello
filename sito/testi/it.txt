@@ -22,7 +22,7 @@ Codice sorgente
 Tassello: il necessario per lavorare sui file
 
 [pagina.descrizione]
-Tassello: strumenti liberi e gratuiti per scrivere, fare i conti, registrare e montare audio e video senza installare suite ingombranti. Ogni strumento è un solo file HTML, accessibile e offline. Scaricalo solo dal sito ufficiale.
+Tassello: strumenti liberi e gratuiti per scrivere, fare i conti, impaginare, registrare e montare audio e video senza installare suite ingombranti. Ogni strumento è un solo file HTML, accessibile e offline. Scaricalo solo dal sito ufficiale.
 
 [nav.etichetta]
 Sezioni della pagina
@@ -46,10 +46,10 @@ Gratis · Software libero · Accessibile
 Il necessario per lavorare sui file.
 
 [hero.testo]
-Tassello è una famiglia di piccoli strumenti liberi per la produttività di base: scrivere, compilare, fare i conti, registrare e montare audio e video. Ognuno sta in un solo file HTML che si apre nel browser, senza suite o installazioni ingombranti e senza account. Un coltellino svizzero, ordinato e leggero.
+Tassello è una famiglia di piccoli strumenti liberi per la produttività di base: scrivere, compilare, fare i conti, impaginare, registrare e montare audio e video. Ognuno sta in un solo file HTML che si apre nel browser, senza suite o installazioni ingombranti e senza account. Un coltellino svizzero, ordinato e leggero.
 
 [hero.ufficio]
-Testo e Calcolo, per documenti e conti
+Testo, Calcolo e Impagina, per documenti, conti e pagine
 
 [hero.media]
 Audio e Video, per registrare e montare
@@ -73,13 +73,13 @@ Tassello mette in mano a chiunque, nel modo più semplice possibile, la capacit�
 Il necessario
 
 [perche.necessario]
-Le funzioni che servono davvero per documenti, fogli di calcolo, audio e video, scelte una per una e messe in ordine.
+Le funzioni che servono davvero per documenti, fogli di calcolo, pagine da stampare o pubblicare, audio e video, scelte una per una e messe in ordine.
 
 [perche.leggero_titolo]
 Leggero
 
 [perche.leggero]
-Nessuna suite da installare e nessun account: un file di meno di un megabyte che si apre nel browser, anche senza rete. Se preferisci, lo installi come app.
+Nessuna suite da installare e nessun account: un file di circa un megabyte che si apre nel browser, anche senza rete. Se preferisci, lo installi come app.
 
 [perche.tuoi_titolo]
 I file restano tuoi
@@ -94,13 +94,13 @@ Accessibile per principio
 Si usa con uno screen reader e con la sola tastiera. Senza questo, un tassello non esce.
 
 [perche.non_e]
-<b>Cosa non è.</b> Tassello non sostituisce gli strumenti da professionisti: se il tuo lavoro richiede macro, revisioni tracciate, un montaggio professionale o strumenti virtuali e MIDI, continua a usare il programma adatto. Non è nemmeno un clone delle app famose: ne apre e salva i formati per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.
+<b>Cosa non è.</b> Tassello non sostituisce gli strumenti da professionisti: se il tuo lavoro richiede macro, revisioni tracciate, un’impaginazione editoriale professionale, un montaggio professionale o strumenti virtuali e MIDI, continua a usare il programma adatto. Non è nemmeno un clone delle app famose: ne apre e salva i formati per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.
 
 [ufficio.titolo]
-Tassello Ufficio: Testo e Calcolo
+Tassello Ufficio: Testo, Calcolo e Impagina
 
 [ufficio.intro]
-Per i documenti e i fogli di calcolo di tutti i giorni. Apre e salva DOCX e XLSX, così scambi file con chi usa altri programmi.
+Per i documenti, i fogli di calcolo e le pagine di tutti i giorni. Apre e salva DOCX e XLSX, così scambi file con chi usa altri programmi; Impagina esporta PNG per i social e PDF per la stampa.
 
 [testo.per]
 Per lettere, relazioni, tesi e moduli.
@@ -122,6 +122,18 @@ Per conti, elenchi e analisi.
           <li>Dodici tipi di grafico, leggibili anche come tabella o come suoni</li>
           <li>Apre e salva XLSX e CSV</li>
 
+[impagina.per]
+Per post e caroselli, storie, volantini, poster, brochure, newsletter e presentazioni.
+
+[impagina.elenco]
+          <li>Formati pronti, margini, colonne, griglia e pagine mastro con numero di pagina e logo</li>
+          <li>Testo che scorre tra le cornici e le pagine, stili di paragrafo e di carattere, insegne d’effetto</li>
+          <li>Dati da CSV, XLSX, JSON o da un foglio di Calcolo per una pagina per riga; feed RSS e testo da DOCX</li>
+          <li>Una cartella del computer collegata, anche quella di Google Drive, OneDrive o Dropbox, che si rilegge con un comando</li>
+          <li>Temi di colore, sagome per le immagini, griglie di foto, guide intelligenti e adattamento a un altro formato</li>
+          <li>Poster e striscioni stampati a tessere su fogli A4 o A3; esporta PNG e PDF</li>
+          <li>Ordine di lettura, testi alternativi e verifica dell’accessibilità per ogni pagina</li>
+
 [ufficio.scarica]
 Scarica Tassello Ufficio
 
@@ -132,7 +144,7 @@ Prova Tassello Ufficio nel browser
 Installa come app
 
 [ufficio.limiti]
-Un file da circa 800 KB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base, non tutto: macro, revisioni tracciate, slicer delle tabelle pivot e grafici combinati non sono supportati. Conserva sempre una copia degli originali.
+Un file da circa 1 MB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base, non tutto: macro, revisioni tracciate, slicer delle tabelle pivot e grafici combinati non sono supportati, e Impagina non sostituisce un programma di impaginazione professionale. Conserva sempre una copia degli originali.
 
 [media.titolo]
 Tassello Media: Audio e Video
@@ -192,7 +204,7 @@ Ruoli ARIA standard e annunci per celle, stati e messaggi, pensati per NVDA, JAW
 Lettura
 
 [accessibilita.lettura]
-Modalità lettura, contrasto elevato, tema scuro, lettura ad alta voce e verifica dell’accessibilità dei documenti.
+Modalità lettura, contrasto elevato, tema scuro, lettura ad alta voce e verifica dell’accessibilità di documenti e pagine; in Impagina l’ordine di lettura delle cornici è esplicito e <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>I</kbd> descrive la pagina.
 
 [accessibilita.ascolto_titolo]
 Ascolto
@@ -208,6 +220,7 @@ Privacy
 
 [privacy.testo]
       <p>I documenti restano nel tuo browser e sul tuo computer. L’unica funzione che usa un servizio esterno è la dettatura vocale di Tassello Ufficio: in Chrome l’audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Se non la usi, nulla esce dal tuo dispositivo.</p>
+      <p>Impagina legge la cartella che colleghi solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed.</p>
       <p>Tassello Media usa il microfono solo quando lo chiedi tu, e le registrazioni, i file e i video esportati restano sul tuo computer.</p>
       <p>Questo vale per la copia ufficiale. Una copia modificata da altri può comportarsi in modo diverso: anche per questo conviene <a href="#sicurezza">scaricare Tassello solo da qui</a>.</p>
 
