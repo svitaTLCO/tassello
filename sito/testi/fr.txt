@@ -1,0 +1,370 @@
+# Testi del sito in francese. Stesse voci di it.txt, che è il riferimento: le istruzioni sono lì.
+# Prima di : ; ? ! e dentro « » va lo spazio indivisibile &nbsp;, come vuole la tipografia francese.
+
+[lingua.etichetta]
+Langue&nbsp;:
+
+[comune.salta]
+Aller au contenu
+
+[comune.logo]
+Tassello, page d’accueil
+
+[comune.codice]
+Code source
+
+# Pagina iniziale
+
+[pagina.titolo]
+Tassello&nbsp;: l’essentiel pour travailler sur vos fichiers
+
+[pagina.descrizione]
+Tassello&nbsp;: des outils libres et gratuits pour écrire, faire vos calculs, enregistrer et monter de l’audio et de la vidéo sans installer de suites encombrantes. Chaque outil est un seul fichier HTML, accessible et utilisable hors ligne. Téléchargez-le uniquement depuis le site officiel.
+
+[nav.etichetta]
+Sections de la page
+
+[nav.accessibilita]
+Accessibilité
+
+[nav.privacy]
+Confidentialité
+
+[nav.sicurezza]
+Sécurité
+
+[nav.verifica]
+Vérifier une copie
+
+[hero.etichetta]
+Gratuit · Logiciel libre · Accessible
+
+[hero.titolo]
+L’essentiel pour travailler sur vos fichiers.
+
+[hero.testo]
+Tassello est une famille de petits outils libres pour la productivité de tous les jours&nbsp;: écrire, remplir des formulaires, faire des calculs, enregistrer et monter de l’audio et de la vidéo. Chacun tient dans un seul fichier HTML qui s’ouvre dans le navigateur, sans suite encombrante à installer et sans compte. Un couteau suisse, ordonné et léger.
+
+[hero.ufficio]
+Testo et Calcolo, pour documents et calculs
+
+[hero.media]
+Audio et Video, pour enregistrer et monter
+
+[hero.dettagli]
+Fonctionne dans Chrome et Edge récents, même hors ligne. Les programmes eux-mêmes sont pour l’instant en italien.
+
+[hero.ufficiale]
+<b>Téléchargez Tassello uniquement ici</b>, c’est-à-dire sur svitatlco.github.io/tassello, ou depuis les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a>. N’ouvrez pas les copies reçues d’autres personnes&nbsp;: téléchargez-le à nouveau ici. <a href="#sicurezza">Pourquoi c’est important</a>
+
+[hero.marchio]
+Le logo de Tassello&nbsp;: quatre carreaux de couleur, dont un avec le coin plié comme un fichier
+
+[perche.titolo]
+Un couteau suisse, pas une suite
+
+[perche.intro]
+Tassello met entre les mains de chacun, le plus simplement possible, la capacité de travailler sur ses propres fichiers. Il fait le travail de base, celui de tous les jours, et il le fait avec ordre. Il est gratuit pour tous, y compris en entreprise et à l’école.
+
+[perche.necessario_titolo]
+L’essentiel
+
+[perche.necessario]
+Les fonctions vraiment utiles pour les documents, les tableurs, l’audio et la vidéo, choisies une à une et bien rangées.
+
+[perche.leggero_titolo]
+Léger
+
+[perche.leggero]
+Aucune suite à installer et aucun compte&nbsp;: un fichier de moins d’un mégaoctet qui s’ouvre dans le navigateur, même hors ligne. Si vous préférez, vous pouvez l’installer comme une application.
+
+[perche.tuoi_titolo]
+Vos fichiers restent à vous
+
+[perche.tuoi]
+Tout se passe dans votre navigateur&nbsp;: aucun serveur ne reçoit vos fichiers, pas même vos enregistrements.
+
+[perche.accessibile_titolo]
+Accessible par principe
+
+[perche.accessibile]
+Il s’utilise avec un lecteur d’écran et au clavier seul. Sans cela, aucun tassello ne sort.
+
+[perche.non_e]
+<b>Ce qu’il n’est pas.</b> Tassello ne remplace pas les outils professionnels&nbsp;: si votre travail demande des macros, le suivi des modifications, un montage professionnel ou des instruments virtuels et du MIDI, continuez à utiliser le programme adapté. Ce n’est pas non plus un clone des applications célèbres&nbsp;: il en ouvre et enregistre les formats pour échanger des fichiers avec tout le monde, mais il a sa propre conception, avec des fonctions choisies pour le travail de tous les jours et toutes accessibles au clavier.
+
+[ufficio.titolo]
+Tassello Ufficio&nbsp;: Testo et Calcolo
+
+[ufficio.intro]
+Pour les documents et les tableurs de tous les jours. Il ouvre et enregistre les formats DOCX et XLSX, pour échanger des fichiers avec ceux qui utilisent d’autres programmes. L’interface est en italien.
+
+[testo.per]
+Le traitement de texte, pour les lettres, les rapports, les mémoires et les formulaires.
+
+[testo.elenco]
+          <li>Styles modifiables, listes à plusieurs niveaux, tableaux, images et légendes</li>
+          <li>Sections, en-têtes avec logo, notes, table des matières et index</li>
+          <li>Renvois, citations et bibliographie APA ou Chicago</li>
+          <li>Formulaires à remplir, équations, commentaires, publipostage</li>
+          <li>Ouvre et enregistre le DOCX, exporte en HTML et en PDF par l’impression</li>
+
+[calcolo.per]
+Le tableur, pour les comptes, les listes et les analyses.
+
+[calcolo.elenco]
+          <li>Plus de cent fonctions en italien ou en anglais, matrices dynamiques</li>
+          <li>Tableaux croisés dynamiques avec champs calculés, filtres et graphique</li>
+          <li>Mise en forme conditionnelle, validation des données, noms définis, notes</li>
+          <li>Douze types de graphiques, que l’on peut aussi lire sous forme de tableau ou écouter sous forme de sons</li>
+          <li>Ouvre et enregistre XLSX et CSV</li>
+
+[ufficio.scarica]
+Télécharger Tassello Ufficio
+
+[ufficio.prova]
+Essayer Tassello Ufficio dans le navigateur
+
+[ufficio.installa]
+Installer comme application
+
+[ufficio.limiti]
+Un fichier d’environ 800&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base, pas tout&nbsp;: les macros, le suivi des modifications, les segments des tableaux croisés dynamiques et les graphiques combinés ne sont pas pris en charge. Conservez toujours une copie des originaux.
+
+[media.titolo]
+Tassello Media&nbsp;: Audio et Video
+
+[media.intro]
+Pour enregistrer et nettoyer la voix, préparer un podcast ou monter une vidéo pour l’école ou le travail. Tout s’utilise au clavier et avec un lecteur d’écran&nbsp;: on entend l’endroit où l’on se trouve, on saute d’une pause à l’autre de la parole, chaque propriété a un champ avec son nom. L’interface est en italien.
+
+[audio.per]
+Pour les podcasts, les interviews, les cours et les petites productions musicales.
+
+[audio.elenco]
+          <li>Plusieurs pistes avec volume, panoramique, muet, solo, graves, aigus, compression et réverbération</li>
+          <li>Régions à déplacer, couper et répéter&nbsp;; tempo, métronome, boucle et enregistrement par-dessus les autres pistes</li>
+          <li>Normalisation au pic ou au volume perçu (LUFS), fondus, changement de tempo sans modifier la hauteur</li>
+          <li>Réduction du bruit, égaliseur, compresseur, raccourcissement des pauses</li>
+          <li>Exporte le morceau ou les pistes séparées en WAV, M4A et WebM&nbsp;; enregistre le projet dans un fichier ZIP</li>
+
+[video.per]
+Pour les présentations, les tutoriels et les souvenirs à partager.
+
+[video.elenco]
+          <li>Piste vidéo avec découpage, coupes, vitesse, volume, filtres, rotation</li>
+          <li>Transitions, cartons, titres et une piste audio pour la musique et la voix off</li>
+          <li>Sous-titres à écrire, importer et exporter en SRT et WebVTT</li>
+          <li>Vérification de l’accessibilité&nbsp;: sous-titres, temps de lecture, contraste et clignotements</li>
+          <li>Exporte en MP4 ou WebM, l’audio seul ou une image&nbsp;; enregistre le projet dans un fichier ZIP</li>
+          <li>Exportation image par image, même avec l’onglet en arrière-plan</li>
+
+[media.scarica]
+Télécharger Tassello Media
+
+[media.prova]
+Essayer Tassello Media dans le navigateur
+
+[media.limiti]
+Un fichier d’environ 470&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: les fichiers très longs demandent beaucoup de mémoire, et les vidéos que le navigateur ne sait pas décoder s’exportent en temps réel au lieu d’image par image. Conservez toujours une copie des originaux.
+
+[accessibilita.titolo]
+Accessibilité&nbsp;: la condition, pas un extra
+
+[accessibilita.intro]
+Un tassello n’est distribué que s’il s’utilise avec un lecteur d’écran et au clavier seul. Ce n’est pas une option à activer&nbsp;: c’est la façon dont chaque commande, chaque fenêtre et chaque message sont conçus.
+
+[accessibilita.tastiera_titolo]
+Clavier
+
+[accessibilita.tastiera]
+<kbd>F6</kbd> passe d’une zone à l’autre, <kbd>Alt</kbd>+<kbd>Q</kbd> trouve n’importe quelle commande, <kbd>F1</kbd> liste les raccourcis.
+
+[accessibilita.lettore_titolo]
+Lecteurs d’écran
+
+[accessibilita.lettore]
+Rôles ARIA standard et annonces pour les cellules, les états et les messages, pensés pour NVDA, JAWS et le Narrateur.
+
+[accessibilita.lettura_titolo]
+Lecture
+
+[accessibilita.lettura]
+Mode lecture, contraste élevé, thème sombre, lecture à voix haute et vérification de l’accessibilité des documents.
+
+[accessibilita.ascolto_titolo]
+Écoute
+
+[accessibilita.ascolto]
+Dans Audio, la forme d’onde fait entendre l’endroit où vous êtes et vous sautez d’une pause à l’autre de la parole&nbsp;; dans Video, la vérification contrôle les sous-titres, le contraste et les clignotements.
+
+[accessibilita.segnalazioni]
+Vous utilisez NVDA, JAWS ou le Narrateur&nbsp;? Vos <a href="https://github.com/svitaTLCO/tassello/issues">signalements</a> sont les bienvenus&nbsp;: un problème d’accessibilité est un défaut à corriger, pas une amélioration à envisager.
+
+[privacy.titolo]
+Confidentialité
+
+[privacy.testo]
+      <p>Vos documents restent dans votre navigateur et sur votre ordinateur. La seule fonction qui utilise un service externe est la dictée vocale de Tassello Ufficio&nbsp;: dans Chrome, l’audio est envoyé aux serveurs de Google, dans Edge à ceux de Microsoft. Si vous ne l’utilisez pas, rien ne quitte votre appareil.</p>
+      <p>Tassello Media n’utilise le microphone que lorsque vous le demandez, et les enregistrements, les fichiers et les vidéos exportées restent sur votre ordinateur.</p>
+      <p>Cela vaut pour la copie officielle. Une copie modifiée par d’autres peut se comporter autrement&nbsp;: raison de plus pour <a href="#sicurezza">télécharger Tassello uniquement ici</a>.</p>
+
+[sicurezza.titolo]
+Sécurité&nbsp;: utilisez uniquement la copie officielle
+
+[sicurezza.intro]
+Tassello est un logiciel libre&nbsp;: chacun peut l’étudier et le modifier. Des copies altérées peuvent donc circuler, même sous le même nom, qui lisent vos documents ou vous demandent des données personnelles. Voici comment reconnaître la copie officielle.
+
+[sicurezza.scarica_titolo]
+Téléchargez uniquement ici
+
+[sicurezza.scarica]
+Les seules adresses officielles sont <b>svitatlco.github.io/tassello</b> et les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a>. Un fichier reçu par e-mail, sur une clé USB ou depuis d’autres sites peut avoir été modifié&nbsp;: ne l’ouvrez pas et téléchargez-le à nouveau ici. Pour faire connaître Tassello, partagez le lien plutôt que le fichier.
+
+[sicurezza.mai_titolo]
+Ce qu’il ne fait jamais
+
+[sicurezza.mai]
+La copie officielle ne demande jamais de mot de passe, de compte ou de paiement, ne propose jamais de télécharger des mises à jour ou d’autres programmes et ne se connecte pas à Internet&nbsp;: une règle de sécurité inscrite dans le fichier l’interdit. Seule exception, la dictée de Tassello Ufficio, qui utilise le service du navigateur.
+
+[sicurezza.verifica_titolo]
+Vérifier une copie
+
+[sicurezza.verifica]
+Sur la page <a href="verifica.html">Vérifier une copie</a>, choisissez le fichier&nbsp;: le site vous indique s’il est identique à une version officielle. Le fichier ne quitte pas votre ordinateur.
+
+[sicurezza.app_titolo]
+L’installer comme application
+
+[sicurezza.app]
+Dans Chrome ou Edge, ouvrez <a href="{{BASE}}tassello-ufficio.html">Tassello Ufficio</a> ou <a href="{{BASE}}tassello-media.html">Tassello Media</a> dans le navigateur et choisissez <b>Installer</b> dans la barre d’adresse ou dans le menu. L’application vient toujours de ce site, fonctionne hors ligne et se met à jour toute seule.
+
+[sicurezza.segnala]
+Vous avez trouvé une copie suspecte&nbsp;? <a href="https://github.com/svitaTLCO/tassello/issues">Signalez-la sur GitHub</a>.
+
+[famiglia.titolo]
+La famille Tassello
+
+[famiglia.intro]
+Chaque tassello couvre un type de travail sur les fichiers et reste indépendant des autres&nbsp;: prenez seulement ce dont vous avez besoin. Un nouvel outil ne sort que lorsqu’il est accessible.
+
+[famiglia.disponibile]
+Disponible
+
+[famiglia.in_progetto]
+En projet
+
+[piede.canali]
+Canaux officiels&nbsp;: svitatlco.github.io/tassello et les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a>. Les copies reçues par d’autres moyens, ou modifiées par d’autres, ne sont pas officielles&nbsp;: <a href="verifica.html">vérifiez une copie</a>.
+
+[piede.licenza]
+© 2026 svitaTLCO et contributeurs. Tassello est un logiciel libre, distribué sous licence <a href="https://github.com/svitaTLCO/tassello/blob/main/LICENSE">EUPL 1.2</a>. <a href="https://github.com/svitaTLCO/tassello">Code source et signalements</a>.
+
+[piede.marchi]
+Microsoft, Office, Word et Excel sont des marques de Microsoft Corporation. Tassello n’est pas lié à Microsoft.
+
+# Pagina Verifica
+
+[verifica.pagina_titolo]
+Vérifier votre copie · Tassello
+
+[verifica.descrizione]
+Vérifiez que votre fichier Tassello Ufficio ou Tassello Media est identique à une version officielle. Le fichier reste sur votre ordinateur.
+
+[verifica.nav]
+Site
+
+[verifica.home]
+Page d’accueil
+
+[verifica.titolo]
+Vérifier votre copie
+
+[verifica.testo]
+Vérifiez si votre fichier Tassello (Ufficio ou Media) est identique à une version officielle. Le fichier ne quitte pas votre ordinateur&nbsp;: la vérification se fait ici, dans le navigateur.
+
+[verifica.scegli]
+<b>Choisissez le fichier à vérifier</b>, en général <code>tassello-ufficio.html</code> ou <code>tassello-media.html</code>
+
+[verifica.trascina]
+Ou faites-le glisser dans ce cadre.
+
+[verifica.come_titolo]
+Comment ça marche
+
+[verifica.come]
+    <p>Pour chaque version publiée, nous enregistrons l’<b>empreinte SHA-256</b> du fichier&nbsp;: une suite de 64&nbsp;caractères qui change complètement si une seule lettre du fichier change. Cette page calcule l’empreinte de votre fichier et la recherche dans les listes des versions officielles de <a href="{{BASE}}versioni.json">Tassello Ufficio</a> et de <a href="{{BASE}}versioni-media.json">Tassello Media</a>.</p>
+    <p>Si le fichier n’est pas reconnu comme officiel, quelqu’un l’a peut-être modifié, ou un programme l’a enregistré à nouveau (par exemple avec «&nbsp;Enregistrer sous&nbsp;» du navigateur). Dans les deux cas, ne l’utilisez pas pour des documents importants et <a href="./">téléchargez la copie officielle</a>.</p>
+
+[verifica.ufficiali_titolo]
+Versions officielles
+
+[verifica.caricamento]
+Chargement de la liste…
+
+[verifica.avanzata_titolo]
+Vérification avancée
+
+[verifica.avanzata_1]
+Sous Windows, vous pouvez aussi calculer l’empreinte depuis l’invite de commandes et la comparer à la liste&nbsp;:
+
+[verifica.avanzata_2]
+Pour Tassello Media, écrivez <code>tassello-media.html</code> à la place de <code>tassello-ufficio.html</code>, ici et dans la commande suivante.
+
+[verifica.avanzata_3]
+Chaque fichier téléchargé depuis les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a> (Tassello Ufficio depuis la version 1.3.0, Tassello Media depuis sa première version publiée) porte aussi une signature de provenance, qui prouve que GitHub l’a construit à partir du code source public. Avec l’outil <a href="https://cli.github.com/">GitHub CLI</a>&nbsp;:
+
+# Messaggi dello script della pagina Verifica
+
+[js.controllo]
+Vérification en cours…
+
+[js.grande_titolo]
+Ce fichier n’est pas une copie officielle
+
+[js.grande]
+Il est trop volumineux pour être un programme Tassello.
+
+[js.impronta]
+Empreinte du fichier <b>{file}</b>&nbsp;: <code>{hex}</code>
+
+[js.elenco_errore_titolo]
+Impossible de lire la liste des versions officielles
+
+[js.elenco_errore]
+Vérifiez votre connexion et réessayez.
+
+[js.non_ufficiale_titolo]
+Ce fichier ne correspond à aucune version officielle
+
+[js.non_ufficiale]
+Il a peut-être été modifié, ou enregistré à nouveau par un autre programme. Ne l’utilisez pas pour des documents importants&nbsp;: <a href="./">téléchargez la copie officielle</a> sur ce site.
+
+[js.ok_titolo]
+Copie officielle de {nome} {versione}
+
+[js.ok]
+Elle est identique à la dernière version publiée.
+
+[js.vecchia_titolo]
+Copie officielle de {nome} {versione}, pas à jour
+
+[js.vecchia]
+Le fichier est authentique, mais il existe une version plus récente ({ultima})&nbsp;: <a href="./">téléchargez-la sur ce site</a>.
+
+[js.recente]
+la plus récente
+
+[js.tabella]
+Versions officielles et empreintes SHA-256
+
+[js.col_versione]
+Version
+
+[js.col_data]
+Date
+
+[js.col_impronta]
+Empreinte SHA-256
+
+[js.elenco_non_disponibile]
+Impossible de lire la liste&nbsp;: vérifiez votre connexion et rechargez la page.

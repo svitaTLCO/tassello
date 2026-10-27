@@ -1,0 +1,192 @@
+<!doctype html>
+<!-- Pagina generata da sito/build.py: modifica sito/pagine/index.html o i testi in sito/testi/, poi ricostruisci. -->
+<html lang="{{LINGUA}}">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{pagina.titolo}}</title>
+<meta name="description" content="{{pagina.descrizione}}">
+<meta name="color-scheme" content="light dark">
+{{ALTERNATIVE}}
+<link rel="icon" href="{{BASE}}icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="{{BASE}}stile.css">
+<link rel="manifest" href="{{BASE}}manifest.webmanifest">
+</head>
+<body>
+<a class="skip" href="#contenuto">{{comune.salta}}</a>
+<div class="wrap">
+<header class="top">
+  <a class="logo" href="./" aria-label="{{comune.logo}}">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"/><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/><rect y="54" width="46" height="46" rx="10" fill="#B35500"/><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/></svg>
+    tassello
+  </a>
+  {{LINGUE}}
+  <nav aria-label="{{nav.etichetta}}">
+    <ul>
+      <li><a href="#ufficio">Tassello Ufficio</a></li>
+      <li><a href="#media">Tassello Media</a></li>
+      <li><a href="#accessibilita">{{nav.accessibilita}}</a></li>
+      <li><a href="#privacy">{{nav.privacy}}</a></li>
+      <li><a href="#sicurezza">{{nav.sicurezza}}</a></li>
+      <li><a href="verifica.html">{{nav.verifica}}</a></li>
+      <li><a href="https://github.com/svitaTLCO/tassello">{{comune.codice}}</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="contenuto">
+  <div class="hero">
+    <div>
+      <p class="eyebrow">{{hero.etichetta}}</p>
+      <h1>{{hero.titolo}}</h1>
+      <p class="lead">{{hero.testo}}</p>
+      <div class="actions scelta">
+        <a class="btn" href="#ufficio"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#2457C5"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#1E7A46"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><span><b>Tassello Ufficio</b><span class="sr-only">: </span><small>{{hero.ufficio}}</small></span></a>
+        <a class="btn" href="#media"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B35500"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#7A3DB8"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><span><b>Tassello Media</b><span class="sr-only">: </span><small>{{hero.media}}</small></span></a>
+      </div>
+      <p class="meta">{{hero.dettagli}}</p>
+      <p class="official"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-4.5"/></svg><span>{{hero.ufficiale}}</span></p>
+    </div>
+    <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="{{hero.marchio}}"><rect width="46" height="46" rx="10" fill="#2457C5"/><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/><rect y="54" width="46" height="46" rx="10" fill="#B35500"/><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/></svg>
+  </div>
+
+  <section aria-labelledby="perche">
+    <h2 id="perche">{{perche.titolo}}</h2>
+    <p class="intro">{{perche.intro}}</p>
+    <div class="grid">
+      <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M3 13h18"/></svg><h3>{{perche.necessario_titolo}}</h3><p>{{perche.necessario}}</p></div>
+      <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8L2 22"/><path d="M17.5 15H9"/></svg><h3>{{perche.leggero_titolo}}</h3><p>{{perche.leggero}}</p></div>
+      <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><h3>{{perche.tuoi_titolo}}</h3><p>{{perche.tuoi}}</p></div>
+      <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><path d="M4 8l8 2 8-2"/><path d="M12 10v5"/><path d="M8 21l4-6 4 6"/></svg><h3>{{perche.accessibile_titolo}}</h3><p>{{perche.accessibile}}</p></div>
+    </div>
+    <div class="note">
+      <p>{{perche.non_e}}</p>
+    </div>
+  </section>
+
+  <section id="ufficio" aria-labelledby="titolo-ufficio">
+    <h2 id="titolo-ufficio">{{ufficio.titolo}}</h2>
+    <p class="intro">{{ufficio.intro}}</p>
+    <div class="apps">
+      <div class="app">
+        <h3>Testo</h3>
+        <p>{{testo.per}}</p>
+        <ul>
+{{testo.elenco}}
+        </ul>
+      </div>
+      <div class="app calc">
+        <h3>Calcolo</h3>
+        <p>{{calcolo.per}}</p>
+        <ul>
+{{calcolo.elenco}}
+        </ul>
+      </div>
+    </div>
+    <div class="actions app-actions">
+      <a class="btn primary" href="{{BASE}}tassello-ufficio.html" download="tassello-ufficio.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+        {{ufficio.scarica}}
+      </a>
+      <a class="btn secondary" href="{{BASE}}tassello-ufficio.html">{{ufficio.prova}}</a>
+      <button type="button" class="btn secondary hidden" id="installa">{{ufficio.installa}}</button>
+    </div>
+    <p class="meta">{{ufficio.limiti}}</p>
+  </section>
+
+  <section id="media" aria-labelledby="titolo-media">
+    <h2 id="titolo-media">{{media.titolo}}</h2>
+    <p class="intro">{{media.intro}}</p>
+    <div class="apps">
+      <div class="app audio">
+        <h3>Audio</h3>
+        <p>{{audio.per}}</p>
+        <ul>
+{{audio.elenco}}
+        </ul>
+      </div>
+      <div class="app video">
+        <h3>Video</h3>
+        <p>{{video.per}}</p>
+        <ul>
+{{video.elenco}}
+        </ul>
+      </div>
+    </div>
+    <div class="actions app-actions">
+      <a class="btn primary" href="{{BASE}}tassello-media.html" download="tassello-media.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+        {{media.scarica}}
+      </a>
+      <a class="btn secondary" href="{{BASE}}tassello-media.html">{{media.prova}}</a>
+    </div>
+    <p class="meta">{{media.limiti}}</p>
+  </section>
+
+  <section id="accessibilita" aria-labelledby="titolo-accessibilita">
+    <h2 id="titolo-accessibilita">{{accessibilita.titolo}}</h2>
+    <p class="intro">{{accessibilita.intro}}</p>
+    <div class="grid">
+      <div class="card"><h3>{{accessibilita.tastiera_titolo}}</h3><p>{{accessibilita.tastiera}}</p></div>
+      <div class="card"><h3>{{accessibilita.lettore_titolo}}</h3><p>{{accessibilita.lettore}}</p></div>
+      <div class="card"><h3>{{accessibilita.lettura_titolo}}</h3><p>{{accessibilita.lettura}}</p></div>
+      <div class="card"><h3>{{accessibilita.ascolto_titolo}}</h3><p>{{accessibilita.ascolto}}</p></div>
+    </div>
+    <p class="meta">{{accessibilita.segnalazioni}}</p>
+  </section>
+
+  <section id="privacy" aria-labelledby="titolo-privacy">
+    <h2 id="titolo-privacy">{{privacy.titolo}}</h2>
+    <div class="note">
+{{privacy.testo}}
+    </div>
+  </section>
+
+  <section id="sicurezza" aria-labelledby="titolo-sicurezza">
+    <h2 id="titolo-sicurezza">{{sicurezza.titolo}}</h2>
+    <p class="intro">{{sicurezza.intro}}</p>
+    <div class="grid">
+      <div class="card"><h3>{{sicurezza.scarica_titolo}}</h3><p>{{sicurezza.scarica}}</p></div>
+      <div class="card"><h3>{{sicurezza.mai_titolo}}</h3><p>{{sicurezza.mai}}</p></div>
+      <div class="card"><h3>{{sicurezza.verifica_titolo}}</h3><p>{{sicurezza.verifica}}</p></div>
+      <div class="card"><h3>{{sicurezza.app_titolo}}</h3><p>{{sicurezza.app}}</p></div>
+    </div>
+    <p class="meta">{{sicurezza.segnala}}</p>
+  </section>
+
+  <section aria-labelledby="famiglia">
+    <h2 id="famiglia">{{famiglia.titolo}}</h2>
+    <p class="intro">{{famiglia.intro}}</p>
+    <div class="family">
+      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#2457C5"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#1E7A46"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Ufficio</h3><span class="tag on">{{famiglia.disponibile}}</span></div></div>
+      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B35500"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#7A3DB8"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Media</h3><span class="tag on">{{famiglia.disponibile}}</span></div></div>
+      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H78L100 22V78Q100 100 78 100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B0306A"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Grafica</h3><span class="tag">{{famiglia.in_progetto}}</span></div></div>
+    </div>
+  </section>
+</main>
+<footer>
+  <p>{{piede.canali}}</p>
+  <p>{{piede.licenza}}</p>
+  <p>{{piede.marchi}}</p>
+</footer>
+</div>
+<script>
+// App installabile: il service worker conserva il programma per l'uso senza rete; il pulsante compare solo
+// quando il browser permette di installare l'app.
+(()=>{
+if('serviceWorker' in navigator)navigator.serviceWorker.register('{{BASE}}sw.js').catch(()=>{});
+const button=document.getElementById('installa');let offer=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();offer=e;button.classList.remove('hidden')});
+button.addEventListener('click',async()=>{if(!offer)return;offer.prompt();await offer.userChoice;offer=null;button.classList.add('hidden')});
+addEventListener('appinstalled',()=>button.classList.add('hidden'));
+})();
+// Selettore della lingua: si chiude con Esc, con un clic fuori o quando il fuoco esce dall'elenco.
+(()=>{
+const menu=document.querySelector('.lingua'),summary=menu.querySelector('summary');
+addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open){menu.open=false;summary.focus()}});
+addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
+menu.addEventListener('focusout',e=>{if(e.relatedTarget&&!menu.contains(e.relatedTarget))menu.open=false});
+})();
+</script>
+</body>
+</html>

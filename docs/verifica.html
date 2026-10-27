@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Pagina generata da sito/build.py: modifica sito/pagine/verifica.html o i testi in sito/testi/, poi ricostruisci. -->
 <html lang="it">
 <head>
 <meta charset="utf-8">
@@ -7,6 +8,11 @@
 <title>Verifica la tua copia · Tassello</title>
 <meta name="description" content="Controlla che il tuo file di Tassello Ufficio o Tassello Media sia identico a una versione ufficiale. Il file resta sul tuo computer.">
 <meta name="color-scheme" content="light dark">
+<link rel="alternate" hreflang="it" href="https://svitatlco.github.io/tassello/verifica.html">
+<link rel="alternate" hreflang="en" href="https://svitatlco.github.io/tassello/en/verifica.html">
+<link rel="alternate" hreflang="fr" href="https://svitatlco.github.io/tassello/fr/verifica.html">
+<link rel="alternate" hreflang="es" href="https://svitatlco.github.io/tassello/es/verifica.html">
+<link rel="alternate" hreflang="x-default" href="https://svitatlco.github.io/tassello/verifica.html">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="stile.css">
 </head>
@@ -18,6 +24,15 @@
     <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"/><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/><rect y="54" width="46" height="46" rx="10" fill="#B35500"/><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/></svg>
     tassello
   </a>
+  <details class="lingua">
+    <summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span class="sr-only">Lingua: </span>Italiano</summary>
+    <ul>
+      <li><a href="verifica.html" hreflang="it" lang="it" aria-current="page">Italiano</a></li>
+      <li><a href="en/verifica.html" hreflang="en" lang="en">English</a></li>
+      <li><a href="fr/verifica.html" hreflang="fr" lang="fr">Français</a></li>
+      <li><a href="es/verifica.html" hreflang="es" lang="es">Español</a></li>
+    </ul>
+  </details>
   <nav aria-label="Sito">
     <ul>
       <li><a href="./">Pagina iniziale</a></li>
@@ -55,18 +70,21 @@
     <p>In Windows puoi calcolare l’impronta anche dal Prompt dei comandi e confrontarla con l’elenco:</p>
     <pre>certutil -hashfile tassello-ufficio.html SHA256</pre>
     <p>Per Tassello Media scrivi <code>tassello-media.html</code> al posto di <code>tassello-ufficio.html</code>, qui e nel comando seguente.</p>
-    <p>Dalla versione 1.3.0 ogni file scaricato dalle <a href="https://github.com/svitaTLCO/tassello/releases">release su GitHub</a> ha anche una firma di provenienza, che dimostra che è stato costruito da GitHub a partire dal codice sorgente pubblico. Con lo strumento <a href="https://cli.github.com/">GitHub CLI</a>:</p>
+    <p>Ogni file scaricato dalle <a href="https://github.com/svitaTLCO/tassello/releases">release su GitHub</a> (Tassello Ufficio dalla versione 1.3.0, Tassello Media dalla prima release) ha anche una firma di provenienza, che dimostra che è stato costruito da GitHub a partire dal codice sorgente pubblico. Con lo strumento <a href="https://cli.github.com/">GitHub CLI</a>:</p>
     <pre>gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello</pre>
   </section>
 </main>
 <footer>
-  <p>© 2026 svitaTLCO e collaboratori. Tassello è software libero, distribuito con licenza <a href="https://github.com/svitaTLCO/tassello/blob/main/LICENSE">EUPL 1.2</a>.</p>
+  <p>Canali ufficiali: svitatlco.github.io/tassello e le <a href="https://github.com/svitaTLCO/tassello/releases">release su GitHub</a>. Le copie ricevute per altre vie, o modificate da altri, non sono ufficiali: <a href="verifica.html">verifica una copia</a>.</p>
+  <p>© 2026 svitaTLCO e collaboratori. Tassello è software libero, distribuito con licenza <a href="https://github.com/svitaTLCO/tassello/blob/main/LICENSE">EUPL 1.2</a>. <a href="https://github.com/svitaTLCO/tassello">Codice sorgente e segnalazioni</a>.</p>
   <p>Hai trovato una copia sospetta? <a href="https://github.com/svitaTLCO/tassello/issues">Segnalala su GitHub</a>.</p>
 </footer>
 </div>
 <script>
 // Confronta l'impronta SHA-256 del file scelto con gli elenchi delle versioni ufficiali di ogni tassello.
 (()=>{
+const T={"controllo": "Controllo in corso…", "grande_titolo": "Questo file non è una copia ufficiale", "grande": "È troppo grande per essere un programma di Tassello.", "impronta": "Impronta del file <b>{file}</b>: <code>{hex}</code>", "elenco_errore_titolo": "Non riesco a leggere l’elenco delle versioni ufficiali", "elenco_errore": "Controlla la connessione e riprova.", "non_ufficiale_titolo": "Questo file non corrisponde a nessuna versione ufficiale", "non_ufficiale": "Può essere stato modificato, oppure salvato di nuovo da un altro programma. Non usarlo per documenti importanti: <a href=\"./\">scarica la copia ufficiale</a> da questo sito.", "ok_titolo": "Copia ufficiale di {nome} {versione}", "ok": "È identica alla versione più recente pubblicata.", "vecchia_titolo": "Copia ufficiale di {nome} {versione}, non aggiornata", "vecchia": "Il file è autentico, ma esiste una versione più recente ({ultima}): <a href=\"./\">scaricala da questo sito</a>.", "recente": "più recente", "tabella": "Versioni ufficiali e impronte SHA-256", "col_versione": "Versione", "col_data": "Data", "col_impronta": "Impronta SHA-256", "elenco_non_disponibile": "Non riesco a leggere l’elenco: controlla la connessione e ricarica la pagina."};
+const fmt=(s,values)=>s.replace(/\{(\w+)\}/g,(m,k)=>k in values?values[k]:m);
 const $=id=>document.getElementById(id);
 const ICON={wait:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',ok:'<path d="M5 12l5 5 9-10"/>',old:'<path d="M12 7v6"/><path d="M12 17h.01"/>',bad:'<path d="M6 6l12 12"/><path d="M18 6L6 18"/>'};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -78,18 +96,18 @@ function show(kind,title,lines){
 }
 async function check(file){
   if(!file)return;
-  show('wait','Controllo in corso…',[esc(file.name)]);
-  if(file.size>20e6){show('bad','Questo file non è una copia ufficiale',['È troppo grande per essere un programma di Tassello.']);return}
+  show('wait',T.controllo,[esc(file.name)]);
+  if(file.size>20e6){show('bad',T.grande_titolo,[T.grande]);return}
   const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());
   const hex=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
-  const footer=`Impronta del file <b>${esc(file.name)}</b>: <code>${hex}</code>`;
+  const footer=fmt(T.impronta,{file:esc(file.name),hex});
   let lists;
-  try{lists=await loadList()}catch(e){listing=null;show('bad','Non riesco a leggere l’elenco delle versioni ufficiali',['Controlla la connessione e riprova.',footer]);return}
+  try{lists=await loadList()}catch(e){listing=null;show('bad',T.elenco_errore_titolo,[T.elenco_errore,footer]);return}
   const data=lists.find(l=>l.versioni.some(v=>v.sha256===hex)),hit=data?.versioni.find(v=>v.sha256===hex);
-  if(!hit){show('bad','Questo file non corrisponde a nessuna versione ufficiale',['Può essere stato modificato, oppure salvato di nuovo da un altro programma. Non usarlo per documenti importanti: <a href="./">scarica la copia ufficiale</a> da questo sito.',footer]);return}
-  const name=hit.nome||data.programma;
-  if(hit.versione===data.ultima)show('ok',`Copia ufficiale di ${esc(name)} ${esc(hit.versione)}`,['È identica alla versione più recente pubblicata.',footer]);
-  else show('old',`Copia ufficiale di ${esc(name)} ${esc(hit.versione)}, non aggiornata`,[`Il file è autentico, ma esiste una versione più recente (${esc(data.ultima)}): <a href="./">scaricala da questo sito</a>.`,footer]);
+  if(!hit){show('bad',T.non_ufficiale_titolo,[T.non_ufficiale,footer]);return}
+  const name={nome:esc(hit.nome||data.programma),versione:esc(hit.versione),ultima:esc(data.ultima)};
+  if(hit.versione===data.ultima)show('ok',fmt(T.ok_titolo,name),[T.ok,footer]);
+  else show('old',fmt(T.vecchia_titolo,name),[fmt(T.vecchia,name),footer]);
 }
 $('file').addEventListener('change',e=>check(e.target.files[0]));
 const drop=$('drop');
@@ -97,9 +115,16 @@ drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over
 drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
 drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');check(e.dataTransfer.files[0])});
 loadList().then(lists=>{
-  const rows=lists.flatMap(data=>data.versioni.map(v=>`<tr><td>${esc(v.nome||data.programma)} ${esc(v.versione)}${v.versione===data.ultima?' (più recente)':''}</td><td>${esc(v.data)}</td><td>${esc(v.sha256)}</td></tr>`)).join('');
-  $('elenco').innerHTML=`<table class="versions"><caption class="sr-only">Versioni ufficiali e impronte SHA-256</caption><thead><tr><th scope="col">Versione</th><th scope="col">Data</th><th scope="col">Impronta SHA-256</th></tr></thead><tbody>${rows}</tbody></table>`;
-}).catch(()=>{listing=null;$('elenco').innerHTML='<p>Non riesco a leggere l’elenco: controlla la connessione e ricarica la pagina.</p>'});
+  const rows=lists.flatMap(data=>data.versioni.map(v=>`<tr><td>${esc(v.nome||data.programma)} ${esc(v.versione)}${v.versione===data.ultima?` (${T.recente})`:''}</td><td>${esc(v.data)}</td><td>${esc(v.sha256)}</td></tr>`)).join('');
+  $('elenco').innerHTML=`<table class="versions"><caption class="sr-only">${T.tabella}</caption><thead><tr><th scope="col">${T.col_versione}</th><th scope="col">${T.col_data}</th><th scope="col">${T.col_impronta}</th></tr></thead><tbody>${rows}</tbody></table>`;
+}).catch(()=>{listing=null;$('elenco').innerHTML=`<p>${T.elenco_non_disponibile}</p>`});
+})();
+// Selettore della lingua: si chiude con Esc, con un clic fuori o quando il fuoco esce dall'elenco.
+(()=>{
+const menu=document.querySelector('.lingua'),summary=menu.querySelector('summary');
+addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open){menu.open=false;summary.focus()}});
+addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
+menu.addEventListener('focusout',e=>{if(e.relatedTarget&&!menu.contains(e.relatedTarget))menu.open=false});
 })();
 </script>
 </body>

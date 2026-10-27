@@ -1,0 +1,131 @@
+<!doctype html>
+<!-- Pagina generata da sito/build.py: modifica sito/pagine/verifica.html o i testi in sito/testi/, poi ricostruisci. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vérifier votre copie · Tassello</title>
+<meta name="description" content="Vérifiez que votre fichier Tassello Ufficio ou Tassello Media est identique à une version officielle. Le fichier reste sur votre ordinateur.">
+<meta name="color-scheme" content="light dark">
+<link rel="alternate" hreflang="it" href="https://svitatlco.github.io/tassello/verifica.html">
+<link rel="alternate" hreflang="en" href="https://svitatlco.github.io/tassello/en/verifica.html">
+<link rel="alternate" hreflang="fr" href="https://svitatlco.github.io/tassello/fr/verifica.html">
+<link rel="alternate" hreflang="es" href="https://svitatlco.github.io/tassello/es/verifica.html">
+<link rel="alternate" hreflang="x-default" href="https://svitatlco.github.io/tassello/verifica.html">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../stile.css">
+</head>
+<body>
+<a class="skip" href="#contenuto">Aller au contenu</a>
+<div class="wrap">
+<header class="top">
+  <a class="logo" href="./" aria-label="Tassello, page d’accueil">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"/><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/><rect y="54" width="46" height="46" rx="10" fill="#B35500"/><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/></svg>
+    tassello
+  </a>
+  <details class="lingua">
+    <summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span class="sr-only">Langue&nbsp;: </span>Français</summary>
+    <ul>
+      <li><a href="../verifica.html" hreflang="it" lang="it">Italiano</a></li>
+      <li><a href="../en/verifica.html" hreflang="en" lang="en">English</a></li>
+      <li><a href="../fr/verifica.html" hreflang="fr" lang="fr" aria-current="page">Français</a></li>
+      <li><a href="../es/verifica.html" hreflang="es" lang="es">Español</a></li>
+    </ul>
+  </details>
+  <nav aria-label="Site">
+    <ul>
+      <li><a href="./">Page d’accueil</a></li>
+      <li><a href="./#sicurezza">Sécurité</a></li>
+      <li><a href="https://github.com/svitaTLCO/tassello">Code source</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="contenuto">
+  <div class="page-head">
+    <h1>Vérifier votre copie</h1>
+    <p class="lead">Vérifiez si votre fichier Tassello (Ufficio ou Media) est identique à une version officielle. Le fichier ne quitte pas votre ordinateur&nbsp;: la vérification se fait ici, dans le navigateur.</p>
+  </div>
+
+  <div class="drop" id="drop">
+    <label for="file"><b>Choisissez le fichier à vérifier</b>, en général <code>tassello-ufficio.html</code> ou <code>tassello-media.html</code></label>
+    <input type="file" id="file" accept=".html,.htm,text/html">
+    <p>Ou faites-le glisser dans ce cadre.</p>
+  </div>
+  <div id="esito" role="status" aria-live="polite"></div>
+
+  <section aria-labelledby="come">
+    <h2 id="come">Comment ça marche</h2>
+    <p>Pour chaque version publiée, nous enregistrons l’<b>empreinte SHA-256</b> du fichier&nbsp;: une suite de 64&nbsp;caractères qui change complètement si une seule lettre du fichier change. Cette page calcule l’empreinte de votre fichier et la recherche dans les listes des versions officielles de <a href="../versioni.json">Tassello Ufficio</a> et de <a href="../versioni-media.json">Tassello Media</a>.</p>
+    <p>Si le fichier n’est pas reconnu comme officiel, quelqu’un l’a peut-être modifié, ou un programme l’a enregistré à nouveau (par exemple avec «&nbsp;Enregistrer sous&nbsp;» du navigateur). Dans les deux cas, ne l’utilisez pas pour des documents importants et <a href="./">téléchargez la copie officielle</a>.</p>
+  </section>
+
+  <section aria-labelledby="ufficiali">
+    <h2 id="ufficiali">Versions officielles</h2>
+    <div id="elenco"><p>Chargement de la liste…</p></div>
+  </section>
+
+  <section aria-labelledby="avanzata">
+    <h2 id="avanzata">Vérification avancée</h2>
+    <p>Sous Windows, vous pouvez aussi calculer l’empreinte depuis l’invite de commandes et la comparer à la liste&nbsp;:</p>
+    <pre>certutil -hashfile tassello-ufficio.html SHA256</pre>
+    <p>Pour Tassello Media, écrivez <code>tassello-media.html</code> à la place de <code>tassello-ufficio.html</code>, ici et dans la commande suivante.</p>
+    <p>Chaque fichier téléchargé depuis les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a> (Tassello Ufficio depuis la version 1.3.0, Tassello Media depuis sa première version publiée) porte aussi une signature de provenance, qui prouve que GitHub l’a construit à partir du code source public. Avec l’outil <a href="https://cli.github.com/">GitHub CLI</a>&nbsp;:</p>
+    <pre>gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello</pre>
+  </section>
+</main>
+<footer>
+  <p>Canaux officiels&nbsp;: svitatlco.github.io/tassello et les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a>. Les copies reçues par d’autres moyens, ou modifiées par d’autres, ne sont pas officielles&nbsp;: <a href="verifica.html">vérifiez une copie</a>.</p>
+  <p>© 2026 svitaTLCO et contributeurs. Tassello est un logiciel libre, distribué sous licence <a href="https://github.com/svitaTLCO/tassello/blob/main/LICENSE">EUPL 1.2</a>. <a href="https://github.com/svitaTLCO/tassello">Code source et signalements</a>.</p>
+  <p>Vous avez trouvé une copie suspecte&nbsp;? <a href="https://github.com/svitaTLCO/tassello/issues">Signalez-la sur GitHub</a>.</p>
+</footer>
+</div>
+<script>
+// Confronta l'impronta SHA-256 del file scelto con gli elenchi delle versioni ufficiali di ogni tassello.
+(()=>{
+const T={"controllo": "Vérification en cours…", "grande_titolo": "Ce fichier n’est pas une copie officielle", "grande": "Il est trop volumineux pour être un programme Tassello.", "impronta": "Empreinte du fichier <b>{file}</b>&nbsp;: <code>{hex}</code>", "elenco_errore_titolo": "Impossible de lire la liste des versions officielles", "elenco_errore": "Vérifiez votre connexion et réessayez.", "non_ufficiale_titolo": "Ce fichier ne correspond à aucune version officielle", "non_ufficiale": "Il a peut-être été modifié, ou enregistré à nouveau par un autre programme. Ne l’utilisez pas pour des documents importants&nbsp;: <a href=\"./\">téléchargez la copie officielle</a> sur ce site.", "ok_titolo": "Copie officielle de {nome} {versione}", "ok": "Elle est identique à la dernière version publiée.", "vecchia_titolo": "Copie officielle de {nome} {versione}, pas à jour", "vecchia": "Le fichier est authentique, mais il existe une version plus récente ({ultima})&nbsp;: <a href=\"./\">téléchargez-la sur ce site</a>.", "recente": "la plus récente", "tabella": "Versions officielles et empreintes SHA-256", "col_versione": "Version", "col_data": "Date", "col_impronta": "Empreinte SHA-256", "elenco_non_disponibile": "Impossible de lire la liste&nbsp;: vérifiez votre connexion et rechargez la page."};
+const fmt=(s,values)=>s.replace(/\{(\w+)\}/g,(m,k)=>k in values?values[k]:m);
+const $=id=>document.getElementById(id);
+const ICON={wait:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',ok:'<path d="M5 12l5 5 9-10"/>',old:'<path d="M12 7v6"/><path d="M12 17h.01"/>',bad:'<path d="M6 6l12 12"/><path d="M18 6L6 18"/>'};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LISTS=['../versioni.json','../versioni-media.json'];
+let listing=null;
+const loadList=()=>listing??=Promise.all(LISTS.map(name=>fetch(name,{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));
+function show(kind,title,lines){
+  $('esito').innerHTML=`<div class="result ${kind}"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[kind]}</svg>${title}</h2>${lines.map(l=>`<p>${l}</p>`).join('')}</div>`;
+}
+async function check(file){
+  if(!file)return;
+  show('wait',T.controllo,[esc(file.name)]);
+  if(file.size>20e6){show('bad',T.grande_titolo,[T.grande]);return}
+  const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());
+  const hex=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  const footer=fmt(T.impronta,{file:esc(file.name),hex});
+  let lists;
+  try{lists=await loadList()}catch(e){listing=null;show('bad',T.elenco_errore_titolo,[T.elenco_errore,footer]);return}
+  const data=lists.find(l=>l.versioni.some(v=>v.sha256===hex)),hit=data?.versioni.find(v=>v.sha256===hex);
+  if(!hit){show('bad',T.non_ufficiale_titolo,[T.non_ufficiale,footer]);return}
+  const name={nome:esc(hit.nome||data.programma),versione:esc(hit.versione),ultima:esc(data.ultima)};
+  if(hit.versione===data.ultima)show('ok',fmt(T.ok_titolo,name),[T.ok,footer]);
+  else show('old',fmt(T.vecchia_titolo,name),[fmt(T.vecchia,name),footer]);
+}
+$('file').addEventListener('change',e=>check(e.target.files[0]));
+const drop=$('drop');
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');check(e.dataTransfer.files[0])});
+loadList().then(lists=>{
+  const rows=lists.flatMap(data=>data.versioni.map(v=>`<tr><td>${esc(v.nome||data.programma)} ${esc(v.versione)}${v.versione===data.ultima?` (${T.recente})`:''}</td><td>${esc(v.data)}</td><td>${esc(v.sha256)}</td></tr>`)).join('');
+  $('elenco').innerHTML=`<table class="versions"><caption class="sr-only">${T.tabella}</caption><thead><tr><th scope="col">${T.col_versione}</th><th scope="col">${T.col_data}</th><th scope="col">${T.col_impronta}</th></tr></thead><tbody>${rows}</tbody></table>`;
+}).catch(()=>{listing=null;$('elenco').innerHTML=`<p>${T.elenco_non_disponibile}</p>`});
+})();
+// Selettore della lingua: si chiude con Esc, con un clic fuori o quando il fuoco esce dall'elenco.
+(()=>{
+const menu=document.querySelector('.lingua'),summary=menu.querySelector('summary');
+addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open){menu.open=false;summary.focus()}});
+addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
+menu.addEventListener('focusout',e=>{if(e.relatedTarget&&!menu.contains(e.relatedTarget))menu.open=false});
+})();
+</script>
+</body>
+</html>

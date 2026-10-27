@@ -9,7 +9,7 @@ Piccoli strumenti liberi e gratuiti per scrivere, compilare, fare i conti, regis
 <a href="https://svitatlco.github.io/tassello/">Sito</a> ·
 <a href="https://svitatlco.github.io/tassello/tassello-ufficio.html">Prova Ufficio</a> ·
 <a href="https://svitatlco.github.io/tassello/tassello-media.html">Prova Media</a> ·
-<a href="https://github.com/svitaTLCO/tassello/releases/latest">Scarica</a> ·
+<a href="https://github.com/svitaTLCO/tassello/releases">Scarica</a> ·
 <a href="#in-english">English</a>
 </p>
 
@@ -22,7 +22,7 @@ Tassello è un piccolo coltellino svizzero per i file: ordinato e leggero. Serve
 
 Ogni strumento della famiglia è un *tassello*: un unico file che si apre con un doppio clic e funziona anche senza rete. L'obiettivo è mettere in mano a chiunque, nel modo più semplice possibile, la capacità di lavorare sui propri file.
 
-**Cosa non è.** Tassello non sostituisce gli strumenti da professionisti: se il tuo lavoro richiede macro, revisioni tracciate o modelli complessi, continua a usare il programma adatto. Non è nemmeno un clone delle app famose: ne apre e salva i formati per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte una per una per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.
+**Cosa non è.** Tassello non sostituisce gli strumenti da professionisti: se il tuo lavoro richiede macro, revisioni tracciate, un montaggio professionale o strumenti virtuali e MIDI, continua a usare il programma adatto. Non è nemmeno un clone delle app famose: ne apre e salva i formati per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte una per una per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.
 
 **L'accessibilità è la condizione, non un di più.** Un tassello viene distribuito solo se si usa con uno screen reader e con la sola tastiera. Vedi [Accessibilità](#accessibilità).
 
@@ -43,7 +43,7 @@ Qualche regola semplice:
 - **Riconosci una copia falsa.** Tassello non si collega a internet (la dettatura usa il servizio del browser) e non chiede mai password, account o pagamenti. Una copia che lo fa non è quella ufficiale: chiudila e cancellala.
 - **Verifica una copia.** Nella pagina [Verifica una copia](https://svitatlco.github.io/tassello/verifica.html) scegli il file e il sito ti dice se è identico a una versione ufficiale; il file non lascia il tuo computer. Gli elenchi delle versioni con le loro impronte SHA-256 sono in [`docs/versioni.json`](docs/versioni.json) (Tassello Ufficio) e [`docs/versioni-media.json`](docs/versioni-media.json) (Tassello Media).
 - **Controlla l'impronta da solo.** Ogni release indica l'impronta SHA-256 del file, che deve coincidere carattere per carattere. In Windows la calcoli con `certutil -hashfile tassello-ufficio.html SHA256`, in macOS e Linux con `shasum -a 256 tassello-ufficio.html` (per Tassello Media il file è `tassello-media.html`).
-- **Controlla la provenienza.** Dalla versione 1.3.0 ogni file delle release ha una firma di provenienza di GitHub, che dimostra che è stato costruito da questo repository a partire dal codice pubblico: `gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello`.
+- **Controlla la provenienza.** Ogni file delle release (Tassello Ufficio dalla versione 1.3.0, Tassello Media dalla prima release) ha una firma di provenienza di GitHub, che dimostra che è stato costruito da questo repository a partire dal codice pubblico: `gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello` (o `tassello-media.html`).
 - **Installa l'app.** In Chrome o in Edge apri [Tassello Ufficio](https://svitatlco.github.io/tassello/tassello-ufficio.html) o [Tassello Media](https://svitatlco.github.io/tassello/tassello-media.html) nel browser e scegli *Installa*. L'app arriva sempre dal sito ufficiale, funziona senza rete e si aggiorna da sola; le sue bozze restano separate da quelle del file scaricato.
 
 Ogni file ufficiale contiene anche una regola di sicurezza del browser (Content Security Policy) che gli impedisce di collegarsi a internet o di caricare script, immagini e suoni esterni. Non protegge da una copia alterata, che può toglierla, ma rende verificabile da chiunque che la copia ufficiale non invia dati.
@@ -65,8 +65,8 @@ Il primo tassello contiene due app per i documenti di tutti i giorni:
 
 Il secondo tassello contiene due app per i suoni e i filmati di tutti i giorni:
 
-- **Audio**, per registrare, montare e modificare: un progetto a più tracce, ognuna con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo e griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre. Ogni regione si apre nell'editor della forma d'onda: registrazione dal microfono con avvisi a voce sul livello, taglia, copia, incolla anche mescolando, duplica, ritaglia, silenzia, marcatori con nome, amplificazione, normalizzazione al picco o al volume percepito (LUFS), dissolvenze, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, mono e stereo, statistiche e ricerca delle distorsioni. Apre **WAV**, **MP3**, **M4A**, **OGG**, **Opus**, **FLAC** e l'audio dei video; esporta il brano mixato, le tracce separate o la sola regione in **WAV** con i marcatori e, se il browser lo permette, **M4A** (AAC) e **WebM** (Opus); salva il progetto in un file **ZIP** con i suoi suoni.
-- **Video**, per montare: raccolta dei file, traccia video con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni, filtri, luce e colore, rotazione; cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli da scrivere, importare ed esportare in **SRT** e **WebVTT**; verifica dell'accessibilità con controllo di sottotitoli, tempi di lettura, contrasto e lampeggiamenti pericolosi. Esporta **MP4** o **WebM**, solo l'audio, un fotogramma, e salva il progetto in un file **ZIP** con i suoi file.
+- **Audio**, per registrare, montare e modificare: un progetto a più tracce, ognuna con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo e griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre. Ogni regione si apre nell'editor della forma d'onda: registrazione dal microfono con indicatore di livello e avvisi letti dallo screen reader quando è troppo alto o troppo basso, taglia, copia, incolla anche mescolando, duplica, ritaglia, silenzia, marcatori con nome, amplificazione, normalizzazione al picco o al volume percepito (LUFS), dissolvenze, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, mono e stereo, statistiche e ricerca delle distorsioni. Apre **WAV**, **MP3**, **M4A**, **OGG**, **Opus**, **FLAC** e l'audio dei video; esporta il brano mixato, le tracce separate o la sola regione in **WAV** con i marcatori e, se il browser lo permette, **M4A** (AAC) e **WebM** (Opus); salva il progetto in un file **ZIP** con i suoi suoni.
+- **Video**, per montare: raccolta dei file, traccia video con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni, filtri, luce e colore, rotazione; cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli da scrivere, importare ed esportare in **SRT** e **WebVTT**; verifica dell'accessibilità con controllo di sottotitoli, tempi di lettura, contrasto e lampeggiamenti pericolosi. Esporta **MP4** o **WebM** un fotogramma alla volta, anche con la scheda in secondo piano, oppure solo l'audio o un singolo fotogramma, e salva il progetto in un file **ZIP** con i suoi file.
 
 ### Come si usa
 
@@ -107,7 +107,7 @@ Ogni tassello copre un tipo di lavoro sui file e resta indipendente dagli altri:
 
 Tassello Ufficio copre il lavoro di base, non tutto. Macro, revisioni (modifiche tracciate), slicer delle tabelle pivot e grafici combinati non sono supportati; l'apertura di DOCX e XLSX copre un sottoinsieme dei formati.
 
-Tassello Media copre il lavoro di base. In Audio le tracce sono solo audio (niente strumenti virtuali né MIDI), gli effetti di traccia sono semplici, la latenza della registrazione è stimata e regolabile, e i progetti molto lunghi richiedono molta memoria. In Video l'esportazione avviene in tempo reale, quindi dura quanto il montaggio, e la scheda va lasciata in primo piano; MP4 dipende dal browser, altrimenti si ottiene WebM; non ci sono fotogrammi chiave né più tracce video sovrapposte; si importano solo i formati che il browser sa riprodurre.
+Tassello Media copre il lavoro di base. In Audio le tracce sono solo audio (niente strumenti virtuali né MIDI), gli effetti di traccia sono semplici, la latenza della registrazione è stimata e regolabile, e i progetti molto lunghi richiedono molta memoria. In Video l'esportazione procede un fotogramma alla volta e la sua velocità dipende dal computer; se un file del montaggio usa un formato che il browser non sa decodificare, l'esportazione avviene invece in tempo reale, quindi dura quanto il montaggio e la scheda va lasciata in primo piano; MP4 dipende dal browser, altrimenti si ottiene WebM; non ci sono fotogrammi chiave né più tracce video sovrapposte; si importano solo i formati che il browser sa riprodurre.
 
 Conserva sempre una copia degli originali.
 
@@ -115,8 +115,9 @@ Conserva sempre una copia degli originali.
 
 ```
 docs/                 sito pubblicato con GitHub Pages
-  index.html          pagina di presentazione
-  verifica.html       verifica di una copia
+  index.html          pagina di presentazione (generata da sito/)
+  verifica.html       verifica di una copia (generata da sito/)
+  en/, fr/, es/       le stesse pagine in inglese, francese e spagnolo (generate da sito/)
   versioni.json       versioni ufficiali con le impronte SHA-256
   versioni-media.json versioni ufficiali di Tassello Media
   tassello-ufficio.html, tassello-media.html  i programmi, già costruiti
@@ -130,14 +131,21 @@ media/
   VERSIONE            numero di versione di Tassello Media
   build.py            costruisce docs/tassello-media.html e aggiorna docs/versioni-media.json
   src/                sorgenti: HTML, CSS e JavaScript senza dipendenze
+sito/
+  build.py            costruisce le pagine del sito in ogni lingua
+  pagine/             modelli della pagina iniziale e della pagina Verifica
+  testi/              testi del sito: it.txt è il riferimento, poi en.txt, fr.txt, es.txt
 ```
 
-Per ricostruire un programma dopo una modifica serve solo Python 3.8 o successivo:
+Per ricostruire un programma o il sito dopo una modifica serve solo Python 3.8 o successivo:
 
 ```
 python ufficio/build.py
 python media/build.py
+python sito/build.py
 ```
+
+Le pagine del sito non si modificano direttamente in `docs/`: si cambiano il modello in `sito/pagine/` o i testi in `sito/testi/` e si ricostruisce. Ogni lingua deve avere le stesse voci dell'italiano; se ne manca una, o ne avanza una, `sito/build.py` si ferma e dice quale.
 
 L'ordine dei file è indicato in ogni `build.py`. Tutto il codice gira dentro un'unica funzione: non ci sono librerie esterne né richieste di rete, e la regola di sicurezza in `src/01-head.html` le vieta.
 
@@ -145,7 +153,7 @@ Ogni build registra l'impronta del file nel suo elenco (`docs/versioni.json` o `
 
 ## Contribuire
 
-Segnalazioni e proposte sono benvenute nelle [issue](https://github.com/svitaTLCO/tassello/issues), in italiano o in inglese, e quelle sull'accessibilità hanno la precedenza. Per una modifica al codice apri una pull request che tocchi i file in `ufficio/src/` o `media/src/` e includa il file ricostruito.
+Segnalazioni e proposte sono benvenute nelle [issue](https://github.com/svitaTLCO/tassello/issues), in italiano o in inglese, e quelle sull'accessibilità hanno la precedenza. Per una modifica al codice apri una pull request che tocchi i file in `ufficio/src/` o `media/src/` e includa il file ricostruito. Correzioni alle traduzioni del sito, o una lingua nuova, si propongono in `sito/testi/`.
 
 ## Licenza
 
@@ -157,12 +165,14 @@ Microsoft, Office, Word ed Excel sono marchi di Microsoft Corporation. Tassello 
 
 ## In English
 
+The website is available in [English](https://svitatlco.github.io/tassello/en/), [French](https://svitatlco.github.io/tassello/fr/) and [Spanish](https://svitatlco.github.io/tassello/es/) as well as Italian.
+
 **Tassello** is a small family of free and open source tools for basic, everyday work on files: writing a letter, filling in a form, keeping a list, doing the numbers. Each tool is a single HTML file that runs in your browser, with no bulky suite to install, no account and no cloud. Think of it as a small, tidy Swiss Army knife for your files: not a replacement for professional software, and not a clone of famous apps.
 
 **Only use official copies.** Download Tassello only from the [website](https://svitatlco.github.io/tassello/) or from the [releases of this repository](https://github.com/svitaTLCO/tassello/releases). Because it is a single file, anyone could alter a copy and pass it around: do not open copies you receive by email, chat or USB stick, and share the link instead of the file. Tassello never connects to the internet (dictation uses the browser's own service) and never asks for passwords, accounts or payments. The [verification page](https://svitatlco.github.io/tassello/verifica.html) tells you whether a file is identical to an official version, and in Chrome or Edge you can install each tool as an app that always comes from the official website and works offline.
 
 **Tassello Ufficio** contains **Testo**, a word processor, and **Calcolo**, a spreadsheet. It opens and saves DOCX, XLSX and CSV files and works offline in recent Chrome and Edge. **Tassello Media** contains **Audio**, a multitrack recorder and editor with per-track volume, pan, mute, solo, EQ, compression and reverb, regions, tempo grid, metronome, cycle and overdubbing, plus a waveform editor with markers, noise reduction and loudness normalization (WAV, M4A and WebM export), and **Video**, a timeline editor with titles, a music and voice-over track, captions in SRT and WebVTT and an accessibility check for captions, contrast and flashing (MP4 or WebM export). Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is currently in Italian.
 
-To rebuild them from source, run `python ufficio/build.py` and `python media/build.py`.
+To rebuild them from source, run `python ufficio/build.py` and `python media/build.py`; the website pages are built with `python sito/build.py` from the templates in `sito/pagine/` and the texts in `sito/testi/`.
 
 Licensed under the [EUPL 1.2](LICENSE). Microsoft, Office, Word and Excel are trademarks of Microsoft Corporation; Tassello is not affiliated with Microsoft.

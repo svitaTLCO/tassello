@@ -1,0 +1,118 @@
+<!doctype html>
+<!-- Pagina generata da sito/build.py: modifica sito/pagine/verifica.html o i testi in sito/testi/, poi ricostruisci. -->
+<html lang="{{LINGUA}}">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{verifica.pagina_titolo}}</title>
+<meta name="description" content="{{verifica.descrizione}}">
+<meta name="color-scheme" content="light dark">
+{{ALTERNATIVE}}
+<link rel="icon" href="{{BASE}}icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="{{BASE}}stile.css">
+</head>
+<body>
+<a class="skip" href="#contenuto">{{comune.salta}}</a>
+<div class="wrap">
+<header class="top">
+  <a class="logo" href="./" aria-label="{{comune.logo}}">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"/><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/><rect y="54" width="46" height="46" rx="10" fill="#B35500"/><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/></svg>
+    tassello
+  </a>
+  {{LINGUE}}
+  <nav aria-label="{{verifica.nav}}">
+    <ul>
+      <li><a href="./">{{verifica.home}}</a></li>
+      <li><a href="./#sicurezza">{{nav.sicurezza}}</a></li>
+      <li><a href="https://github.com/svitaTLCO/tassello">{{comune.codice}}</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="contenuto">
+  <div class="page-head">
+    <h1>{{verifica.titolo}}</h1>
+    <p class="lead">{{verifica.testo}}</p>
+  </div>
+
+  <div class="drop" id="drop">
+    <label for="file">{{verifica.scegli}}</label>
+    <input type="file" id="file" accept=".html,.htm,text/html">
+    <p>{{verifica.trascina}}</p>
+  </div>
+  <div id="esito" role="status" aria-live="polite"></div>
+
+  <section aria-labelledby="come">
+    <h2 id="come">{{verifica.come_titolo}}</h2>
+{{verifica.come}}
+  </section>
+
+  <section aria-labelledby="ufficiali">
+    <h2 id="ufficiali">{{verifica.ufficiali_titolo}}</h2>
+    <div id="elenco"><p>{{verifica.caricamento}}</p></div>
+  </section>
+
+  <section aria-labelledby="avanzata">
+    <h2 id="avanzata">{{verifica.avanzata_titolo}}</h2>
+    <p>{{verifica.avanzata_1}}</p>
+    <pre>certutil -hashfile tassello-ufficio.html SHA256</pre>
+    <p>{{verifica.avanzata_2}}</p>
+    <p>{{verifica.avanzata_3}}</p>
+    <pre>gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello</pre>
+  </section>
+</main>
+<footer>
+  <p>{{piede.canali}}</p>
+  <p>{{piede.licenza}}</p>
+  <p>{{sicurezza.segnala}}</p>
+</footer>
+</div>
+<script>
+// Confronta l'impronta SHA-256 del file scelto con gli elenchi delle versioni ufficiali di ogni tassello.
+(()=>{
+const T={{TESTI_JS}};
+const fmt=(s,values)=>s.replace(/\{(\w+)\}/g,(m,k)=>k in values?values[k]:m);
+const $=id=>document.getElementById(id);
+const ICON={wait:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',ok:'<path d="M5 12l5 5 9-10"/>',old:'<path d="M12 7v6"/><path d="M12 17h.01"/>',bad:'<path d="M6 6l12 12"/><path d="M18 6L6 18"/>'};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LISTS=['{{BASE}}versioni.json','{{BASE}}versioni-media.json'];
+let listing=null;
+const loadList=()=>listing??=Promise.all(LISTS.map(name=>fetch(name,{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));
+function show(kind,title,lines){
+  $('esito').innerHTML=`<div class="result ${kind}"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[kind]}</svg>${title}</h2>${lines.map(l=>`<p>${l}</p>`).join('')}</div>`;
+}
+async function check(file){
+  if(!file)return;
+  show('wait',T.controllo,[esc(file.name)]);
+  if(file.size>20e6){show('bad',T.grande_titolo,[T.grande]);return}
+  const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());
+  const hex=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  const footer=fmt(T.impronta,{file:esc(file.name),hex});
+  let lists;
+  try{lists=await loadList()}catch(e){listing=null;show('bad',T.elenco_errore_titolo,[T.elenco_errore,footer]);return}
+  const data=lists.find(l=>l.versioni.some(v=>v.sha256===hex)),hit=data?.versioni.find(v=>v.sha256===hex);
+  if(!hit){show('bad',T.non_ufficiale_titolo,[T.non_ufficiale,footer]);return}
+  const name={nome:esc(hit.nome||data.programma),versione:esc(hit.versione),ultima:esc(data.ultima)};
+  if(hit.versione===data.ultima)show('ok',fmt(T.ok_titolo,name),[T.ok,footer]);
+  else show('old',fmt(T.vecchia_titolo,name),[fmt(T.vecchia,name),footer]);
+}
+$('file').addEventListener('change',e=>check(e.target.files[0]));
+const drop=$('drop');
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');check(e.dataTransfer.files[0])});
+loadList().then(lists=>{
+  const rows=lists.flatMap(data=>data.versioni.map(v=>`<tr><td>${esc(v.nome||data.programma)} ${esc(v.versione)}${v.versione===data.ultima?` (${T.recente})`:''}</td><td>${esc(v.data)}</td><td>${esc(v.sha256)}</td></tr>`)).join('');
+  $('elenco').innerHTML=`<table class="versions"><caption class="sr-only">${T.tabella}</caption><thead><tr><th scope="col">${T.col_versione}</th><th scope="col">${T.col_data}</th><th scope="col">${T.col_impronta}</th></tr></thead><tbody>${rows}</tbody></table>`;
+}).catch(()=>{listing=null;$('elenco').innerHTML=`<p>${T.elenco_non_disponibile}</p>`});
+})();
+// Selettore della lingua: si chiude con Esc, con un clic fuori o quando il fuoco esce dall'elenco.
+(()=>{
+const menu=document.querySelector('.lingua'),summary=menu.querySelector('summary');
+addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open){menu.open=false;summary.focus()}});
+addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
+menu.addEventListener('focusout',e=>{if(e.relatedTarget&&!menu.contains(e.relatedTarget))menu.open=false});
+})();
+</script>
+</body>
+</html>
