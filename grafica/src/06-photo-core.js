@@ -22,7 +22,7 @@ const newRecipe=()=>({adj:Object.fromEntries(ADJ.map(a=>[a[0],0])),rot:0,flip:fa
 // La foto aperta: il file originale, l'immagine decodificata e la ricetta, con la cronologia per Annulla e Ripeti.
 // base è la ricetta dell'ultima modifica conclusa: i cursori cambiano r mentre si trascinano e la modifica entra
 // nella cronologia solo quando si rilasciano.
-const I={file:null,name:'',bmp:null,r:newRecipe(),base:'',hist:[],redo:[],luts:{},plan:'libera',step:0,seen:new Set(),compare:false,stats:null};
+const I={file:null,name:'',title:'Foto',bmp:null,r:newRecipe(),base:'',hist:[],redo:[],luts:{},plan:'libera',step:0,seen:new Set(),compare:false,stats:null};
 const snap=()=>JSON.stringify(I.r);
 I.base=snap();
 function settle(label,opts){const now=snap();if(now===I.base)return false;I.hist.push({label,r:I.base});if(I.hist.length>200)I.hist.shift();I.redo=[];I.base=now;recipeChanged(opts);return true}
@@ -34,20 +34,20 @@ const changedAdj=r=>ADJ.filter(a=>r.adj[a[0]]);
 const hasEdits=()=>snap()!==JSON.stringify(newRecipe());
 // Apertura: la foto nuova riparte da una ricetta vuota e dal primo passo del piano scelto.
 async function openPhoto(file){const bmp=await work('Apertura della foto',()=>decodePhoto(file));if(!bmp)return false;
- I.bmp?.close();Object.assign(I,{file,name:file.name,bmp,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false});I.base=snap();
- $('docTitle').value=baseName(file.name);updateTitle();showPhoto();renderPanel();renderPlans();refreshToggles();schedulePersist('immagini');
+ I.bmp?.close();Object.assign(I,{file,name:file.name,title:baseName(file.name),bmp,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false});I.base=snap();
+ $('docTitle').value=I.title;updateTitle();showPhoto();renderPanel();renderPlans();refreshToggles();schedulePersist('immagini');
  const intro=enterStep();announce(`Aperta «${file.name}», ${fmtInt(bmp.width)} per ${fmtInt(bmp.height)} pixel.${intro?' '+intro:''}`);$('photo').focus();return true}
 async function closePhoto(){if(!I.bmp)return;if(hasEdits()&&!(await confirmAction('Le modifiche non esportate andranno perse. L’originale resta com’è sul tuo computer. Vuoi chiudere la foto?','Chiudi la foto')))return;
- I.bmp.close();Object.assign(I,{file:null,name:'',bmp:null,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false,stats:null});I.base=snap();
- $('docTitle').value='Foto';updateTitle();showPhoto();renderPanel();refreshToggles();schedulePersist('immagini');announce('Foto chiusa');$('photoEmpty').querySelector('button')?.focus()}
+ I.bmp.close();Object.assign(I,{file:null,name:'',title:'Foto',bmp:null,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false,stats:null});I.base=snap();
+ $('docTitle').value=I.title;updateTitle();showPhoto();renderPanel();refreshToggles();schedulePersist('immagini');announce('Foto chiusa');$('photoEmpty').querySelector('button')?.focus()}
 // Bozza: il file originale si salva una volta sola, la ricetta a ogni modifica.
 let fileSaved=null;
 async function persistPhoto(){if(!I.file){await dbDel('photo');await dbDel('photoFile');fileSaved=null;return}
  if(fileSaved!==I.file){await dbPut('photoFile',I.file);fileSaved=I.file}
- await dbPut('photo',{name:I.name,title:$('docTitle').value,r:I.r,luts:I.luts,plan:I.plan,step:I.step,seen:[...I.seen]})}
+ await dbPut('photo',{name:I.name,title:I.title,r:I.r,luts:I.luts,plan:I.plan,step:I.step,seen:[...I.seen]})}
 async function restorePhoto(){const meta=await dbGet('photo'),file=await dbGet('photoFile');if(meta?.plan&&PLANS.some(p=>p.id===meta.plan))I.plan=meta.plan;if(meta?.luts)I.luts=meta.luts;if(!meta||!file)return;
  let bmp;try{bmp=await decodePhoto(file)}catch(e){console.warn('Foto della bozza non leggibile',e);return}
  const r=Object.assign(newRecipe(),meta.r);r.adj=Object.assign(newRecipe().adj,meta.r?.adj);
  Object.assign(I,{file,name:meta.name||file.name,bmp,r,step:clamp(meta.step|0,0,Math.max(0,planSteps().length-1)),seen:new Set(meta.seen||[])});I.base=snap();fileSaved=file;
- $('docTitle').value=meta.title||baseName(I.name)}
-function updateTitle(){document.title=($('docTitle').value.trim()||'Senza titolo')+' — Immagini · Tassello Grafica'}
+ I.title=meta.title||baseName(I.name)}
+function updateTitle(){document.title=($('docTitle').value.trim()||'Senza titolo')+' — '+appName()+' · Tassello Grafica'}

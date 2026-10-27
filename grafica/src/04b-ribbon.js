@@ -3,8 +3,13 @@ const RIBBON={
  i:{Inizio:[['Foto','!open !export'],['Regolazioni','!auto !compare / resetAll+ / readStatus+'],['Piano','!planMenu stepPrev+ / stepNext+ / planFree+'],['Cronologia','!undo !redo']],
   Inquadra:[['Ruota','!rotateLeft !rotateRight / flipH+'],['Formato','!ratioMenu !straighten / resetGeometry+']],
   Look:[['Look','!lookMenu !lutImport / lookAmount+ / lookOff+']],
-  Vista:[['Confronto','!compare'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]}};
-const TABS={i:Object.keys(RIBBON.i)};
+  Vista:[['Confronto','!compare'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]},
+ d:{Inizio:[['Disegno','!openDraw !saveSvg !exportDraw'],['Appunti','!paste cut / copy / duplicateItem+'],['Inserisci','!addText !addImage / addRect+ / addEllipse+'],['Cronologia','!undo !redo']],
+  Inserisci:[['Forme','!addRect !addEllipse !addLine'],['Testo','!addText'],['Immagini','!addImage']],
+  Disponi:[['Ordine','!bringFront !sendBack / forward+ / backward+'],['Allinea al foglio','alignLeft alignCenter alignRight / alignTop alignMiddle alignBottom'],['Oggetto','!duplicateItem !deleteItem / readDraw+']],
+  Foglio:[['Foglio','!sheetSize !sheetDesc / newDraw+'],['Accessibilità','!a11yCheck']],
+  Vista:[['Zoom','!zoomIn !zoomOut !zoomFit'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]}};
+const TABS={i:Object.keys(RIBBON.i),d:Object.keys(RIBBON.d)};
 let currentTab='Inizio';
 const slug=s=>s.replace(/\s+/g,'-');
 function tipText(c){const k=keysOf(c);return c.label+(k?' ('+k+')':'')}

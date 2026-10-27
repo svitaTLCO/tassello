@@ -6,7 +6,7 @@ function exportLabel(x){const f=FORMATS[x.format]||FORMATS.jpeg;return f.label+(
 function exportDims(size,custom){const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),long=size==='orig'?Math.max(w,h):size==='custom'?custom:Number(size),k=Math.min(1,long/Math.max(w,h));return [Math.max(1,Math.round(w*k)),Math.max(1,Math.round(h*k))]}
 async function exportDialog(){if(!I.bmp){toast('Apri prima una foto');return}const step=planSteps()[I.step],pre=step?.export||{format:prefs.exportFormat,quality:prefs.exportQuality,size:prefs.exportSize},[fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
  const r=await modal('Esporta la foto',`<p>La foto ha ${fmtInt(fw)} × ${fmtInt(fh)} pixel con l’inquadratura scelta. L’originale resta com’è; il file nuovo non contiene i dati della fotocamera né la posizione.</p>`,[
-  {id:'name',label:'Nome del file',value:$('docTitle').value.trim()||baseName(I.name)},
+  {id:'name',label:'Nome del file',value:I.title.trim()||baseName(I.name)},
   {id:'format',label:'Formato',type:'select',value:pre.format,options:Object.entries(FORMATS).map(([k,f])=>[k,f.label+(k==='jpeg'?', per le foto':k==='png'?', senza perdita di qualità':', più leggero')])},
   {id:'quality',label:'Qualità (JPEG e WebP)',type:'range',min:50,max:100,step:1,value:pre.quality||90,fmt:v=>v+(v>=90?', alta':v>=75?', buona':', file leggero'),hint:'Più bassa, più leggero il file. Sotto 75 si possono vedere difetti.'},
   {id:'size',label:'Dimensione',type:'select',value:SIZES.some(s=>s[0]===String(pre.size))?String(pre.size):'orig',options:SIZES},

@@ -122,7 +122,7 @@ docs/                 sito pubblicato con GitHub Pages
   versioni-media.json versioni ufficiali di Tassello Media
   versioni-grafica.json versioni di Tassello Grafica (in preparazione, non ancora pubblicato)
   tassello-ufficio.html, tassello-media.html  i programmi, già costruiti
-  tassello-grafica.html  Tassello Grafica in preparazione: per ora solo Immagini
+  tassello-grafica.html  Tassello Grafica in preparazione: Immagini e Disegno
   manifest.webmanifest, manifest-media.webmanifest, sw.js  app installabili e uso senza rete
   stile.css, icon*    stile del sito e marchio
 ufficio/
