@@ -1,13 +1,13 @@
 // Scorciatoie globali: intercettate in cattura, prima dei gestori dei singoli controlli.
 window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;if(e.key==='MediaPlayPause'){e.preventDefault();runCommand('playPause');return}const ctx=focusContext();if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key==='/'){e.preventDefault();runCommand('shortcuts');return}const c=findShortcut(e,ctx);if(!c)return;e.preventDefault();e.stopPropagation();runCommand(c.id)},true);
-$('skipWork').onclick=e=>{e.preventDefault();(isAudio()?$('wave'):($(lastTrack)||playheadEl)).focus()};
+$('skipWork').onclick=e=>{e.preventDefault();if(isAudio())focusLane(P.track);else($(lastTrack)||playheadEl).focus()};
 $('skipRibbon').onclick=e=>{e.preventDefault();$('tab-'+slug(currentTab))?.focus()};
 // Pulsanti con data-action in tutta la pagina: barra multifunzione, trasporto, riquadri e finestre vuote.
 document.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.closest('#menu'))return;runCommand(b.dataset.action)});
 // Barra del titolo
 for(const [id,mode] of [['switchAudio','audio'],['switchVideo','video']])$(id).onclick=()=>setMode(mode);
-$('docTitle').addEventListener('input',e=>{const v=e.target.value;if(isAudio())A.title=v;else{V.p.title=v}updateTitle();schedulePersist()});
-$('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();(isAudio()?$('wave'):($(lastTrack)||playheadEl)).focus()});
+$('docTitle').addEventListener('input',e=>{const v=e.target.value;if(isAudio())P.title=v;else{V.p.title=v}updateTitle();schedulePersist()});
+$('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();if(isAudio())focusLane(P.track);else($(lastTrack)||playheadEl).focus()});
 $('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand(isAudio()?'saveAudio':'saveProject');$('openTop').onclick=()=>runCommand('open');
 $('paletteBtn').onclick=()=>runCommand('palette');$('kbdBtn').onclick=()=>runCommand('shortcuts');$('helpBtn').onclick=()=>runCommand('help');$('brandBtn').onclick=()=>runCommand('help');$('fileBtn').onclick=openFilePanel;
 $('fileBtn').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('tab-'+slug(currentTab))?.focus()}});
@@ -34,7 +34,7 @@ document.addEventListener('mousedown',e=>{if(menuState&&!e.target.closest('#menu
 // File
 const takeFiles=input=>{const files=[...input.files];input.value='';return files};
 $('fileInput').onchange=async e=>{const files=takeFiles(e.target);closeFilePanel(false);await openFiles(files);pickMode='open'};
-$('mediaInput').onchange=async e=>{const files=takeFiles(e.target);closeFilePanel(false);if(files.length)await importMedia(files)};
+$('mediaInput').onchange=async e=>{const files=takeFiles(e.target);closeFilePanel(false);if(!files.length)return;if(isAudio())await importAudioTracks(files.filter(f=>kindOf(f)!=='image'));else await importMedia(files)};
 $('textInput').onchange=e=>{const [f]=takeFiles(e.target);if(!f)return;if(pickMode==='labels')importLabelsFile(f);else importSubsFile(f);pickMode='open'};
 $('filepanel').addEventListener('click',e=>{const action=e.target.closest('[data-file-action]')?.dataset.fileAction;if(!action)return;closeFilePanel(true);if(action!=='close')runCommand(action)});
 $('filepanel').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeFilePanel(true);return}if((e.key==='ArrowDown'||e.key==='ArrowUp')&&e.target.closest('.file-side')){e.preventDefault();const l=$$('.file-side button'),i=l.indexOf(e.target);l[(i+(e.key==='ArrowDown'?1:-1)+l.length)%l.length].focus();return}trapTab(e,$('filepanel'))});
@@ -45,11 +45,11 @@ addEventListener('dragleave',()=>{if(--dragDepth<=0){dragDepth=0;document.body.c
 addEventListener('dragover',e=>{if([...(e.dataTransfer?.types||[])].includes('Files'))e.preventDefault()});
 addEventListener('drop',e=>{dragDepth=0;document.body.classList.remove('drop-over');const files=[...(e.dataTransfer?.files||[])];if(!files.length)return;e.preventDefault();if(overlayOpen())return;pickMode='open';openFiles(files)});
 // Zoom della barra di stato: forma d'onda in Audio, linea temporale in Video.
-$('zoomSlider').addEventListener('input',e=>{const v=Number(e.target.value);isAudio()?sliderToZoom(v):sliderToTimelineZoom(v)});
+$('zoomSlider').addEventListener('input',e=>{const v=Number(e.target.value);isAudio()?sliderToArZoom(v):sliderToTimelineZoom(v)});
 $('zoomMinus').onclick=()=>runCommand('zoomOut');$('zoomPlus').onclick=()=>runCommand('zoomIn');
 tlScroll.addEventListener('scroll',()=>updateTimelineZoomUI());
 // Anteprima video: Spazio avvia e ferma, le frecce spostano di un fotogramma.
 view.addEventListener('keydown',e=>{if(timelineKeys(e,null))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();frameStep(e.key==='ArrowRight'?1:-1);announce(fmtTC(V.t,V.p.fps))}});
 view.addEventListener('click',()=>vPlayPause());
 // Prima di chiudere: avviso se un'esportazione è in corso o se l'audio non è entrato nella bozza.
-addEventListener('beforeunload',e=>{if(VE.exp||(A.buf&&alen()*A.nch*4>DRAFT_LIMIT&&audioModified())){e.preventDefault();e.returnValue=''}});
+addEventListener('beforeunload',e=>{const big=[...new Set(P.regions.map(r=>r.src))].reduce((n,id)=>{const b=SOURCES.get(id);return n+(b?b.length*b.numberOfChannels*4:0)},0)>DRAFT_LIMIT;if(VE.exp||MIX.recording||(big&&audioModified())){e.preventDefault();e.returnValue=''}});

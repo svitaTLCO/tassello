@@ -13,7 +13,8 @@ function zoomToSel(){if(!hasSel()){toast('Nessuna selezione');return}const W=wav
 function ensureVisible(pos){const W=waveWidth(),end=AV.start+W*AV.spp;if(pos<AV.start||pos>end){AV.start=pos-W*AV.spp*(pos<AV.start?0.8:0.2);viewClamp()}}
 // Il cursore dello zoom va da tutto il file (0) a circa 50 pixel per campione (100), in scala logaritmica.
 function zoomToSlider(){const f=fitSpp();return f<=MIN_SPP?100:Math.round(100*Math.log(f/AV.spp)/Math.log(f/MIN_SPP))}
-function updateZoomUI(){const s=$('zoomSlider');if(isAudio()){const v=clamp(zoomToSlider(),0,100);s.value=v;const t=A.buf?'Si vedono '+sayTime(waveWidth()*AV.spp/A.rate):'Nessun audio';s.setAttribute('aria-valuetext',t);$('zoomText').textContent=A.buf?fmtTime(waveWidth()*AV.spp/A.rate,1):''}else updateTimelineZoomUI()}
+// La barra di stato regola lo zoom delle tracce in Audio e della linea temporale in Video.
+function updateZoomUI(){const s=$('zoomSlider');if(isAudio()){s.value=clamp(arZoomToSlider(),0,100);const vis=(arScroll.clientWidth-HEAD_W)/P.pxs;s.setAttribute('aria-valuetext','Tracce: si vedono '+sayTime(Math.max(0,vis)));$('zoomText').textContent=fmtTime(Math.max(0,vis),0)}else updateTimelineZoomUI()}
 function sliderToZoom(v){const f=fitSpp();AV.spp=f*Math.pow(MIN_SPP/f,v/100);const c=aplay.playing?playPos():A.cursor;AV.start=c-waveWidth()*AV.spp/2;viewClamp();drawAudio();updateZoomUI()}
 // Disegno: una corsia per canale, colonne con minimo e massimo e una banda più chiara con il volume medio.
 function fitCanvas(cv){const r=cv.getBoundingClientRect(),dpr=devicePixelRatio||1,w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return{g,w:r.width,h:r.height}}
@@ -46,17 +47,14 @@ function drawOverview(){const {g,w,h}=fitCanvas($('aOverview')),P=palette;g.fill
 function drawMeter(cv,db){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const f=v=>clamp((v+60)/60,0,1),x=f(db)*w;g.fillStyle='#1e7a46';g.fillRect(0,0,Math.min(x,f(-12)*w),h);if(x>f(-12)*w){g.fillStyle='#b38600';g.fillRect(f(-12)*w,0,Math.min(x,f(-3)*w)-f(-12)*w,h)}if(x>f(-3)*w){g.fillStyle='#c50f1f';g.fillRect(f(-3)*w,0,x-f(-3)*w,h)}g.fillStyle=palette['text-3'];for(const d of [-48,-36,-24,-12,-6,-3])g.fillRect(f(d)*w,h-4,1,4)}
 const meterBuf=new Float32Array(2048);
 function aTick(){if(!aplay.playing)return;const pos=playPos();if(prefs.follow){const W=waveWidth(),end=AV.start+W*AV.spp;if(pos>end||pos<AV.start){AV.start=pos-W*AV.spp*0.05;viewClamp()}}
- drawAudioNow();$('aClock').textContent=fmtTime(sec(pos));if(aplay.analyser){aplay.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}aplay.raf=requestAnimationFrame(aTick)}
-function playUI(on){const b=$('aPlay');b.setAttribute('aria-label',on?'Pausa':'Riproduci');b.innerHTML=ICON(on?'pause':'play');if(!on)drawMeter($('aMeter'),-Infinity)}
+ drawAudioNow();if(aplay.analyser){aplay.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}aplay.raf=requestAnimationFrame(aTick)}
+function playUI(on){const b=document.querySelector('#editorArea [data-action=playRegion]');if(b)b.textContent=on?'Pausa':'Ascolta la regione';if(!on)drawMeter($('aMeter'),-Infinity)}
 // Testi per gli screen reader: posizione, selezione e marcatore sotto il cursore.
 const timeDec=()=>prefs.step<0.1?2:1;
-function waveValueText(){if(!A.buf)return 'Nessun audio: Ctrl+O apre un file, Ctrl+Alt+R registra dal microfono';let t=sayTime(sec(A.cursor),timeDec());const m=A.markers.findIndex(m=>Math.abs(m.pos-A.cursor)<=A.rate*0.005);if(m>=0)t+=`, marcatore ${m+1} «${A.markers[m].label}»`;if(hasSel())t+=`, selezionati ${sayTime(sec(A.selB-A.selA),timeDec())}`;return t}
+function waveValueText(){if(!A.buf)return 'Nessuna regione nell’editor: scegli una regione nelle tracce e premi Invio';let t=sayTime(sec(A.cursor),timeDec());const m=A.markers.findIndex(m=>Math.abs(m.pos-A.cursor)<=A.rate*0.005);if(m>=0)t+=`, marcatore ${m+1} «${A.markers[m].label}»`;if(hasSel())t+=`, selezionati ${sayTime(sec(A.selB-A.selA),timeDec())}`;return t}
 function updateAudioUI(){if(!isAudio())return;const w=waveEl;w.setAttribute('aria-valuemax',Math.ceil(adur()));w.setAttribute('aria-valuenow',Math.round(sec(A.cursor)));w.setAttribute('aria-valuetext',waveValueText());
  for(const [id,val] of [['selCursor',A.cursor],['selStart',hasSel()?A.selA:null],['selEnd',hasSel()?A.selB:null]]){const el=$(id);if(document.activeElement!==el)el.value=val===null?'':fmtTime(sec(val))}
  $('selStart').placeholder=$('selEnd').placeholder='nessuna';$('selLen').textContent=hasSel()?fmtTime(sec(A.selB-A.selA)):'—';
- if(!aplay.playing)$('aClock').textContent=fmtTime(sec(A.cursor));$('aClockSub').textContent=A.buf?'di '+fmtTime(adur()):'Nessun audio';
- $('aInfo').innerHTML=A.buf?`<span>${esc(chName())}</span><span>${fmtNum(A.rate/1000,1)} kHz</span>`:'';
- $('docInfo').textContent=A.buf?`${fmtTime(adur(),1)} · ${chName()} · ${fmtNum(A.rate/1000,1)} kHz · ${A.markers.length} marcatori`:'';
  renderMarkers();updateZoomUI()}
 // Spostamenti del cursore: senza Maiusc la selezione si chiude, con Maiusc si estende dal punto fermo (ancora).
 function moveCursor(pos,extend=false,{listen=true,note=''}={}){if(!A.buf)return;pos=clamp(Math.round(pos),0,alen());
@@ -122,4 +120,4 @@ $('markList').addEventListener('keydown',e=>{const list=A.markers,i=list.findInd
 $('markList').addEventListener('click',e=>{const li=e.target.closest('[data-id]');if(!li)return;markActive=li.dataset.id;const m=A.markers.find(x=>x.id===markActive);renderMarkers();if(m)moveCursor(m.pos,false,{listen:false})});
 $('markList').addEventListener('dblclick',e=>{const li=e.target.closest('[data-id]');if(li)markerRename(A.markers.find(x=>x.id===li.dataset.id))});
 $('markClose').onclick=()=>{$('markPane').hidden=true;refreshToggles();waveEl.focus();announce('Riquadro dei marcatori chiuso')};
-addEventListener('resize',()=>{if(isAudio()){viewClamp();drawAudio()}else drawTimeline()});
+addEventListener('resize',()=>{if(isAudio()){viewClamp();drawAudio();renderArrange()}else drawTimeline()});

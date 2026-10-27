@@ -65,14 +65,14 @@ Il primo tassello contiene due app per i documenti di tutti i giorni:
 
 Il secondo tassello contiene due app per i suoni e i filmati di tutti i giorni:
 
-- **Audio**, per registrare e modificare: registrazione dal microfono con avvisi a voce sul livello, taglia, copia, incolla anche mescolando, duplica, ritaglia, silenzia, marcatori con nome, amplificazione, normalizzazione al picco o al volume percepito (LUFS), dissolvenze, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, mono e stereo, statistiche e ricerca delle distorsioni. Apre **WAV**, **MP3**, **M4A**, **OGG**, **Opus**, **FLAC** e l'audio dei video; esporta **WAV** con i marcatori e, se il browser lo permette, **M4A** (AAC) e **WebM** (Opus), anche una parte per ogni tratto tra i marcatori.
+- **Audio**, per registrare, montare e modificare: un progetto a più tracce, ognuna con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo e griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre. Ogni regione si apre nell'editor della forma d'onda: registrazione dal microfono con avvisi a voce sul livello, taglia, copia, incolla anche mescolando, duplica, ritaglia, silenzia, marcatori con nome, amplificazione, normalizzazione al picco o al volume percepito (LUFS), dissolvenze, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, mono e stereo, statistiche e ricerca delle distorsioni. Apre **WAV**, **MP3**, **M4A**, **OGG**, **Opus**, **FLAC** e l'audio dei video; esporta il brano mixato, le tracce separate o la sola regione in **WAV** con i marcatori e, se il browser lo permette, **M4A** (AAC) e **WebM** (Opus); salva il progetto in un file **ZIP** con i suoi suoni.
 - **Video**, per montare: raccolta dei file, traccia video con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni, filtri, luce e colore, rotazione; cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli da scrivere, importare ed esportare in **SRT** e **WebVTT**; verifica dell'accessibilità con controllo di sottotitoli, tempi di lettura, contrasto e lampeggiamenti pericolosi. Esporta **MP4** o **WebM**, solo l'audio, un fotogramma, e salva il progetto in un file **ZIP** con i suoi file.
 
 ### Come si usa
 
 1. Scarica `tassello-media.html` da un canale ufficiale: il [sito](https://svitatlco.github.io/tassello/) o la [pagina delle release](https://github.com/svitaTLCO/tassello/releases).
 2. Aprilo con un doppio clic in Chrome o Edge recenti. Funziona anche senza rete.
-3. L'audio aperto e il progetto video restano salvati nel browser come bozza; con **Esporta** ottieni i file da condividere.
+3. Il progetto audio e il progetto video restano salvati nel browser come bozza; con **Esporta** ottieni i file da condividere, con **Salva progetto** un file ZIP da riaprire.
 
 ## Accessibilità
 
@@ -81,7 +81,7 @@ Per Tassello l'accessibilità non è una funzione in più da attivare: è il req
 - <kbd>F6</kbd> passa tra le aree, <kbd>Alt</kbd>+<kbd>Q</kbd> cerca qualsiasi comando, <kbd>F1</kbd> elenca tutte le scorciatoie;
 - schede, griglia, grafici, finestre e menu usano i ruoli ARIA standard e annunciano celle, valori e stati;
 - i grafici si esplorano con le frecce, si leggono come tabella e si ascoltano come suoni;
-- in Audio la forma d'onda è un cursore che fa ascoltare il punto in cui ti trovi: Ctrl+frecce salta da una pausa all'altra del parlato, P e D ascoltano prima e dopo, I e O fissano la selezione anche durante l'ascolto, ogni effetto ha l'anteprima;
+- in Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati e annunciati; nell'editor della regione la forma d'onda è un cursore che fa ascoltare il punto in cui ti trovi: Ctrl+frecce salta da una pausa all'altra del parlato, P e D ascoltano prima e dopo, I e O fissano la selezione anche durante l'ascolto, ogni effetto ha l'anteprima;
 - in Video ogni traccia è un elenco che si scorre con le frecce, ogni proprietà ha un campo con il suo nome e la verifica controlla sottotitoli, contrasto e lampeggiamenti;
 - modalità lettura, contrasto elevato, tema scuro e verifica dell'accessibilità dei documenti.
 
@@ -107,7 +107,7 @@ Ogni tassello copre un tipo di lavoro sui file e resta indipendente dagli altri:
 
 Tassello Ufficio copre il lavoro di base, non tutto. Macro, revisioni (modifiche tracciate), slicer delle tabelle pivot e grafici combinati non sono supportati; l'apertura di DOCX e XLSX copre un sottoinsieme dei formati.
 
-Tassello Media copre il lavoro di base. In Audio si lavora su un file alla volta (per sovrapporre voce e musica c'è Incolla mescolando) e i file molto lunghi richiedono molta memoria. In Video l'esportazione avviene in tempo reale, quindi dura quanto il montaggio, e la scheda va lasciata in primo piano; MP4 dipende dal browser, altrimenti si ottiene WebM; non ci sono fotogrammi chiave né più tracce video sovrapposte; si importano solo i formati che il browser sa riprodurre.
+Tassello Media copre il lavoro di base. In Audio le tracce sono solo audio (niente strumenti virtuali né MIDI), gli effetti di traccia sono semplici, la latenza della registrazione è stimata e regolabile, e i progetti molto lunghi richiedono molta memoria. In Video l'esportazione avviene in tempo reale, quindi dura quanto il montaggio, e la scheda va lasciata in primo piano; MP4 dipende dal browser, altrimenti si ottiene WebM; non ci sono fotogrammi chiave né più tracce video sovrapposte; si importano solo i formati che il browser sa riprodurre.
 
 Conserva sempre una copia degli originali.
 
@@ -161,7 +161,7 @@ Microsoft, Office, Word ed Excel sono marchi di Microsoft Corporation. Tassello 
 
 **Only use official copies.** Download Tassello only from the [website](https://svitatlco.github.io/tassello/) or from the [releases of this repository](https://github.com/svitaTLCO/tassello/releases). Because it is a single file, anyone could alter a copy and pass it around: do not open copies you receive by email, chat or USB stick, and share the link instead of the file. Tassello never connects to the internet (dictation uses the browser's own service) and never asks for passwords, accounts or payments. The [verification page](https://svitatlco.github.io/tassello/verifica.html) tells you whether a file is identical to an official version, and in Chrome or Edge you can install each tool as an app that always comes from the official website and works offline.
 
-**Tassello Ufficio** contains **Testo**, a word processor, and **Calcolo**, a spreadsheet. It opens and saves DOCX, XLSX and CSV files and works offline in recent Chrome and Edge. **Tassello Media** contains **Audio**, a sound editor with microphone recording, markers, noise reduction and loudness normalization (WAV, M4A and WebM export), and **Video**, a timeline editor with titles, a music and voice-over track, captions in SRT and WebVTT and an accessibility check for captions, contrast and flashing (MP4 or WebM export). Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is currently in Italian.
+**Tassello Ufficio** contains **Testo**, a word processor, and **Calcolo**, a spreadsheet. It opens and saves DOCX, XLSX and CSV files and works offline in recent Chrome and Edge. **Tassello Media** contains **Audio**, a multitrack recorder and editor with per-track volume, pan, mute, solo, EQ, compression and reverb, regions, tempo grid, metronome, cycle and overdubbing, plus a waveform editor with markers, noise reduction and loudness normalization (WAV, M4A and WebM export), and **Video**, a timeline editor with titles, a music and voice-over track, captions in SRT and WebVTT and an accessibility check for captions, contrast and flashing (MP4 or WebM export). Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is currently in Italian.
 
 To rebuild them from source, run `python ufficio/build.py` and `python media/build.py`.
 

@@ -100,6 +100,8 @@
 <symbol id="i-goto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
 <symbol id="i-selAll" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5" stroke-dasharray="3 2"/><path d="M7 12h10"/></symbol>
 <symbol id="i-magnet" viewBox="0 0 24 24"><path d="M6 4v8a6 6 0 0 0 12 0V4h-4v8a2 2 0 0 1-4 0V4z"/><path d="M6 8h4M14 8h4"/></symbol>
+<symbol id="i-metronome" viewBox="0 0 24 24"><path d="M9 3h6l4 18H5z"/><path d="M12 15l5-8"/><path d="M7 16h10"/></symbol>
+<symbol id="i-tracks" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><rect x="6" y="4" width="7" height="4" rx="1" fill="currentColor" opacity=".35"/><rect x="11" y="10" width="8" height="4" rx="1" fill="currentColor" opacity=".35"/><rect x="4" y="16" width="9" height="4" rx="1" fill="currentColor" opacity=".35"/></symbol>
 <symbol id="i-follow" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M15 9l3 3-3 3M21 12h-3"/></symbol>
 </defs></svg>
 <a class="skip" href="#workRegion" id="skipWork">Vai all’area di lavoro</a><a class="skip" href="#tabs" id="skipRibbon">Vai alla barra multifunzione</a>
@@ -117,7 +119,7 @@
 <div class="title-center"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Audio1" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
 <button type="button" class="cmd-search" id="paletteBtn" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Cerca comandi</span><kbd aria-hidden="true">Alt+Q</kbd></button>
 <button type="button" class="top-action" id="openTop" aria-keyshortcuts="Control+O" data-tip="Apri (Ctrl+O)"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><span>Apri</span></button>
-<button type="button" class="top-action primary" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta l’audio (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta audio</span></button>
+<button type="button" class="top-action primary" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta il brano (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
 <button type="button" class="tb-btn" id="kbdBtn" aria-label="Scorciatoie da tastiera" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg></button>
 </header>
 <div class="tabrow" id="tabrow">
@@ -128,25 +130,36 @@
 <main class="main" id="workRegion" tabindex="-1" aria-label="Area di lavoro">
 <div class="editor-pane" id="audioPane">
 <div class="wave-col">
-<div class="transport" id="aTransport" role="toolbar" aria-label="Riproduzione audio">
+<div class="transport" id="aTransport" role="toolbar" aria-label="Riproduzione del brano">
 <div class="tp-group">
-<button type="button" class="tp-btn" data-action="toStart" aria-label="Vai all’inizio" aria-keyshortcuts="Home" data-tip="Vai all’inizio (Home nella forma d’onda)"><svg class="ico" aria-hidden="true"><use href="#i-toStart"/></svg></button>
-<button type="button" class="tp-btn main-play" id="aPlay" data-action="playPause" aria-label="Riproduci" aria-keyshortcuts="Control+Space" data-tip="Riproduci o pausa (Spazio nella forma d’onda, Ctrl+Spazio ovunque)"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></button>
+<button type="button" class="tp-btn" data-action="toStart" aria-label="Vai all’inizio" data-tip="Vai all’inizio (Home sull’indicatore)"><svg class="ico" aria-hidden="true"><use href="#i-toStart"/></svg></button>
+<button type="button" class="tp-btn main-play" id="aPlay" data-action="playPause" aria-label="Riproduci il brano" aria-keyshortcuts="Control+Space" data-tip="Riproduci o pausa (Spazio sulle tracce, Ctrl+Spazio ovunque)"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></button>
 <button type="button" class="tp-btn" data-action="stop" aria-label="Ferma e torna al punto di partenza" data-tip="Ferma e torna al punto di partenza"><svg class="ico" aria-hidden="true"><use href="#i-stop"/></svg></button>
-<button type="button" class="tp-btn" data-action="toEnd" aria-label="Vai alla fine" aria-keyshortcuts="End" data-tip="Vai alla fine (Fine nella forma d’onda)"><svg class="ico" aria-hidden="true"><use href="#i-toEnd"/></svg></button>
-<button type="button" class="tp-btn" data-action="playSel" aria-label="Riproduci la selezione" aria-keyshortcuts="Shift+Space" data-tip="Riproduci la selezione (Maiusc+Spazio)"><svg class="ico" aria-hidden="true"><use href="#i-playSel"/></svg></button>
-<button type="button" class="tp-btn" id="aLoop" data-action="loop" aria-pressed="false" aria-label="Ripetizione ciclica" data-tip="Ripetizione ciclica della selezione"><svg class="ico" aria-hidden="true"><use href="#i-loop"/></svg></button>
-<button type="button" class="tp-btn rec" data-action="record" aria-label="Registra dal microfono" aria-keyshortcuts="Control+Alt+R" data-tip="Registra dal microfono (Ctrl+Alt+R)"><svg class="ico" aria-hidden="true"><use href="#i-record"/></svg></button>
+<button type="button" class="tp-btn" data-action="toEnd" aria-label="Vai alla fine" data-tip="Vai alla fine (Fine sull’indicatore)"><svg class="ico" aria-hidden="true"><use href="#i-toEnd"/></svg></button>
+<button type="button" class="tp-btn rec" data-action="recordAudio" aria-label="Registra sulla traccia scelta" aria-keyshortcuts="Control+Alt+R" data-tip="Registra sulla traccia scelta, all’indicatore (Ctrl+Alt+R)"><svg class="ico" aria-hidden="true"><use href="#i-record"/></svg></button>
+<button type="button" class="tp-btn" data-action="cycle" aria-pressed="false" aria-label="Ciclo" data-tip="Ciclo: ripete il tratto scelto (I e O sull’indicatore)"><svg class="ico" aria-hidden="true"><use href="#i-loop"/></svg></button>
+<button type="button" class="tp-btn" data-action="metronome" aria-pressed="false" aria-label="Metronomo" data-tip="Metronomo"><svg class="ico" aria-hidden="true"><use href="#i-metronome"/></svg></button>
 </div>
-<div class="clock" aria-hidden="true"><b id="aClock">0:00,000</b><small id="aClockSub">Nessun audio</small></div>
+<div class="clock" aria-hidden="true"><b id="aClock">0:00,000</b><small id="aClockSub">Progetto vuoto</small></div>
 <canvas class="meter" id="aMeter" width="300" height="28" aria-hidden="true"></canvas>
-<div class="tp-sel"><label for="aRate">Velocità di ascolto</label><select id="aRate" class="rb-select"><option value="0.5">0,5×</option><option value="0.75">0,75×</option><option value="1" selected>1×</option><option value="1.25">1,25×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></div>
+<button type="button" class="btn sm" id="arTempo" data-action="tempoSettings" data-tip="Tempo, battuta, griglia e metronomo">120 BPM · 4/4</button>
 <div class="tp-info" id="aInfo" aria-hidden="true"></div>
 </div>
+<section class="arrange" id="arrange" aria-labelledby="arTitle">
+<div class="ar-bar"><h2 id="arTitle">Tracce</h2><span class="pane-count" id="arInfo"></span><span class="grow"></span><button type="button" class="btn sm" data-action="newTrack">Nuova traccia</button><button type="button" class="btn sm" data-action="importTrack">Importa audio…</button></div>
+<div class="ar-scroll" id="arScroll"><div class="ar-inner" id="arInner">
+<div class="ar-row ar-rulerrow"><div class="ar-head ar-corner" aria-hidden="true">Tempo</div><div class="ar-ruler" id="arRuler"><canvas id="arRulerCanvas" aria-hidden="true"></canvas><div class="ar-cycle" id="arCycle" aria-hidden="true" hidden></div><div class="tl-handle" id="arPlayhead" role="slider" tabindex="0" aria-label="Indicatore del brano" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0 secondi" aria-describedby="arPlayheadHint"></div></div></div>
+<div id="arRows"></div>
+<div class="ar-line" id="arLine" aria-hidden="true"></div>
+</div></div>
+<div class="ar-empty" id="arEmpty"><div><b>Il progetto è vuoto</b>Registra dal microfono, importa uno o più file audio (ognuno diventa una traccia) oppure trascinali qui.<div class="row"><button type="button" class="btn primary" data-action="recordAudio">Registra</button><button type="button" class="btn" data-action="importTrack">Importa audio…</button><button type="button" class="btn" data-action="newTrack">Nuova traccia vuota</button></div></div></div>
+</section>
+<section class="editor-area" id="editorArea" aria-labelledby="edTitle">
+<div class="ed-bar"><h2 id="edTitle">Editor della regione</h2><span class="pane-count" id="edInfo">nessuna regione aperta</span><span class="grow"></span><div class="tp-sel"><label for="aRate">Velocità di ascolto</label><select id="aRate" class="rb-select"><option value="0.5">0,5×</option><option value="0.75">0,75×</option><option value="1" selected>1×</option><option value="1.25">1,25×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></div><button type="button" class="btn sm" data-action="playRegion">Ascolta la regione</button><button type="button" class="btn sm" id="aLoop" data-action="loop" aria-pressed="false">Ciclo sulla selezione</button><button type="button" class="btn icon" data-action="toggleEditor" aria-label="Nascondi l’editor della regione" data-tip="Nascondi l’editor (Ctrl+E)"><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></button></div>
 <div class="wave-wrap">
 <div class="ruler" aria-hidden="true"><canvas id="aRuler"></canvas></div>
 <div class="wave-box"><div class="wave" id="wave" role="slider" tabindex="0" aria-label="Forma d’onda" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="Nessun audio" aria-describedby="waveHint" data-focus-hint="Frecce: cursore · Maiusc: seleziona · Spazio: ascolta"><canvas id="waveCanvas" aria-hidden="true"></canvas></div>
-<div class="wave-empty" id="waveEmpty"><div><b>Nessun audio aperto</b>Apri un file, trascinalo qui, oppure registra dal microfono.<div class="row"><button type="button" class="btn primary" data-action="open">Apri un file</button><button type="button" class="btn" data-action="recordAudio">Registra</button><button type="button" class="btn" data-action="generate">Genera un suono</button></div></div></div></div>
+<div class="wave-empty" id="waveEmpty"><div><b>Nessuna regione nell’editor</b>Scegli una regione nelle tracce e premi Invio (o fai doppio clic) per modificarla qui, con tagli, effetti e marcatori.<div class="row"><button type="button" class="btn" data-action="generate">Genera un suono</button></div></div></div></div>
 <div class="overview" id="aOverviewBox" aria-hidden="true"><canvas id="aOverview"></canvas></div>
 </div>
 <div class="selbar" id="selbar" role="group" aria-label="Posizione e selezione">
@@ -156,8 +169,9 @@
 <div class="fld"><label for="selLen">Durata selezione</label><output id="selLen">—</output></div>
 <div class="fld"><label for="stepSel">Passo delle frecce</label><select id="stepSel" class="rb-select"><option value="0.01">10 millesimi</option><option value="0.05">50 millesimi</option><option value="0.1">Un decimo di secondo</option><option value="0.5">Mezzo secondo</option><option value="1">Un secondo</option><option value="5">Cinque secondi</option></select></div>
 </div>
+</section>
 </div>
-<aside class="side-pane" id="markPane" aria-labelledby="markTitle">
+<aside class="side-pane" id="markPane" aria-labelledby="markTitle" hidden>
 <div class="pane-head"><h2 id="markTitle">Marcatori</h2><span class="pane-count" id="markCount"></span><button type="button" class="btn icon" id="markClose" aria-label="Chiudi il riquadro dei marcatori" data-tip="Chiudi il riquadro"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button></div>
 <p class="pane-hint" id="markHint">Frecce per scorrere, Invio per spostare il cursore sul marcatore, F2 per rinominarlo, Canc per eliminarlo.</p>
 <div class="pane-tools"><button type="button" class="btn sm" data-action="markerAdd">Aggiungi al cursore</button><button type="button" class="btn sm" data-action="markersFromPauses">Sulle pause</button></div>
@@ -217,7 +231,9 @@
 <div class="zoom" role="group" aria-label="Zoom orizzontale"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom" data-tip="Riduci zoom (−)"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="0" min="0" max="100" step="1" aria-label="Zoom orizzontale" aria-valuetext="Tutto il file"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom" data-tip="Aumenta zoom (+)"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true"></output></div>
 </footer>
 </div>
-<p id="waveHint" class="sr-only">Frecce sinistra e destra spostano il cursore del passo scelto, Pagina su e giù di cinque secondi, Ctrl più frecce alla pausa precedente o successiva, Home e Fine all’inizio e alla fine; con Maiusc si seleziona. Spazio ascolta o mette in pausa, Maiusc+Spazio ascolta la selezione, P e D ascoltano due secondi prima o dopo il cursore. I e O fissano inizio e fine della selezione, anche durante l’ascolto. Esc toglie la selezione. Maiusc+F10 apre il menu, Alt+Maiusc+I legge posizione e livello.</p>
+<p id="waveHint" class="sr-only">Editor della regione. Frecce sinistra e destra spostano il cursore del passo scelto, Pagina su e giù di cinque secondi, Ctrl più frecce alla pausa precedente o successiva, Home e Fine all’inizio e alla fine; con Maiusc si seleziona. Spazio ascolta o mette in pausa, Maiusc+Spazio ascolta la selezione, P e D ascoltano due secondi prima o dopo il cursore. I e O fissano inizio e fine della selezione, anche durante l’ascolto. Esc toglie la selezione. Maiusc+F10 apre il menu, Alt+Maiusc+I legge posizione e livello.</p>
+<p id="laneHint" class="sr-only">Frecce sinistra e destra per scegliere una regione, su e giù per cambiare traccia. Ctrl più frecce sposta la regione nel tempo, Ctrl più frecce su e giù la porta su un’altra traccia. Invio la apre nell’editor, Alt+Invio ne mostra le proprietà, Ctrl+K la divide all’indicatore, Canc la elimina. M e S attivano muto e solo della traccia, R registra su questa traccia, Spazio avvia o ferma il brano.</p>
+<p id="arPlayheadHint" class="sr-only">Frecce sinistra e destra di un passo della griglia, Maiusc più frecce di un passo piccolo, Pagina su e giù di una battuta o di cinque secondi, frecce su e giù al bordo di regione precedente o successivo, Home e Fine. Spazio avvia o ferma il brano, I e O fissano inizio e fine del ciclo, C attiva il ciclo, R registra sulla traccia scelta.</p>
 <p id="timeHint" class="sr-only">Scrivi un tempo come 83,5 oppure 1:23,5 oppure 0:01:23,500 e premi Invio.</p>
 <p id="trackHint" class="sr-only">Frecce sinistra e destra per scegliere un elemento, Ctrl più frecce per spostarlo di un secondo e Ctrl+Maiusc più frecce di un fotogramma: le clip attaccate in quella direzione si spostano insieme. Alt+Maiusc più frecce scambia una clip con la vicina, Invio per modificarne le proprietà, Canc per eliminarlo, Maiusc+F10 per il menu. Spazio avvia o ferma l’anteprima.</p>
 <p id="playheadHint" class="sr-only">Frecce sinistra e destra di un fotogramma, Maiusc più frecce di un secondo, Pagina su e giù di cinque secondi, frecce su e giù al taglio precedente o successivo, Home e Fine. Spazio avvia o ferma l’anteprima, J K L come un registratore, S divide la clip, Alt+Maiusc+I descrive l’istante.</p>
