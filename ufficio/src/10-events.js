@@ -25,7 +25,7 @@ const takeFile=input=>{const file=input.files[0];input.value='';return file};
 $('fileInput').onchange=async e=>{const file=takeFile(e.target);closeFilePanel(false);if(file)await openFile(file)};
 $('imageInput').onchange=e=>{const file=takeFile(e.target);if(file)readImage(file)};
 const FILE_PANEL_ACTIONS={new:()=>runCommand('new'),open:()=>runCommand('open'),save:()=>runCommand('save'),backup:()=>projectBackup(),export:()=>runCommand(isWord()?'exportHtml':isCalc()?'exportCSV':'pgExportPng'),
- pgSave:()=>runCommand('pgSave'),pgFolder:()=>runCommand('pgFolder'),pgCheck:()=>runCommand('pgCheck'),
+ pgSave:()=>runCommand('pgSave'),pgTemplates:()=>runCommand('pgTemplates'),pgFolder:()=>runCommand('pgFolder'),pgCheck:()=>runCommand('pgCheck'),
  print:()=>runCommand('print'),shortcuts:()=>runCommand('shortcuts'),templates:()=>runCommand('templates'),versions:()=>runCommand('versionHistory'),help:()=>runCommand('help')};
 $('filepanel').addEventListener('click',e=>{const action=e.target.closest('[data-file-action]')?.dataset.fileAction;if(action===undefined)return;closeFilePanel(true);if(Object.hasOwn(FILE_PANEL_ACTIONS,action))FILE_PANEL_ACTIONS[action]()});
 $('filepanel').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeFilePanel(true);return}if((e.key==='ArrowDown'||e.key==='ArrowUp')&&e.target.closest('.file-side')){e.preventDefault();const l=$$('.file-side button'),i=l.indexOf(e.target);l[(i+(e.key==='ArrowDown'?1:-1)+l.length)%l.length].focus();return}trapTab(e,$('filepanel'))});

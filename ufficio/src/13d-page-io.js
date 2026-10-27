@@ -203,18 +203,19 @@ function pgFocusProp(id){pgShowProps();if(Pg.sel)pgSelect(null,{say:false});if(P
 // Avvio: i formati pronti come primo passo, con o senza contenuti di esempio.
 const PG_PRESET_DESC={a2:'Da stampare a tessere su fogli A4 o A3',a1:'Da stampare a tessere su fogli A4 o A3',a0:'Da stampare a tessere su fogli A4 o A3',striscione:'Una scritta grande, stampata su più fogli',festone:'Una lettera per foglio, da appendere a un filo',post:'Instagram e Facebook, una pagina',carosello:'Cinque pagine dello stesso formato, numerate',storia:'Con i margini delle zone coperte dall’app',a4:'Da stampare o in PDF',a5:'Mezzo foglio, da stampare o in PDF',brochure:'Testo su due colonne che scorre tra le pagine',newsletter:'Testata, tre colonne, intestazione con la data',slide:'Tre diapositive con il numero di pagina'};
 function pgRenderStart(){$('pgPresets').innerHTML=[...PG_PRESETS,['festone','Festone di lettere',297,210]].map(([id,label,w,h])=>`<button type="button" class="pg-preset" data-preset="${id}"><span class="pg-shape${id==='festone'?' fest':''}" style="aspect-ratio:${pr2(w)}/${pr2(h)}" aria-hidden="true"></span><b>${esc(label)}</b><span>${esc(PG_PRESET_DESC[id])}</span></button>`).join('')}
-function pgStartWith(id,sample=$('pgSample').checked){if(id==='festone'){pgFestoneDialog();return}const old=Pg.p,p=newPub(id);if(sample)pgStarter(p);pgUseNew(p,'Nuovo documento');
- announce(`Nuovo documento «${p.title}»: ${p.pages.length===1?'una pagina':p.pages.length+' pagine'}${sample?' con contenuti di esempio da sostituire':''}${p.tiles.on?`, da stampare su ${pgTileSay(pgTileGrid(p))}`:''}. ${old?'Ctrl+Z torna al documento di prima. ':''}F6 passa tra pagine, cornici, pagina e proprietà.`)}
+// Con i contenuti di esempio si apre la galleria dei modelli del formato, senza si parte dal documento vuoto.
+function pgStartWith(id,sample=$('pgSample').checked){if(id==='festone'){pgFestoneDialog();return}if(sample)pgGallery({fmt:id});else pgTplOpen(newPub(id),'')}
+// Nuovo, in Impagina, apre la galleria dei modelli: il documento vuoto è la prima voce di ogni formato.
+const pageNewDialog=()=>pgGallery();
 // Il documento nuovo prende il posto di quello aperto; Ctrl+Z lo riporta.
 function pgUseNew(p,label){const old=Pg.p;if(old){Pg.p=p;Object.assign(Pg,{pi:0,mid:'',sel:null,row:0,zoom:0});pgSettle(label,{props:true})}else{pgReset(p);Pg.hist=[]}$('docTitle').value=p.title;updateTitle();pgRenderAll({props:true});$('pgPages').focus()}
-async function pageNewDialog(){const v=await modal('Nuovo documento di Impagina','Scegli il formato: margini, colonne e mastri sono già pronti e si cambiano dopo.',[{id:'preset',label:'Formato',type:'select',value:PG_PRESETS.some(x=>x[0]===Pg.p?.preset)?Pg.p.preset:'post',options:[...PG_PRESETS.map(([value,label])=>({value,label:label+' · '+PG_PRESET_DESC[value]})),{value:'festone',label:'Festone di lettere · '+PG_PRESET_DESC.festone}]},{id:'sample',label:'Con cornici e testi di esempio da sostituire',type:'checkbox',value:true}],'Crea');if(v)pgStartWith(v.preset,v.sample)}
 // Entrata e uscita dall'app, titolo e dettagli per il menu File.
 function pageShow(){pgRenderStart();Pg.ver++;pgRenderAll({props:true,story:true})}
 function pageLeave(){if(Pg.p){pgStorySync();pgPersist()}}
 function pageRetitle(v){if(!Pg.p)return;Pg.p.title=v.slice(0,120);pgSettle('Titolo',{merge:true})}
 function pageFileDetails(dd){const p=Pg.p;if(!p)return dd('Documento','nessuno: scegli il formato');const all=pgInstances(p),n=pgAllItems(p).length;return dd('Nome',p.title)+dd('Formato',PG_PRESETS.find(x=>x[0]===p.preset)?.[1]||`${fmtU(p.w)} × ${pgU(p.h)}`)+dd('Pagine',`${p.pages.length}${all.length>p.pages.length?`, ${all.length} con quelle dai dati`:''}`)+dd('Cornici',n)+dd('Dati',p.data?`${p.data.name}, ${p.data.rows.length} righe`:'nessuno')+dd('Cartella collegata',Pg.folder?.name||'nessuna')+dd('Bozza',$('saveState').textContent)}
 // I comandi di Impagina; senza documento valgono solo quelli che lo creano o lo aprono.
-const PAGE_ACTIONS={new:pageNewDialog,open:()=>$('pgFileInput').click(),print:pgPrint,undo:()=>pgUndo(false),redo:()=>pgUndo(true),
+const PAGE_ACTIONS={new:pageNewDialog,pgTemplates:pageNewDialog,open:()=>$('pgFileInput').click(),print:pgPrint,undo:()=>pgUndo(false),redo:()=>pgUndo(true),
  zoomUp:()=>pgZoom(1.25),zoomDown:()=>pgZoom(.8),zoomReset:()=>{Pg.zoom=1;pgRenderStage();announce('Zoom 100%')},pgZoomFit:()=>pgZoom(0),
  pgSave:pageSave,pgExportPng,pgDescribe,pgCheck,
  pgAddPage,pgDupPage,pgDelPage,pgPrevPage:()=>pgStepPage(-1),pgNextPage:()=>pgStepPage(1),pgDataRepeat,pgRowPrev:()=>pgStepRow(-1),pgRowNext:()=>pgStepRow(1),
@@ -232,4 +233,4 @@ const PAGE_ACTIONS={new:pageNewDialog,open:()=>$('pgFileInput').click(),print:pg
  pgAddSign:()=>pgAddSign(),pgSignStyles:pgSignStylesMenu,pgAddTri:()=>pgAddCmd('tri'),pgFestone:pgFestoneDialog,
  pgTiles:()=>{pgEdit('Stampa a tessere',p=>{p.tiles.on=!p.tiles.on},{props:true});announce(Pg.p.tiles.on?`Stampa a tessere: ${pgTileSay(pgTileGrid(Pg.p))}`:'Stampa su un foglio solo')},pgTileSetup:()=>{if(!Pg.p.tiles.on)pgEdit('Stampa a tessere',p=>{p.tiles.on=true},{props:true});pgFocusProp('pp-tsheet')},
  pgFolder:pgLinkFolder,pgRefresh,pgSources:pgSourcesDialog,pgData:()=>$('pgDataInput').click(),pgDataSheet:pgDataFromSheet,pgFeed:()=>$('pgDataInput').click(),pgFeedPaste,pgDocx:()=>$('pgTextInput').click()};
-for(const [k,f] of Object.entries(PAGE_ACTIONS))if(!['new','open','undo','redo','pgFestone'].includes(k))PAGE_ACTIONS[k]=(...a)=>Pg.p?f(...a):toast('Scegli prima il formato del documento nella pagina iniziale di Impagina');
+for(const [k,f] of Object.entries(PAGE_ACTIONS))if(!['new','open','undo','redo','pgFestone','pgTemplates'].includes(k))PAGE_ACTIONS[k]=(...a)=>Pg.p?f(...a):toast('Scegli prima il formato del documento nella pagina iniziale di Impagina');
