@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Verifica tu copia · Tassello</title>
-<meta name="description" content="Comprueba que tu archivo de Tassello Ufficio o Tassello Media es idéntico a una versión oficial. El archivo se queda en tu ordenador.">
+<meta name="description" content="Comprueba que tu archivo de Tassello Ufficio, Media o Grafica es idéntico a una versión oficial. El archivo se queda en tu ordenador.">
 <meta name="color-scheme" content="light dark">
 <link rel="alternate" hreflang="it" href="https://svitatlco.github.io/tassello/verifica.html">
 <link rel="alternate" hreflang="en" href="https://svitatlco.github.io/tassello/en/verifica.html">
@@ -44,11 +44,11 @@
 <main id="contenuto">
   <div class="page-head">
     <h1>Verifica tu copia</h1>
-    <p class="lead">Comprueba si tu archivo de Tassello (Ufficio o Media) es idéntico a una versión oficial. El archivo no sale de tu ordenador: la comprobación se hace aquí, en el navegador.</p>
+    <p class="lead">Comprueba si tu archivo de Tassello (Ufficio, Media o Grafica) es idéntico a una versión oficial. El archivo no sale de tu ordenador: la comprobación se hace aquí, en el navegador.</p>
   </div>
 
   <div class="drop" id="drop">
-    <label for="file"><b>Elige el archivo que quieres comprobar</b>, normalmente <code>tassello-ufficio.html</code> o <code>tassello-media.html</code></label>
+    <label for="file"><b>Elige el archivo que quieres comprobar</b>, normalmente <code>tassello-ufficio.html</code>, <code>tassello-media.html</code> o <code>tassello-grafica.html</code></label>
     <input type="file" id="file" accept=".html,.htm,text/html">
     <p>O arrástralo a este recuadro.</p>
   </div>
@@ -56,7 +56,7 @@
 
   <section aria-labelledby="come">
     <h2 id="come">Cómo funciona</h2>
-    <p>Para cada versión publicada registramos la <b>huella SHA-256</b> del archivo: una secuencia de 64 caracteres que cambia por completo si cambia una sola letra del archivo. Esta página calcula la huella de tu archivo y la busca en las listas de versiones oficiales de <a href="../versioni.json">Tassello Ufficio</a> y de <a href="../versioni-media.json">Tassello Media</a>.</p>
+    <p>Para cada versión publicada registramos la <b>huella SHA-256</b> del archivo: una secuencia de 64 caracteres que cambia por completo si cambia una sola letra del archivo. Esta página calcula la huella de tu archivo y la busca en las listas de versiones oficiales de <a href="../versioni.json">Tassello Ufficio</a>, de <a href="../versioni-media.json">Tassello Media</a> y de <a href="../versioni-grafica.json">Tassello Grafica</a>.</p>
     <p>Si el archivo no resulta oficial, puede que alguien lo haya modificado o que un programa lo haya vuelto a guardar (por ejemplo con «Guardar como» del navegador). En ambos casos, no lo uses para documentos importantes y <a href="./">descarga la copia oficial</a>.</p>
   </section>
 
@@ -69,8 +69,8 @@
     <h2 id="avanzata">Verificación avanzada</h2>
     <p>En Windows también puedes calcular la huella desde el Símbolo del sistema y compararla con la lista:</p>
     <pre>certutil -hashfile tassello-ufficio.html SHA256</pre>
-    <p>Para Tassello Media, escribe <code>tassello-media.html</code> en lugar de <code>tassello-ufficio.html</code>, aquí y en el comando siguiente.</p>
-    <p>Cada archivo descargado de las <a href="https://github.com/svitaTLCO/tassello/releases">versiones publicadas en GitHub</a> (Tassello Ufficio desde la versión 1.3.0, Tassello Media desde su primera versión publicada) tiene además una firma de procedencia, que demuestra que GitHub lo construyó a partir del código fuente público. Con la herramienta <a href="https://cli.github.com/">GitHub CLI</a>:</p>
+    <p>Para Tassello Media o Tassello Grafica, escribe <code>tassello-media.html</code> o <code>tassello-grafica.html</code> en lugar de <code>tassello-ufficio.html</code>, aquí y en el comando siguiente.</p>
+    <p>Cada archivo descargado de las <a href="https://github.com/svitaTLCO/tassello/releases">versiones publicadas en GitHub</a> (Tassello Ufficio desde la versión 1.3.0, Tassello Media y Tassello Grafica desde su primera versión publicada) tiene además una firma de procedencia, que demuestra que GitHub lo construyó a partir del código fuente público. Con la herramienta <a href="https://cli.github.com/">GitHub CLI</a>:</p>
     <pre>gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello</pre>
   </section>
 </main>
@@ -88,7 +88,7 @@ const fmt=(s,values)=>s.replace(/\{(\w+)\}/g,(m,k)=>k in values?values[k]:m);
 const $=id=>document.getElementById(id);
 const ICON={wait:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',ok:'<path d="M5 12l5 5 9-10"/>',old:'<path d="M12 7v6"/><path d="M12 17h.01"/>',bad:'<path d="M6 6l12 12"/><path d="M18 6L6 18"/>'};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LISTS=['../versioni.json','../versioni-media.json'];
+const LISTS=['../versioni.json','../versioni-media.json','../versioni-grafica.json'];
 let listing=null;
 const loadList=()=>listing??=Promise.all(LISTS.map(name=>fetch(name,{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));
 function show(kind,title,lines){

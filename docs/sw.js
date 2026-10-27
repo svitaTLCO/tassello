@@ -1,7 +1,7 @@
 // Service worker di Tassello: conserva una copia dei programmi per usarli come app anche senza rete.
 // Con la rete prende sempre la versione pubblicata sul sito e aggiorna la copia; senza rete usa l'ultima copia.
 const CACHE = 'tassello';
-const FILES = ['tassello-ufficio.html', 'tassello-media.html', 'manifest.webmanifest', 'manifest-media.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
+const FILES = ['tassello-ufficio.html', 'tassello-media.html', 'tassello-grafica.html', 'manifest.webmanifest', 'manifest-media.webmanifest', 'manifest-grafica.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 const urlOf = name => new URL(name, self.registration.scope).href;
 
 self.addEventListener('install', event => {

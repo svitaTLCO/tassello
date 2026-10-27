@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tassello&nbsp;: l’essentiel pour travailler sur vos fichiers</title>
-<meta name="description" content="Tassello&nbsp;: des outils libres et gratuits pour écrire, faire vos calculs, mettre en page, enregistrer et monter de l’audio et de la vidéo sans installer de suites encombrantes. Chaque outil est un seul fichier HTML, accessible et utilisable hors ligne. Téléchargez-le uniquement depuis le site officiel.">
+<meta name="description" content="Tassello&nbsp;: des outils libres et gratuits pour écrire, faire vos calculs, mettre en page, améliorer vos photos, dessiner, enregistrer et monter de l’audio et de la vidéo sans installer de suites encombrantes. Chaque outil est un seul fichier HTML, accessible et utilisable hors ligne. Téléchargez-le uniquement depuis le site officiel.">
 <meta name="color-scheme" content="light dark">
 <link rel="alternate" hreflang="it" href="https://svitatlco.github.io/tassello/">
 <link rel="alternate" hreflang="en" href="https://svitatlco.github.io/tassello/en/">
@@ -38,6 +38,7 @@
     <ul>
       <li><a href="#ufficio">Tassello Ufficio</a></li>
       <li><a href="#media">Tassello Media</a></li>
+      <li><a href="#grafica">Tassello Grafica</a></li>
       <li><a href="#accessibilita">Accessibilité</a></li>
       <li><a href="#privacy">Confidentialité</a></li>
       <li><a href="#sicurezza">Sécurité</a></li>
@@ -51,10 +52,11 @@
     <div>
       <p class="eyebrow">Gratuit · Logiciel libre · Accessible</p>
       <h1>L’essentiel pour travailler sur vos fichiers.</h1>
-      <p class="lead">Tassello est une famille de petits outils libres pour la productivité de tous les jours&nbsp;: écrire, remplir des formulaires, faire des calculs, mettre en page, enregistrer et monter de l’audio et de la vidéo. Chacun tient dans un seul fichier HTML qui s’ouvre dans le navigateur, sans suite encombrante à installer et sans compte. Un couteau suisse, ordonné et léger.</p>
+      <p class="lead">Tassello est une famille de petits outils libres pour la productivité de tous les jours&nbsp;: écrire, remplir des formulaires, faire des calculs, mettre en page, améliorer des photos et dessiner, enregistrer et monter de l’audio et de la vidéo. Chacun tient dans un seul fichier HTML qui s’ouvre dans le navigateur, sans suite encombrante à installer et sans compte. Un couteau suisse, ordonné et léger.</p>
       <div class="actions scelta">
         <a class="btn" href="#ufficio"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#2457C5"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#1E7A46"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><span><b>Tassello Ufficio</b><span class="sr-only">: </span><small>Testo, Calcolo et Impagina, pour documents, calculs et mise en page</small></span></a>
         <a class="btn" href="#media"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B35500"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#7A3DB8"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><span><b>Tassello Media</b><span class="sr-only">: </span><small>Audio et Video, pour enregistrer et monter</small></span></a>
+        <a class="btn" href="#grafica"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H78L100 22V78Q100 100 78 100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B0306A"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><span><b>Tassello Grafica</b><span class="sr-only">: </span><small>Immagini et Disegno, pour photos et graphismes</small></span></a>
       </div>
       <p class="meta">Fonctionne dans Chrome et Edge récents, même hors ligne. Les programmes eux-mêmes sont pour l’instant en italien.</p>
       <p class="official"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-4.5"/></svg><span><b>Téléchargez Tassello uniquement ici</b>, c’est-à-dire sur svitatlco.github.io/tassello, ou depuis les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a>. N’ouvrez pas les copies reçues d’autres personnes&nbsp;: téléchargez-le à nouveau ici. <a href="#sicurezza">Pourquoi c’est important</a></span></p>
@@ -66,13 +68,13 @@
     <h2 id="perche">Un couteau suisse, pas une suite</h2>
     <p class="intro">Tassello met entre les mains de chacun, le plus simplement possible, la capacité de travailler sur ses propres fichiers. Il fait le travail de base, celui de tous les jours, et il le fait avec ordre. Il est gratuit pour tous, y compris en entreprise et à l’école.</p>
     <div class="grid">
-      <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M3 13h18"/></svg><h3>L’essentiel</h3><p>Les fonctions vraiment utiles pour les documents, les tableurs, les pages à imprimer ou à publier, l’audio et la vidéo, choisies une à une et bien rangées.</p></div>
+      <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M3 13h18"/></svg><h3>L’essentiel</h3><p>Les fonctions vraiment utiles pour les documents, les tableurs, les pages à imprimer ou à publier, les photos et les graphismes, l’audio et la vidéo, choisies une à une et bien rangées.</p></div>
       <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8L2 22"/><path d="M17.5 15H9"/></svg><h3>Léger</h3><p>Aucune suite à installer et aucun compte&nbsp;: un fichier d’environ un mégaoctet qui s’ouvre dans le navigateur, même hors ligne. Si vous préférez, vous pouvez l’installer comme une application.</p></div>
       <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><h3>Vos fichiers restent à vous</h3><p>Tout se passe dans votre navigateur&nbsp;: aucun serveur ne reçoit vos fichiers, pas même vos enregistrements.</p></div>
       <div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><path d="M4 8l8 2 8-2"/><path d="M12 10v5"/><path d="M8 21l4-6 4 6"/></svg><h3>Accessible par principe</h3><p>Il s’utilise avec un lecteur d’écran et au clavier seul. Sans cela, aucun tassello ne sort.</p></div>
     </div>
     <div class="note">
-      <p><b>Ce qu’il n’est pas.</b> Tassello ne remplace pas les outils professionnels&nbsp;: si votre travail demande des macros, le suivi des modifications, une mise en page éditoriale professionnelle, un montage professionnel ou des instruments virtuels et du MIDI, continuez à utiliser le programme adapté. Ce n’est pas non plus un clone des applications célèbres&nbsp;: il en ouvre et enregistre les formats pour échanger des fichiers avec tout le monde, mais il a sa propre conception, avec des fonctions choisies pour le travail de tous les jours et toutes accessibles au clavier.</p>
+      <p><b>Ce qu’il n’est pas.</b> Tassello ne remplace pas les outils professionnels&nbsp;: si votre travail demande des macros, le suivi des modifications, une mise en page éditoriale professionnelle, la retouche photo professionnelle, un montage professionnel ou des instruments virtuels et du MIDI, continuez à utiliser le programme adapté. Ce n’est pas non plus un clone des applications célèbres&nbsp;: il en ouvre et enregistre les formats pour échanger des fichiers avec tout le monde, mais il a sa propre conception, avec des fonctions choisies pour le travail de tous les jours et toutes accessibles au clavier.</p>
     </div>
   </section>
 
@@ -165,6 +167,43 @@
     <p class="meta">Un fichier d’environ 470&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: les fichiers très longs demandent beaucoup de mémoire, et les vidéos que le navigateur ne sait pas décoder s’exportent en temps réel au lieu d’image par image. Conservez toujours une copie des originaux.</p>
   </section>
 
+  <section id="grafica" aria-labelledby="titolo-grafica">
+    <h2 id="titolo-grafica">Tassello Grafica&nbsp;: Immagini et Disegno</h2>
+    <p class="intro">Pour améliorer des photos et créer les graphismes de tous les jours&nbsp;: une photo pour les réseaux sociaux, un portrait, un document à rendre lisible, un flyer ou une image pour une publication. Tout s’utilise au clavier et avec un lecteur d’écran&nbsp;: la photo et sa lumière sont décrites en mots, chaque réglage est un curseur avec son nom. L’interface est en italien.</p>
+    <div class="apps">
+      <div class="app immagini">
+        <h3>Immagini</h3>
+        <p>La retouche photo, pour les photos à publier, les portraits, les paysages, les documents et les produits.</p>
+        <ul>
+          <li>Parcours guidés selon l’objectif&nbsp;: réseaux sociaux, portrait, paysage, document ou ticket, produit sur fond clair</li>
+          <li>Cadrage avec rotation, redressement et formats prêts à l’emploi&nbsp;; lumière, couleur et vignettage</li>
+          <li>Looks prêts à l’emploi et looks importés depuis des fichiers LUT .cube, avec leur intensité</li>
+          <li>Histogramme décrit en mots, avec une alerte quand les hautes lumières brûlent ou que les ombres se bouchent</li>
+          <li>Ouvre JPEG, PNG, WebP, AVIF, GIF et BMP&nbsp;; exporte en JPEG, PNG ou WebP sans les données de l’appareil photo</li>
+        </ul>
+      </div>
+      <div class="app disegno">
+        <h3>Disegno</h3>
+        <p>Le dessin, pour les publications, les stories, les bannières, les flyers et les icônes.</p>
+        <ul>
+          <li>Feuilles aux formats d’aujourd’hui ou à la taille de votre choix, avec un fond plein ou transparent</li>
+          <li>Rectangles, ellipses, lignes, textes sur plusieurs lignes et images, avec les réglages d’Immagini</li>
+          <li>Calques, alignement sur la feuille, dupliquer, copier et coller</li>
+          <li>Enregistre en SVG modifiable avec titre et description&nbsp;; exporte en PNG ou JPEG</li>
+          <li>Vérification de l’accessibilité&nbsp;: contraste des textes et description du dessin</li>
+        </ul>
+      </div>
+    </div>
+    <div class="actions app-actions">
+      <a class="btn primary" href="../tassello-grafica.html" download="tassello-grafica.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+        Télécharger Tassello Grafica
+      </a>
+      <a class="btn secondary" href="../tassello-grafica.html">Essayer Tassello Grafica dans le navigateur</a>
+    </div>
+    <p class="meta">Un fichier d’environ 210&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: Immagini traite une photo à la fois, n’ouvre pas les fichiers HEIC et RAW et n’a pas encore de pinceaux, de retouches locales, de netteté ni de réduction du bruit&nbsp;; Disegno n’a pas encore de plume pour les courbes, de groupes ni de sélection multiple. Conservez toujours une copie des originaux.</p>
+  </section>
+
   <section id="accessibilita" aria-labelledby="titolo-accessibilita">
     <h2 id="titolo-accessibilita">Accessibilité&nbsp;: la condition, pas un extra</h2>
     <p class="intro">Un tassello n’est distribué que s’il s’utilise avec un lecteur d’écran et au clavier seul. Ce n’est pas une option à activer&nbsp;: c’est la façon dont chaque commande, chaque fenêtre et chaque message sont conçus.</p>
@@ -172,7 +211,7 @@
       <div class="card"><h3>Clavier</h3><p><kbd>F6</kbd> passe d’une zone à l’autre, <kbd>Alt</kbd>+<kbd>Q</kbd> trouve n’importe quelle commande, <kbd>F1</kbd> liste les raccourcis.</p></div>
       <div class="card"><h3>Lecteurs d’écran</h3><p>Rôles ARIA standard et annonces pour les cellules, les états et les messages, pensés pour NVDA, JAWS et le Narrateur.</p></div>
       <div class="card"><h3>Lecture</h3><p>Mode lecture, contraste élevé, thème sombre, lecture à voix haute et vérification de l’accessibilité des documents et des pages&nbsp;; dans Impagina, l’ordre de lecture des blocs est explicite et <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>I</kbd> décrit la page.</p></div>
-      <div class="card"><h3>Écoute</h3><p>Dans Audio, la forme d’onde fait entendre l’endroit où vous êtes et vous sautez d’une pause à l’autre de la parole&nbsp;; dans Video, la vérification contrôle les sous-titres, le contraste et les clignotements.</p></div>
+      <div class="card"><h3>Écoute</h3><p>Dans Audio, la forme d’onde fait entendre l’endroit où vous êtes et vous sautez d’une pause à l’autre de la parole&nbsp;; dans Video, la vérification contrôle les sous-titres, le contraste et les clignotements&nbsp;; dans Immagini, <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>I</kbd> décrit la photo, sa lumière et les réglages modifiés.</p></div>
     </div>
     <p class="meta">Vous utilisez NVDA, JAWS ou le Narrateur&nbsp;? Vos <a href="https://github.com/svitaTLCO/tassello/issues">signalements</a> sont les bienvenus&nbsp;: un problème d’accessibilité est un défaut à corriger, pas une amélioration à envisager.</p>
   </section>
@@ -183,6 +222,7 @@
       <p>Vos documents restent dans votre navigateur et sur votre ordinateur. La seule fonction qui utilise un service externe est la dictée vocale de Tassello Ufficio&nbsp;: dans Chrome, l’audio est envoyé aux serveurs de Google, dans Edge à ceux de Microsoft. Si vous ne l’utilisez pas, rien ne quitte votre appareil.</p>
       <p>Impagina ne lit le dossier que vous reliez que lorsque vous le demandez et ne le modifie jamais&nbsp;; il ne télécharge rien, pas même les images indiquées dans un flux.</p>
       <p>Tassello Media n’utilise le microphone que lorsque vous le demandez, et les enregistrements, les fichiers et les vidéos exportées restent sur votre ordinateur.</p>
+      <p>Tassello Grafica ne modifie jamais vos photos originales, et les fichiers exportés ne contiennent ni les données de l’appareil photo ni le lieu de la prise de vue.</p>
       <p>Cela vaut pour la copie officielle. Une copie modifiée par d’autres peut se comporter autrement&nbsp;: raison de plus pour <a href="#sicurezza">télécharger Tassello uniquement ici</a>.</p>
     </div>
   </section>
@@ -194,7 +234,7 @@
       <div class="card"><h3>Téléchargez uniquement ici</h3><p>Les seules adresses officielles sont <b>svitatlco.github.io/tassello</b> et les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a>. Un fichier reçu par e-mail, sur une clé USB ou depuis d’autres sites peut avoir été modifié&nbsp;: ne l’ouvrez pas et téléchargez-le à nouveau ici. Pour faire connaître Tassello, partagez le lien plutôt que le fichier.</p></div>
       <div class="card"><h3>Ce qu’il ne fait jamais</h3><p>La copie officielle ne demande jamais de mot de passe, de compte ou de paiement, ne propose jamais de télécharger des mises à jour ou d’autres programmes et ne se connecte pas à Internet&nbsp;: une règle de sécurité inscrite dans le fichier l’interdit. Seule exception, la dictée de Tassello Ufficio, qui utilise le service du navigateur.</p></div>
       <div class="card"><h3>Vérifier une copie</h3><p>Sur la page <a href="verifica.html">Vérifier une copie</a>, choisissez le fichier&nbsp;: le site vous indique s’il est identique à une version officielle. Le fichier ne quitte pas votre ordinateur.</p></div>
-      <div class="card"><h3>L’installer comme application</h3><p>Dans Chrome ou Edge, ouvrez <a href="../tassello-ufficio.html">Tassello Ufficio</a> ou <a href="../tassello-media.html">Tassello Media</a> dans le navigateur et choisissez <b>Installer</b> dans la barre d’adresse ou dans le menu. L’application vient toujours de ce site, fonctionne hors ligne et se met à jour toute seule.</p></div>
+      <div class="card"><h3>L’installer comme application</h3><p>Dans Chrome ou Edge, ouvrez <a href="../tassello-ufficio.html">Tassello Ufficio</a>, <a href="../tassello-media.html">Tassello Media</a> ou <a href="../tassello-grafica.html">Tassello Grafica</a> dans le navigateur et choisissez <b>Installer</b> dans la barre d’adresse ou dans le menu. L’application vient toujours de ce site, fonctionne hors ligne et se met à jour toute seule.</p></div>
     </div>
     <p class="meta">Vous avez trouvé une copie suspecte&nbsp;? <a href="https://github.com/svitaTLCO/tassello/issues">Signalez-la sur GitHub</a>.</p>
   </section>
@@ -205,7 +245,7 @@
     <div class="family">
       <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#2457C5"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#1E7A46"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Ufficio</h3><span class="tag on">Disponible</span></div></div>
       <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B35500"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#7A3DB8"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Media</h3><span class="tag on">Disponible</span></div></div>
-      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H78L100 22V78Q100 100 78 100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B0306A"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Grafica</h3><span class="tag">En projet</span></div></div>
+      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H78L100 22V78Q100 100 78 100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B0306A"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Grafica</h3><span class="tag on">Disponible</span></div></div>
     </div>
   </section>
 </main>

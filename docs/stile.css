@@ -1,6 +1,6 @@
 /* Stile del sito di Tassello: pagina iniziale e pagina Verifica. */
-:root{--ink:#13203b;--ink-2:#3f4b66;--ground:#f5f7fb;--surface:#fff;--line:#d9dfea;--blue:#2457c5;--blue-strong:#1b4398;--green:#1e7a46;--orange:#b35500;--purple:#7a3db8;--magenta:#b0306a;--focus:#13203b}
-@media (prefers-color-scheme:dark){:root{--ink:#eef2fa;--ink-2:#c3cbdc;--ground:#0f1729;--surface:#18233b;--line:#2f3d5c;--blue:#7ea3f2;--blue-strong:#a9c2f7;--green:#5cc88d;--orange:#f2a05a;--purple:#c19af0;--magenta:#ef86b6;--focus:#fff}}
+:root{--ink:#13203b;--ink-2:#3f4b66;--ground:#f5f7fb;--surface:#fff;--line:#d9dfea;--blue:#2457c5;--blue-strong:#1b4398;--green:#1e7a46;--orange:#b35500;--purple:#7a3db8;--magenta:#b0306a;--teal:#0e6f8a;--focus:#13203b}
+@media (prefers-color-scheme:dark){:root{--ink:#eef2fa;--ink-2:#c3cbdc;--ground:#0f1729;--surface:#18233b;--line:#2f3d5c;--blue:#7ea3f2;--blue-strong:#a9c2f7;--green:#5cc88d;--orange:#f2a05a;--purple:#c19af0;--magenta:#ef86b6;--teal:#5cc0d8;--focus:#fff}}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -46,6 +46,8 @@ h3{margin:0 0 8px;font-size:21px}
 .app.impagina ul{columns:2 320px;column-gap:40px}.app.impagina li{break-inside:avoid}
 .app.audio{border-top-color:var(--orange)}
 .app.video{border-top-color:var(--purple)}
+.app.immagini{border-top-color:var(--magenta)}
+.app.disegno{border-top-color:var(--teal)}
 .app-actions{margin-top:24px}
 .app ul{margin:12px 0 0;padding-left:22px;color:var(--ink-2)}
 .app li{margin:6px 0}

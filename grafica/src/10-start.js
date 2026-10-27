@@ -6,9 +6,12 @@ async function start(){applyPrefs();
  planCursor=Math.max(0,PLANS.findIndex(p=>p.id===I.plan));$('docTitle').value=I.title;updateTitle();renderBar();applyLayout();renderPlans();renderPanel();showPhoto();renderLayers();renderProps();refreshToggles();
  const ui=await dbGet('ui').catch(()=>null);if(ui?.mode==='disegno'){suppressAutosave=true;setMode('disegno',{focus:false});suppressAutosave=false}
  status(db?'Pronto · i file restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze: esporta il lavoro prima di chiudere')}
-// Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si potrà installare come app;
-// il manifest e la copia senza rete si aggiungono quando Tassello Grafica viene pubblicato.
-start();
+// Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si può installare come app
+// che funziona anche senza rete e si aggiorna dal sito.
+function enableInstall(){if(location.protocol==='file:'||!('serviceWorker' in navigator))return;
+ document.head.append(Object.assign(document.createElement('link'),{rel:'manifest',href:'manifest-grafica.webmanifest'}));
+ navigator.serviceWorker.register('sw.js').catch(()=>{})}
+start().then(enableInstall);
 })();
 </script>
 </body></html>

@@ -26,6 +26,7 @@
     <ul>
       <li><a href="#ufficio">Tassello Ufficio</a></li>
       <li><a href="#media">Tassello Media</a></li>
+      <li><a href="#grafica">Tassello Grafica</a></li>
       <li><a href="#accessibilita">{{nav.accessibilita}}</a></li>
       <li><a href="#privacy">{{nav.privacy}}</a></li>
       <li><a href="#sicurezza">{{nav.sicurezza}}</a></li>
@@ -43,6 +44,7 @@
       <div class="actions scelta">
         <a class="btn" href="#ufficio"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#2457C5"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#1E7A46"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><span><b>Tassello Ufficio</b><span class="sr-only">: </span><small>{{hero.ufficio}}</small></span></a>
         <a class="btn" href="#media"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B35500"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#7A3DB8"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><span><b>Tassello Media</b><span class="sr-only">: </span><small>{{hero.media}}</small></span></a>
+        <a class="btn" href="#grafica"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H78L100 22V78Q100 100 78 100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B0306A"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><span><b>Tassello Grafica</b><span class="sr-only">: </span><small>{{hero.grafica}}</small></span></a>
       </div>
       <p class="meta">{{hero.dettagli}}</p>
       <p class="official"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-4.5"/></svg><span>{{hero.ufficiale}}</span></p>
@@ -130,6 +132,35 @@
     <p class="meta">{{media.limiti}}</p>
   </section>
 
+  <section id="grafica" aria-labelledby="titolo-grafica">
+    <h2 id="titolo-grafica">{{grafica.titolo}}</h2>
+    <p class="intro">{{grafica.intro}}</p>
+    <div class="apps">
+      <div class="app immagini">
+        <h3>Immagini</h3>
+        <p>{{immagini.per}}</p>
+        <ul>
+{{immagini.elenco}}
+        </ul>
+      </div>
+      <div class="app disegno">
+        <h3>Disegno</h3>
+        <p>{{disegno.per}}</p>
+        <ul>
+{{disegno.elenco}}
+        </ul>
+      </div>
+    </div>
+    <div class="actions app-actions">
+      <a class="btn primary" href="{{BASE}}tassello-grafica.html" download="tassello-grafica.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+        {{grafica.scarica}}
+      </a>
+      <a class="btn secondary" href="{{BASE}}tassello-grafica.html">{{grafica.prova}}</a>
+    </div>
+    <p class="meta">{{grafica.limiti}}</p>
+  </section>
+
   <section id="accessibilita" aria-labelledby="titolo-accessibilita">
     <h2 id="titolo-accessibilita">{{accessibilita.titolo}}</h2>
     <p class="intro">{{accessibilita.intro}}</p>
@@ -167,7 +198,7 @@
     <div class="family">
       <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#2457C5"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#1E7A46"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Ufficio</h3><span class="tag on">{{famiglia.disponibile}}</span></div></div>
       <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B35500"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#7A3DB8"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Media</h3><span class="tag on">{{famiglia.disponibile}}</span></div></div>
-      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H78L100 22V78Q100 100 78 100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B0306A"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Grafica</h3><span class="tag">{{famiglia.in_progetto}}</span></div></div>
+      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H78L100 22V78Q100 100 78 100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B0306A"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Grafica</h3><span class="tag on">{{famiglia.disponibile}}</span></div></div>
     </div>
   </section>
 </main>

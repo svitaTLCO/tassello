@@ -18,7 +18,7 @@ Código fuente
 Tassello: lo necesario para trabajar con archivos
 
 [pagina.descrizione]
-Tassello: herramientas libres y gratuitas para escribir, hacer cuentas, maquetar, grabar y editar audio y vídeo sin instalar suites pesadas. Cada herramienta es un solo archivo HTML, accesible y sin conexión. Descárgalo solo desde el sitio oficial.
+Tassello: herramientas libres y gratuitas para escribir, hacer cuentas, maquetar, mejorar fotos, dibujar, grabar y editar audio y vídeo sin instalar suites pesadas. Cada herramienta es un solo archivo HTML, accesible y sin conexión. Descárgalo solo desde el sitio oficial.
 
 [nav.etichetta]
 Secciones de la página
@@ -42,13 +42,16 @@ Gratis · Software libre · Accesible
 Lo necesario para trabajar con tus archivos.
 
 [hero.testo]
-Tassello es una familia de pequeñas herramientas libres para la productividad básica: escribir, rellenar formularios, hacer cuentas, maquetar, grabar y editar audio y vídeo. Cada una cabe en un solo archivo HTML que se abre en el navegador, sin suites pesadas que instalar y sin cuentas. Una navaja suiza, ordenada y ligera.
+Tassello es una familia de pequeñas herramientas libres para la productividad básica: escribir, rellenar formularios, hacer cuentas, maquetar, mejorar fotos y dibujar, grabar y editar audio y vídeo. Cada una cabe en un solo archivo HTML que se abre en el navegador, sin suites pesadas que instalar y sin cuentas. Una navaja suiza, ordenada y ligera.
 
 [hero.ufficio]
 Testo, Calcolo e Impagina, para documentos, cuentas y maquetación
 
 [hero.media]
 Audio y Video, para grabar y editar
+
+[hero.grafica]
+Immagini y Disegno, para fotos y gráficos
 
 [hero.dettagli]
 Funciona en Chrome y Edge recientes, incluso sin conexión. Por ahora los programas están en italiano.
@@ -69,7 +72,7 @@ Tassello pone en manos de cualquiera, de la forma más sencilla posible, la capa
 Lo necesario
 
 [perche.necessario]
-Las funciones que de verdad hacen falta para documentos, hojas de cálculo, páginas para imprimir o publicar, audio y vídeo, elegidas una a una y bien ordenadas.
+Las funciones que de verdad hacen falta para documentos, hojas de cálculo, páginas para imprimir o publicar, fotos y gráficos, audio y vídeo, elegidas una a una y bien ordenadas.
 
 [perche.leggero_titolo]
 Ligero
@@ -90,7 +93,7 @@ Accesible por principio
 Se usa con un lector de pantalla y solo con el teclado. Sin eso, ningún tassello sale.
 
 [perche.non_e]
-<b>Lo que no es.</b> Tassello no sustituye a las herramientas profesionales: si tu trabajo requiere macros, control de cambios, maquetación editorial profesional, edición de vídeo profesional o instrumentos virtuales y MIDI, sigue usando el programa adecuado. Tampoco es un clon de las aplicaciones famosas: abre y guarda sus formatos para intercambiar archivos con todo el mundo, pero tiene un diseño propio, con funciones elegidas para el trabajo de todos los días y todas accesibles desde el teclado.
+<b>Lo que no es.</b> Tassello no sustituye a las herramientas profesionales: si tu trabajo requiere macros, control de cambios, maquetación editorial profesional, retoque fotográfico profesional, edición de vídeo profesional o instrumentos virtuales y MIDI, sigue usando el programa adecuado. Tampoco es un clon de las aplicaciones famosas: abre y guarda sus formatos para intercambiar archivos con todo el mundo, pero tiene un diseño propio, con funciones elegidas para el trabajo de todos los días y todas accesibles desde el teclado.
 
 [ufficio.titolo]
 Tassello Ufficio: Testo, Calcolo e Impagina
@@ -178,6 +181,41 @@ Probar Tassello Media en el navegador
 [media.limiti]
 Un archivo de unos 470 KB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico: los archivos muy largos necesitan mucha memoria, y los vídeos que el navegador no sabe descodificar se exportan en tiempo real en lugar de fotograma a fotograma. Conserva siempre una copia de los originales.
 
+[grafica.titolo]
+Tassello Grafica: Immagini y Disegno
+
+[grafica.intro]
+Para mejorar fotos y crear los gráficos de todos los días: una foto para las redes sociales, un retrato, un documento que hay que hacer legible, un folleto o una imagen para una publicación. Todo se usa con el teclado y con un lector de pantalla: la foto y su luz se describen con palabras y cada ajuste es un control deslizante con su nombre. La interfaz está en italiano.
+
+[immagini.per]
+El editor de fotos, para fotos que compartir, retratos, paisajes, documentos y productos.
+
+[immagini.elenco]
+          <li>Planes guiados según el objetivo: redes sociales, retrato, paisaje, documento o tique, producto sobre fondo claro</li>
+          <li>Encuadre con rotación, enderezado y formatos listos; luz, color y viñeteado</li>
+          <li>Estilos listos y estilos importados de archivos LUT .cube, con su intensidad</li>
+          <li>Histograma descrito con palabras, con un aviso cuando se queman las luces o se cierran las sombras</li>
+          <li>Abre JPEG, PNG, WebP, AVIF, GIF y BMP; exporta JPEG, PNG o WebP sin los datos de la cámara</li>
+
+[disegno.per]
+El dibujo, para publicaciones, historias, banners, folletos e iconos.
+
+[disegno.elenco]
+          <li>Lienzos en los formatos de hoy o del tamaño que quieras, con fondo liso o transparente</li>
+          <li>Rectángulos, elipses, líneas, textos de varias líneas e imágenes, con los ajustes de Immagini</li>
+          <li>Capas, alineación con el lienzo, duplicar, copiar y pegar</li>
+          <li>Guarda en SVG editable con título y descripción; exporta PNG o JPEG</li>
+          <li>Comprobación de accesibilidad: contraste de los textos y descripción del dibujo</li>
+
+[grafica.scarica]
+Descargar Tassello Grafica
+
+[grafica.prova]
+Probar Tassello Grafica en el navegador
+
+[grafica.limiti]
+Un archivo de unos 210 KB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico: Immagini trabaja con una foto cada vez, no abre archivos HEIC ni RAW y todavía no tiene pinceles, retoques locales, nitidez ni reducción de ruido; Disegno todavía no tiene pluma para curvas, grupos ni selección múltiple. Conserva siempre una copia de los originales.
+
 [accessibilita.titolo]
 Accesibilidad: la condición, no un extra
 
@@ -206,7 +244,7 @@ Modo lectura, alto contraste, tema oscuro, lectura en voz alta y comprobación d
 Escucha
 
 [accessibilita.ascolto]
-En Audio, la forma de onda reproduce el punto en el que estás y se salta de una pausa a otra del habla; en Video, la comprobación revisa subtítulos, contraste y destellos.
+En Audio, la forma de onda reproduce el punto en el que estás y se salta de una pausa a otra del habla; en Video, la comprobación revisa subtítulos, contraste y destellos; en Immagini, <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>I</kbd> describe la foto, su luz y los ajustes cambiados.
 
 [accessibilita.segnalazioni]
 ¿Usas NVDA, JAWS o Narrador? Tus <a href="https://github.com/svitaTLCO/tassello/issues">avisos</a> son muy bienvenidos: un problema de accesibilidad es un fallo que corregir, no una mejora que valorar.
@@ -218,6 +256,7 @@ Privacidad
       <p>Tus documentos se quedan en tu navegador y en tu ordenador. La única función que usa un servicio externo es el dictado por voz de Tassello Ufficio: en Chrome el audio se envía a los servidores de Google, en Edge a los de Microsoft. Si no lo usas, nada sale de tu dispositivo.</p>
       <p>Impagina lee la carpeta que enlazas solo cuando se lo pides y nunca la modifica; no descarga nada, ni siquiera las imágenes indicadas en un feed.</p>
       <p>Tassello Media usa el micrófono solo cuando tú lo pides, y las grabaciones, los archivos y los vídeos exportados se quedan en tu ordenador.</p>
+      <p>Tassello Grafica nunca modifica tus fotos originales, y los archivos exportados no contienen los datos de la cámara ni el lugar donde se hizo la foto.</p>
       <p>Esto vale para la copia oficial. Una copia modificada por otros puede comportarse de otra manera: un motivo más para <a href="#sicurezza">descargar Tassello solo desde aquí</a>.</p>
 
 [sicurezza.titolo]
@@ -248,7 +287,7 @@ En la página <a href="verifica.html">Verificar una copia</a> eliges el archivo 
 Instálalo como aplicación
 
 [sicurezza.app]
-En Chrome o Edge, abre <a href="{{BASE}}tassello-ufficio.html">Tassello Ufficio</a> o <a href="{{BASE}}tassello-media.html">Tassello Media</a> en el navegador y elige <b>Instalar</b> en la barra de direcciones o en el menú. La aplicación siempre viene de este sitio, funciona sin conexión y se actualiza sola.
+En Chrome o Edge, abre <a href="{{BASE}}tassello-ufficio.html">Tassello Ufficio</a>, <a href="{{BASE}}tassello-media.html">Tassello Media</a> o <a href="{{BASE}}tassello-grafica.html">Tassello Grafica</a> en el navegador y elige <b>Instalar</b> en la barra de direcciones o en el menú. La aplicación siempre viene de este sitio, funciona sin conexión y se actualiza sola.
 
 [sicurezza.segnala]
 ¿Has encontrado una copia sospechosa? <a href="https://github.com/svitaTLCO/tassello/issues">Avísanos en GitHub</a>.
@@ -261,9 +300,6 @@ Cada tassello cubre un tipo de trabajo con archivos y es independiente de los de
 
 [famiglia.disponibile]
 Disponible
-
-[famiglia.in_progetto]
-En proyecto
 
 [piede.canali]
 Canales oficiales: svitatlco.github.io/tassello y las <a href="https://github.com/svitaTLCO/tassello/releases">versiones publicadas en GitHub</a>. Las copias recibidas por otras vías, o modificadas por otros, no son oficiales: <a href="verifica.html">verifica una copia</a>.
@@ -280,7 +316,7 @@ Microsoft, Office, Word y Excel son marcas de Microsoft Corporation. Tassello no
 Verifica tu copia · Tassello
 
 [verifica.descrizione]
-Comprueba que tu archivo de Tassello Ufficio o Tassello Media es idéntico a una versión oficial. El archivo se queda en tu ordenador.
+Comprueba que tu archivo de Tassello Ufficio, Media o Grafica es idéntico a una versión oficial. El archivo se queda en tu ordenador.
 
 [verifica.nav]
 Sitio
@@ -292,10 +328,10 @@ Página de inicio
 Verifica tu copia
 
 [verifica.testo]
-Comprueba si tu archivo de Tassello (Ufficio o Media) es idéntico a una versión oficial. El archivo no sale de tu ordenador: la comprobación se hace aquí, en el navegador.
+Comprueba si tu archivo de Tassello (Ufficio, Media o Grafica) es idéntico a una versión oficial. El archivo no sale de tu ordenador: la comprobación se hace aquí, en el navegador.
 
 [verifica.scegli]
-<b>Elige el archivo que quieres comprobar</b>, normalmente <code>tassello-ufficio.html</code> o <code>tassello-media.html</code>
+<b>Elige el archivo que quieres comprobar</b>, normalmente <code>tassello-ufficio.html</code>, <code>tassello-media.html</code> o <code>tassello-grafica.html</code>
 
 [verifica.trascina]
 O arrástralo a este recuadro.
@@ -304,7 +340,7 @@ O arrástralo a este recuadro.
 Cómo funciona
 
 [verifica.come]
-    <p>Para cada versión publicada registramos la <b>huella SHA-256</b> del archivo: una secuencia de 64 caracteres que cambia por completo si cambia una sola letra del archivo. Esta página calcula la huella de tu archivo y la busca en las listas de versiones oficiales de <a href="{{BASE}}versioni.json">Tassello Ufficio</a> y de <a href="{{BASE}}versioni-media.json">Tassello Media</a>.</p>
+    <p>Para cada versión publicada registramos la <b>huella SHA-256</b> del archivo: una secuencia de 64 caracteres que cambia por completo si cambia una sola letra del archivo. Esta página calcula la huella de tu archivo y la busca en las listas de versiones oficiales de <a href="{{BASE}}versioni.json">Tassello Ufficio</a>, de <a href="{{BASE}}versioni-media.json">Tassello Media</a> y de <a href="{{BASE}}versioni-grafica.json">Tassello Grafica</a>.</p>
     <p>Si el archivo no resulta oficial, puede que alguien lo haya modificado o que un programa lo haya vuelto a guardar (por ejemplo con «Guardar como» del navegador). En ambos casos, no lo uses para documentos importantes y <a href="./">descarga la copia oficial</a>.</p>
 
 [verifica.ufficiali_titolo]
@@ -320,10 +356,10 @@ Verificación avanzada
 En Windows también puedes calcular la huella desde el Símbolo del sistema y compararla con la lista:
 
 [verifica.avanzata_2]
-Para Tassello Media, escribe <code>tassello-media.html</code> en lugar de <code>tassello-ufficio.html</code>, aquí y en el comando siguiente.
+Para Tassello Media o Tassello Grafica, escribe <code>tassello-media.html</code> o <code>tassello-grafica.html</code> en lugar de <code>tassello-ufficio.html</code>, aquí y en el comando siguiente.
 
 [verifica.avanzata_3]
-Cada archivo descargado de las <a href="https://github.com/svitaTLCO/tassello/releases">versiones publicadas en GitHub</a> (Tassello Ufficio desde la versión 1.3.0, Tassello Media desde su primera versión publicada) tiene además una firma de procedencia, que demuestra que GitHub lo construyó a partir del código fuente público. Con la herramienta <a href="https://cli.github.com/">GitHub CLI</a>:
+Cada archivo descargado de las <a href="https://github.com/svitaTLCO/tassello/releases">versiones publicadas en GitHub</a> (Tassello Ufficio desde la versión 1.3.0, Tassello Media y Tassello Grafica desde su primera versión publicada) tiene además una firma de procedencia, que demuestra que GitHub lo construyó a partir del código fuente público. Con la herramienta <a href="https://cli.github.com/">GitHub CLI</a>:
 
 # Messaggi dello script della pagina Verifica
 

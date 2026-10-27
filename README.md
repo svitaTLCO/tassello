@@ -3,12 +3,13 @@
 <h1 align="center">Tassello</h1>
 
 <p align="center"><b>Il necessario per lavorare sui file, in un file solo.</b><br>
-Piccoli strumenti liberi e gratuiti per scrivere, compilare, fare i conti, impaginare, registrare e montare audio e video, senza suite o installazioni ingombranti. Ognuno è un solo file HTML che si apre nel browser.</p>
+Piccoli strumenti liberi e gratuiti per scrivere, compilare, fare i conti, impaginare, migliorare le foto, disegnare, registrare e montare audio e video, senza suite o installazioni ingombranti. Ognuno è un solo file HTML che si apre nel browser.</p>
 
 <p align="center">
 <a href="https://svitatlco.github.io/tassello/">Sito</a> ·
 <a href="https://svitatlco.github.io/tassello/tassello-ufficio.html">Prova Ufficio</a> ·
 <a href="https://svitatlco.github.io/tassello/tassello-media.html">Prova Media</a> ·
+<a href="https://svitatlco.github.io/tassello/tassello-grafica.html">Prova Grafica</a> ·
 <a href="https://github.com/svitaTLCO/tassello/releases">Scarica</a> ·
 <a href="#in-english">English</a>
 </p>
@@ -18,11 +19,11 @@ Piccoli strumenti liberi e gratuiti per scrivere, compilare, fare i conti, impag
 
 ## Che cos'è
 
-Tassello è un piccolo coltellino svizzero per i file: ordinato e leggero. Serve per la produttività di base, cioè scrivere una lettera, compilare un modulo, preparare un preventivo, tenere un elenco, fare due conti, comporre un volantino o un post, ripulire una registrazione o montare un video, senza dipendere da una suite da installare o da un account.
+Tassello è un piccolo coltellino svizzero per i file: ordinato e leggero. Serve per la produttività di base, cioè scrivere una lettera, compilare un modulo, preparare un preventivo, tenere un elenco, fare due conti, comporre un volantino o un post, sistemare una foto, ripulire una registrazione o montare un video, senza dipendere da una suite da installare o da un account.
 
 Ogni strumento della famiglia è un *tassello*: un unico file che si apre con un doppio clic e funziona anche senza rete. L'obiettivo è mettere in mano a chiunque, nel modo più semplice possibile, la capacità di lavorare sui propri file.
 
-**Cosa non è.** Tassello non sostituisce gli strumenti da professionisti: se il tuo lavoro richiede macro, revisioni tracciate, un'impaginazione editoriale professionale, un montaggio professionale o strumenti virtuali e MIDI, continua a usare il programma adatto. Non è nemmeno un clone delle app famose: ne apre e salva i formati per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte una per una per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.
+**Cosa non è.** Tassello non sostituisce gli strumenti da professionisti: se il tuo lavoro richiede macro, revisioni tracciate, un'impaginazione editoriale professionale, il fotoritocco professionale, un montaggio professionale o strumenti virtuali e MIDI, continua a usare il programma adatto. Non è nemmeno un clone delle app famose: ne apre e salva i formati per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte una per una per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.
 
 **L'accessibilità è la condizione, non un di più.** Un tassello viene distribuito solo se si usa con uno screen reader e con la sola tastiera. Vedi [Accessibilità](#accessibilità).
 
@@ -41,10 +42,10 @@ Qualche regola semplice:
 - **Condividi il link, non il file.** Per consigliare Tassello a qualcuno, mandagli l'indirizzo del sito.
 - **Aggiorna dallo stesso posto.** Le nuove versioni escono solo sui canali ufficiali: un "aggiornamento" arrivato per altre vie non è ufficiale.
 - **Riconosci una copia falsa.** Tassello non si collega a internet (la dettatura usa il servizio del browser) e non chiede mai password, account o pagamenti. Una copia che lo fa non è quella ufficiale: chiudila e cancellala.
-- **Verifica una copia.** Nella pagina [Verifica una copia](https://svitatlco.github.io/tassello/verifica.html) scegli il file e il sito ti dice se è identico a una versione ufficiale; il file non lascia il tuo computer. Gli elenchi delle versioni con le loro impronte SHA-256 sono in [`docs/versioni.json`](docs/versioni.json) (Tassello Ufficio) e [`docs/versioni-media.json`](docs/versioni-media.json) (Tassello Media).
-- **Controlla l'impronta da solo.** Ogni release indica l'impronta SHA-256 del file, che deve coincidere carattere per carattere. In Windows la calcoli con `certutil -hashfile tassello-ufficio.html SHA256`, in macOS e Linux con `shasum -a 256 tassello-ufficio.html` (per Tassello Media il file è `tassello-media.html`).
-- **Controlla la provenienza.** Ogni file delle release (Tassello Ufficio dalla versione 1.3.0, Tassello Media dalla prima release) ha una firma di provenienza di GitHub, che dimostra che è stato costruito da questo repository a partire dal codice pubblico: `gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello` (o `tassello-media.html`).
-- **Installa l'app.** In Chrome o in Edge apri [Tassello Ufficio](https://svitatlco.github.io/tassello/tassello-ufficio.html) o [Tassello Media](https://svitatlco.github.io/tassello/tassello-media.html) nel browser e scegli *Installa*. L'app arriva sempre dal sito ufficiale, funziona senza rete e si aggiorna da sola; le sue bozze restano separate da quelle del file scaricato.
+- **Verifica una copia.** Nella pagina [Verifica una copia](https://svitatlco.github.io/tassello/verifica.html) scegli il file e il sito ti dice se è identico a una versione ufficiale; il file non lascia il tuo computer. Gli elenchi delle versioni con le loro impronte SHA-256 sono in [`docs/versioni.json`](docs/versioni.json) (Tassello Ufficio), [`docs/versioni-media.json`](docs/versioni-media.json) (Tassello Media) e [`docs/versioni-grafica.json`](docs/versioni-grafica.json) (Tassello Grafica).
+- **Controlla l'impronta da solo.** Ogni release indica l'impronta SHA-256 del file, che deve coincidere carattere per carattere. In Windows la calcoli con `certutil -hashfile tassello-ufficio.html SHA256`, in macOS e Linux con `shasum -a 256 tassello-ufficio.html` (per Tassello Media e Tassello Grafica il file è `tassello-media.html` o `tassello-grafica.html`).
+- **Controlla la provenienza.** Ogni file delle release (Tassello Ufficio dalla versione 1.3.0, Tassello Media e Tassello Grafica dalla prima release) ha una firma di provenienza di GitHub, che dimostra che è stato costruito da questo repository a partire dal codice pubblico: `gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello` (o `tassello-media.html`, `tassello-grafica.html`).
+- **Installa l'app.** In Chrome o in Edge apri [Tassello Ufficio](https://svitatlco.github.io/tassello/tassello-ufficio.html), [Tassello Media](https://svitatlco.github.io/tassello/tassello-media.html) o [Tassello Grafica](https://svitatlco.github.io/tassello/tassello-grafica.html) nel browser e scegli *Installa*. L'app arriva sempre dal sito ufficiale, funziona senza rete e si aggiorna da sola; le sue bozze restano separate da quelle del file scaricato.
 
 Ogni file ufficiale contiene anche una regola di sicurezza del browser (Content Security Policy) che gli impedisce di collegarsi a internet o di caricare script, immagini e suoni esterni. Non protegge da una copia alterata, che può toglierla, ma rende verificabile da chiunque che la copia ufficiale non invia dati.
 
@@ -75,6 +76,19 @@ Il secondo tassello contiene due app per i suoni e i filmati di tutti i giorni:
 2. Aprilo con un doppio clic in Chrome o Edge recenti. Funziona anche senza rete.
 3. Il progetto audio e il progetto video restano salvati nel browser come bozza; con **Esporta** ottieni i file da condividere, con **Salva progetto** un file ZIP da riaprire.
 
+## Tassello Grafica
+
+Il terzo tassello contiene due app per le foto e le grafiche di tutti i giorni:
+
+- **Immagini**, per migliorare le foto: i *piani* guidano secondo quello che vuoi ottenere (foto per i social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro), un passo alla volta e solo con i controlli che servono, con una proposta automatica da accettare o ritoccare; con *Tutti i controlli* si lavora senza piano. Inquadratura con rotazione, riflessione, raddrizzamento e formati pronti (quadrato, 4:5, 9:16, 3:2, 16:9, A4); luce (esposizione, contrasto, alte luci, ombre, bianchi e neri), colore (temperatura, tinta, vividezza e saturazione) e vignettatura; look pronti e look importati da file LUT **.cube**, con la loro intensità; istogramma descritto a parole. Apre **JPEG**, **PNG**, **WebP**, **AVIF**, **GIF** e **BMP**; esporta **JPEG**, **PNG** o **WebP** alla dimensione che scegli, senza i dati della fotocamera; *Usa in Disegno* porta la foto nel foglio.
+- **Disegno**, per comporre: un foglio nei formati di oggi (post, quadrato, storia, 16:9, banner, A4, icona) o della misura che vuoi, con sfondo pieno o trasparente; rettangoli, ellissi, linee, testi su più righe e immagini, con posizione, dimensioni, rotazione, colori, contorno, angoli arrotondati e opacità, e sulle foto le regolazioni e i look di Immagini; livelli, allineamento al foglio, duplica, copia e incolla. Salva in **SVG**, che si apre in ogni browser e programma di grafica e che Disegno riapre modificabile, con titolo e descrizione per chi non vede; esporta **PNG** o **JPEG**.
+
+### Come si usa
+
+1. Scarica `tassello-grafica.html` da un canale ufficiale: il [sito](https://svitatlco.github.io/tassello/) o la [pagina delle release](https://github.com/svitaTLCO/tassello/releases).
+2. Aprilo con un doppio clic in Chrome o Edge recenti. Funziona anche senza rete.
+3. Le foto originali non vengono mai modificate: con **Esporta** ottieni la foto migliorata, in Disegno con **Salva** un file SVG da riaprire.
+
 ## Accessibilità
 
 Per Tassello l'accessibilità non è una funzione in più da attivare: è il requisito senza il quale un tassello non viene distribuito. Ogni comando, finestra e messaggio nasce per essere usato anche con uno screen reader o con la sola tastiera.
@@ -84,6 +98,7 @@ Per Tassello l'accessibilità non è una funzione in più da attivare: è il req
 - i grafici si esplorano con le frecce, si leggono come tabella e si ascoltano come suoni;
 - in Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati e annunciati; nell'editor della regione la forma d'onda è un cursore che fa ascoltare il punto in cui ti trovi: Ctrl+frecce salta da una pausa all'altra del parlato, P e D ascoltano prima e dopo, I e O fissano la selezione anche durante l'ascolto, ogni effetto ha l'anteprima;
 - in Video ogni traccia è un elenco che si scorre con le frecce, ogni proprietà ha un campo con il suo nome e la verifica controlla sottotitoli, contrasto e lampeggiamenti;
+- in Immagini Alt+Maiusc+I descrive la foto (dimensioni, inquadratura, luminosità, quanta parte è bruciata nelle luci o chiusa nelle ombre, regolazioni cambiate), ogni regolazione è un cursore con il suo nome che Canc riporta a zero, l'istogramma è descritto a parole e se una modifica brucia le luci lo senti subito; in Disegno i livelli sono un elenco che si scorre con le frecce, sul foglio le frecce spostano l'oggetto e la verifica controlla il contrasto dei testi e la descrizione del disegno;
 - in Impagina le pagine e le cornici sono elenchi che si scorrono con le frecce, le cornici sono nell'ordine di lettura (Alt+Maiusc+frecce lo cambia), sulla pagina le frecce spostano la cornice e Alt+Maiusc+frecce la porta alla guida successiva dicendo a che cosa si è allineata, Alt+Maiusc+I descrive la pagina e la verifica controlla testi alternativi, contrasto, ordine di lettura e testo che non entra;
 - modalità lettura, contrasto elevato, tema scuro e verifica dell'accessibilità di documenti e pagine.
 
@@ -91,7 +106,7 @@ Le prove fatte finora sono nel browser; le segnalazioni di chi usa NVDA, JAWS o 
 
 ## Privacy
 
-I documenti restano sul tuo dispositivo. L'unica funzione che usa un servizio esterno è la dettatura vocale di Tassello Ufficio: in Chrome l'audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Impagina legge la cartella che colleghi solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed. Tassello Media usa il microfono solo quando lo chiedi tu e le registrazioni restano sul dispositivo.
+I documenti restano sul tuo dispositivo. L'unica funzione che usa un servizio esterno è la dettatura vocale di Tassello Ufficio: in Chrome l'audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Impagina legge la cartella che colleghi solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed. Tassello Media usa il microfono solo quando lo chiedi tu e le registrazioni restano sul dispositivo. Tassello Grafica non modifica mai le foto originali, e il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto.
 
 Questo vale per la copia ufficiale. Una copia modificata da altri può comportarsi in modo diverso: è uno dei motivi per [usare solo i canali ufficiali](#solo-dai-canali-ufficiali).
 
@@ -103,13 +118,15 @@ Ogni tassello copre un tipo di lavoro sui file e resta indipendente dagli altri:
 | --- | --- | --- | --- |
 | Tassello Ufficio | `tassello-ufficio.html` | Testo, Calcolo, Impagina | Disponibile |
 | Tassello Media | `tassello-media.html` | Audio, Video | Disponibile |
-| Tassello Grafica | `tassello-grafica.html` | Immagini, Disegno | In progetto |
+| Tassello Grafica | `tassello-grafica.html` | Immagini, Disegno | Disponibile |
 
 ## Limiti
 
 Tassello Ufficio copre il lavoro di base, non tutto. Macro, revisioni (modifiche tracciate), slicer delle tabelle pivot e grafici combinati non sono supportati; l'apertura di DOCX e XLSX copre un sottoinsieme dei formati. In Impagina le cornici non si ruotano, il testo va a capo senza sillabazione e usa i caratteri installati sul computer; la cartella collegata si autorizza di nuovo a ogni sessione.
 
 Tassello Media copre il lavoro di base. In Audio le tracce sono solo audio (niente strumenti virtuali né MIDI), gli effetti di traccia sono semplici, la latenza della registrazione è stimata e regolabile, e i progetti molto lunghi richiedono molta memoria. In Video l'esportazione procede un fotogramma alla volta e la sua velocità dipende dal computer; se un file del montaggio usa un formato che il browser non sa decodificare, l'esportazione avviene invece in tempo reale, quindi dura quanto il montaggio e la scheda va lasciata in primo piano; MP4 dipende dal browser, altrimenti si ottiene WebM; non ci sono fotogrammi chiave né più tracce video sovrapposte; si importano solo i formati che il browser sa riprodurre.
+
+Tassello Grafica copre il lavoro di base. Immagini lavora su una foto alla volta; le foto HEIC degli iPhone e i file RAW delle fotocamere non si aprono (esportale prima in JPEG); non ci sono ancora pennelli, ritocchi locali, nitidezza e riduzione del rumore; il file esportato è in sRGB, a 8 bit per canale. Disegno non ha ancora la penna per le curve, i gruppi né la scelta di più oggetti insieme; i testi usano i caratteri installati sul computer e gli SVG di altri programmi entrano come immagini.
 
 Conserva sempre una copia degli originali.
 
@@ -122,10 +139,9 @@ docs/                 sito pubblicato con GitHub Pages
   en/, fr/, es/       le stesse pagine in inglese, francese e spagnolo (generate da sito/)
   versioni.json       versioni ufficiali con le impronte SHA-256
   versioni-media.json versioni ufficiali di Tassello Media
-  versioni-grafica.json versioni di Tassello Grafica (in preparazione, non ancora pubblicato)
-  tassello-ufficio.html, tassello-media.html  i programmi, già costruiti
-  tassello-grafica.html  Tassello Grafica in preparazione: Immagini e Disegno
-  manifest.webmanifest, manifest-media.webmanifest, sw.js  app installabili e uso senza rete
+  versioni-grafica.json versioni ufficiali di Tassello Grafica
+  tassello-ufficio.html, tassello-media.html, tassello-grafica.html  i programmi, già costruiti
+  manifest.webmanifest, manifest-media.webmanifest, manifest-grafica.webmanifest, sw.js  app installabili e uso senza rete
   stile.css, icon*    stile del sito e marchio
 ufficio/
   VERSIONE            numero di versione del programma
@@ -158,7 +174,7 @@ Le pagine del sito non si modificano direttamente in `docs/`: si cambiano il mod
 
 L'ordine dei file è indicato in ogni `build.py`. Tutto il codice gira dentro un'unica funzione: non ci sono librerie esterne né richieste di rete, e la regola di sicurezza in `src/01-head.html` le vieta.
 
-Ogni build registra l'impronta del file nel suo elenco (`docs/versioni.json`, `docs/versioni-media.json` o `docs/versioni-grafica.json`) per la versione scritta nel suo `VERSIONE`. Quando pubblichi una modifica del programma sul sito, aumenta prima il numero di versione: così ogni file pubblicato resta riconoscibile come ufficiale. La release si crea inviando l'etichetta corrispondente: `v` per Tassello Ufficio, per esempio `git tag v1.3.0 && git push origin v1.3.0`, e `media-v` per Tassello Media, per esempio `git tag media-v1.0.0 && git push origin media-v1.0.0`, e `grafica-v` per Tassello Grafica.
+Ogni build registra l'impronta del file nel suo elenco (`docs/versioni.json`, `docs/versioni-media.json` o `docs/versioni-grafica.json`) per la versione scritta nel suo `VERSIONE`. Quando pubblichi una modifica del programma sul sito, aumenta prima il numero di versione: così ogni file pubblicato resta riconoscibile come ufficiale. La release si crea inviando l'etichetta corrispondente: `v` per Tassello Ufficio, per esempio `git tag v1.3.0 && git push origin v1.3.0`, `media-v` per Tassello Media, per esempio `git tag media-v1.0.0 && git push origin media-v1.0.0`, e `grafica-v` per Tassello Grafica, per esempio `git tag grafica-v1.0.0 && git push origin grafica-v1.0.0`.
 
 ## Contribuire
 
@@ -176,12 +192,12 @@ Microsoft, Office, Word ed Excel sono marchi di Microsoft Corporation. Tassello 
 
 The website is available in [English](https://svitatlco.github.io/tassello/en/), [French](https://svitatlco.github.io/tassello/fr/) and [Spanish](https://svitatlco.github.io/tassello/es/) as well as Italian.
 
-**Tassello** is a small family of free and open source tools for basic, everyday work on files: writing a letter, filling in a form, keeping a list, doing the numbers, laying out a flyer or a social media post. Each tool is a single HTML file that runs in your browser, with no bulky suite to install, no account and no cloud. Think of it as a small, tidy Swiss Army knife for your files: not a replacement for professional software, and not a clone of famous apps.
+**Tassello** is a small family of free and open source tools for basic, everyday work on files: writing a letter, filling in a form, keeping a list, doing the numbers, laying out a flyer or a social media post, touching up a photo. Each tool is a single HTML file that runs in your browser, with no bulky suite to install, no account and no cloud. Think of it as a small, tidy Swiss Army knife for your files: not a replacement for professional software, and not a clone of famous apps.
 
 **Only use official copies.** Download Tassello only from the [website](https://svitatlco.github.io/tassello/) or from the [releases of this repository](https://github.com/svitaTLCO/tassello/releases). Because it is a single file, anyone could alter a copy and pass it around: do not open copies you receive by email, chat or USB stick, and share the link instead of the file. Tassello never connects to the internet (dictation uses the browser's own service) and never asks for passwords, accounts or payments. The [verification page](https://svitatlco.github.io/tassello/verifica.html) tells you whether a file is identical to an official version, and in Chrome or Edge you can install each tool as an app that always comes from the official website and works offline.
 
-**Tassello Ufficio** contains **Testo**, a word processor, **Calcolo**, a spreadsheet, and **Impagina**, a multi-page layout editor for social posts, flyers, brochures, newsletters, posters, banners and slides, with text threaded across frames and pages, master pages, decorative text effects that stay real text, posters printed as tiles across standard sheets, and local sources only (a linked folder, CSV, XLSX or JSON data merged into pages, saved RSS or Atom feeds, DOCX text). It opens and saves DOCX, XLSX and CSV files, exports PNG and PDF, and works offline in recent Chrome and Edge. **Tassello Media** contains **Audio**, a multitrack recorder and editor with per-track volume, pan, mute, solo, EQ, compression and reverb, regions, tempo grid, metronome, cycle and overdubbing, plus a waveform editor with markers, noise reduction and loudness normalization (WAV, M4A and WebM export), and **Video**, a timeline editor with titles, a music and voice-over track, captions in SRT and WebVTT and an accessibility check for captions, contrast and flashing (MP4 or WebM export). Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is currently in Italian.
+**Tassello Ufficio** contains **Testo**, a word processor, **Calcolo**, a spreadsheet, and **Impagina**, a multi-page layout editor for social posts, flyers, brochures, newsletters, posters, banners and slides, with text threaded across frames and pages, master pages, decorative text effects that stay real text, posters printed as tiles across standard sheets, and local sources only (a linked folder, CSV, XLSX or JSON data merged into pages, saved RSS or Atom feeds, DOCX text). It opens and saves DOCX, XLSX and CSV files, exports PNG and PDF, and works offline in recent Chrome and Edge. **Tassello Media** contains **Audio**, a multitrack recorder and editor with per-track volume, pan, mute, solo, EQ, compression and reverb, regions, tempo grid, metronome, cycle and overdubbing, plus a waveform editor with markers, noise reduction and loudness normalization (WAV, M4A and WebM export), and **Video**, a timeline editor with titles, a music and voice-over track, captions in SRT and WebVTT and an accessibility check for captions, contrast and flashing (MP4 or WebM export). **Tassello Grafica** contains **Immagini**, a photo editor with guided plans by goal (social media, portrait, landscape, document or receipt, product), framing, light, colour, vignetting, looks and .cube LUTs and a histogram described in words (JPEG, PNG and WebP export without camera data), and **Disegno**, a drawing tool for posts, stories, banners, flyers and icons with shapes, text, images and layers, saved as editable SVG with a title and description. Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is currently in Italian.
 
-To rebuild them from source, run `python ufficio/build.py` and `python media/build.py`; the website pages are built with `python sito/build.py` from the templates in `sito/pagine/` and the texts in `sito/testi/`.
+To rebuild them from source, run `python ufficio/build.py`, `python media/build.py` and `python grafica/build.py`; the website pages are built with `python sito/build.py` from the templates in `sito/pagine/` and the texts in `sito/testi/`.
 
 Licensed under the [EUPL 1.2](LICENSE). Microsoft, Office, Word and Excel are trademarks of Microsoft Corporation; Tassello is not affiliated with Microsoft.

@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Verify your copy · Tassello</title>
-<meta name="description" content="Check that your Tassello Ufficio or Tassello Media file is identical to an official version. The file stays on your computer.">
+<meta name="description" content="Check that your Tassello Ufficio, Media or Grafica file is identical to an official version. The file stays on your computer.">
 <meta name="color-scheme" content="light dark">
 <link rel="alternate" hreflang="it" href="https://svitatlco.github.io/tassello/verifica.html">
 <link rel="alternate" hreflang="en" href="https://svitatlco.github.io/tassello/en/verifica.html">
@@ -44,11 +44,11 @@
 <main id="contenuto">
   <div class="page-head">
     <h1>Verify your copy</h1>
-    <p class="lead">Check whether your Tassello file (Ufficio or Media) is identical to an official version. The file never leaves your computer: the check happens here, in your browser.</p>
+    <p class="lead">Check whether your Tassello file (Ufficio, Media or Grafica) is identical to an official version. The file never leaves your computer: the check happens here, in your browser.</p>
   </div>
 
   <div class="drop" id="drop">
-    <label for="file"><b>Choose the file to check</b>, usually <code>tassello-ufficio.html</code> or <code>tassello-media.html</code></label>
+    <label for="file"><b>Choose the file to check</b>, usually <code>tassello-ufficio.html</code>, <code>tassello-media.html</code> or <code>tassello-grafica.html</code></label>
     <input type="file" id="file" accept=".html,.htm,text/html">
     <p>Or drag it into this box.</p>
   </div>
@@ -56,7 +56,7 @@
 
   <section aria-labelledby="come">
     <h2 id="come">How it works</h2>
-    <p>For every published version we record the file’s <b>SHA-256 fingerprint</b>: a sequence of 64 characters that changes completely if even a single letter of the file changes. This page computes your file’s fingerprint and looks it up in the lists of official versions of <a href="../versioni.json">Tassello Ufficio</a> and <a href="../versioni-media.json">Tassello Media</a>.</p>
+    <p>For every published version we record the file’s <b>SHA-256 fingerprint</b>: a sequence of 64 characters that changes completely if even a single letter of the file changes. This page computes your file’s fingerprint and looks it up in the lists of official versions of <a href="../versioni.json">Tassello Ufficio</a>, <a href="../versioni-media.json">Tassello Media</a> and <a href="../versioni-grafica.json">Tassello Grafica</a>.</p>
     <p>If the file is not recognised as official, someone may have modified it, or a program may have saved it again (for example with the browser’s “Save page as”). Either way, do not use it for important documents and <a href="./">download the official copy</a>.</p>
   </section>
 
@@ -69,8 +69,8 @@
     <h2 id="avanzata">Advanced check</h2>
     <p>On Windows you can also compute the fingerprint from the Command Prompt and compare it with the list:</p>
     <pre>certutil -hashfile tassello-ufficio.html SHA256</pre>
-    <p>For Tassello Media, write <code>tassello-media.html</code> instead of <code>tassello-ufficio.html</code>, here and in the command below.</p>
-    <p>Every file downloaded from the <a href="https://github.com/svitaTLCO/tassello/releases">GitHub releases</a> (Tassello Ufficio from version 1.3.0, Tassello Media from its first release) also carries a provenance signature, which proves that GitHub built it from the public source code. With the <a href="https://cli.github.com/">GitHub CLI</a> tool:</p>
+    <p>For Tassello Media or Tassello Grafica, write <code>tassello-media.html</code> or <code>tassello-grafica.html</code> instead of <code>tassello-ufficio.html</code>, here and in the command below.</p>
+    <p>Every file downloaded from the <a href="https://github.com/svitaTLCO/tassello/releases">GitHub releases</a> (Tassello Ufficio from version 1.3.0, Tassello Media and Tassello Grafica from their first release) also carries a provenance signature, which proves that GitHub built it from the public source code. With the <a href="https://cli.github.com/">GitHub CLI</a> tool:</p>
     <pre>gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello</pre>
   </section>
 </main>
@@ -88,7 +88,7 @@ const fmt=(s,values)=>s.replace(/\{(\w+)\}/g,(m,k)=>k in values?values[k]:m);
 const $=id=>document.getElementById(id);
 const ICON={wait:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',ok:'<path d="M5 12l5 5 9-10"/>',old:'<path d="M12 7v6"/><path d="M12 17h.01"/>',bad:'<path d="M6 6l12 12"/><path d="M18 6L6 18"/>'};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LISTS=['../versioni.json','../versioni-media.json'];
+const LISTS=['../versioni.json','../versioni-media.json','../versioni-grafica.json'];
 let listing=null;
 const loadList=()=>listing??=Promise.all(LISTS.map(name=>fetch(name,{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));
 function show(kind,title,lines){
