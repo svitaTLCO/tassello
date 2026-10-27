@@ -37,12 +37,14 @@ function linkFinish({stay=false}={}){if(!photoLink.id)return true;if(cutBusy){to
  if(it){selectItem(it.id,{say:false});const done=settleD(`Modifica di «${it.name}» con Immagini`,{props:true}),say=photoSay(it);setTimeout(()=>announce(done?`Riportate in «${it.name}» le modifiche${say?': '+say:''}.`:`«${it.name}» non è cambiata.`,{join:true}),0)}
  if(stay){$('docTitle').value=I.title;updateTitle();showPhoto();renderPanel();refreshToggles()}return true}
 function linkBack(){if(!photoLink.id){toast('Non stai modificando un’immagine del disegno');return}setMode('disegno')}
-// Comandi di Disegno sull'immagine scelta: apri in Immagini, vai alle maschere.
+// Comandi di Disegno sull'immagine scelta: apri in Immagini, vai alle maschere, togli lo sfondo.
 const panelBtn=sel=>{const b=$('adjBody').querySelector(sel);b?.scrollIntoView({block:'center'});b?.focus();return b};
 function imgEdit(){const it=needPhotoImg();return it&&linkStart(it)}
 function imgMasks(){const it=needPhotoImg();return it&&linkStart(it,()=>{panelBtn('[data-action="maskBrush"]');announce(`Maschere di «${it.name}», con gli strumenti di Immagini. ${I.r.masks.length?maskSummary():'Nessuna maschera.'} Crea una maschera a pennello, con una sfumatura o dalla selezione (scheda Seleziona), poi sposta i suoi cursori. Ctrl+Alt+D torna a Disegno.`)})}
+function imgCutout(){const it=needPhotoImg(),hint=' Correggi con Tieni e Togli, poi Ctrl+Alt+D torna a Disegno.';return it&&linkStart(it,async()=>{
+ if(I.r.cut){panelBtn('[data-action="cutKeep"]');announce(`Sfondo di «${it.name}», con gli strumenti di Immagini. ${cutSummary()}${hint}`);return}if(await cutAuto()){panelBtn('[data-action="cutKeep"]');announce(hint,{join:true})}})}
 function imgPhotoReset(){const it=needPhotoImg();if(!it)return;if(!it.photo){toast(`«${it.name}» non ha maschere, scontorno o ritocchi`);return}editD(`Togli maschere e scontorno di «${it.name}»`,()=>{delete it.photo},{props:true});announce(`«${it.name}»: tolte maschere, scontorno, ritocchi, curve e inquadratura; restano luce, colore e look. Ctrl+Z per riaverli.`)}
 // Proprietà: la ricetta dell'immagine a parole, con i comandi.
 const drawBtn=id=>{const c=C[id];return `<button type="button" class="btn sm" data-action="${id}">${ICON(c.icon)}${esc(c.short||c.label)}</button>`};
-function imgPhotoProps(it){if(!isPhotoImg(it))return '';const say=photoSay(it);return `<h3>Maschere e sfondo</h3><p class="hint" id="pr-photo">${esc(say?say[0].toUpperCase()+say.slice(1)+'.':'Nessuna maschera, sfondo intero.')}</p><div class="insp-actions">${['imgMasks','imgEdit',...(it.photo?['imgPhotoReset']:[])].map(drawBtn).join('')}</div>`}
-const DRAW_PHOTO_ACTIONS={imgEdit,imgMasks,imgPhotoReset};
+function imgPhotoProps(it){if(!isPhotoImg(it))return '';const say=photoSay(it);return `<h3>Maschere e sfondo</h3><p class="hint" id="pr-photo">${esc(say?say[0].toUpperCase()+say.slice(1)+'.':'Nessuna maschera, sfondo intero.')}</p><div class="insp-actions">${['imgMasks','imgCutout','imgEdit',...(it.photo?['imgPhotoReset']:[])].map(drawBtn).join('')}</div>`}
+const DRAW_PHOTO_ACTIONS={imgEdit,imgMasks,imgCutout,imgPhotoReset};
