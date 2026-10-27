@@ -13,7 +13,7 @@ const TOOLS={
  range:{label:'Intervallo di colore',kind:'click',sel:1,keys:'Clic su un colore: si scelgono in tutta la foto i colori vicini. Da tastiera: Invio sceglie il colore sotto il cursore.',at:(p,m)=>commitSel({t:'range',c:colorAt(p,true).map(Math.round),tol:T.range},m,'Intervallo di colore')}};
 // Stato dello strumento: modo, opzioni (dimensione del pennello in unità della foto, durezza, tolleranze), cursore, punti in corso.
 const T={tool:null,mode:'new',selMode:'new',size:.03,hard:.5,tol:32,contig:true,range:40,u:.5,v:.5,pts:[],drag:false,down:false,kbd:false,pmode:'new',...(prefs.photoTool||{})};
-const saveTool=()=>{prefs.photoTool={size:T.size,hard:T.hard,tol:T.tol,contig:T.contig,range:T.range};savePrefs()};
+const saveTool=()=>{prefs.photoTool={size:T.size,hard:T.hard,tol:T.tol,contig:T.contig,range:T.range,heal:T.heal};savePrefs()};
 const antsCv=$('photoAnts'),overCv=$('photoOver');
 let lastMc=null;
 const U5=v=>Math.round(v*1e5)/1e5;
@@ -48,15 +48,16 @@ const TOOL_OPTS={size:{label:'Dimensione',min:0,max:100,get:()=>sizeToV(T.size),
  hard:{label:'Durezza',min:0,max:100,get:()=>Math.round(T.hard*100),set:v=>{T.hard=v/100},fmt:()=>fmtPct(T.hard)},
  tol:{label:'Tolleranza',min:0,max:128,get:()=>T.tol,set:v=>{T.tol=v},fmt:()=>fmtInt(T.tol)},
  range:{label:'Tolleranza',min:5,max:150,get:()=>T.range,set:v=>{T.range=v},fmt:()=>fmtInt(T.range)}};
+const TOOL_CHECKS={contig:'Solo i pixel collegati',heal:'Ripara: adatta il colore ai dintorni'};
 function toolOptsOf(id){const t=TOOLS[id];return t.opts||(t.kind==='paint'?['size','hard']:id==='wand'?['tol','contig']:id==='range'?['range']:[])}
 function renderToolOpts(){const box=$('toolOpts'),t=T.tool&&TOOLS[T.tool];box.hidden=!t;if(!t){box.innerHTML='';return}
  const modes=t.modes||(t.sel?SEL_MODES:null);let h=`<b id="toolName">${esc(t.label)}</b>`;
  if(modes)h+=`<span class="seg" role="group" aria-label="Modo">${modes.map(([v,l])=>`<button type="button" data-tool-mode="${v}" aria-pressed="${v===T.mode}">${esc(l)}</button>`).join('')}</span>`;
- for(const o of toolOptsOf(T.tool)){if(o==='contig'){h+=`<label class="check"><input type="checkbox" data-tool-opt="contig"${T.contig?' checked':''}> Solo i pixel collegati</label>`;continue}const d=TOOL_OPTS[o],v=d.get();
+ for(const o of toolOptsOf(T.tool)){if(TOOL_CHECKS[o]){h+=`<label class="check"><input type="checkbox" data-tool-opt="${o}"${T[o]?' checked':''}> ${TOOL_CHECKS[o]}</label>`;continue}const d=TOOL_OPTS[o],v=d.get();
   h+=`<span class="opt"><label for="to-${o}">${esc(d.label)}</label><input type="range" id="to-${o}" data-tool-opt="${o}" min="${d.min}" max="${d.max}" step="1" value="${v}" aria-valuetext="${esc(d.fmt())}"><output id="to-${o}-o" aria-hidden="true">${esc(d.fmt())}</output></span>`}
  box.innerHTML=h+`<span class="grow"></span><button type="button" class="btn sm" data-tool-end>${ICON('close')}Fine</button>`}
 $('toolOpts').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.toolMode){T.mode=b.dataset.toolMode;if(TOOLS[T.tool]?.sel)T.selMode=T.mode;renderToolOpts();$('toolOpts').querySelector(`[data-tool-mode="${T.mode}"]`)?.focus();announce('Modo: '+b.textContent)}else if(b.hasAttribute('data-tool-end')){endTool();photoCv.focus()}});
-$('toolOpts').addEventListener('input',e=>{const el=e.target,o=el.dataset.toolOpt;if(!o)return;if(o==='contig')T.contig=el.checked;else{const d=TOOL_OPTS[o];d.set(Number(el.value));el.setAttribute('aria-valuetext',d.fmt());$('to-'+o+'-o').textContent=d.fmt()}saveTool();drawOver()});
+$('toolOpts').addEventListener('input',e=>{const el=e.target,o=el.dataset.toolOpt;if(!o)return;if(TOOL_CHECKS[o])T[o]=el.checked;else{const d=TOOL_OPTS[o];d.set(Number(el.value));el.setAttribute('aria-valuetext',d.fmt());$('to-'+o+'-o').textContent=d.fmt()}saveTool();drawOver()});
 // Cambia dimensione o durezza del pennello da tastiera, sulla foto.
 function brushKey(bigger,hard){if(hard)T.hard=clamp(Math.round(T.hard*10+(bigger?1:-1))/10,0,1);else T.size=clamp(T.size*(bigger?1.25:.8),.001,.25);saveTool();renderToolOpts();drawOver();announce(hard?'Durezza '+TOOL_OPTS.hard.fmt():'Dimensione '+TOOL_OPTS.size.fmt())}
 // Fine di un'operazione con i punti raccolti.
@@ -77,7 +78,7 @@ photoCv.addEventListener('keydown',e=>{const t=T.tool&&TOOLS[T.tool];if(!t||!I.b
  if(k===' '){e.preventDefault();if(t.kind==='paint')penToggle();else keyEnter(false);return}
  if(k==='Backspace'&&T.pts.length&&(t.kind==='poly'||t.kind==='lasso')){e.preventDefault();T.pts.pop();drawOver();announce(T.pts.length?`Tolto l’ultimo punto, ne restano ${T.pts.length}`:'Nessun punto');return}
  if(k==='Escape'){e.preventDefault();if(T.pts.length||T.down){T.pts=[];T.down=false;drawOver();announce('Annullato')}else endTool();return}
- if((k==='['||k===']'||k==='{'||k==='}')&&t.kind==='paint'){e.preventDefault();brushKey(k===']'||k==='}',e.shiftKey)}});
+ if((k==='['||k===']'||k==='{'||k==='}')&&toolOptsOf(T.tool).includes('size')){e.preventDefault();brushKey(k===']'||k==='}',e.shiftKey)}});
 // Mouse e penna: Maiusc aggiunge, Alt sottrae, tutti e due intersecano.
 const eventUV=e=>{const r=photoCv.getBoundingClientRect();return [clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1)]};
 const dispDist=(a,b)=>{const r=photoCv.getBoundingClientRect();return Math.hypot((a[0]-b[0])*r.width,(a[1]-b[1])*r.height)};
@@ -119,6 +120,7 @@ function drawOver(cursor=true){if(overCv.hidden)return;const r=photoCv.getBoundi
  if((t.kind==='poly'||t.kind==='lasso')&&pts.length){line(()=>{pts.forEach((p,i)=>c[i?'lineTo':'moveTo'](...P(p)));if(!T.drag)c.lineTo(...P(cur))});for(const p of pts.slice(0,1)){const [x,y]=P(p);c.fillStyle='#fff';c.fillRect(x-3*dpr,y-3*dpr,6*dpr,6*dpr);c.strokeStyle='#000';c.lineWidth=dpr;c.strokeRect(x-3*dpr,y-3*dpr,6*dpr,6*dpr)}}
  if(t.kind==='paint'){const R=brushDisp()*dpr;if(pts.length){c.globalAlpha=.45;c.beginPath();pts.forEach((p,i)=>c[i?'lineTo':'moveTo'](...P(p)));if(pts.length===1)c.lineTo(...P(pts[0]));c.strokeStyle=t.color||'#ff2d6f';c.lineWidth=2*R;c.stroke();c.globalAlpha=1}
   if(cursor){const [x,y]=P(cur);line(()=>c.arc(x,y,Math.max(2,R),0,Math.PI*2),false);if(T.hard<1&&R*T.hard>3)line(()=>c.arc(x,y,R*T.hard,0,Math.PI*2))}}
+ else if(cursor&&toolOptsOf(T.tool).includes('size')&&!(t.kind==='two'&&pts.length)){const [x,y]=P(cur);line(()=>c.arc(x,y,Math.max(2,brushDisp()*dpr),0,Math.PI*2),false)}
  if(cursor&&(T.kbd||t.kind==='two'&&pts.length&&!T.drag)){const [x,y]=P(cur),s=9*dpr;line(()=>{c.moveTo(x-s,y);c.lineTo(x-3*dpr,y);c.moveTo(x+3*dpr,y);c.lineTo(x+s,y);c.moveTo(x,y-s);c.lineTo(x,y-3*dpr);c.moveTo(x,y+3*dpr);c.lineTo(x,y+s)},false)}}
 // Altri segni da disegnare sopra la foto (maniglie delle sfumature, riquadro dello scontorno…): funzioni aggiunte dagli altri moduli.
 const overGuides=[];

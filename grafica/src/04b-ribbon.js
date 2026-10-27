@@ -7,6 +7,7 @@ const RIBBON={
   Dettaglio:[['Curve','curveS curveAdd curveDel curveReset'],['Dettaglio','fxClarity fxDehaze fxSharpen fxNoise'],['Colore','bwToggle']],
   Seleziona:[['Strumenti','toolRect toolEllipse toolLasso toolPoly toolBrush toolWand toolRange'],['Selezione','selAll selNone selInvert selMeasure'],['Bordo','selFeather selGrow selRefine'],['Vista','selShow selDescribe']],
   Maschere:[['Nuova','maskFromSel maskBrush maskLinear maskRadial'],['Maschera','maskPaint maskRedraw maskAddSel maskSubSel maskInvert'],['Gestisci','maskPrev maskNext maskHide maskOverlay maskRename maskDelete maskDescribe']],
+  Ritocca:[['Ritocco','toolSpot toolClone toolRedEye'],['Ritocchi','retouchLast retouchClear']],
   Sfondo:[['Scontorno','cutAuto cutBox cutKeep cutDrop cutRecalc cutRemove'],['Sfondo','cutBgNone cutBgColor cutBgBlur cutColor'],['Vista','cutMatte cutDescribe']],
   Vista:[['Confronto','compare'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  d:{Inizio:[['Disegno','openDraw saveSvg exportDraw'],['Appunti','paste cut copy duplicateItem'],['Inserisci','addText addImage addRect addEllipse'],['Cronologia','undo redo']],

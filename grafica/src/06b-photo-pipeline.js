@@ -21,9 +21,9 @@ function toneTables(a){const g=2**a.exposure,t=a.temp/100,n=a.tint/100;let wr=(1
  return [wr/y,wg/y,wb/y].map(w=>{const tab=new Float32Array(256);for(let i=0;i<256;i++)tab[i]=curve(l2s(Math.min(1,S2L[i]*g*w)));return tab})}
 // Applica la ricetta ai pixel di src (già inquadrati) e scrive in dst, della stessa misura; src e dst possono coincidere.
 // Con il contesto mc (vedi maskCtx) seguono le maschere della foto: regolazioni locali e scontorno. Le regolazioni di r.fx
-// (06j) si aggiungono: rumore e foschia prima, tinte, bianco e nero e curve nel ciclo, chiarezza e nitidezza dopo.
+// (06j) si aggiungono: ritocchi (06k), rumore e foschia prima, tinte, bianco e nero e curve nel ciclo, chiarezza e nitidezza dopo.
 // Il ciclo sui pixel non chiama funzioni: con un'anteprima di qualche milione di pixel ogni chiamata si sente.
-function develop(src,dst,r,lut,mc){if(mc&&r.fx&&(r.fx.noise||r.fx.noiseC||r.fx.dehaze))src=fxPre(src,dst,r.fx,mc);const X=fxTables(r.fx),[TR,TG,TB]=toneTables(r.adj),w=src.width,h=src.height,s=src.data,d=dst.data,sat=1+r.adj.saturation/100,vib=r.adj.vibrance/100,vg=r.adj.vignette/100*.75,amt=clamp(r.lookAmt/100,0,1),L=lut&&amt>0?lut:null,color=sat!==1||vib!==0;
+function develop(src,dst,r,lut,mc){if(mc&&(r.heal?.length||r.fx&&(r.fx.noise||r.fx.noiseC||r.fx.dehaze)))src=fxPre(src,dst,r,mc);const X=fxTables(r.fx),[TR,TG,TB]=toneTables(r.adj),w=src.width,h=src.height,s=src.data,d=dst.data,sat=1+r.adj.saturation/100,vib=r.adj.vibrance/100,vg=r.adj.vignette/100*.75,amt=clamp(r.lookAmt/100,0,1),L=lut&&amt>0?lut:null,color=sat!==1||vib!==0;
  // Solo luce: bastano tre tabelle di byte.
  if(!color&&!vg&&!L&&!X){const BR=Uint8ClampedArray.from(TR,v=>v*255+.5),BG=Uint8ClampedArray.from(TG,v=>v*255+.5),BB=Uint8ClampedArray.from(TB,v=>v*255+.5);for(let i=0;i<s.length;i+=4){d[i]=BR[s[i]];d[i+1]=BG[s[i+1]];d[i+2]=BB[s[i+2]];d[i+3]=s[i+3]}if(mc)developLocal(dst,r,mc);return dst}
  const cx=w/2,cy=h/2,rad=1/Math.hypot(cx,cy),N=L?L.size:2,n=N-1,D=L?.data,SY=N*3,SZ=N*N*3,lx=L?L.min[0]:0,ly=L?L.min[1]:0,lz=L?L.min[2]:0,kx=L?n/(L.max[0]-lx):0,ky=L?n/(L.max[1]-ly):0,kz=L?n/(L.max[2]-lz):0;

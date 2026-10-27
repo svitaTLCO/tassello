@@ -43,10 +43,11 @@ function dehaze(img,a){const w=img.width,h=img.height,d=img.data,f=Math.max(1,Ma
  const {x0,x1,fx}=gridCols(w,gw,f),row=new Float32Array(gw);
  for(let y=0,i=0;y<h;y++){gridRow(tmp,gw,gh,y,f,row);for(let x=0;x<w;x++,i++){const t=clamp(row[x0[x]]+(row[x1[x]]-row[x0[x]])*fx[x],0,1),o=i*4;
   if(a>0){const k=1/Math.max(.25,1-a*(1-t));for(let c=0;c<3;c++){const A=L[c]*255;d[o+c]=A+(d[o+c]-A)*k}}else{const k=-a*.55*(1.2-t);for(let c=0;c<3;c++)d[o+c]+=(L[c]*255-d[o+c])*k}}}}
-// Prima dello sviluppo: per l'anteprima il risultato si ricorda per misura e valori, all'esportazione si lavora sul posto.
+// Prima dello sviluppo: ritocchi (06k), foschia e rumore. Per l'anteprima il risultato si ricorda per misura e valori,
+// all'esportazione si lavora sul posto.
 const fxPreCache=new Map();
-function fxPre(src,dst,fx,mc){const z=mc.k/mc.S,run=img=>{if(fx.dehaze)dehaze(img,fx.dehaze/100);if(fx.noise||fx.noiseC)denoise(img,fx.noise/100,fx.noiseC/100,z);return img};if(src===dst||!mc.key)return run(src);
- const key=mc.key+JSON.stringify([fx.noise,fx.noiseC,fx.dehaze]);let img=fxPreCache.get(key);if(!img){img=run(new ImageData(new Uint8ClampedArray(src.data),src.width,src.height));fxPreCache.set(key,img);while(fxPreCache.size>2)fxPreCache.delete(fxPreCache.keys().next().value)}return img}
+function fxPre(src,dst,r,mc){const fx=r.fx,heal=r.heal||[],z=mc.k/mc.S,pre=!!fx&&!!(fx.noise||fx.noiseC||fx.dehaze),run=img=>{if(heal.length)retouch(img,heal,mc);if(pre&&fx.dehaze)dehaze(img,fx.dehaze/100);if(pre&&(fx.noise||fx.noiseC))denoise(img,fx.noise/100,fx.noiseC/100,z);return img};if(src===dst||!mc.key)return run(src);
+ const key=mc.key+JSON.stringify([heal,pre&&[fx.noise,fx.noiseC,fx.dehaze]]);let img=fxPreCache.get(key);if(!img){img=run(new ImageData(new Uint8ClampedArray(src.data),src.width,src.height));fxPreCache.set(key,img);while(fxPreCache.size>2)fxPreCache.delete(fxPreCache.keys().next().value)}return img}
 // Dopo lo sviluppo: chiarezza (contrasto locale dei toni medi su un raggio dell'1% del lato lungo) e nitidezza (maschera
 // di contrasto sulla luminosità, con il raggio in pixel della foto intera).
 function fxPost(img,fx,mc){const w=img.width,h=img.height,d=img.data,n=w*h,lum=()=>{const Y=new Uint8Array(n);for(let i=0,o=0;i<n;i++,o+=4)Y[i]=(54*d[o]+183*d[o+1]+19*d[o+2])>>8;return Y};

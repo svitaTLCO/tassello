@@ -18,7 +18,7 @@ const ADJ_BY=Object.fromEntries(ADJ.map(([id,label,group,min,max,step,fmt,hint])
 // Formati dell'inquadratura come larghezza diviso altezza; 0 tiene il formato della foto.
 const RATIOS=[['orig','Formato della foto',0],['1:1','Quadrato 1:1',1],['4:5','Verticale 4:5, post',4/5],['9:16','Verticale 9:16, storie',9/16],['2:3','Verticale 2:3',2/3],['3:2','Orizzontale 3:2',3/2],['4:3','Orizzontale 4:3',4/3],['16:9','Panoramico 16:9',16/9],['a4','Foglio A4 verticale',210/297]];
 const ratioName=id=>(RATIOS.find(x=>x[0]===id)||RATIOS[0])[1];
-const newRecipe=()=>({adj:Object.fromEntries(ADJ.map(a=>[a[0],0])),rot:0,flip:false,angle:0,ratio:'orig',cx:.5,cy:.5,look:'none',lookAmt:100,sel:null,masks:[],cut:null,fx:newFx()});
+const newRecipe=()=>({adj:Object.fromEntries(ADJ.map(a=>[a[0],0])),rot:0,flip:false,angle:0,ratio:'orig',cx:.5,cy:.5,look:'none',lookAmt:100,sel:null,masks:[],cut:null,fx:newFx(),heal:[]});
 // La foto aperta: il file originale, l'immagine decodificata e la ricetta, con la cronologia per Annulla e Ripeti.
 // base è la ricetta dell'ultima modifica conclusa: i cursori cambiano r mentre si trascinano e la modifica entra
 // nella cronologia solo quando si rilasciano.

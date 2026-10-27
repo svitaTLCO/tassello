@@ -90,6 +90,12 @@ def('i','Dettaglio',[
  ['fxDehaze','Foschia…','dehaze','',{short:'Foschia'}],
  ['fxSharpen','Nitidezza…','sharpen','',{short:'Nitidezza'}],
  ['fxNoise','Riduzione del rumore…','noise','',{short:'Riduzione del rumore'}]]);
+def('i','Ritocco',[
+ ['toolSpot','Correttivo puntuale','heal','J',{ctx:'photo',short:'Correttivo',quiet:1,toggle:()=>T.tool==='spot'}],
+ ['toolClone','Timbro clone','clone','S',{ctx:'photo',short:'Timbro clone',quiet:1,toggle:()=>T.tool==='clone'}],
+ ['toolRedEye','Occhi rossi','redEye','',{short:'Occhi rossi',quiet:1,toggle:()=>T.tool==='redeye'}],
+ ['retouchLast','Togli l’ultimo ritocco','undo','',{short:'Togli l’ultimo'}],
+ ['retouchClear','Togli tutti i ritocchi','trash','',{short:'Togli tutti'}]]);
 def('d','File',[
  ['openDraw','Apri un disegno SVG o inserisci immagini','open','Ctrl+O',{g:1,short:'Apri'}],
  ['saveSvg','Salva il disegno (SVG, si riapre modificabile)','save','Ctrl+S',{g:1,short:'Salva'}],
