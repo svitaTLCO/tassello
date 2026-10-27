@@ -77,7 +77,7 @@ function exportCSV(){const s=sheet(),{rows,cols}=sheetExtent(s),field=t=>/[;"\n]
  const text='\uFEFF'+lines.join('\r\n');toast('Esportato in CSV solo il foglio attivo');download(text,extName(state.excelTitle,'csv'),CSV_MIME)}
 // Apertura di un file: il tipo si riconosce dall'estensione (DOCX, XLSX, CSV e TSV, HTML e testo, backup JSON).
 const currentTitle=()=>isWord()?state.wordTitle:state.excelTitle;
-async function openText(file,base,ext){const body=await file.text();$('wordEditor').innerHTML=ext==='txt'?`<p>${esc(body).replace(/\n/g,'<br>')}</p>`:sanitizeHTML(body);wordHistReset();wordChanged();setMode('word');state.wordTitle=base;toast('Documento aperto')}
+async function openText(file,base,ext){const body=await file.text();$('wordEditor').innerHTML=ext==='txt'?`<p>${esc(body).replace(/\n/g,'<br>')}</p>`:sanitizeHTML(body);wordHistReset();wordChanged();setMode('word');state.wordTitle=base;toast('Documento aperto'+altNotice())}
 async function openSheetTable(file,base){importCSV(await file.text());state.excelTitle=base}
 const OPENERS=new Map([
  ['xlsx',async(file,base)=>{importXlsx(await zipEntries(await file.arrayBuffer()));state.excelTitle=base}],
