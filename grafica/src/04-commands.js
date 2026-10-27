@@ -54,12 +54,12 @@ def('d','Oggetto',[
  ['sendBack','Porta in fondo','backL','',{short:'In fondo'}],
  ['forward','Porta su di un livello','up','',{short:'Su di un livello'}],
  ['backward','Porta giù di un livello','down','',{short:'Giù di un livello'}],
- ['alignLeft','Allinea al bordo sinistro del foglio','alignL','',{short:'A sinistra'}],
- ['alignCenter','Centra in orizzontale nel foglio','alignC','',{short:'Al centro'}],
- ['alignRight','Allinea al bordo destro del foglio','alignR','',{short:'A destra'}],
- ['alignTop','Allinea al bordo superiore del foglio','alignT','',{short:'In alto'}],
- ['alignMiddle','Centra in verticale nel foglio','alignM','',{short:'Al centro'}],
- ['alignBottom','Allinea al bordo inferiore del foglio','alignB','',{short:'In basso'}],
+ ['alignLeft','Allinea a sinistra, al foglio o tra gli oggetti scelti','alignL','',{short:'A sinistra'}],
+ ['alignCenter','Centra in orizzontale, nel foglio o tra gli oggetti scelti','alignC','',{short:'Al centro'}],
+ ['alignRight','Allinea a destra, al foglio o tra gli oggetti scelti','alignR','',{short:'A destra'}],
+ ['alignTop','Allinea in alto, al foglio o tra gli oggetti scelti','alignT','',{short:'In alto'}],
+ ['alignMiddle','Centra in verticale, nel foglio o tra gli oggetti scelti','alignM','',{short:'Al centro'}],
+ ['alignBottom','Allinea in basso, al foglio o tra gli oggetti scelti','alignB','',{short:'In basso'}],
  ['readDraw','Descrivi il foglio e l’oggetto scelto','speak','Alt+Maiusc+I',{g:1,short:'Descrivi'}]]);
 def('d','Foglio',[
  ['sheetSize','Formato del foglio','sheet','',{short:'Formato'}],
@@ -68,6 +68,15 @@ def('d','Foglio',[
  ['zoomIn','Aumenta lo zoom','zoomIn','',{short:'Zoom avanti'}],
  ['zoomOut','Riduci lo zoom','zoomOut','',{short:'Zoom indietro'}],
  ['zoomFit','Mostra tutto il foglio','zoomFit','',{short:'Tutto'}]]);
+def('d','Scelta',[
+ ['selectAll','Scegli tutti gli oggetti','selectAll','Ctrl+A',{short:'Scegli tutti'}],
+ ['groupItems','Raggruppa gli oggetti scelti','group','Ctrl+G',{short:'Raggruppa'}],
+ ['ungroupItems','Separa il gruppo','ungroup','Ctrl+Maiusc+G',{short:'Separa'}],
+ ['lockItems','Blocca o sblocca gli oggetti scelti','lock','Ctrl+Maiusc+L',{short:'Blocca',quiet:1,toggle:()=>{const s=selItems();return !!s.length&&s.every(x=>x.lock)}}],
+ ['hideItems','Nascondi o mostra gli oggetti scelti','eye','Ctrl+Maiusc+H',{short:'Nascondi',quiet:1,toggle:()=>{const s=selItems();return !!s.length&&s.every(x=>x.hidden)}}],
+ ['distH','Distribuisci in orizzontale a spazi uguali','distH','',{short:'In orizzontale'}],
+ ['distV','Distribuisci in verticale a spazi uguali','distV','',{short:'In verticale'}],
+ ['smartGuides','Guide intelligenti','magnet','',{short:'Guide intelligenti',toggle:()=>smartOn()}]]);
 def('id','Generale',[
  ['filePanel','Apri il menu File','file','',{}],
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],

@@ -226,6 +226,9 @@ html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 #overlay .handle{pointer-events:all;fill:#fff;stroke:var(--accent)}
 #overlay .h-n,#overlay .h-s{cursor:ns-resize}#overlay .h-e,#overlay .h-w{cursor:ew-resize}#overlay .h-nw,#overlay .h-se{cursor:nwse-resize}#overlay .h-ne,#overlay .h-sw{cursor:nesw-resize}#overlay .h-p1,#overlay .h-p2{cursor:move}
 #sheet [data-id]{cursor:move}
+#overlay .sel-all{stroke:var(--accent)}#overlay .g-smart{stroke:#e0218a}#overlay .marq{fill:var(--sel-tint);stroke:var(--accent)}
+.insp-body .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+@media (forced-colors:active){#overlay .sel-all,#overlay .g-smart,#overlay .marq{stroke:Highlight}#overlay .marq{fill:none}}
 .layer-item .ico{width:16px;height:16px;color:var(--text-3)}
 .layer-item[aria-selected=true] .ico{color:inherit}
 @media (forced-colors:active){#overlay .sel-box{stroke:Highlight}#overlay .handle{fill:Canvas;stroke:Highlight}}

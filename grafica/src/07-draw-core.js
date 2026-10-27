@@ -8,17 +8,21 @@ const KIND_NAME={rect:'Rettangolo',ellipse:'Ellisse',line:'Linea',text:'Testo',i
 const KIND_ICON={rect:'rect',ellipse:'ellipse',line:'lineI',text:'textI',image:'image'};
 const newDrawing=()=>({title:'Senza titolo',w:1080,h:1350,bg:'#ffffff',desc:'',items:[]});
 // Il disegno aperto, l'oggetto scelto, la cronologia e le immagini (file originali, indirizzi per l'anteprima).
-const Dw={p:newDrawing(),sel:null,base:'',hist:[],redo:[],imgs:new Map(),zoom:0,clip:null,last:{label:'',t:0}};
+// Dw.sel è l'oggetto principale, quello delle proprietà; Dw.multi gli altri scelti con lui. tool è lo strumento del foglio.
+const Dw={p:newDrawing(),sel:null,multi:{for:null,ids:[]},base:'',hist:[],redo:[],imgs:new Map(),zoom:0,clip:null,last:{label:'',t:0},guides:[],tool:'select'};
 const snapD=()=>JSON.stringify(Dw.p);
 Dw.base=snapD();
 const itemOf=id=>Dw.p.items.find(x=>x.id===id);
 const selItem=()=>itemOf(Dw.sel);
+function selIds(){const it=selItem();if(!it)return [];const ids=new Set([it.id,...(Dw.multi.for===Dw.sel?Dw.multi.ids:[])]);return Dw.p.items.filter(x=>ids.has(x.id)).map(x=>x.id)}
+const selItems=()=>{const ids=new Set(selIds());return Dw.p.items.filter(x=>ids.has(x.id))};
 // Riquadro di un oggetto senza rotazione; le linee vanno da (x, y) a (x+w, y+h) e w o h possono essere negativi.
 const box=it=>it.kind==='line'?{x:Math.min(it.x,it.x+it.w),y:Math.min(it.y,it.y+it.h),w:Math.abs(it.w),h:Math.abs(it.h)}:{x:it.x,y:it.y,w:it.w,h:it.h};
 // Le modifiche ravvicinate con lo stesso nome (le frecce tenute premute) diventano un solo passo da annullare.
 function settleD(label,{props=false,merge=false}={}){const now=snapD();if(now===Dw.base)return false;const join=merge&&Dw.last.label===label&&Date.now()-Dw.last.t<1200&&Dw.hist.length;if(!join){Dw.hist.push({label,p:Dw.base,sel:Dw.sel});if(Dw.hist.length>200)Dw.hist.shift()}Dw.redo=[];Dw.base=now;Dw.last={label,t:Date.now()};drawingChanged({props});return true}
 function editD(label,fn,opts){fn(Dw.p);return settleD(label,opts)}
-function drawUndo(redo){const from=redo?Dw.redo:Dw.hist,to=redo?Dw.hist:Dw.redo,e=from.pop();if(!e){toast(redo?'Niente da ripetere':'Niente da annullare');return}to.push({label:e.label,p:snapD(),sel:Dw.sel});Dw.p=JSON.parse(e.p);Dw.base=e.p;Dw.last={label:'',t:0};if(!itemOf(Dw.sel))Dw.sel=itemOf(e.sel)?e.sel:null;drawingChanged({props:true});announce((redo?'Ripetuto: ':'Annullato: ')+e.label)}
+function drawUndo(redo){const from=redo?Dw.redo:Dw.hist,to=redo?Dw.hist:Dw.redo,e=from.pop();if(!e){toast(redo?'Niente da ripetere':'Niente da annullare');return}to.push({label:e.label,p:snapD(),sel:Dw.sel});Dw.p=JSON.parse(e.p);Dw.base=e.p;Dw.last={label:'',t:0};
+ const keep=[Dw.sel,...(Dw.multi.for===Dw.sel?Dw.multi.ids:[])].filter(itemOf);if(!itemOf(Dw.sel))Dw.sel=keep[0]||(itemOf(e.sel)?e.sel:null);Dw.multi={for:Dw.sel,ids:keep};toolReset();drawingChanged({props:true});announce((redo?'Ripetuto: ':'Annullato: ')+e.label)}
 // Dopo ogni modifica: foglio, livelli, proprietà, pulsanti attivi e bozza.
 function drawingChanged({props=false}={}){renderSheet();renderLayers();if(props)renderProps();else syncProps();refreshToggles();schedulePersist('disegno')}
 // Testo: la misura del riquadro segue le righe scritte, il carattere e la dimensione.
