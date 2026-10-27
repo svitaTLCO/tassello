@@ -178,7 +178,9 @@ def('d','Immagine',[
  ['imgEdit','Modifica l’immagine scelta con gli strumenti di Immagini','image','',{short:'Modifica in Immagini'}],
  ['imgMasks','Maschere e regolazioni locali dell’immagine','mask','',{short:'Maschere'}],
  ['imgCutout','Togli lo sfondo dell’immagine','cutout','Ctrl+Maiusc+B',{g:1,short:'Togli lo sfondo'}],
- ['imgPhotoReset','Togli maschere, scontorno e ritocchi dall’immagine','history','',{short:'Togli maschere e scontorno'}]]);
+ ['imgPhotoReset','Togli maschere, scontorno e ritocchi dall’immagine','history','',{short:'Togli maschere e scontorno'}],
+ ['imgClip','Ritaglia l’immagine nella forma scelta con lei','clipIn','',{short:'Ritaglia nella forma'}],
+ ['imgUnclip','Togli il ritaglio nella forma','clipOut','',{short:'Togli il ritaglio'}]]);
 def('id','Generale',[
  ['filePanel','Apri il menu File','file','',{}],
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],

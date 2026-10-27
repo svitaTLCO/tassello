@@ -3,6 +3,8 @@
 // modificabile: nell'oggetto restano adj, look e lookAmt come prima, e in photo le altre parti della ricetta diverse da
 // quelle di partenza. La foto aperta in Immagini si mette da parte e torna quando si rientra in Disegno. Le maschere
 // calcolate (lo scontorno) stanno in Dw.ras e si salvano con la bozza e dentro l'SVG.
+$$('svg defs')[0].insertAdjacentHTML('beforeend',`<symbol id="i-clipIn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M4.5 16.5l4.5-4.5 3 3 3-4 4.5 5.5"/></symbol>
+<symbol id="i-clipOut" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="6" stroke-dasharray="2.5 2.5"/><path d="M3 17l5-5 4 4 3-3 6 6"/></symbol>`);
 const PHOTO_KEYS=[...GEO_KEYS,'masks','cut','fx','heal'];
 function photoFields(r){const z=newRecipe(),o={};for(const k of PHOTO_KEYS)if(JSON.stringify(r[k])!==JSON.stringify(z[k]))o[k]=structuredClone(r[k]);return o}
 const photoOf=it=>it?.kind==='image'?Dw.imgs.get(it.img):null;
@@ -44,7 +46,28 @@ function imgMasks(){const it=needPhotoImg();return it&&linkStart(it,()=>{panelBt
 function imgCutout(){const it=needPhotoImg(),hint=' Correggi con Tieni e Togli, poi Ctrl+Alt+D torna a Disegno.';return it&&linkStart(it,async()=>{
  if(I.r.cut){panelBtn('[data-action="cutKeep"]');announce(`Sfondo di «${it.name}», con gli strumenti di Immagini. ${cutSummary()}${hint}`);return}if(await cutAuto()){panelBtn('[data-action="cutKeep"]');announce(hint,{join:true})}})}
 function imgPhotoReset(){const it=needPhotoImg();if(!it)return;if(!it.photo){toast(`«${it.name}» non ha maschere, scontorno o ritocchi`);return}editD(`Togli maschere e scontorno di «${it.name}»`,()=>{delete it.photo},{props:true});announce(`«${it.name}»: tolte maschere, scontorno, ritocchi, curve e inquadratura; restano luce, colore e look. Ctrl+Z per riaverli.`)}
-// Proprietà: la ricetta dell'immagine a parole, con i comandi.
+// Ritaglio nella forma: l'immagine si vede solo dentro una forma o un tracciato. La forma resta un oggetto del foglio,
+// subito sopra l'immagine e nel suo gruppo, ma non si disegna: diventa il clipPath dell'immagine. Nell'immagine clip è
+// l'id della forma, nella forma clipOf quello dell'immagine; un legame rimasto a metà (forma eliminata) non conta.
+const CLIP_KINDS=['rect','ellipse','poly','arrow','bubble','path'];
+const clipShape=it=>{const s=it?.kind==='image'&&it.clip?itemOf(it.clip):null;return s&&s.clipOf===it.id?s:null};
+const isClipShape=s=>!!s?.clipOf&&itemOf(s.clipOf)?.clip===s.id;
+function clipGeom(s){const b=box(s),tr=s.rot?` transform="rotate(${n2(s.rot)} ${n2(b.x+b.w/2)} ${n2(b.y+b.h/2)})"`:'',cr=s.rule==='evenodd'?' clip-rule="evenodd"':'';
+ if(s.kind==='rect')return `<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}"${s.radius?` rx="${s.radius}"`:''}${tr}/>`;
+ if(s.kind==='ellipse')return `<ellipse cx="${n2(b.x+b.w/2)}" cy="${n2(b.y+b.h/2)}" rx="${n2(s.w/2)}" ry="${n2(s.h/2)}"${tr}/>`;
+ return `<path d="${s.kind==='path'?pathD(s):shapeD(s)}"${cr}${tr}/>`}
+function clipSay(it){const s=clipShape(it);return s?`, ritagliata nella forma «${s.name}»`:isClipShape(it)?`, forma che ritaglia «${itemOf(it.clipOf).name}»`:''}
+function imgClip(){const many=selItems(),img=many.filter(x=>x.kind==='image'),shp=many.filter(x=>CLIP_KINDS.includes(x.kind));
+ if(many.length!==2||img.length!==1||shp.length!==1){toast('Scegli insieme un’immagine e una forma o un tracciato: Maiusc+clic sul foglio o Maiusc+frecce nei livelli');return}const [it]=img,[s]=shp;
+ if(clipShape(it)){toast(`«${it.name}» è già ritagliata: togli prima il ritaglio`);return}if(isClipShape(s)){toast(`«${s.name}» ritaglia già un’altra immagine`);return}if(it.lock||s.lock){movable([it,s],'ritagliarlo');return}
+ editD(`Ritaglia «${it.name}» nella forma`,p=>{const g=it.g||uid();p.items=p.items.filter(x=>x!==s);p.items.splice(p.items.indexOf(it)+1,0,s);Object.assign(it,{clip:s.id,g});Object.assign(s,{clipOf:it.id,g})},{props:true});setSel([it.id,s.id],it.id,{say:false});
+ announce(`«${it.name}» ritagliata nella forma «${s.name}»: si vede solo dentro la forma. Sono in un gruppo e si spostano insieme; per spostare solo l’immagine dentro la forma sceglila da sola, con Alt+clic o nei livelli.`)}
+function imgUnclip(){const pairs=[];for(const x of selItems()){const img=x.kind==='image'?x:itemOf(x.clipOf),s=clipShape(img);if(s&&!pairs.some(q=>q[0]===img))pairs.push([img,s])}
+ if(!pairs.length){toast('Scegli un’immagine ritagliata o la forma che la ritaglia');return}
+ editD(pairs.length>1?'Togli i ritagli':`Togli il ritaglio di «${pairs[0][0].name}»`,p=>{for(const [img,s] of pairs){delete img.clip;delete s.clipOf;if(img.g&&s.g===img.g&&p.items.filter(x=>x.g===img.g).length===2){delete img.g;delete s.g}}},{props:true});
+ announce(pairs.length>1?`Tolti ${pairs.length} ritagli: le forme si vedono di nuovo.`:`Tolto il ritaglio: «${pairs[0][0].name}» si vede intera e «${pairs[0][1].name}» di nuovo come forma.`)}
+// Proprietà: la ricetta dell'immagine a parole e il ritaglio, con i comandi.
 const drawBtn=id=>{const c=C[id];return `<button type="button" class="btn sm" data-action="${id}">${ICON(c.icon)}${esc(c.short||c.label)}</button>`};
 function imgPhotoProps(it){if(!isPhotoImg(it))return '';const say=photoSay(it);return `<h3>Maschere e sfondo</h3><p class="hint" id="pr-photo">${esc(say?say[0].toUpperCase()+say.slice(1)+'.':'Nessuna maschera, sfondo intero.')}</p><div class="insp-actions">${['imgMasks','imgCutout','imgEdit',...(it.photo?['imgPhotoReset']:[])].map(drawBtn).join('')}</div>`}
-const DRAW_PHOTO_ACTIONS={imgEdit,imgMasks,imgCutout,imgPhotoReset};
+function clipProps(it){const s=clipShape(it),img=isClipShape(it)&&itemOf(it.clipOf);if(!s&&!img)return '';return `<h3>Ritaglio</h3><p class="hint">${s?`Si vede solo dentro la forma «${esc(s.name)}».`:`Questa forma non si disegna: ritaglia l’immagine «${esc(img.name)}».`}</p><div class="insp-actions">${drawBtn('imgUnclip')}</div>`}
+const DRAW_PHOTO_ACTIONS={imgEdit,imgMasks,imgCutout,imgPhotoReset,imgClip,imgUnclip};
