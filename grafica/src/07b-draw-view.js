@@ -6,7 +6,7 @@ function sheetScale(){if(Dw.zoom)return Dw.zoom;const pad=32;return Math.max(.02
 // Un oggetto in SVG. hit: l'oggetto si può scegliere col puntatore anche dove è trasparente; img: id per riaprire il file.
 function itemSvg(it,o){const s=itemShape(it,o);return s&&styled(it,s)}
 function itemShape(it,{href='',hit=false,img=false}={}){if(it.hidden)return '';const b=box(it),cx=n2(b.x+b.w/2),cy=n2(b.y+b.h/2),tr=it.rot?` transform="rotate(${n2(it.rot)} ${cx} ${cy})"`:'',op=it.opacity<100?` opacity="${it.opacity/100}"`:'',id=hit?` data-id="${it.id}"`:'',pe=hit?' pointer-events="visible"':'';
- const paint=`fill="${fillOf(it)}"${strokeAttrs(it,['line','path','poly','arrow','bubble'].includes(it.kind))}`;
+ const paint=`fill="${fillOf(it)}"${it.rule==='evenodd'?' fill-rule="evenodd"':''}${strokeAttrs(it,['line','path','poly','arrow','bubble'].includes(it.kind))}`;
  switch(it.kind){
   case 'rect':return `<rect${id} x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}"${it.radius?` rx="${it.radius}"`:''} ${paint}${tr}${op}${pe}/>`;
   case 'ellipse':return `<ellipse${id} cx="${cx}" cy="${cy}" rx="${n2(it.w/2)}" ry="${n2(it.h/2)}" ${paint}${tr}${op}${pe}/>`;

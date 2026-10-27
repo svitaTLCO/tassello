@@ -91,6 +91,11 @@ def('d','Tracciato',[
  ['pathClose','Chiudi o apri il tracciato','pathClose','',{short:'Chiudi o apri'}],
  ['readPath','Descrivi il tracciato','speak','Alt+Maiusc+P',{g:1,short:'Descrivi'}],
  ['toPath','Converti in tracciato','toPath','',{short:'Converti in tracciato'}]]);
+def('d','Combina',[
+ ['boolUnion','Unisci le forme scelte','union','',{short:'Unisci'}],
+ ['boolSubtract','Sottrai le forme davanti da quella in fondo','subtract','',{short:'Sottrai'}],
+ ['boolIntersect','Interseca: tieni l’area in comune','intersect','',{short:'Interseca'}],
+ ['boolExclude','Escludi l’area in comune','exclude','',{short:'Escludi'}]]);
 def('d','Inserisci',[
  ['addPolygon','Inserisci un poligono','polygon','',{short:'Poligono'}],
  ['addStar','Inserisci una stella','star','',{short:'Stella'}],
