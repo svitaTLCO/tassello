@@ -260,21 +260,21 @@ function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_
  const fillHolder=(h,list,pi)=>{for(const e of list){if(Array.isArray(e)){put(h,e,1,pi);continue}const [cnt,dx,dy]=e.rep;for(let j=0;j<cnt;j++)for(const x of e.g)put(h,[x[0],x[1]+j*dx,x[2]+j*dy,x[3]+j*dx,x[4]+j*dy,...x.slice(5)],j+1,pi)}};
  const pages=[];for(const pg of t.p){if(Array.isArray(pg))pages.push({list:pg,pi:pages.length+1});else for(let j=0;j<(pg.r||1);j++)pages.push({list:pg.p,pi:j+1,data:!!pg.d,free:!!pg.x})}
  p.pages=pages.map(x=>({...pgBlankPage(p),data:x.data,...(x.free?{master:''}:{})}));if(t.m)fillHolder(p.masters[0],t.m,1);pages.forEach((x,i)=>fillHolder(p.pages[i],x.list,x.pi));return p}
-// Le voci della galleria per un formato: il documento vuoto, il modello di pgStarter, i modelli e quelli dell'utente.
+// Le voci della galleria per un formato: il documento vuoto, i modelli dell'utente, quello di pgStarter e gli altri.
 function pgTplEntries(fmt,mine){const own=mine.filter(m=>m.preset===fmt).map(m=>({id:'m:'+m.id,n:m.n,d:m.d||'Un tuo modello.',u:'tuoi',mine:m,make:()=>pgClean(m.p)}));
  if(fmt==='festone')return [{id:'festone',n:'Festone di lettere',d:PG_PRESET_DESC.festone+'. Scegli le lettere, i fogli e i colori nella finestra che segue.',u:'auguri',make:null},...own];
  if(!PG_PRESETS.some(x=>x[0]===fmt))return own;const s=PG_STARTER[fmt];
- return [{id:'vuoto',n:'Documento vuoto',d:'Solo margini, colonne, mastri e stili: le cornici le aggiungi tu.',u:'',make:()=>newPub(fmt)},...(s?[{id:'base',n:s[0],d:s[1],u:s[2],make:()=>Object.assign(pgStarter(newPub(fmt)),{title:s[0]})}]:[]),
-  ...PG_TEMPLATES.filter(t=>t.f.split(' ').includes(fmt)).map(t=>({id:t.id,n:t.n,d:t.d,u:t.u,make:()=>pgTplBuild(t,fmt)})),...own]}
+ return [{id:'vuoto',n:'Documento vuoto',d:'Solo margini, colonne, mastri e stili: le cornici le aggiungi tu.',u:'',make:()=>newPub(fmt)},...own,...(s?[{id:'base',n:s[0],d:s[1],u:s[2],make:()=>Object.assign(pgStarter(newPub(fmt)),{title:s[0]})}]:[]),
+  ...PG_TEMPLATES.filter(t=>t.f.split(' ').includes(fmt)).map(t=>({id:t.id,n:t.n,d:t.d,u:t.u,make:()=>pgTplBuild(t,fmt)}))]}
 // Anteprime: le pagine del modello disegnate come la pagina vera, con il documento del modello al posto di quello aperto.
 // Le cornici per le foto ancora vuote si vedono come un riquadro grigio con un paesaggio stilizzato.
 const pgTplCache=new Map();
 function pgTplPhoto(it){const s=Math.min(Math.abs(it.w),Math.abs(it.h))*.32,cx=it.x+it.w/2,cy=it.y+it.h/2,X=u=>pr2(cx+u*s),Y=v=>pr2(cy+v*s);return `<path d="M${X(-.5)} ${Y(.32)}L${X(-.16)} ${Y(-.1)}L${X(.06)} ${Y(.14)}L${X(.2)} ${Y(0)}L${X(.5)} ${Y(.32)}Z" fill="#a9b1bb"/><circle cx="${X(.26)}" cy="${Y(-.24)}" r="${pr2(s*.1)}" fill="#a9b1bb"/>`}
 function pgTplPreview(e,fmt){const key=fmt+'|'+e.id;let v=pgTplCache.get(key);if(v)return v;const p=e.make(),old=Pg.p,empty=pgAllItems(p).filter(x=>x.kind==='image'&&!x.img&&!x.hidden);for(const it of empty)if(it.fill==='none')it.fill='#dde1e6';Pg.p=p;
- try{const all=pgInstances(p),insts=Object.assign(all.slice(0,6),{total:all.length}),lay=pgLayout(p,insts);v={n:p.pages.length,svg:insts.map((I,ii)=>`<svg viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" aria-hidden="true" focusable="false">${pgPageSvg(p,I,ii,lay)}${[...(pgMasterOf(I.pg)?.items||[]),...I.pg.items].filter(x=>empty.includes(x)).map(pgTplPhoto).join('')}</svg>`)}}finally{Pg.p=old}
+ try{const all=pgInstances(p),insts=Object.assign(all.slice(0,6),{total:all.length}),lay=pgLayout(p,insts);v={n:p.pages.length,svg:insts.map((I,ii)=>`<svg viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" width="${Math.round(p.w)}" height="${Math.round(p.h)}" aria-hidden="true" focusable="false">${pgPageSvg(p,I,ii,lay)}${[...(pgMasterOf(I.pg)?.items||[]),...I.pg.items].filter(x=>empty.includes(x)).map(pgTplPhoto).join('')}</svg>`)}}finally{Pg.p=old}
  pgTplCache.set(key,v);return v}
 // La galleria: formato e uso filtrano l'elenco; le frecce scelgono il modello, Invio lo crea.
-async function pgGallery({fmt,use='',pick=''}={}){const mine=await pgMineList();await pgMineImgs(mine);
+async function pgGallery({fmt,use='',pick='',say=''}={}){const mine=await pgMineList();await pgMineImgs(mine);
  const fmts=[...PG_PRESETS.map(([v,l])=>[v,l]),['festone','Festone di lettere'],...(mine.some(m=>m.preset!=='festone'&&!PG_PRESETS.some(x=>x[0]===m.preset))?[['','Formato personalizzato, i tuoi modelli']]:[])];
  fmt??=PG_PRESETS.some(x=>x[0]===Pg.p?.preset)?Pg.p.preset:'post';if(!fmts.some(x=>x[0]===fmt))fmt='post';
  let list=[],cur=0,act=null;const opt=(v,l,s)=>`<option value="${esc(v)}"${v===s?' selected':''}>${esc(l)}</option>`;
@@ -295,17 +295,28 @@ async function pgGallery({fmt,use='',pick=''}={}){const mine=await pgMineList();
    else if(k.length===1&&/\S/.test(k)&&!e.ctrlKey&&!e.altKey){const q=k.toLowerCase(),j=[...list.keys()].map(x=>(cur+1+x)%list.length).find(x=>list[x].n.toLowerCase().startsWith(q));if(j!=null)go(j)}else return;e.preventDefault()};
   L.onclick=e=>{const o=e.target.closest('[role=option][id^=tpo-]');if(o&&o.id!=='tpo-none'){cur=+o.id.slice(4);show()}};L.ondblclick=e=>{if(e.target.closest('[role=option]')&&list[cur])finish({})};
   pane.querySelector('#tplMine').onclick=e=>{const b=e.target.closest('[data-tpl]');if(b)mineAct(b.dataset.tpl)};
-  setTimeout(()=>announce(countSay()+'. Frecce per scegliere, Invio per creare.'),400)}});
+  setTimeout(()=>announce(say+countSay()+'. Frecce per scegliere, Invio per creare.'),400)}});
  $('modal').setAttribute('aria-describedby','dlgBody');const state={fmt:$('tplFmt')?.value??fmt,use:$('tplUse')?.value??use};
- if(act){const nb=list[act.i+1]||list[act.i-1];if(act.k==='rename'){if(await pgMineRename(act.m))pgTplCache.clear();pgGallery({...state,pick:'m:'+act.m.id})}else{if(await confirmAction(`Eliminare il modello «${act.m.n}»? Non si può annullare.`)){await pgMineDel(act.m.id);announce(`Modello «${act.m.n}» eliminato`);pgGallery({...state,pick:nb?.id||''})}else pgGallery({...state,pick:'m:'+act.m.id})}return}
- const e=v&&list[cur];if(!e)return;if(e.id==='festone'){pgFestoneDialog();return}const p=e.make();if(e.id!=='vuoto')p.title=e.n.slice(0,120);pgTplOpen(p,e.id==='vuoto'?'':e.n)}
+ if(act){const nb=list[act.i+1]||list[act.i-1];if(act.k==='rename'){const ok=await pgMineRename(act.m);pgGallery({...state,pick:'m:'+act.m.id,say:ok?`Modello rinominato: «${act.m.n}». `:''})}
+  else if(await confirmAction(`Eliminare il modello «${act.m.n}»? Non si può annullare.`)){await pgMineDel(act.m.id);pgGallery({...state,pick:nb?.id||'',say:`Modello «${act.m.n}» eliminato. `})}else pgGallery({...state,pick:'m:'+act.m.id});return}
+ const e=v&&list[cur];if(!e)return;if(e.id==='festone'){pgFestoneDialog();return}const p=e.make();if(e.id!=='vuoto')p.title=e.n.slice(0,120);pgTplOpen(p,e.id==='vuoto'?'':e.n,!!e.mine)}
 // Il documento nuovo prende il posto di quello aperto (Ctrl+Z lo riporta) e si annuncia che cosa contiene.
-function pgTplOpen(p,from){const old=Pg.p,ph=pgAllItems(p).filter(x=>x.kind==='image'&&!x.img&&!x.field).length;pgUseNew(p,from?'Nuovo da modello':'Nuovo documento');
- announce(`Nuovo documento ${from?`dal modello «${from}»`:`«${p.title}»`}: ${p.pages.length===1?'una pagina':p.pages.length+' pagine'}${p.tiles.on?`, da stampare su ${pgTileSay(pgTileGrid(p))}`:''}. ${from?`Sostituisci i testi di esempio${ph?` e scegli ${ph===1?'la foto':'le '+ph+' foto'}: Invio sulla cornice vuota apre la scelta del file`:''}. `:''}${old?'Ctrl+Z torna al documento di prima. ':''}F6 passa tra pagine, cornici, pagina e proprietà.`)}
+function pgTplOpen(p,from,own=false){const old=Pg.p,ph=pgAllItems(p).filter(x=>x.kind==='image'&&!x.img&&!x.field).length,todo=[!own&&'sostituisci i testi di esempio',ph&&`scegli ${ph===1?'la foto':'le '+ph+' foto'}: Invio sulla cornice vuota apre la scelta del file`].filter(Boolean).join(' e ');pgUseNew(p,from?'Nuovo da modello':'Nuovo documento');
+ announce(`Nuovo documento ${from?`dal modello «${from}»`:`«${p.title}»`}: ${p.pages.length===1?'una pagina':p.pages.length+' pagine'}${p.tiles.on?`, da stampare su ${pgTileSay(pgTileGrid(p))}`:''}. ${from&&todo?todo[0].toUpperCase()+todo.slice(1)+'. ':''}${old?'Ctrl+Z torna al documento di prima. ':''}F6 passa tra pagine, cornici, pagina e proprietà.`)}
 // I modelli dell'utente stanno nel browser come le bozze: in IndexedDB con le immagini, altrimenti in localStorage senza.
 const PG_MINE_KEY='tassello-ufficio.impagina.modelli';
 async function pgMineList(){try{if(db)return ((await storeCall(db,'readonly',st=>st.getAll(IDBKeyRange.bound('pmod:','pmod:￿'))))||[]).sort((a,b)=>b.ts-a.ts);return JSON.parse(localStorage.getItem(PG_MINE_KEY)||'[]')}catch(e){return []}}
 async function pgMinePut(m){if(db){await storeCall(db,'readwrite',st=>st.put(m,'pmod:'+m.id));return}const l=(await pgMineList()).filter(x=>x.id!==m.id);l.unshift({...m,imgs:{}});localStorage.setItem(PG_MINE_KEY,JSON.stringify(l))}
 async function pgMineDel(id){if(db){await storeCall(db,'readwrite',st=>st.delete('pmod:'+id));return}localStorage.setItem(PG_MINE_KEY,JSON.stringify((await pgMineList()).filter(x=>x.id!==id)))}
 async function pgMineImgs(list){for(const m of list)for(const [id,x] of Object.entries(m.imgs||{}))if(!Pg.imgs.has(id)&&x?.blob)try{await pgRegister(id,x.blob,x.name)}catch(e){}}
-async function pgMineRename(m){return false}
+async function pgMineRename(m){const v=await modal('Rinomina il modello','<p>Il nome e la descrizione sono quelli che la galleria mostra e legge.</p>',[{id:'n',label:'Nome del modello',value:m.n},{id:'d',label:'Descrizione',type:'textarea',rows:2,value:m.d}],'Rinomina');if(!v)return false;
+ Object.assign(m,{n:v.n.trim().slice(0,80)||m.n,d:v.d.trim().slice(0,300)});try{await pgMinePut(m)}catch(e){toast('Modello non rinominato: '+e.message);return false}return true}
+// Salva come modello: il documento di adesso, con le sue immagini, diventa un modello dell'utente nel suo formato.
+async function pgSaveTpl(){const p=Pg.p;pgStorySync();const fmt=PG_PRESETS.find(x=>x[0]===p.preset)?.[1]||(p.preset==='festone'?'Festone di lettere':'Formato personalizzato'),mine=await pgMineList(),n=pgAllItems(p).length;
+ const v=await modal('Salva come modello',`<p>Il documento di adesso diventa un tuo modello: lo trovi in Nuovo da modello, nel formato ${esc(fmt)}, e nell’uso «I tuoi modelli». Resta solo in questo browser${db?', con le immagini':', senza le immagini: questo browser non permette di salvarle'}.</p>`,
+  [{id:'n',label:'Nome del modello',value:p.title},{id:'d',label:'Descrizione, letta nella galleria',type:'textarea',rows:2,value:`${p.pages.length===1?'Una pagina':p.pages.length+' pagine'}, ${n===1?'una cornice':n+' cornici'}. Salvato il ${pgToday()}.`}],'Salva il modello');if(!v)return;
+ const name=v.n.trim().slice(0,80)||p.title,same=mine.find(m=>m.preset===p.preset&&m.n===name);if(same&&!(await confirmAction(`C’è già un tuo modello «${name}» per questo formato: sostituirlo?`)))return;
+ const imgs={};if(db)for(const id of pgUsedImgs()){const m=Pg.imgs.get(id);if(m)imgs[id]={blob:m.blob,name:m.name}}
+ const rec={id:same?.id||uid(),n:name,d:v.d.trim().slice(0,300),preset:p.preset,ts:Date.now(),p:JSON.parse(pgSnap()),imgs};
+ try{await pgMinePut(rec)}catch(e){toast('Modello non salvato: lo spazio del browser è esaurito');return}if(same)for(const k of [...pgTplCache.keys()])if(k.endsWith('|m:'+same.id))pgTplCache.delete(k);
+ announce(`Modello «${name}» ${same?'sostituito':'salvato'}: lo trovi in Nuovo da modello, tra i tuoi modelli del formato ${fmt}`)}

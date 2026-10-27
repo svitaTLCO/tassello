@@ -314,6 +314,7 @@ def('x','Fogli',[
  ['nextSheet','Foglio successivo','','Alt+PgGiù',{}]]);
 def('p','File',[
  ['pgTemplates','Nuovo da modello: evento, offerta, menu, citazione, prima e dopo…','new','',{short:'Modelli'}],
+ ['pgSaveTpl','Salva il documento come modello','backup','',{short:'Salva come modello'}],
  ['pgSave','Salva il progetto di Impagina (un file da riaprire)','save','Ctrl+S',{g:1,short:'Salva progetto'}],
  ['pgExportPng','Esporta le pagine in PNG','image','Ctrl+Maiusc+E',{g:1,short:'Esporta PNG'}]]);
 def('p','Pagine',[

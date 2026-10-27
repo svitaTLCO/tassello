@@ -223,7 +223,7 @@ function pageFileDetails(dd){const p=Pg.p;if(!p)return dd('Documento','nessuno: 
 // I comandi di Impagina; senza documento valgono solo quelli che lo creano o lo aprono.
 const PAGE_ACTIONS={new:pageNewDialog,pgTemplates:pageNewDialog,open:()=>$('pgFileInput').click(),print:pgPrint,undo:()=>pgUndo(false),redo:()=>pgUndo(true),
  zoomUp:()=>pgZoom(1.25),zoomDown:()=>pgZoom(.8),zoomReset:()=>{Pg.zoom=1;pgRenderStage();announce('Zoom 100%')},pgZoomFit:()=>pgZoom(0),
- pgSave:pageSave,pgExportPng,pgDescribe,pgCheck,
+ pgSave:pageSave,pgSaveTpl,pgExportPng,pgDescribe,pgCheck,
  pgAddPage,pgDupPage,pgDelPage,pgPrevPage:()=>pgStepPage(-1),pgNextPage:()=>pgStepPage(1),pgDataRepeat,pgRowPrev:()=>pgStepRow(-1),pgRowNext:()=>pgStepRow(1),
  pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
  pgPageNum:()=>pgMasterAdd('num'),pgHeader:()=>pgMasterAdd('head'),pgLogo:()=>pgMasterAdd('logo'),pgField:pgFieldMenu,
