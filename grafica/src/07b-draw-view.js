@@ -4,17 +4,18 @@ const sheet=$('sheet'),overlay=$('overlay'),sheetWrap=$('sheetWrap'),drawStage=$
 const n2=v=>Math.round(v*100)/100;
 function sheetScale(){if(Dw.zoom)return Dw.zoom;const pad=32;return Math.max(.02,Math.min(1,(drawStage.clientWidth-pad)/Dw.p.w,(drawStage.clientHeight-pad)/Dw.p.h))}
 // Un oggetto in SVG. hit: l'oggetto si può scegliere col puntatore anche dove è trasparente; img: id per riaprire il file.
-function itemSvg(it,{href='',hit=false,img=false}={}){if(it.hidden)return '';const b=box(it),cx=n2(b.x+b.w/2),cy=n2(b.y+b.h/2),tr=it.rot?` transform="rotate(${n2(it.rot)} ${cx} ${cy})"`:'',op=it.opacity<100?` opacity="${it.opacity/100}"`:'',id=hit?` data-id="${it.id}"`:'',pe=hit?' pointer-events="visible"':'';
- const paint=`fill="${it.fill==='none'?'none':esc(it.fill)}"${it.sw>0&&it.stroke!=='none'?` stroke="${esc(it.stroke)}" stroke-width="${it.sw}"`:''}`;
+function itemSvg(it,o){const s=itemShape(it,o);return s&&styled(it,s)}
+function itemShape(it,{href='',hit=false,img=false}={}){if(it.hidden)return '';const b=box(it),cx=n2(b.x+b.w/2),cy=n2(b.y+b.h/2),tr=it.rot?` transform="rotate(${n2(it.rot)} ${cx} ${cy})"`:'',op=it.opacity<100?` opacity="${it.opacity/100}"`:'',id=hit?` data-id="${it.id}"`:'',pe=hit?' pointer-events="visible"':'';
+ const paint=`fill="${fillOf(it)}"${strokeAttrs(it,['line','path','poly','arrow','bubble'].includes(it.kind))}`;
  switch(it.kind){
   case 'rect':return `<rect${id} x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}"${it.radius?` rx="${it.radius}"`:''} ${paint}${tr}${op}${pe}/>`;
   case 'ellipse':return `<ellipse${id} cx="${cx}" cy="${cy}" rx="${n2(it.w/2)}" ry="${n2(it.h/2)}" ${paint}${tr}${op}${pe}/>`;
-  case 'line':{const {xy,caps}=lineEnds(it);return `<g${id}${tr}${op}><line ${xy} stroke="${esc(it.stroke)}" stroke-width="${it.sw}" stroke-linecap="round"/>${caps}${hit?`<line ${xy} stroke="transparent" stroke-width="${Math.max(it.sw,24)}"/>`:''}</g>`}
-  case 'text':{const lines=String(it.text).split('\n'),ax=n2(it.align==='center'?it.x+it.w/2:it.align==='right'?it.x+it.w:it.x),anchor=it.align==='center'?'middle':it.align==='right'?'end':'start';
-   return `<g${id}${tr}${op}>${hit?`<rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" fill="transparent"/>`:''}<text x="${ax}" y="${it.y}" font-family="${esc(it.font)}" font-size="${it.size}" font-weight="${it.bold?700:400}"${it.italic?' font-style="italic"':''} fill="${esc(it.fill)}" text-anchor="${anchor}" xml:space="preserve">${lines.map((l,i)=>`<tspan x="${ax}" dy="${n2(i?it.size*it.lineH:it.size*(it.lineH/2+.35))}">${esc(l)}</tspan>`).join('')}</text></g>`}
-  case 'path':{const E=pathEnds(it),d=`d="${E?.d||pathD(it)}"`,cap=it.sw>0?` stroke-linecap="${it.cap||'round'}" stroke-linejoin="${it.join||'round'}"`:'';if(!E&&(!hit||it.fill!=='none'))return `<path${id} ${d} ${paint}${cap}${tr}${op}${pe}/>`;
-   return `<g${id}${tr}${op}><path ${d} ${paint}${cap}/>${E?.caps||''}${hit&&it.fill==='none'?`<path ${d} fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/>`:''}</g>`}
-  case 'poly':case 'arrow':case 'bubble':return `<path${id} d="${shapeD(it)}" ${paint}${it.sw>0?` stroke-linejoin="${it.join||'round'}"`:''}${tr}${op}${pe}/>`;
+  case 'line':{const {xy,caps}=lineEnds(it);return `<g${id}${tr}${op}><line ${xy}${strokeAttrs(it,true)}/>${caps}${hit?`<line ${xy} stroke="transparent" stroke-width="${Math.max(it.sw,24)}"/>`:''}</g>`}
+  case 'text':{const font=`font-family="${esc(it.font)}" font-size="${it.size}" font-weight="${it.bold?700:400}"${it.italic?' font-style="italic"':''}`;if(it.subs)return textPathSvg(it,{id,tr,op,hit,font});const lines=textLines(it),ax=n2(it.align==='center'?it.x+it.w/2:it.align==='right'?it.x+it.w:it.x),anchor=it.align==='center'?'middle':it.align==='right'?'end':'start';
+   return `<g${id}${tr}${op}>${hit?`<rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" fill="transparent"/>`:''}<text x="${ax}" y="${it.y}" ${font} fill="${fillOf(it)}"${it.ls?` letter-spacing="${it.ls}"`:''} text-anchor="${anchor}" xml:space="preserve">${lines.map((l,i)=>`<tspan x="${ax}" dy="${n2(i?it.size*it.lineH:it.size*(it.lineH/2+.35))}">${esc(l)}</tspan>`).join('')}</text></g>`}
+  case 'path':{const E=pathEnds(it),d=`d="${E?.d||pathD(it)}"`;if(!E&&(!hit||it.fill!=='none'))return `<path${id} ${d} ${paint}${tr}${op}${pe}/>`;
+   return `<g${id}${tr}${op}><path ${d} ${paint}/>${E?.caps||''}${hit&&it.fill==='none'?`<path ${d} fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/>`:''}</g>`}
+  case 'poly':case 'arrow':case 'bubble':return `<path${id} d="${shapeD(it)}" ${paint}${tr}${op}${pe}/>`;
   case 'image':return `<image${id}${img?` data-img="${it.img}"`:''} href="${esc(href)}" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" preserveAspectRatio="none"${tr}${op}/>`}
  return ''}
 function renderSheet(){const p=Dw.p,k=sheetScale();for(const s of [sheet,overlay]){s.setAttribute('viewBox',`0 0 ${p.w} ${p.h}`);s.style.width=Math.round(p.w*k)+'px';s.style.height=Math.round(p.h*k)+'px'}
@@ -32,7 +33,7 @@ function renderOverlay(){const it=selItem(),k=sheetScale(),hs=n2(10/k),sw=n2(1.5
  else if(it&&!it.hidden&&mode!=='none'){const b=box(it),cx=b.x+b.w/2,cy=b.y+b.h/2,hd=mode==='handles'&&!it.lock;
   s+=`<g${it.rot?` transform="rotate(${it.rot} ${n2(cx)} ${n2(cy)})"`:''}><rect class="sel-box" x="${n2(b.x)}" y="${n2(b.y)}" width="${n2(Math.max(b.w,.01))}" height="${n2(Math.max(b.h,.01))}" fill="none" stroke-width="${sw}"${it.lock?'':dash}/>`;
   if(hd&&it.kind==='line')s+=handle(it.x,it.y,'p1')+handle(it.x+it.w,it.y+it.h,'p2');
-  else if(hd&&!it.rot)for(const [h,x,y] of HANDLES(b))if(it.kind!=='text'||h.length===2)s+=handle(x,y,h);
+  else if(hd&&!it.rot)for(const [h,x,y] of HANDLES(b))if(it.kind!=='text'||h.length===2||it.wrap&&(h==='e'||h==='w'))s+=handle(x,y,h);
   s+='</g>'}
  overlay.innerHTML=s+(T.overlay?.(k)||'')}
 // Immagini regolate: si calcolano a parte (al massimo 1024 pixel per l'anteprima) e si ricordano per chiave.
@@ -71,19 +72,21 @@ function renderProps(){const b=$('propBody'),it=selItem(),p=Dw.p,focusId=documen
   if(it.kind==='line')h+=colorFld('stroke','Colore',it.stroke)+fld('sw','Spessore (px)',it.sw);
   if(it.kind==='path')h+=pathProps(it);else h+=SHAPE_PROPS[it.kind]?.(it)||'';
   if(it.kind==='image'){const svg=Dw.imgs.get(it.img)?.type==='image/svg+xml';h+=svg?'<p class="hint">Le immagini SVG si mettono sul foglio così come sono: le regolazioni valgono per le foto.</p>':`<h3>Regolazioni della foto</h3>`+IMG_ADJ.map(id=>{const a=ADJ_BY[id];return rangeFld('adj.'+id,a.label,a.min,a.max,a.step,it.adj?.[id]||0,a.fmt)}).join('')+selFld('look','Look',it.look||'none',lookList())+((it.look||'none')!=='none'?rangeFld('lookAmt','Intensità del look',0,100,1,it.lookAmt??100,v=>fmtInt(v)+'%'):'')}
-  h+=rangeFld('opacity','Opacità',0,100,1,it.opacity,v=>fmtInt(v)+'%')+`<label class="check"><input type="checkbox" data-prop="hidden"${it.hidden?' checked':''}> Nascosto</label>`;b.innerHTML=h}
+  if(it.kind==='text'&&it.subs)h+=nodeSection(it);
+  h+=styleProps(it)+rangeFld('opacity','Opacità',0,100,1,it.opacity,v=>fmtInt(v)+'%')+`<label class="check"><input type="checkbox" data-prop="hidden"${it.hidden?' checked':''}> Nascosto</label>`;b.innerHTML=h}
  if(focusId&&$(focusId))$(focusId).focus()}
 // Aggiorna i valori senza ricostruire il pannello, così il campo che si sta usando non perde il focus.
 function syncProps(){const it=selItem(),a=document.activeElement;if(selIds().length>1){syncMulti();return}if(!it){if($('pr-sw_')&&a!==$('pr-sw_'))$('pr-sw_').value=Dw.p.w;if($('pr-sh_')&&a!==$('pr-sh_'))$('pr-sh_').value=Dw.p.h;return}if(!$('pr-name')){renderProps();return}const bx=box(it);
  for(const [k,v] of [['x',bx.x],['y',bx.y],['w',it.w],['h',it.h],['rot',n2(it.rot)],['size',it.size],['sw',it.sw],['radius',it.radius]]){const el=$('pr-'+k);if(el&&el!==a)el.value=v}
- const op=$('pr-opacity');if(op&&op!==a){op.value=it.opacity;op.setAttribute('aria-valuetext',it.opacity+'%');$('pr-opacity-o').textContent=it.opacity+'%'}if(it.kind==='path')syncNodes(it)}
+ const op=$('pr-opacity');if(op&&op!==a){op.value=it.opacity;op.setAttribute('aria-valuetext',it.opacity+'%');$('pr-opacity-o').textContent=it.opacity+'%'}if(curveOf(it))syncNodes(it)}
 // Valori scritti nei campi: si controllano e diventano una modifica.
-const PROP_NAME={mx:'Posizione',my:'Posizione',name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',text:'Testo',font:'Carattere',size:'Dimensione del testo',bold:'Grassetto',italic:'Corsivo',align:'Allineamento',fill:'Colore',fillNone:'Riempimento',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',hidden:'Nascosto',look:'Look',lookAmt:'Intensità del look',nx:'Posizione del nodo',ny:'Posizione del nodo',ntype:'Tipo di nodo',nclosed:'Tracciato chiuso',bsize:'Spessore del pennello',start:'Inizio della linea',end:'Fine della linea',sides:'Lati',star:'Stella',inner:'Raggio interno',head:'Punta della freccia',shaft:'Corpo della freccia',double:'Due punte',tail:'Coda del fumetto',tip:'Punta della coda',tl:'Lunghezza della coda',tcolor:'Colore dello strumento',tsize:'Spessore dello strumento',nix:'Maniglia',niy:'Maniglia',nox:'Maniglia',noy:'Maniglia',sw_:'Larghezza del foglio',sh_:'Altezza del foglio',preset:'Formato del foglio',bg:'Sfondo',bgNone:'Sfondo',desc:'Descrizione'};
+const PROP_NAME={mx:'Posizione',my:'Posizione',name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',text:'Testo',font:'Carattere',size:'Dimensione del testo',bold:'Grassetto',italic:'Corsivo',align:'Allineamento',fill:'Colore',fillNone:'Riempimento',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',hidden:'Nascosto',look:'Look',lookAmt:'Intensità del look',nx:'Posizione del nodo',ny:'Posizione del nodo',ntype:'Tipo di nodo',nclosed:'Tracciato chiuso',bsize:'Spessore del pennello',gtype:'Sfumatura',gangle:'Direzione della sfumatura',gstop:'Punto di colore',dash:'Tratteggio',cap:'Estremità',join:'Angoli',shadowOn:'Ombra',sx:'Ombra',sy:'Ombra',sblur:'Sfocatura dell’ombra',scolor:'Colore dell’ombra',sop:'Opacità dell’ombra',blur:'Sfocatura',blend:'Fusione',ls:'Spaziatura tra le lettere',wrap:'A capo nel riquadro',toff:'Inizio lungo la curva',start:'Inizio della linea',end:'Fine della linea',sides:'Lati',star:'Stella',inner:'Raggio interno',head:'Punta della freccia',shaft:'Corpo della freccia',double:'Due punte',tail:'Coda del fumetto',tip:'Punta della coda',tl:'Lunghezza della coda',tcolor:'Colore dello strumento',tsize:'Spessore dello strumento',nix:'Maniglia',niy:'Maniglia',nox:'Maniglia',noy:'Maniglia',sw_:'Larghezza del foglio',sh_:'Altezza del foglio',preset:'Formato del foglio',bg:'Sfondo',bgNone:'Sfondo',desc:'Descrizione'};
 function applyProp(key,el){const p=Dw.p,it=selItem(),v=el.type==='checkbox'?el.checked:el.value,n=num(v);
  const need=(lo,hi)=>{if(!(n>=lo&&n<=hi))throw Error(`Scrivi un numero tra ${fmtInt(lo)} e ${fmtInt(hi)}`);return n};
  if(selIds().length>1){applyMulti(key,v,need);return}
  if(!it){if(key==='preset'){const s=SHEETS.find(x=>x[0]===v);if(s){p.w=s[2];p.h=s[3]}}else if(key==='sw_')p.w=Math.round(need(16,10000));else if(key==='sh_')p.h=Math.round(need(16,10000));else if(key==='bg')p.bg=v;else if(key==='bgNone')p.bg=v?'none':'#ffffff';else if(key==='desc')p.desc=v;else if(key==='tcolor')setInk('color',v);else if(key==='tsize')setInk(Dw.tool,Math.round(need(1,2000)));return}
  if(key.startsWith('adj.')){it.adj={...it.adj,[key.slice(4)]:Number(v)};return}
+ if(applyStyleProp(it,key,v,need))return;
  if(/^n(x|y|type|closed|ix|iy|ox|oy)$/.test(key)){applyNodeProp(it,key,v,need);return}
  if(key==='bsize'){strokeProp(it,key,v,need);return}
  const o=it.subs&&(key==='w'||key==='h')?structuredClone(it):null;
@@ -93,7 +96,7 @@ function applyProp(key,el){const p=Dw.p,it=selItem(),v=el.type==='checkbox'?el.c
   case 'rot':it.rot=((need(-360,360)%360)+360)%360;break;case 'sw':it.sw=need(0,1000);break;case 'radius':it.radius=need(0,1e5);break;
   case 'size':it.size=need(1,2000);break;case 'opacity':case 'lookAmt':case 'inner':case 'head':case 'shaft':case 'tail':case 'tip':case 'tl':it[key]=Number(v);break;case 'sides':it.sides=Math.round(need(3,60));break;case 'fillNone':it.fill=v?'none':'#0e6f8a';break;
   default:it[key]=v}
- if(it.kind==='text'&&['text','font','size','bold','italic'].includes(key))measureText(it);if(o)fitGeometry(it,o);if(it.tool)strokeProp(it,key,v,need)}
+ if(it.kind==='text'&&['text','font','size','bold','italic','w'].includes(key))measureText(it);if(o)fitGeometry(it,o);if(it.tool)strokeProp(it,key,v,need)}
 // Strumenti del foglio: ognuno risponde al puntatore (down, move, up) e ai tasti sul foglio (key); sel dice come
 // mostrare la scelta, overlay aggiunge quello che lo strumento disegna sopra il foglio. Selezione è quello di partenza.
 const toSheet=e=>{const r=sheet.getBoundingClientRect(),k=sheetScale();return {x:(e.clientX-r.left)/k,y:(e.clientY-r.top)/k}};
@@ -102,11 +105,13 @@ let drag=null;
 // Maniglie ai lati e agli angoli; Maiusc mantiene le proporzioni. Le guide intelligenti agganciano i lati che si spostano.
 function resizeBy(it,d,dx,dy,shift,snap){const o=d.it0,H=d.h;
  if(it.kind==='line'){if(H==='p1'){it.x=Math.round(o.x+dx);it.y=Math.round(o.y+dy);it.w=Math.round(o.w-dx);it.h=Math.round(o.h-dy)}else{it.w=Math.round(o.w+dx);it.h=Math.round(o.h+dy)}return}
+ if(it.kind==='text'&&it.wrap&&H.length===1){const w=Math.max(it.size,H==='e'?o.w+dx:o.w-dx);it.w=Math.round(w);if(H==='w')it.x=Math.round(o.x+o.w-w);measureText(it);return}
  let x=o.x,y=o.y,w=o.w,h=o.h;if(H.includes('e'))w=o.w+dx;if(H.includes('s'))h=o.h+dy;if(H.includes('w')){w=o.w-dx;x=o.x+dx}if(H.includes('n')){h=o.h-dy;y=o.y+dy}w=Math.max(1,w);h=Math.max(1,h);
  // Testi e immagini (dagli angoli) mantengono le proporzioni; le forme solo con Maiusc.
  if(it.kind==='text'||((it.kind==='image')!==shift&&H.length===2)){const k=Math.max(w/o.w,h/o.h);w=o.w*k;h=o.h*k;if(H.includes('w'))x=o.x+o.w-w;if(H.includes('n'))y=o.y+o.h-h}
  else if(snap){const tol=7/sheetScale(),g=(v,L)=>snapNear([v],L,tol);let q;if(H.includes('e')&&(q=g(x+w,d.L.X))){w+=q.d;Dw.guides.push({x:q.v,lab:q.lab})}if(H.includes('w')&&(q=g(x,d.L.X))){x+=q.d;w-=q.d;Dw.guides.push({x:q.v,lab:q.lab})}if(H.includes('s')&&(q=g(y+h,d.L.Y))){h+=q.d;Dw.guides.push({y:q.v,lab:q.lab})}if(H.includes('n')&&(q=g(y,d.L.Y))){y+=q.d;h-=q.d;Dw.guides.push({y:q.v,lab:q.lab})}}
- if(it.kind==='text'){it.size=Math.max(4,Math.round(o.size*h/o.h));measureText(it);it.x=Math.round(H.includes('w')?o.x+o.w-it.w:o.x);it.y=Math.round(H.includes('n')?o.y+o.h-it.h:o.y);return}
+ if(it.kind==='text'&&it.subs)it.size=Math.max(4,Math.round(o.size*h/o.h));
+ else if(it.kind==='text'){it.size=Math.max(4,Math.round(o.size*h/o.h));if(it.wrap)it.w=Math.round(o.w*h/o.h);measureText(it);it.x=Math.round(H.includes('w')?o.x+o.w-it.w:o.x);it.y=Math.round(H.includes('n')?o.y+o.h-it.h:o.y);return}
  const r=Dw.guides.length?n2:Math.round;Object.assign(it,{x:r(x),y:r(y),w:Math.max(1,r(w)),h:Math.max(1,r(h))});fitGeometry(it,o)}
 // Selezione: un clic sceglie l'oggetto con il suo gruppo (Alt+clic l'oggetto solo), Maiusc+clic o Ctrl+clic lo
 // aggiunge o lo toglie, trascinando sul vuoto si disegna il riquadro di selezione. Alt mentre si trascina spegne le guide.
@@ -163,6 +168,6 @@ $('layList').addEventListener('click',e=>{const o=e.target.closest('[data-id]');
 $('propBody').addEventListener('input',e=>{const el=e.target,key=el.dataset.prop;if(!key||!(el.type==='range'||el.type==='color'||key==='text'))return;try{applyProp(key,el)}catch(err){return}
  if(el.type==='range'){const t=el.closest('.adj'),f=key.startsWith('adj.')?ADJ_BY[key.slice(4)].fmt:v=>fmtInt(v)+'%',txt=f(Number(el.value));el.setAttribute('aria-valuetext',txt);t.querySelector('output').textContent=txt}renderSheet();if(!selItem())renderLayers()});
 $('propBody').addEventListener('change',e=>{const el=e.target,key=el.dataset.prop;if(!key)return;const it=selItem();try{applyProp(key,el)}catch(err){toast(err.message);el.value=el.defaultValue;el.focus();return}
- const label=PROP_NAME[key.replace(/^adj\./,'')]||ADJ_BY[key.slice(4)]?.label||'Proprietà',n=selIds().length;settleD(n>1?`${label} di ${n} oggetti`:it?`${label} di ${it.name}`:label,{props:['preset','sw_','sh_','bgNone','fillNone','look','name','text','font','size','bold','italic','ntype','nclosed','star','sides'].includes(key)})});
+ const label=PROP_NAME[key.replace(/^adj\./,'').replace(/^gstop\..*/,'gstop')]||ADJ_BY[key.slice(4)]?.label||'Proprietà',n=selIds().length;settleD(n>1?`${label} di ${n} oggetti`:it?`${label} di ${it.name}`:label,{props:['preset','sw_','sh_','bgNone','fillNone','look','name','text','font','size','bold','italic','ntype','nclosed','star','sides','gtype','shadowOn','wrap'].includes(key)})});
 $('propBody').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();(Dw.sel?$('layList'):sheetWrap).focus()}});
 new ResizeObserver(()=>{if(!Dw.zoom&&state.mode==='disegno')renderSheet()}).observe(drawStage);

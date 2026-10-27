@@ -97,6 +97,11 @@ def('d','Inserisci',[
  ['addArrow','Inserisci una freccia','arrowR','',{short:'Freccia'}],
  ['addBubble','Inserisci un fumetto','bubble','',{short:'Fumetto'}],
  ['addArrowLine','Inserisci una linea con la freccia','arrowLine','',{short:'Linea con freccia'}]]);
+def('d','Stile',[
+ ['gradientItem','Sfumatura del riempimento','gradient','',{short:'Sfumatura',quiet:1,toggle:()=>!!selItem()?.grad}],
+ ['shadowItem','Ombra','shadow','',{short:'Ombra',quiet:1,toggle:()=>!!selItem()?.shadow}],
+ ['textOnPath','Testo lungo un tracciato','textPath','',{short:'Testo lungo un tracciato'}],
+ ['textOffPath','Togli il testo dalla curva','textI','',{short:'Togli dalla curva'}]]);
 def('id','Generale',[
  ['filePanel','Apri il menu File','file','',{}],
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],

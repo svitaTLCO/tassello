@@ -28,7 +28,9 @@ const nodeVis=(it,n)=>rotPt(it,it.x+n.x,it.y+n.y),unrot=(it,pt)=>rotPt(it,pt.x,p
 function nodeList(it){const out=[];it.subs.forEach((s,si)=>s.nodes.forEach((n,i)=>out.push({s,si,n,i})));return out}
 // Il nodo scelto è un indice in tutti i nodi del tracciato; si azzera quando si passa a un altro tracciato.
 function curNode(it){if(Dw.nodeFor!==it.id){Dw.nodeFor=it.id;Dw.node=0}Dw.node=clamp(Dw.node,0,Math.max(0,nodeList(it).length-1));return Dw.node}
-const nodePath=()=>{const it=selItem();return it?.kind==='path'&&selIds().length===1?it:null};
+// I nodi si modificano nei tracciati e nella curva di un testo che la segue.
+const curveOf=it=>it&&(it.kind==='path'||it.kind==='text'&&it.subs)?it:null;
+const nodePath=()=>{const it=selItem();return curveOf(it)&&selIds().length===1?it:null};
 function setNodeVis(it,n,P){const A=unrot(it,P);n.x=A.x-it.x;n.y=A.y-it.y;normPath(it)}
 // Curva o angolo: un nodo curvo prende le maniglie dalla direzione dei vicini, lunghe un terzo della distanza.
 function smoothNode(s,i){const n=s.nodes[i],N=s.nodes.length,p=s.nodes[i-1]||(s.closed?s.nodes[N-1]:null),q=s.nodes[i+1]||(s.closed?s.nodes[0]:null);n.s=1;if(!p&&!q)return;
@@ -133,7 +135,7 @@ TOOLS.nodes={sel:'box',
   if(it&&nn){const j=+nn.dataset.n;if(j!==Dw.node)nodeStep(it,j);nd.drag={mode:'n',j,pt0:pt,v:nodeVis(it,nodeList(it)[j].n)};return true}
   if(it&&sg){insertAt(it,+sg.dataset.seg,pt);return false}
   const t=e.target.closest?.('[data-id]'),o=t&&itemOf(t.dataset.id);if(!o){if(Dw.sel)selectItem(null,{say:false});return false}
-  if(o.id!==Dw.sel||selIds().length>1){selectItem(o.id,{say:false});if(o.kind==='path'){curNode(o);announce(`${describeItem(o)}. ${nodeLabel(o,0)}`)}else needPath()}return false},
+  if(o.id!==Dw.sel||selIds().length>1){selectItem(o.id,{say:false});if(curveOf(o)){curNode(o);announce(`${describeItem(o)}. ${nodeLabel(o,0)}`)}else needPath()}return false},
  move(e,pt){const d=nd.drag,it=nodePath();if(!d||!it)return;const dx=pt.x-d.pt0.x,dy=pt.y-d.pt0.y;if(!d.moved&&Math.hypot(dx,dy)*sheetScale()<3)return;d.moved=true;const {n}=nodeList(it)[d.j];
   if(d.mode==='n')setNodeVis(it,n,{x:d.v.x+dx,y:d.v.y+dy});
   else{const P=unrot(it,pt),w=d.w,o=w==='i'?'o':'i',hx=P.x-it.x-n.x,hy=P.y-it.y-n.y;n[w+'x']=n2(hx);n[w+'y']=n2(hy);if(e.altKey)n.s=0;else if(n.s){const l=Math.hypot(n[o+'x'],n[o+'y'])||Math.hypot(hx,hy),L=Math.hypot(hx,hy)||1;n[o+'x']=n2(-hx/L*l);n[o+'y']=n2(-hy/L*l)}normPath(it)}
@@ -148,8 +150,9 @@ TOOLS.nodes={sel:'box',
 sheetWrap.addEventListener('dblclick',e=>{const t=e.target.closest?.('[data-id]'),it=t&&itemOf(t.dataset.id);if(Dw.tool==='nodes'&&e.target.closest?.('[data-n]'))nodeToggle();else if(Dw.tool==='select'&&it?.kind==='path'&&!it.lock)setTool('nodes');else if(Dw.tool==='select'&&it?.kind==='text')$('pr-text')?.focus()});
 // Proprietà di un tracciato: l'elenco dei nodi (frecce per scegliere, Ctrl+frecce per spostare), i campi del nodo scelto
 // e la descrizione a parole.
-function pathProps(it){const j=curNode(it),L=nodeList(it),{s,n}=L[j]||{},v=n&&nodeVis(it,n);
- let h=(it.tool==='brush'?colorFld('fill','Colore',it.fill)+(it.brush?fld('bsize','Spessore del pennello (px)',it.brush.size):''):it.tool==='pencil'?colorFld('stroke','Colore',it.stroke)+fld('sw','Spessore (px)',it.sw):colorFld('fill','Riempimento',it.fill,'Nessun riempimento')+colorFld('stroke','Contorno',it.stroke)+fld('sw','Spessore del contorno (px)',it.sw))+SHAPE_PROPS.path(it)+`<h3 id="pr-nodes-h">Nodi</h3><p class="hint" id="pr-pathsay">Tracciato ${esc(pathSummary(it))}.</p>`;
+function pathProps(it){return (it.tool==='brush'?colorFld('fill','Colore',it.fill)+(it.brush?fld('bsize','Spessore del pennello (px)',it.brush.size):''):it.tool==='pencil'?colorFld('stroke','Colore',it.stroke)+fld('sw','Spessore (px)',it.sw):colorFld('fill','Riempimento',it.fill,'Nessun riempimento')+colorFld('stroke','Contorno',it.stroke)+fld('sw','Spessore del contorno (px)',it.sw))+SHAPE_PROPS.path(it)+nodeSection(it)}
+function nodeSection(it){const j=curNode(it),L=nodeList(it),{s,n}=L[j]||{},v=n&&nodeVis(it,n);
+ let h=`<h3 id="pr-nodes-h">Nodi</h3><p class="hint" id="pr-pathsay">Tracciato ${esc(pathSummary(it))}.</p>`;
  h+=`<div class="lb node-list" id="pr-nodes" role="listbox" tabindex="0" aria-labelledby="pr-nodes-h" aria-describedby="pr-nodes-k" aria-activedescendant="pr-node-${j}">${L.map((x,i)=>`<div role="option" id="pr-node-${i}" class="lb-item${i===j?' active':''}" data-node="${i}" aria-selected="${i===j}">${esc(nodeLabel(it,i))}</div>`).join('')}</div><small class="hint" id="pr-nodes-k">Frecce su e giù per scegliere un nodo, Ctrl+frecce per spostarlo (con Maiusc di dieci pixel), Spazio per farlo d’angolo o curvo, Ins per aggiungerne uno dopo, Canc per toglierlo.</small>`;
  if(!n)return h;h+=`<div class="row2"><div>${fld('nx','X del nodo',n2(v.x))}</div><div>${fld('ny','Y del nodo',n2(v.y))}</div></div>`+selFld('ntype','Tipo di nodo',n.s?'1':'0',[['0','D’angolo'],['1','Curvo']]);
  if(n.s||n.ix||n.iy||n.ox||n.oy)h+=`<div class="row2"><div>${fld('nix','Maniglia d’entrata, x',n.ix)}</div><div>${fld('niy','Maniglia d’entrata, y',n.iy)}</div><div>${fld('nox','Maniglia d’uscita, x',n.ox)}</div><div>${fld('noy','Maniglia d’uscita, y',n.oy)}</div></div>`;
@@ -159,11 +162,11 @@ function applyNodeProp(it,key,v,need){const L=nodeList(it),j=curNode(it),{s,i,n}
  if(key==='ntype'){v==='1'?smoothNode(s,i):cornerNode(n)}else if(key==='nclosed'){if(v&&s.nodes.length<2)throw Error('Servono almeno due nodi');s.closed=!!v}
  else{n[key.slice(1)]=need(-1e5,1e5);if(n.s&&(key==='nix'||key==='niy'||key==='nox'||key==='noy')){const w=key[1],o=w==='i'?'o':'i',l=Math.hypot(n[o+'x'],n[o+'y']),L2=Math.hypot(n[w+'x'],n[w+'y'])||1;n[o+'x']=n2(-n[w+'x']/L2*l);n[o+'y']=n2(-n[w+'y']/L2*l)}}normPath(it)}
 function syncNodes(it){const j=curNode(it),a=document.activeElement,v=nodeVis(it,nodeList(it)[j].n);for(const [k,val] of [['nx',n2(v.x)],['ny',n2(v.y)]]){const el=$('pr-'+k);if(el&&el!==a)el.value=val}const o=$('pr-node-'+j);if(o)o.textContent=nodeLabel(it,j);if($('pr-pathsay'))$('pr-pathsay').textContent=`Tracciato ${pathSummary(it)}.`}
-$('propBody').addEventListener('keydown',e=>{if(e.target.id!=='pr-nodes')return;const it=nodePath()||(selItem()?.kind==='path'?selItem():null);if(!it)return;const L=nodeList(it).length,j=curNode(it),A={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+$('propBody').addEventListener('keydown',e=>{if(e.target.id!=='pr-nodes')return;const it=nodePath()||curveOf(selItem());if(!it)return;const L=nodeList(it).length,j=curNode(it),A={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
  if(A&&(e.ctrlKey||e.metaKey)){e.preventDefault();const st=e.shiftKey?10:1;if(moveNode(it,j,A[0]*st,A[1]*st)){const v=nodeVis(it,nodeList(it)[j].n);announce(`x ${fmtInt(v.x)}, y ${fmtInt(v.y)}`)}return}
  const to={ArrowDown:Math.min(L-1,j+1),ArrowUp:Math.max(0,j-1),Home:0,End:L-1}[e.key];if(to!=null){e.preventDefault();nodeStep(it,to);return}
  if(e.key===' '){e.preventDefault();nodeToggle();return}if(e.key==='Insert'){e.preventDefault();nodeAdd();return}if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();deleteNode();return}if(e.key==='Enter'){e.preventDefault();$('pr-nx')?.focus()}});
-$('propBody').addEventListener('click',e=>{const o=e.target.closest('[data-node]'),it=selItem();if(!o||it?.kind!=='path')return;Dw.node=+o.dataset.node;renderOverlay();renderProps();$('pr-nodes')?.focus()});
+$('propBody').addEventListener('click',e=>{const o=e.target.closest('[data-node]'),it=selItem();if(!o||!curveOf(it))return;Dw.node=+o.dataset.node;renderOverlay();renderProps();$('pr-nodes')?.focus()});
 STATIC_KEYS.d.push(['Penna',[['Muovi il cursore di dieci pixel (con Maiusc di uno)','← → ↑ ↓'],['Muovi il cursore in diagonale','Home / Fine / PgSu / PgGiù'],['Nodo d’angolo dove c’è il cursore','Spazio'],['Nodo curvo','Maiusc+Spazio'],['Chiudi il tracciato','Maiusc+Invio'],['Finisci il tracciato aperto','Invio o Esc']]],
  ['Nodi',[['Nodo precedente o successivo','PgSu / PgGiù'],['Primo o ultimo nodo','Home / Fine'],['Sposta il nodo di un pixel (con Maiusc di dieci)','← → ↑ ↓'],['Nodo d’angolo o curvo','Spazio'],['Aggiungi un nodo dopo','Ins'],['Togli il nodo','Canc'],['Elenco dei nodi nelle proprietà','Invio'],['Nell’elenco: sposta il nodo','Ctrl+← → ↑ ↓'],['Una maniglia sola, con il puntatore','Alt mentre trascini']]]);
 renderToolButtons();sheetWrap.dataset.tool='select';$('sheetHint').textContent=TOOL_INFO.select[2];

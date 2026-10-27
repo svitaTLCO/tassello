@@ -51,7 +51,7 @@ const SHAPE_PROPS={poly:it=>fld('sides',it.star?'Punte':'Lati',it.sides)+`<label
  arrow:it=>rangeFld('head','Lunghezza della punta',10,300,5,it.head??100,pct)+rangeFld('shaft','Spessore del corpo',5,100,1,it.shaft??50,pct)+`<label class="check"><input type="checkbox" data-prop="double"${it.double?' checked':''}> Due punte</label>`,
  bubble:it=>rangeFld('tail','Posizione della coda',0,100,1,it.tail??30,pct)+rangeFld('tip','Punta della coda',0,100,1,it.tip??15,pct)+rangeFld('tl','Lunghezza della coda',5,60,1,it.tl??22,pct)+fld('radius','Angoli arrotondati (px)',it.radius),
  line:endsFld,path:it=>it.subs[0]&&!it.subs[0].closed?endsFld(it):''};
-Object.assign(KIND_SAY,{poly:it=>`, ${it.star?`stella a ${it.sides} punte`:`${it.sides} lati`}`,arrow:it=>`, ${it.double?'a due punte, ':''}punta ${dirWord(Math.cos((it.rot||0)*Math.PI/180),Math.sin((it.rot||0)*Math.PI/180))}`,
+Object.assign(KIND_SAY,{poly:it=>`, ${it.sides} ${it.star?'punte':'lati'}`,arrow:it=>`, ${it.double?'a due punte, ':''}punta ${dirWord(Math.cos((it.rot||0)*Math.PI/180),Math.sin((it.rot||0)*Math.PI/180))}`,
  bubble:it=>`, con la coda in basso ${(it.tip??15)<34?'a sinistra':(it.tip??15)>66?'a destra':'al centro'}`,line:it=>endsSay(it)});
 const endsSay=it=>{const e=[hasEnd(it.start)&&`${it.start==='arrow'?'una freccia':'un punto'} all’inizio`,hasEnd(it.end)&&`${it.end==='arrow'?'una freccia':'un punto'} alla fine`].filter(Boolean);return e.length?', con '+e.join(' e '):''};
 // Converti in tracciato: le forme scelte diventano nodi modificabili, con lo stesso aspetto. I testi e le immagini restano.

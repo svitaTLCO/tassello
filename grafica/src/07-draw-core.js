@@ -30,7 +30,8 @@ function drawingChanged({props=false}={}){renderSheet();renderLayers();if(props)
 // Testo: la misura del riquadro segue le righe scritte, il carattere e la dimensione.
 const measureCtx=new OffscreenCanvas(1,1).getContext('2d');
 const fontCss=it=>`${it.italic?'italic ':''}${it.bold?700:400} ${it.size}px ${it.font}`;
-function measureText(it){measureCtx.font=fontCss(it);const lines=String(it.text).split('\n');it.w=Math.max(1,Math.ceil(Math.max(...lines.map(l=>measureCtx.measureText(l).width))));it.h=Math.max(1,Math.ceil(lines.length*it.size*it.lineH))}
+// Il testo che va a capo nel riquadro tiene la sua larghezza; quello lungo una curva tiene il riquadro della curva.
+function measureText(it){if(it.subs)return;measureCtx.font=fontCss(it);const ls=it.ls||0,lines=textLines(it);if(!it.wrap)it.w=Math.max(1,Math.ceil(Math.max(...lines.map(l=>measureCtx.measureText(l).width+ls*[...l].length))));it.h=Math.max(1,Math.ceil(lines.length*it.size*it.lineH))}
 function nextName(kind,base=KIND_NAME[kind]){let n=1;while(Dw.p.items.some(x=>x.name===base+' '+n))n++;return base+' '+n}
 const KIND_DEFAULTS={rect:(p,s)=>({w:Math.round(s*.5),h:Math.round(s*.3),fill:'#0e6f8a'}),ellipse:(p,s)=>({w:Math.round(s*.35),h:Math.round(s*.35),fill:'#e8a33d'}),
  line:(p,s)=>({w:Math.round(s*.5),h:0,fill:'none',sw:Math.max(2,Math.round(s/120))}),
@@ -40,7 +41,7 @@ const KIND_DEFAULTS={rect:(p,s)=>({w:Math.round(s*.5),h:Math.round(s*.3),fill:'#
 function addItem(kind,extra={}){const p=Dw.p,s=Math.min(p.w,p.h),it={id:uid(),kind,name:nextName(kind),x:0,y:0,w:100,h:100,rot:0,opacity:100,fill:'#0e6f8a',stroke:'#1b1b1b',sw:0,radius:0,...KIND_DEFAULTS[kind](p,s),...extra};
  if(kind==='text')measureText(it);it.x=Math.round((p.w-it.w)/2);it.y=Math.round((p.h-it.h)/2);
  Dw.sel=it.id;editD('Inserisci '+it.name,q=>{q.items.push(it)},{props:true});announce(`Inserito l’oggetto «${it.name}» al centro del foglio, sopra gli altri. Le proprietà sono nel riquadro a destra.`);return it}
-const describeItem=it=>{const b=box(it);return `${it.name}${it.name.startsWith(kindName(it))?'':', '+kindName(it).toLowerCase()}${it.kind==='text'?` «${it.text.replace(/\n/g,' ')}»`:''}${KIND_SAY[it.kind]?.(it)||''}, x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}${it.rot?`, ruotato di ${fmtNum(it.rot,0)} gradi`:''}${it.opacity<100?`, opacità ${it.opacity}%`:''}${it.hidden?', nascosto':''}${it.lock?', bloccato':''}`};
+const describeItem=it=>{const b=box(it);return `${it.name}${it.name.startsWith(kindName(it))?'':', '+kindName(it).toLowerCase()}${it.kind==='text'?` «${it.text.replace(/\n/g,' ')}»`:''}${KIND_SAY[it.kind]?.(it)||''}${styleSay(it)}, x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}${it.rot?`, ruotato di ${fmtNum(it.rot,0)} gradi`:''}${it.opacity<100?`, opacità ${it.opacity}%`:''}${it.hidden?', nascosto':''}${it.lock?', bloccato':''}`};
 // Immagini del disegno: il file originale resta com'è; per l'anteprima e per l'esportazione si usa un indirizzo locale.
 function registerImage(id,blob,name,w,h){const old=Dw.imgs.get(id);if(old)URL.revokeObjectURL(old.url);Dw.imgs.set(id,{blob,name,w,h,type:blob.type,url:URL.createObjectURL(blob),bmp:null})}
 const isSvgFile=f=>/svg/i.test(f.type)||/\.svg$/i.test(f.name);

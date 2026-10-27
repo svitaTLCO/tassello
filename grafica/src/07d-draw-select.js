@@ -71,7 +71,7 @@ function moveKeys(many,ax,ay,step){const ok=movable(many);if(!ok.length||!editD(
 // Più oggetti si ridimensionano insieme sul riquadro che li contiene: posizioni e misure in proporzione, i testi
 // cambiano dimensione. B è il riquadro di prima, N quello nuovo.
 function scaleItem(it,o,B,N){const sx=B.w?N.w/B.w:1,sy=B.h?N.h/B.h:1,b=box(o),nx=N.x+(b.x-B.x)*sx,ny=N.y+(b.y-B.y)*sy;
- if(it.kind==='text'){it.size=Math.max(1,Math.round(o.size*Math.min(sx,sy)));measureText(it)}else{it.w=n2(o.w*sx);it.h=n2(o.h*sy);fitGeometry(it,o)}
+ if(it.kind==='text'){it.size=Math.max(1,Math.round(o.size*Math.min(sx,sy)));if(it.wrap)it.w=n2(o.w*sx);measureText(it)}if(it.kind!=='text'||it.subs){it.w=n2(o.w*sx);it.h=n2(o.h*sy);fitGeometry(it,o)}
  const nb=box(it);it.x=n2(it.x+nx-nb.x);it.y=n2(it.y+ny-nb.y)}
 function scaleDrag(d,dx,dy,shift){const B=d.B,H=d.h;let x=B.x,y=B.y,w=B.w,h=B.h;if(H.includes('e'))w=B.w+dx;if(H.includes('s'))h=B.h+dy;if(H.includes('w')){w=B.w-dx;x=B.x+dx}if(H.includes('n')){h=B.h-dy;y=B.y+dy}w=Math.max(1,w);h=Math.max(1,h);
  if(shift&&B.w&&B.h){const k=Math.max(w/B.w,h/B.h);w=B.w*k;h=B.h*k;if(H.includes('w'))x=B.x+B.w-w;if(H.includes('n'))y=B.y+B.h-h}for(const [it,o] of d.os)scaleItem(it,o,B,{x,y,w,h})}
