@@ -80,7 +80,10 @@ def('d','Scelta',[
 def('d','Strumenti',[
  ['toolSelect','Strumento Selezione','pointer','V',{ctx:'sheet',short:'Selezione',quiet:1,toggle:()=>Dw.tool==='select'}],
  ['toolNodes','Strumento Nodi: modifica i nodi dei tracciati','nodes','A',{ctx:'sheet',short:'Nodi',quiet:1,toggle:()=>Dw.tool==='nodes'}],
- ['toolPen','Strumento Penna: tracciati nodo per nodo','pen','P',{ctx:'sheet',short:'Penna',quiet:1,toggle:()=>Dw.tool==='pen'}]]);
+ ['toolPen','Strumento Penna: tracciati nodo per nodo','pen','P',{ctx:'sheet',short:'Penna',quiet:1,toggle:()=>Dw.tool==='pen'}],
+ ['toolPencil','Strumento Matita: disegno a mano libera','pencil','N',{ctx:'sheet',short:'Matita',quiet:1,toggle:()=>Dw.tool==='pencil'}],
+ ['toolBrush','Strumento Pennello: tratto che segue la pressione','brush','B',{ctx:'sheet',short:'Pennello',quiet:1,toggle:()=>Dw.tool==='brush'}],
+ ['toolEraser','Strumento Gomma: cancella i tratti','eraser','E',{ctx:'sheet',short:'Gomma',quiet:1,toggle:()=>Dw.tool==='eraser'}]]);
 def('d','Tracciato',[
  ['nodeAdd','Aggiungi un nodo dopo quello scelto','plus','',{short:'Aggiungi nodo'}],
  ['nodeDelete','Togli il nodo scelto','minus','',{short:'Togli nodo'}],

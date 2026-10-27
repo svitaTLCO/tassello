@@ -7,7 +7,7 @@ const RIBBON={
   Vista:[['Confronto','compare'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  d:{Inizio:[['Disegno','openDraw saveSvg exportDraw'],['Appunti','paste cut copy duplicateItem'],['Inserisci','addText addImage addRect addEllipse'],['Cronologia','undo redo']],
   Inserisci:[['Forme','addRect addEllipse addLine'],['Testo','addText'],['Immagini','addImage']],
-  Disegna:[['Strumenti','toolSelect toolNodes toolPen'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath']],
+  Disegna:[['Strumenti','toolSelect toolNodes toolPen toolPencil toolBrush toolEraser'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath']],
   Disponi:[['Scelta','selectAll groupItems ungroupItems lockItems hideItems'],['Ordine','bringFront sendBack forward backward'],['Allinea','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Distribuisci','distH distV smartGuides'],['Oggetto','duplicateItem deleteItem readDraw']],
   Foglio:[['Foglio','sheetSize sheetDesc newDraw'],['Accessibilità','a11yCheck']],
   Vista:[['Zoom','zoomIn zoomOut zoomFit'],['Tasselli','showLayers showProps layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]}};
