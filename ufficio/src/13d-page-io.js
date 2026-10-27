@@ -30,7 +30,8 @@ function pgClean(o){if(!o||typeof o!=='object'||!Array.isArray(o.pages)||!o.page
   if(['lin','rad'].includes(x.grad)&&col(x.fill2)&&x.fill2!=='none'){it.grad=x.grad;it.fill2=x.fill2;if(x.gangle!=null)it.gangle=num(x.gangle,90,0,360)}if(PG_DASHES.some(d=>d[0]&&d[0]===x.dash))it.dash=x.dash;
   if(x.kind!=='sign'&&x.shadow!=='none'&&PG_SIGN_SHADOWS.some(s=>s[0]===x.shadow)){it.shadow=x.shadow;it.shc=col(x.shc)&&x.shc!=='none'?x.shc:'#1b1b1b'}
   if(x.kind==='text'){it.story=str(x.story,40);it.valign=['top','middle','bottom'].includes(x.valign)?x.valign:'top';it.cols=Math.round(it.cols)}
-  if(x.kind==='image'){it.img=key(String(x.img||''))?String(x.img):'';it.fit=x.fit==='fit'?'fit':'fill';it.field=str(x.field,40);it.file=str(x.file,300)}
+  if(x.kind==='image'){it.img=key(String(x.img||''))?String(x.img):'';it.fit=x.fit==='fit'?'fit':'fill';it.field=str(x.field,40);it.file=str(x.file,300);
+   const a={};for(const [k,,,lo,hi] of PG_ADJ)if(x.adj?.[k])a[k]=num(x.adj[k],0,lo,hi);if(Object.keys(a).length)it.adj=a;if(PG_LOOKS.some(l=>l.id!=='none'&&l.id===x.look)){it.look=x.look;if(x.lookAmt!=null)it.lookAmt=num(x.lookAmt,100,0,100)}}
   if(x.kind==='sign'){const one=(k,list)=>list.some(e=>e[0]===x[k])?x[k]:it[k];Object.assign(it,{text:str(x.text,500),style:PG_SIGN_STYLES[x.style]?x.style:'',font:FONTS.includes(x.font)?x.font:it.font,bold:!!x.bold,italic:!!x.italic,caps:!!x.caps,fit:x.fit!==false,size:num(x.size,48,1,1e4),ls:num(x.ls,0,-5,40),align:['left','center','right'].includes(x.align)?x.align:'center',shape:one('shape',PG_SIGN_SHAPES),curve:num(x.curve,50,0,100),fillType:one('fillType',PG_SIGN_FILLS),angle:num(x.angle,0,0,360),ow:num(x.ow,0,0,15),ow2:num(x.ow2,0,0,15),shadow:one('shadow',PG_SIGN_SHADOWS),glow:num(x.glow,0,0,100),img:key(String(x.img||''))?String(x.img):''});for(const k of ['c1','c2','oc','oc2','shc','gc'])if(col(x[k])&&x[k]!=='none')it[k]=x[k]}
   return it};
  const holder=(h,extra)=>{const items=(Array.isArray(h?.items)?h.items:[]).slice(0,500).map(item).filter(Boolean),ids=new Set(items.map(x=>x.id));return{id:key(String(h?.id))?String(h.id):uid(),items,read:(Array.isArray(h?.read)?h.read:[]).map(String).filter(id=>ids.has(id)),...extra(h)}};
@@ -65,8 +66,9 @@ async function pageOpenFiles(files){files=[...files];if(!files.length)return;con
 for(const [id,fn] of [['pgFileInput',pageOpenFiles],['pgImgInput',files=>pgInsertImages(files)],['pgDataInput',files=>pgDataFromFile(files[0])],['pgTextInput',files=>pgTextFromFile(files[0])]])$(id).onchange=async e=>{const list=[...e.target.files];e.target.value='';if(list.length)await fn(list)};
 // PNG: ogni pagina disegnata su un canvas; le immagini entrano come data URL, perché un SVG usato come immagine non può caricare altro.
 async function pgPng(insts,ii,lay,k){const p=Pg.p,I=insts[ii],W=Math.max(1,Math.round(p.w*k)),H=Math.max(1,Math.round(p.h*k)),m=pgMasterOf(I.pg);
- for(const it of [...(m?.items||[]),...I.pg.items]){const im=it.kind==='image'?pgImgFor(it,{row:I.row}):it.kind==='sign'&&it.fillType==='image'&&it.img?Pg.imgs.get(it.img):null;if(im)await pgDataUrl(im)}
- const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}">${pgPageSvg(p,I,ii,lay,im=>im.data)}</svg>`,url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+ // Le foto regolate entrano alla misura grande (Pg.hq), come nella stampa.
+ for(const it of [...(m?.items||[]),...I.pg.items]){let im=it.kind==='image'?pgImgFor(it,{row:I.row}):it.kind==='sign'&&it.fillType==='image'&&it.img?Pg.imgs.get(it.img):null;if(im&&pgPhotoOn(it))im=await pgDevFull(it,im);if(im)await pgDataUrl(im)}
+ Pg.hq=true;let svg;try{svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}">${pgPageSvg(p,I,ii,lay,im=>im.data)}</svg>`}finally{Pg.hq=false}const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
  try{const img=new Image();img.src=url;await img.decode();const cv=new OffscreenCanvas(W,H);cv.getContext('2d').drawImage(img,0,0,W,H);return await cv.convertToBlob({type:'image/png'})}finally{URL.revokeObjectURL(url)}}
 async function pgExportPng(){const p=Pg.p;pgStorySync();const mm=pgMM(),all=pgInstances(p),px=(k)=>`${Math.round(p.w*k)} × ${Math.round(p.h*k)} pixel`;
  const v=await modal('Esporta in PNG',`<p>${all.length===1?'Una pagina':all.length+' pagine'}${p.data&&all.length>p.pages.length?`, comprese quelle dai dati`:''}. Con più pagine scarichi un archivio ZIP con un PNG per pagina e un file con i testi alternativi da usare quando pubblichi.</p>`,[
@@ -80,10 +82,11 @@ async function pgExportPng(){const p=Pg.p;pgStorySync();const mm=pgMM(),all=pgIn
 // Stampa e PDF: una pagina SVG per copia, nel formato del documento e senza margini del browser.
 function pagePrintCss(){const p=Pg.p;if(p?.tiles?.on)return pgTilePrintCss();return p?`@page{size:${pr2(p.w/MM)}mm ${pr2(p.h/MM)}mm;margin:0}`:'@page{size:A4 portrait;margin:18mm}'}
 let pgPrinting=false;
-function pgBuildPrint(){const p=Pg.p,box=$('pgPrint');if(!p){box.replaceChildren();return}const insts=pgInstances(p),lay=pgLayout(p,insts);if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay);return}
+function pgBuildPrint(){const p=Pg.p,box=$('pgPrint');if(!p){box.replaceChildren();return}Pg.hq=true;try{pgPrintMarkup(p,box)}finally{Pg.hq=false}}
+function pgPrintMarkup(p,box){const insts=pgInstances(p),lay=pgLayout(p,insts);if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay);return}
  box.innerHTML=insts.map((I,ii)=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" style="width:${pr2(p.w/MM)}mm;height:${pr2(p.h/MM)}mm" role="img" aria-label="Pagina ${I.n}${I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:insts.length,row:I.row,title:p.title,date:pgToday()})):''}">${pgPageSvg(p,I,ii,lay)}</svg>`).join('')}
 window.addEventListener('beforeprint',()=>{if(isPage()&&!pgPrinting)pgBuildPrint()});window.addEventListener('afterprint',()=>{pgPrinting=false;$('pgPrint').replaceChildren()});
-async function pgPrint(){const p=Pg.p;pgStorySync();await pgPreloadFieldImages(pgInstances(p));pgBuildPrint();pgPrinting=true;
+async function pgPrint(){const p=Pg.p;pgStorySync();await pgPreloadFieldImages(pgInstances(p));await pgWork('Preparazione delle foto regolate',()=>pgDevPreload(pgInstances(p)));pgBuildPrint();pgPrinting=true;
  await Promise.all([...new Set($$('#pgPrint image').map(i=>i.getAttribute('href')))].map(u=>{const im=new Image();im.src=u;return im.decode().catch(()=>{})}));await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));printStyle();window.print()}
 // Alt+Maiusc+I: la pagina, le cornici nell'ordine di lettura e la cornice scelta.
 function pgDescribe(){const p=Pg.p,h=pgHolder(),items=pgReadOrder(h).filter(x=>!x.deco),pg=pgCurPage(),over=h.items.filter(it=>pgFrameLay(it)?.over).length;
@@ -237,7 +240,7 @@ const PAGE_ACTIONS={new:pageNewDialog,pgTemplates:pageNewDialog,open:()=>$('pgFi
  pgAlignL:()=>pgAlign('L'),pgAlignC:()=>pgAlign('C'),pgAlignR:()=>pgAlign('R'),pgAlignT:()=>pgAlign('T'),pgAlignM:()=>pgAlign('M'),pgAlignB:()=>pgAlign('B'),
  pgRotR:()=>pgRotate(15),pgRotL:()=>pgRotate(-15),pgRotR1:()=>pgRotate(1),pgRotL1:()=>pgRotate(-1),pgRot0:()=>pgRotate(0,true),
  pgReadUp:()=>pgReadMove(-1),pgReadDown:()=>pgReadMove(1),pgReadAuto,pgLink,pgLinkTo:pgLinkToMenu,pgUnlink,pgOverflow,
- pgChooseImage:()=>$('pgImgInput').click(),pgFit:()=>{const it=pgNeed('image');if(it&&pgEdit('Adatta l’immagine',()=>{it.fit='fit'},{props:true}))announce('L’immagine si vede tutta dentro la cornice')},pgFill:()=>{const it=pgNeed('image');if(it&&pgEdit('Riempi la cornice',()=>{it.fit='fill'},{props:true}))announce('L’immagine riempie la cornice; il punto focale sceglie che cosa resta al centro')},
+ pgChooseImage:()=>$('pgImgInput').click(),pgPhotoAdj,pgPhotoAuto,pgPhotoReset,pgFit:()=>{const it=pgNeed('image');if(it&&pgEdit('Adatta l’immagine',()=>{it.fit='fit'},{props:true}))announce('L’immagine si vede tutta dentro la cornice')},pgFill:()=>{const it=pgNeed('image');if(it&&pgEdit('Riempi la cornice',()=>{it.fit='fill'},{props:true}))announce('L’immagine riempie la cornice; il punto focale sceglie che cosa resta al centro')},
  pgFormat:()=>pgFocusProp('pp-preset'),pgMargins:()=>pgFocusProp('pp-mt'),pgGuides:()=>{Pg.guides=!Pg.guides;pgRenderOverlay();pgPersistSoon()},pgGrid:()=>{Pg.grid=!Pg.grid;pgRenderOverlay();pgPersistSoon()},pgSnap:()=>pgEdit('Aggancia alla griglia',p=>{p.snap=!p.snap}),
  pgMasterApply:pgMasterMenu,pgMasterEdit,pgMasterNew,pgStyles:pgStylesMenu,
  pgSelectAll,pgGroup,pgUngroup,pgLock,pgDistH:()=>pgDistribute('h'),pgDistV:()=>pgDistribute('v'),pgSmart:()=>{Pg.smart=Pg.smart===false;announce(Pg.smart?'Guide intelligenti attive: trascinando, le cornici si agganciano a bordi e centri':'Guide intelligenti spente')},

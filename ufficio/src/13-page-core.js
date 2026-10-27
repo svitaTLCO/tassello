@@ -191,7 +191,7 @@ function pgItemShape(it,L,ctx,href,fv,edge){const op=it.opacity<100?` opacity="$
   case 'text':return `<g${op}>${bg}${pgTextSvg(L?.lines||[])}</g>`;
   case 'tri':return `<polygon points="${pr2(it.x)},${pr2(it.y)} ${pr2(it.x+it.w)},${pr2(it.y)} ${pr2(it.x+it.w/2)},${pr2(it.y+it.h)}" ${paint} stroke-linejoin="round"${op}/>`;
   case 'sign':return pgSignSvg(it,ctx,href);
-  case 'image':{const m=pgImgFor(it,ctx),d=pgMaskPath(it),pic=()=>{const [ox,oy,dw,dh]=pgFitBox(it,m);return `<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg>`};
+  case 'image':{const m=pgPhotoFor(it,ctx),d=pgMaskPath(it),pic=()=>{const [ox,oy,dw,dh]=pgFitBox(it,m);return `<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg>`};
    // Il contorno va sopra la foto, che altrimenti ne coprirebbe metà.
    if(!d){const back=it.fill!=='none'?`<rect ${box}${rx} fill="${fv}"/>`:'',line=edge?`<rect ${box}${rx} fill="none"${stroke}/>`:'';if(!m)return back||line?`<g${op}>${back}${line}</g>`:'';return `<g${op}>${back}${pic()}${line}</g>`}
    // Con una sagoma, la foto, lo sfondo e il contorno seguono la forma.

@@ -33,7 +33,7 @@ const PG_V='post quadrato storia a4 letter a5 a3 a2 a1 a0';
 // verticale m/b, c colonne, pad margine interno (in corpi del testo), k catena (le cornici con la stessa k si passano il
 // testo), q quadrata al centro, i rientro (frazione del lato corto), m sagoma, d decorativa, a testo alternativo, s colore
 // del contorno delle forme, w spessore della linea o del contorno (in corpi del testo), rot rotazione in gradi (le linee la ignorano),
-// sh ombra (soft, long, 3d) con shc il suo colore, f2 secondo colore della sfumatura (ga direzione in gradi, gr:1 radiale), da tratto del contorno;
+// sh ombra (soft, long, 3d) con shc il suo colore, nelle immagini ad regolazioni della foto ({exposure:.3,…}) e lk look, f2 secondo colore della sfumatura (ga direzione in gradi, gr:1 radiale), da tratto del contorno;
 // nelle insegne st stile e c1, c2, oc, oc2, shc, gc colori, x altre proprietà.
 // Un gruppo {rep:[volte,dx,dy],g:[cornici…]} si ripete spostato di dx e dy: nei testi {n} è il numero della copia.
 const PG_NUM=['t',.5,1.25,1,1.8,'k:«Pagina» / «Pagine»',{n:'Numero di pagina'}];
@@ -253,7 +253,7 @@ function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_
  const put=(h,e,n,pi)=>{const k=e[0],a=e[5],o=[e[5],e[6]].find(v=>v&&typeof v==='object')||{},B={...box(e,o),...(o.rot?{rot:pgRotNorm(o.rot)}:{})},nm=d=>name(o.n?fill(o.n,n,pi):d),rad=o.r?Math.min(B.w,B.h)*o.r:0,ef={...(o.sh?{shadow:o.sh,shc:tok(o.shc||'dark')}:{}),...(o.f2?{grad:o.gr?'rad':'lin',fill2:tok(o.f2),gangle:o.ga??90}:{}),...(o.da?{dash:o.da}:{})};
   if(k==='t'){const x={name:nm(PG_TPL_NAME[(a.replace(/^[+-]/,'')[0]||'c').toLowerCase()]||'Testo'),...B,valign:{m:'middle',b:'bottom'}[o.v]||'top',cols:o.c||1,gut:p.gut,pad:(o.pad||0)*b,fill:o.f?tok(o.f):'none',radius:rad,...ef};
    if(o.k&&chains[o.k])return pgPutLinked(p,h,chains[o.k],x);const it=pgPutText(p,h,x,paras(a,n,pi));if(o.k)chains[o.k]=it;return it}
-  if(k==='i')return pgPut(h,pgMk(p,'image',{name:nm('Foto'),...B,fill:o.f?tok(o.f):'none',radius:rad,...ef,deco:!!o.d,...(o.m?{mask:o.m}:{})}));
+  if(k==='i')return pgPut(h,pgMk(p,'image',{name:nm('Foto'),...B,fill:o.f?tok(o.f):'none',radius:rad,...ef,...(o.ad?{adj:{...o.ad}}:{}),...(o.lk?{look:o.lk}:{}),deco:!!o.d,...(o.m?{mask:o.m}:{})}));
   if(k==='s'){const st=o.st||'classica',c={};for(const z of ['c1','c2','oc','oc2','shc','gc'])if(o[z])c[z]=tok(o[z]);return pgPut(h,pgMk(p,'sign',{...pgSignStyle(st),style:st,name:nm('Scritta'),text:fill(a,n,pi),...B,c1:T.head,...c,...ef,...o.x}))}
   if(k==='l')return pgPut(h,pgMk(p,'line',{name:nm('Linea'),x:B.x,y:B.y,w:B.w,h:B.h,stroke:tok(a||'accent'),...(o.w?{sw:b*o.w}:{}),...ef}));
   if(k==='g'){const cells=PG_GRIDS.find(x=>x[0]===a)[2],g=p.gut*.6,gid=uid(),e6=1e-6;return cells.map(([u,v,cw,ch])=>{const l=u>e6?g/2:0,r=u+cw<1-e6?g/2:0,tp=v>e6?g/2:0,bt=v+ch<1-e6?g/2:0;return pgPut(h,pgMk(p,'image',{name:nm(o.n||'Foto'),...B,x:B.x+u*B.w+l,y:B.y+v*B.h+tp,w:cw*B.w-l-r,h:ch*B.h-tp-bt,fill:o.f?tok(o.f):'none',g:gid,...(o.m?{mask:o.m}:{})}))})}

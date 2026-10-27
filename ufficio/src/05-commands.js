@@ -369,6 +369,9 @@ def('p','Cornice',[
  ['pgUnlink','Togli la cornice dalla catena del testo','unchain','',{short:'Scollega'}],
  ['pgOverflow','Vai al testo che non entra nelle cornici','overflow','',{short:'Testo in eccesso'}],
  ['pgChooseImage','Scegli l’immagine della cornice','image','',{short:'Scegli immagine'}],
+ ['pgPhotoAdj','Regolazioni della foto: luce, colore e look','sliders','',{short:'Regola la foto'}],
+ ['pgPhotoAuto','Regolazione automatica della foto','wand','',{short:'Automatica'}],
+ ['pgPhotoReset','Togli le regolazioni della foto','history','',{short:'Foto originale'}],
  ['pgFit','Adatta l’immagine alla cornice','fit','',{short:'Adatta',toggle:()=>pgSel()?.fit==='fit'}],
  ['pgFill','Riempi la cornice con l’immagine','fill','',{short:'Riempi',toggle:()=>pgSel()?.fit==='fill'}]]);
 def('p','Pagina e griglia',[
