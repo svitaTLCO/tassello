@@ -5,7 +5,7 @@ const n2=v=>Math.round(v*100)/100;
 function sheetScale(){if(Dw.zoom)return Dw.zoom;const pad=32;return Math.max(.02,Math.min(1,(drawStage.clientWidth-pad)/Dw.p.w,(drawStage.clientHeight-pad)/Dw.p.h))}
 // Un oggetto in SVG. hit: l'oggetto si può scegliere col puntatore anche dove è trasparente; img: id per riaprire il file.
 function itemSvg(it,o){const s=itemShape(it,o);return s&&styled(it,s)}
-function itemShape(it,{href='',hit=false,img=false}={}){if(it.hidden||isClipShape(it))return '';const b=box(it),cx=n2(b.x+b.w/2),cy=n2(b.y+b.h/2),tr=it.rot?` transform="rotate(${n2(it.rot)} ${cx} ${cy})"`:'',op=it.opacity<100?` opacity="${it.opacity/100}"`:'',id=hit?` data-id="${it.id}"`:'',pe=hit?' pointer-events="visible"':'';
+function itemShape(it,{href='',hit=false,img=false,mask=''}={}){if(it.hidden||isClipShape(it))return '';const b=box(it),cx=n2(b.x+b.w/2),cy=n2(b.y+b.h/2),tr=it.rot?` transform="rotate(${n2(it.rot)} ${cx} ${cy})"`:'',op=it.opacity<100?` opacity="${it.opacity/100}"`:'',id=hit?` data-id="${it.id}"`:'',pe=hit?' pointer-events="visible"':'';
  const paint=`fill="${fillOf(it)}"${it.rule==='evenodd'?' fill-rule="evenodd"':''}${strokeAttrs(it,['line','path','poly','arrow','bubble'].includes(it.kind))}`;
  switch(it.kind){
   case 'rect':return `<rect${id} x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}"${it.radius?` rx="${it.radius}"`:''} ${paint}${tr}${op}${pe}/>`;
@@ -16,9 +16,11 @@ function itemShape(it,{href='',hit=false,img=false}={}){if(it.hidden||isClipShap
   case 'path':{const E=pathEnds(it),d=`d="${E?.d||pathD(it)}"`;if(!E&&(!hit||it.fill!=='none'))return `<path${id} ${d} ${paint}${tr}${op}${pe}/>`;
    return `<g${id}${tr}${op}><path ${d} ${paint}/>${E?.caps||''}${hit&&it.fill==='none'?`<path ${d} fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/>`:''}</g>`}
   case 'poly':case 'arrow':case 'bubble':return `<path${id} d="${shapeD(it)}" ${paint}${tr}${op}${pe}/>`;
-  // L'immagine ritagliata sta in un gruppo con il clipPath, così la sua rotazione non gira anche la forma.
-  case 'image':{const s=`<image${id}${img?` data-img="${it.img}"`:''} href="${esc(href)}" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" preserveAspectRatio="none"${tr}${op}/>`,c=clipShape(it);
-   return c?`<g clip-path="url(#ritaglio-${it.id})"><clipPath id="ritaglio-${it.id}">${clipGeom(c)}</clipPath>${s}</g>`:s}}
+  // L'immagine ritagliata sta in un gruppo con il clipPath, così la sua rotazione non gira anche la forma. mask è il PNG
+  // dello scontorno trasparente, nell'SVG salvato: la trasparenza resta fuori dalla foto, che può restare in JPEG.
+  case 'image':{const s=`<image${id}${img?` data-img="${it.img}"`:''} href="${esc(href)}" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" preserveAspectRatio="none"${mask?` mask="url(#scontorno-${it.id})"`:''}${tr}${op}/>`,c=clipShape(it),
+   mk=mask?`<mask id="scontorno-${it.id}" maskUnits="userSpaceOnUse" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}"><image href="${esc(mask)}" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" preserveAspectRatio="none"/></mask>`:'';
+   return c?`<g clip-path="url(#ritaglio-${it.id})"><clipPath id="ritaglio-${it.id}">${clipGeom(c)}</clipPath>${mk}${s}</g>`:mk+s}}
  return ''}
 function renderSheet(){const p=Dw.p,k=sheetScale();for(const s of [sheet,overlay]){s.setAttribute('viewBox',`0 0 ${p.w} ${p.h}`);s.style.width=Math.round(p.w*k)+'px';s.style.height=Math.round(p.h*k)+'px'}
  sheet.innerHTML=(p.bg==='none'?'':`<rect width="${p.w}" height="${p.h}" fill="${esc(p.bg)}"/>`)+p.items.map(it=>itemSvg(it,{href:it.kind==='image'?imgHref(it):'',hit:true})).join('');
@@ -45,8 +47,10 @@ function imgRecipe(it){const z=newRecipe(),ph=it.photo||{};return {...z,...ph,ad
  fx:ph.fx?{...z.fx,...ph.fx,curves:{...z.fx.curves,...ph.fx.curves}}:z.fx,masks:(ph.masks||[]).map(m=>({...m,adj:{...zeroAdj(),...m.adj}})),cut:ph.cut?{...newCut(),...ph.cut}:null}}
 const hasImgEdits=it=>Object.values(it.adj||{}).some(v=>v)||(it.look||'none')!=='none'||!!it.photo;
 // Come l'esportazione di Immagini: inquadratura, maschere calcolate prima dai pixel originali, poi lo sviluppo sul posto.
-async function processImage(m,it,max,mime='image/png'){m.bmp??=await createImageBitmap(m.blob,{imageOrientation:'from-image'});const B=m.bmp,r=imgRecipe(it),[fw,fh]=outSize(r,B.width,B.height),k=Math.min(1,max/Math.max(fw,fh)),w=Math.max(1,Math.round(fw*k)),h=Math.max(1,Math.round(fh*k)),cv=new OffscreenCanvas(w,h),ctx=cv.getContext('2d',{willReadFrequently:true});
- drawGeometry(ctx,B,r,w,h);const px=ctx.getImageData(0,0,w,h);ctx.putImageData(develop(px,px,r,lutOf(r.look),prepareMasks(r,maskCtx(r,w,h,px,'',B,Dw.ras))),0,0);return cv.convertToBlob({type:mime,quality:.92})}
+// Con split lo scontorno trasparente non entra nei pixel: torna a parte la sua maschera (cut), per l'SVG.
+async function processImage(m,it,max,mime='image/png',split=false){m.bmp??=await createImageBitmap(m.blob,{imageOrientation:'from-image'});const B=m.bmp,r=imgRecipe(it),[fw,fh]=outSize(r,B.width,B.height),k=Math.min(1,max/Math.max(fw,fh)),w=Math.max(1,Math.round(fw*k)),h=Math.max(1,Math.round(fh*k)),cv=new OffscreenCanvas(w,h),ctx=cv.getContext('2d',{willReadFrequently:true});
+ drawGeometry(ctx,B,r,w,h);const px=ctx.getImageData(0,0,w,h),mc=prepareMasks(r,maskCtx(r,w,h,px,'',B,Dw.ras)),cut=split&&r.cut?.bg==='none'&&Dw.ras.has(r.cut.raster)?mc.memo.get(JSON.stringify(cutOps(r,mc))):null;
+ ctx.putImageData(develop(px,px,cut?{...r,cut:null}:r,lutOf(r.look),mc),0,0);const blob=await cv.convertToBlob({type:mime,quality:.92});return split?{blob,cut,w,h}:blob}
 function imgHref(it){const m=Dw.imgs.get(it.img);if(!m)return '';if(!hasImgEdits(it)||m.type==='image/svg+xml')return m.url;const key=it.img+JSON.stringify([it.adj,it.look,it.lookAmt,it.photo]),c=procCache.get(key);if(c)return c.url||c.prev||m.url;
  const prev=[...procCache.entries()].reverse().find(([k2,v])=>k2.startsWith(it.img)&&v.url)?.[1].url;procCache.set(key,{url:null,prev});
  processImage(m,it,PREVIEW_FAST).then(blob=>{const e=procCache.get(key);if(!e)return;e.url=URL.createObjectURL(blob);if(procCache.size>40){const [k0,v0]=procCache.entries().next().value;if(v0.url)URL.revokeObjectURL(v0.url);procCache.delete(k0)}renderSheet()}).catch(e=>console.warn('Immagine non regolata',e));return prev||m.url}

@@ -70,4 +70,11 @@ function imgUnclip(){const pairs=[];for(const x of selItems()){const img=x.kind=
 const drawBtn=id=>{const c=C[id];return `<button type="button" class="btn sm" data-action="${id}">${ICON(c.icon)}${esc(c.short||c.label)}</button>`};
 function imgPhotoProps(it){if(!isPhotoImg(it))return '';const say=photoSay(it);return `<h3>Maschere e sfondo</h3><p class="hint" id="pr-photo">${esc(say?say[0].toUpperCase()+say.slice(1)+'.':'Nessuna maschera, sfondo intero.')}</p><div class="insp-actions">${['imgMasks','imgCutout','imgEdit',...(it.photo?['imgPhotoReset']:[])].map(drawBtn).join('')}</div>`}
 function clipProps(it){const s=clipShape(it),img=isClipShape(it)&&itemOf(it.clipOf);if(!s&&!img)return '';return `<h3>Ritaglio</h3><p class="hint">${s?`Si vede solo dentro la forma «${esc(s.name)}».`:`Questa forma non si disegna: ritaglia l’immagine «${esc(img.name)}».`}</p><div class="insp-actions">${drawBtn('imgUnclip')}</div>`}
+// SVG: lo scontorno trasparente va in un elemento mask con un PNG bianco che ha per trasparenza la maschera (vale
+// sia come luminanza sia come alfa); le maschere calcolate vanno nei dati di Disegno, compresse.
+const maskPng=(m,w,h)=>{const d=new Uint8Array(w*h*2);for(let i=0,j=0;i<m.length;i++,j+=2){d[j]=255;d[j+1]=m[i]}return pngEncode(w,h,d,4)};
+const b64=u8=>{let s='';for(let i=0;i<u8.length;i+=32768)s+=String.fromCharCode.apply(null,u8.subarray(i,i+32768));return btoa(s)};
+const zipBytes=async(u8,pack)=>new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(pack?new CompressionStream('deflate-raw'):new DecompressionStream('deflate-raw'))).arrayBuffer());
+const rasterPack=async R=>({w:R.w,h:R.h,z:b64(await zipBytes(R.data,true))});
+async function rasterUnpack(o){const data=await zipBytes(Uint8Array.from(atob(o.z),c=>c.charCodeAt(0)),false);if(data.length!==o.w*o.h)throw Error('Maschera calcolata non valida');return {w:o.w,h:o.h,data}}
 const DRAW_PHOTO_ACTIONS={imgEdit,imgMasks,imgCutout,imgPhotoReset,imgClip,imgUnclip};
