@@ -56,9 +56,15 @@ async function fixWebmDuration(blob,durationMs){try{const head=new Uint8Array(aw
    if(!seg.unknown){const fixed=ebmlLen(seg.size+grow,seg.sizeLen);if(fixed.length!==seg.sizeLen)return blob;const pre=head.slice(0,el.start);pre.set(fixed,seg.sizeAt);parts[0]=pre}
    return new Blob(parts,{type:blob.type})}
   at=el.data+el.size}return blob}catch(e){console.warn('Durata non aggiunta',e);return blob}}
+// CRC32 a otto byte per passo (slicing-by-8): otto tabelle e una lettura di 8 byte alla volta, circa 5 volte più veloce
+// del calcolo byte per byte. Serve per gli archivi ZIP, che con i video arrivano a qualche GB.
+const CRC_TABLES=(()=>{const t=Array.from({length:8},()=>new Int32Array(256));for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[0][n]=c}for(let n=0;n<256;n++){let c=t[0][n];for(let k=1;k<8;k++){c=t[0][c&255]^(c>>>8);t[k][n]=c}}return t})();
+async function crc32Blob(blob,progress=()=>{}){const [t0,t1,t2,t3,t4,t5,t6,t7]=CRC_TABLES,reader=blob.stream().getReader();let c=-1,done=0;
+ for(;;){const {value:b,done:end}=await reader.read();if(end)break;const n=b.length,e=n-(n&7);let i=0;
+  for(;i<e;i+=8){const lo=(b[i]|b[i+1]<<8|b[i+2]<<16|b[i+3]<<24)^c,hi=b[i+4]|b[i+5]<<8|b[i+6]<<16|b[i+7]<<24;c=t7[lo&255]^t6[lo>>>8&255]^t5[lo>>>16&255]^t4[lo>>>24]^t3[hi&255]^t2[hi>>>8&255]^t1[hi>>>16&255]^t0[hi>>>24]}
+  for(;i<n;i++)c=t0[(c^b[i])&255]^(c>>>8);done+=n;progress(done)}
+ return (c^-1)>>>0}
 // ZIP con i file memorizzati senza compressione: i video sono già compressi e i dati restano nei Blob, senza copiarli in memoria.
-const CRC_TABLE=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
-async function crc32Blob(blob,progress=()=>{}){let c=0xFFFFFFFF,done=0;const reader=blob.stream().getReader();for(;;){const {value,done:end}=await reader.read();if(end)break;for(let i=0;i<value.length;i++)c=CRC_TABLE[(c^value[i])&255]^(c>>>8);done+=value.length;progress(done)}return (c^0xFFFFFFFF)>>>0}
 async function zipBlob(files,progress=()=>{}){const parts=[],dir=[],d=new Date(),time=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),date=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate(),total=files.reduce((n,f)=>n+(f.data.size??f.data.length),0);let offset=0,done=0;
  if(total>0xFFFFFFF0)throw Error('Il progetto supera i 4 GB che un file ZIP semplice può contenere');
  for(const f of files){const data=f.data instanceof Blob?f.data:new Blob([f.data]),name=te.encode(f.name),crc=await crc32Blob(data,n=>progress((done+n)/Math.max(1,total)));done+=data.size;

@@ -58,16 +58,21 @@ function cleanAudioProject(p){const n=(v,d,lo=-Infinity,hi=Infinity)=>Number.isF
  return{title:s(p?.title||'Audio1',120),bpm:n(p?.bpm,120,30,300),sig:[2,3,4,5,6,7].includes(Number(p?.sig))?Number(p.sig):4,grid:p?.grid==='beats'?'beats':'time',metro:!!p?.metro,countIn:!!p?.countIn,cycle:{on:!!p?.cycle?.on,a:n(p?.cycle?.a,0,0),b:n(p?.cycle?.b,0,0)},latency:p?.latency==='auto'||p?.latency==null?'auto':n(p.latency,0,0,1000),tracks,regions,sel:null,track:tracks[0]?.id||null,t:n(p?.t,0,0),pxs:n(p?.pxs,40,1,2000)}}
 const projectData=()=>({title:P.title,bpm:P.bpm,sig:P.sig,grid:P.grid,metro:P.metro,countIn:P.countIn,cycle:P.cycle,latency:P.latency,tracks:P.tracks,regions:P.regions,t:P.t,pxs:P.pxs});
 // Bozza: progetto e stato dell'editor a ogni modifica; i suoni solo quando sono nuovi o cambiati.
+// Un suono entra nella bozza come un unico Blob con i canali uno dopo l'altro: il browser lo scrive senza bloccare
+// la pagina, mentre un elenco di numeri andrebbe copiato e convertito tutto prima di salvarlo.
+const sourceDraft=b=>({rate:b.sampleRate,nch:b.numberOfChannels,length:b.length,data:new Blob(Array.from({length:b.numberOfChannels},(_,c)=>b.getChannelData(c)))});
+async function sourceFromDraft(d){if(d?.channels?.length)return makeBuffer(d.channels,d.rate);if(!(d?.data instanceof Blob)||!(d.length>0)||!(d.nch>0)||d.data.size!==d.length*d.nch*4)return null;
+ const all=await d.data.arrayBuffer(),b=new AudioBuffer({length:d.length,numberOfChannels:d.nch,sampleRate:d.rate});for(let c=0;c<d.nch;c++)b.copyToChannel(new Float32Array(all,c*d.length*4,d.length),c);return b}
 async function persistAudio(){const meta={...projectData(),sel:P.sel,track:P.track,version:P.version,exported:P.exported,editor:A.region?{region:A.region,cursor:A.cursor,selA:A.selA,selB:A.selB}:null};
  const used=new Set(P.regions.map(r=>r.src));let bytes=0;for(const id of used){const b=SOURCES.get(id);if(b)bytes+=b.length*b.numberOfChannels*4}
  if(bytes>DRAFT_LIMIT){await dbPut('audio-project',{...meta,regions:[],tooBig:true});return 'Progetto troppo grande per la bozza: salvalo in ZIP per non perderlo'}
  // Un suono non più usato resta da salvare: se l'eliminazione della sua regione viene annullata, serve ancora.
- for(const id of [...dirtySources]){const b=SOURCES.get(id);if(!b){dirtySources.delete(id);continue}if(used.has(id)){dirtySources.delete(id);await dbPut('asrc:'+id,{rate:b.sampleRate,channels:Array.from({length:b.numberOfChannels},(_,c)=>b.getChannelData(c))})}}
+ for(const id of [...dirtySources]){const b=SOURCES.get(id);if(!b){dirtySources.delete(id);continue}if(used.has(id)){dirtySources.delete(id);await dbPut('asrc:'+id,sourceDraft(b))}}
  await dbPut('audio-project',meta);return ''}
 async function restoreAudio(){let meta=await dbGet('audio-project');
  if(!meta){const old=await dbGet('audio-meta'),data=await dbGet('audio-data');if(old&&data?.channels?.length){const buf=makeBuffer(data.channels,data.rate);if(buf){const t=newTrack(String(old.title||'Traccia 1').slice(0,80)),src=addSource(buf),r=newRegion(t.id,src,0,String(old.title||'Regione 1').slice(0,120));r.markers=Array.isArray(old.markers)?old.markers:[];Object.assign(P,{title:String(old.title||'Audio1').slice(0,120),tracks:[t],regions:[r],track:t.id,sel:r.id});await persistAudio();await dbDel('audio-meta');await dbDel('audio-data')}}return}
  Object.assign(P,cleanAudioProject(meta));P.sel=regionOf(meta.sel)?meta.sel:null;P.track=trackOf(meta.track)?meta.track:P.tracks[0]?.id||null;P.version=meta.version||0;P.exported=meta.exported??P.version;
- const missing=[];for(const id of new Set(P.regions.map(r=>r.src))){const d=await dbGet('asrc:'+id);const b=d?.channels?.length?makeBuffer(d.channels,d.rate):null;if(b)SOURCES.set(id,b);else missing.push(id)}
+ const missing=[];for(const id of new Set(P.regions.map(r=>r.src))){const b=await sourceFromDraft(await dbGet('asrc:'+id)).catch(()=>null);if(b)SOURCES.set(id,b);else missing.push(id)}
  if(missing.length){P.regions=P.regions.filter(r=>!missing.includes(r.src));toast('Alcune regioni non sono state recuperate dalla bozza')}if(meta.tooBig)toast('Il progetto era troppo grande per la bozza: riaprilo dal file ZIP salvato')
  const ed=meta.editor&&regionOf(meta.editor.region);if(ed&&openRegion(ed,{focus:false,quiet:true})){A.cursor=meta.editor.cursor|0;A.selA=meta.editor.selA|0;A.selB=meta.editor.selB|0;clampSel()}}
 async function gcSources(){try{const used=new Set(P.regions.map(r=>'asrc:'+r.src));for(const k of await dbKeys())if(String(k).startsWith('asrc:')&&!used.has(k))await dbDel(k)}catch(e){}}
@@ -77,6 +82,6 @@ async function saveAudioProjectZip(){if(!P.tracks.length){toast('Il progetto è 
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(P.title+' (progetto audio)','zip'));P.exported=P.version;schedulePersist('audio');toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Audio`)}
 async function openAudioProjectZip(entries){let data;try{data=JSON.parse(await entries['progetto-audio.json'].text())}catch(e){toast('Il file progetto-audio.json è danneggiato');return}
  if(audioModified()&&!(await confirmAction('Aprendo il progetto sostituisci quello attuale. Continuare?','Apri')))return;const p=cleanAudioProject(data.progetto||data),bufs=new Map();
- for(const id of new Set(p.regions.map(r=>r.src))){const f=entries[`audio/${id}.wav`];if(!f)continue;try{const w=readWav(await f.arrayBuffer());const b=makeBuffer(w.channels,w.rate);if(b)bufs.set(id,b)}catch(e){}}
+ for(const id of new Set(p.regions.map(r=>r.src))){const f=entries[`audio/${id}.wav`];if(!f)continue;try{const b=readWav(await f.arrayBuffer())?.buffer;if(b)bufs.set(id,b)}catch(e){}}
  mixStop(false);closeRegionEditor();SOURCES.clear();dirtySources.clear();for(const [id,b] of bufs){SOURCES.set(id,b);dirtySources.add(id)}phist=[];predo=[];Object.assign(P,p);P.regions=P.regions.filter(r=>SOURCES.has(r.src));P.exported=P.version+1;projectChanged();
  $('docTitle').value=P.title;updateTitle();await gcSources();announce(`Progetto «${P.title}» aperto: ${P.tracks.length} tracce, ${P.regions.length} regioni, ${sayTime(projDur())}`)}

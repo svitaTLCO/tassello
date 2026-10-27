@@ -87,13 +87,17 @@ async function runExport({mime,ext,bps,burn,srt,name}){vStop();const T=totalDur(
  const outcome=await done,exp=VE.exp;exp.completed=true;vStop();await new Promise(r=>{rec.onstop=r;if(rec.state!=='inactive')rec.stop();else r()});try{vMaster().limiter.disconnect(dest)}catch(e){}stream.getTracks().forEach(t=>t.stop());exp.close?.(null);VE.exp=null;$('viewCanvas').focus();
  if(outcome==='cancel'){toast('Esportazione annullata');return}
  let blob=new Blob(chunks,{type:mime.split(';')[0]});if(ext==='webm')blob=await fixWebmDuration(blob,T*1000);const file=extName(name,ext);download(blob,file);if(srt&&V.p.subs.length)download(srtText(V.p.subs),extName(name,'srt'),'application/x-subrip');
- const warn=flashWarnings(exp.lum);V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');
+ await lumDone(exp);const warn=flashWarnings(exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');
  toast(`Video esportato: ${file} (${fmtBytes(blob.size)}).${warn.length?` Attenzione: possibili lampeggiamenti pericolosi a ${warn.slice(0,3).map(w=>fmtTime(w,0)).join(', ')}. Apri Verifica l’accessibilità.`:''}`)}
 // Durante l'esportazione: avanzamento e misura della luminosità media di ogni fotogramma, per trovare i lampeggiamenti.
 const lumCanvas=document.createElement('canvas');lumCanvas.width=32;lumCanvas.height=18;const lumG=lumCanvas.getContext('2d',{willReadFrequently:true});
 const linear=v=>{v/=255;return v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4};
 function frameLuminance(src){lumG.drawImage(src,0,0,32,18);const d=lumG.getImageData(0,0,32,18).data;let s=0;for(let i=0;i<d.length;i+=4)s+=0.2126*linear(d[i])+0.7152*linear(d[i+1])+0.0722*linear(d[i+2]);return s/(d.length/4)}
-function expFrame(t){const e=VE.exp;e.lum.push([t,frameLuminance(view)]);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`Esportazione al ${step*10}%`)}}}
+// Il fotogramma si riduce a 32 × 18 fuori dalla pagina (createImageBitmap): leggerlo intero bloccherebbe il disegno
+// per circa 14 ms in 1080p e all'esportazione si perderebbero fotogrammi. Le misure arrivano poco dopo, in ordine di tempo.
+function measureFrame(e,t){e.inflight=(e.inflight||0)+1;createImageBitmap(view,{resizeWidth:32,resizeHeight:18,resizeQuality:'medium'}).then(b=>{e.lum.push([t,frameLuminance(b)]);b.close()}).catch(()=>{}).finally(()=>{if(--e.inflight===0)e.idle?.()})}
+const lumDone=e=>e.inflight?new Promise(r=>{e.idle=r}):Promise.resolve();
+function expFrame(t){const e=VE.exp;measureFrame(e,t);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`Esportazione al ${step*10}%`)}}}
 // Impronta di ciò che si vede: se cambia, l'analisi dei lampeggiamenti va rifatta.
 function visualKey(){const s=JSON.stringify([V.p.main,V.p.titles,V.p.w,V.p.h,V.p.fps,V.p.bg,V.p.burnSubs&&V.p.subs]);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36)}
 // Lampeggiamenti (WCAG 2.3.1): coppie di variazioni opposte di luminosità di almeno il 10%, più di tre in un secondo.
@@ -104,7 +108,7 @@ async function analyzeFlashes(){const T=totalDur();if(T<=0){toast('La linea temp
  VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:V.p.burnSubs,T,lum:[],finish,lastPct:-1,step:-1,completed:false,close:null};
  modal('Analisi dei lampeggiamenti',`<p>Il montaggio scorre senza audio e viene misurata la luminosità di ogni fotogramma. Dura circa ${esc(sayTime(T))}.</p><div class="progress" id="expBar" role="progressbar" aria-label="Avanzamento dell’analisi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div><p id="expText">Preparazione…</p>`,[],'Annulla',{noCancel:true,restore:false,onOpen:(p,close)=>{VE.exp.close=close}}).then(()=>{if(VE.exp&&!VE.exp.completed)VE.exp.finish('cancel')});
  V.t=0;await showFrame(0);vPlay();const outcome=await done,exp=VE.exp;exp.completed=true;vStop();exp.close?.(null);VE.exp=null;vMaster().gain.value=1;if(outcome==='cancel'){toast('Analisi annullata');return null}
- const warn=flashWarnings(exp.lum);V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
+ await lumDone(exp);const warn=flashWarnings(exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
 // Solo audio: mixaggio fuori linea delle clip e della traccia audio, molto più veloce del tempo reale.
 // Le clip accelerate o rallentate mantengono l'intonazione, come nell'anteprima.
 const decoded=new Map();

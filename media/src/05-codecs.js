@@ -18,15 +18,18 @@ function readWav(buf){const v=new DataView(buf);if(v.byteLength<12)return null;c
  if(!(tag===1&&[8,16,24,32].includes(bits))&&!(tag===3&&(bits===32||bits===64)))throw Error(`Formato WAV non supportato (codifica ${tag}, ${bits} bit)`);
  if(!ch||ch>MAX_CHANNELS)throw Error(`File WAV con ${ch} canali: se ne aprono al massimo ${MAX_CHANNELS}`);
  if(rate<3000||rate>768000)throw Error('Frequenza di campionamento non supportata: '+rate+' Hz');
- const frames=Math.floor(data.len/(ch*bps)),out=Array.from({length:ch},()=>new Float32Array(frames)),raw=buf.slice(data.off,data.off+frames*ch*bps);
- if(tag===3&&bits===32){const a=new Float32Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=a[k++]}
- else if(tag===3){const a=new Float64Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=a[k++]}
- else if(bits===16){const a=new Int16Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=a[k++]/32768}
- else if(bits===32){const a=new Int32Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=a[k++]/2147483648}
- else if(bits===8){const a=new Uint8Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=(a[k++]-128)/128}
- else{const a=new Uint8Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++,k+=3)out[c][i]=((a[k]|a[k+1]<<8|a[k+2]<<16)<<8>>8)/8388608}
+ // I campioni si leggono sul posto (senza copiare i dati del file quando la loro posizione lo permette) e vanno
+ // direttamente nei canali dell'AudioBuffer; un ciclo per formato, così il browser lo rende veloce.
+ const frames=Math.floor(data.len/(ch*bps)),n=frames*ch,out=frames?new AudioBuffer({length:frames,numberOfChannels:ch,sampleRate:rate}):null,chans=Array.from({length:out?ch:0},(_,c)=>out.getChannelData(c));
+ const view=(T,size)=>data.off%size?new T(buf.slice(data.off,data.off+n*size)):new T(buf,data.off,n);
+ if(tag===3&&bits===32){const a=view(Float32Array,4);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=a[k]}}
+ else if(tag===3){const a=view(Float64Array,8);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=a[k]}}
+ else if(bits===16){const a=view(Int16Array,2);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=a[k]*(1/32768)}}
+ else if(bits===32){const a=view(Int32Array,4);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=a[k]*(1/2147483648)}}
+ else if(bits===8){const a=new Uint8Array(buf,data.off,n);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=(a[k]-128)*(1/128)}}
+ else{const a=new Uint8Array(buf,data.off,n*3),step=ch*3;for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c*3;i<frames;i++,k+=step)d[i]=((a[k]|a[k+1]<<8|a[k+2]<<16)<<8>>8)*(1/8388608)}}
  const markers=cues.filter(c=>c.pos<=frames).sort((a,b)=>a.pos-b.pos).map((c,i)=>({id:uid(),pos:c.pos,label:labels.get(c.id)||'Marcatore '+(i+1)}));
- return{rate,channels:out,markers}}
+ return{rate,buffer:out,markers}}
 // WAV a 16 o 24 bit interi oppure 32 bit in virgola mobile, dal campione start a end; i marcatori diventano cue e labl.
 function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length){const ch=buffer.numberOfChannels,rate=buffer.sampleRate,frames=Math.max(0,end-start),float=bits===32,bps=bits/8,dataLen=frames*ch*bps;
  if(dataLen+1e6>0xFFFFFFFF)throw Error('Il file supera i 4 GB del formato WAV: esporta una parte alla volta');
@@ -39,9 +42,10 @@ function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length){const ch=b
  w4(0,'RIFF');v.setUint32(4,head.byteLength-8+dataLen+(dataLen&1)+tailLen,true);w4(8,'WAVE');w4(12,'fmt ');v.setUint32(16,fmtLen,true);v.setUint16(20,float?3:1,true);v.setUint16(22,ch,true);v.setUint32(24,rate,true);v.setUint32(28,rate*ch*bps,true);v.setUint16(32,ch*bps,true);v.setUint16(34,bits,true);
  let at=36;if(float){v.setUint16(at,0,true);at+=2;w4(at,'fact');v.setUint32(at+4,4,true);v.setUint32(at+8,frames,true);at+=12}w4(at,'data');v.setUint32(at+4,dataLen,true);
  const parts=[head],chans=Array.from({length:ch},(_,c)=>buffer.getChannelData(c)),BLOCK=1<<18;
- for(let i=start;i<end;i+=BLOCK){const n=Math.min(BLOCK,end-i);if(float){const a=new Float32Array(n*ch);for(let j=0,k=0;j<n;j++)for(let c=0;c<ch;c++)a[k++]=chans[c][i+j];parts.push(a)}
-  else if(bits===16){const a=new Int16Array(n*ch);for(let j=0,k=0;j<n;j++)for(let c=0;c<ch;c++){const x=chans[c][i+j];a[k++]=x<=-1?-32768:x>=1?32767:Math.round(x*32767)}parts.push(a)}
-  else{const a=new Uint8Array(n*ch*3);for(let j=0,k=0;j<n;j++)for(let c=0;c<ch;c++,k+=3){const x=chans[c][i+j],s=x<=-1?-8388608:x>=1?8388607:Math.round(x*8388607);a[k]=s&255;a[k+1]=s>>8&255;a[k+2]=s>>16&255}parts.push(a)}}
+ for(let i=start;i<end;i+=BLOCK){const n=Math.min(BLOCK,end-i);
+  if(float){const a=new Float32Array(n*ch);for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c;j<n;j++,k+=ch)a[k]=d[i+j]}parts.push(a)}
+  else if(bits===16){const a=new Int16Array(n*ch);for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c;j<n;j++,k+=ch){const x=d[i+j];a[k]=x<=-1?-32768:x>=1?32767:Math.round(x*32767)}}parts.push(a)}
+  else{const a=new Uint8Array(n*ch*3),step=ch*3;for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c*3;j<n;j++,k+=step){const x=d[i+j],s=x<=-1?-8388608:x>=1?8388607:Math.round(x*8388607);a[k]=s&255;a[k+1]=s>>8&255;a[k+2]=s>>16&255}}parts.push(a)}}
  if(dataLen&1)parts.push(new Uint8Array(1));parts.push(...tail);return new Blob(parts,{type:'audio/wav'})}
 // AudioBuffer con i canali dati; la frequenza resta quella del file.
 function makeBuffer(channels,rate){const len=channels[0]?.length||0;if(!len)return null;const b=new AudioBuffer({length:len,numberOfChannels:channels.length,sampleRate:rate});channels.forEach((d,c)=>b.copyToChannel(d,c));return b}
@@ -51,7 +55,7 @@ async function resampleBuffer(buf,rate){if(!buf||buf.sampleRate===rate)return bu
 // interno, che conserva la frequenza originale, i bit in virgola mobile e i marcatori.
 let decodeCtx=null;
 async function decodeAudioFile(file){const buf=await file.arrayBuffer();let wav=null;try{wav=readWav(buf)}catch(e){if(/WAV/.test(e.message)&&!/non supportato/.test(e.message))throw e}
- if(wav)return{buffer:makeBuffer(wav.channels,wav.rate),markers:wav.markers};
+ if(wav)return{buffer:wav.buffer,markers:wav.markers};
  decodeCtx??=new (window.AudioContext||window.webkitAudioContext)();let out;
  try{out=await decodeCtx.decodeAudioData(buf)}catch(e){throw Error(`Il browser non sa leggere l’audio di «${file.name}»`)}
  return{buffer:out,markers:[]}}

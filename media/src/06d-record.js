@@ -30,13 +30,13 @@ async function recordDialog({title='Registra dal microfono',intro='',places=null
 // e il metronomo; oppure dentro la regione aperta nell'editor, come un normale inserimento.
 async function recordAudio(){if(MIX.playing)mixStop(true);stopPlayback(false);const t=selTrack(),from=P.t,inEditor=!!(A.buf&&A.region);
  const places=[...(t?[['track',`Nella traccia «${t.name}», da ${fmtTime(from,1)}`]]:[]),['newtrack',`In una nuova traccia, da ${fmtTime(from,1)}`],...(inEditor?[...(hasSel()?[['replace','Nell’editor, al posto della selezione della regione']]:[]),['cursor','Nell’editor, al cursore della regione']]:[])];
- let c0=null;const hasOthers=P.regions.length>0||P.metro;
+ let c0=null,glat=0;const hasOthers=P.regions.length>0||P.metro;
  await recordDialog({title:'Registra',intro:hasOthers?'Mentre registri senti le altre tracce dall’indicatore in poi: usa le cuffie, così il microfono non le riprende.'+(P.countIn?' Prima di iniziare senti una battuta di conteggio.':''):(P.countIn?'Prima di iniziare senti una battuta di conteggio.':''),places,
-  onStart:async place=>{if(place==='replace'||place==='cursor')return;if(P.countIn)await countIn();if(hasOthers){mixPlay(from,{recording:true,origin:from});c0=MIX.c0}},
+  onStart:async place=>{if(place==='replace'||place==='cursor')return;if(P.countIn)await countIn();if(hasOthers){mixPlay(from,{recording:true,origin:from});c0=MIX.c0;glat=MIX.lat}},
   onStop:()=>{if(MIX.recording)mixStop(false)},
   onDone:async(buf,place,info)=>{
    if(place==='replace'||place==='cursor'){const ins=await conformAudio(buf),[a,b]=place==='replace'?[A.selA,A.selB]:[A.cursor,A.cursor];audioEdit('Registrazione',a,b,ins);announce('Registrazione di '+sayTime(buf.duration)+' inserita nella regione: ora è selezionata');$('wave').focus();return}
-   const ctx=actxGet(),lat=P.latency==='auto'?(ctx.outputLatency||0)+(ctx.baseLatency||0)+info.inputLatency:P.latency/1000;let start=from;
+   const ctx=actxGet(),lat=P.latency==='auto'?(ctx.outputLatency||0)+(ctx.baseLatency||0)+info.inputLatency+glat:P.latency/1000;let start=from;
    if(c0!==null&&info.first!==null)start=from+(info.first-c0)-lat;if(start<0){const cut=Math.min(buf.length-1,Math.round(-start*buf.sampleRate));buf=makeBuffer(sliceCh(buf,cut,buf.length),buf.sampleRate);start=0}
    const src=addSource(buf);let r,tr;pCommit('Registrazione',()=>{tr=place==='track'&&t?t:null;if(!tr){tr=newTrack(P.tracks.length?'Voce '+(P.tracks.length+1):'Voce');P.tracks.push(tr)}r=newRegion(tr.id,src,start,'Registrazione '+(P.regions.filter(x=>x.track===tr.id).length+1));P.regions.push(r);P.sel=r.id;P.track=tr.id});
    P.t=from;updateArrangeUI();focusLane(tr.id);announce(`Registrazione di ${sayTime(buf.duration)} sulla traccia «${tr.name}», da ${sayTime(r.start,2)}`)}})}

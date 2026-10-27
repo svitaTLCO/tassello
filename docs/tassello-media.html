@@ -957,7 +957,7 @@ const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc
  v:[['Sull’indicatore di riproduzione',[['Un fotogramma indietro o avanti','← →'],['Un secondo indietro o avanti','Maiusc+← / Maiusc+→'],['Cinque secondi indietro o avanti','PgSu / PgGiù'],['Taglio precedente o successivo','↑ / ↓'],['Inizio o fine del montaggio','Home / Fine'],['Riproduci o pausa','Spazio'],['Indietro, pausa, avanti veloce','J / K / L'],['Dividi la clip all’indicatore','S'],['Taglia inizio o fine della clip all’indicatore','Q / W'],['Zoom avanti, indietro, tutto','+ / − / 0']]],['Nelle tracce',[['Elemento precedente o successivo','← →'],['Primo o ultimo elemento','Home / Fine'],['Sposta l’elemento di un secondo indietro o avanti: le clip attaccate in quella direzione si spostano insieme','Ctrl+← / Ctrl+→'],['Sposta l’elemento di un fotogramma','Ctrl+Maiusc+← / Ctrl+Maiusc+→'],['Modifica le proprietà','Invio'],['Elimina l’elemento','Canc'],['Menu dell’elemento','Maiusc+F10'],['Traccia sopra o sotto','↑ / ↓']]],['Nella raccolta',[['Scegli un file','↑ ↓'],['Aggiungi alla linea temporale','Invio'],['Menu del file','Maiusc+F10'],['Togli dalla raccolta','Canc']]]]};
 function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${isAudio()?'Audio':'Video'}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
-async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.1.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli e lampeggiamenti pericolosi.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori.</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.1.1</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli e lampeggiamenti pericolosi.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori.</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
 // Aree raggiungibili con F6 e Maiusc+F6.
 let lastTrack='trk-main';
 function regions(){const l=[$('titlebar'),$('tabrow'),$('ribbon')];if(isAudio()){l.push($('aTransport'),$('arrange'));if(!$('editorArea').classList.contains('closed'))l.push($('wave'),$('selbar'));if(!$('markPane').hidden)l.push($('markPane'))}else l.push($('libList').closest('.library'),$('vTransport'),$('timeline'),$('inspBody').closest('.inspector'));l.push($('statusbar'));return l.filter(el=>el.offsetWidth||el.offsetHeight)}
@@ -1012,15 +1012,18 @@ function readWav(buf){const v=new DataView(buf);if(v.byteLength<12)return null;c
  if(!(tag===1&&[8,16,24,32].includes(bits))&&!(tag===3&&(bits===32||bits===64)))throw Error(`Formato WAV non supportato (codifica ${tag}, ${bits} bit)`);
  if(!ch||ch>MAX_CHANNELS)throw Error(`File WAV con ${ch} canali: se ne aprono al massimo ${MAX_CHANNELS}`);
  if(rate<3000||rate>768000)throw Error('Frequenza di campionamento non supportata: '+rate+' Hz');
- const frames=Math.floor(data.len/(ch*bps)),out=Array.from({length:ch},()=>new Float32Array(frames)),raw=buf.slice(data.off,data.off+frames*ch*bps);
- if(tag===3&&bits===32){const a=new Float32Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=a[k++]}
- else if(tag===3){const a=new Float64Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=a[k++]}
- else if(bits===16){const a=new Int16Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=a[k++]/32768}
- else if(bits===32){const a=new Int32Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=a[k++]/2147483648}
- else if(bits===8){const a=new Uint8Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++)out[c][i]=(a[k++]-128)/128}
- else{const a=new Uint8Array(raw);for(let i=0,k=0;i<frames;i++)for(let c=0;c<ch;c++,k+=3)out[c][i]=((a[k]|a[k+1]<<8|a[k+2]<<16)<<8>>8)/8388608}
+ // I campioni si leggono sul posto (senza copiare i dati del file quando la loro posizione lo permette) e vanno
+ // direttamente nei canali dell'AudioBuffer; un ciclo per formato, così il browser lo rende veloce.
+ const frames=Math.floor(data.len/(ch*bps)),n=frames*ch,out=frames?new AudioBuffer({length:frames,numberOfChannels:ch,sampleRate:rate}):null,chans=Array.from({length:out?ch:0},(_,c)=>out.getChannelData(c));
+ const view=(T,size)=>data.off%size?new T(buf.slice(data.off,data.off+n*size)):new T(buf,data.off,n);
+ if(tag===3&&bits===32){const a=view(Float32Array,4);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=a[k]}}
+ else if(tag===3){const a=view(Float64Array,8);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=a[k]}}
+ else if(bits===16){const a=view(Int16Array,2);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=a[k]*(1/32768)}}
+ else if(bits===32){const a=view(Int32Array,4);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=a[k]*(1/2147483648)}}
+ else if(bits===8){const a=new Uint8Array(buf,data.off,n);for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c;i<frames;i++,k+=ch)d[i]=(a[k]-128)*(1/128)}}
+ else{const a=new Uint8Array(buf,data.off,n*3),step=ch*3;for(let c=0;c<chans.length;c++){const d=chans[c];for(let i=0,k=c*3;i<frames;i++,k+=step)d[i]=((a[k]|a[k+1]<<8|a[k+2]<<16)<<8>>8)*(1/8388608)}}
  const markers=cues.filter(c=>c.pos<=frames).sort((a,b)=>a.pos-b.pos).map((c,i)=>({id:uid(),pos:c.pos,label:labels.get(c.id)||'Marcatore '+(i+1)}));
- return{rate,channels:out,markers}}
+ return{rate,buffer:out,markers}}
 // WAV a 16 o 24 bit interi oppure 32 bit in virgola mobile, dal campione start a end; i marcatori diventano cue e labl.
 function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length){const ch=buffer.numberOfChannels,rate=buffer.sampleRate,frames=Math.max(0,end-start),float=bits===32,bps=bits/8,dataLen=frames*ch*bps;
  if(dataLen+1e6>0xFFFFFFFF)throw Error('Il file supera i 4 GB del formato WAV: esporta una parte alla volta');
@@ -1033,9 +1036,10 @@ function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length){const ch=b
  w4(0,'RIFF');v.setUint32(4,head.byteLength-8+dataLen+(dataLen&1)+tailLen,true);w4(8,'WAVE');w4(12,'fmt ');v.setUint32(16,fmtLen,true);v.setUint16(20,float?3:1,true);v.setUint16(22,ch,true);v.setUint32(24,rate,true);v.setUint32(28,rate*ch*bps,true);v.setUint16(32,ch*bps,true);v.setUint16(34,bits,true);
  let at=36;if(float){v.setUint16(at,0,true);at+=2;w4(at,'fact');v.setUint32(at+4,4,true);v.setUint32(at+8,frames,true);at+=12}w4(at,'data');v.setUint32(at+4,dataLen,true);
  const parts=[head],chans=Array.from({length:ch},(_,c)=>buffer.getChannelData(c)),BLOCK=1<<18;
- for(let i=start;i<end;i+=BLOCK){const n=Math.min(BLOCK,end-i);if(float){const a=new Float32Array(n*ch);for(let j=0,k=0;j<n;j++)for(let c=0;c<ch;c++)a[k++]=chans[c][i+j];parts.push(a)}
-  else if(bits===16){const a=new Int16Array(n*ch);for(let j=0,k=0;j<n;j++)for(let c=0;c<ch;c++){const x=chans[c][i+j];a[k++]=x<=-1?-32768:x>=1?32767:Math.round(x*32767)}parts.push(a)}
-  else{const a=new Uint8Array(n*ch*3);for(let j=0,k=0;j<n;j++)for(let c=0;c<ch;c++,k+=3){const x=chans[c][i+j],s=x<=-1?-8388608:x>=1?8388607:Math.round(x*8388607);a[k]=s&255;a[k+1]=s>>8&255;a[k+2]=s>>16&255}parts.push(a)}}
+ for(let i=start;i<end;i+=BLOCK){const n=Math.min(BLOCK,end-i);
+  if(float){const a=new Float32Array(n*ch);for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c;j<n;j++,k+=ch)a[k]=d[i+j]}parts.push(a)}
+  else if(bits===16){const a=new Int16Array(n*ch);for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c;j<n;j++,k+=ch){const x=d[i+j];a[k]=x<=-1?-32768:x>=1?32767:Math.round(x*32767)}}parts.push(a)}
+  else{const a=new Uint8Array(n*ch*3),step=ch*3;for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c*3;j<n;j++,k+=step){const x=d[i+j],s=x<=-1?-8388608:x>=1?8388607:Math.round(x*8388607);a[k]=s&255;a[k+1]=s>>8&255;a[k+2]=s>>16&255}}parts.push(a)}}
  if(dataLen&1)parts.push(new Uint8Array(1));parts.push(...tail);return new Blob(parts,{type:'audio/wav'})}
 // AudioBuffer con i canali dati; la frequenza resta quella del file.
 function makeBuffer(channels,rate){const len=channels[0]?.length||0;if(!len)return null;const b=new AudioBuffer({length:len,numberOfChannels:channels.length,sampleRate:rate});channels.forEach((d,c)=>b.copyToChannel(d,c));return b}
@@ -1045,7 +1049,7 @@ async function resampleBuffer(buf,rate){if(!buf||buf.sampleRate===rate)return bu
 // interno, che conserva la frequenza originale, i bit in virgola mobile e i marcatori.
 let decodeCtx=null;
 async function decodeAudioFile(file){const buf=await file.arrayBuffer();let wav=null;try{wav=readWav(buf)}catch(e){if(/WAV/.test(e.message)&&!/non supportato/.test(e.message))throw e}
- if(wav)return{buffer:makeBuffer(wav.channels,wav.rate),markers:wav.markers};
+ if(wav)return{buffer:wav.buffer,markers:wav.markers};
  decodeCtx??=new (window.AudioContext||window.webkitAudioContext)();let out;
  try{out=await decodeCtx.decodeAudioData(buf)}catch(e){throw Error(`Il browser non sa leggere l’audio di «${file.name}»`)}
  return{buffer:out,markers:[]}}
@@ -1131,9 +1135,15 @@ async function fixWebmDuration(blob,durationMs){try{const head=new Uint8Array(aw
    if(!seg.unknown){const fixed=ebmlLen(seg.size+grow,seg.sizeLen);if(fixed.length!==seg.sizeLen)return blob;const pre=head.slice(0,el.start);pre.set(fixed,seg.sizeAt);parts[0]=pre}
    return new Blob(parts,{type:blob.type})}
   at=el.data+el.size}return blob}catch(e){console.warn('Durata non aggiunta',e);return blob}}
+// CRC32 a otto byte per passo (slicing-by-8): otto tabelle e una lettura di 8 byte alla volta, circa 5 volte più veloce
+// del calcolo byte per byte. Serve per gli archivi ZIP, che con i video arrivano a qualche GB.
+const CRC_TABLES=(()=>{const t=Array.from({length:8},()=>new Int32Array(256));for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[0][n]=c}for(let n=0;n<256;n++){let c=t[0][n];for(let k=1;k<8;k++){c=t[0][c&255]^(c>>>8);t[k][n]=c}}return t})();
+async function crc32Blob(blob,progress=()=>{}){const [t0,t1,t2,t3,t4,t5,t6,t7]=CRC_TABLES,reader=blob.stream().getReader();let c=-1,done=0;
+ for(;;){const {value:b,done:end}=await reader.read();if(end)break;const n=b.length,e=n-(n&7);let i=0;
+  for(;i<e;i+=8){const lo=(b[i]|b[i+1]<<8|b[i+2]<<16|b[i+3]<<24)^c,hi=b[i+4]|b[i+5]<<8|b[i+6]<<16|b[i+7]<<24;c=t7[lo&255]^t6[lo>>>8&255]^t5[lo>>>16&255]^t4[lo>>>24]^t3[hi&255]^t2[hi>>>8&255]^t1[hi>>>16&255]^t0[hi>>>24]}
+  for(;i<n;i++)c=t0[(c^b[i])&255]^(c>>>8);done+=n;progress(done)}
+ return (c^-1)>>>0}
 // ZIP con i file memorizzati senza compressione: i video sono già compressi e i dati restano nei Blob, senza copiarli in memoria.
-const CRC_TABLE=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
-async function crc32Blob(blob,progress=()=>{}){let c=0xFFFFFFFF,done=0;const reader=blob.stream().getReader();for(;;){const {value,done:end}=await reader.read();if(end)break;for(let i=0;i<value.length;i++)c=CRC_TABLE[(c^value[i])&255]^(c>>>8);done+=value.length;progress(done)}return (c^0xFFFFFFFF)>>>0}
 async function zipBlob(files,progress=()=>{}){const parts=[],dir=[],d=new Date(),time=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),date=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate(),total=files.reduce((n,f)=>n+(f.data.size??f.data.length),0);let offset=0,done=0;
  if(total>0xFFFFFFF0)throw Error('Il progetto supera i 4 GB che un file ZIP semplice può contenere');
  for(const f of files){const data=f.data instanceof Blob?f.data:new Blob([f.data]),name=te.encode(f.name),crc=await crc32Blob(data,n=>progress((done+n)/Math.max(1,total)));done+=data.size;
@@ -1555,13 +1565,13 @@ async function recordDialog({title='Registra dal microfono',intro='',places=null
 // e il metronomo; oppure dentro la regione aperta nell'editor, come un normale inserimento.
 async function recordAudio(){if(MIX.playing)mixStop(true);stopPlayback(false);const t=selTrack(),from=P.t,inEditor=!!(A.buf&&A.region);
  const places=[...(t?[['track',`Nella traccia «${t.name}», da ${fmtTime(from,1)}`]]:[]),['newtrack',`In una nuova traccia, da ${fmtTime(from,1)}`],...(inEditor?[...(hasSel()?[['replace','Nell’editor, al posto della selezione della regione']]:[]),['cursor','Nell’editor, al cursore della regione']]:[])];
- let c0=null;const hasOthers=P.regions.length>0||P.metro;
+ let c0=null,glat=0;const hasOthers=P.regions.length>0||P.metro;
  await recordDialog({title:'Registra',intro:hasOthers?'Mentre registri senti le altre tracce dall’indicatore in poi: usa le cuffie, così il microfono non le riprende.'+(P.countIn?' Prima di iniziare senti una battuta di conteggio.':''):(P.countIn?'Prima di iniziare senti una battuta di conteggio.':''),places,
-  onStart:async place=>{if(place==='replace'||place==='cursor')return;if(P.countIn)await countIn();if(hasOthers){mixPlay(from,{recording:true,origin:from});c0=MIX.c0}},
+  onStart:async place=>{if(place==='replace'||place==='cursor')return;if(P.countIn)await countIn();if(hasOthers){mixPlay(from,{recording:true,origin:from});c0=MIX.c0;glat=MIX.lat}},
   onStop:()=>{if(MIX.recording)mixStop(false)},
   onDone:async(buf,place,info)=>{
    if(place==='replace'||place==='cursor'){const ins=await conformAudio(buf),[a,b]=place==='replace'?[A.selA,A.selB]:[A.cursor,A.cursor];audioEdit('Registrazione',a,b,ins);announce('Registrazione di '+sayTime(buf.duration)+' inserita nella regione: ora è selezionata');$('wave').focus();return}
-   const ctx=actxGet(),lat=P.latency==='auto'?(ctx.outputLatency||0)+(ctx.baseLatency||0)+info.inputLatency:P.latency/1000;let start=from;
+   const ctx=actxGet(),lat=P.latency==='auto'?(ctx.outputLatency||0)+(ctx.baseLatency||0)+info.inputLatency+glat:P.latency/1000;let start=from;
    if(c0!==null&&info.first!==null)start=from+(info.first-c0)-lat;if(start<0){const cut=Math.min(buf.length-1,Math.round(-start*buf.sampleRate));buf=makeBuffer(sliceCh(buf,cut,buf.length),buf.sampleRate);start=0}
    const src=addSource(buf);let r,tr;pCommit('Registrazione',()=>{tr=place==='track'&&t?t:null;if(!tr){tr=newTrack(P.tracks.length?'Voce '+(P.tracks.length+1):'Voce');P.tracks.push(tr)}r=newRegion(tr.id,src,start,'Registrazione '+(P.regions.filter(x=>x.track===tr.id).length+1));P.regions.push(r);P.sel=r.id;P.track=tr.id});
    P.t=from;updateArrangeUI();focusLane(tr.id);announce(`Registrazione di ${sayTime(buf.duration)} sulla traccia «${tr.name}», da ${sayTime(r.start,2)}`)}})}
@@ -1625,73 +1635,120 @@ function cleanAudioProject(p){const n=(v,d,lo=-Infinity,hi=Infinity)=>Number.isF
  return{title:s(p?.title||'Audio1',120),bpm:n(p?.bpm,120,30,300),sig:[2,3,4,5,6,7].includes(Number(p?.sig))?Number(p.sig):4,grid:p?.grid==='beats'?'beats':'time',metro:!!p?.metro,countIn:!!p?.countIn,cycle:{on:!!p?.cycle?.on,a:n(p?.cycle?.a,0,0),b:n(p?.cycle?.b,0,0)},latency:p?.latency==='auto'||p?.latency==null?'auto':n(p.latency,0,0,1000),tracks,regions,sel:null,track:tracks[0]?.id||null,t:n(p?.t,0,0),pxs:n(p?.pxs,40,1,2000)}}
 const projectData=()=>({title:P.title,bpm:P.bpm,sig:P.sig,grid:P.grid,metro:P.metro,countIn:P.countIn,cycle:P.cycle,latency:P.latency,tracks:P.tracks,regions:P.regions,t:P.t,pxs:P.pxs});
 // Bozza: progetto e stato dell'editor a ogni modifica; i suoni solo quando sono nuovi o cambiati.
+// Un suono entra nella bozza come un unico Blob con i canali uno dopo l'altro: il browser lo scrive senza bloccare
+// la pagina, mentre un elenco di numeri andrebbe copiato e convertito tutto prima di salvarlo.
+const sourceDraft=b=>({rate:b.sampleRate,nch:b.numberOfChannels,length:b.length,data:new Blob(Array.from({length:b.numberOfChannels},(_,c)=>b.getChannelData(c)))});
+async function sourceFromDraft(d){if(d?.channels?.length)return makeBuffer(d.channels,d.rate);if(!(d?.data instanceof Blob)||!(d.length>0)||!(d.nch>0)||d.data.size!==d.length*d.nch*4)return null;
+ const all=await d.data.arrayBuffer(),b=new AudioBuffer({length:d.length,numberOfChannels:d.nch,sampleRate:d.rate});for(let c=0;c<d.nch;c++)b.copyToChannel(new Float32Array(all,c*d.length*4,d.length),c);return b}
 async function persistAudio(){const meta={...projectData(),sel:P.sel,track:P.track,version:P.version,exported:P.exported,editor:A.region?{region:A.region,cursor:A.cursor,selA:A.selA,selB:A.selB}:null};
  const used=new Set(P.regions.map(r=>r.src));let bytes=0;for(const id of used){const b=SOURCES.get(id);if(b)bytes+=b.length*b.numberOfChannels*4}
  if(bytes>DRAFT_LIMIT){await dbPut('audio-project',{...meta,regions:[],tooBig:true});return 'Progetto troppo grande per la bozza: salvalo in ZIP per non perderlo'}
  // Un suono non più usato resta da salvare: se l'eliminazione della sua regione viene annullata, serve ancora.
- for(const id of [...dirtySources]){const b=SOURCES.get(id);if(!b){dirtySources.delete(id);continue}if(used.has(id)){dirtySources.delete(id);await dbPut('asrc:'+id,{rate:b.sampleRate,channels:Array.from({length:b.numberOfChannels},(_,c)=>b.getChannelData(c))})}}
+ for(const id of [...dirtySources]){const b=SOURCES.get(id);if(!b){dirtySources.delete(id);continue}if(used.has(id)){dirtySources.delete(id);await dbPut('asrc:'+id,sourceDraft(b))}}
  await dbPut('audio-project',meta);return ''}
 async function restoreAudio(){let meta=await dbGet('audio-project');
  if(!meta){const old=await dbGet('audio-meta'),data=await dbGet('audio-data');if(old&&data?.channels?.length){const buf=makeBuffer(data.channels,data.rate);if(buf){const t=newTrack(String(old.title||'Traccia 1').slice(0,80)),src=addSource(buf),r=newRegion(t.id,src,0,String(old.title||'Regione 1').slice(0,120));r.markers=Array.isArray(old.markers)?old.markers:[];Object.assign(P,{title:String(old.title||'Audio1').slice(0,120),tracks:[t],regions:[r],track:t.id,sel:r.id});await persistAudio();await dbDel('audio-meta');await dbDel('audio-data')}}return}
  Object.assign(P,cleanAudioProject(meta));P.sel=regionOf(meta.sel)?meta.sel:null;P.track=trackOf(meta.track)?meta.track:P.tracks[0]?.id||null;P.version=meta.version||0;P.exported=meta.exported??P.version;
- const missing=[];for(const id of new Set(P.regions.map(r=>r.src))){const d=await dbGet('asrc:'+id);const b=d?.channels?.length?makeBuffer(d.channels,d.rate):null;if(b)SOURCES.set(id,b);else missing.push(id)}
+ const missing=[];for(const id of new Set(P.regions.map(r=>r.src))){const b=await sourceFromDraft(await dbGet('asrc:'+id)).catch(()=>null);if(b)SOURCES.set(id,b);else missing.push(id)}
  if(missing.length){P.regions=P.regions.filter(r=>!missing.includes(r.src));toast('Alcune regioni non sono state recuperate dalla bozza')}if(meta.tooBig)toast('Il progetto era troppo grande per la bozza: riaprilo dal file ZIP salvato')
  const ed=meta.editor&&regionOf(meta.editor.region);if(ed&&openRegion(ed,{focus:false,quiet:true})){A.cursor=meta.editor.cursor|0;A.selA=meta.editor.selA|0;A.selB=meta.editor.selB|0;clampSel()}}
 async function gcSources(){try{const used=new Set(P.regions.map(r=>'asrc:'+r.src));for(const k of await dbKeys())if(String(k).startsWith('asrc:')&&!used.has(k))await dbDel(k)}catch(e){}}
 // Progetto in un file: ZIP con progetto-audio.json e un WAV per ogni suono (32 bit in virgola mobile, senza perdite).
 async function saveAudioProjectZip(){if(!P.tracks.length){toast('Il progetto è vuoto');return}const used=[...new Set(P.regions.map(r=>r.src))].filter(id=>SOURCES.has(id));
- const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.1.0',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
+ const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.1.1',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(P.title+' (progetto audio)','zip'));P.exported=P.version;schedulePersist('audio');toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Audio`)}
 async function openAudioProjectZip(entries){let data;try{data=JSON.parse(await entries['progetto-audio.json'].text())}catch(e){toast('Il file progetto-audio.json è danneggiato');return}
  if(audioModified()&&!(await confirmAction('Aprendo il progetto sostituisci quello attuale. Continuare?','Apri')))return;const p=cleanAudioProject(data.progetto||data),bufs=new Map();
- for(const id of new Set(p.regions.map(r=>r.src))){const f=entries[`audio/${id}.wav`];if(!f)continue;try{const w=readWav(await f.arrayBuffer());const b=makeBuffer(w.channels,w.rate);if(b)bufs.set(id,b)}catch(e){}}
+ for(const id of new Set(p.regions.map(r=>r.src))){const f=entries[`audio/${id}.wav`];if(!f)continue;try{const b=readWav(await f.arrayBuffer())?.buffer;if(b)bufs.set(id,b)}catch(e){}}
  mixStop(false);closeRegionEditor();SOURCES.clear();dirtySources.clear();for(const [id,b] of bufs){SOURCES.set(id,b);dirtySources.add(id)}phist=[];predo=[];Object.assign(P,p);P.regions=P.regions.filter(r=>SOURCES.has(r.src));P.exported=P.version+1;projectChanged();
  $('docTitle').value=P.title;updateTitle();await gcSources();announce(`Progetto «${P.title}» aperto: ${P.tracks.length} tracce, ${P.regions.length} regioni, ${sayTime(projDur())}`)}
 // Motore del progetto multitraccia. Ogni traccia ha una catena di nodi audio: bassi e alti, compressione,
 // bilanciamento, volume (con muto e solo) e una mandata al riverbero comune; ogni regione è una sorgente programmata
 // con il suo guadagno e le sue dissolvenze. La stessa catena suona in tempo reale e, fuori linea, produce il mix.
-const MIX={playing:false,from:0,c0:0,origin:0,raf:0,nodes:null,srcs:[],analyser:null,out:null,metroK:0,recording:false};
+// Un effetto a zero non crea nodi: costano calcolo anche quando non cambiano il suono. Il compressore ritarda il
+// suono di 6 ms (come il limitatore finale), quindi quando una traccia lo usa le altre ricevono lo stesso ritardo.
+const MIX={playing:false,from:0,c0:0,origin:0,raf:0,timer:0,graph:null,srcs:[],passes:[],analyser:null,out:null,metroUntil:0,cycKey:'',recording:false,lat:0};
+const PRE_DELAY=0.006,LOOKAHEAD=0.4,START_GAP=0.04,EDGE_FADE=0.003;
 const trackLive=t=>{const solo=P.tracks.some(x=>x.solo);return t.mute||(solo&&!t.solo)?0:fromDb(t.vol)};
 // Riverbero: risposta all'impulso generata (rumore che si spegne in 2,4 secondi), una per contesto audio.
 const IR=new WeakMap();
 function impulse(ctx){let b=IR.get(ctx);if(b)return b;const n=Math.round(ctx.sampleRate*2.4);b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.5)}IR.set(ctx,b);return b}
+const anyComp=tracks=>tracks.some(t=>t.comp>0);
+// Ritardo di tutto il mixer: limitatore, più il compressore se almeno una traccia lo usa.
+const mixLatency=tracks=>PRE_DELAY*(anyComp(tracks)?2:1);
+const chainShape=(t,comp)=>`${t.low!==0}${t.high!==0}${t.comp>0}${comp&&!(t.comp>0)}${t.reverb>0}`;
+function newGraph(ctx,dest){const master=ctx.createGain(),lim=ctx.createDynamicsCompressor();lim.threshold.value=-1.5;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.12;master.connect(lim);lim.connect(dest);return{ctx,master,lim,rev:null,tracks:new Map(),lat:PRE_DELAY}}
+// Catena di una traccia con i soli effetti attivi; si rifà quando un effetto passa da zero ad attivo o viceversa.
+// Le sorgenti entrano in input, che resta sempre lo stesso.
+function chainTrack(gr,t,comp){const ctx=gr.ctx;let n=gr.tracks.get(t.id);
+ if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),send:ctx.createGain(),shape:''};n.pan.connect(n.vol);n.vol.connect(gr.master);n.vol.connect(n.send);gr.tracks.set(t.id,n)}
+ const shape=chainShape(t,comp);if(n.shape===shape)return n;n.input.disconnect();n.send.disconnect();for(const k of ['low','high','comp','make','delay']){n[k]?.disconnect();n[k]=null}
+ let at=n.input;const link=x=>{at.connect(x);at=x;return x};
+ if(t.low!==0){link(n.low=ctx.createBiquadFilter());n.low.type='lowshelf';n.low.frequency.value=200}
+ if(t.high!==0){link(n.high=ctx.createBiquadFilter());n.high.type='highshelf';n.high.frequency.value=4000}
+ if(t.comp>0){link(n.comp=ctx.createDynamicsCompressor());n.comp.knee.value=6;n.comp.attack.value=0.006;n.comp.release.value=0.18;link(n.make=ctx.createGain())}
+ else if(comp){link(n.delay=ctx.createDelay(0.05));n.delay.delayTime.value=PRE_DELAY}
+ at.connect(n.pan);if(t.reverb>0){if(!gr.rev){gr.rev=ctx.createConvolver();gr.rev.buffer=impulse(ctx);gr.rev.connect(gr.master)}n.send.connect(gr.rev)}
+ n.shape=shape;return n}
 function setTrackNodes(t,n,{only=null,ctx=null}={}){const set=(p,v)=>ctx?p.setTargetAtTime(v,ctx.currentTime,0.02):p.value=v,c=t.comp/100;
- set(n.low.gain,t.low);set(n.high.gain,t.high);set(n.comp.threshold,-10-26*c);set(n.comp.ratio,1+7*c);set(n.make.gain,fromDb(9*c));set(n.pan.pan,t.pan);set(n.vol.gain,only?(only===t.id?fromDb(t.vol):0):trackLive(t));set(n.send.gain,t.reverb/100*0.6)}
-function buildMix(ctx,dest,{only=null}={}){const master=ctx.createGain(),lim=ctx.createDynamicsCompressor();lim.threshold.value=-1.5;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.12;master.connect(lim);lim.connect(dest);
- const rev=ctx.createConvolver();rev.buffer=impulse(ctx);rev.connect(master);const tracks=new Map();
- for(const t of P.tracks){const n={input:ctx.createGain(),low:ctx.createBiquadFilter(),high:ctx.createBiquadFilter(),comp:ctx.createDynamicsCompressor(),make:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),send:ctx.createGain()};
-  n.low.type='lowshelf';n.low.frequency.value=200;n.high.type='highshelf';n.high.frequency.value=4000;n.comp.knee.value=6;n.comp.attack.value=0.006;n.comp.release.value=0.18;
-  n.input.connect(n.low);n.low.connect(n.high);n.high.connect(n.comp);n.comp.connect(n.make);n.make.connect(n.pan);n.pan.connect(n.vol);n.vol.connect(master);n.vol.connect(n.send);n.send.connect(rev);setTrackNodes(t,n,{only});tracks.set(t.id,n)}
- return{master,lim,rev,tracks}}
-// Regioni dal tempo from in poi, a partire dall'istante when del contesto; end limita il mixaggio di un tratto.
+ if(n.low)set(n.low.gain,t.low);if(n.high)set(n.high.gain,t.high);if(n.comp){set(n.comp.threshold,-10-26*c);set(n.comp.ratio,1+7*c);set(n.make.gain,fromDb(9*c))}
+ set(n.pan.pan,t.pan);set(n.vol.gain,only?fromDb(t.vol):trackLive(t));set(n.send.gain,t.reverb/100*0.6)}
+// Allinea il mixer alle tracce: catene nuove o da rifare, tracce tolte, poi i valori dei cursori.
+// only: una sola traccia, per esportarla da sola (senza muto né solo).
+function syncGraph(gr,tracks,{only=null,live=false}={}){const comp=anyComp(tracks),ids=new Set(tracks.map(t=>t.id));
+ for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.send])x?.disconnect();gr.tracks.delete(id)}
+ for(const t of tracks)setTrackNodes(t,chainTrack(gr,t,comp),{only,ctx:live?gr.ctx:null});gr.lat=mixLatency(tracks);return gr}
+// Il mixer della riproduzione resta pronto tra un ascolto e l'altro: spostarsi nel brano riprogramma solo le regioni.
+function liveGraph(live){const ctx=actxGet();if(!MIX.graph||MIX.graph.ctx!==ctx)MIX.graph=newGraph(ctx,mixOut());return syncGraph(MIX.graph,P.tracks,{live})}
+// Regioni del brano tra from ed end, a partire dall'istante when del contesto. Il guadagno segue i punti dell'inviluppo
+// (dissolvenze della regione); dove la regione è tagliata (ascolto da metà, fine del ciclo) entra ed esce in 3 ms.
 function regionGainAt(r,x){let v=fromDb(r.gain);if(r.fadeIn>0)v*=clamp(x/r.fadeIn,0,1);if(r.fadeOut>0)v*=clamp((r.dur-x)/r.fadeOut,0,1);return v}
-function scheduleRegions(ctx,mix,from,when,{end=Infinity}={}){const out=[];for(const r of P.regions){if(regionEnd(r)<=from+1e-6||r.start>=end)continue;const buf=SOURCES.get(r.src),tn=mix.tracks.get(r.track);if(!buf||!tn)continue;
-  const t=Math.max(from,r.start),into=t-r.start,len=Math.min(r.dur-into,end-t);if(len<=1e-4)continue;const s=ctx.createBufferSource(),g=ctx.createGain(),at=when+(t-from);s.buffer=buf;
-  g.gain.setValueAtTime(regionGainAt(r,into),at);if(r.fadeIn>into)g.gain.linearRampToValueAtTime(regionGainAt(r,r.fadeIn),at+(r.fadeIn-into));if(r.fadeOut>0){const fs=Math.max(into,r.dur-r.fadeOut);g.gain.setValueAtTime(regionGainAt(r,fs),at+(fs-into));g.gain.linearRampToValueAtTime(0,at+(r.dur-into))}
-  s.connect(g);g.connect(tn.input);s.start(at,r.off+into,len);out.push(s)}return out}
+function scheduleRegions(ctx,gr,from,when,{end=Infinity}={}){const out=[];for(const r of P.regions){if(regionEnd(r)<=from+1e-6||r.start>=end)continue;const buf=SOURCES.get(r.src),tn=gr.tracks.get(r.track);if(!buf||!tn)continue;
+  const t=Math.max(from,r.start),into=t-r.start,len=Math.min(r.dur-into,end-t);if(len<=1e-4)continue;const s=ctx.createBufferSource(),g=ctx.createGain(),at=when+(t-from),e=into+len,x=Math.min(EDGE_FADE,len/2),cutIn=into>1e-4,cutOut=e<r.dur-1e-4;s.buffer=buf;
+  const pts=new Set([into,e]);if(cutIn)pts.add(into+x);if(cutOut)pts.add(e-x);for(const b of [r.fadeIn,r.dur-r.fadeOut])if(b>into&&b<e)pts.add(b);
+  const env=y=>regionGainAt(r,y)*(cutIn?clamp((y-into)/x,0,1):1)*(cutOut?clamp((e-y)/x,0,1):1);
+  [...pts].sort((a,b)=>a-b).forEach((y,i)=>i?g.gain.linearRampToValueAtTime(env(y),at+(y-into)):g.gain.setValueAtTime(env(y),at));
+  s.connect(g);g.connect(tn.input);s.start(at,r.off+into,len);out.push({s,g,until:at+len})}return out}
 // Metronomo: un colpo per tempo, più acuto sul primo della battuta.
-function clickAt(ctx,dest,t,accent){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=accent?1600:1000;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(accent?0.55:0.38,t+0.002);g.gain.exponentialRampToValueAtTime(0.001,t+0.06);o.connect(g);g.connect(dest);o.start(t);o.stop(t+0.07)}
+function clickAt(ctx,dest,t,accent){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=accent?1600:1000;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(accent?0.55:0.38,t+0.002);g.gain.exponentialRampToValueAtTime(0.001,t+0.06);o.connect(g);g.connect(dest);o.start(t);o.stop(t+0.07);return{s:o,g,click:true,until:t+0.07}}
 async function countIn(){const ctx=actxGet(),out=mixOut(),t0=ctx.currentTime+0.08;for(let k=0;k<P.sig;k++)clickAt(ctx,out,t0+k*beatDur(),k===0);announce('Conteggio di una battuta');await new Promise(r=>setTimeout(r,(P.sig*beatDur()+0.08)*1000-30))}
 function mixOut(){const ctx=actxGet();if(!MIX.out){MIX.out=ctx.createGain();MIX.analyser=ctx.createAnalyser();MIX.analyser.fftSize=2048;MIX.out.connect(MIX.analyser);MIX.analyser.connect(ctx.destination)}return MIX.out}
-const mixPos=()=>MIX.playing&&actx?MIX.from+Math.max(0,actx.currentTime-MIX.c0):P.t;
-function mixKill(){cancelAnimationFrame(MIX.raf);for(const s of MIX.srcs){try{s.stop()}catch(e){}}MIX.srcs=[];if(MIX.nodes){try{MIX.nodes.lim.disconnect()}catch(e){}MIX.nodes=null}MIX.playing=false}
-function mixPlay(from=P.t,{recording=false,origin=from}={}){mixKill();stopPlayback(false);const ctx=actxGet(),out=mixOut();MIX.nodes=buildMix(ctx,out);const when=ctx.currentTime+0.06;MIX.srcs=scheduleRegions(ctx,MIX.nodes,from,when);
- Object.assign(MIX,{playing:true,from,c0:when,origin,recording,metroK:Math.ceil(from/beatDur()-1e-6)});P.t=from;playUIProject(true);MIX.raf=requestAnimationFrame(mixTick)}
+// Il brano suona a passate: tratti [a, b) del brano, ognuno con l'istante w del contesto in cui comincia. Senza ciclo
+// c'è una sola passata fino alla fine; con il ciclo la passata seguente si programma in anticipo, attaccata alla
+// precedente, così il giro non ha buchi. Un timer, che continua anche con la scheda nascosta, programma passate e colpi
+// del metronomo; l'indicatore si ridisegna a ogni fotogramma.
+const cycleOn=()=>{const c=P.cycle;return c.on&&c.b>c.a+0.05&&!MIX.recording};
+const cycleKey=()=>cycleOn()?P.cycle.a+':'+P.cycle.b:'';
+function addPass(a,b,w){MIX.passes.push({a,b,w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}))}
+function mixPos(){if(!MIX.playing||!actx||!MIX.passes.length)return P.t;const now=actx.currentTime;let p=MIX.passes[0];for(const q of MIX.passes)if(q.w<=now)p=q;return Math.min(p.b,p.a+Math.max(0,now-p.w))}
+// Fermata: le regioni escono in 3 ms, i colpi del metronomo già programmati si staccano.
+function mixKill(){clearInterval(MIX.timer);cancelAnimationFrame(MIX.raf);const now=actx?.currentTime||0;
+ for(const x of MIX.srcs){if(x.click){x.g.disconnect();continue}try{x.g.gain.cancelScheduledValues(now);x.g.gain.setValueAtTime(x.g.gain.value,now);x.g.gain.linearRampToValueAtTime(0,now+EDGE_FADE);x.s.stop(now+EDGE_FADE)}catch(e){}}
+ MIX.srcs=[];MIX.passes=[];MIX.playing=false}
+function mixPlay(from=P.t,{recording=false,origin=from}={}){mixKill();stopPlayback(false);const ctx=actxGet();MIX.recording=recording;liveGraph(false);const when=ctx.currentTime+START_GAP,c=P.cycle;
+ const [a,b]=cycleOn()?[from>=c.b-1e-6?c.a:from,c.b]:[from,Infinity];
+ Object.assign(MIX,{playing:true,from:a,c0:when,origin,lat:MIX.graph.lat,metroUntil:when-1e-3,cycKey:cycleKey()});P.t=a;addPass(a,b,when);
+ playUIProject(true);mixPump();MIX.timer=setInterval(mixPump,25);MIX.raf=requestAnimationFrame(mixTick)}
 function mixStop(keep=true){if(!MIX.playing)return;const pos=mixPos();mixKill();if(keep)P.t=pos;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI()}
 function mixRestart(){if(!MIX.playing)return;mixPlay(mixPos(),{recording:MIX.recording,origin:MIX.origin})}
-function mixLive(){if(!MIX.playing||!MIX.nodes)return;if(P.tracks.some(t=>!MIX.nodes.tracks.has(t.id))){mixRestart();return}for(const t of P.tracks)setTrackNodes(t,MIX.nodes.tracks.get(t.id),{ctx:actx})}
-function mixTick(){if(!MIX.playing)return;const pos=mixPos(),cy=P.cycle;
- if(cy.on&&cy.b>cy.a+0.05&&!MIX.recording&&pos>=cy.b){mixPlay(cy.a,{origin:MIX.origin});return}
- if(!MIX.recording&&!P.metro&&pos>=projDur()+0.05){const o=MIX.origin;mixKill();P.t=o;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI();announce('Fine del brano');return}
- if(P.metro||MIX.recording&&P.metro){const ctx=actx;while(MIX.metroK*beatDur()<pos+0.3){const tb=MIX.metroK*beatDur();if(tb>=MIX.from-1e-6)clickAt(ctx,mixOut(),MIX.c0+(tb-MIX.from),MIX.metroK%P.sig===0);MIX.metroK++}}
- placeArPlayhead(pos);$('aClock').textContent=fmtTime(pos);if(prefs.follow)followAr(pos);
+// Cambi di volume, bilanciamento ed effetti durante l'ascolto; una traccia nuova va programmata, quindi si riparte.
+function mixLive(){if(!MIX.playing||!MIX.graph)return;const had=new Set(MIX.graph.tracks.keys());syncGraph(MIX.graph,P.tracks,{live:true});MIX.lat=MIX.graph.lat;if(P.tracks.some(t=>!had.has(t.id)))mixRestart()}
+function mixPump(){if(!MIX.playing)return;const ctx=actx,now=ctx.currentTime,horizon=now+LOOKAHEAD;if(cycleKey()!==MIX.cycKey){mixRestart();return}
+ for(let last=MIX.passes.at(-1);last.b<Infinity&&last.w+(last.b-last.a)<horizon;last=MIX.passes.at(-1)){const w=last.w+(last.b-last.a);if(cycleOn())addPass(P.cycle.a,P.cycle.b,w);else addPass(last.b,Infinity,w)}
+ if(P.metro){const bd=beatDur();for(const p of MIX.passes){if(p.w+(p.b-p.a)<=MIX.metroUntil)continue;for(let k=Math.ceil((p.a+Math.max(0,MIX.metroUntil-p.w))/bd-1e-6);;k++){const tb=k*bd,ct=p.w+(tb-p.a);if(tb>=p.b-1e-6||ct>horizon)break;if(ct>MIX.metroUntil+1e-6)MIX.srcs.push(clickAt(ctx,mixOut(),ct,k%P.sig===0))}}}
+ MIX.metroUntil=horizon;MIX.srcs=MIX.srcs.filter(x=>x.until>now-0.1);MIX.passes=MIX.passes.filter((p,i,l)=>i===l.length-1||l[i+1].w>now-1);
+ if(!MIX.recording&&!P.metro&&!cycleOn()&&mixPos()>=projDur()+0.05){const o=MIX.origin;mixKill();P.t=o;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI();announce('Fine del brano')}}
+function mixTick(){if(!MIX.playing)return;const pos=mixPos();placeArPlayhead(pos);$('aClock').textContent=fmtTime(pos);if(prefs.follow)followAr(pos);
  if(MIX.analyser){MIX.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}
  MIX.raf=requestAnimationFrame(mixTick)}
 function playUIProject(on){const b=$('aPlay');b.setAttribute('aria-label',on?'Pausa del brano':'Riproduci il brano');b.innerHTML=ICON(on?'pause':'play')}
 function songPlayPause(){if(MIX.playing){mixStop(true);announce('Pausa a '+sayTime(P.t,1));return}if(!P.regions.length&&!P.metro){toast('Il progetto è vuoto: registra o importa un file');return}let from=P.t;if(from>=projDur()-0.01&&!P.metro)from=0;mixPlay(from)}
 function songStop(){const o=MIX.playing?MIX.origin:0;mixStop(false);P.t=o;updateArrangeUI();announce('Fermo, indicatore a '+sayTime(o))}
-// Mixaggio fuori linea: tutto il brano, oppure una sola traccia (only) per esportarla da sola.
-async function renderMix({only=null,from=0,to=null,rate=48000}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');const oc=new OfflineAudioContext(2,Math.max(1,Math.ceil((to-from)*rate)),rate),mix=buildMix(oc,oc.destination,{only});scheduleRegions(oc,mix,from,0,{end:to});return oc.startRendering()}
+// Mixaggio fuori linea: tutto il brano, oppure una sola traccia (only) con la sua sola catena, per esportarla da sola.
+// Si mixano 6 o 12 ms in più e si tolgono all'inizio: è il ritardo di limitatore e compressori.
+async function renderMix({only=null,from=0,to=null,rate=48000}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');const tracks=only?P.tracks.filter(t=>t.id===only):P.tracks,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate);
+ const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
+ for(let c=0;c<2;c++)res.copyToChannel(out.getChannelData(c).subarray(skip,skip+n),c);return res}
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.
 function songMarkers(rate){const out=[];for(const r of P.regions){const sr=SOURCES.get(r.src)?.sampleRate||rate;for(const m of r.markers||[]){const x=m.pos/sr;if(x<0||x>r.dur)continue;out.push({id:m.id,pos:Math.round((r.start+x)*rate),label:m.label})}}return out.sort((a,b)=>a.pos-b.pos)}
 async function exportStems(){if(!P.regions.length){toast('Il progetto è vuoto');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
@@ -1922,7 +1979,7 @@ async function gcMedia(){try{const keys=await dbKeys(),used=new Set(V.p.media.ma
 // Progetto in un file: ZIP con progetto.json e la cartella media, senza compressione.
 async function saveProjectZip(){if(!V.p.media.length&&!V.p.main.length&&!V.p.titles.length&&!V.p.subs.length){toast('Il progetto è vuoto');return}const files=[],p=structuredClone(V.p);
  for(const m of p.media){const rt=MEDIA.get(m.id);if(!rt)continue;m.file=`media/${m.id}-${safeFileName(m.name)}`;files.push({name:m.file,data:rt.blob})}
- files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.1.0',progetto:p},null,1)});
+ files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.1.1',progetto:p},null,1)});
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(V.p.title+' (progetto video)','zip'));toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Video`)}
 async function openProjectZip(file){const entries=await work('Apertura del progetto',()=>unzipBlob(file));if(!entries)return false;const json=entries['progetto.json'];if(!json)return false;let data;try{data=JSON.parse(await json.text())}catch(e){toast('Il file progetto.json è danneggiato');return true}
  const p=data.progetto||data,blobs={};for(const m of p.media||[]){const b=entries[m.file];if(b)blobs[m.id]=new File([b],m.name||'file',{type:b.type})}
@@ -2018,13 +2075,17 @@ async function runExport({mime,ext,bps,burn,srt,name}){vStop();const T=totalDur(
  const outcome=await done,exp=VE.exp;exp.completed=true;vStop();await new Promise(r=>{rec.onstop=r;if(rec.state!=='inactive')rec.stop();else r()});try{vMaster().limiter.disconnect(dest)}catch(e){}stream.getTracks().forEach(t=>t.stop());exp.close?.(null);VE.exp=null;$('viewCanvas').focus();
  if(outcome==='cancel'){toast('Esportazione annullata');return}
  let blob=new Blob(chunks,{type:mime.split(';')[0]});if(ext==='webm')blob=await fixWebmDuration(blob,T*1000);const file=extName(name,ext);download(blob,file);if(srt&&V.p.subs.length)download(srtText(V.p.subs),extName(name,'srt'),'application/x-subrip');
- const warn=flashWarnings(exp.lum);V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');
+ await lumDone(exp);const warn=flashWarnings(exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');
  toast(`Video esportato: ${file} (${fmtBytes(blob.size)}).${warn.length?` Attenzione: possibili lampeggiamenti pericolosi a ${warn.slice(0,3).map(w=>fmtTime(w,0)).join(', ')}. Apri Verifica l’accessibilità.`:''}`)}
 // Durante l'esportazione: avanzamento e misura della luminosità media di ogni fotogramma, per trovare i lampeggiamenti.
 const lumCanvas=document.createElement('canvas');lumCanvas.width=32;lumCanvas.height=18;const lumG=lumCanvas.getContext('2d',{willReadFrequently:true});
 const linear=v=>{v/=255;return v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4};
 function frameLuminance(src){lumG.drawImage(src,0,0,32,18);const d=lumG.getImageData(0,0,32,18).data;let s=0;for(let i=0;i<d.length;i+=4)s+=0.2126*linear(d[i])+0.7152*linear(d[i+1])+0.0722*linear(d[i+2]);return s/(d.length/4)}
-function expFrame(t){const e=VE.exp;e.lum.push([t,frameLuminance(view)]);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`Esportazione al ${step*10}%`)}}}
+// Il fotogramma si riduce a 32 × 18 fuori dalla pagina (createImageBitmap): leggerlo intero bloccherebbe il disegno
+// per circa 14 ms in 1080p e all'esportazione si perderebbero fotogrammi. Le misure arrivano poco dopo, in ordine di tempo.
+function measureFrame(e,t){e.inflight=(e.inflight||0)+1;createImageBitmap(view,{resizeWidth:32,resizeHeight:18,resizeQuality:'medium'}).then(b=>{e.lum.push([t,frameLuminance(b)]);b.close()}).catch(()=>{}).finally(()=>{if(--e.inflight===0)e.idle?.()})}
+const lumDone=e=>e.inflight?new Promise(r=>{e.idle=r}):Promise.resolve();
+function expFrame(t){const e=VE.exp;measureFrame(e,t);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`Esportazione al ${step*10}%`)}}}
 // Impronta di ciò che si vede: se cambia, l'analisi dei lampeggiamenti va rifatta.
 function visualKey(){const s=JSON.stringify([V.p.main,V.p.titles,V.p.w,V.p.h,V.p.fps,V.p.bg,V.p.burnSubs&&V.p.subs]);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36)}
 // Lampeggiamenti (WCAG 2.3.1): coppie di variazioni opposte di luminosità di almeno il 10%, più di tre in un secondo.
@@ -2035,7 +2096,7 @@ async function analyzeFlashes(){const T=totalDur();if(T<=0){toast('La linea temp
  VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:V.p.burnSubs,T,lum:[],finish,lastPct:-1,step:-1,completed:false,close:null};
  modal('Analisi dei lampeggiamenti',`<p>Il montaggio scorre senza audio e viene misurata la luminosità di ogni fotogramma. Dura circa ${esc(sayTime(T))}.</p><div class="progress" id="expBar" role="progressbar" aria-label="Avanzamento dell’analisi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div><p id="expText">Preparazione…</p>`,[],'Annulla',{noCancel:true,restore:false,onOpen:(p,close)=>{VE.exp.close=close}}).then(()=>{if(VE.exp&&!VE.exp.completed)VE.exp.finish('cancel')});
  V.t=0;await showFrame(0);vPlay();const outcome=await done,exp=VE.exp;exp.completed=true;vStop();exp.close?.(null);VE.exp=null;vMaster().gain.value=1;if(outcome==='cancel'){toast('Analisi annullata');return null}
- const warn=flashWarnings(exp.lum);V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
+ await lumDone(exp);const warn=flashWarnings(exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
 // Solo audio: mixaggio fuori linea delle clip e della traccia audio, molto più veloce del tempo reale.
 // Le clip accelerate o rallentate mantengono l'intonazione, come nell'anteprima.
 const decoded=new Map();
