@@ -2,7 +2,7 @@
   "id": "./tassello-ufficio.html",
   "name": "Tassello Ufficio",
   "short_name": "Tassello",
-  "description": "Testo e Calcolo: documenti e fogli di calcolo nel browser, anche senza rete.",
+  "description": "Testo, Calcolo e Impagina: documenti, fogli di calcolo e pagine nel browser, anche senza rete.",
   "lang": "it",
   "dir": "ltr",
   "start_url": "./tassello-ufficio.html",

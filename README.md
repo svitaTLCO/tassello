@@ -3,7 +3,7 @@
 <h1 align="center">Tassello</h1>
 
 <p align="center"><b>Il necessario per lavorare sui file, in un file solo.</b><br>
-Piccoli strumenti liberi e gratuiti per scrivere, compilare, fare i conti, registrare e montare audio e video, senza suite o installazioni ingombranti. Ognuno è un solo file HTML che si apre nel browser.</p>
+Piccoli strumenti liberi e gratuiti per scrivere, compilare, fare i conti, impaginare, registrare e montare audio e video, senza suite o installazioni ingombranti. Ognuno è un solo file HTML che si apre nel browser.</p>
 
 <p align="center">
 <a href="https://svitatlco.github.io/tassello/">Sito</a> ·
@@ -18,11 +18,11 @@ Piccoli strumenti liberi e gratuiti per scrivere, compilare, fare i conti, regis
 
 ## Che cos'è
 
-Tassello è un piccolo coltellino svizzero per i file: ordinato e leggero. Serve per la produttività di base, cioè scrivere una lettera, compilare un modulo, preparare un preventivo, tenere un elenco, fare due conti, ripulire una registrazione o montare un video, senza dipendere da una suite da installare o da un account.
+Tassello è un piccolo coltellino svizzero per i file: ordinato e leggero. Serve per la produttività di base, cioè scrivere una lettera, compilare un modulo, preparare un preventivo, tenere un elenco, fare due conti, comporre un volantino o un post, ripulire una registrazione o montare un video, senza dipendere da una suite da installare o da un account.
 
 Ogni strumento della famiglia è un *tassello*: un unico file che si apre con un doppio clic e funziona anche senza rete. L'obiettivo è mettere in mano a chiunque, nel modo più semplice possibile, la capacità di lavorare sui propri file.
 
-**Cosa non è.** Tassello non sostituisce gli strumenti da professionisti: se il tuo lavoro richiede macro, revisioni tracciate, un montaggio professionale o strumenti virtuali e MIDI, continua a usare il programma adatto. Non è nemmeno un clone delle app famose: ne apre e salva i formati per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte una per una per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.
+**Cosa non è.** Tassello non sostituisce gli strumenti da professionisti: se il tuo lavoro richiede macro, revisioni tracciate, un'impaginazione editoriale professionale, un montaggio professionale o strumenti virtuali e MIDI, continua a usare il programma adatto. Non è nemmeno un clone delle app famose: ne apre e salva i formati per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte una per una per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.
 
 **L'accessibilità è la condizione, non un di più.** Un tassello viene distribuito solo se si usa con uno screen reader e con la sola tastiera. Vedi [Accessibilità](#accessibilità).
 
@@ -80,17 +80,18 @@ Il secondo tassello contiene due app per i suoni e i filmati di tutti i giorni:
 Per Tassello l'accessibilità non è una funzione in più da attivare: è il requisito senza il quale un tassello non viene distribuito. Ogni comando, finestra e messaggio nasce per essere usato anche con uno screen reader o con la sola tastiera.
 
 - <kbd>F6</kbd> passa tra le aree, <kbd>Alt</kbd>+<kbd>Q</kbd> cerca qualsiasi comando, <kbd>F1</kbd> elenca tutte le scorciatoie;
-- schede, griglia, grafici, finestre e menu usano i ruoli ARIA standard e annunciano celle, valori e stati;
+- barra, cassetti, riquadri, griglia, grafici, finestre e menu usano i ruoli ARIA standard e annunciano celle, valori e stati;
 - i grafici si esplorano con le frecce, si leggono come tabella e si ascoltano come suoni;
 - in Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati e annunciati; nell'editor della regione la forma d'onda è un cursore che fa ascoltare il punto in cui ti trovi: Ctrl+frecce salta da una pausa all'altra del parlato, P e D ascoltano prima e dopo, I e O fissano la selezione anche durante l'ascolto, ogni effetto ha l'anteprima;
 - in Video ogni traccia è un elenco che si scorre con le frecce, ogni proprietà ha un campo con il suo nome e la verifica controlla sottotitoli, contrasto e lampeggiamenti;
-- modalità lettura, contrasto elevato, tema scuro e verifica dell'accessibilità dei documenti.
+- in Impagina le pagine e le cornici sono elenchi che si scorrono con le frecce, le cornici sono nell'ordine di lettura (Alt+Maiusc+frecce lo cambia), sulla pagina le frecce spostano la cornice e Alt+Maiusc+frecce la porta alla guida successiva dicendo a che cosa si è allineata, Alt+Maiusc+I descrive la pagina e la verifica controlla testi alternativi, contrasto, ordine di lettura e testo che non entra;
+- modalità lettura, contrasto elevato, tema scuro e verifica dell'accessibilità di documenti e pagine.
 
 Le prove fatte finora sono nel browser; le segnalazioni di chi usa NVDA, JAWS o Assistente vocale sono molto benvenute. Un problema di accessibilità è un difetto da correggere, non un miglioramento da valutare.
 
 ## Privacy
 
-I documenti restano sul tuo dispositivo. L'unica funzione che usa un servizio esterno è la dettatura vocale di Tassello Ufficio: in Chrome l'audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Tassello Media usa il microfono solo quando lo chiedi tu e le registrazioni restano sul dispositivo.
+I documenti restano sul tuo dispositivo. L'unica funzione che usa un servizio esterno è la dettatura vocale di Tassello Ufficio: in Chrome l'audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Impagina legge la cartella che colleghi solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed. Tassello Media usa il microfono solo quando lo chiedi tu e le registrazioni restano sul dispositivo.
 
 Questo vale per la copia ufficiale. Una copia modificata da altri può comportarsi in modo diverso: è uno dei motivi per [usare solo i canali ufficiali](#solo-dai-canali-ufficiali).
 
@@ -175,7 +176,7 @@ Microsoft, Office, Word ed Excel sono marchi di Microsoft Corporation. Tassello 
 
 The website is available in [English](https://svitatlco.github.io/tassello/en/), [French](https://svitatlco.github.io/tassello/fr/) and [Spanish](https://svitatlco.github.io/tassello/es/) as well as Italian.
 
-**Tassello** is a small family of free and open source tools for basic, everyday work on files: writing a letter, filling in a form, keeping a list, doing the numbers. Each tool is a single HTML file that runs in your browser, with no bulky suite to install, no account and no cloud. Think of it as a small, tidy Swiss Army knife for your files: not a replacement for professional software, and not a clone of famous apps.
+**Tassello** is a small family of free and open source tools for basic, everyday work on files: writing a letter, filling in a form, keeping a list, doing the numbers, laying out a flyer or a social media post. Each tool is a single HTML file that runs in your browser, with no bulky suite to install, no account and no cloud. Think of it as a small, tidy Swiss Army knife for your files: not a replacement for professional software, and not a clone of famous apps.
 
 **Only use official copies.** Download Tassello only from the [website](https://svitatlco.github.io/tassello/) or from the [releases of this repository](https://github.com/svitaTLCO/tassello/releases). Because it is a single file, anyone could alter a copy and pass it around: do not open copies you receive by email, chat or USB stick, and share the link instead of the file. Tassello never connects to the internet (dictation uses the browser's own service) and never asks for passwords, accounts or payments. The [verification page](https://svitatlco.github.io/tassello/verifica.html) tells you whether a file is identical to an official version, and in Chrome or Edge you can install each tool as an app that always comes from the official website and works offline.
 
