@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tassello: il necessario per lavorare sui file</title>
-<meta name="description" content="Tassello Ufficio: strumenti liberi e gratuiti per scrivere e fare i conti senza installare suite ingombranti. Un solo file HTML, accessibile e offline, che apre e salva DOCX e XLSX. Scaricalo solo dal sito ufficiale.">
+<meta name="description" content="Tassello: strumenti liberi e gratuiti per scrivere, fare i conti, registrare e montare audio e video senza installare suite ingombranti. Ogni strumento è un solo file HTML, accessibile e offline. Scaricalo solo dal sito ufficiale.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="stile.css">
@@ -22,6 +22,7 @@
   <nav aria-label="Sezioni della pagina">
     <ul>
       <li><a href="#ufficio">Tassello Ufficio</a></li>
+      <li><a href="#media">Tassello Media</a></li>
       <li><a href="#accessibilita">Accessibilità</a></li>
       <li><a href="#privacy">Privacy</a></li>
       <li><a href="#sicurezza">Sicurezza</a></li>
@@ -36,13 +37,14 @@
     <div>
       <p class="eyebrow">Gratis · Software libero · Accessibile</p>
       <h1>Il necessario per lavorare sui file.</h1>
-      <p class="lead">Tassello è una famiglia di piccoli strumenti liberi per la produttività di base: scrivere, compilare, fare i conti. Ognuno sta in un solo file HTML che si apre nel browser, senza suite o installazioni ingombranti e senza account. Un coltellino svizzero, ordinato e leggero.</p>
+      <p class="lead">Tassello è una famiglia di piccoli strumenti liberi per la produttività di base: scrivere, compilare, fare i conti, registrare e montare audio e video. Ognuno sta in un solo file HTML che si apre nel browser, senza suite o installazioni ingombranti e senza account. Un coltellino svizzero, ordinato e leggero.</p>
       <div class="actions">
         <a class="btn primary" href="tassello-ufficio.html" download="tassello-ufficio.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
           Scarica Tassello Ufficio
         </a>
         <a class="btn secondary" href="tassello-ufficio.html">Provalo nel browser</a>
+        <a class="btn secondary" href="#media">Audio e video</a>
         <button type="button" class="btn secondary hidden" id="installa">Installa come app</button>
       </div>
       <p class="meta">Un file da circa 800 KB per Chrome ed Edge recenti, anche senza rete. Apre e salva file DOCX e XLSX.</p>
@@ -95,6 +97,43 @@
     <p class="meta">Copre il lavoro di base, non tutto: macro, revisioni tracciate, slicer delle tabelle pivot e grafici combinati non sono supportati. Conserva sempre una copia degli originali.</p>
   </section>
 
+  <section id="media" aria-labelledby="titolo-media">
+    <h2 id="titolo-media">Tassello Media: Audio e Video</h2>
+    <p class="intro">Per registrare e ripulire la voce, preparare un podcast o montare un video per la scuola o il lavoro. Si usa tutto da tastiera e con lo screen reader: si ascolta il punto in cui ci si trova, si salta da una pausa all’altra del parlato, ogni proprietà ha un campo con il suo nome.</p>
+    <div class="apps">
+      <div class="app audio">
+        <h3>Audio</h3>
+        <p>Per interviste, lezioni, podcast e messaggi vocali.</p>
+        <ul>
+          <li>Registra dal microfono con avvisi a voce se il livello è troppo alto o troppo basso</li>
+          <li>Taglia, copia, incolla anche mescolando, ritaglia, silenzia, marcatori con nome</li>
+          <li>Normalizza al picco o al volume percepito (LUFS), dissolvenze, ritmo senza cambiare intonazione</li>
+          <li>Riduzione del rumore, equalizzatore, compressore, accorcia le pause</li>
+          <li>Apre WAV, MP3, M4A, OGG, FLAC; esporta WAV con i marcatori, M4A e WebM</li>
+        </ul>
+      </div>
+      <div class="app video">
+        <h3>Video</h3>
+        <p>Per presentazioni, tutorial e ricordi da condividere.</p>
+        <ul>
+          <li>Traccia video con divisione, tagli, velocità, volume, filtri, rotazione</li>
+          <li>Transizioni, cartelli, titoli e una traccia audio per musica e voce fuori campo</li>
+          <li>Sottotitoli da scrivere, importare ed esportare in SRT e WebVTT</li>
+          <li>Verifica dell’accessibilità: sottotitoli, tempi di lettura, contrasto e lampeggiamenti</li>
+          <li>Esporta MP4 o WebM, solo l’audio o un fotogramma; salva il progetto in ZIP</li>
+        </ul>
+      </div>
+    </div>
+    <div class="actions media-actions">
+      <a class="btn primary" href="tassello-media.html" download="tassello-media.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+        Scarica Tassello Media
+      </a>
+      <a class="btn secondary" href="tassello-media.html">Prova Tassello Media nel browser</a>
+    </div>
+    <p class="meta">Un file da circa 330 KB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base: l’esportazione del video avviene in tempo reale e i file molto lunghi richiedono molta memoria. Conserva sempre una copia degli originali.</p>
+  </section>
+
   <section id="accessibilita" aria-labelledby="titolo-accessibilita">
     <h2 id="titolo-accessibilita">Accessibilità: la condizione, non un extra</h2>
     <p class="intro">Un tassello viene distribuito solo se si usa con uno screen reader e con la sola tastiera. Non è un’opzione da attivare: è il modo in cui ogni comando, finestra e messaggio è progettato.</p>
@@ -109,7 +148,8 @@
   <section id="privacy" aria-labelledby="titolo-privacy">
     <h2 id="titolo-privacy">Privacy</h2>
     <div class="note">
-      <p>I documenti restano nel tuo browser e sul tuo computer. L’unica funzione che usa un servizio esterno è la dettatura vocale: in Chrome l’audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Se non la usi, nulla esce dal tuo dispositivo.</p>
+      <p>I documenti restano nel tuo browser e sul tuo computer. L’unica funzione che usa un servizio esterno è la dettatura vocale di Tassello Ufficio: in Chrome l’audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Se non la usi, nulla esce dal tuo dispositivo.</p>
+      <p>Tassello Media usa il microfono solo quando lo chiedi tu, e le registrazioni, i file e i video esportati restano sul tuo computer.</p>
       <p>Questo vale per la copia ufficiale. Una copia modificata da altri può comportarsi in modo diverso: anche per questo conviene <a href="#sicurezza">scaricare Tassello solo da qui</a>.</p>
     </div>
   </section>
@@ -121,7 +161,7 @@
       <div class="card"><h3>Scarica solo da qui</h3><p>Gli unici indirizzi ufficiali sono <b>svitatlco.github.io/tassello</b> e le <a href="https://github.com/svitaTLCO/tassello/releases">release su GitHub</a>. Un file ricevuto per email, su una chiavetta o da altri siti potrebbe essere stato modificato: non aprirlo e scaricalo di nuovo da qui. Per far conoscere Tassello, condividi il link invece del file.</p></div>
       <div class="card"><h3>Cosa non fa mai</h3><p>La copia ufficiale non chiede password, account o pagamenti, non propone di scaricare aggiornamenti o altri programmi e non si collega a internet: lo vieta una regola di sicurezza scritta nel file. Fa eccezione solo la dettatura, che usa il servizio del browser.</p></div>
       <div class="card"><h3>Verifica una copia</h3><p>Nella pagina <a href="verifica.html">Verifica una copia</a> scegli il file: il sito ti dice se è identico a una versione ufficiale. Il file non lascia il tuo computer.</p></div>
-      <div class="card"><h3>Installala come app</h3><p>In Chrome o in Edge apri <a href="tassello-ufficio.html">Provalo nel browser</a> e scegli <b>Installa</b> nella barra degli indirizzi o nel menu. L’app arriva sempre da questo sito, funziona senza rete e si aggiorna da sola.</p></div>
+      <div class="card"><h3>Installala come app</h3><p>In Chrome o in Edge apri <a href="tassello-ufficio.html">Tassello Ufficio</a> o <a href="tassello-media.html">Tassello Media</a> nel browser e scegli <b>Installa</b> nella barra degli indirizzi o nel menu. L’app arriva sempre da questo sito, funziona senza rete e si aggiorna da sola.</p></div>
     </div>
     <p class="meta">Hai trovato una copia sospetta? <a href="https://github.com/svitaTLCO/tassello/issues">Segnalala su GitHub</a>.</p>
   </section>
@@ -131,7 +171,7 @@
     <p class="intro">Ogni tassello copre un tipo di lavoro sui file e resta indipendente dagli altri: prendi solo quello che ti serve. Un nuovo strumento esce solo quando è accessibile.</p>
     <div class="family">
       <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#2457C5"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#1E7A46"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Ufficio</h3><span class="tag on">Disponibile</span></div></div>
-      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B35500"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#7A3DB8"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Media</h3><span class="tag">In arrivo: audio e video</span></div></div>
+      <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H50V100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B35500"/><path d="M50 0H78L100 22V78Q100 100 78 100H50Z" fill="#7A3DB8"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Media</h3><span class="tag on">Disponibile</span></div></div>
       <div class="card"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 0H78L100 22V78Q100 100 78 100H22Q0 100 0 78V22Q0 0 22 0Z" fill="#B0306A"/><path d="M78 0V14Q78 22 86 22H100Z" fill="#fff" fill-opacity=".5"/></svg><div><h3>Tassello Grafica</h3><span class="tag">In progetto</span></div></div>
     </div>
   </section>
@@ -139,8 +179,8 @@
   <section id="english" lang="en" aria-labelledby="titolo-english">
     <h2 id="titolo-english">In English</h2>
     <div class="note">
-      <p>Tassello is a small family of free tools for basic, everyday work on files. Each tool is a single HTML file that runs in your browser: no bulky suite to install, no account, no cloud. Think of it as a small, tidy Swiss Army knife: not a replacement for professional software, and not a clone of famous apps. Tassello Ufficio contains Testo, a word processor, and Calcolo, a spreadsheet; it opens and saves DOCX and XLSX files. Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is in Italian. Released under the EUPL 1.2 licence.</p>
-      <p><b>Only use official copies.</b> Download Tassello only from this site or from the <a href="https://github.com/svitaTLCO/tassello/releases">GitHub releases</a>: modified copies may circulate, so do not open copies you receive by email or on a USB stick, and share the link instead of the file. The <a href="verifica.html">verification page</a> tells you whether a file is identical to an official version, and in Chrome or Edge you can install Tassello Ufficio as an app that always comes from this site and works offline.</p>
+      <p>Tassello is a small family of free tools for basic, everyday work on files. Each tool is a single HTML file that runs in your browser: no bulky suite to install, no account, no cloud. Think of it as a small, tidy Swiss Army knife: not a replacement for professional software, and not a clone of famous apps. Tassello Ufficio contains Testo, a word processor, and Calcolo, a spreadsheet; it opens and saves DOCX and XLSX files. Tassello Media contains Audio, a sound editor with recording, markers, noise reduction and loudness normalization, and Video, a timeline editor with titles, captions in SRT and WebVTT and an accessibility check. Accessibility is a requirement, not an add-on: no tool is released unless it works with a screen reader and with the keyboard alone. The interface is in Italian. Released under the EUPL 1.2 licence.</p>
+      <p><b>Only use official copies.</b> Download Tassello only from this site or from the <a href="https://github.com/svitaTLCO/tassello/releases">GitHub releases</a>: modified copies may circulate, so do not open copies you receive by email or on a USB stick, and share the link instead of the file. The <a href="verifica.html">verification page</a> tells you whether a file is identical to an official version, and in Chrome or Edge you can install each tool as an app that always comes from this site and works offline.</p>
     </div>
   </section>
 </main>

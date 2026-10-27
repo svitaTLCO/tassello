@@ -1,11 +1,14 @@
-# Pubblica una release quando si invia un'etichetta di versione, per esempio: git tag v1.3.0 && git push origin v1.3.0
+# Pubblica una release quando si invia un'etichetta di versione:
+#   Tassello Ufficio  git tag v1.3.0 && git push origin v1.3.0
+#   Tassello Media    git tag media-v1.0.0 && git push origin media-v1.0.0
 # Ricostruisce il programma, controlla che docs/ sia aggiornato, firma la provenienza del file
-# e lo allega alla release con la sua impronta SHA-256.
+# e lo allega alla release con la sua impronta SHA-256. La release più recente segnalata da GitHub resta
+# quella di Tassello Ufficio, a cui puntano i collegamenti esistenti a releases/latest.
 name: Release
 
 on:
   push:
-    tags: ['v*']
+    tags: ['v*', 'media-v*']
 
 permissions:
   contents: write
@@ -22,34 +25,45 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Controlla che l'etichetta corrisponda alla versione del programma
-        run: test "v$(cat ufficio/VERSIONE)" = "$GITHUB_REF_NAME"
+      - name: Scegli il programma dall'etichetta
+        run: |
+          case "$GITHUB_REF_NAME" in
+            media-v*) echo "DIR=media" >> "$GITHUB_ENV"; echo "FILE=tassello-media.html" >> "$GITHUB_ENV"
+                      echo "LIST=versioni-media.json" >> "$GITHUB_ENV"; echo "NAME=Tassello Media" >> "$GITHUB_ENV"
+                      echo "VERSION=${GITHUB_REF_NAME#media-v}" >> "$GITHUB_ENV"; echo "LATEST=false" >> "$GITHUB_ENV" ;;
+            *)        echo "DIR=ufficio" >> "$GITHUB_ENV"; echo "FILE=tassello-ufficio.html" >> "$GITHUB_ENV"
+                      echo "LIST=versioni.json" >> "$GITHUB_ENV"; echo "NAME=Tassello Ufficio" >> "$GITHUB_ENV"
+                      echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"; echo "LATEST=true" >> "$GITHUB_ENV" ;;
+          esac
 
-      - name: Costruisci Tassello Ufficio
-        run: python ufficio/build.py
+      - name: Controlla che l'etichetta corrisponda alla versione del programma
+        run: test "$(cat "$DIR/VERSIONE")" = "$VERSION"
+
+      - name: Costruisci il programma
+        run: python "$DIR/build.py"
 
       - name: Controlla che i file pubblicati corrispondano ai sorgenti
-        run: git diff --exit-code docs/tassello-ufficio.html docs/versioni.json
+        run: git diff --exit-code "docs/$FILE" "docs/$LIST"
 
-      # Firma di provenienza (Sigstore): si verifica con gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello
+      # Firma di provenienza (Sigstore): si verifica con gh attestation verify <file> --repo svitaTLCO/tassello
       - name: Firma la provenienza del file
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-path: docs/tassello-ufficio.html
+          subject-path: docs/${{ env.FILE }}
 
       - name: Crea la release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sha=$(sha256sum docs/tassello-ufficio.html | cut -d' ' -f1)
+          sha=$(sha256sum "docs/$FILE" | cut -d' ' -f1)
           {
-            echo "Scarica \`tassello-ufficio.html\` e aprilo con un doppio clic in Chrome o Edge recenti: funziona anche senza rete."
+            echo "Scarica \`$FILE\` e aprilo con un doppio clic in Chrome o Edge recenti: funziona anche senza rete."
             echo
             echo "Impronta SHA-256: \`$sha\`"
             echo
-            echo "Per controllare una copia usa la pagina [Verifica una copia](https://svitatlco.github.io/tassello/verifica.html), oppure in Windows: \`certutil -hashfile tassello-ufficio.html SHA256\`"
+            echo "Per controllare una copia usa la pagina [Verifica una copia](https://svitatlco.github.io/tassello/verifica.html), oppure in Windows: \`certutil -hashfile $FILE SHA256\`"
             echo
-            echo "Firma di provenienza: \`gh attestation verify tassello-ufficio.html --repo $GITHUB_REPOSITORY\`"
+            echo "Firma di provenienza: \`gh attestation verify $FILE --repo $GITHUB_REPOSITORY\`"
           } > note.md
-          gh release create "$GITHUB_REF_NAME" docs/tassello-ufficio.html \
-            --title "Tassello Ufficio ${GITHUB_REF_NAME#v}" --notes-file note.md
+          gh release create "$GITHUB_REF_NAME" "docs/$FILE" \
+            --title "$NAME $VERSION" --notes-file note.md --latest="$LATEST"

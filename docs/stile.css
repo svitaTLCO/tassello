@@ -41,6 +41,9 @@ h3{margin:0 0 8px;font-size:21px}
 .apps{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
 .app{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px;border-top:6px solid var(--blue)}
 .app.calc{border-top-color:var(--green)}
+.app.audio{border-top-color:var(--orange)}
+.app.video{border-top-color:var(--purple)}
+.media-actions{margin-top:24px}
 .app ul{margin:12px 0 0;padding-left:22px;color:var(--ink-2)}
 .app li{margin:6px 0}
 .family{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}

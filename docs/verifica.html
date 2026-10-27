@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Verifica la tua copia · Tassello</title>
-<meta name="description" content="Controlla che il tuo file di Tassello Ufficio sia identico a una versione ufficiale. Il file resta sul tuo computer.">
+<meta name="description" content="Controlla che il tuo file di Tassello Ufficio o Tassello Media sia identico a una versione ufficiale. Il file resta sul tuo computer.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="stile.css">
@@ -29,11 +29,11 @@
 <main id="contenuto">
   <div class="page-head">
     <h1>Verifica la tua copia</h1>
-    <p class="lead">Controlla se il file di Tassello Ufficio che hai è identico a una versione ufficiale. Il file non lascia il tuo computer: il controllo avviene qui, nel browser.</p>
+    <p class="lead">Controlla se il file di Tassello che hai (Ufficio o Media) è identico a una versione ufficiale. Il file non lascia il tuo computer: il controllo avviene qui, nel browser.</p>
   </div>
 
   <div class="drop" id="drop">
-    <label for="file"><b>Scegli il file da controllare</b>, di solito <code>tassello-ufficio.html</code></label>
+    <label for="file"><b>Scegli il file da controllare</b>, di solito <code>tassello-ufficio.html</code> o <code>tassello-media.html</code></label>
     <input type="file" id="file" accept=".html,.htm,text/html">
     <p>Oppure trascinalo in questo riquadro.</p>
   </div>
@@ -41,7 +41,7 @@
 
   <section aria-labelledby="come">
     <h2 id="come">Come funziona</h2>
-    <p>Per ogni versione pubblicata registriamo l’<b>impronta SHA-256</b> del file: una sequenza di 64 caratteri che cambia completamente se nel file cambia anche una sola lettera. Questa pagina calcola l’impronta del tuo file e la cerca nell’<a href="versioni.json">elenco delle versioni ufficiali</a>.</p>
+    <p>Per ogni versione pubblicata registriamo l’<b>impronta SHA-256</b> del file: una sequenza di 64 caratteri che cambia completamente se nel file cambia anche una sola lettera. Questa pagina calcola l’impronta del tuo file e la cerca negli elenchi delle versioni ufficiali di <a href="versioni.json">Tassello Ufficio</a> e di <a href="versioni-media.json">Tassello Media</a>.</p>
     <p>Se il file non risulta ufficiale può essere stato modificato da qualcuno, oppure salvato di nuovo da un programma (per esempio con «Salva pagina con nome» del browser). In entrambi i casi non usarlo per documenti importanti e <a href="./">scarica la copia ufficiale</a>.</p>
   </section>
 
@@ -54,6 +54,7 @@
     <h2 id="avanzata">Verifica avanzata</h2>
     <p>In Windows puoi calcolare l’impronta anche dal Prompt dei comandi e confrontarla con l’elenco:</p>
     <pre>certutil -hashfile tassello-ufficio.html SHA256</pre>
+    <p>Per Tassello Media scrivi <code>tassello-media.html</code> al posto di <code>tassello-ufficio.html</code>, qui e nel comando seguente.</p>
     <p>Dalla versione 1.3.0 ogni file scaricato dalle <a href="https://github.com/svitaTLCO/tassello/releases">release su GitHub</a> ha anche una firma di provenienza, che dimostra che è stato costruito da GitHub a partire dal codice sorgente pubblico. Con lo strumento <a href="https://cli.github.com/">GitHub CLI</a>:</p>
     <pre>gh attestation verify tassello-ufficio.html --repo svitaTLCO/tassello</pre>
   </section>
@@ -64,26 +65,27 @@
 </footer>
 </div>
 <script>
-// Confronta l'impronta SHA-256 del file scelto con l'elenco delle versioni ufficiali (versioni.json).
+// Confronta l'impronta SHA-256 del file scelto con gli elenchi delle versioni ufficiali di ogni tassello.
 (()=>{
 const $=id=>document.getElementById(id);
 const ICON={wait:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',ok:'<path d="M5 12l5 5 9-10"/>',old:'<path d="M12 7v6"/><path d="M12 17h.01"/>',bad:'<path d="M6 6l12 12"/><path d="M18 6L6 18"/>'};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LISTS=['versioni.json','versioni-media.json'];
 let listing=null;
-const loadList=()=>listing??=fetch('versioni.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()});
+const loadList=()=>listing??=Promise.all(LISTS.map(name=>fetch(name,{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()})));
 function show(kind,title,lines){
   $('esito').innerHTML=`<div class="result ${kind}"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[kind]}</svg>${title}</h2>${lines.map(l=>`<p>${l}</p>`).join('')}</div>`;
 }
 async function check(file){
   if(!file)return;
   show('wait','Controllo in corso…',[esc(file.name)]);
-  if(file.size>20e6){show('bad','Questo file non è una copia ufficiale',['È troppo grande per essere Tassello Ufficio.']);return}
+  if(file.size>20e6){show('bad','Questo file non è una copia ufficiale',['È troppo grande per essere un programma di Tassello.']);return}
   const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());
   const hex=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
   const footer=`Impronta del file <b>${esc(file.name)}</b>: <code>${hex}</code>`;
-  let data;
-  try{data=await loadList()}catch(e){listing=null;show('bad','Non riesco a leggere l’elenco delle versioni ufficiali',['Controlla la connessione e riprova.',footer]);return}
-  const hit=data.versioni.find(v=>v.sha256===hex);
+  let lists;
+  try{lists=await loadList()}catch(e){listing=null;show('bad','Non riesco a leggere l’elenco delle versioni ufficiali',['Controlla la connessione e riprova.',footer]);return}
+  const data=lists.find(l=>l.versioni.some(v=>v.sha256===hex)),hit=data?.versioni.find(v=>v.sha256===hex);
   if(!hit){show('bad','Questo file non corrisponde a nessuna versione ufficiale',['Può essere stato modificato, oppure salvato di nuovo da un altro programma. Non usarlo per documenti importanti: <a href="./">scarica la copia ufficiale</a> da questo sito.',footer]);return}
   const name=hit.nome||data.programma;
   if(hit.versione===data.ultima)show('ok',`Copia ufficiale di ${esc(name)} ${esc(hit.versione)}`,['È identica alla versione più recente pubblicata.',footer]);
@@ -94,8 +96,8 @@ const drop=$('drop');
 drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
 drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
 drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');check(e.dataTransfer.files[0])});
-loadList().then(data=>{
-  const rows=data.versioni.map(v=>`<tr><td>${esc(v.nome||data.programma)} ${esc(v.versione)}${v.versione===data.ultima?' (più recente)':''}</td><td>${esc(v.data)}</td><td>${esc(v.sha256)}</td></tr>`).join('');
+loadList().then(lists=>{
+  const rows=lists.flatMap(data=>data.versioni.map(v=>`<tr><td>${esc(v.nome||data.programma)} ${esc(v.versione)}${v.versione===data.ultima?' (più recente)':''}</td><td>${esc(v.data)}</td><td>${esc(v.sha256)}</td></tr>`)).join('');
   $('elenco').innerHTML=`<table class="versions"><caption class="sr-only">Versioni ufficiali e impronte SHA-256</caption><thead><tr><th scope="col">Versione</th><th scope="col">Data</th><th scope="col">Impronta SHA-256</th></tr></thead><tbody>${rows}</tbody></table>`;
 }).catch(()=>{listing=null;$('elenco').innerHTML='<p>Non riesco a leggere l’elenco: controlla la connessione e ricarica la pagina.</p>'});
 })();
