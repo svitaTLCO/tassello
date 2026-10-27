@@ -377,7 +377,19 @@ def('p','Pagina e griglia',[
  ['pgZoomFit','Mostra tutta la pagina','zoomFit','',{short:'Tutta la pagina'}],
  ['pgTiles','Stampa a tessere su più fogli da incollare','tiles','',{short:'Stampa a tessere',toggle:()=>!!Pg.p?.tiles?.on}],
  ['pgTileSetup','Fogli, margini e sovrapposizione delle tessere','margins','',{short:'Fogli e margini'}],
- ['pgFestone','Festone di lettere, una per foglio','festone','',{short:'Festone'}]]);
+ ['pgFestone','Festone di lettere, una per foglio','festone','',{short:'Festone'}],
+ ['pgAdapt','Adatta a un altro formato','resize','',{short:'Adatta formato'}],
+ ['pgTheme','Temi di colore','palette','',{menu:1,short:'Temi di colore'}],
+ ['pgSmart','Guide intelligenti','magnet','',{short:'Guide intelligenti',toggle:()=>Pg.smart!==false}]]);
+def('p','Più cornici',[
+ ['pgSelectAll','Scegli tutte le cornici della pagina','','Ctrl+A',{ctx:'page',short:'Scegli tutte'}],
+ ['pgGroup','Raggruppa le cornici scelte','group','Ctrl+G',{ctx:'page',short:'Raggruppa'}],
+ ['pgUngroup','Separa il gruppo','ungroup','Ctrl+Maiusc+G',{ctx:'page',short:'Separa'}],
+ ['pgLock','Blocca o sblocca le cornici scelte','lock','',{short:'Blocca',toggle:()=>{const s=pgSelItems?.()||[];return !!s.length&&s.every(x=>x.lock)}}],
+ ['pgDistH','Distribuisci in orizzontale a spazi uguali','distH','',{short:'Distribuisci in orizzontale'}],
+ ['pgDistV','Distribuisci in verticale a spazi uguali','distV','',{short:'Distribuisci in verticale'}],
+ ['pgMask','Sagoma dell’immagine','mask','',{menu:1,short:'Sagoma'}],
+ ['pgPhotoGrid','Griglia di foto','grid','',{menu:1,short:'Griglia di foto'}]]);
 def('p','Fonti',[
  ['pgFolder','Collega una cartella del computer','folder','',{short:'Collega cartella'}],
  ['pgRefresh','Aggiorna dalle fonti','refresh','Alt+F5',{g:1,short:'Aggiorna dalle fonti'}],

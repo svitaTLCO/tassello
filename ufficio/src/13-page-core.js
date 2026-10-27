@@ -162,7 +162,11 @@ function pgItemSvg(it,L,ctx,href){if(it.hidden)return '';const op=it.opacity<100
   case 'text':return `<g${op}>${bg}${pgTextSvg(L?.lines||[])}</g>`;
   case 'tri':return `<polygon points="${pr2(it.x)},${pr2(it.y)} ${pr2(it.x+it.w)},${pr2(it.y)} ${pr2(it.x+it.w/2)},${pr2(it.y+it.h)}" ${paint} stroke-linejoin="round"${op}/>`;
   case 'sign':return pgSignSvg(it,ctx,href);
-  case 'image':{const m=pgImgFor(it,ctx);if(!m)return bg?`<g${op}>${bg}</g>`:'';const [ox,oy,dw,dh]=pgFitBox(it,m);return `<g${op}>${bg}<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg></g>`}}
+  case 'image':{const m=pgImgFor(it,ctx),d=pgMaskPath(it),pic=()=>{const [ox,oy,dw,dh]=pgFitBox(it,m);return `<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg>`};
+   if(!d){if(!m)return bg?`<g${op}>${bg}</g>`:'';return `<g${op}>${bg}${pic()}</g>`}
+   // Con una sagoma, la foto, lo sfondo e il contorno seguono la forma.
+   const id='mk'+(++pgDefSeq),line=it.sw>0&&it.stroke!=='none'?`<path d="${d}" fill="none" stroke="${esc(it.stroke)}" stroke-width="${pr2(it.sw)}" stroke-linejoin="round"/>`:'',back=it.fill!=='none'?`<path d="${d}" fill="${esc(it.fill)}"/>`:'';
+   return `<g${op}>${back}${m?`<defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs><g clip-path="url(#${id})">${pic()}</g>`:''}${line}</g>`}}
  return ''}
 function pgPageSvg(p,I,ii,lay,href=m=>m.url){const m=pgMasterOf(I.pg),ctx={row:I.row,n:I.n,total:I.total,title:p.title,date:pgToday()};return (p.bg&&p.bg!=='none'?`<rect width="${pr2(p.w)}" height="${pr2(p.h)}" fill="${esc(p.bg)}"/>`:'')+[...(m?m.items:[]),...I.pg.items].map(it=>pgItemSvg(it,lay.get(ii+'|'+it.id),ctx,href)).join('')}
 // Misure per l'interfaccia: millimetri e punti nei documenti da stampa, pixel in quelli per lo schermo.
