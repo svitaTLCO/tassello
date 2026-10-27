@@ -5,6 +5,7 @@ const tlScroll=$('tlScroll'),tlInner=$('tlInner'),playheadEl=$('playhead');
 const TL_ACTIVE={main:null,titles:null,audio:null,subs:null};
 const itemName=(kind,x)=>kind==='main'?(x.kind==='card'?'Cartello «'+(x.text||'').split('\n')[0].slice(0,40)+'»':x.label||mediaMeta(x.media)?.name||'clip'):kind==='titles'?'«'+(x.text||'').split('\n')[0].slice(0,60)+'»':kind==='subs'?'«'+(x.text||'').replace(/\n/g,' ').slice(0,80)+'»':x.label||mediaMeta(x.media)?.name||'audio';
 function itemLabel(kind,it,i,n){const x=it.x,parts=[];const noun={main:'Clip',titles:'Titolo',audio:'Audio',subs:'Sottotitolo'}[kind];parts.push(`${noun} ${i+1} di ${n}: ${itemName(kind,x)}`,`da ${sayTime(it.start)} a ${sayTime(it.end)}`,`durata ${sayTime(it.end-it.start)}`);
+ if(kind==='main'&&it.gap>0)parts.splice(1,0,`dopo ${sayTime(it.gap)} di spazio vuoto`);
  if(kind==='main'){if(x.speed&&x.speed!==1)parts.push('velocità '+fmtNum(x.speed,x.speed%1?2:0)+' per');if(x.mute)parts.push('audio disattivato');else if(x.volume!==1)parts.push('volume '+Math.round(x.volume*100)+'%');if(x.trans?.type!=='none'&&i>0)parts.push('transizione '+TRANS[x.trans.type].toLowerCase());if(x.filter!=='none')parts.push('filtro '+FILTERS[x.filter][0].toLowerCase());if(x.fadeIn)parts.push('dissolvenza in entrata');if(x.fadeOut)parts.push('dissolvenza in uscita');if(x.rotate)parts.push('ruotata di '+x.rotate+' gradi');if(x.flip)parts.push('riflessa')}
  else if(kind==='audio'){if(x.volume!==1)parts.push('volume '+Math.round(x.volume*100)+'%')}return parts.join(', ')}
 function tlWidth(){return Math.max(tlScroll.clientWidth,Math.ceil((totalDur()+8)*V.pxs))}
@@ -18,7 +19,7 @@ function renderTrack(kind){const el=$('trk-'+kind),items=itemsOf(kind),n=items.l
 function drawTlRuler(){const cv=$('tlRulerCanvas'),W=Math.min(tlWidth(),32000);cv.style.width=W+'px';const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);drawTicks(g,w,h,0,V.pxs,palette.ruler)}
 function placePlayhead(t){const x=t*V.pxs;$('tlLine').style.left=x+'px';playheadEl.style.left=x+'px'}
 function tickTimelineUI(t){placePlayhead(t);$('vClock').textContent=fmtTC(t,V.p.fps);if(prefs.follow){const x=t*V.pxs,l=tlScroll.scrollLeft,w=tlScroll.clientWidth;if(x>l+w-30||x<l)tlScroll.scrollLeft=x-30}}
-function playheadText(t=V.t){const s=segAt(t),parts=[sayTime(t,2)];if(s)parts.push(`clip ${s.i+1} ${itemName('main',s.c)}`);const ti=V.p.titles.find(x=>t>=x.start&&t<x.start+x.dur);if(ti)parts.push('titolo '+itemName('titles',ti));const su=V.p.subs.find(x=>t>=x.start&&t<x.end);if(su)parts.push('sottotitolo '+itemName('subs',su));return parts.join(', ')}
+function playheadText(t=V.t){const s=segAt(t),parts=[sayTime(t,2)];if(s)parts.push(`clip ${s.i+1} ${itemName('main',s.c)}`);else if(V.p.main.length&&t<layout().at(-1).end)parts.push('spazio vuoto tra le clip');const ti=V.p.titles.find(x=>t>=x.start&&t<x.start+x.dur);if(ti)parts.push('titolo '+itemName('titles',ti));const su=V.p.subs.find(x=>t>=x.start&&t<x.end);if(su)parts.push('sottotitolo '+itemName('subs',su));return parts.join(', ')}
 function updateVideoUI(){if(isAudio())return;const T=totalDur(),t=VE.playing?nowT():V.t;$('vClock').textContent=fmtTC(t,V.p.fps);$('vClockSub').textContent=T?'di '+fmtTC(T,V.p.fps):'Progetto vuoto';
  playheadEl.setAttribute('aria-valuemax',Math.ceil(T));playheadEl.setAttribute('aria-valuenow',Math.round(t));if(!VE.playing)playheadEl.setAttribute('aria-valuetext',playheadText(t));
  $('tlInfo').textContent=`${V.p.main.length} clip · ${fmtTime(T,1)}`;$('docInfo').textContent=`${V.p.w} × ${V.p.h} · ${V.p.fps} fps · ${fmtTime(T,1)}`;
@@ -49,31 +50,41 @@ function selectItem(kind,id,{seek=true,focus=false}={}){V.sel={kind,id};TL_ACTIV
 for(const kind of TRACKS){const el=$('trk-'+kind);
  el.addEventListener('focus',()=>{lastTrack=el.id;const items=itemsOf(kind);if(items.length&&V.sel?.kind!==kind){const at=items.find(it=>V.t>=it.start&&V.t<it.end)||items.find(it=>it.x.id===TL_ACTIVE[kind])||items[0];selectItem(kind,at.x.id,{seek:false})}});
  el.addEventListener('keydown',e=>{if(e.target!==el)return;const items=itemsOf(kind),i=items.findIndex(it=>it.x.id===TL_ACTIVE[kind]),k=e.key,ctrl=e.ctrlKey||e.metaKey;let done=true;
-  if((k==='ArrowLeft'||k==='ArrowRight')&&ctrl)runCommand(k==='ArrowLeft'?'moveEarlier':'moveLater');
+  if((k==='ArrowLeft'||k==='ArrowRight')&&ctrl&&!e.altKey)moveItem(k==='ArrowLeft'?-1:1,e.shiftKey);
+  else if((k==='ArrowLeft'||k==='ArrowRight')&&e.altKey&&e.shiftKey&&!ctrl){if(kind==='main')swapItem(k==='ArrowLeft'?-1:1)}
   else if((k==='ArrowLeft'||k==='ArrowRight')&&!e.altKey){if(!items.length)return;const j=clamp(i+(k==='ArrowRight'?1:-1),0,items.length-1);if(j===i)announce(j?'Ultimo elemento':'Primo elemento');selectItem(kind,items[j].x.id)}
   else if(k==='Home'||k==='End'){if(items.length)selectItem(kind,items[k==='Home'?0:items.length-1].x.id)}
   else if((k==='ArrowUp'||k==='ArrowDown')&&!ctrl&&!e.altKey){const t=TRACKS[clamp(TRACKS.indexOf(kind)+(k==='ArrowDown'?1:-1),0,TRACKS.length-1)];if(t===kind){if(k==='ArrowUp'){playheadEl.focus()}else announce('Ultima traccia')}else $('trk-'+t).focus()}
   else if(k==='Enter'){if(selected())focusInspector()}else if(k==='Delete'||k==='Backspace')runCommand('deleteItem');else if(k==='F2'){if(selected())focusInspector()}
   else if(timelineKeys(e,kind))return;else done=false;if(done){e.preventDefault();e.stopPropagation()}});}
 function focusInspector(){const f=focusables($('inspBody'))[0];if(f){f.focus();announce('Proprietà di '+itemName(V.sel.kind,selected()))}}
-// Mouse sulla linea temporale: clic sul righello sposta l'indicatore; gli elementi si scelgono, si spostano trascinandoli
-// (le clip cambiano ordine, titoli, audio e sottotitoli cambiano tempo).
+// Mouse sulla linea temporale: clic sul righello sposta l'indicatore; gli elementi si scelgono e si trascinano.
+// Una clip trascinata spinge con sé quelle attaccate nella direzione del movimento e lascia uno spazio dall'altra parte;
+// con Ctrl premuto invece cambia posto nella sequenza. I bordi si agganciano a inizio, indicatore e bordi degli altri
+// elementi entro 8 pixel: Alt durante il trascinamento sospende l'aggancio, che si spegne anche in Vista.
 const tAtX=clientX=>{const r=tlInner.getBoundingClientRect();return Math.max(0,(clientX-r.left)/V.pxs)};
+function snapStart(start,dur,except,off){if(off||!prefs.snap)return start;const lim=8/V.pxs,pts=[0,V.t];for(const k of TRACKS)for(const it of itemsOf(k))if(!except.has(it.x.id))pts.push(it.start,it.end);let best=null;for(const p of pts)for(const cand of [p,p-dur]){const d=Math.abs(start-cand);if(cand>=0&&d<=lim&&(!best||d<best.d))best={d,v:cand}}return best?best.v:start}
 $('tlRuler').addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();seekTo(tAtX(e.clientX));playheadEl.focus({preventScroll:true});const move=ev=>seekTo(tAtX(ev.clientX)),up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up)};addEventListener('pointermove',move);addEventListener('pointerup',up)});
 tlInner.addEventListener('pointerdown',e=>{const item=e.target.closest('.item');if(e.button!==0)return;const track=e.target.closest('.track');if(!track)return;if(!item){seekTo(tAtX(e.clientX));track.focus({preventScroll:true});return}
- const kind=item.dataset.kind,id=item.dataset.id,x0=e.clientX,t0=tAtX(e.clientX);let moved=false;const x=V.p[kind].find(v=>v.id===id),orig=kind==='main'?null:x.start;
+ const kind=item.dataset.kind,id=item.dataset.id,x0=e.clientX,t0=tAtX(e.clientX);let moved=false,reorder=false,delta=0;const x=V.p[kind].find(v=>v.id===id),it0=itemsOf(kind).find(i=>i.x.id===id),dur=it0.end-it0.start;
+ const gaps=kind==='main'?V.p.main.map(c=>c.gap||0):null,restore=()=>{if(gaps)V.p.main.forEach((c,i)=>{c.gap=gaps[i]});layoutMemo=null};
  V.sel={kind,id};TL_ACTIVE[kind]=id;track.focus({preventScroll:true});renderInspector();
- const move=ev=>{if(Math.abs(ev.clientX-x0)<4&&!moved)return;moved=true;if(kind==='main'){item.style.transform=`translateX(${ev.clientX-x0}px)`;item.style.zIndex=9}else{const d=(ev.clientX-x0)/V.pxs;item.style.left=Math.max(0,(orig+d))*V.pxs+'px'}};
- const up=ev=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);if(!moved){seekTo(t0);selectItem(kind,id,{seek:false});return}
-  if(kind==='main'){const t=tAtX(ev.clientX),L=layout(),from=L.findIndex(s=>s.c.id===id);let to=L.findIndex(s=>t<(s.start+s.end)/2);if(to<0)to=L.length;if(to>from)to--;if(to!==from)vCommit('Sposta la clip',()=>{const [c]=V.p.main.splice(from,1);V.p.main.splice(to,0,c)});else drawTimeline();announce(`Clip spostata in posizione ${to+1}`)}
-  else{const d=(ev.clientX-x0)/V.pxs;vCommit('Sposta',()=>{shiftItem(kind,x,Math.max(0,orig+d)-x.start)});announce(itemName(kind,x)+' a '+sayTime(x.start))}};
+ const move=ev=>{if(Math.abs(ev.clientX-x0)<4&&!moved)return;moved=true;reorder=kind==='main'&&(ev.ctrlKey||ev.metaKey);
+  if(reorder){restore();renderTrack('main');const el=$('it-'+id);if(el){el.style.transform=`translateX(${ev.clientX-x0}px)`;el.style.opacity='.75';el.style.zIndex=9}return}
+  const want=snapStart(Math.max(0,it0.start+(ev.clientX-x0)/V.pxs),dur,new Set([id]),ev.altKey);
+  if(kind==='main'){restore();delta=shiftClip(x,want-it0.start);layoutMemo=null;renderTrack('main')}else{delta=want-it0.start;item.style.left=want*V.pxs+'px'}};
+ const up=ev=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);if(!moved){seekTo(t0);selectItem(kind,id,{seek:false});return}restore();
+  if(reorder){const t=tAtX(ev.clientX),L=layout(),from=L.findIndex(s=>s.c.id===id);let to=L.findIndex(s=>t<(s.start+s.end)/2);if(to<0)to=L.length;if(to>from)to--;if(to!==from){vCommit('Cambia l’ordine',()=>{const [c]=V.p.main.splice(from,1);c.gap=0;V.p.main.splice(to,0,c)});announce(`Clip spostata in posizione ${to+1} di ${L.length}`)}else drawTimeline();return}
+  if(Math.abs(delta)<1e-6){drawTimeline();return}
+  if(kind==='main'){vCommit('Sposta la clip',()=>{shiftClip(x,delta)});const s=layout().find(v=>v.c===x);announce(`Clip a ${sayTime(s.start)}${s.gap>0?`, dopo ${sayTime(s.gap)} di spazio vuoto`:', attaccata alla precedente'}`)}
+  else{vCommit('Sposta',()=>{shiftItem(kind,x,delta)});announce(itemName(kind,x)+' a '+sayTime(x.start))}};
  addEventListener('pointermove',move);addEventListener('pointerup',up)});
 tlInner.addEventListener('dblclick',e=>{if(e.target.closest('.item'))focusInspector()});
 tlInner.addEventListener('contextmenu',e=>{const item=e.target.closest('.item');if(!item)return;e.preventDefault();selectItem(item.dataset.kind,item.dataset.id,{seek:false});itemMenu(item.dataset.kind,e.clientX,e.clientY)});
 tlScroll.addEventListener('wheel',e=>{if(e.ctrlKey){e.preventDefault();zoomTimeline(e.deltaY>0?1/1.25:1.25,tAtX(e.clientX))}else if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){tlScroll.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 function shiftItem(kind,x,d){if(kind==='subs'){const len=x.end-x.start;x.start=Math.max(0,x.start+d);x.end=x.start+len}else x.start=Math.max(0,x.start+d)}
 function itemMenu(kind=V.sel?.kind,x,y){const it=selected(),r=(document.activeElement?.getAttribute('aria-activedescendant')&&$(document.activeElement.getAttribute('aria-activedescendant')))?.getBoundingClientRect()||document.activeElement.getBoundingClientRect();
- const items=it?[mi('cut'),mi('copy'),mi('paste'),mi('duplicateItem'),mi('deleteItem'),'-',mi('split'),mi('trimStart'),mi('trimEnd'),...(kind==='main'?['-',mi('transitionMenu'),mi('filterMenu'),mi('adjust'),mi('clipSpeed'),mi('clipVolume'),mi('rotate')]:kind==='audio'?['-',mi('clipVolume'),mi('fadeInV'),mi('fadeOutV')]:[]),'-',{label:'Modifica le proprietà',icon:'gear',run:focusInspector}]:[mi('paste'),mi('addTitle'),mi('addSub'),mi('addCard')];
+ const items=it?[mi('cut'),mi('copy'),mi('paste'),mi('duplicateItem'),mi('deleteItem'),'-',mi('split'),mi('trimStart'),mi('trimEnd'),...(kind==='main'?['-',mi('swapPrev'),mi('swapNext'),mi('transitionMenu'),mi('filterMenu'),mi('adjust'),mi('clipSpeed'),mi('clipVolume'),mi('rotate')]:kind==='audio'?['-',mi('clipVolume'),mi('fadeInV'),mi('fadeOutV')]:[]),'-',{label:'Modifica le proprietà',icon:'gear',run:focusInspector}]:[mi('paste'),mi('addTitle'),mi('addSub'),mi('addCard')];
  openMenu(items,x??r.left+10,y??r.bottom,it?'Menu di '+itemName(kind,it):'Menu della linea temporale')}
 // Raccolta dei file.
 let libActive=null;
@@ -98,6 +109,7 @@ function inspSpec(kind,x){const fps=V.p.fps,T=v=>fmtTime(v,2),F=[];
  if(kind==='main'){const m=x.kind==='card'?null:mediaMeta(x.media),still=x.kind==='card'||m?.type==='image';
   if(x.kind==='card')F.push({id:'text',label:'Testo del cartello',type:'textarea',value:x.text||'',set:v=>{x.text=v}},{id:'color',label:'Colore di sfondo',type:'color',value:x.color,set:v=>{x.color=v}},{id:'textColor',label:'Colore del testo',type:'color',value:x.textColor,set:v=>{x.textColor=v}});
   else F.push({id:'label',label:'Nome della clip',type:'text',value:x.label||'',hint:'Facoltativo: si usa al posto del nome del file.',set:v=>{x.label=v.trim()}});
+  {const s=layout().find(v=>v.c===x);F.push({id:'start',label:'Inizio sulla linea temporale',type:'time',value:T(s?.start||0),hint:'Spostandola, le clip attaccate nella stessa direzione si muovono con lei e dall’altra parte si apre uno spazio.',set:v=>{const t=parseTime(v,fps);if(!(t>=0))throw Error('Tempo non valido');placeClip(x,t)}})}
   if(still)F.push({id:'dur',label:'Durata',type:'time',value:T(x.out-x.in),set:v=>{const d=parseTime(v,fps);if(!(d>=frameDur()))throw Error('Durata non valida');x.out=x.in+d}});
   else F.push({id:'in',label:'Inizio nella sorgente',type:'time',value:T(x.in),hint:`Il file dura ${fmtTime(m?.dur||0,2)}.`,set:v=>{const t=parseTime(v,fps);if(!(t>=0&&t<x.out-frameDur()))throw Error('L’inizio deve essere prima della fine');x.in=t}},{id:'out',label:'Fine nella sorgente',type:'time',value:T(x.out),set:v=>{const t=parseTime(v,fps);if(!(t>x.in+frameDur()&&t<=(m?.dur||Infinity)+0.01))throw Error('La fine deve essere dopo l’inizio ed entro la durata del file');x.out=Math.min(t,m?.dur||t)}},
    {id:'speed',label:'Velocità',type:'select',value:String(x.speed),options:SPEEDS,set:v=>{x.speed=Number(v)}},{id:'volume',label:'Volume',type:'range',min:0,max:200,step:5,value:Math.round(x.volume*100),fmt:pct,set:v=>{x.volume=Number(v)/100}},{id:'mute',label:'Disattiva l’audio della clip',type:'checkbox',value:x.mute,set:v=>{x.mute=v}});
@@ -124,7 +136,7 @@ function renderInspector(){if(isAudio())return;const kind=V.sel?.kind,x=selected
   if(f.type==='color')return lab+`<input type="color" id="${id}" data-f="${f.id}" value="${esc(f.value)}"${desc}>${hint}`;
   const decimal=f.type==='time'||f.type==='number';return lab+`<input type="text" id="${id}" data-f="${f.id}" value="${esc(f.type==='number'?fmtNum(f.value,f.value%1?2:0):f.value)}" autocomplete="off" spellcheck="false"${decimal?' inputmode="decimal"':''}${desc}>${hint}`};
  let dl='';if(!x){const T=totalDur();dl=`<h3>Riepilogo</h3><dl><dt>Durata</dt><dd>${esc(fmtTime(T,1))}</dd><dt>Clip</dt><dd>${V.p.main.length}</dd><dt>Titoli</dt><dd>${V.p.titles.length}</dd><dt>Audio</dt><dd>${V.p.audio.length}</dd><dt>Sottotitoli</dt><dd>${V.p.subs.length}</dd><dt>File</dt><dd>${V.p.media.length}</dd></dl>`}
- else if(kind==='main'){const s=layout().find(s=>s.c.id===x.id);if(s)dl=`<dl><dt>Sulla linea temporale</dt><dd>${esc(fmtTime(s.start,2))} – ${esc(fmtTime(s.end,2))}</dd><dt>Durata</dt><dd>${esc(fmtTime(s.dur,2))}</dd></dl>`}
+ else if(kind==='main'){const s=layout().find(s=>s.c.id===x.id);if(s)dl=`<dl><dt>Sulla linea temporale</dt><dd>${esc(fmtTime(s.start,2))} – ${esc(fmtTime(s.end,2))}</dd><dt>Durata</dt><dd>${esc(fmtTime(s.dur,2))}</dd><dt>Spazio prima</dt><dd>${s.gap>0?esc(fmtTime(s.gap,2)):'nessuno, attaccata'}</dd></dl>`}
  body.innerHTML=head+dl+F.map(field).join('')+(x?`<div class="insp-actions"><button type="button" class="btn sm" data-action="duplicateItem">Duplica</button><button type="button" class="btn sm" data-action="deleteItem">Elimina</button></div>`:'');
  if(keep&&$(keep))$(keep).focus({preventScroll:true})}
 function applyInspector(el){const f=inspFieldsNow.find(x=>x.id===el.dataset.f);if(!f)return;const v=el.type==='checkbox'?el.checked:el.value;try{let err=null;vCommit('Modifica: '+f.label.toLowerCase(),()=>{try{f.set(v)}catch(e){err=e}},{inspector:false});if(err)throw err;

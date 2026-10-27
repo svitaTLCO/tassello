@@ -6,12 +6,12 @@ const RIBBON={
   Analisi:[['Misura','!stats !readLevel'],['Pause','!prevPause !nextPause !pauseSettings'],['Distorsioni','!findClip']],
   Esporta:[['Audio','!saveAudio !exportParts'],['Marcatori','!exportLabels !importLabels']],
   Vista:[['Zoom','!zoomIn !zoomOut !zoomFit !zoomSel'],['Mostra','!markPane !follow'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]},
- v:{Inizio:[['Appunti','!paste cut / copy'],['File','!importMedia !addToTimeline'],['Montaggio','!split trimStart+ / trimEnd+ duplicateItem+ / deleteItem+'],['Ordine','moveEarlier+ / moveLater+'],['Riproduzione','!playPause stop+ / prevEdit+ nextEdit+'],['Cronologia','!undo !redo']],
+ v:{Inizio:[['Appunti','!paste cut / copy'],['File','!importMedia !addToTimeline'],['Montaggio','!split trimStart+ / trimEnd+ duplicateItem+ / deleteItem+'],['Posizione','moveEarlier+ swapPrev+ / moveLater+ swapNext+ / snap+'],['Riproduzione','!playPause stop+ / prevEdit+ nextEdit+'],['Cronologia','!undo !redo']],
   Inserisci:[['Testo','!addTitle !addSub !addCard'],['Audio','!recordVoice'],['File','!importMedia']],
   Clip:[['Transizione','!transitionMenu'],['Aspetto','!filterMenu !adjust rotate+ / flip+ fitMode+'],['Tempo e suono','!clipSpeed !clipVolume clipMute+ / fadeInV+ fadeOutV+']],
   Sottotitoli:[['Sottotitoli','!addSub !subImport !subExport'],['Visualizzazione','!subShow !subBurn']],
   Esporta:[['Video','!exportVideo !exportMix !exportFrame'],['Progetto','!saveProject !projectSettings'],['Accessibilità','!a11yCheck']],
-  Vista:[['Zoom','!zoomIn !zoomOut !zoomFit'],['Mostra','!follow !subShow'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]}};
+  Vista:[['Zoom','!zoomIn !zoomOut !zoomFit'],['Mostra','!follow !subShow !snap'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]}};
 const TABS={a:Object.keys(RIBBON.a),v:Object.keys(RIBBON.v)};
 let currentTab='Inizio';
 const slug=s=>s.replace(/\s+/g,'-');

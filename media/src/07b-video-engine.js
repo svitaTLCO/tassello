@@ -13,7 +13,7 @@ function slotFor(key,url,kind){const f=VE.frame;let s=SLOTS.find(x=>x.key===key&
 // Volume di una clip all'istante t: volume, dissolvenze e transizioni con la clip vicina.
 function clipGain(s,t){const c=s.c;if(c.mute)return 0;let g=c.volume;if(c.fadeIn>0)g*=clamp((t-s.start)/c.fadeIn,0,1);if(c.fadeOut>0)g*=clamp((s.end-t)/c.fadeOut,0,1);const next=layout()[s.i+1];
  if(s.tr>0){if(overlaps(c)&&t<s.start+s.tr)g*=(t-s.start)/s.tr;else if(c.trans.type==='black'&&t<s.start+s.tr/2)g*=(t-s.start)/(s.tr/2)}
- if(next&&next.tr>0){if(overlaps(next.c)&&t>next.start)g*=clamp((s.end-t)/next.tr,0,1);else if(next.c.trans.type==='black'&&t>s.end-next.tr/2)g*=clamp((s.end-t)/(next.tr/2),0,1)}return clamp(g,0,2)}
+ if(next&&next.tr>0){if(overlaps(next.c)&&t>next.start&&s.end>next.start)g*=clamp((s.end-t)/(s.end-next.start),0,1);else if(next.c.trans.type==='black'&&t>s.end-next.tr/2)g*=clamp((s.end-t)/(next.tr/2),0,1)}return clamp(g,0,2)}
 function audioItemGain(a,t){let g=a.volume;const end=a.start+(a.out-a.in);if(a.fadeIn>0)g*=clamp((t-a.start)/a.fadeIn,0,1);if(a.fadeOut>0)g*=clamp((end-t)/a.fadeOut,0,1);return clamp(g,0,2)}
 // Opacità e tendina della clip: dissolvenze dal colore di sfondo e transizioni.
 function clipLook(s,t){const c=s.c,next=layout()[s.i+1];let a=1,wipe=null;if(c.fadeIn>0)a*=clamp((t-s.start)/c.fadeIn,0,1);if(c.fadeOut>0)a*=clamp((s.end-t)/c.fadeOut,0,1);

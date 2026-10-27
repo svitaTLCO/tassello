@@ -85,7 +85,7 @@ const tip=$('tip');let tipTimer;
 function showTip(el){const t=el.dataset.tip;if(!t||!el.isConnected)return;tip.textContent=t;tip.hidden=false;const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;let x=Math.min(innerWidth-w-6,Math.max(6,r.left+r.width/2-w/2)),y=r.bottom+6;if(y+h>innerHeight-4)y=r.top-h-6;tip.style.left=x+'px';tip.style.top=y+'px'}
 function hideTip(){clearTimeout(tipTimer);tip.hidden=true}
 // Preferenze: tema, contrasto, passo delle frecce, ascolto durante lo spostamento, formati di esportazione.
-const prefs={theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',contrast:matchMedia('(prefers-contrast: more)').matches,step:0.1,scrub:true,follow:true,audioFormat:'wav16',videoFormat:'',showSubs:true,pauseDb:-40};
+const prefs={theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',contrast:matchMedia('(prefers-contrast: more)').matches,step:0.1,scrub:true,follow:true,audioFormat:'wav16',videoFormat:'',showSubs:true,pauseDb:-40,snap:true};
 const PREFS_KEY='tassello-media.preferenze';
 try{Object.assign(prefs,JSON.parse(localStorage.getItem(PREFS_KEY)||'{}'))}catch(e){}
 function savePrefs(){try{localStorage.setItem(PREFS_KEY,JSON.stringify(prefs))}catch(e){}}
