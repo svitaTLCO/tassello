@@ -173,19 +173,29 @@ const pgRot=it=>it.kind==='line'?0:+it.rot||0,pgRotNorm=a=>{a=((a%360)+540)%360-
 const pgRotT=it=>{const r=pgRot(it);return r?` transform="rotate(${pr2(r)} ${pr2(it.x+it.w/2)} ${pr2(it.y+it.h/2)})"`:''};
 // Un punto della cornice com'è disegnato sulla pagina (back: dalla pagina alla cornice diritta).
 function pgTurn(it,x,y,back=false){const r=pgRot(it)*Math.PI/180*(back?-1:1);if(!r)return{x,y};const cx=it.x+it.w/2,cy=it.y+it.h/2,c=Math.cos(r),s=Math.sin(r),dx=x-cx,dy=y-cy;return{x:cx+dx*c-dy*s,y:cy+dx*s+dy*c}}
-function pgItemSvg(it,L,ctx,href){const s=pgItemBody(it,L,ctx,href),t=s&&pgRotT(it);return t?`<g${t}>${s}</g>`:s}
-function pgItemBody(it,L,ctx,href){if(it.hidden)return '';const op=it.opacity<100?` opacity="${it.opacity/100}"`:'',paint=`fill="${it.fill==='none'?'none':esc(it.fill)}"${it.sw>0&&it.stroke!=='none'?` stroke="${esc(it.stroke)}" stroke-width="${pr2(it.sw)}"`:''}`,box=`x="${pr2(it.x)}" y="${pr2(it.y)}" width="${pr2(Math.max(0,it.w))}" height="${pr2(Math.max(0,it.h))}"`,bg=it.fill!=='none'||it.sw>0?`<rect ${box}${it.radius?` rx="${pr2(it.radius)}"`:''} ${paint}/>`:'';
+// L'ombra sta fuori dalla rotazione, così cade sempre dalla stessa parte.
+function pgItemSvg(it,L,ctx,href){let s=pgItemBody(it,L,ctx,href);if(!s)return s;const t=pgRotT(it);if(t)s=`<g${t}>${s}</g>`;const f=it.kind!=='sign'&&it.shadow&&it.shadow!=='none'&&pgFrameShadow(it,L);return f?`<defs>${f.def}</defs><g filter="url(#${f.id})">${s}</g>`:s}
+// Riempimento: un colore o una sfumatura (lineare, con la sua direzione, o radiale); contorno pieno o tratteggiato.
+const PG_DASHES=[['','Continuo'],['dash','Tratteggiato'],['long','A tratti lunghi'],['dot','Punteggiato'],['dashdot','Tratto e punto']];
+const pgDashAttr=(it,w,cap=true)=>{const k={dash:[2,3],long:[5,3.5],dot:[0,2],dashdot:[3,2.5,0,2.5]}[it.dash];return k?` stroke-dasharray="${k.map(v=>pr2(v*w)).join(' ')}"${cap?' stroke-linecap="round"':''}`:''};
+function pgGrad(id,type,c1,c2,angle){const stops=`<stop offset="0" stop-color="${esc(c1)}"/><stop offset="1" stop-color="${esc(c2)}"/>`;if(type==='rad')return `<radialGradient id="${id}" cx="50%" cy="50%" r="70%">${stops}</radialGradient>`;const a=(angle||0)*Math.PI/180,cx=Math.cos(a)*50,cy=Math.sin(a)*50;return `<linearGradient id="${id}" x1="${pr2(50-cx)}%" y1="${pr2(50-cy)}%" x2="${pr2(50+cx)}%" y2="${pr2(50+cy)}%">${stops}</linearGradient>`}
+// Misura dell'ombra: il corpo più grande del testo su fondo trasparente, altrimenti il lato corto della cornice, entro un quarto della pagina.
+function pgFrameShadow(it,L){let s=0;if(it.kind==='text'&&it.fill==='none')for(const l of L?.lines||[])for(const pc of l.pieces)s=Math.max(s,pc.st.size);if(!s)s=clampV(Math.min(Math.abs(it.w),Math.abs(it.h))*.8,Math.max(it.sw||0,1)*8,Math.min(Pg.p.w,Pg.p.h)*.25);
+ const fx=pgShadowFx(it.shadow,it.shc||'#1b1b1b',s);if(!fx)return null;const id='fx'+(++pgDefSeq);return{id,def:`<filter id="${id}" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">${fx[0]}<feMerge><feMergeNode in="${fx[1]}"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`}}
+function pgItemBody(it,L,ctx,href){if(it.hidden)return '';const gid=it.grad&&it.fill!=='none'&&it.fill2?'gr'+(++pgDefSeq):'',fv=gid?`url(#${gid})`:it.fill==='none'?'none':esc(it.fill),body=pgItemShape(it,L,ctx,href,fv,it.sw>0&&it.stroke!=='none');return gid&&body?`<defs>${pgGrad(gid,it.grad,it.fill,it.fill2,it.gangle??90)}</defs>${body}`:body}
+function pgItemShape(it,L,ctx,href,fv,edge){const op=it.opacity<100?` opacity="${it.opacity/100}"`:'',stroke=edge?` stroke="${esc(it.stroke)}" stroke-width="${pr2(it.sw)}"${pgDashAttr(it,it.sw)}`:'',paint=`fill="${fv}"${stroke}`,box=`x="${pr2(it.x)}" y="${pr2(it.y)}" width="${pr2(Math.max(0,it.w))}" height="${pr2(Math.max(0,it.h))}"`,rx=it.radius?` rx="${pr2(it.radius)}"`:'',bg=it.fill!=='none'||it.sw>0?`<rect ${box}${rx} ${paint}/>`:'';
  switch(it.kind){
   case 'rect':return `<rect ${box}${it.radius?` rx="${pr2(it.radius)}"`:''} ${paint}${op}/>`;
   case 'ellipse':return `<ellipse cx="${pr2(it.x+it.w/2)}" cy="${pr2(it.y+it.h/2)}" rx="${pr2(Math.abs(it.w/2))}" ry="${pr2(Math.abs(it.h/2))}" ${paint}${op}/>`;
-  case 'line':return `<line x1="${pr2(it.x)}" y1="${pr2(it.y)}" x2="${pr2(it.x+it.w)}" y2="${pr2(it.y+it.h)}" stroke="${esc(it.stroke)}" stroke-width="${pr2(Math.max(it.sw,.5))}" stroke-linecap="round"${op}/>`;
+  case 'line':return `<line x1="${pr2(it.x)}" y1="${pr2(it.y)}" x2="${pr2(it.x+it.w)}" y2="${pr2(it.y+it.h)}" stroke="${esc(it.stroke)}" stroke-width="${pr2(Math.max(it.sw,.5))}" stroke-linecap="round"${pgDashAttr(it,Math.max(it.sw,.5),false)}${op}/>`;
   case 'text':return `<g${op}>${bg}${pgTextSvg(L?.lines||[])}</g>`;
   case 'tri':return `<polygon points="${pr2(it.x)},${pr2(it.y)} ${pr2(it.x+it.w)},${pr2(it.y)} ${pr2(it.x+it.w/2)},${pr2(it.y+it.h)}" ${paint} stroke-linejoin="round"${op}/>`;
   case 'sign':return pgSignSvg(it,ctx,href);
   case 'image':{const m=pgImgFor(it,ctx),d=pgMaskPath(it),pic=()=>{const [ox,oy,dw,dh]=pgFitBox(it,m);return `<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg>`};
-   if(!d){if(!m)return bg?`<g${op}>${bg}</g>`:'';return `<g${op}>${bg}${pic()}</g>`}
+   // Il contorno va sopra la foto, che altrimenti ne coprirebbe metà.
+   if(!d){const back=it.fill!=='none'?`<rect ${box}${rx} fill="${fv}"/>`:'',line=edge?`<rect ${box}${rx} fill="none"${stroke}/>`:'';if(!m)return back||line?`<g${op}>${back}${line}</g>`:'';return `<g${op}>${back}${pic()}${line}</g>`}
    // Con una sagoma, la foto, lo sfondo e il contorno seguono la forma.
-   const id='mk'+(++pgDefSeq),line=it.sw>0&&it.stroke!=='none'?`<path d="${d}" fill="none" stroke="${esc(it.stroke)}" stroke-width="${pr2(it.sw)}" stroke-linejoin="round"/>`:'',back=it.fill!=='none'?`<path d="${d}" fill="${esc(it.fill)}"/>`:'';
+   const id='mk'+(++pgDefSeq),line=edge?`<path d="${d}" fill="none"${stroke} stroke-linejoin="round"/>`:'',back=it.fill!=='none'?`<path d="${d}" fill="${fv}"/>`:'';
    return `<g${op}>${back}${m?`<defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs><g clip-path="url(#${id})">${pic()}</g>`:''}${line}</g>`}}
  return ''}
 function pgPageSvg(p,I,ii,lay,href=m=>m.url){const m=pgMasterOf(I.pg),ctx={row:I.row,n:I.n,total:I.total,title:p.title,date:pgToday()};return (p.bg&&p.bg!=='none'?`<rect width="${pr2(p.w)}" height="${pr2(p.h)}" fill="${esc(p.bg)}"/>`:'')+[...(m?m.items:[]),...I.pg.items].map(it=>pgItemSvg(it,lay.get(ii+'|'+it.id),ctx,href)).join('')}
