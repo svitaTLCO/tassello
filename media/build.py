@@ -19,9 +19,9 @@ VERSION = (HERE / 'VERSIONE').read_text(encoding='utf-8').strip()
 # L'ordine conta: le costanti devono esistere prima del codice che le usa all'avvio.
 ORDER = [
     '01-head.html', '02-body.html', '02b-base.js', '03-store.js', '04-commands.js', '04b-ribbon.js',
-    '05-codecs.js', '05b-containers.js',
+    '05-codecs.js', '05b-containers.js', '05c-demux.js', '05d-mux.js',
     '06-audio-core.js', '06b-audio-view.js', '06c-audio-effects.js', '06d-record.js', '06e-mix-core.js', '06f-mix-engine.js', '06g-mix-view.js',
-    '07-video-core.js', '07b-video-engine.js', '07c-video-view.js', '07d-video-text.js',
+    '07-video-core.js', '07b-video-engine.js', '07c-video-view.js', '07d-video-text.js', '07e-video-export.js',
     '08-actions.js', '09-events.js', '10-start.js',
 ]
 

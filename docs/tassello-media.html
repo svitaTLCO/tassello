@@ -957,7 +957,7 @@ const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc
  v:[['Sull’indicatore di riproduzione',[['Un fotogramma indietro o avanti','← →'],['Un secondo indietro o avanti','Maiusc+← / Maiusc+→'],['Cinque secondi indietro o avanti','PgSu / PgGiù'],['Taglio precedente o successivo','↑ / ↓'],['Inizio o fine del montaggio','Home / Fine'],['Riproduci o pausa','Spazio'],['Indietro, pausa, avanti veloce','J / K / L'],['Dividi la clip all’indicatore','S'],['Taglia inizio o fine della clip all’indicatore','Q / W'],['Zoom avanti, indietro, tutto','+ / − / 0']]],['Nelle tracce',[['Elemento precedente o successivo','← →'],['Primo o ultimo elemento','Home / Fine'],['Sposta l’elemento di un secondo indietro o avanti: le clip attaccate in quella direzione si spostano insieme','Ctrl+← / Ctrl+→'],['Sposta l’elemento di un fotogramma','Ctrl+Maiusc+← / Ctrl+Maiusc+→'],['Modifica le proprietà','Invio'],['Elimina l’elemento','Canc'],['Menu dell’elemento','Maiusc+F10'],['Traccia sopra o sotto','↑ / ↓']]],['Nella raccolta',[['Scegli un file','↑ ↓'],['Aggiungi alla linea temporale','Invio'],['Menu del file','Maiusc+F10'],['Togli dalla raccolta','Canc']]]]};
 function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${isAudio()?'Audio':'Video'}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
-async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.1.2</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli e lampeggiamenti pericolosi.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori.</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.2.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli e lampeggiamenti pericolosi.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori.</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
 // Aree raggiungibili con F6 e Maiusc+F6.
 let lastTrack='trk-main';
 function regions(){const l=[$('titlebar'),$('tabrow'),$('ribbon')];if(isAudio()){l.push($('aTransport'),$('arrange'));if(!$('editorArea').classList.contains('closed'))l.push($('wave'),$('selbar'));if(!$('markPane').hidden)l.push($('markPane'))}else l.push($('libList').closest('.library'),$('vTransport'),$('timeline'),$('inspBody').closest('.inspector'));l.push($('statusbar'));return l.filter(el=>el.offsetWidth||el.offsetHeight)}
@@ -1089,11 +1089,12 @@ const fullBox=(type,version,flags,...parts)=>box(type,[version,flags>>16&255,fla
 const MATRIX=[0x00010000,0,0,0,0x00010000,0,0,0,0x40000000].flatMap(be32);
 // Descrittore MPEG-4: etichetta, lunghezza su quattro byte, contenuto.
 const descr=(tag,body)=>[tag,0x80,0x80,0x80,body.length,...body];
+// Descrizione della traccia AAC (mp4a con esds): la usano l'M4A e l'MP4 del video.
+const mp4aEntry=(desc,ch,rate,bitrate)=>box('mp4a',[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,...be16(ch),...be16(16),0,0,0,0,...be32(rate<<16>>>0)],fullBox('esds',0,0,descr(3,[0,1,0,...descr(4,[0x40,0x15,0,0,0,...be32(bitrate),...be32(bitrate),...descr(5,[...desc])]),...descr(6,[2])])));
 function m4aBlob({packets,desc,rate,ch,bitrate}){if(!desc)throw Error('Il codificatore AAC non ha fornito la configurazione');
  const sizes=packets.map(p=>p.data.length),deltas=packets.map(p=>p.dur?Math.round(p.dur*rate/1e6):1024),duration=deltas.reduce((a,b)=>a+b,0);
  const runs=[];for(const d of deltas){const last=runs.at(-1);if(last&&last[1]===d)last[0]++;else runs.push([1,d])}
- const esds=fullBox('esds',0,0,descr(3,[0,1,0,...descr(4,[0x40,0x15,0,0,0,...be32(bitrate),...be32(bitrate),...descr(5,[...desc])]),...descr(6,[2])]));
- const mp4a=box('mp4a',[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,...be16(ch),...be16(16),0,0,0,0,...be32(rate<<16>>>0)],esds);
+ const mp4a=mp4aEntry(desc,ch,rate,bitrate);
  const stbl=chunkOffset=>box('stbl',fullBox('stsd',0,0,be32(1),mp4a),fullBox('stts',0,0,be32(runs.length),runs.flatMap(([n,d])=>[...be32(n),...be32(d)])),fullBox('stsc',0,0,be32(1),be32(1),be32(packets.length),be32(1)),fullBox('stsz',0,0,be32(0),be32(packets.length),sizes.flatMap(be32)),fullBox('stco',0,0,be32(1),be32(chunkOffset)));
  const moov=chunkOffset=>box('moov',fullBox('mvhd',0,0,be32(0),be32(0),be32(rate),be32(duration),be32(0x00010000),be16(0x0100),[0,0,0,0,0,0,0,0,0,0],MATRIX,new Array(24).fill(0),be32(2)),
   box('trak',fullBox('tkhd',0,3,be32(0),be32(0),be32(1),be32(0),be32(duration),new Array(8).fill(0),be16(0),be16(0),be16(0x0100),be16(0),MATRIX,be32(0),be32(0)),
@@ -1166,6 +1167,185 @@ async function unzipBlob(blob){const tailLen=Math.min(blob.size,65557),tail=new 
   const lh=new DataView(await blob.slice(local,local+30).arrayBuffer()),start=local+30+lh.getUint16(26,true)+lh.getUint16(28,true),data=blob.slice(start,start+packed);
   if(method===0)out[name]=data;else if(method===8){if(typeof DecompressionStream==='undefined')throw Error('Questo browser non sa aprire archivi compressi');out[name]=await new Response(data.stream().pipeThrough(new DecompressionStream('deflate-raw'))).blob()}else throw Error(`Compressione non supportata (metodo ${method})`)}
  return out}
+// Lettori dei contenitori MP4 (anche frammentati, come quelli registrati dal browser) e WebM/Matroska. Trovano le
+// tracce, i parametri dei decodificatori, la rotazione e la posizione di ogni pacchetto nel file leggendolo a pezzi:
+// video e audio si decodificano poi con WebCodecs solo nei tratti che servono, senza tenere il file in memoria.
+const readBytes=async(blob,at,len)=>new Uint8Array(await blob.slice(at,at+len).arrayBuffer());
+const fourcc=(b,at)=>String.fromCharCode(b[at],b[at+1],b[at+2],b[at+3]);
+const hex2=n=>n.toString(16).padStart(2,'0');
+// Pacchetti di una traccia: posizione e dimensione nel file, istanti di presentazione (pts) e di decodifica (dts) in
+// secondi, durata, fotogramma chiave. Si raccolgono in elenchi e diventano array tipizzati alla fine.
+const packetList=()=>({off:[],size:[],pts:[],dts:[],dur:[],key:[]});
+function packPackets(p){const n=p.off.length;for(let i=0;i<n;i++)if(!(p.dur[i]>0))p.dur[i]=i+1<n?Math.max(0,p.dts[i+1]-p.dts[i]):(p.dur[i-1]||0);
+ return{n,off:Float64Array.from(p.off),size:Uint32Array.from(p.size),pts:Float64Array.from(p.pts),dts:Float64Array.from(p.dts),dur:Float64Array.from(p.dur),key:Uint8Array.from(p.key)}}
+async function demuxMedia(blob){if(!blob||blob.size<16)return null;const head=await readBytes(blob,0,16);
+ try{if(head[0]===0x1A&&head[1]===0x45&&head[2]===0xDF&&head[3]===0xA3)return await demuxWebm(blob);
+  if(['ftyp','moov','mdat','free','skip','wide','styp'].includes(fourcc(head,4)))return await demuxMp4(blob)}catch(e){console.warn('Contenitore non letto',e)}
+ return null}
+// Codici dei decodificatori dalle loro configurazioni, nel formato che WebCodecs si aspetta.
+function avcCodec(fmt,c){return`${fmt==='avc3'?'avc3':'avc1'}.${hex2(c[1])}${hex2(c[2])}${hex2(c[3])}`}
+function hevcCodec(fmt,c){const space=c[1]>>6,tier=(c[1]>>5)&1,prof=c[1]&31;let compat=((c[2]<<24)|(c[3]<<16)|(c[4]<<8)|c[5])>>>0,rev=0;for(let i=0;i<32;i++){rev=(rev<<1)|(compat&1);compat>>>=1}
+ const cons=[c[6],c[7],c[8],c[9],c[10],c[11]];while(cons.length&&!cons.at(-1))cons.pop();return`${fmt==='hev1'?'hev1':'hvc1'}.${['','A','B','C'][space]}${prof}.${(rev>>>0).toString(16)}.${tier?'H':'L'}${c[12]}${cons.map(x=>'.'+x.toString(16)).join('')}`}
+function av1Codec(c){const prof=c[1]>>5,level=c[1]&31,tier=c[2]>>7,high=(c[2]>>6)&1,twelve=(c[2]>>5)&1;return`av01.${prof}.${String(level).padStart(2,'0')}${tier?'H':'M'}.${high?(twelve?'12':'10'):'08'}`}
+function aacCodec(asc){let aot=asc[0]>>3;if(aot===31)aot=32+(((asc[0]&7)<<3)|(asc[1]>>5));return'mp4a.40.'+aot}
+// Intestazione Opus (OpusHead, in little endian) ricostruita dalla scatola dOps dell'MP4 (in big endian).
+function opusHeadFromDops(b,v,at,end){const ch=b[at+1],out=new Uint8Array(19+(b[at+10]?2+ch:0)),o=new DataView(out.buffer);out.set([79,112,117,115,72,101,97,100]);out[8]=1;out[9]=ch;o.setUint16(10,v.getUint16(at+2),true);o.setUint32(12,v.getUint32(at+4),true);o.setInt16(16,v.getInt16(at+8),true);out[18]=b[at+10];if(b[at+10])out.set(b.subarray(at+11,Math.min(end,at+13+ch)),19);return out}
+// ---- MP4 ----
+function* mp4Boxes(b,v,start,end){let at=start;while(at+8<=end){let size=v.getUint32(at),hdr=8;const type=fourcc(b,at+4);if(size===1){size=Number(v.getBigUint64(at+8));hdr=16}else if(size===0)size=end-at;if(size<hdr||at+size>end)return;yield{type,at,start:at+hdr,end:at+size};at+=size}}
+function mp4Child(b,v,box,type){if(!box)return null;for(const c of mp4Boxes(b,v,box.start,box.end))if(c.type===type)return c;return null}
+const mp4Path=(b,v,box,...types)=>types.reduce((x,t)=>mp4Child(b,v,x,t),box);
+// Lunghezza dei descrittori MPEG-4: fino a quattro byte da 7 bit.
+function descLen(b,at){let n=0,i=0;for(;i<4;i++){const x=b[at+i];n=(n<<7)|(x&127);if(!(x&128))break}return{n,len:i+1}}
+function esdsConfig(b,at,end){let p=at+4;if(b[p]!==3)return null;let d=descLen(b,p+1);p+=1+d.len;const flags=b[p+2];p+=3;if(flags&128)p+=2;if(flags&64)p+=1+b[p];if(flags&32)p+=2;if(b[p]!==4)return null;d=descLen(b,p+1);p+=1+d.len;const oti=b[p];p+=13;
+ if(b[p]!==5)return{oti,asc:null};d=descLen(b,p+1);p+=1+d.len;return{oti,asc:b.slice(p,Math.min(end,p+d.n))}}
+function mp4SampleEntry(b,v,stsd,type){const e=stsd.start+8,size=v.getUint32(e),fmt=fourcc(b,e+4),end=Math.min(stsd.end,e+size),t={fmt,codec:null,description:null};
+ if(type==='video'){t.width=v.getUint16(e+32);t.height=v.getUint16(e+34);const kids=[...mp4Boxes(b,v,e+86,end)],cfg=x=>{const k=kids.find(c=>c.type===x);return k?b.slice(k.start,k.end):null};
+  if(fmt==='avc1'||fmt==='avc3'){const c=cfg('avcC');if(c){t.codec=avcCodec(fmt,c);t.description=c}}
+  else if(fmt==='hvc1'||fmt==='hev1'){const c=cfg('hvcC');if(c){t.codec=hevcCodec(fmt,c);t.description=c}}
+  else if(fmt==='vp09'){const c=cfg('vpcC');t.codec=c?`vp09.${String(c[4]).padStart(2,'0')}.${String(c[5]).padStart(2,'0')}.${String(c[6]>>4).padStart(2,'0')}`:'vp09.00.10.08'}
+  else if(fmt==='av01'){const c=cfg('av1C');if(c)t.codec=av1Codec(c)}}
+ else{const ver=v.getUint16(e+16);t.channels=v.getUint16(e+24);t.sampleRate=v.getUint32(e+32)>>>16;if(ver===2){t.sampleRate=Math.round(v.getFloat64(e+40));t.channels=v.getUint32(e+48)}
+  const kids=[...mp4Boxes(b,v,e+36+(ver===1?16:ver===2?36:0),end)];
+  if(fmt==='mp4a'){const k=kids.find(c=>c.type==='esds')||[...kids].map(c=>c.type==='wave'?[...mp4Boxes(b,v,c.start,c.end)].find(x=>x.type==='esds'):null).find(Boolean);const cf=k&&esdsConfig(b,k.start,k.end);
+   if(cf?.asc&&[0x40,0x66,0x67,0x68].includes(cf.oti)){t.codec=aacCodec(cf.asc);t.description=cf.asc;const sr=[96000,88200,64000,48000,44100,32000,24000,22050,16000,12000,11025,8000,7350][((cf.asc[0]&7)<<1)|(cf.asc[1]>>7)];if(sr)t.sampleRate=sr}else if(cf&&(cf.oti===0x6B||cf.oti===0x69))t.codec='mp3'}
+  else if(fmt==='Opus'){const k=kids.find(c=>c.type==='dOps');t.codec='opus';t.sampleRate=48000;if(k){t.description=opusHeadFromDops(b,v,k.start,k.end);t.preSkip=v.getUint16(k.start+2)}}
+  else if(fmt==='.mp3')t.codec='mp3'}
+ return t}
+// Tabelle dei campioni di una traccia non frammentata.
+function mp4Samples(b,v,stbl,scale,shift){const box=t=>mp4Child(b,v,stbl,t),P=packetList(),stts=box('stts'),ctts=box('ctts'),stss=box('stss'),stsc=box('stsc'),stsz=box('stsz'),stz2=box('stz2'),stco=box('stco'),co64=box('co64');
+ const sizes=[];if(stsz){const fixed=v.getUint32(stsz.start+4),n=v.getUint32(stsz.start+8);for(let i=0;i<n;i++)sizes.push(fixed||v.getUint32(stsz.start+12+i*4))}
+ else if(stz2){const fs=b[stz2.start+7],n=v.getUint32(stz2.start+8);for(let i=0;i<n;i++)sizes.push(fs===16?v.getUint16(stz2.start+12+i*2):fs===8?b[stz2.start+12+i]:(b[stz2.start+12+(i>>1)]>>(i&1?0:4))&15)}
+ const n=sizes.length;if(!n||!stsc||!(stco||co64))return P;
+ const chunks=[];if(stco){const k=v.getUint32(stco.start+4);for(let i=0;i<k;i++)chunks.push(v.getUint32(stco.start+8+i*4))}else{const k=v.getUint32(co64.start+4);for(let i=0;i<k;i++)chunks.push(Number(v.getBigUint64(co64.start+8+i*8)))}
+ const sc=[];{const k=v.getUint32(stsc.start+4);for(let i=0;i<k;i++)sc.push([v.getUint32(stsc.start+8+i*12),v.getUint32(stsc.start+12+i*12)])}
+ let s=0;for(let ci=0,e=0;ci<chunks.length&&s<n;ci++){while(e+1<sc.length&&sc[e+1][0]<=ci+1)e++;let at=chunks[ci];for(let k=0;k<sc[e][1]&&s<n;k++,s++){P.off.push(at);P.size.push(sizes[s]);at+=sizes[s]}}
+ const durs=[];if(stts){const k=v.getUint32(stts.start+4);for(let i=0;i<k;i++){const c=v.getUint32(stts.start+8+i*8),d=v.getUint32(stts.start+12+i*8);for(let j=0;j<c&&durs.length<n;j++)durs.push(d)}}
+ const cts=new Array(n).fill(0);if(ctts){const ver=b[ctts.start],k=v.getUint32(ctts.start+4);for(let i=0,q=0;i<k&&q<n;i++){const c=v.getUint32(ctts.start+8+i*8),o=ver?v.getInt32(ctts.start+12+i*8):v.getUint32(ctts.start+12+i*8);for(let j=0;j<c&&q<n;j++)cts[q++]=o}}
+ const keys=stss?new Set(Array.from({length:v.getUint32(stss.start+4)},(_,i)=>v.getUint32(stss.start+8+i*4))):null;
+ let dts=0;for(let i=0;i<P.off.length;i++){const d=durs[i]??durs.at(-1)??0;P.dts.push((dts-shift)/scale);P.pts.push((dts+cts[i]-shift)/scale);P.dur.push(d/scale);P.key.push(keys?(keys.has(i+1)?1:0):1);dts+=d}return P}
+async function demuxMp4(blob){const top=[];let at=0;
+ while(at+8<=blob.size&&top.length<400000){const h=await readBytes(blob,at,16),v=new DataView(h.buffer);let size=v.getUint32(0),hdr=8;const type=fourcc(h,4);if(size===1){size=Number(v.getBigUint64(8));hdr=16}else if(size===0)size=blob.size-at;if(size<hdr)break;top.push({type,at,size,hdr});at+=size}
+ const mb=top.find(x=>x.type==='moov');if(!mb)return null;const b=await readBytes(blob,mb.at,mb.size),v=new DataView(b.buffer),moov={start:mb.hdr,end:b.length};
+ const mvhd=mp4Child(b,v,moov,'mvhd'),mver=mvhd&&b[mvhd.start],movieScale=mvhd?v.getUint32(mvhd.start+(mver?20:12)):1000,tracks=[],trex=new Map();
+ for(const x of mp4Boxes(b,v,mp4Child(b,v,moov,'mvex')?.start??0,mp4Child(b,v,moov,'mvex')?.end??0))if(x.type==='trex')trex.set(v.getUint32(x.start+4),{dur:v.getUint32(x.start+12),size:v.getUint32(x.start+16),flags:v.getUint32(x.start+20)});
+ for(const trak of mp4Boxes(b,v,moov.start,moov.end)){if(trak.type!=='trak')continue;const tkhd=mp4Child(b,v,trak,'tkhd'),mdia=mp4Child(b,v,trak,'mdia'),mdhd=mp4Child(b,v,mdia,'mdhd'),hdlr=mp4Child(b,v,mdia,'hdlr');if(!tkhd||!mdhd||!hdlr)continue;
+  const handler=fourcc(b,hdlr.start+8),type=handler==='vide'?'video':handler==='soun'?'audio':null;if(!type)continue;const tv=b[tkhd.start],mo=tkhd.start+(tv?52:40),scale=v.getUint32(mdhd.start+(b[mdhd.start]?20:12));
+  const rotation=((Math.round(Math.atan2(v.getInt32(mo+4),v.getInt32(mo))*2/Math.PI)*90)%360+360)%360,stbl=mp4Path(b,v,mdia,'minf','stbl'),stsd=mp4Child(b,v,stbl,'stsd');if(!stsd)continue;
+  // Elenco delle modifiche (edts/elst): un tratto vuoto iniziale ritarda la traccia, media_time dice da dove si comincia.
+  let shift=0,delay=0;const elst=mp4Path(b,v,trak,'edts','elst');if(elst){const ev=b[elst.start],k=v.getUint32(elst.start+4);for(let i=0;i<k;i++){const p=elst.start+8+i*(ev?20:12),dur=ev?Number(v.getBigUint64(p)):v.getUint32(p),mt=ev?Number(v.getBigInt64(p+8)):v.getInt32(p+4);if(mt===-1){delay+=dur/movieScale;continue}shift=mt;break}}
+  const t={id:v.getUint32(tkhd.start+(tv?20:12)),type,scale,rotation,...mp4SampleEntry(b,v,stsd,type)},P=mp4Samples(b,v,stbl,scale,shift);if(delay)for(const k of ['pts','dts'])P[k]=P[k].map(x=>x+delay);t.P=P;t.shift=shift;t.delay=delay;tracks.push(t)}
+ // MP4 frammentato: i campioni stanno nei moof, ognuno con la sua tabella (trun) per traccia.
+ if(tracks.some(t=>!t.P.off.length)&&top.some(x=>x.type==='moof')){const next=new Map();
+  for(const mf of top){if(mf.type!=='moof')continue;const fb=await readBytes(blob,mf.at,mf.size),fv=new DataView(fb.buffer);
+   for(const traf of mp4Boxes(fb,fv,mf.hdr,fb.length)){if(traf.type!=='traf')continue;const tfhd=mp4Child(fb,fv,traf,'tfhd');if(!tfhd)continue;const fl=fv.getUint32(tfhd.start)&0xFFFFFF,id=fv.getUint32(tfhd.start+4),t=tracks.find(x=>x.id===id);if(!t)continue;
+    let p=tfhd.start+8,base=mf.at;const df=trex.get(id)||{dur:0,size:0,flags:0};let dDur=df.dur,dSize=df.size,dFlags=df.flags;if(fl&1){base=Number(fv.getBigUint64(p));p+=8}if(fl&2)p+=4;if(fl&8){dDur=fv.getUint32(p);p+=4}if(fl&16){dSize=fv.getUint32(p);p+=4}if(fl&32){dFlags=fv.getUint32(p);p+=4}
+    const tfdt=mp4Child(fb,fv,traf,'tfdt');let dts=tfdt?(fb[tfdt.start]?Number(fv.getBigUint64(tfdt.start+4)):fv.getUint32(tfdt.start+4)):(next.get(id)?.dts||0),pos=base;
+    for(const tr of mp4Boxes(fb,fv,traf.start,traf.end)){if(tr.type!=='trun')continue;const tf=fv.getUint32(tr.start)&0xFFFFFF,ver=fb[tr.start],cnt=fv.getUint32(tr.start+4);let q=tr.start+8;if(tf&1){pos=base+fv.getInt32(q);q+=4}let first=null;if(tf&4){first=fv.getUint32(q);q+=4}
+     for(let i=0;i<cnt;i++){let d=dDur,s=dSize,f=i===0&&first!==null?first:dFlags,o=0;if(tf&0x100){d=fv.getUint32(q);q+=4}if(tf&0x200){s=fv.getUint32(q);q+=4}if(tf&0x400){f=fv.getUint32(q);q+=4}if(tf&0x800){o=ver?fv.getInt32(q):fv.getUint32(q);q+=4}
+      if(i===0&&first!==null)f=first;const P=t.P;P.off.push(pos);P.size.push(s);P.dts.push((dts-t.shift)/t.scale+t.delay);P.pts.push((dts+o-t.shift)/t.scale+t.delay);P.dur.push(d/t.scale);P.key.push(f&0x10000?0:1);pos+=s;dts+=d}}
+    next.set(id,{dts})}}}
+ for(const t of tracks)t.packets=packPackets(t.P),delete t.P;const live=tracks.filter(t=>t.packets.n);
+ return{kind:'mp4',tracks:live,duration:live.reduce((m,t)=>Math.max(m,t.packets.pts[t.packets.n-1]+t.packets.dur[t.packets.n-1]),0)}}
+// ---- WebM / Matroska ----
+// Si legge il file una volta, a finestre di 4 MB, annotando dove sta ogni blocco; i dati dei blocchi si saltano.
+async function demuxWebm(blob){const WIN=4<<20;let buf=new Uint8Array(0),base=0;
+ const have=async(pos,len)=>{if(pos>=base&&pos+len<=base+buf.length)return true;if(pos>=blob.size)return false;buf=await readBytes(blob,pos,Math.min(blob.size,pos+Math.max(len,WIN))-pos);base=pos;return pos+len<=base+buf.length};
+ const byte=p=>buf[p-base];
+ const id=async p=>{if(!await have(p,4)&&p>=blob.size)return null;const f=byte(p);let len=1;while(len<=4&&!(f&(0x80>>(len-1))))len++;if(len>4||!await have(p,len))return null;let x=0;for(let i=0;i<len;i++)x=x*256+byte(p+i);return{id:x,len}};
+ const vint=async p=>{if(!await have(p,8)&&!await have(p,1))return null;const f=byte(p);let len=1;while(len<=8&&!(f&(0x80>>(len-1))))len++;if(len>8||!await have(p,len))return null;let x=f&(0xFF>>len),all=x===(0xFF>>len);for(let i=1;i<len;i++){x=x*256+byte(p+i);if(byte(p+i)!==255)all=false}return{value:x,len,unknown:all}};
+ const head=async p=>{const a=await id(p);if(!a)return null;const s=await vint(p+a.len);if(!s)return null;return{id:a.id,data:p+a.len+s.len,size:s.unknown?Infinity:s.value}};
+ const bytesOf=async(p,n)=>{await have(p,n);return buf.slice(p-base,p-base+n)};
+ const uintOf=b=>b.reduce((x,y)=>x*256+y,0),floatOf=b=>{const v=new DataView(b.buffer,b.byteOffset,b.length);return b.length===4?v.getFloat32(0):v.getFloat64(0)};
+ // Figli di un elemento piccolo già in memoria (Info, Tracks).
+ const kids=b=>{const out=[];let p=0;while(p<b.length){let f=b[p],l=1;while(l<=4&&!(f&(0x80>>(l-1))))l++;let x=0;for(let i=0;i<l;i++)x=x*256+b[p+i];p+=l;f=b[p];let sl=1;while(sl<=8&&!(f&(0x80>>(sl-1))))sl++;let s=f&(0xFF>>sl);for(let i=1;i<sl;i++)s=s*256+b[p+i];p+=sl;out.push({id:x,b:b.subarray(p,Math.min(b.length,p+s))});p+=s}return out};
+ const top=await head(0);if(!top||top.id!==0x1A45DFA3)return null;const seg=await head(top.data+top.size);if(!seg||seg.id!==0x18538067)return null;
+ const segEnd=Math.min(blob.size,seg.data+seg.size),TOP=new Set([0x1F43B675,0x1C53BB6B,0x1254C367,0x1043A770,0x1941A469,0x114D9B74,0x1549A966,0x1654AE6B]);let scale=1e6,duration=0;const tracks=new Map();
+ const block=async(p,size,tc,keyFlag)=>{const tn=await vint(p);if(!tn)return;const t=tracks.get(tn.value);if(!t)return;await have(p,tn.len+4);const rel=((byte(p+tn.len)<<8|byte(p+tn.len+1))<<16)>>16,flags=byte(p+tn.len+2),lace=(flags>>1)&3;let q=p+tn.len+3;const end=p+size;
+  const ts=((tc+rel)*scale/1e9)-(t.codecDelay||0),key=keyFlag===null?flags&0x80?1:0:keyFlag,push=(o,s,k)=>{t.P.off.push(o);t.P.size.push(s);t.P.pts.push(ts);t.P.dts.push(ts);t.P.dur.push(0);t.P.key.push(k)};
+  if(!lace){push(q,end-q,key);return}
+  await have(q,Math.min(end-q,4096));const n=byte(q)+1;q++;const sizes=[];
+  if(lace===2){for(let i=0;i<n-1;i++){let s=0,x;do{x=byte(q++);s+=x}while(x===255);sizes.push(s)}}
+  else if(lace===3){let r=await vint(q);sizes.push(r.value);q+=r.len;for(let i=1;i<n-1;i++){r=await vint(q);const range=2**(7*r.len-1)-1;sizes.push(sizes.at(-1)+r.value-range);q+=r.len}}
+  else{const s=Math.floor((end-q)/n);for(let i=0;i<n-1;i++)sizes.push(s)}
+  sizes.push(end-q-sizes.reduce((a,b)=>a+b,0));for(const s of sizes){push(q,s,key);q+=s}};
+ let p=seg.data;
+ while(p<segEnd){const e=await head(p);if(!e)break;
+  if(e.id===0x1549A966){const ks=kids(await bytesOf(e.data,e.size));for(const k of ks){if(k.id===0x2AD7B1)scale=uintOf(k.b);else if(k.id===0x4489)duration=floatOf(k.b)}}
+  else if(e.id===0x1654AE6B){for(const te of kids(await bytesOf(e.data,e.size))){if(te.id!==0xAE)continue;const t={P:packetList()};let num=0,type=0,cid='',priv=null;
+    for(const k of kids(te.b)){if(k.id===0xD7)num=uintOf(k.b);else if(k.id===0x83)type=uintOf(k.b);else if(k.id===0x86)cid=td.decode(k.b);else if(k.id===0x63A2)priv=k.b.slice();else if(k.id===0x56AA)t.codecDelay=uintOf(k.b)/1e9;
+     else if(k.id===0xE0)for(const x of kids(k.b)){if(x.id===0xB0)t.width=uintOf(x.b);else if(x.id===0xBA)t.height=uintOf(x.b)}
+     else if(k.id===0xE1)for(const x of kids(k.b)){if(x.id===0xB5)t.sampleRate=Math.round(floatOf(x.b));else if(x.id===0x9F)t.channels=uintOf(x.b)}}
+    t.type=type===1?'video':type===2?'audio':null;t.rotation=0;t.channels??=1;t.sampleRate??=8000;
+    const map={V_VP8:'vp8',V_VP9:'vp09.00.10.08',A_OPUS:'opus',A_VORBIS:'vorbis','A_MPEG/L3':'mp3'};t.codec=map[cid]||null;
+    if(cid==='V_AV1'&&priv)t.codec=av1Codec(priv);if(cid==='V_MPEG4/ISO/AVC'&&priv){t.codec=avcCodec('avc1',priv);t.description=priv}if(cid==='V_MPEGH/ISO/HEVC'&&priv){t.codec=hevcCodec('hvc1',priv);t.description=priv}
+    if(cid==='A_AAC'&&priv){t.codec=aacCodec(priv);t.description=priv}if((cid==='A_OPUS'||cid==='A_VORBIS')&&priv)t.description=priv;if(cid==='A_OPUS'){t.sampleRate=48000;if(priv?.length>=12)t.preSkip=priv[10]|priv[11]<<8}
+    if(t.type&&num)tracks.set(num,t)}}
+  else if(e.id===0x1F43B675){let q=e.data,tc=0;const end=e.size===Infinity?segEnd:Math.min(segEnd,e.data+e.size);
+   while(q<end){const c=await head(q);if(!c)break;if(e.size===Infinity&&TOP.has(c.id))break;const cs=c.size===Infinity?0:c.size;
+    if(c.id===0xE7)tc=uintOf(await bytesOf(c.data,cs));
+    else if(c.id===0xA3)await block(c.data,cs,tc,null);
+    else if(c.id===0xA0){let r=c.data,blk=null,ref=false;const ge=c.data+cs;while(r<ge){const g=await head(r);if(!g)break;if(g.id===0xA1)blk=[g.data,g.size];else if(g.id===0xFB)ref=true;r=g.data+g.size}if(blk)await block(blk[0],blk[1],tc,ref?0:1)}
+    q=c.data+cs}
+   p=q;continue}
+  if(e.size===Infinity)break;p=e.data+e.size}
+ const list=[...tracks.values()].filter(t=>t.P.off.length);for(const t of list){t.packets=packPackets(t.P);delete t.P}
+ return{kind:'webm',tracks:list,duration:duration?duration*scale/1e9:list.reduce((m,t)=>Math.max(m,t.packets.pts[t.packets.n-1]+t.packets.dur[t.packets.n-1]),0)}}
+// Legge i pacchetti da i a j (escluso) con poche letture: quelli vicini nel file si leggono insieme, fino a 8 MB.
+async function readPackets(blob,P,i,j){const out=[];let k=i;while(k<j){const a=P.off[k];let e=a+P.size[k],m=k+1;while(m<j&&P.off[m]>=a&&P.off[m]-e<65536&&P.off[m]+P.size[m]-a<(8<<20)){e=Math.max(e,P.off[m]+P.size[m]);m++}
+  const bytes=await readBytes(blob,a,e-a);for(let q=k;q<m;q++)out.push(bytes.subarray(P.off[q]-a,P.off[q]-a+P.size[q]));k=m}return out}
+// Contenitori del video esportato: MP4 con H.264 e AAC, WebM con VP9 (o VP8) e Opus. Video e audio si alternano a tratti
+// di un secondo, l'indice sta all'inizio (il file si apre e ci si sposta subito) e i dati restano nei Blob dei pacchetti,
+// senza copiarli in un unico array: un video lungo non deve stare tutto nella memoria della pagina.
+// Pacchetto: {data (Blob o Uint8Array), size, pts e dur in microsecondi, key}.
+const be32s=list=>{const b=new Uint8Array(list.length*4),v=new DataView(b.buffer);for(let i=0;i<list.length;i++)v.setUint32(i*4,list[i]>>>0);return b};
+const be64=n=>{const b=new Uint8Array(8);new DataView(b.buffer).setBigUint64(0,BigInt(Math.round(n)));return b};
+const psize=p=>p.size??p.data.byteLength??p.data.size;
+const seriesRuns=list=>{const r=[];for(const d of list){const l=r.at(-1);if(l&&l[1]===d)l[0]++;else r.push([1,d])}return r};
+// Tratti di un secondo: per ogni traccia l'elenco dei pacchetti (indici) che cadono in ciascun secondo.
+function chunkPlan(times,T){const out=[];let k=0;for(let w=0;w*1e6<T||k<times.length;w++){const from=k;while(k<times.length&&times[k]<(w+1)*1e6)k++;out.push([from,k])}return out}
+function mp4Movie({video,audio}){const vs=90000,V=video.packets,Au=audio?.packets||[],T=Math.max(V.length?V.at(-1).pts+V.at(-1).dur:0,Au.length?Au.at(-1).ts+Au.at(-1).dur:0);
+ // Ordine di decodifica = ordine d'uscita del codificatore; se i tempi di presentazione non crescono servono gli scarti (ctts).
+ const dts=V.map(p=>p.pts).sort((a,b)=>a-b),vt=x=>Math.round(x*vs/1e6),vdur=V.map((p,i)=>i+1<V.length?vt(dts[i+1])-vt(dts[i]):vt(p.dur)),cto=V.map((p,i)=>vt(p.pts)-vt(dts[i])),keys=[];V.forEach((p,i)=>{if(p.key)keys.push(i+1)});
+ const ar=audio?.rate||48000,adur=Au.map(p=>p.dur?Math.round(p.dur*ar/1e6):1024);
+ // Tratti: secondo per secondo prima il video poi l'audio.
+ const vPlan=chunkPlan(dts,T),aPlan=chunkPlan(Au.map(p=>p.ts),T),chunks=[];for(let w=0;w<Math.max(vPlan.length,aPlan.length);w++){const v=vPlan[w],a=aPlan[w];if(v&&v[1]>v[0])chunks.push({track:'v',from:v[0],to:v[1]});if(a&&a[1]>a[0])chunks.push({track:'a',from:a[0],to:a[1]})}
+ let rel=0;for(const c of chunks){const list=c.track==='v'?V:Au;c.rel=rel;for(let i=c.from;i<c.to;i++)rel+=psize(list[i])}
+ const payload=rel,mdatHead=payload+8>0xFFFFFFFF?16:8,big=payload+mdatHead+(1<<22)>0xFFFFFFFF;
+ const table=(track,base)=>{const cs=chunks.filter(c=>c.track===track),sc=[];cs.forEach((c,i)=>{const n=c.to-c.from;if(!sc.length||sc.at(-1)[1]!==n)sc.push([i+1,n])});
+  return[fullBox('stsc',0,0,be32(sc.length),be32s(sc.flat().flatMap((x,i)=>i%2?[x,1]:[x]))),big?fullBox('co64',0,0,be32(cs.length),...cs.map(c=>be64(base+c.rel))):fullBox('stco',0,0,be32(cs.length),be32s(cs.map(c=>base+c.rel)))]};
+ const durMs=Math.round(T/1000),vDurTs=vdur.reduce((a,b)=>a+b,0),aDurTs=adur.reduce((a,b)=>a+b,0),w=video.width,h=video.height;
+ const moov=base=>{const vr=seriesRuns(vdur),cr=seriesRuns(cto),stsz=list=>fullBox('stsz',0,0,be32(0),be32(list.length),be32s(list.map(psize)));
+  const vtrak=box('trak',fullBox('tkhd',0,3,be32(0),be32(0),be32(1),be32(0),be32(durMs),new Array(8).fill(0),be16(0),be16(0),be16(0),be16(0),MATRIX,be32(w*65536),be32(h*65536)),
+   box('mdia',fullBox('mdhd',0,0,be32(0),be32(0),be32(vs),be32(vDurTs),be16(0x55C4),be16(0)),fullBox('hdlr',0,0,be32(0),chars('vide'),new Array(12).fill(0),[...chars('VideoHandler'),0]),
+    box('minf',fullBox('vmhd',0,1,new Array(8).fill(0)),box('dinf',fullBox('dref',0,0,be32(1),fullBox('url ',0,1))),
+     box('stbl',fullBox('stsd',0,0,be32(1),box('avc1',[0,0,0,0,0,0,0,1,...new Array(16).fill(0),...be16(w),...be16(h),...be32(0x00480000),...be32(0x00480000),0,0,0,0,...be16(1),...new Array(32).fill(0),...be16(0x18),0xFF,0xFF],box('avcC',video.desc))),
+      fullBox('stts',0,0,be32(vr.length),be32s(vr.flat())),...(cto.some(x=>x)?[fullBox('ctts',1,0,be32(cr.length),be32s(cr.flat()))]:[]),fullBox('stss',0,0,be32(keys.length),be32s(keys)),...table('v',base),stsz(V)))));
+  const ats=audio?[box('trak',fullBox('tkhd',0,3,be32(0),be32(0),be32(2),be32(0),be32(durMs),new Array(8).fill(0),be16(0),be16(1),be16(0x0100),be16(0),MATRIX,be32(0),be32(0)),
+   box('mdia',fullBox('mdhd',0,0,be32(0),be32(0),be32(ar),be32(aDurTs),be16(0x55C4),be16(0)),fullBox('hdlr',0,0,be32(0),chars('soun'),new Array(12).fill(0),[...chars('SoundHandler'),0]),
+    box('minf',fullBox('smhd',0,0,be16(0),be16(0)),box('dinf',fullBox('dref',0,0,be32(1),fullBox('url ',0,1))),
+     box('stbl',fullBox('stsd',0,0,be32(1),mp4aEntry(audio.desc,audio.ch,ar,audio.bitrate)),fullBox('stts',0,0,be32(seriesRuns(adur).length),be32s(seriesRuns(adur).flat())),...table('a',base),stsz(Au)))))]:[];
+  return box('moov',fullBox('mvhd',0,0,be32(0),be32(0),be32(1000),be32(durMs),be32(0x00010000),be16(0x0100),new Array(10).fill(0),MATRIX,new Array(24).fill(0),be32(3)),vtrak,...ats)};
+ const ftyp=box('ftyp',chars('isom'),be32(0x200),chars('isomiso2avc1mp41')),size=moov(0).length,base=ftyp.length+size+mdatHead,head=new Uint8Array(mdatHead),hv=new DataView(head.buffer);
+ if(mdatHead===16){hv.setUint32(0,1);head.set(chars('mdat'),4);hv.setBigUint64(8,BigInt(payload+16))}else{hv.setUint32(0,payload+8);head.set(chars('mdat'),4)}
+ const parts=[ftyp,moov(base),head];for(const c of chunks){const list=c.track==='v'?V:Au;for(let i=c.from;i<c.to;i++)parts.push(list[i].data)}
+ return new Blob(parts,{type:'video/mp4'})}
+// WebM: un cluster nuovo a ogni fotogramma chiave dopo almeno un secondo (al massimo ogni 5 secondi), blocchi di video e
+// audio in ordine di tempo, indice dei fotogrammi chiave (Cues) in fondo e indice degli elementi (SeekHead) in testa.
+function webmMovie({video,audio}){const ev=[];for(const p of video.packets)ev.push({t:Math.round(p.pts/1000),track:1,key:p.key,p});for(const p of audio?.packets||[])ev.push({t:Math.round(p.ts/1000),track:2,key:true,p});
+ ev.sort((a,b)=>a.t-b.t||a.track-b.track);const T=ev.reduce((m,e)=>Math.max(m,e.t+Math.round((e.p.dur||0)/1000)),0),clusters=[];let cur=null;
+ for(const e of ev){if(!cur||e.t-cur.t0>=5000||(e.track===1&&e.key&&e.t-cur.t0>=1000)){cur={t0:e.t,blocks:[],key:e.track===1&&e.key,size:0};clusters.push(cur)}
+  const rel=e.t-cur.t0,hdr=Uint8Array.from([0x80|e.track,rel>>8&255,rel&255,e.key?0x80:0]),len=hdr.length+psize(e.p),idLen=Uint8Array.from([0xA3,...ebmlLen(len)]);cur.blocks.push(idLen,hdr,e.p.data);cur.size+=idLen.length+len}
+ for(const c of clusters){c.tc=ebml(0xE7,ebUint(c.t0));c.head=Uint8Array.from([...ebmlId(0x1F43B675),...ebmlLen(c.tc.length+c.size,8)]);c.bytes=c.head.length+c.tc.length+c.size}
+ const vcodec=video.codec==='vp8'?'V_VP8':'V_VP9',head=audio?(audio.desc&&audio.desc.length>=19?audio.desc:opusHead(audio.ch,audio.rate)):null;
+ const info=ebml(0x1549A966,ebml(0x2AD7B1,ebUint(1e6)),ebml(0x4489,ebFloat(T)),ebml(0x4D80,te.encode('Tassello Media')),ebml(0x5741,te.encode('Tassello Media')));
+ const tracks=ebml(0x1654AE6B,ebml(0xAE,ebml(0xD7,[1]),ebml(0x73C5,[1]),ebml(0x83,[1]),ebml(0x86,te.encode(vcodec)),ebml(0xE0,ebml(0xB0,ebUint(video.width)),ebml(0xBA,ebUint(video.height)))),
+  ...(audio?[ebml(0xAE,ebml(0xD7,[2]),ebml(0x73C5,[2]),ebml(0x83,[2]),ebml(0x86,te.encode('A_OPUS')),ebml(0x63A2,head),ebml(0x56AA,ebUint(Math.round(new DataView(head.buffer,head.byteOffset).getUint16(10,true)/48000*1e9))),ebml(0x56BB,ebUint(80e6)),ebml(0xE1,ebml(0xB5,ebFloat(audio.rate)),ebml(0x9F,[audio.ch])))]:[]));
+ const seek=(id,pos)=>ebml(0x4DBB,ebml(0x53AB,ebmlId(id)),ebml(0x53AC,ebUint(pos,8))),seekLen=ebml(0x114D9B74,seek(0x1549A966,0),seek(0x1654AE6B,0),seek(0x1C53BB6B,0)).length;
+ let pos=seekLen+info.length+tracks.length;const cues=[];for(const c of clusters){if(c.key)cues.push(ebml(0xBB,ebml(0xB3,ebUint(c.t0)),ebml(0xB7,ebml(0xF7,[1]),ebml(0xF1,ebUint(pos)))));pos+=c.bytes}
+ const cueEl=ebml(0x1C53BB6B,...cues),seekHead=ebml(0x114D9B74,seek(0x1549A966,seekLen),seek(0x1654AE6B,seekLen+info.length),seek(0x1C53BB6B,pos));
+ const ebmlHead=ebml(0x1A45DFA3,ebml(0x4286,[1]),ebml(0x42F7,[1]),ebml(0x42F2,[4]),ebml(0x42F3,[8]),ebml(0x4282,te.encode('webm')),ebml(0x4287,[4]),ebml(0x4285,[2]));
+ const parts=[ebmlHead,Uint8Array.from(ebmlId(0x18538067)),ebmlLen(pos+cueEl.length,8),seekHead,info,tracks];for(const c of clusters)parts.push(c.head,c.tc,...c.blocks);parts.push(cueEl);
+ return new Blob(parts,{type:'video/webm'})}
 // Editor della regione: un AudioBuffer (null quando è vuoto), cursore e selezione in campioni, marcatori con nome.
 // region è la regione del progetto che l'editor sta modificando; ogni modifica la aggiorna.
 // Ogni modifica sostituisce un tratto [a, b) con nuovi campioni: così taglia, incolla, effetti e annulla
@@ -1688,7 +1868,7 @@ async function restoreAudio(){let meta=await dbGet('audio-project');
 async function gcSources(){try{const used=new Set(P.regions.map(r=>'asrc:'+r.src));for(const k of await dbKeys())if(String(k).startsWith('asrc:')&&!used.has(k))await dbDel(k)}catch(e){}}
 // Progetto in un file: ZIP con progetto-audio.json e un WAV per ogni suono (32 bit in virgola mobile, senza perdite).
 async function saveAudioProjectZip(){if(!P.tracks.length){toast('Il progetto è vuoto');return}const used=[...new Set(P.regions.map(r=>r.src))].filter(id=>SOURCES.has(id));
- const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.1.2',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
+ const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.2.0',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(P.title+' (progetto audio)','zip'));P.exported=P.version;schedulePersist('audio');toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Audio`)}
 async function openAudioProjectZip(entries){let data;try{data=JSON.parse(await entries['progetto-audio.json'].text())}catch(e){toast('Il file progetto-audio.json è danneggiato');return}
  if(audioModified()&&!(await confirmAction('Aprendo il progetto sostituisci quello attuale. Continuare?','Apri')))return;const p=cleanAudioProject(data.progetto||data),bufs=new Map();
@@ -2014,7 +2194,7 @@ async function gcMedia(){try{const keys=await dbKeys(),used=new Set(V.p.media.ma
 // Progetto in un file: ZIP con progetto.json e la cartella media, senza compressione.
 async function saveProjectZip(){if(!V.p.media.length&&!V.p.main.length&&!V.p.titles.length&&!V.p.subs.length){toast('Il progetto è vuoto');return}const files=[],p=structuredClone(V.p);
  for(const m of p.media){const rt=MEDIA.get(m.id);if(!rt)continue;m.file=`media/${m.id}-${safeFileName(m.name)}`;files.push({name:m.file,data:rt.blob})}
- files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.1.2',progetto:p},null,1)});
+ files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.2.0',progetto:p},null,1)});
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(V.p.title+' (progetto video)','zip'));toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Video`)}
 async function openProjectZip(file){const entries=await work('Apertura del progetto',()=>unzipBlob(file));if(!entries)return false;const json=entries['progetto.json'];if(!json)return false;let data;try{data=JSON.parse(await json.text())}catch(e){toast('Il file progetto.json è danneggiato');return true}
  const p=data.progetto||data,blobs={};for(const m of p.media||[]){const b=entries[m.file];if(b)blobs[m.id]=new File([b],m.name||'file',{type:b.type})}
@@ -2027,7 +2207,7 @@ const hasVideoWork=()=>V.p.main.length||V.p.titles.length||V.p.audio.length||V.p
 // dissolvenze si regolano in tempo reale. L'esportazione registra il canvas e l'audio mentre il montaggio scorre.
 const view=$('viewCanvas'),vg=view.getContext('2d',{alpha:false});
 function resizeCanvas(){if(view.width!==V.p.w||view.height!==V.p.h){view.width=V.p.w;view.height=V.p.h}requestFrame()}
-const VE={playing:false,t0:0,c0:0,rate:1,raf:0,frame:0,bound:new Map(),stalled:false,suspended:false,exp:null};
+const VE={playing:false,t0:0,c0:0,rate:1,raf:0,frame:0,bound:new Map(),stalled:false,suspended:false,exp:null,frames:null};
 const SLOTS=[];let vMasterNode=null,vAnalyser=null;
 // Uscita del montaggio: un limitatore evita che clip e musica sommate superino il fondo scala e distorcano.
 function vMaster(){if(!vMasterNode){const ctx=actxGet(),lim=ctx.createDynamicsCompressor();lim.threshold.value=-2;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.12;vMasterNode=ctx.createGain();vAnalyser=ctx.createAnalyser();vAnalyser.fftSize=2048;vMasterNode.connect(lim);lim.connect(vAnalyser);vAnalyser.connect(ctx.destination);vMasterNode.limiter=lim}return vMasterNode}
@@ -2060,10 +2240,10 @@ function drawText(g,text,{color='#ffffff',size=7,pos='lower',box='dark',bold=tru
 function filterOf(c){const blur=Math.round((c.blur||4)*V.p.w/1280);return [c.bright!==100&&`brightness(${c.bright}%)`,c.contrast!==100&&`contrast(${c.contrast}%)`,c.sat!==100&&`saturate(${c.sat}%)`,(FILTERS[c.filter]?.[1]||'').replace('var',blur+'px')].filter(Boolean).join(' ')||'none'}
 function drawClip(g,s,t){const c=s.c,W=V.p.w,H=V.p.h,{a,wipe}=clipLook(s,t);if(a<=0)return;g.save();g.globalAlpha=a;if(wipe!==null){g.beginPath();g.rect(0,0,W*wipe,H);g.clip()}
  if(c.kind==='card'){g.fillStyle=c.color||'#2457c5';g.fillRect(0,0,W,H);g.restore();drawText(g,c.text,{color:c.textColor||'#ffffff',size:8,pos:'center',box:'none',alpha:a});return}
- const m=mediaMeta(c.media),rt=MEDIA.get(c.media);let src=null,sw=0,sh=0;if(m?.type==='image'){src=rt?.bitmap;sw=m.w;sh=m.h}else{const slot=VE.bound.get(c.id);if(slot&&slot.el.readyState>=2){src=slot.el;sw=slot.el.videoWidth;sh=slot.el.videoHeight}}
+ const m=mediaMeta(c.media),rt=MEDIA.get(c.media);let src=null,sw=0,sh=0,frot=0;if(m?.type==='image'){src=rt?.bitmap;sw=m.w;sh=m.h}else if(VE.frames){const fr=VE.frames.get(c.id);if(fr){src=fr.img;sw=fr.w;sh=fr.h;frot=fr.rot}}else{const slot=VE.bound.get(c.id);if(slot&&slot.el.readyState>=2){src=slot.el;sw=slot.el.videoWidth;sh=slot.el.videoHeight}}
  if(!rt){g.restore();drawText(g,'File mancante: '+(m?.name||''),{size:4,pos:'center',box:'dark'});return}
  if(!src||!sw){g.restore();return}
- const rot=((c.rotate||0)%360+360)%360,side=rot===90||rot===270,rw=side?sh:sw,rh=side?sw:sh,k=c.fit==='cover'?Math.max(W/rw,H/rh):Math.min(W/rw,H/rh);
+ const rot=(((c.rotate||0)+frot)%360+360)%360,side=rot===90||rot===270,rw=side?sh:sw,rh=side?sw:sh,k=c.fit==='cover'?Math.max(W/rw,H/rh):Math.min(W/rw,H/rh);
  g.filter=filterOf(c);g.translate(W/2,H/2);if(rot)g.rotate(rot*Math.PI/180);if(c.flip)g.scale(-1,1);g.drawImage(src,-sw*k/2,-sh*k/2,sw*k,sh*k);g.restore()}
 function titleAlpha(x,t){let a=1;if(x.fadeIn>0)a*=clamp((t-x.start)/x.fadeIn,0,1);if(x.fadeOut>0)a*=clamp((x.start+x.dur-t)/x.fadeOut,0,1);return a}
 function drawFrame(g,t,{subs=prefs.showSubs}={}){const W=V.p.w,H=V.p.h;g.save();g.globalAlpha=1;g.filter='none';g.fillStyle=V.p.bg;g.fillRect(0,0,W,H);g.restore();
@@ -2102,11 +2282,13 @@ function seekEl(el,time){el._want=time;if(el._seek)return el._seek;const near=x=
 async function showFrame(t){if(isAudio())return;const tok=++frameToken,want=syncMedia(t,false);await Promise.all(want.filter(w=>w.active&&w.slot).map(w=>{const el=w.slot.el;el.pause();w.slot.gain.gain.value=0;return seekEl(el,w.expected)}));if(tok!==frameToken||VE.playing)return;drawFrame(vg,t);updateVideoUI()}
 // Esportazione in tempo reale: MediaRecorder registra il canvas e l'audio del montaggio.
 function recorderTypes(){if(typeof MediaRecorder==='undefined')return[];const list=[['video/mp4;codecs=avc1.640028,mp4a.40.2','mp4','MP4 (H.264 e AAC): si apre su tutti i dispositivi'],['video/mp4;codecs=avc1.42E01F,mp4a.40.2','mp4','MP4 (H.264 e AAC): si apre su tutti i dispositivi'],['video/mp4','mp4','MP4'],['video/webm;codecs=vp9,opus','webm','WebM (VP9 e Opus): leggero, per il web'],['video/webm;codecs=vp8,opus','webm','WebM (VP8 e Opus)'],['video/webm','webm','WebM']],seen=new Set();return list.filter(([m,ext])=>{if(seen.has(ext)||!MediaRecorder.isTypeSupported(m))return false;seen.add(ext);return true})}
-async function exportVideoDialog(){const T=totalDur();if(T<=0){toast('La linea temporale è vuota');return}const types=recorderTypes();if(!types.length||!view.captureStream){toast('Questo browser non sa registrare video: usa Chrome o Edge recenti');return}
+async function exportVideoDialog(){const T=totalDur();if(T<=0){toast('La linea temporale è vuota');return}const plan=await fastPlan(),types=recorderTypes();if(!plan.ok&&(!types.length||!view.captureStream)){toast('Questo browser non sa registrare video: usa Chrome o Edge recenti');return}
  const missing=V.p.main.filter(c=>c.kind==='media'&&!MEDIA.get(c.media)).length;if(missing){toast(`Mancano i file di ${missing} clip: importali di nuovo prima di esportare`);return}
  const px=V.p.w*V.p.h,q=px>=3840*2160*0.9?[20,35,50]:px>=1920*1080*0.9?[6,10,16]:[3,5,8];
- const r=await modal('Esporta il video',`<p>Formato ${V.p.w} × ${V.p.h} a ${V.p.fps} fotogrammi al secondo, durata ${esc(sayTime(T))}. L’esportazione avviene mentre il montaggio scorre, quindi dura circa ${esc(sayTime(T))}: tieni questa scheda in primo piano (se la nascondi, l’esportazione si mette in pausa).</p>`,[{id:'fmt',label:'Formato',type:'select',value:types.some(x=>x[1]===prefs.videoFormat)?prefs.videoFormat:types[0][1],options:types.map(x=>[x[1],x[2]])},{id:'q',label:'Qualità',type:'select',value:String(q[1]),options:[[String(q[0]),`Leggera (${q[0]} Mbit/s)`],[String(q[1]),`Buona (${q[1]} Mbit/s)`],[String(q[2]),`Alta (${q[2]} Mbit/s)`]]},{id:'burn',label:'Imprimi i sottotitoli nel video',type:'checkbox',value:V.p.burnSubs,hint:'Così si vedono ovunque, ma non si possono spegnere.'},...(V.p.subs.length?[{id:'srt',label:'Scarica anche i sottotitoli in un file SRT separato',type:'checkbox',value:true}]:[]),{id:'name',label:'Nome del file',value:V.p.title}],'Esporta');
- if(!r)return;prefs.videoFormat=r.fmt;savePrefs();const type=types.find(x=>x[1]===r.fmt);await runExport({mime:type[0],ext:type[1],bps:Number(r.q)*1e6,burn:r.burn,srt:r.srt,name:r.name||V.p.title})}
+ const fmts=plan.ok?plan.formats.map(f=>[f.ext,f.label]):types.map(x=>[x[1],x[2]]);
+ const how=plan.ok?'Il video si prepara un fotogramma alla volta: di solito ci vuole meno della durata del montaggio e intanto puoi usare altre schede.':`${plan.reason?`«${esc(plan.reason)}» non si può leggere un fotogramma alla volta, quindi l’esportazione`:'L’esportazione'} avviene mentre il montaggio scorre e dura circa ${esc(sayTime(T))}: tieni questa scheda in primo piano (se la nascondi, l’esportazione si mette in pausa).`;
+ const r=await modal('Esporta il video',`<p>Formato ${V.p.w} × ${V.p.h} a ${V.p.fps} fotogrammi al secondo, durata ${esc(sayTime(T))}. ${how}</p>`,[{id:'fmt',label:'Formato',type:'select',value:fmts.some(x=>x[0]===prefs.videoFormat)?prefs.videoFormat:fmts[0][0],options:fmts},{id:'q',label:'Qualità',type:'select',value:String(q[1]),options:[[String(q[0]),`Leggera (${q[0]} Mbit/s)`],[String(q[1]),`Buona (${q[1]} Mbit/s)`],[String(q[2]),`Alta (${q[2]} Mbit/s)`]]},{id:'burn',label:'Imprimi i sottotitoli nel video',type:'checkbox',value:V.p.burnSubs,hint:'Così si vedono ovunque, ma non si possono spegnere.'},...(V.p.subs.length?[{id:'srt',label:'Scarica anche i sottotitoli in un file SRT separato',type:'checkbox',value:true}]:[]),{id:'name',label:'Nome del file',value:V.p.title}],'Esporta');
+ if(!r)return;prefs.videoFormat=r.fmt;savePrefs();const opts={bps:Number(r.q)*1e6,burn:r.burn,srt:r.srt,name:r.name||V.p.title};if(plan.ok){await fastExport(plan,{fmt:r.fmt,...opts});return}const type=types.find(x=>x[1]===r.fmt)||types[0];await runExport({mime:type[0],ext:type[1],...opts})}
 async function runExport({mime,ext,bps,burn,srt,name}){vStop();const T=totalDur(),ctx=actxGet();await ctx.resume();const stream=view.captureStream(V.p.fps),dest=ctx.createMediaStreamDestination();vMaster().limiter.connect(dest);
  const rec=new MediaRecorder(new MediaStream([...stream.getVideoTracks(),...dest.stream.getAudioTracks()]),{mimeType:mime,videoBitsPerSecond:bps,audioBitsPerSecond:192000}),chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
  let finish;const done=new Promise(res=>{finish=res});VE.exp={rec,burn,T,lum:[],finish,lastPct:-1,step:-1,completed:false,close:null};
@@ -2123,31 +2305,31 @@ const linear=v=>{v/=255;return v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4};
 function frameLuminance(src){lumG.drawImage(src,0,0,32,18);const d=lumG.getImageData(0,0,32,18).data;let s=0;for(let i=0;i<d.length;i+=4)s+=0.2126*linear(d[i])+0.7152*linear(d[i+1])+0.0722*linear(d[i+2]);return s/(d.length/4)}
 // Il fotogramma si riduce a 32 × 18 fuori dalla pagina (createImageBitmap): leggerlo intero bloccherebbe il disegno
 // per circa 14 ms in 1080p e all'esportazione si perderebbero fotogrammi. Le misure arrivano poco dopo, in ordine di tempo.
-function measureFrame(e,t){e.inflight=(e.inflight||0)+1;createImageBitmap(view,{resizeWidth:32,resizeHeight:18,resizeQuality:'medium'}).then(b=>{e.lum.push([t,frameLuminance(b)]);b.close()}).catch(()=>{}).finally(()=>{if(--e.inflight===0)e.idle?.()})}
+function measureFrame(e,t,src=view){e.inflight=(e.inflight||0)+1;createImageBitmap(src,{resizeWidth:32,resizeHeight:18,resizeQuality:'medium'}).then(b=>{e.lum.push([t,frameLuminance(b)]);b.close()}).catch(()=>{}).finally(()=>{if(--e.inflight===0)e.idle?.()})}
 const lumDone=e=>e.inflight?new Promise(r=>{e.idle=r}):Promise.resolve();
-function expFrame(t){const e=VE.exp;measureFrame(e,t);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`Esportazione al ${step*10}%`)}}}
+function expFrame(t,src=view){const e=VE.exp;measureFrame(e,t,src);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`Esportazione al ${step*10}%`)}}}
 // Impronta di ciò che si vede: se cambia, l'analisi dei lampeggiamenti va rifatta.
 function visualKey(){const s=JSON.stringify([V.p.main,V.p.titles,V.p.w,V.p.h,V.p.fps,V.p.bg,V.p.burnSubs&&V.p.subs]);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36)}
 // Lampeggiamenti (WCAG 2.3.1): coppie di variazioni opposte di luminosità di almeno il 10%, più di tre in un secondo.
 function flashWarnings(series){const ev=[];if(series.length<2)return[];let ext=series[0][1],trend=0;for(const [t,L] of series){if(trend>=0){if(L>ext)ext=L;else if(ext-L>=0.1&&Math.min(ext,L)<0.8){ev.push(t);trend=-1;ext=L}}else{if(L<ext)ext=L;else if(L-ext>=0.1&&Math.min(ext,L)<0.8){ev.push(t);trend=1;ext=L}}}
  const out=[];for(let i=0,j=0;i<ev.length;i++){while(ev[i]-ev[j]>1)j++;if(i-j+1>6&&(!out.length||ev[i]-out.at(-1)>2))out.push(ev[j])}return out}
 // Analisi dei lampeggiamenti senza esportare: il montaggio scorre senza audio e si misura ogni fotogramma.
-async function analyzeFlashes(){const T=totalDur();if(T<=0){toast('La linea temporale è vuota');return null}vStop();vMaster().gain.value=0;let finish;const done=new Promise(r=>{finish=r});
+async function analyzeFlashes(){const T=totalDur();if(T<=0){toast('La linea temporale è vuota');return null}if((await fastPlan()).decodable)return fastFlashes();vStop();vMaster().gain.value=0;let finish;const done=new Promise(r=>{finish=r});
  VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:V.p.burnSubs,T,lum:[],finish,lastPct:-1,step:-1,completed:false,close:null};
  modal('Analisi dei lampeggiamenti',`<p>Il montaggio scorre senza audio e viene misurata la luminosità di ogni fotogramma. Dura circa ${esc(sayTime(T))}.</p><div class="progress" id="expBar" role="progressbar" aria-label="Avanzamento dell’analisi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div><p id="expText">Preparazione…</p>`,[],'Annulla',{noCancel:true,restore:false,onOpen:(p,close)=>{VE.exp.close=close}}).then(()=>{if(VE.exp&&!VE.exp.completed)VE.exp.finish('cancel')});
  V.t=0;await showFrame(0);vPlay();const outcome=await done,exp=VE.exp;exp.completed=true;vStop();exp.close?.(null);VE.exp=null;vMaster().gain.value=1;if(outcome==='cancel'){toast('Analisi annullata');return null}
  await lumDone(exp);const warn=flashWarnings(exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
-// Solo audio: mixaggio fuori linea delle clip e della traccia audio, molto più veloce del tempo reale.
+// Solo audio: mixaggio fuori linea delle clip e della traccia audio (di ogni file si legge solo il tratto usato), molto più veloce del tempo reale.
 // Le clip accelerate o rallentate mantengono l'intonazione, come nell'anteprima.
 const decoded=new Map();
 async function decodedAudio(id){if(decoded.has(id))return decoded.get(id);const rt=MEDIA.get(id);let buf=null;if(rt){try{const r=await decodeAudioFile(rt.blob,{rate:48000});buf=r.buffer?await resampleBuffer(r.buffer,48000):null}catch(e){buf=null}}decoded.set(id,buf);return buf}
 // L'audio decodificato dei file serve solo durante il mixaggio (un'ora di video occupa più di un GB): poi si libera.
 async function mixdown(){try{return await mixAll()}finally{decoded.clear()}}
 async function mixAll(){const rate=48000,T=totalDur(),n=Math.max(1,Math.ceil(T*rate)),L=new Float32Array(n),R=new Float32Array(n);
- const add=(buf,srcIn,srcOut,start,speed,gainAt)=>{const a=Math.floor(srcIn*rate),b=Math.min(buf.length,Math.ceil(srcOut*rate));if(b<=a)return;let ch=[0,1].map(c=>buf.getChannelData(Math.min(c,buf.numberOfChannels-1)).slice(a,b));if(Math.abs(speed-1)>1e-3)ch=wsola(ch,rate,speed);const off=Math.round(start*rate);
+ const add=(buf,srcIn,srcOut,start,speed,gainAt)=>{const a0=Math.floor(srcIn*rate),a=Math.max(0,a0),b=Math.min(buf.length,Math.ceil(srcOut*rate));if(b<=a)return;let ch=[0,1].map(c=>buf.getChannelData(Math.min(c,buf.numberOfChannels-1)).slice(a,b));if(Math.abs(speed-1)>1e-3)ch=wsola(ch,rate,speed);const off=Math.round(start*rate)+Math.round((a-a0)/speed);
   for(let i=0;i<ch[0].length;i+=64){const g=gainAt(start+i/rate);for(let k=i;k<Math.min(i+64,ch[0].length);k++){const j=off+k;if(j>=n||j<0)continue;L[j]+=ch[0][k]*g;R[j]+=ch[1][k]*g}}};
- for(const s of layout()){if(s.c.kind!=='media'||s.c.mute)continue;const m=mediaMeta(s.c.media);if(!m||m.type==='image')continue;status('Mixaggio: '+m.name);const buf=await decodedAudio(m.id);if(buf)add(buf,s.c.in,s.c.out,s.start,s.c.speed||1,t=>clipGain(s,t))}
- for(const a of V.p.audio){const m=mediaMeta(a.media);status('Mixaggio: '+(m?.name||''));const buf=await decodedAudio(a.media);if(buf)add(buf,a.in,a.out,a.start,1,t=>audioItemGain(a,t))}
+ for(const s of layout()){if(s.c.kind!=='media'||s.c.mute)continue;const m=mediaMeta(s.c.media);if(!m||m.type==='image')continue;status('Mixaggio: '+m.name);const src=await clipAudio(m.id,s.c.in,s.c.out);if(src)add(src.buf,s.c.in-src.t0,s.c.out-src.t0,s.start,s.c.speed||1,t=>clipGain(s,t))}
+ for(const a of V.p.audio){const m=mediaMeta(a.media);status('Mixaggio: '+(m?.name||''));const src=await clipAudio(a.media,a.in,a.out);if(src)add(src.buf,a.in-src.t0,a.out-src.t0,a.start,1,t=>audioItemGain(a,t))}
  // Se la somma supera il fondo scala si abbassa tutto il mixaggio fino a −1 dB, invece di distorcere.
  let pk=0;for(const d of [L,R])for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v}if(pk>fromDb(-1)){const g=fromDb(-1)/pk;for(const d of [L,R])for(let i=0;i<d.length;i++)d[i]*=g;toast(`Il mixaggio superava il fondo scala: abbassato di ${fmtDb(toDb(g)).replace('−','')}`)}
  return makeBuffer([L,R],rate)}
@@ -2386,6 +2568,116 @@ async function a11yCheck(){const issues=[],T=totalDur();if(T<=0){toast('La linea
  let close=null;
  await modal('Verifica dell’accessibilità del video',`<p>${issues.length?`${issues.length} ${issues.length===1?'punto da sistemare':'punti da sistemare'}.`:''} ${esc(flashNote)}</p>${list}`,[],'Chiudi',{noCancel:true,wide:true,buttons:[{label:'Analizza i lampeggiamenti',run:async()=>{close(null);await new Promise(r=>setTimeout(r,0));const w=await analyzeFlashes();if(w)a11yCheck()}}],
   onOpen:(pane,finish)=>(close=finish,pane).addEventListener('click',e=>{const b=e.target.closest('[data-issue]');if(!b)return;const x=issues[Number(b.dataset.issue)];finish(null);setTimeout(()=>{if(x.go){selectItem(x.go[0],x.go[1],{focus:true})}else{seekTo(x.at,{say:true});playheadEl.focus()}},0)})})}
+// Esportazione del video un fotogramma alla volta, di solito più veloce del tempo reale: i file del montaggio si
+// decodificano con WebCodecs, ogni istante si compone nel canvas come nell'anteprima, il codificatore del browser lo
+// comprime e i pacchetti finiscono in un MP4 o in un WebM. Il montaggio non deve scorrere, quindi la scheda può stare in
+// secondo piano. Se un file non si può leggere così (contenitore o codice sconosciuto) resta l'esportazione in tempo reale.
+const DEMUX=new Map();let fastBroken=false;
+function mediaDemux(id){const m=mediaMeta(id),rt=MEDIA.get(id);if(!m||!rt||m.type==='image')return Promise.resolve(null);let p=DEMUX.get(id);if(!p||p.blob!==rt.blob){p=demuxMedia(rt.blob).catch(()=>null);p.blob=rt.blob;DEMUX.set(id,p)}return p}
+// Una pausa che lascia rispondere la pagina senza usare timer, che con la scheda nascosta rallentano.
+const yieldPage=()=>new Promise(r=>{const ch=new MessageChannel();ch.port1.onmessage=()=>r();ch.port2.postMessage(0)});
+// Lettore dei fotogrammi di un file video: si chiede un istante alla volta, in avanti, e lui decodifica quanto serve.
+// Tiene pochi fotogrammi in sospeso: quelli non ancora chiusi occupano la memoria del decodificatore, che con troppi si ferma.
+function frameReader(blob,tr){const P=tr.packets,keys=[];for(let i=0;i<P.n;i++)if(P.key[i])keys.push(i);let next=0,flushed=false,err=null,wake=null,cur=null,reading=null;const ready=[];
+ const ping=()=>{const w=wake;wake=null;w?.()},wait=()=>new Promise(r=>{wake=r});
+ const dec=new VideoDecoder({output:f=>{ready.push(f);ping()},error:e=>{err=e;ping()}});dec.addEventListener('dequeue',ping);
+ const configure=()=>dec.configure({codec:tr.codec,...(tr.description?{description:tr.description}:{}),...(tr.width?{codedWidth:tr.width,codedHeight:tr.height}:{})});configure();
+ // Pacchetto da cui cominciare per arrivare a t: l'ultimo fotogramma chiave che si presenta entro t.
+ const startAt=t=>{let lo=0,hi=keys.length-1,k=keys[0]||0;while(lo<=hi){const m=(lo+hi)>>1;if(P.pts[keys[m]]<=t+1e-6){k=keys[m];lo=m+1}else hi=m-1}return k};
+ const feed=async()=>{const end=Math.min(P.n,next+8),data=await readPackets(blob,P,next,end);for(let i=next;i<end;i++)dec.decode(new EncodedVideoChunk({type:P.key[i]?'key':'delta',timestamp:Math.round(P.pts[i]*1e6),duration:Math.round(P.dur[i]*1e6),data:data[i-next]}));next=end};
+ const drop=()=>{for(const f of ready)f.close();ready.length=0;cur?.close();cur=null};
+ return{
+  seek(t){if(next||ready.length||cur){drop();dec.reset();configure()}next=startAt(t);flushed=false},
+  // Il fotogramma da mostrare all'istante t del file: l'ultimo che comincia entro t. Un salto oltre il prossimo
+  // fotogramma chiave riparte da lì invece di decodificare tutto quello che c'è in mezzo.
+  async frameAt(t){const T=Math.round(t*1e6)+1;if(startAt(t)>next)this.seek(t);
+   for(;;){if(err)throw err;while(ready.length&&ready[0].timestamp<=T){cur?.close();cur=ready.shift()}
+    if(ready.length||(flushed&&dec.decodeQueueSize===0))return cur||ready[0]||null;
+    if(next<P.n&&dec.decodeQueueSize<4&&ready.length<3){await (reading??=feed().finally(()=>{reading=null}));continue}
+    if(next>=P.n&&!flushed){flushed=true;await dec.flush();continue}
+    await wait()}},
+  close(){drop();try{dec.close()}catch(e){}}}}
+// Audio di un tratto di un file, già a 48 kHz: si leggono solo i suoi pacchetti (più un poco prima, perché il
+// decodificatore si assesti), si rimettono in un piccolo M4A o WebM e li decodifica il browser con il suo convertitore.
+// Restituisce {buf, t0} (t0: istante del file del primo campione), {none} se il file non ha audio, null se non si sa leggere.
+function wavLayout(b){if(b.length<12||fourcc(b,0)!=='RIFF'&&fourcc(b,0)!=='RF64'||fourcc(b,8)!=='WAVE')return null;const v=new DataView(b.buffer,b.byteOffset,b.length);let at=12,fmt=null;
+ while(at+8<=b.length){const id=fourcc(b,at),size=v.getUint32(at+4,true);if(id==='fmt '&&at+24<=b.length){fmt={tag:v.getUint16(at+8,true),ch:v.getUint16(at+10,true),rate:v.getUint32(at+12,true),align:v.getUint16(at+20,true),bits:v.getUint16(at+22,true)};if(fmt.tag===0xFFFE&&at+34<=b.length)fmt.tag=v.getUint16(at+32,true)}
+  else if(id==='data')return fmt&&fmt.align?{...fmt,off:at+8,size}:null;at+=8+size+(size&1)}return null}
+async function wavRange(blob,t0,t1){const L=wavLayout(await readBytes(blob,0,Math.min(blob.size,1<<16)));if(!L)return null;const frames=Math.floor(Math.min(L.size,blob.size-L.off)/L.align),a=Math.max(0,Math.floor(t0*L.rate)),b=Math.min(frames,Math.ceil(t1*L.rate)+1);if(b<=a)return{none:true};
+ const data=await readBytes(blob,L.off+a*L.align,(b-a)*L.align),head=new Uint8Array(44),v=new DataView(head.buffer),w4=(at,s)=>head.set(chars(s),at);
+ w4(0,'RIFF');v.setUint32(4,36+data.length,true);w4(8,'WAVE');w4(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,L.tag,true);v.setUint16(22,L.ch,true);v.setUint32(24,L.rate,true);v.setUint32(28,L.rate*L.align,true);v.setUint16(32,L.align,true);v.setUint16(34,L.bits,true);w4(36,'data');v.setUint32(40,data.length,true);
+ const w=readWav(await new Blob([head,data]).arrayBuffer());return w?.buffer?{buf:await resampleBuffer(w.buffer,48000),t0:a/L.rate}:{none:true}}
+async function mediaAudioRange(id,t0,t1){const rt=MEDIA.get(id),m=mediaMeta(id);if(!rt||!m||m.type==='image')return null;
+ if(/\.wav$/i.test(m.name)||rt.blob.type==='audio/wav'){const r=await wavRange(rt.blob,t0,t1);if(r)return r}
+ const dm=await mediaDemux(id);if(!dm)return null;const tr=dm.tracks.find(t=>t.type==='audio');if(!tr)return{none:true};const c=tr.codec||'';if(!(c.startsWith('mp4a')&&tr.description||c==='opus'||c==='mp3'))return null;
+ const P=tr.packets,pre=c==='opus'?0.08:0.1;let i=0;while(i<P.n&&P.pts[i]+P.dur[i]<t0-pre)i++;let j=i;while(j<P.n&&P.pts[j]<t1+0.05)j++;if(j<=i)return{none:true};
+ const data=await readPackets(rt.blob,P,i,j),pk=data.map((d,q)=>({data:d,ts:Math.round((P.pts[i+q]-P.pts[i])*1e6),dur:Math.round(P.dur[i+q]*1e6)}));
+ const file=c.startsWith('mp4a')?m4aBlob({packets:pk,desc:tr.description,rate:tr.sampleRate,ch:tr.channels,bitrate:128000}):c==='opus'?webmAudioBlob({packets:pk,desc:tr.description,rate:48000,ch:tr.channels}):new Blob(data);
+ // Nel piccolo WebM il primo campione decodificato corrisponde all'istante del blocco, senza il ritardo dell'Opus (CodecDelay).
+ const out=await decodeAudioFile(file,{rate:48000});return out?.buffer?{buf:await resampleBuffer(out.buffer,48000),t0:P.pts[i]+(c==='opus'?tr.codecDelay||0:0)}:{none:true}}
+// Audio di una clip per il mixaggio: il tratto che serve, oppure (per i formati che non si leggono a pezzi) il file intero.
+async function clipAudio(id,a,b){try{const r=await mediaAudioRange(id,a,b);if(r?.none)return null;if(r)return r}catch(e){console.warn('Tratto audio non letto',e)}const buf=await decodedAudio(id);return buf?{buf,t0:0}:null}
+// Che cosa si può fare un fotogramma alla volta: decodable se ogni video del montaggio si decodifica con WebCodecs,
+// formats i formati che il browser sa codificare (MP4 con H.264 e AAC, WebM con VP9 o VP8 e Opus).
+async function fastPlan(){const out={decodable:false,ok:false,formats:[],reason:''};if(fastBroken||typeof VideoDecoder==='undefined'||typeof VideoEncoder==='undefined'||typeof EncodedVideoChunk==='undefined')return out;
+ for(const s of layout()){if(s.c.kind!=='media')continue;const m=mediaMeta(s.c.media);if(m?.type!=='video')continue;const tr=(await mediaDemux(m.id))?.tracks.find(t=>t.type==='video');let ok=!!tr?.codec;
+  if(ok)try{ok=(await VideoDecoder.isConfigSupported({codec:tr.codec,...(tr.description?{description:tr.description}:{}),...(tr.width?{codedWidth:tr.width,codedHeight:tr.height}:{})})).supported}catch(e){ok=false}
+  if(!ok){out.reason=m.name;return out}}
+ out.decodable=true;const W=V.p.w,H=V.p.h,enc=async(codec,extra={})=>{try{return (await VideoEncoder.isConfigSupported({codec,width:W,height:H,bitrate:8e6,framerate:V.p.fps,...extra})).supported?codec:null}catch(e){return null}};
+ const avc=await enc(W*H>1920*1088?'avc1.640033':'avc1.640028',{avc:{format:'avc'}});if(avc&&await codecSupported('aac'))out.formats.push({ext:'mp4',codec:avc,audio:'aac',label:'MP4 (H.264 e AAC): si apre su tutti i dispositivi'});
+ const vp=(await enc('vp09.00.10.08'))||(await enc('vp8'));if(vp&&await codecSupported('opus'))out.formats.push({ext:'webm',codec:vp,audio:'opus',label:vp==='vp8'?'WebM (VP8 e Opus)':'WebM (VP9 e Opus): leggero, per il web'});
+ out.ok=out.formats.length>0;return out}
+// Percorre il montaggio un fotogramma alla volta e disegna ogni istante come nell'anteprima, in un canvas a parte sulla
+// scheda grafica: il codificatore prende il fotogramma direttamente dal canvas (rileggere i pixel con getImageData
+// costerebbe più del resto). L'anteprima si aggiorna ogni 15 fotogrammi. onFrame(k, t, canvas) riceve il disegno pronto;
+// restituisce false se stop() ha fermato il lavoro.
+async function renderFrames({burn,onFrame,stop}){const fps=V.p.fps,N=Math.max(1,Math.round(totalDur()*fps)),readers=new Map(),xc=document.createElement('canvas');xc.width=V.p.w;xc.height=V.p.h;const xg=xc.getContext('2d',{alpha:false});VE.frames=new Map();let lastYield=performance.now();
+ try{for(let k=0;k<N;k++){if(stop())return false;const t=k/fps,active=layout().filter(s=>s.c.kind==='media'&&t>=s.start&&t<s.end&&mediaMeta(s.c.media)?.type==='video');
+   for(const [id,r] of readers)if(!active.some(s=>s.c.id===id)){r.close();readers.delete(id);VE.frames.delete(id)}
+   for(const s of active){const tr=(await mediaDemux(s.c.media)).tracks.find(x=>x.type==='video'),st=srcTime(s,t);let r=readers.get(s.c.id);if(!r){r=frameReader(MEDIA.get(s.c.media).blob,tr);readers.set(s.c.id,r);r.seek(st)}
+    const f=await r.frameAt(st);if(f)VE.frames.set(s.c.id,{img:f,w:f.displayWidth,h:f.displayHeight,rot:tr.rotation});else VE.frames.delete(s.c.id)}
+   drawFrame(xg,t,{subs:burn});if(k%15===0)vg.drawImage(xc,0,0);await onFrame(k,t,xc);if(performance.now()-lastYield>40){await yieldPage();lastYield=performance.now()}}
+  return true}
+ finally{for(const r of readers.values())r.close();VE.frames=null}}
+// Codificatore hardware o software: dipende dal computer quale sia più veloce, quindi si prova ognuno su 16 fotogrammi
+// presi da un canvas, come nell'esportazione.
+async function pickAccel(cfg){let best='no-preference',bestMs=Infinity;const W=cfg.width,H=cfg.height,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d',{alpha:false});
+ for(const hw of ['prefer-software','prefer-hardware']){const c={...cfg,hardwareAcceleration:hw};try{if(!(await VideoEncoder.isConfigSupported(c)).supported)continue}catch(e){continue}
+  let err=null;const enc=new VideoEncoder({output:()=>{},error:e=>{err=e}});try{enc.configure(c);const t0=performance.now();for(let k=0;k<16&&!err;k++){g.fillStyle=`hsl(${k*20},60%,45%)`;g.fillRect(0,0,W,H);g.fillStyle='#fff';g.fillRect(k*40%W,H/3,W/5,H/3);const vf=new VideoFrame(c,{timestamp:k*33333});enc.encode(vf,{keyFrame:k===0});vf.close()}
+   await enc.flush();const ms=performance.now()-t0;if(!err&&ms<bestMs){bestMs=ms;best=hw}}catch(e){}finally{try{enc.close()}catch(e){}}}
+ return best}
+// Finestra di avanzamento comune a esportazione e analisi; annullare ferma il lavoro al fotogramma seguente.
+function progressDialog(title,intro,button,what){let cancelled=false;VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:false,T:totalDur(),lum:[],finish:()=>{cancelled=true},lastPct:-1,step:-1,completed:false,close:null};
+ modal(title,`<p>${intro}</p><div class="progress" id="expBar" role="progressbar" aria-label="${what}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div><p id="expText">Preparazione…</p>`,[],button,{noCancel:true,restore:false,onOpen:(p,close)=>{VE.exp.close=close}}).then(()=>{if(VE.exp&&!VE.exp.completed)cancelled=true});
+ return{exp:VE.exp,cancelled:()=>cancelled,text:s=>{const el=$('expText');if(el)el.textContent=s},end:()=>{const e=VE.exp;if(e){e.completed=true;e.close?.(null)}VE.exp=null;requestFrame()}}}
+async function fastExport(plan,{fmt,bps,burn,srt,name}){vStop();const f=plan.formats.find(x=>x.ext===fmt)||plan.formats[0],W=V.p.w,H=V.p.h,fps=V.p.fps,T=totalDur();
+ const ui=progressDialog('Esportazione del video','Il video si prepara un fotogramma alla volta: puoi usare altre schede nel frattempo. Puoi annullare in qualsiasi momento.','Annulla l’esportazione','Avanzamento dell’esportazione');ui.exp.burn=burn;let enc=null;
+ try{ui.text('Mixaggio dell’audio…');announce('Esportazione avviata: prima l’audio, poi i fotogrammi');const mix=await mixdown();if(ui.cancelled()){toast('Esportazione annullata');return}
+  ui.text('Codifica dell’audio…');const audio=await encodeAudio(mix,f.audio,192000);
+  // I pacchetti video si raccolgono in Blob da 16 MB: la memoria della pagina non cresce con la durata del video.
+  const packets=[];let desc=null,err=null,batch=[],bytes=0;
+  const seal=()=>{if(!batch.length)return;const blob=new Blob(batch.map(p=>p.data));let at=0;for(const p of batch){p.data=blob.slice(at,at+p.size);at+=p.size}batch=[];bytes=0};
+  enc=new VideoEncoder({output:(ch,meta)=>{const d=new Uint8Array(ch.byteLength);ch.copyTo(d);const p={data:d,size:d.length,pts:ch.timestamp,dur:ch.duration||Math.round(1e6/fps),key:ch.type==='key'};packets.push(p);batch.push(p);bytes+=d.length;if(bytes>(16<<20))seal();
+    const x=meta?.decoderConfig?.description;if(x&&!desc)desc=x instanceof ArrayBuffer?new Uint8Array(x.slice(0)):new Uint8Array(x.buffer.slice(x.byteOffset,x.byteOffset+x.byteLength))},error:e=>{err=e}});
+  const cfg={codec:f.codec,width:W,height:H,bitrate:bps,framerate:fps,latencyMode:'quality',...(f.ext==='mp4'?{avc:{format:'avc'}}:{})};ui.text('Scelta del codificatore…');enc.configure({...cfg,hardwareAcceleration:await pickAccel(cfg)});
+  const drained=()=>new Promise(r=>enc.addEventListener('dequeue',r,{once:true})),gop=Math.max(1,Math.round(fps*2)),t0=performance.now();
+  const ok=await renderFrames({burn,stop:()=>ui.cancelled()||!!err,onFrame:async(k,t,xc)=>{expFrame(t,xc);const vf=new VideoFrame(xc,{timestamp:Math.round(k*1e6/fps),duration:Math.round(1e6/fps)});
+   enc.encode(vf,{keyFrame:k%gop===0});vf.close();while(enc.encodeQueueSize>4&&!err)await drained()}});
+  if(err)throw err;if(!ok){toast('Esportazione annullata');return}
+  ui.text('Scrittura del file…');await enc.flush();seal();
+  if(f.ext==='mp4'&&!desc)throw Error('il codificatore H.264 non ha fornito la configurazione');
+  const blob=f.ext==='mp4'?mp4Movie({video:{width:W,height:H,desc,packets},audio}):webmMovie({video:{codec:f.codec==='vp8'?'vp8':'vp9',width:W,height:H,packets},audio});
+  const file=extName(name,f.ext);download(blob,file);if(srt&&V.p.subs.length)download(srtText(V.p.subs),extName(name,'srt'),'application/x-subrip');
+  await lumDone(ui.exp);const warn=flashWarnings(ui.exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');const secs=(performance.now()-t0)/1000;
+  toast(`Video esportato: ${file} (${fmtBytes(blob.size)}), in ${sayTime(secs)} per ${sayTime(T)} di montaggio.${warn.length?` Attenzione: possibili lampeggiamenti pericolosi a ${warn.slice(0,3).map(w=>fmtTime(w,0)).join(', ')}. Apri Verifica l’accessibilità.`:''}`)}
+ catch(e){console.error('Esportazione fotogramma per fotogramma non riuscita',e);fastBroken=true;toast('Esportazione non riuscita ('+(e.message||e)+'). Riprova: si userà l’esportazione in tempo reale.')}
+ finally{try{if(enc&&enc.state!=='closed')enc.close()}catch(e){}ui.end()}}
+// Analisi dei lampeggiamenti senza esportare, un fotogramma alla volta.
+async function fastFlashes(){vStop();const ui=progressDialog('Analisi dei lampeggiamenti','Si misura la luminosità di ogni fotogramma, senza far scorrere il montaggio.','Annulla','Avanzamento dell’analisi');ui.exp.burn=V.p.burnSubs;
+ try{const ok=await renderFrames({burn:V.p.burnSubs,stop:ui.cancelled,onFrame:(k,t,xc)=>expFrame(t,xc)});if(!ok){toast('Analisi annullata');return null}
+  await lumDone(ui.exp);const warn=flashWarnings(ui.exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
+ catch(e){console.error('Analisi fotogramma per fotogramma non riuscita',e);fastBroken=true;toast('Analisi non riuscita: riprova, si userà l’analisi in tempo reale');return null}
+ finally{ui.end()}}
 // Ogni comando del registro corrisponde a una funzione: prima quelle dell'app attiva, poi quelle comuni.
 const toggleMarkPane=()=>{const p=$('markPane');p.hidden=!p.hidden;if(!p.hidden)$('markList').focus();else $('wave').focus()};
 // In Audio alcuni comandi valgono per l'editor della regione o per le tracce secondo dove si sta lavorando.

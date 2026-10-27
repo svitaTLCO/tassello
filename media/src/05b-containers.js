@@ -9,11 +9,12 @@ const fullBox=(type,version,flags,...parts)=>box(type,[version,flags>>16&255,fla
 const MATRIX=[0x00010000,0,0,0,0x00010000,0,0,0,0x40000000].flatMap(be32);
 // Descrittore MPEG-4: etichetta, lunghezza su quattro byte, contenuto.
 const descr=(tag,body)=>[tag,0x80,0x80,0x80,body.length,...body];
+// Descrizione della traccia AAC (mp4a con esds): la usano l'M4A e l'MP4 del video.
+const mp4aEntry=(desc,ch,rate,bitrate)=>box('mp4a',[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,...be16(ch),...be16(16),0,0,0,0,...be32(rate<<16>>>0)],fullBox('esds',0,0,descr(3,[0,1,0,...descr(4,[0x40,0x15,0,0,0,...be32(bitrate),...be32(bitrate),...descr(5,[...desc])]),...descr(6,[2])])));
 function m4aBlob({packets,desc,rate,ch,bitrate}){if(!desc)throw Error('Il codificatore AAC non ha fornito la configurazione');
  const sizes=packets.map(p=>p.data.length),deltas=packets.map(p=>p.dur?Math.round(p.dur*rate/1e6):1024),duration=deltas.reduce((a,b)=>a+b,0);
  const runs=[];for(const d of deltas){const last=runs.at(-1);if(last&&last[1]===d)last[0]++;else runs.push([1,d])}
- const esds=fullBox('esds',0,0,descr(3,[0,1,0,...descr(4,[0x40,0x15,0,0,0,...be32(bitrate),...be32(bitrate),...descr(5,[...desc])]),...descr(6,[2])]));
- const mp4a=box('mp4a',[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,...be16(ch),...be16(16),0,0,0,0,...be32(rate<<16>>>0)],esds);
+ const mp4a=mp4aEntry(desc,ch,rate,bitrate);
  const stbl=chunkOffset=>box('stbl',fullBox('stsd',0,0,be32(1),mp4a),fullBox('stts',0,0,be32(runs.length),runs.flatMap(([n,d])=>[...be32(n),...be32(d)])),fullBox('stsc',0,0,be32(1),be32(1),be32(packets.length),be32(1)),fullBox('stsz',0,0,be32(0),be32(packets.length),sizes.flatMap(be32)),fullBox('stco',0,0,be32(1),be32(chunkOffset)));
  const moov=chunkOffset=>box('moov',fullBox('mvhd',0,0,be32(0),be32(0),be32(rate),be32(duration),be32(0x00010000),be16(0x0100),[0,0,0,0,0,0,0,0,0,0],MATRIX,new Array(24).fill(0),be32(2)),
   box('trak',fullBox('tkhd',0,3,be32(0),be32(0),be32(1),be32(0),be32(duration),new Array(8).fill(0),be16(0),be16(0),be16(0x0100),be16(0),MATRIX,be32(0),be32(0)),
