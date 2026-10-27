@@ -36,13 +36,16 @@ function renderOverlay(){const it=selItem(),k=sheetScale(),hs=n2(10/k),sw=n2(1.5
   else if(hd&&!it.rot)for(const [h,x,y] of HANDLES(b))if(it.kind!=='text'||h.length===2||it.wrap&&(h==='e'||h==='w'))s+=handle(x,y,h);
   s+='</g>'}
  overlay.innerHTML=s+(T.overlay?.(k)||'')}
-// Immagini regolate: si calcolano a parte (al massimo 1024 pixel per l'anteprima) e si ricordano per chiave.
+// Immagini regolate: si calcolano a parte (al massimo 1024 pixel per l'anteprima) e si ricordano per chiave. La ricetta
+// è quella di Immagini: adj, look e lookAmt nell'oggetto, il resto (maschere, scontorno, ritocchi, inquadratura) in photo.
 const procCache=new Map();
-const imgRecipe=it=>({...newRecipe(),adj:{...newRecipe().adj,...it.adj},look:it.look||'none',lookAmt:it.lookAmt??100});
-const hasImgEdits=it=>Object.values(it.adj||{}).some(v=>v)||(it.look||'none')!=='none';
-async function processImage(m,it,max,mime='image/png'){m.bmp??=await createImageBitmap(m.blob);const k=Math.min(1,max/Math.max(m.w,m.h)),w=Math.max(1,Math.round(m.w*k)),h=Math.max(1,Math.round(m.h*k)),cv=new OffscreenCanvas(w,h),ctx=cv.getContext('2d',{willReadFrequently:true});
- ctx.drawImage(m.bmp,0,0,w,h);const px=ctx.getImageData(0,0,w,h);ctx.putImageData(develop(px,px,imgRecipe(it),lutOf(it.look||'none')),0,0);return cv.convertToBlob({type:mime,quality:.92})}
-function imgHref(it){const m=Dw.imgs.get(it.img);if(!m)return '';if(!hasImgEdits(it)||m.type==='image/svg+xml')return m.url;const key=it.img+JSON.stringify([it.adj,it.look,it.lookAmt]),c=procCache.get(key);if(c)return c.url||c.prev||m.url;
+function imgRecipe(it){const z=newRecipe(),ph=it.photo||{};return {...z,...ph,adj:{...z.adj,...it.adj},look:it.look||'none',lookAmt:it.lookAmt??100,
+ fx:ph.fx?{...z.fx,...ph.fx,curves:{...z.fx.curves,...ph.fx.curves}}:z.fx,masks:(ph.masks||[]).map(m=>({...m,adj:{...zeroAdj(),...m.adj}})),cut:ph.cut?{...newCut(),...ph.cut}:null}}
+const hasImgEdits=it=>Object.values(it.adj||{}).some(v=>v)||(it.look||'none')!=='none'||!!it.photo;
+// Come l'esportazione di Immagini: inquadratura, maschere calcolate prima dai pixel originali, poi lo sviluppo sul posto.
+async function processImage(m,it,max,mime='image/png'){m.bmp??=await createImageBitmap(m.blob,{imageOrientation:'from-image'});const B=m.bmp,r=imgRecipe(it),[fw,fh]=outSize(r,B.width,B.height),k=Math.min(1,max/Math.max(fw,fh)),w=Math.max(1,Math.round(fw*k)),h=Math.max(1,Math.round(fh*k)),cv=new OffscreenCanvas(w,h),ctx=cv.getContext('2d',{willReadFrequently:true});
+ drawGeometry(ctx,B,r,w,h);const px=ctx.getImageData(0,0,w,h);ctx.putImageData(develop(px,px,r,lutOf(r.look),prepareMasks(r,maskCtx(r,w,h,px,'',B,Dw.ras))),0,0);return cv.convertToBlob({type:mime,quality:.92})}
+function imgHref(it){const m=Dw.imgs.get(it.img);if(!m)return '';if(!hasImgEdits(it)||m.type==='image/svg+xml')return m.url;const key=it.img+JSON.stringify([it.adj,it.look,it.lookAmt,it.photo]),c=procCache.get(key);if(c)return c.url||c.prev||m.url;
  const prev=[...procCache.entries()].reverse().find(([k2,v])=>k2.startsWith(it.img)&&v.url)?.[1].url;procCache.set(key,{url:null,prev});
  processImage(m,it,PREVIEW_FAST).then(blob=>{const e=procCache.get(key);if(!e)return;e.url=URL.createObjectURL(blob);if(procCache.size>40){const [k0,v0]=procCache.entries().next().value;if(v0.url)URL.revokeObjectURL(v0.url);procCache.delete(k0)}renderSheet()}).catch(e=>console.warn('Immagine non regolata',e));return prev||m.url}
 // Livelli: dal più in alto al più in basso, come si vedono sul foglio.
@@ -71,7 +74,7 @@ function renderProps(){const b=$('propBody'),it=selItem(),p=Dw.p,focusId=documen
   if(['rect','ellipse','poly','arrow','bubble'].includes(it.kind))h+=colorFld('fill','Riempimento',it.fill,'Nessun riempimento')+colorFld('stroke','Contorno',it.stroke)+fld('sw','Spessore del contorno (px)',it.sw)+(it.kind==='rect'?fld('radius','Angoli arrotondati (px)',it.radius):'');
   if(it.kind==='line')h+=colorFld('stroke','Colore',it.stroke)+fld('sw','Spessore (px)',it.sw);
   if(it.kind==='path')h+=pathProps(it);else h+=SHAPE_PROPS[it.kind]?.(it)||'';
-  if(it.kind==='image'){const svg=Dw.imgs.get(it.img)?.type==='image/svg+xml';h+=svg?'<p class="hint">Le immagini SVG si mettono sul foglio così come sono: le regolazioni valgono per le foto.</p>':`<h3>Regolazioni della foto</h3>`+IMG_ADJ.map(id=>{const a=ADJ_BY[id];return rangeFld('adj.'+id,a.label,a.min,a.max,a.step,it.adj?.[id]||0,a.fmt)}).join('')+selFld('look','Look',it.look||'none',lookList())+((it.look||'none')!=='none'?rangeFld('lookAmt','Intensità del look',0,100,1,it.lookAmt??100,v=>fmtInt(v)+'%'):'')}
+  if(it.kind==='image'){const svg=Dw.imgs.get(it.img)?.type==='image/svg+xml';h+=svg?'<p class="hint">Le immagini SVG si mettono sul foglio così come sono: le regolazioni valgono per le foto.</p>':`<h3>Regolazioni della foto</h3>`+IMG_ADJ.map(id=>{const a=ADJ_BY[id];return rangeFld('adj.'+id,a.label,a.min,a.max,a.step,it.adj?.[id]||0,a.fmt)}).join('')+selFld('look','Look',it.look||'none',lookList())+((it.look||'none')!=='none'?rangeFld('lookAmt','Intensità del look',0,100,1,it.lookAmt??100,v=>fmtInt(v)+'%'):'')+imgPhotoProps(it)}
   if(it.kind==='text'&&it.subs)h+=nodeSection(it);
   h+=styleProps(it)+rangeFld('opacity','Opacità',0,100,1,it.opacity,v=>fmtInt(v)+'%')+`<label class="check"><input type="checkbox" data-prop="hidden"${it.hidden?' checked':''}> Nascosto</label>`;b.innerHTML=h}
  if(focusId&&$(focusId))$(focusId).focus()}

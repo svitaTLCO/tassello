@@ -9,9 +9,10 @@ const KIND_ICON={rect:'rect',ellipse:'ellipse',line:'lineI',text:'textI',image:'
 // Quello che si aggiunge alla descrizione di un oggetto, secondo il tipo.
 const KIND_SAY={path:it=>(it.tool?`, tratto a mano libera di ${nodeList(it).length} nodi`:`, ${pathSummary(it)}`)+endsSay(it)};
 const newDrawing=()=>({title:'Senza titolo',w:1080,h:1350,bg:'#ffffff',desc:'',items:[]});
-// Il disegno aperto, l'oggetto scelto, la cronologia e le immagini (file originali, indirizzi per l'anteprima).
+// Il disegno aperto, l'oggetto scelto, la cronologia e le immagini (file originali, indirizzi per l'anteprima);
+// ras sono le maschere calcolate delle immagini (lo scontorno), per id, come rasters in Immagini.
 // Dw.sel è l'oggetto principale, quello delle proprietà; Dw.multi gli altri scelti con lui. tool è lo strumento del foglio.
-const Dw={p:newDrawing(),sel:null,multi:{for:null,ids:[]},base:'',hist:[],redo:[],imgs:new Map(),zoom:0,clip:null,last:{label:'',t:0},guides:[],tool:'select'};
+const Dw={p:newDrawing(),sel:null,multi:{for:null,ids:[]},base:'',hist:[],redo:[],imgs:new Map(),zoom:0,clip:null,last:{label:'',t:0},guides:[],tool:'select',ras:new Map()};
 const snapD=()=>JSON.stringify(Dw.p);
 Dw.base=snapD();
 const itemOf=id=>Dw.p.items.find(x=>x.id===id);
@@ -50,11 +51,14 @@ async function svgSize(file){const doc=new DOMParser().parseFromString(await fil
 async function addImages(files){for(const f of files){let w,h;try{if(isSvgFile(f))[w,h]=await svgSize(f);else{const bmp=await decodePhoto(f);w=bmp.width;h=bmp.height;bmp.close()}}catch(e){toast(e.message);continue}
  const id=uid(),k=Math.min(1,Dw.p.w*.8/w,Dw.p.h*.8/h);registerImage(id,f,f.name,w,h);addItem('image',{img:id,w:Math.max(1,Math.round(w*k)),h:Math.max(1,Math.round(h*k)),name:safeFileName(baseName(f.name)).slice(0,40)||nextName('image')})}}
 async function newDrawingCmd(){if(Dw.p.items.length&&!(await confirmAction('Il disegno attuale verrà chiuso. Se non l’hai salvato in SVG lo perdi: vuoi continuare?','Nuovo disegno')))return;Object.assign(Dw,{p:newDrawing(),sel:null,hist:[],redo:[],zoom:0});Dw.base=snapD();$('docTitle').value=Dw.p.title;updateTitle();drawingChanged({props:true});announce('Nuovo disegno vuoto, formato post 4:5. Inserisci forme, testi e immagini dalla scheda Inserisci.')}
-// Bozza: il disegno a ogni modifica, ogni immagine una volta sola; le immagini non più usate si tolgono.
-const imgSaved=new Set();
+// Bozza: il disegno a ogni modifica, ogni immagine e ogni maschera calcolata una volta sola; quelle non più usate si tolgono.
+const imgSaved=new Set(),rasSaved=new Set();
+const usedRasters=()=>new Set(Dw.p.items.map(x=>x.kind==='image'&&x.photo?.cut?.raster).filter(Boolean));
 async function persistDrawing(){await dbPut('drawing',{p:Dw.p,sel:Dw.sel});const used=new Set(Dw.p.items.filter(x=>x.kind==='image').map(x=>x.img));
  for(const id of used){const m=Dw.imgs.get(id);if(m&&!imgSaved.has(id)){await dbPut('dimg:'+id,{blob:m.blob,name:m.name,w:m.w,h:m.h});imgSaved.add(id)}}
- for(const k of await dbKeys())if(String(k).startsWith('dimg:')&&!used.has(k.slice(5))){await dbDel(k);imgSaved.delete(k.slice(5))}}
+ const ras=usedRasters();for(const id of ras){const R=Dw.ras.get(id);if(R&&!rasSaved.has(id)){await dbPut('dras:'+id,{w:R.w,h:R.h,data:R.data});rasSaved.add(id)}}
+ for(const k of await dbKeys()){const s=String(k);if(s.startsWith('dimg:')&&!used.has(s.slice(5))){await dbDel(k);imgSaved.delete(s.slice(5))}else if(s.startsWith('dras:')&&!ras.has(s.slice(5))){await dbDel(k);rasSaved.delete(s.slice(5))}}}
 async function restoreDrawing(){const d=await dbGet('drawing');if(!d?.p)return;Dw.p=Object.assign(newDrawing(),d.p);
  for(const it of Dw.p.items)if(it.kind==='image'&&!Dw.imgs.has(it.img)){const m=await dbGet('dimg:'+it.img);if(m){registerImage(it.img,m.blob,m.name,m.w,m.h);imgSaved.add(it.img)}}
+ for(const id of usedRasters())if(!Dw.ras.has(id)){const R=await dbGet('dras:'+id);if(R){Dw.ras.set(id,R);rasSaved.add(id)}}
  Dw.p.items=Dw.p.items.filter(it=>it.kind!=='image'||Dw.imgs.has(it.img));Dw.sel=itemOf(d.sel)?d.sel:null;Dw.base=snapD()}

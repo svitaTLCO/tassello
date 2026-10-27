@@ -4,7 +4,7 @@ const I_ACTIONS={open:()=>pickFile(),export:exportDialog,closePhoto,auto:applyAu
  lookMenu,lutImport:()=>$('lutInput').click(),lookAmount:()=>I.r.look==='none'?toast('Scegli prima un look'):liveRange('Intensità del look','lookAmt'),lookOff:()=>setLook('none'),
  planMenu,stepNext:()=>stepGo(1),stepPrev:()=>stepGo(-1),stepAuto,planFree:()=>choosePlan('libera'),
  undo:()=>photoUndo(false),redo:()=>photoUndo(true)};
-Object.assign(I_ACTIONS,PHOTO_TOOL_ACTIONS);
+Object.assign(I_ACTIONS,PHOTO_TOOL_ACTIONS,{photoBack:linkBack});
 const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newDraw:newDrawingCmd,
  addRect:()=>addItem('rect'),addEllipse:()=>addItem('ellipse'),addLine:()=>addItem('line'),addText:()=>{addItem('text');$('pr-text')?.focus();$('pr-text')?.select()},addImage:()=>{pickMode='image';$('drawInput').click()},
  duplicateItem,deleteItem,cut:()=>copyItem(true),copy:()=>copyItem(false),paste:pasteItem,
@@ -17,12 +17,14 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  boolUnion:()=>boolOp('union'),boolSubtract:()=>boolOp('subtract'),boolIntersect:()=>boolOp('intersect'),boolExclude:()=>boolOp('exclude'),
  addPolygon:()=>addItem('poly'),addStar:()=>addItem('poly',{star:true,sides:5,inner:45,fill:'#e8a33d',name:nextName('poly','Stella')}),addArrow:()=>addItem('arrow'),addBubble:()=>addItem('bubble'),addArrowLine:()=>addItem('line',{end:'arrow',name:nextName('line','Linea con freccia')}),
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
+Object.assign(D_ACTIONS,DRAW_PHOTO_ACTIONS);
 const COMMON_ACTIONS={filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
  switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),layoutMenu,layoutReset,showPlans:()=>paneToggle('planPane'),showAdjust:()=>paneToggle('adjPane'),showLayers:()=>paneToggle('layPane'),showProps:()=>paneToggle('propPane'),
  themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};
 async function handleAction(id){const f=(isImmagini()?I_ACTIONS[id]:D_ACTIONS[id])??COMMON_ACTIONS[id];if(!f){toast('Comando non disponibile');return}await f()}
-// Passa da Immagini a Disegno e viceversa: ogni app tiene il suo titolo, la sua barra e il suo lavoro.
-function setMode(mode,{focus=true}={}){const img=mode==='immagini',home=()=>img?(I.bmp?$('photo'):$('planList')):sheetWrap;if(mode===state.mode){if(focus)home().focus();return}
+// Passa da Immagini a Disegno e viceversa: ogni app tiene il suo titolo, la sua barra e il suo lavoro. Tornando in
+// Disegno finisce la modifica di un'immagine del disegno con gli strumenti di Immagini (07j).
+function setMode(mode,{focus=true}={}){if(mode==='disegno'&&!linkFinish())return;const img=mode==='immagini',home=()=>img?(I.bmp?$('photo'):$('planList')):sheetWrap;if(mode===state.mode){if(focus)home().focus();return}
  state.mode=mode;$('app').className=mode;document.documentElement.dataset.mode=mode;$('photoPane').classList.toggle('hidden',!img);$('drawPane').classList.toggle('hidden',img);$('switchImmagini').setAttribute('aria-pressed',img);$('switchDisegno').setAttribute('aria-pressed',!img);
  $('docTitle').value=img?I.title:Dw.p.title;$('saveTopLabel').textContent=img?'Esporta':'Salva';$('saveTop').dataset.tip=img?'Esporta la foto (Ctrl+S)':'Salva il disegno in SVG (Ctrl+S)';updateTitle();
  renderBar();applyLayout();themeChanged();if(img){showPhoto();renderPanel()}else{renderSheet();renderLayers();renderProps()}refreshToggles();
@@ -33,7 +35,7 @@ let pickMode='open';
 function pickFile(){pickMode='open';(isImmagini()?$('fileInput'):$('drawInput')).click()}
 async function openFiles(files){files=[...files];if(!files.length)return;const cube=files.find(f=>/\.cube$/i.test(f.name));if(cube&&files.length===1){await importLut(cube);return}
  if(!isImmagini()){const svg=files.find(isSvgFile),rest=files.filter(f=>f!==svg&&(isPhotoFile(f)||isSvgFile(f)));if(pickMode==='open'&&svg&&files.length===1){await openSvg(svg);return}const all=[...(svg?[svg]:[]),...rest];if(!all.length){toast('Scegli un disegno SVG o delle immagini');return}await addImages(all);return}
- const photo=files.find(isPhotoFile);if(!photo){toast('Scegli una foto: JPEG, PNG, WebP, AVIF, GIF o BMP');return}if(files.length>1)toast('Immagini apre una foto alla volta: aperta la prima');
+ if(!linkFinish({stay:true}))return;const photo=files.find(isPhotoFile);if(!photo){toast('Scegli una foto: JPEG, PNG, WebP, AVIF, GIF o BMP');return}if(files.length>1)toast('Immagini apre una foto alla volta: aperta la prima');
  if(I.bmp&&hasEdits()&&!(await confirmAction(`Aprire «${photo.name}»? Le modifiche alla foto attuale non esportate andranno perse; l’originale resta com’è.`,'Apri')))return;await openPhoto(photo)}
 // Pannello File a schermo intero, gestito come finestra di dialogo.
 const FILE_MENU={i:[['open','open','Apri una foto'],['export','save','Esporta la foto'],['sendToDraw','draw','Usa la foto in Disegno'],['lutImport','cube','Importa un look (LUT .cube)'],['closePhoto','close','Chiudi la foto'],['shortcuts','keyboard','Scorciatoie da tastiera'],['help','info','Informazioni e limiti']],

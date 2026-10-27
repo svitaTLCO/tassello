@@ -8,7 +8,8 @@
 // Modifiche a tutta la maschera: invert, feather (raggio r), grow (r, negativo per contrarre), refine (raggio r, eps e).
 // Contesto per disegnare le maschere alla misura w×h: matrice dalle unità ai pixel (U), pixel della foto inquadrata
 // (px, per bacchetta, colori e rifinitura), pixel per unità (k) e chiave per ricordare le maschere dell'anteprima.
-function maskCtx(r,w,h,px,key){const W=I.bmp.width,H=I.bmp.height,S=Math.max(W,H),U=geoMatrix(r,W,H,w,h).scale(S);return {r,w,h,px,U,S,k:Math.hypot(U.a,U.b),key}}
+// Di solito la foto è quella di Immagini; per le immagini di Disegno si passano la loro foto (src) e le loro maschere calcolate (ras).
+function maskCtx(r,w,h,px,key,src=I.bmp,ras=rasters){const W=src.width,H=src.height,S=Math.max(W,H),U=geoMatrix(r,W,H,w,h).scale(S);return {r,w,h,px,U,S,k:Math.hypot(U.a,U.b),key,W,H,ras}}
 const toPx=(mc,x,y)=>{const p=mc.U.transformPoint(new DOMPoint(x,y));return [p.x,p.y]};
 // Dal punto u, v dell'inquadratura (da 0 a 1) alle unità della foto, e ritorno.
 function fullMatrix(r=I.r){const W=I.bmp.width,H=I.bmp.height,[fw,fh]=outSize(r,W,H);return {U:geoMatrix(r,W,H,fw,fh).scale(Math.max(W,H)),fw,fh}}
@@ -54,7 +55,7 @@ function rangeLayer(op,mc){const {w,h}=mc,n=w*h,d=mc.px.data,L=new Uint8Array(n)
 // ridisegnano come la foto, con la stessa inquadratura.
 const rasters=new Map();
 function rasterCanvas(R){if(R.cv)return R.cv;const cv=new OffscreenCanvas(R.w,R.h),c=cv.getContext('2d'),img=c.createImageData(R.w,R.h),d=img.data;for(let i=0,j=0;i<R.data.length;i++,j+=4){d[j]=d[j+1]=d[j+2]=255;d[j+3]=R.data[i]}c.putImageData(img,0,0);return R.cv=cv}
-function rasterLayer(op,mc){const R=rasters.get(op.id);if(!R)return new Uint8Array(mc.w*mc.h);const W=I.bmp.width,H=I.bmp.height;
+function rasterLayer(op,mc){const R=mc.ras.get(op.id);if(!R)return new Uint8Array(mc.w*mc.h);const W=mc.W,H=mc.H;
  return canvasLayer(mc,c=>{c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.setTransform(mc.U.scale(W/mc.S/R.w,H/mc.S/R.h));c.drawImage(rasterCanvas(R),0,0)})}
 const LAYERS={rect:shapeLayer,poly:shapeLayer,ellipse:shapeLayer,brush:brushLayer,linear:linearLayer,radial:radialLayer,wand:wandLayer,range:rangeLayer,raster:rasterLayer};
 // Unione con il massimo, sottrazione e intersezione con il minimo: con i bordi morbidi danno passaggi puliti.
@@ -130,12 +131,12 @@ function rasterOps(ops,mc,from=null,start=0){let m=from;for(let i=start;i<ops.le
 const maskCache=new Map();
 // Foto nuova o chiusa: si dimenticano i pixel, le maschere e le maschere calcolate della foto di prima (le chiavi dicono
 // misura e inquadratura, non quale foto: due foto della stessa fotocamera avrebbero la stessa chiave).
-function photoChanged(){for(const slot of Object.values(srcCache))Object.assign(slot,{key:'',px:null});maskCache.clear();rasters.clear();I.maskSel=null;lastMc=null;endTool(false)}
+function photoChanged(){for(const slot of Object.values(srcCache))Object.assign(slot,{key:'',px:null});maskCache.clear();fxPreCache.clear();rasters.clear();I.maskSel=null;lastMc=null;endTool(false)}
 function maskOf(ops,mc){if(!mc.key)return mc.memo?.get(JSON.stringify(ops))??rasterOps(ops,mc);const key=mc.key+JSON.stringify(ops);let m=maskCache.get(key);if(m){maskCache.delete(key);maskCache.set(key,m);return m}
  const prev=ops.length>1&&maskCache.get(mc.key+JSON.stringify(ops.slice(0,-1)));m=prev?rasterOps(ops,mc,prev.slice(),ops.length-1):rasterOps(ops,mc);
  maskCache.set(key,m);while(maskCache.size>24)maskCache.delete(maskCache.keys().next().value);return m}
 // All'esportazione la foto si sviluppa sul posto: le maschere che leggono i pixel si calcolano prima, dagli originali.
-function prepareMasks(r,mc){mc.memo=new Map();for(const ops of [...(r.masks||[]).filter(m=>!m.off).map(m=>m.ops),...(typeof cutOps==='function'&&r.cut?[cutOps(r)]:[])])if(ops?.length)mc.memo.set(JSON.stringify(ops),rasterOps(ops,mc));return mc}
+function prepareMasks(r,mc){mc.memo=new Map();for(const ops of [...(r.masks||[]).filter(m=>!m.off).map(m=>m.ops),...(typeof cutOps==='function'&&r.cut?[cutOps(r,mc)]:[])])if(ops?.length)mc.memo.set(JSON.stringify(ops),rasterOps(ops,mc));return mc}
 const maskEmpty=m=>{for(let i=0;i<m.length;i+=7)if(m[i])return false;return !m.some(v=>v)};
 // Regolazione locale: le regolazioni della maschera applicate ai pixel già sviluppati e pesate dalla maschera, così più
 // maschere si sommano una sull'altra. amt è l'intensità (da 0 a 1); inv usa la maschera rovesciata.

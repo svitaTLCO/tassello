@@ -128,11 +128,11 @@ function* cutCompute(c,from=null){const W=I.bmp.width,H=I.bmp.height,S=Math.max(
  const data=new Uint8Array(n);for(let p=0;p<n;p++)data[p]=lab[p]?255:0;return {w,h,data,method}}
 // La maschera dello scontorno: quella calcolata, il bordo rifinito sulla foto (più ampio quanto più la copia era piccola)
 // e i tratti, che valgono sempre.
-function cutOps(r){const c=r.cut,R=c?.raster&&rasters.get(c.raster);if(!R)return [];const S=Math.max(I.bmp.width,I.bmp.height),k=I.bmp.width/R.w,e=c.edge??50;
+function cutOps(r,mc){const c=r.cut,R=c?.raster&&(mc?.ras||rasters).get(c.raster);if(!R)return [];const W=mc?mc.W:I.bmp.width,S=Math.max(W,mc?mc.H:I.bmp.height),k=W/R.w,e=c.edge??50;
  return [{t:'raster',id:c.raster},{t:'refine',r:U5(k*(1.2+e/30)/S),e:e<34?1e-4:e<67?1e-3:1e-2},...c.keep.map(s=>({...s,mode:'add'})),...c.drop.map(s=>({...s,mode:'sub'}))]}
 const hexRgb=h=>{const v=parseInt(String(h).replace('#',''),16)||0;return [v>>16&255,v>>8&255,v&255]};
 // Applica lo scontorno ai pixel sviluppati: trasparenza, oppure un colore pieno o la stessa foto sfocata dietro al soggetto.
-function applyCut(img,r,mc){const c=r.cut;if(!c?.raster)return;if(!rasters.has(c.raster)){cutRestore();return}const m=maskOf(cutOps(r),mc),d=img.data,n=m.length;
+function applyCut(img,r,mc){const c=r.cut;if(!c?.raster)return;if(!mc.ras.has(c.raster)){if(mc.ras===rasters)cutRestore();return}const m=maskOf(cutOps(r,mc),mc),d=img.data,n=m.length;
  if(c.bg==='color'){const [R,G,B]=hexRgb(c.color);for(let i=0,j=0;i<n;i++,j+=4){const a=m[i];if(a===255)continue;const k=a/255,l=1-k;d[j]=d[j]*k+R*l;d[j+1]=d[j+1]*k+G*l;d[j+2]=d[j+2]*k+B*l;d[j+3]=255}return}
  if(c.bg==='blur'){blurBehind(img,m,mc.w,mc.h,Math.max(1,(c.blur??40)/100*.02*mc.k));return}
  for(let i=0,j=3;i<n;i++,j+=4)if(m[i]!==255)d[j]=d[j]*m[i]/255}
@@ -155,7 +155,7 @@ async function cutRun(c,label,from=null){if(!I.bmp){toast('Apri prima una foto')
  try{const res=await runChunks(cutCompute(c,from),'Scontorno');if(!res)return false;const id=uid();rasters.set(id,{w:res.w,h:res.h,data:res.data});
   edit(label,r=>{r.cut={...c,raster:id,used:res.method}},{panel:true});renderPhoto(false);I.cutTime=Math.round(performance.now()-t0);announce(`${label}: ${cutSummary()}`);return true}
  catch(e){console.error(e);toast('Scontorno non riuscito: '+(e.message||e));return false}finally{cutBusy=false}}
-function cutSummary(r=I.r){const c=r.cut;if(!c)return 'Lo sfondo c’è ancora.';const R=rasters.get(c.raster);if(!R||!lastMc)return 'Sfondo tolto.';const m=maskOf(cutOps(r),lastMc);
+function cutSummary(r=I.r){const c=r.cut;if(!c)return 'Lo sfondo c’è ancora.';const R=rasters.get(c.raster);if(!R||!lastMc)return 'Sfondo tolto.';const m=maskOf(cutOps(r,lastMc),lastMc);
  return `${describeMask(m,lastMc.w,lastMc.h,null,'Il soggetto',true)} Metodo: ${c.used==='uniform'?'fondo uniforme':'GrabCut'}${c.keep.length||c.drop.length?`, ${c.keep.length} tratti tieni e ${c.drop.length} togli`:''}. Sfondo: ${c.bg==='color'?'colore '+c.color:c.bg==='blur'?'foto sfocata':'trasparente'}.`}
 const cutAuto=()=>cutRun({...newCut(),method:prefs.cutMethod||'auto',bg:I.r.cut?.bg||'none',color:I.r.cut?.color||'#ffffff',blur:I.r.cut?.blur??40},'Togli lo sfondo');
 const needCut=()=>{if(!I.bmp){toast('Apri prima una foto');return false}if(!I.r.cut){toast('Lo sfondo c’è ancora: usa prima Togli lo sfondo');return false}return true};

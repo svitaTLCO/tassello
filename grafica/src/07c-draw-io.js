@@ -53,7 +53,7 @@ async function exportDrawImage(){const p=Dw.p;const r=await modal('Esporta come 
  const blob=await work('Esportazione',async()=>{const url=URL.createObjectURL(new Blob([await drawingSvg({meta:false})],{type:'image/svg+xml'}));try{const img=new Image();img.src=url;await img.decode();const cv=new OffscreenCanvas(W,H),ctx=cv.getContext('2d');if(mime==='image/jpeg'){ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H)}ctx.drawImage(img,0,0,W,H);return await cv.convertToBlob({type:mime,quality:.92})}finally{URL.revokeObjectURL(url)}});
  if(!blob)return;download(blob,extName(r.name||p.title,r.format==='jpeg'?'jpg':'png'),mime);toast(`Esportato in ${r.format.toUpperCase()}, ${fmtInt(W)} × ${fmtInt(H)} pixel, ${fmtBytes(blob.size)}`)}
 // La foto di Immagini, con le sue regolazioni, entra in Disegno come immagine (al massimo 4096 pixel sul lato lungo).
-async function sendPhotoToDraw(){if(!I.bmp){toast('Apri prima una foto');return}const [w,h]=exportDims('4096'),blob=await work('Preparazione della foto',()=>renderFull(w,h,'image/png',1));if(!blob)return;
+async function sendPhotoToDraw(){if(photoLink.id){linkBack();return}if(!I.bmp){toast('Apri prima una foto');return}const [w,h]=exportDims('4096'),blob=await work('Preparazione della foto',()=>renderFull(w,h,'image/png',1));if(!blob)return;
  setMode('disegno',{focus:false});await addImages([new File([blob],(I.title||baseName(I.name))+'.png',{type:'image/png'})]);sheetWrap.focus()}
 // Verifica dell'accessibilità: contrasto dei testi (WCAG), testi troppo piccoli, descrizione del disegno.
 function lumOf(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return null;const v=parseInt(m[1],16);return [v>>16,v>>8&255,v&255].map(c=>S2L[c]).reduce((s,c,i)=>s+c*[.2126,.7152,.0722][i],0)}

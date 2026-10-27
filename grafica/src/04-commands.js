@@ -14,7 +14,8 @@ def('i','Foto',[
  ['compare','Mostra l’originale','compare','\\',{short:'Originale',toggle:()=>I.compare}],
  ['resetAll','Ripristina la foto com’era','history','Ctrl+Maiusc+R',{g:1,short:'Ripristina tutto'}],
  ['readStatus','Descrivi la foto e la sua luce','speak','Alt+Maiusc+I',{g:1,short:'Descrivi'}],
- ['sendToDraw','Usa la foto in Disegno','draw','',{short:'Usa in Disegno'}]]);
+ ['sendToDraw','Usa la foto in Disegno','draw','',{short:'Usa in Disegno'}],
+ ['photoBack','Torna a Disegno con le modifiche all’immagine','draw','',{short:'Torna a Disegno'}]]);
 def('i','Inquadratura',[
  ['rotateLeft','Ruota a sinistra di 90 gradi','rotateL','',{short:'Ruota a sinistra'}],
  ['rotateRight','Ruota a destra di 90 gradi','rotate','',{short:'Ruota a destra'}],
@@ -173,6 +174,10 @@ def('d','Stile',[
  ['shadowItem','Ombra','shadow','',{short:'Ombra',quiet:1,toggle:()=>!!selItem()?.shadow}],
  ['textOnPath','Testo lungo un tracciato','textPath','',{short:'Testo lungo un tracciato'}],
  ['textOffPath','Togli il testo dalla curva','textI','',{short:'Togli dalla curva'}]]);
+def('d','Immagine',[
+ ['imgEdit','Modifica l’immagine scelta con gli strumenti di Immagini','image','',{short:'Modifica in Immagini'}],
+ ['imgMasks','Maschere e regolazioni locali dell’immagine','mask','',{short:'Maschere'}],
+ ['imgPhotoReset','Togli maschere, scontorno e ritocchi dall’immagine','history','',{short:'Togli maschere e scontorno'}]]);
 def('id','Generale',[
  ['filePanel','Apri il menu File','file','',{}],
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],
