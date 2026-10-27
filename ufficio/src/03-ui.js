@@ -12,7 +12,7 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const field=x=>{const id='dlg_'+x.id,hint=x.hint?`<small class="hint" id="${id}_h">${esc(x.hint)}</small>`:'',desc=x.hint?` aria-describedby="${id}_h"`:'';
   if(x.type==='checkbox')return `<label class="check"><input type="checkbox" id="${id}"${x.value?' checked':''}${desc}> ${esc(x.label)}</label>${hint}`;
   const lab=`<label for="${id}">${esc(x.label)}</label>`;
-  if(x.type==='select')return lab+`<select id="${id}"${desc}>${x.options.map(opt=>`<option value="${esc(opt.value)}"${String(y.value)===String(x.value??'')?' selected':''}>${esc(y.label)}</option>`).join('')}</select>`+hint;
+  if(x.type==='select')return lab+`<select id="${id}"${desc}>${x.options.map(opt=>`<option value="${esc(opt.value)}"${String(opt.value)===String(x.value??'')?' selected':''}>${esc(opt.label)}</option>`).join('')}</select>`+hint;
   if(x.type==='textarea')return lab+`<textarea id="${id}" rows="${x.rows||3}"${desc}>${esc(x.value||'')}</textarea>`+hint;
   return lab+`<input id="${id}" type="${x.type||'text'}" value="${esc(x.value??'')}"${x.min!==undefined?` min="${x.min}"`:''}${x.max!==undefined?` max="${x.max}"`:''} autocomplete="off"${desc}>`+hint};
  pane.className='modal'+(opts.wide?' wide':'');
