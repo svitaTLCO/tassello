@@ -19,7 +19,7 @@ const PG_TIPS=[...PG_SAMPLE,'Scrivi frasi brevi e concrete: chi legge di corsa d
 // Testi lunghi per le storie che scorrono tra le pagine.
 const PG_TB='c:@0|c:@1|c:@2',PG_TL='c:@0|c:@1|c:@3|c:@6|c:@2|c:@4|c:@5|c:@7|c:@8';
 // Una pagina in verticale: post, storie, volantini e poster.
-const PG_V='post storia a4 a5 a2 a1 a0';
+const PG_V='post quadrato storia a4 letter a5 a3 a2 a1 a0';
 // I modelli. Campi: id, n nome, d descrizione, u usi, f formati, th tema, bg colore della pagina, st modifiche agli stili
 // (a allineamento c/r/j, x corpo in volte il corpo del testo, f carattere, c colore, b grassetto, i corsivo, u maiuscolo),
 // sp il corpo del testo nei formati da stampa, in frazioni dell'altezza dei margini (un volantino si legge da più lontano
@@ -31,8 +31,8 @@ const PG_V='post storia a4 a5 a2 a1 a0';
 // griglia di foto (PG_GRIDS). I paragrafi sono «lettera:testo» separati da |; con + davanti valgono solo nei formati da
 // stampa, con - solo in quelli per lo schermo. Opzioni: n nome, f sfondo, r angoli (frazione del lato corto), v allineamento
 // verticale m/b, c colonne, pad margine interno (in corpi del testo), k catena (le cornici con la stessa k si passano il
-// testo), q quadrata al centro, i rientro (frazione del lato corto), m sagoma, d decorativa, a testo alternativo, w spessore
-// della linea (in corpi del testo); nelle insegne st stile e c1, c2, oc, oc2, shc, gc colori, x altre proprietà.
+// testo), q quadrata al centro, i rientro (frazione del lato corto), m sagoma, d decorativa, a testo alternativo, s colore
+// del contorno delle forme, w spessore della linea o del contorno (in corpi del testo); nelle insegne st stile e c1, c2, oc, oc2, shc, gc colori, x altre proprietà.
 // Un gruppo {rep:[volte,dx,dy],g:[cornici…]} si ripete spostato di dx e dy: nei testi {n} è il numero della copia.
 const PG_NUM=['t',.5,1.25,1,1.8,'k:«Pagina» / «Pagine»',{n:'Numero di pagina'}];
 const PG_TEMPLATES=[
@@ -52,9 +52,9 @@ const PG_TEMPLATES=[
    ['t',0,.23,1,.9,'h:Antipasti|c:Nome del piatto · 8 €|d:Ingredienti principali|h:Primi|c:Nome del piatto · 12 €|d:Ingredienti principali|+c:Nome del piatto · 11 €|+d:Ingredienti principali|h:Secondi|c:Nome del piatto · 16 €|d:Ingredienti principali|+c:Nome del piatto · 15 €|+d:Ingredienti principali|h:Dolci|c:Nome del piatto · 6 €|d:Ingredienti principali',{c:2}],
    ['t',0,.91,1,1,'n:Allergie: chiedi al personale · prenotazioni 012 345 678']]]},
  {id:'elenco',n:'Cinque cose da sapere',d:'Un titolo e cinque punti numerati, ognuno con una frase di spiegazione.',u:'elenco',f:PG_V,th:'classico',sp:.024,
-  p:[[['t',0,0,1,.2,'t:Cinque cose da sapere'],{rep:[5,0,.158],g:[['e',0,.22,.14,.35,'accent',{q:1,n:'Cerchio {n}'}],['s',0,.22,.14,.35,'{n}',{q:1,i:.2,c1:'light',n:'Numero {n}'}],['t',.18,.21,1,.365,'h:Il punto numero {n}|c:Spiegalo in una frase breve.',{v:'m',n:'Punto {n}'}]]}]]},
+  p:[[['s',0,0,1,.17,'Cinque cose da sapere'],{rep:[5,0,.158],g:[['e',0,.22,.14,.35,'accent',{q:1,n:'Cerchio {n}'}],['s',0,.22,.14,.35,'{n}',{q:1,i:.2,c1:'light',n:'Numero {n}'}],['t',.18,.21,1,.365,'h:Il punto numero {n}|c:Spiegalo in una frase breve.',{v:'m',n:'Punto {n}'}]]}]]},
  {id:'confronto',n:'Prima e dopo',d:'Due foto una sopra l’altra con le etichette Prima e Dopo, un titolo e una frase che racconta il cambiamento.',u:'confronto',f:PG_V,th:'classico',sp:.024,st:{corpoInverso:{b:1,a:'c'}},
-  p:[[['t',0,0,1,.16,'o:Il nostro lavoro|t:Prima e dopo'],['i',0,.18,1,.51,{n:'Foto di prima'}],['t',.03,.2,.25,.26,'C:Prima',{f:'dark',r:.5,v:'m',n:'Etichetta Prima'}],
+  p:[[['t',0,0,1,.17,'o:Il nostro lavoro|t:Prima e dopo'],['i',0,.19,1,.51,{n:'Foto di prima'}],['t',.03,.21,.25,.27,'C:Prima',{f:'dark',r:.5,v:'m',n:'Etichetta Prima'}],
    ['i',0,.53,1,.86,{n:'Foto di dopo'}],['t',.03,.55,.25,.61,'C:Dopo',{f:'accent',r:.5,v:'m',n:'Etichetta Dopo'}],['t',0,.88,1,1,'c:Racconta in una frase che cosa è cambiato e in quanto tempo.']]]},
  // Caroselli: cinque pagine con il numero di pagina nel mastro.
  {id:'car-consigli',n:'Tre consigli',d:'Copertina scura con il titolo grande, tre pagine con un consiglio ciascuna e il numero in evidenza, una pagina finale che invita a seguirti.',u:'elenco',f:'carosello',th:'mare',bg:'soft',st:{corpoInverso:{a:'c'}},m:[PG_NUM],
@@ -162,7 +162,79 @@ const PG_TEMPLATES=[
  {id:'str-annuncio',n:'Iscrizioni aperte',d:'Fondo scuro, una scritta chiara a sinistra e a destra le informazioni per iscriversi.',u:'annuncio',f:'striscione',th:'bosco',st:{titolettoInverso:{x:2.4},corpoInverso:{x:1.6}},
   p:[[['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['s',0,0,.6,1,'Iscrizioni aperte',{c1:'light'}],['l',.63,.1,.63,.9,'accent2',{w:.08}],['t',.66,0,1,1,'H:Corsi per tutte le età|C:Chiedi in segreteria o scrivi a info@esempio.it',{v:'m'}]]]},
  {id:'str-slogan',n:'Slogan',d:'Una frase tra virgolette, centrata, con il nome di chi la firma.',u:'citazione annuncio',f:'striscione',th:'lavanda',bg:'soft',st:{citazione:{a:'c',x:4.4},note:{a:'c',x:1.6}},
-  p:[[['t',.05,0,.95,.74,'q:«Insieme si arriva più lontano»',{v:'m'}],['t',.05,.76,.95,1,'n:Il nome della tua associazione']]]}];
+  p:[[['t',.05,0,.95,.74,'q:«Insieme si arriva più lontano»',{v:'m'}],['t',.05,.76,.95,1,'n:Il nome della tua associazione']]]},
+ // Copertina di Facebook e banner di LinkedIn: tutto dentro i margini, che lasciano fuori le parti tagliate o coperte.
+ {id:'fb-attivita',n:'Copertina dell’attività',d:'Il nome dell’attività e una frase a sinistra, una foto al vivo a destra.',u:'presentazione contatti',f:'fbcover',th:'classico',
+  p:[[['s',0,.08,.55,.6,'Il nome della tua attività'],['t',0,.64,.55,1,'c:Che cosa fai e per chi, in una frase.|n:sito · telefono · orari'],['i',.6,-1,2,2,{n:'Foto dell’attività'}]]]},
+ {id:'fb-evento',n:'Evento in copertina',d:'Fondo scuro, la data in un riquadro colorato e il nome dell’evento in grande.',u:'evento',f:'fbcover',th:'mare',st:{titolettoInverso:{a:'c',x:1.6},corpoInverso:{a:'c'}},
+  p:[[['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['t',0,0,.26,1,'H:Sabato 14 marzo|C:ore 18',{f:'accent',r:.08,pad:.6,v:'m',n:'Data'}],['s',.31,.06,1,.62,'Il nome dell’evento',{c1:'light'}],['t',.31,.66,1,1,'N:Il luogo, e dove trovare il programma']]]},
+ {id:'fb-offerta',n:'Offerta in copertina',d:'Il titolo dell’offerta e una riga con le condizioni, con un bollino rotondo per lo sconto.',u:'offerta',f:'fbcover',th:'agrumi',
+  p:[[['s',0,.05,.7,.6,'Saldi di primavera'],['e',.74,-.6,1,1.6,'accent',{q:1,n:'Bollino'}],['s',.74,-.6,1,1.6,'−30%',{q:1,i:.2,c1:'light',n:'Sconto'}],['t',0,.66,.7,1,'c:Fino al 21 marzo, in negozio e sul sito.']]]},
+ {id:'li-professione',n:'Il tuo lavoro',d:'Fondo scuro con il ruolo, quello che fai per i clienti in grande e il tuo punto di forza.',u:'presentazione contatti',f:'linkedin',th:'classico',st:{occhielloInverso:{c:'accent2'}},
+  p:[[['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['t',0,0,1,1,'O:Il tuo ruolo|T:Che cosa fai per i tuoi clienti|C:Una frase con il tuo punto di forza',{v:'m'}]]]},
+ {id:'li-azienda',n:'Azienda',d:'Il nome dell’azienda e lo slogan su fondo chiaro, una foto al vivo a destra.',u:'presentazione',f:'linkedin',th:'mare',bg:'soft',
+  p:[[['s',0,.08,.6,.62,'Il nome dell’azienda'],['t',0,.66,.6,1,'c:Lo slogan, in una riga'],['i',.65,-1,2,2,{n:'Foto o logo'}]]]},
+ {id:'li-evento',n:'Ti aspetto all’evento',d:'Il nome della conferenza con data e luogo, e un riquadro con il titolo del tuo intervento.',u:'evento',f:'linkedin',th:'lavanda',
+  p:[[['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['t',0,0,.6,1,'O:Parlo a|T:Il nome della conferenza|C:Data · città · sala',{v:'m'}],['t',.63,.04,1,.96,'H:Il mio intervento|C:Il titolo, in una riga',{f:'accent',r:.1,pad:.7,v:'m',n:'Intervento'}]]]},
+ // Miniature dei video: poche parole, grandi, che si leggono anche piccole.
+ {id:'yt-titolo',n:'Titolo grande con foto',d:'Metà scura con il titolo in grande e una riga in colore, metà con la foto.',u:'presentazione annuncio',f:'miniatura',th:'classico',st:{occhielloInverso:{c:'accent2',x:1.3}},
+  p:[[['r',-1,-1,.5,2,'dark',{n:'Sfondo del titolo'}],['s',0,.05,.46,.72,'Come fare\nuna cosa',{c1:'light'}],['t',0,.76,.46,1,'O:In cinque minuti',{v:'m'}],['i',.5,-1,2,2,{n:'Foto'}]]]},
+ {id:'yt-confronto',n:'Prima e dopo',d:'Una fascia con la scritta in alto e due foto affiancate con le etichette Prima e Dopo.',u:'confronto',f:'miniatura',th:'classico',st:{corpoInverso:{a:'c',b:1,x:1.2}},
+  p:[[['r',-1,-1,2,.26,'dark',{n:'Fascia'}],['s',0,0,1,.24,'Che differenza!',{c1:'light'}],['i',-1,.3,.495,2,{n:'Foto di prima'}],['t',.03,.35,.25,.48,'C:Prima',{f:'dark',r:.5,v:'m',n:'Etichetta Prima'}],['i',.505,.3,2,2,{n:'Foto di dopo'}],['t',.54,.35,.76,.48,'C:Dopo',{f:'accent',r:.5,v:'m',n:'Etichetta Dopo'}]]]},
+ {id:'yt-elenco',n:'Classifica',d:'Un numero grande a sinistra e il titolo della classifica a destra.',u:'elenco',f:'miniatura',th:'agrumi',bg:'soft',st:{titolo:{x:2.2}},
+  p:[[['s',0,0,.38,1,'5',{c1:'head',n:'Numero'}],['t',.42,0,1,1,'o:La classifica|t:I cinque libri da leggere quest’estate',{v:'m'}]]]},
+ // Biglietti da visita: davanti il nome e i contatti, dietro il logo o lo slogan.
+ {id:'bv-classico',n:'Classico',d:'Davanti una barra colorata, il nome, il ruolo e i contatti; dietro il nome dell’azienda su fondo scuro.',u:'contatti',f:'biglietto',th:'classico',st:{noteInverso:{a:'c'}},
+  p:[[['r',-1,-1,-.3,2,'accent',{n:'Barra'}],['t',0,0,1,.55,'t:Nome Cognome|s:Il tuo ruolo'],['t',0,.58,1,1,'n:Telefono 012 345 678|n:nome@esempio.it|n:www.esempio.it',{v:'b'}]],
+   [['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['s',0,.15,1,.65,'Il nome dell’azienda',{c1:'light'}],['t',0,.7,1,1,'N:Lo slogan dell’azienda']]]},
+ {id:'bv-logo',n:'Con il logo',d:'Davanti il logo accanto al nome, un filetto e i contatti; dietro lo slogan su fondo chiaro.',u:'contatti',f:'biglietto',th:'bosco',st:{citazione:{a:'c'}},
+  p:[[['i',0,0,.34,.55,{n:'Logo',q:1}],['t',.4,0,1,.55,'h:Nome Cognome|d:Il tuo ruolo',{v:'m'}],['l',0,.63,1,.63,'accent'],['t',0,.68,1,1,'n:Telefono · e-mail|n:Indirizzo, città',{v:'b'}]],
+   [['r',-1,-1,2,2,'soft',{n:'Sfondo'}],['t',0,0,1,1,'q:«Lo slogan, o il servizio che offri»',{v:'m'}]]]},
+ {id:'bv-scuro',n:'Scuro',d:'Davanti il nome in grande su fondo scuro, il ruolo in colore e i contatti; dietro le iniziali.',u:'contatti',f:'biglietto',th:'lavanda',st:{occhielloInverso:{c:'light'}},
+  p:[[['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['s',0,0,1,.4,'Nome Cognome',{c1:'light'}],['t',0,.42,1,.6,'O:Il tuo ruolo'],['t',0,.62,1,1,'N:Telefono · e-mail|N:sito',{v:'b'}]],
+   [['r',-1,-1,2,2,'accent',{n:'Sfondo'}],['s',.2,.1,.8,.9,'NC',{q:1,c1:'light',n:'Iniziali'}]]]},
+ // Cartoline: davanti la foto, dietro lo spazio per il messaggio, l'indirizzo e il francobollo.
+ {id:'cart-saluti',n:'Saluti da…',d:'Davanti una foto al vivo con una fascia scura e il nome del luogo; dietro il messaggio, l’indirizzo e il francobollo.',u:'auguri',f:'cartolina',th:'mare',
+  p:[[['i',-1,-1,2,2,{n:'Foto del luogo'}],['r',-1,.72,2,2,'dark',{n:'Fascia'}],['s',0,.76,1,1,'Saluti da Bologna',{c1:'light'}]],
+   [['t',0,0,.47,1,'c:Scrivi qui il tuo messaggio: due righe bastano per dire che pensi a qualcuno.|n:Un saluto, e la firma'],['l',.5,0,.5,1,'ink',{n:'Divisorio'}],['r',.78,0,1,.32,'none',{s:'ink',w:.08,n:'Francobollo'}],{rep:[4,0,.14],g:[['l',.55,.52,1,.52,'ink',{n:'Riga dell’indirizzo {n}'}]]}]]},
+ {id:'cart-auguri',n:'Tanti auguri',d:'Davanti una scritta d’auguri tra coriandoli colorati; dietro il messaggio, l’indirizzo e il francobollo.',u:'auguri',f:'cartolina',th:'pastello',bg:'soft',st:{sottotitolo:{a:'c'}},
+  p:[[{rep:[3,.34,0],g:[['e',.02,-.7,.1,-.1,'accent',{q:1,n:'Coriandolo'}],['e',.2,1.1,.28,1.7,'accent2',{q:1,n:'Coriandolo'}]]},['s',0,.12,1,.68,'Tanti auguri!'],['t',0,.72,1,.95,'s:Scrivi qui per chi è e perché']],
+   [['t',0,0,.47,1,'c:Scrivi qui il tuo messaggio di auguri.|n:Con affetto, e la firma'],['l',.5,0,.5,1,'ink',{n:'Divisorio'}],['r',.78,0,1,.32,'none',{s:'ink',w:.08,n:'Francobollo'}],{rep:[4,0,.14],g:[['l',.55,.52,1,.52,'ink',{n:'Riga dell’indirizzo {n}'}]]}]]},
+ {id:'cart-data',n:'Salva la data',d:'Davanti «Salva la data», il giorno in grande e l’occasione; dietro i dettagli e lo spazio per l’indirizzo.',u:'evento auguri',f:'cartolina',th:'terracotta',st:{occhiello:{a:'c'},sottotitolo:{a:'c'}},
+  p:[[['t',0,0,1,.2,'o:Salva la data'],['s',0,.2,1,.62,'14 · 03 · 2026'],['l',.3,.68,.7,.68,'accent',{w:.12}],['t',0,.74,1,1,'s:Il nome dell’occasione, e la città']],
+   [['t',0,0,.47,1,'h:Dove e quando|c:Il luogo e l’orario.|c:L’invito vero arriverà più avanti: intanto segna la data.'],['l',.5,0,.5,1,'ink',{n:'Divisorio'}],['r',.78,0,1,.32,'none',{s:'ink',w:.08,n:'Francobollo'}],{rep:[4,0,.14],g:[['l',.55,.52,1,.52,'ink',{n:'Riga dell’indirizzo {n}'}]]}]]},
+ // Inviti in formato DL, stretti e lunghi.
+ {id:'inv-festa',n:'Festa',d:'Coriandoli colorati, «Sei invitato», il nome della festa in grande, una foto rotonda, quando, dove e a chi rispondere.',u:'auguri evento',f:'invito',th:'pastello',sp:.021,st:{occhiello:{a:'c'},titoletto:{a:'c'},corpo:{a:'c'},note:{a:'c'}},
+  p:[[{rep:[2,.8,0],g:[['e',0,-.4,.1,-.15,'accent',{q:1,n:'Coriandolo'}],['e',.1,1.15,.2,1.4,'accent2',{q:1,n:'Coriandolo'}]]},['t',0,0,1,.08,'o:Sei invitato alla'],['s',0,.08,1,.3,'Festa di\ncompleanno'],['i',.15,.33,.85,.6,{n:'Foto del festeggiato',m:'circle',q:1}],
+   ['t',0,.63,1,.92,'h:Sabato 14 marzo, ore 16|c:Il luogo e l’indirizzo|c:Rispondi entro il 7 marzo a Nome, 333 123 4567'],['t',0,.93,1,1,'n:Porta il costume, se ti va!']]]},
+ {id:'inv-cerimonia',n:'Cerimonia',d:'Elegante e centrato: chi invita, i nomi in corsivo tra due filetti, giorno, luogo e risposta.',u:'auguri evento',f:'invito',th:'classico',sp:.021,st:{didascalia:{a:'c'},corpo:{a:'c'},note:{a:'c'}},
+  p:[[['t',0,.08,1,.2,'d:Con gioia annunciano il loro matrimonio'],['l',.3,.22,.7,.22,'accent2',{w:.12}],['s',0,.25,1,.45,'Nome\ne Nome',{x:{italic:true}}],['l',.3,.48,.7,.48,'accent2',{w:.12}],
+   ['t',0,.52,1,.85,'c:Sabato 12 settembre 2026, alle ore 11|c:Il nome del luogo e l’indirizzo|c:Seguirà il pranzo: scrivi qui dove'],['t',0,.88,1,1,'n:Rispondi entro il 31 luglio: telefono o e-mail']]]},
+ {id:'inv-inaugurazione',n:'Inaugurazione',d:'Una foto ad arco, «Inaugurazione» in grande, che cosa si apre, quando e dove, con un brindisi.',u:'evento annuncio',f:'invito',th:'bosco',sp:.021,bg:'soft',st:{occhiello:{a:'c'},corpo:{a:'c'},note:{a:'c'}},
+  p:[[['i',0,0,1,.36,{n:'Foto del nuovo spazio',m:'arch'}],['t',0,.39,1,.46,'o:Sei invitato all’'],['s',0,.46,1,.6,'Inaugurazione'],['t',0,.63,1,.9,'c:Del nuovo negozio, studio o laboratorio: scrivi qui che cosa si apre.|c:Venerdì 20 marzo, dalle 18|c:Via e numero civico, città'],['t',0,.92,1,1,'n:Ti aspettiamo per un brindisi']]]},
+ // Segnalibri: davanti e dietro.
+ {id:'seg-citazione',n:'Citazione',d:'Davanti una frase da un libro tra virgolette, con l’autore; dietro il nome della biblioteca o della libreria su fondo scuro.',u:'citazione',f:'segnalibro',th:'lavanda',bg:'soft',st:{citazione:{a:'c',x:1.4},note:{a:'c'},titolettoInverso:{a:'c'},corpoInverso:{a:'c'}},
+  p:[[['t',0,.04,1,.72,'q:«Scrivi qui una frase da un libro che ami.»',{v:'m'}],['l',.3,.76,.7,.76,'accent',{w:.12}],['t',0,.79,1,.96,'n:Autore, titolo del libro']],
+   [['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['t',0,.1,1,.9,'H:Leggere fa bene|C:Il nome della biblioteca o della libreria|C:Orari e indirizzo',{v:'m'}]]]},
+ {id:'seg-biblioteca',n:'Orari della biblioteca',d:'Davanti il nome, una foto ad arco, gli orari e i contatti; dietro lo spazio per la data di restituzione.',u:'contatti annuncio',f:'segnalibro',th:'mare',
+  p:[[['s',0,0,1,.1,'Biblioteca'],['i',0,.13,1,.42,{n:'Foto o logo',m:'arch'}],['t',0,.46,1,1,'h:Orari|c:Lun–ven 9–19|c:Sabato 9–13|h:Contatti|c:Telefono|c:Sito']],
+   [['t',0,0,1,.2,'h:Da restituire entro il'],{rep:[5,0,.13],g:[['l',0,.3,1,.3,'ink',{n:'Riga {n}'}]]},['t',0,.88,1,1,'n:Grazie di avere cura dei libri']]]},
+ {id:'seg-libreria',n:'Libreria',d:'Davanti il nome della libreria su fondo scuro e una frase; dietro uno sconto in un bollino e l’indirizzo.',u:'offerta',f:'segnalibro',th:'terracotta',st:{corpoInverso:{a:'c'},corpo:{a:'c'},note:{a:'c'}},
+  p:[[['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['s',0,.05,1,.35,'Il nome\ndella\nlibreria',{c1:'light'}],['l',.3,.4,.7,.4,'accent2',{w:.12}],['t',0,.44,1,.95,'C:Una frase che racconta la libreria: che cosa trovi, chi ti consiglia.',{v:'m'}]],
+   [['e',0,.05,1,.4,'accent',{q:1,n:'Bollino'}],['s',0,.05,1,.4,'−10%',{q:1,i:.2,c1:'light',n:'Sconto'}],['t',0,.45,1,.8,'c:Sul prossimo libro, mostrando questo segnalibro alla cassa.',{v:'m'}],['t',0,.85,1,1,'n:Indirizzo · telefono · sito']]]},
+ // Attestati: la pagina si ripete per ogni riga dei dati, con il campo «Nome e cognome».
+ {id:'att-partecipazione',n:'Attestato di partecipazione',d:'Cornice sottile, il titolo, il nome in grande da un campo dei dati, il corso, il luogo e la data, la firma.',u:'contatti',f:'attestato',th:'classico',st:{corpo:{a:'c',x:1.3},didascalia:{a:'c'}},
+  p:[{d:1,p:[['r',-.6,-.6,1.6,1.6,'none',{s:'head',w:.2,n:'Cornice'}],['s',.08,.05,.92,.22,'Attestato di partecipazione'],['t',.1,.26,.9,.34,'c:Si attesta che'],['s',.12,.35,.88,.53,'«Nome e cognome»',{x:{italic:true},n:'Nome'}],
+   ['t',.08,.56,.92,.76,'c:ha partecipato al corso «Titolo del corso», della durata di 20 ore, dal 3 al 28 marzo 2026.'],['l',.06,.88,.38,.88,'ink',{n:'Riga del luogo'}],['t',.06,.89,.38,1,'d:Luogo e data'],['l',.62,.88,.94,.88,'ink',{n:'Riga della firma'}],['t',.62,.89,.94,1,'d:Firma del responsabile']]}]},
+ {id:'att-merito',n:'Attestato di merito',d:'Fondo chiaro, una fascia colorata in alto, il nome in grande, il motivo del riconoscimento e due firme.',u:'contatti',f:'attestato',th:'terracotta',bg:'soft',st:{corpo:{a:'c',x:1.3},didascalia:{a:'c'},occhiello:{a:'c'}},
+  p:[{d:1,p:[['r',-1,-1,2,-.4,'accent',{n:'Fascia'}],['t',0,.02,1,.1,'o:Il nome della scuola o dell’associazione'],['s',.1,.12,.9,.3,'Attestato di merito'],['s',.12,.36,.88,.54,'«Nome e cognome»',{x:{italic:true},n:'Nome'}],
+   ['t',.08,.58,.92,.76,'c:per scrivi qui il motivo: il risultato raggiunto, l’impegno, la gara vinta.'],['l',.06,.88,.38,.88,'ink',{n:'Riga della prima firma'}],['t',.06,.89,.38,1,'d:Firma'],['l',.62,.88,.94,.88,'ink',{n:'Riga della seconda firma'}],['t',.62,.89,.94,1,'d:Firma']]}]},
+ {id:'att-grazie',n:'Ringraziamento',d:'«Grazie» in grande, il nome da un campo dei dati, per che cosa e da parte di chi.',u:'contatti auguri',f:'attestato',th:'bosco',st:{corpo:{a:'c',x:1.3},note:{a:'c',x:1.1}},
+  p:[{d:1,p:[['r',-1,-1,-.4,2,'dark',{n:'Fascia a sinistra'}],['r',1.4,-1,2,2,'dark',{n:'Fascia a destra'}],['s',.1,.04,.9,.34,'Grazie'],['s',.12,.38,.88,.56,'«Nome e cognome»',{x:{italic:true},n:'Nome'}],
+   ['t',.08,.6,.92,.82,'c:per il tempo e l’impegno che hai dedicato a scrivi qui il progetto o l’attività.'],['t',.08,.86,.92,1,'n:Il nome di chi ringrazia · la data']]}]},
+ // Post quadrati: poche parole, grandi.
+ {id:'q-domanda',n:'Domanda ai follower',d:'Una domanda in grande su fondo colorato e un invito a rispondere nei commenti.',u:'annuncio',f:'quadrato',th:'agrumi',bg:'soft',st:{corpo:{a:'c'}},
+  p:[[['r',-1,-1,2,-.5,'head',{n:'Fascia in alto'}],['s',0,.05,1,.62,'E tu, come\nla pensi?'],['l',.35,.68,.65,.68,'accent',{w:.15}],['t',0,.73,1,1,'c:Scrivi qui la domanda per intero e invita a rispondere nei commenti.',{v:'m'}]]]}];
 // Costruisce il documento di un modello nel formato scelto.
 function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_THEMES.classico[2],tok=v=>T[v]||v,print=p.unit==='mm',I=pgInner(p),sp=print&&t.sp?Math.max(1,t.sp*I.h/p.ps.corpo.size):1,b=p.ps.corpo.size*sp,used=new Set(),chains={};
  Object.assign(p,{title:t.n,bg:tok(t.bg||'bg')});if(sp>1)for(const s of Object.values(p.ps)){s.size=r1(s.size*sp);s.before=r1(s.before*sp);s.after=r1(s.after*sp)}
@@ -183,7 +255,7 @@ function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_
   if(k==='s'){const st=o.st||'classica',c={};for(const z of ['c1','c2','oc','oc2','shc','gc'])if(o[z])c[z]=tok(o[z]);return pgPut(h,pgMk(p,'sign',{...pgSignStyle(st),style:st,name:nm('Scritta'),text:fill(a,n,pi),...B,c1:T.head,...c,...o.x}))}
   if(k==='l')return pgPut(h,pgMk(p,'line',{name:nm('Linea'),...B,stroke:tok(a||'accent'),...(o.w?{sw:b*o.w}:{})}));
   if(k==='g'){const cells=PG_GRIDS.find(x=>x[0]===a)[2],g=p.gut*.6,gid=uid(),e6=1e-6;return cells.map(([u,v,cw,ch])=>{const l=u>e6?g/2:0,r=u+cw<1-e6?g/2:0,tp=v>e6?g/2:0,bt=v+ch<1-e6?g/2:0;return pgPut(h,pgMk(p,'image',{name:nm(o.n||'Foto'),x:B.x+u*B.w+l,y:B.y+v*B.h+tp,w:cw*B.w-l-r,h:ch*B.h-tp-bt,fill:o.f?tok(o.f):'none',g:gid,...(o.m?{mask:o.m}:{})}))})}
-  const kind={r:'rect',e:'ellipse',v:'tri'}[k];return pgPut(h,pgMk(p,kind,{name:nm(PG_KIND[kind]),...B,fill:tok(a||'soft'),radius:rad,opacity:o.op||100,...(o.a?{alt:o.a,deco:false}:{})}))};
+  const kind={r:'rect',e:'ellipse',v:'tri'}[k];return pgPut(h,pgMk(p,kind,{name:nm(PG_KIND[kind]),...B,fill:tok(a||'soft'),radius:rad,opacity:o.op||100,...(o.s?{stroke:tok(o.s),sw:b*(o.w||.1)}:{}),...(o.a?{alt:o.a,deco:false}:{})}))};
  // Un gruppo {rep:[volte,dx,dy],g:[…]} ripete le sue cornici spostandole: così l'ordine di lettura va copia per copia.
  const fillHolder=(h,list,pi)=>{for(const e of list){if(Array.isArray(e)){put(h,e,1,pi);continue}const [cnt,dx,dy]=e.rep;for(let j=0;j<cnt;j++)for(const x of e.g)put(h,[x[0],x[1]+j*dx,x[2]+j*dy,x[3]+j*dx,x[4]+j*dy,...x.slice(5)],j+1,pi)}};
  const pages=[];for(const pg of t.p){if(Array.isArray(pg))pages.push({list:pg,pi:pages.length+1});else for(let j=0;j<(pg.r||1);j++)pages.push({list:pg.p,pi:j+1,data:!!pg.d,free:!!pg.x})}
@@ -206,7 +278,7 @@ async function pgGallery({fmt,use='',pick=''}={}){const mine=await pgMineList();
  const fmts=[...PG_PRESETS.map(([v,l])=>[v,l]),['festone','Festone di lettere'],...(mine.some(m=>m.preset!=='festone'&&!PG_PRESETS.some(x=>x[0]===m.preset))?[['','Formato personalizzato, i tuoi modelli']]:[])];
  fmt??=PG_PRESETS.some(x=>x[0]===Pg.p?.preset)?Pg.p.preset:'post';if(!fmts.some(x=>x[0]===fmt))fmt='post';
  let list=[],cur=0,act=null;const opt=(v,l,s)=>`<option value="${esc(v)}"${v===s?' selected':''}>${esc(l)}</option>`;
- const body=`<p id="tplIntro">Scegli il formato e l’uso, poi il modello: frecce per scorrere l’elenco, Invio per creare il documento.${mine.length?' I tuoi modelli si rinominano con F2 e si eliminano con Canc.':''}</p><div class="pg-tpl-bar"><div><label for="tplFmt">Formato</label><select id="tplFmt">${fmts.map(([v,l])=>opt(v,l,fmt)).join('')}</select></div>
+ const body=`<p id="tplIntro">Scegli il formato e l’uso, poi il modello: frecce per scorrere l’elenco, Invio per creare il documento.${mine.length?' I tuoi modelli si rinominano con F2 e si eliminano con Canc.':''}</p><div class="pg-tpl-bar"><div><label for="tplFmt">Formato</label><select id="tplFmt">${[['Per lo schermo',v=>PG_PRESETS.find(x=>x[0]===v)?.[4]==='px'],['Da stampare',v=>PG_PRESETS.find(x=>x[0]===v)?.[4]==='mm'&&!PG_TILED.has(v)],['Grande formato',v=>PG_TILED.has(v)||v==='festone'],['I tuoi formati',v=>!v]].map(([g,f])=>{const l=fmts.filter(x=>f(x[0]));return l.length?`<optgroup label="${g}">${l.map(([v,l])=>opt(v,l,fmt)).join('')}</optgroup>`:''}).join('')}</select></div>
   <div><label for="tplUse">Uso</label><select id="tplUse">${opt('','Tutti gli usi',use)}${PG_USES.map(([v,l])=>opt(v,l,use)).join('')}</select></div></div>
   <p class="pg-tpl-count" id="tplCount"></p><div class="pg-tpl"><div class="lb pg-tpl-list" id="tplList" role="listbox" tabindex="0" aria-labelledby="tplCount" data-autofocus></div><div class="pg-tpl-view" id="tplView" aria-hidden="true"></div></div>
   <p class="pg-btns" id="tplMine" hidden><button type="button" class="btn sm" data-tpl="rename">Rinomina il modello</button><button type="button" class="btn sm" data-tpl="delete">Elimina il modello</button></p>`;

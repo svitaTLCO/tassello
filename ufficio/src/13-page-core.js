@@ -5,14 +5,27 @@
 const MM=96/25.4;
 // Formati pronti: id, nome, larghezza e altezza, unità, margini (alto, destra, basso, sinistra), colonne,
 // spazio tra le colonne, pagine iniziali e corpo del testo, tutto in pixel.
+// I margini della copertina di Facebook e del banner di LinkedIn lasciano fuori le parti tagliate sul telefono e quella
+// coperta dalla foto del profilo.
 const PG_PRESETS=[
  ['post','Post 4:5 (1080 × 1350 px)',1080,1350,'px',[96,90,110,90],1,36,1,38],
+ ['quadrato','Post quadrato 1:1 (1080 × 1080 px)',1080,1080,'px',[90,90,90,90],1,36,1,36],
  ['carosello','Carosello di post 4:5, 5 pagine',1080,1350,'px',[96,90,130,90],1,36,5,38],
  ['storia','Storia 9:16 (1080 × 1920 px)',1080,1920,'px',[250,90,340,90],1,36,1,46],
+ ['fbcover','Copertina Facebook (1640 × 624 px)',1640,624,'px',[60,280,60,280],1,36,1,36],
+ ['linkedin','Banner LinkedIn (1584 × 396 px)',1584,396,'px',[48,80,48,420],1,32,1,34],
+ ['miniatura','Miniatura video 16:9 (1280 × 720 px)',1280,720,'px',[56,64,72,64],1,32,1,40],
  ['a4','Volantino A4 (210 × 297 mm)',210*MM,297*MM,'mm',[15,15,15,15].map(v=>v*MM),1,5*MM,1,15],
+ ['letter','Volantino Letter USA (8,5 × 11 pollici)',8.5*96,11*96,'mm',[15,15,15,15].map(v=>v*MM),1,5*MM,1,15],
  ['a5','Volantino A5 (148 × 210 mm)',148*MM,210*MM,'mm',[12,12,12,12].map(v=>v*MM),1,4*MM,1,13.3],
+ ['a3','Locandina A3 (297 × 420 mm)',297*MM,420*MM,'mm',[15,15,15,15].map(v=>v*MM),1,6*MM,1,20],
  ['brochure','Brochure A4 a due colonne, 4 pagine',210*MM,297*MM,'mm',[18,16,22,16].map(v=>v*MM),2,6*MM,4,13.3],
  ['newsletter','Newsletter A4, 2 pagine',210*MM,297*MM,'mm',[22,15,20,15].map(v=>v*MM),3,5*MM,2,12.7],
+ ['biglietto','Biglietto da visita (85 × 55 mm), fronte e retro',85*MM,55*MM,'mm',[5,5,5,5].map(v=>v*MM),1,3*MM,2,12.7],
+ ['cartolina','Cartolina A6 (148 × 105 mm), fronte e retro',148*MM,105*MM,'mm',[8,8,8,8].map(v=>v*MM),1,4*MM,2,13.3],
+ ['invito','Invito DL (99 × 210 mm)',99*MM,210*MM,'mm',[10,10,10,10].map(v=>v*MM),1,4*MM,1,13.3],
+ ['segnalibro','Segnalibro (50 × 200 mm), fronte e retro',50*MM,200*MM,'mm',[6,6,6,6].map(v=>v*MM),1,3*MM,2,12.7],
+ ['attestato','Attestato A4 orizzontale (297 × 210 mm)',297*MM,210*MM,'mm',[18,18,18,18].map(v=>v*MM),1,6*MM,1,16],
  ['a2','Poster A2 (420 × 594 mm)',420*MM,594*MM,'mm',[20,20,20,20].map(v=>v*MM),1,8*MM,1,28],
  ['a1','Poster A1 (594 × 841 mm)',594*MM,841*MM,'mm',[28,28,28,28].map(v=>v*MM),1,10*MM,1,40],
  ['a0','Poster A0 (841 × 1189 mm)',841*MM,1189*MM,'mm',[40,40,40,40].map(v=>v*MM),1,14*MM,1,56],
