@@ -132,7 +132,9 @@ function flowStory(p,s,regions,ctx){const lines=[],fallback=p.ps.corpo||Object.v
   const pst=runSt(p,ps,''),bw=ps.bullet?textWidth(pst.css,'•')+ps.size*.6:0;let i=0,firstLine=true;
   while(firstLine||i<atoms.length){if(!R){over+=atoms.slice(i).reduce((n,a)=>n+a.t.length,0)+1;break}
    if(!firstLine){while(i<atoms.length&&atoms[i].sp)i++;if(i>=atoms.length)break}
-   const avail=Math.max(1,R.w-bw);let j=i,used=0,size=0;
+   // Scontorno: accanto alle cornici che lo chiedono la riga usa il tratto libero più largo; se non c'è posto, scende.
+   let sx=R.x,sw=R.w;if(R.obs){const lh0=ps.size*ps.lh,f=pgFreeSpan(R,y,lh0,Math.max(ps.size*3,bw+ps.size));if(!f){if(y+lh0>R.y+R.h+.5){ri++;R=regions[ri];if(R){y=R.y;top=true}}else y+=Math.max(1,lh0/4);continue}sx=f.x;sw=f.w}
+   const avail=Math.max(1,sw-bw);let j=i,used=0,size=0;
    while(j<atoms.length){const a=atoms[j];
     // Una parola più larga della colonna si spezza dove serve.
     if(!a.sp&&j===i&&a.w>avail&&a.t.length>1){let k=1;while(k<a.t.length-1&&textWidth(a.st.css,a.t.slice(0,k+1))<=avail)k++;const rest=a.t.slice(k);atoms.splice(j+1,0,{...a,t:rest,w:textWidth(a.st.css,rest)});a.t=a.t.slice(0,k);a.w=textWidth(a.st.css,a.t)}
@@ -140,9 +142,9 @@ function flowStory(p,s,regions,ctx){const lines=[],fallback=p.ps.corpo||Object.v
    let end=j;while(end>i&&atoms[end-1].sp)end--;let w=0;for(let k=i;k<end;k++)w+=atoms[k].w;
    if(!size)size=ps.size;const lh=size*ps.lh;
    if(y+lh>R.y+R.h+.5){ri++;R=regions[ri];if(R){y=R.y;top=true}continue}
-   const ext=avail-w,last=j>=atoms.length;let x=R.x+bw,gap=0;
+   const ext=avail-w,last=j>=atoms.length;let x=sx+bw,gap=0;
    if(ps.align==='center')x+=ext/2;else if(ps.align==='right')x+=ext;else if(ps.align==='justify'&&!last){const n=atoms.slice(i,end).filter(a=>a.sp).length;if(n)gap=ext/n}
-   const pieces=firstLine&&ps.bullet?[{x:R.x,t:'•',st:pst}]:[];let cur=null;
+   const pieces=firstLine&&ps.bullet?[{x:sx,t:'•',st:pst}]:[];let cur=null;
    for(let k=i;k<end;k++){const a=atoms[k];if(gap&&a.sp){x+=a.w+gap;cur=null;continue}if(cur&&cur.st===a.st)cur.t+=a.t;else pieces.push(cur={x,t:a.t,st:a.st});x+=a.w}
    lines.push({r:ri,top:y,lh,base:y+(lh-size)/2+size*.8,pieces});y+=lh;top=false;firstLine=false;i=j}
   if(R)y+=ps.after}
@@ -155,13 +157,31 @@ function pgLayout(p,insts,{raw=false}={}){const res=new Map(),jobs=new Map(),tot
  insts.forEach((I,ii)=>{const ctx={n:I.n,total,row:I.row,title:p.title,date,raw},m=pgMasterOf(I.pg),list=[...(m?m.items.map(it=>[it,'m'+ii]):[]),...I.pg.items.map(it=>[it,I.row?'d'+ii:'n'])];
   for(const [it,key] of list){if(it.kind!=='text'||!p.stories[it.story])continue;const k=key+'|'+it.story;let j=jobs.get(k);if(!j)jobs.set(k,j={s:p.stories[it.story],frames:[],ctx});j.frames.push([it,ii])}});
  for(const j of jobs.values()){const order=j.s.chain;j.frames.sort((a,b)=>order.indexOf(a[0].id)-order.indexOf(b[0].id));const regions=[];
-  for(const [it,ii] of j.frames){const key=ii+'|'+it.id;res.set(key,{lines:[],over:0,it});for(const r of frameRegions(it))regions.push({...r,key})}
+  for(const [it,ii] of j.frames){const key=ii+'|'+it.id,obs=pgWrapObs(insts[ii],it);res.set(key,{lines:[],over:0,it,obs:!!obs});for(const r of frameRegions(it))regions.push(obs?{...r,key,obs}:{...r,key})}
   const out=flowStory(p,j.s,regions,j.ctx);for(const ln of out.lines)res.get(regions[ln.r].key).lines.push(ln);
   const lastKey=j.frames.at(-1)[1]+'|'+j.frames.at(-1)[0].id;if(out.over)res.get(lastKey).over=out.over;
   // Allineamento verticale: vale per la cornice a una colonna in cui il testo finisce.
-  if(!out.over)for(const [it,ii] of j.frames){const f=res.get(ii+'|'+it.id);if(it.valign==='top'||!it.valign||(it.cols||1)>1||!f.lines.length)continue;const later=j.frames.slice(j.frames.findIndex(x=>x[0]===it&&x[1]===ii)+1).some(([i2,k2])=>res.get(k2+'|'+i2.id).lines.length);if(later)continue;
+  if(!out.over)for(const [it,ii] of j.frames){const f=res.get(ii+'|'+it.id);if(it.valign==='top'||!it.valign||(it.cols||1)>1||!f.lines.length||f.obs)continue;const later=j.frames.slice(j.frames.findIndex(x=>x[0]===it&&x[1]===ii)+1).some(([i2,k2])=>res.get(k2+'|'+i2.id).lines.length);if(later)continue;
    const r=frameRegions(it)[0],free=r.y+r.h-(f.lines.at(-1).top+f.lines.at(-1).lh),d=free*(it.valign==='middle'?.5:1);if(d>0)f.lines=f.lines.map(l=>({...l,top:l.top+d,base:l.base+d}))}}
  return res}
+// Scontorno del testo: le cornici con wrap ('box' il riquadro, 'shape' la forma) allontanano di wrapGap il testo delle altre
+// cornici della stessa pagina (e del suo mastro). Le cornici di testo ruotate non ne tengono conto.
+function pgWrapObs(I,it){if(pgRot(it))return null;const m=pgMasterOf(I.pg),A=pgRectOf(it),out=[];
+ for(const o of [...(m?.items||[]),...I.pg.items]){if(!o.wrap||o===it||o.hidden)continue;let B=pgBoxOf(o);if(o.kind==='line'){const e=Math.max(o.sw,.5)/2;B={x:B.x-e,y:B.y-e,w:B.w+2*e,h:B.h+2*e}}const g=o.wrapGap||0;
+  if(B.x-g<A.x+A.w&&B.x+B.w+g>A.x&&B.y-g<A.y+A.h&&B.y+B.h+g>A.y)out.push({it:o,B,g,mode:o.wrap==='shape'&&o.kind!=='line'?'shape':'box'})}return out.length?out:null}
+// Il tratto libero più largo della riga tra y e y+h; null se è più stretto di minW. Senza ostacoli, tutta la colonna.
+function pgFreeSpan(R,y,h,minW){let segs=[[R.x,R.x+R.w]],hit=false;for(const o of R.obs){const e=pgWrapExt(o,y,y+h);if(!e||e[1]<=R.x||e[0]>=R.x+R.w)continue;hit=true;segs=segs.flatMap(([a,b])=>e[1]<=a||e[0]>=b?[[a,b]]:[...(e[0]>a?[[a,e[0]]]:[]),...(e[1]<b?[[e[1],b]]:[])])}
+ if(!hit)return {x:R.x,w:R.w};let best=null;for(const [a,b] of segs)if(b-a>=minW&&(!best||b-a>best.w))best={x:a,w:b-a};return best}
+// Quanto occupa un ostacolo in orizzontale tra y0 e y1, distanza compresa: il riquadro, o la forma letta riga per riga.
+function pgWrapExt(o,y0,y1){const {B,g}=o;if(y1<=B.y-g||y0>=B.y+B.h+g)return null;if(o.mode==='box')return [B.x-g,B.x+B.w+g];const P=o.prof||(o.prof=pgWrapProfile(o.it,B));let a=Infinity,b=-Infinity;
+ for(let r=Math.max(0,Math.floor((y0-g-B.y)*P.k)),r1=Math.min(P.rows-1,Math.ceil((y1+g-B.y)*P.k));r<=r1;r++)if(P.min[r]<=P.max[r]){a=Math.min(a,P.min[r]);b=Math.max(b,P.max[r])}return a<=b?[B.x+a/P.k-g,B.x+(b+1)/P.k+g]:null}
+// La forma disegnata in piccolo (al più 160 punti per lato, ruotata come sulla pagina): per ogni riga il primo e l'ultimo punto pieno.
+const pgWrapCache=new Map();
+function pgWrapProfile(it,B){const key=JSON.stringify([it.kind,it.x,it.y,it.w,it.h,it.rot||0,it.mask||'']);let P=pgWrapCache.get(key);if(P)return P;const k=Math.min(1,160/Math.max(B.w,B.h,1)),W=Math.max(1,Math.ceil(B.w*k)),H=Math.max(1,Math.ceil(B.h*k)),c=new OffscreenCanvas(W,H).getContext('2d');
+ c.setTransform(k,0,0,k,-B.x*k,-B.y*k);const r=pgRot(it)*Math.PI/180,{x,y,w,h}=pgRectOf(it);if(r){c.translate(x+w/2,y+h/2);c.rotate(r);c.translate(-x-w/2,-y-h/2)}
+ c.fill(new Path2D(it.kind==='ellipse'?`M${x} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x+w} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x} ${y+h/2}Z`:it.kind==='tri'?`M${x} ${y}L${x+w} ${y}L${x+w/2} ${y+h}Z`:it.kind==='image'&&it.mask&&it.mask!=='rect'?pgMaskPath(it):`M${x} ${y}h${w}v${h}h${-w}Z`));
+ const d=c.getImageData(0,0,W,H).data,min=new Float32Array(H).fill(Infinity),max=new Float32Array(H).fill(-Infinity);for(let yy=0;yy<H;yy++)for(let xx=0;xx<W;xx++)if(d[(yy*W+xx)*4+3]>40){if(xx<min[yy])min[yy]=xx;max[yy]=xx}
+ P={k,rows:H,min,max};if(pgWrapCache.size>300)pgWrapCache.clear();pgWrapCache.set(key,P);return P}
 // Immagine di una cornice: quella scelta, oppure quella che ha per nome il valore del campo dei dati.
 function pgImgFor(it,ctx){if(it.field&&ctx?.row&&Pg.p.data){const i=Pg.p.data.fields.indexOf(it.field),v=i<0?'':String(ctx.row[i]??'').trim();if(v){const m=pgFieldImage(v);if(m)return m}}return it.img?Pg.imgs.get(it.img)||null:null}
 // Posizione dell'immagine nella cornice: «Adatta» la mostra tutta, «Riempi» copre la cornice tenendo al centro il punto focale.

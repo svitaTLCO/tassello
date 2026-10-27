@@ -370,6 +370,7 @@ def('p','Cornice',[
  ['pgUnlink','Togli la cornice dalla catena del testo','unchain','',{short:'Scollega'}],
  ['pgOverflow','Vai al testo che non entra nelle cornici','overflow','',{short:'Testo in eccesso'}],
  ['pgChooseImage','Scegli l’immagine della cornice','image','',{short:'Scegli immagine'}],
+ ['pgWrap','Scontorno: il testo gira attorno alla cornice','wrapText','',{menu:1,short:'Scontorno'}],
  ['pgPhotoAdj','Regolazioni della foto: luce, colore e look','sliders','',{short:'Regola la foto'}],
  ['pgPhotoAuto','Regolazione automatica della foto','wand','',{short:'Automatica'}],
  ['pgPhotoReset','Togli le regolazioni della foto','history','',{short:'Foto originale'}],

@@ -33,7 +33,8 @@ const PG_V='post quadrato storia a4 letter a5 a3 a2 a1 a0';
 // verticale m/b, c colonne, pad margine interno (in corpi del testo), k catena (le cornici con la stessa k si passano il
 // testo), q quadrata al centro, i rientro (frazione del lato corto), m sagoma, d decorativa, a testo alternativo, s colore
 // del contorno delle forme, w spessore della linea o del contorno (in corpi del testo), rot rotazione in gradi (le linee la ignorano),
-// sh ombra (soft, long, 3d) con shc il suo colore, nelle immagini ad regolazioni della foto ({exposure:.3,…}) e lk look, f2 secondo colore della sfumatura (ga direzione in gradi, gr:1 radiale), da tratto del contorno;
+// sh ombra (soft, long, 3d) con shc il suo colore, nelle immagini ad regolazioni della foto ({exposure:.3,…}) e lk look, f2 secondo colore della sfumatura (ga direzione in gradi, gr:1 radiale), da tratto del contorno,
+// wr scontorno del testo (box o shape) con wg la distanza in corpi del testo;
 // nelle insegne st stile e c1, c2, oc, oc2, shc, gc colori, x altre proprietà.
 // Un gruppo {rep:[volte,dx,dy],g:[cornici…]} si ripete spostato di dx e dy: nei testi {n} è il numero della copia.
 const PG_NUM=['t',.5,1.25,1,1.8,'k:«Pagina» / «Pagine»',{n:'Numero di pagina'}];
@@ -253,7 +254,7 @@ function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_
  const name=s=>{let v=s,k=2;while(used.has(v))v=s+' '+k++;used.add(v);return v};
  const ax=(v,a,n,len)=>v<0?a*(v+1):v>1?a+n+(len-a-n)*(v-1):a+v*n;
  const box=(e,o)=>{let x=ax(e[1],I.x,I.w,p.w),y=ax(e[2],I.y,I.h,p.h),w=ax(e[3],I.x,I.w,p.w)-x,h=ax(e[4],I.y,I.h,p.h)-y;if(o.q){const s=Math.min(w,h);x+=(w-s)/2;y+=(h-s)/2;w=h=s}if(o.i){const d=Math.min(w,h)*o.i;x+=d;y+=d;w-=2*d;h-=2*d}return{x,y,w,h}};
- const put=(h,e,n,pi)=>{const k=e[0],a=e[5],o=[e[5],e[6]].find(v=>v&&typeof v==='object')||{},B={...box(e,o),...(o.rot?{rot:pgRotNorm(o.rot)}:{})},nm=d=>name(o.n?fill(o.n,n,pi):d),rad=o.r?Math.min(B.w,B.h)*o.r:0,ef={...(o.sh?{shadow:o.sh,shc:tok(o.shc||'dark')}:{}),...(o.f2?{grad:o.gr?'rad':'lin',fill2:tok(o.f2),gangle:o.ga??90}:{}),...(o.da?{dash:o.da}:{})};
+ const put=(h,e,n,pi)=>{const k=e[0],a=e[5],o=[e[5],e[6]].find(v=>v&&typeof v==='object')||{},B={...box(e,o),...(o.rot?{rot:pgRotNorm(o.rot)}:{})},nm=d=>name(o.n?fill(o.n,n,pi):d),rad=o.r?Math.min(B.w,B.h)*o.r:0,ef={...(o.sh?{shadow:o.sh,shc:tok(o.shc||'dark')}:{}),...(o.f2?{grad:o.gr?'rad':'lin',fill2:tok(o.f2),gangle:o.ga??90}:{}),...(o.da?{dash:o.da}:{}),...(o.wr?{wrap:o.wr,wrapGap:b*(o.wg??.75)}:{})};
   if(k==='t'){const x={name:nm(PG_TPL_NAME[(a.replace(/^[+-]/,'')[0]||'c').toLowerCase()]||'Testo'),...B,valign:{m:'middle',b:'bottom'}[o.v]||'top',cols:o.c||1,gut:p.gut,pad:(o.pad||0)*b,fill:o.f?tok(o.f):'none',radius:rad,...ef};
    if(o.k&&chains[o.k])return pgPutLinked(p,h,chains[o.k],x);const it=pgPutText(p,h,x,paras(a,n,pi));if(o.k)chains[o.k]=it;return it}
   if(k==='i')return pgPut(h,pgMk(p,'image',{name:nm('Foto'),...B,fill:o.f?tok(o.f):'none',radius:rad,...ef,...(o.ad?{adj:{...o.ad}}:{}),...(o.lk?{look:o.lk}:{}),deco:!!o.d,...(o.m?{mask:o.m}:{})}));
