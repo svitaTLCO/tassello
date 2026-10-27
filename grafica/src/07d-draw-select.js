@@ -77,8 +77,6 @@ function scaleDrag(d,dx,dy,shift){const B=d.B,H=d.h;let x=B.x,y=B.y,w=B.w,h=B.h;
  if(shift&&B.w&&B.h){const k=Math.max(w/B.w,h/B.h);w=B.w*k;h=B.h*k;if(H.includes('w'))x=B.x+B.w-w;if(H.includes('n'))y=B.y+B.h-h}for(const [it,o] of d.os)scaleItem(it,o,B,{x,y,w,h})}
 function scaleKeys(many,ax,ay,step){const ok=movable(many,'ridimensionarlo');if(!ok.length)return;const B=boxOf(ok),N={x:B.x,y:B.y,w:Math.max(1,B.w+ax*step),h:Math.max(1,B.h+ay*step)},os=ok.map(x=>[x,structuredClone(x)]);
  if(editD('Ridimensiona',()=>{for(const [it,o] of os)scaleItem(it,o,B,N)},{merge:true}))announce(`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}`)}
-// Le forme fatte di punti (tracciati) seguono le nuove misure del riquadro; o è l'oggetto com'era prima.
-function fitGeometry(it,o){}
 // Proprietà di più oggetti: posizione del riquadro comune, colori, contorno e opacità per tutti, e i comandi per disporli.
 function multiProps(many){const B=boxOf(many),f=many.find(x=>hasFill(x)&&x.fill!=='none'),s=many.find(hasStroke),btn=id=>{const c=C[id];return `<button type="button" class="btn sm" id="pm-${id}" data-action="${id}"${c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:''} aria-label="${esc(c.label)}" data-tip="${esc(c.label)}">${ICON(c.icon)}</button>`};
  return `<p class="hint">${esc(describeSel())}. Qui le modifiche valgono per tutti; per un oggetto solo sceglilo nei livelli.</p><div class="row2"><div>${fld('mx','X',n2(B.x))}</div><div>${fld('my','Y',n2(B.y))}</div></div>`

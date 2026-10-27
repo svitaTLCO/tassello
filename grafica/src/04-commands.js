@@ -77,6 +77,16 @@ def('d','Scelta',[
  ['distH','Distribuisci in orizzontale a spazi uguali','distH','',{short:'In orizzontale'}],
  ['distV','Distribuisci in verticale a spazi uguali','distV','',{short:'In verticale'}],
  ['smartGuides','Guide intelligenti','magnet','',{short:'Guide intelligenti',toggle:()=>smartOn()}]]);
+def('d','Strumenti',[
+ ['toolSelect','Strumento Selezione','pointer','V',{ctx:'sheet',short:'Selezione',quiet:1,toggle:()=>Dw.tool==='select'}],
+ ['toolNodes','Strumento Nodi: modifica i nodi dei tracciati','nodes','A',{ctx:'sheet',short:'Nodi',quiet:1,toggle:()=>Dw.tool==='nodes'}],
+ ['toolPen','Strumento Penna: tracciati nodo per nodo','pen','P',{ctx:'sheet',short:'Penna',quiet:1,toggle:()=>Dw.tool==='pen'}]]);
+def('d','Tracciato',[
+ ['nodeAdd','Aggiungi un nodo dopo quello scelto','plus','',{short:'Aggiungi nodo'}],
+ ['nodeDelete','Togli il nodo scelto','minus','',{short:'Togli nodo'}],
+ ['nodeType','Nodo d’angolo o curvo','nodeType','',{short:'Angolo o curva'}],
+ ['pathClose','Chiudi o apri il tracciato','pathClose','',{short:'Chiudi o apri'}],
+ ['readPath','Descrivi il tracciato','speak','Alt+Maiusc+P',{g:1,short:'Descrivi'}]]);
 def('id','Generale',[
  ['filePanel','Apri il menu File','file','',{}],
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],

@@ -4,8 +4,10 @@
 const SHEETS=[['post','Post 4:5, 1080 × 1350',1080,1350],['quadrato','Quadrato, 1080 × 1080',1080,1080],['storia','Storia 9:16, 1080 × 1920',1080,1920],['video','Orizzontale 16:9, 1920 × 1080',1920,1080],['banner','Banner, 1500 × 500',1500,500],['a4','A4 verticale, 2480 × 3508 (300 dpi)',2480,3508],['a4o','A4 orizzontale, 3508 × 2480 (300 dpi)',3508,2480],['icona','Icona, 512 × 512',512,512]];
 const sheetPreset=p=>(SHEETS.find(s=>s[2]===p.w&&s[3]===p.h)||[''])[0];
 const FONTS=[['system-ui, sans-serif','Senza grazie del sistema'],["'Segoe UI', sans-serif",'Segoe UI'],['Arial, sans-serif','Arial'],['Verdana, sans-serif','Verdana'],["'Trebuchet MS', sans-serif",'Trebuchet MS'],['Georgia, serif','Georgia'],["'Times New Roman', serif",'Times New Roman'],["'Courier New', monospace",'Courier New']];
-const KIND_NAME={rect:'Rettangolo',ellipse:'Ellisse',line:'Linea',text:'Testo',image:'Immagine'};
-const KIND_ICON={rect:'rect',ellipse:'ellipse',line:'lineI',text:'textI',image:'image'};
+const KIND_NAME={rect:'Rettangolo',ellipse:'Ellisse',line:'Linea',text:'Testo',image:'Immagine',path:'Tracciato'};
+const KIND_ICON={rect:'rect',ellipse:'ellipse',line:'lineI',text:'textI',image:'image',path:'pathI'};
+// Quello che si aggiunge alla descrizione di un oggetto, secondo il tipo.
+const KIND_SAY={path:it=>`, ${pathSummary(it)}`};
 const newDrawing=()=>({title:'Senza titolo',w:1080,h:1350,bg:'#ffffff',desc:'',items:[]});
 // Il disegno aperto, l'oggetto scelto, la cronologia e le immagini (file originali, indirizzi per l'anteprima).
 // Dw.sel è l'oggetto principale, quello delle proprietà; Dw.multi gli altri scelti con lui. tool è lo strumento del foglio.
@@ -38,7 +40,7 @@ const KIND_DEFAULTS={rect:(p,s)=>({w:Math.round(s*.5),h:Math.round(s*.3),fill:'#
 function addItem(kind,extra={}){const p=Dw.p,s=Math.min(p.w,p.h),it={id:uid(),kind,name:nextName(kind),x:0,y:0,w:100,h:100,rot:0,opacity:100,fill:'#0e6f8a',stroke:'#1b1b1b',sw:0,radius:0,...KIND_DEFAULTS[kind](p,s),...extra};
  if(kind==='text')measureText(it);it.x=Math.round((p.w-it.w)/2);it.y=Math.round((p.h-it.h)/2);
  Dw.sel=it.id;editD('Inserisci '+it.name,q=>{q.items.push(it)},{props:true});announce(`Inserito l’oggetto «${it.name}» al centro del foglio, sopra gli altri. Le proprietà sono nel riquadro a destra.`);return it}
-const describeItem=it=>{const b=box(it);return `${it.name}${it.name.startsWith(KIND_NAME[it.kind])?'':', '+KIND_NAME[it.kind].toLowerCase()}${it.kind==='text'?` «${it.text.replace(/\n/g,' ')}»`:''}, x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}${it.rot?`, ruotato di ${fmtNum(it.rot,0)} gradi`:''}${it.opacity<100?`, opacità ${it.opacity}%`:''}${it.hidden?', nascosto':''}`};
+const describeItem=it=>{const b=box(it);return `${it.name}${it.name.startsWith(KIND_NAME[it.kind])?'':', '+KIND_NAME[it.kind].toLowerCase()}${it.kind==='text'?` «${it.text.replace(/\n/g,' ')}»`:''}${KIND_SAY[it.kind]?.(it)||''}, x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}${it.rot?`, ruotato di ${fmtNum(it.rot,0)} gradi`:''}${it.opacity<100?`, opacità ${it.opacity}%`:''}${it.hidden?', nascosto':''}${it.lock?', bloccato':''}`};
 // Immagini del disegno: il file originale resta com'è; per l'anteprima e per l'esportazione si usa un indirizzo locale.
 function registerImage(id,blob,name,w,h){const old=Dw.imgs.get(id);if(old)URL.revokeObjectURL(old.url);Dw.imgs.set(id,{blob,name,w,h,type:blob.type,url:URL.createObjectURL(blob),bmp:null})}
 const isSvgFile=f=>/svg/i.test(f.type)||/\.svg$/i.test(f.name);

@@ -2,7 +2,7 @@
 const needItem=()=>{const it=selItem();if(!it)toast('Scegli prima un oggetto: nei livelli, sul foglio con PgSu e PgGiù, o con un clic');return it};
 const needSel=()=>{const many=selItems();if(!many.length)needItem();return many};
 const whatSel=many=>many.length>1?`${many.length} oggetti`:'«'+many[0].name+'»';
-function deleteItem(){const ok=movable(needSel(),'eliminarlo');if(!ok.length)return;const ids=new Set(ok.map(x=>x.id)),items=Dw.p.items,i=items.indexOf(ok.at(-1)),next=items.slice(i+1).find(x=>!ids.has(x.id))||items.slice(0,i).reverse().find(x=>!ids.has(x.id));
+function deleteItem(){if(Dw.tool==='nodes'&&nodePath()){deleteNode();return}const ok=movable(needSel(),'eliminarlo');if(!ok.length)return;const ids=new Set(ok.map(x=>x.id)),items=Dw.p.items,i=items.indexOf(ok.at(-1)),next=items.slice(i+1).find(x=>!ids.has(x.id))||items.slice(0,i).reverse().find(x=>!ids.has(x.id));
  pick(next?[next.id]:[],next?.id);editD(ok.length>1?`Elimina ${ok.length} oggetti`:'Elimina '+ok[0].name,p=>{p.items=p.items.filter(x=>!ids.has(x.id))},{props:true});announce(`${ok.length>1?`Eliminati ${ok.length} oggetti`:`Eliminato l’oggetto «${ok[0].name}»`}.${next?' Scelto: '+next.name:''}`)}
 function cloneItem(src,dx=20,also=[]){const it=JSON.parse(JSON.stringify(src));it.id=uid();it.x+=dx;it.y+=dx;let n=src.name.replace(/ copia( \d+)?$/,'')+' copia',k=2;const base=n,taken=x=>x.name===n;while(Dw.p.items.some(taken)||also.some(taken))n=`${base} ${k++}`;it.name=n;return it}
 // Le copie di un gruppo formano un gruppo nuovo.

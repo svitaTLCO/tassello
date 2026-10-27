@@ -229,6 +229,14 @@ html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 #overlay .sel-all{stroke:var(--accent)}#overlay .g-smart{stroke:#e0218a}#overlay .marq{fill:var(--sel-tint);stroke:var(--accent)}
 .insp-body .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 @media (forced-colors:active){#overlay .sel-all,#overlay .g-smart,#overlay .marq{stroke:Highlight}#overlay .marq{fill:none}}
+/* Tracciati: nodi, maniglie, tratti da cliccare e cursore da tastiera degli strumenti che disegnano */
+.sheet-wrap:not([data-tool=select]){cursor:crosshair}.sheet-wrap:not([data-tool=select]) #sheet [data-id]{cursor:crosshair}.sheet-wrap[data-tool=nodes] #sheet [data-id]{cursor:default}
+#overlay .n-path,#overlay .n-arm,#overlay .n-rubber{stroke:var(--accent)}#overlay .n-seg{pointer-events:stroke;stroke:transparent;cursor:copy}
+#overlay .node{pointer-events:all;fill:#fff;stroke:var(--accent);cursor:move}#overlay .node.cur{fill:var(--accent)}#overlay .n-h{pointer-events:all;fill:var(--accent);cursor:move}
+#overlay .k-cur{fill:none;stroke:var(--accent)}
+.node-list{max-height:180px;overflow:auto;border:1px solid var(--line-strong);border-radius:6px;padding:2px;margin-top:4px}
+#drawbar .tool-btn.btn[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent)}
+@media (forced-colors:active){#overlay .n-path,#overlay .n-arm,#overlay .node,#overlay .k-cur{stroke:Highlight}#overlay .node.cur,#overlay .n-h{fill:Highlight}#drawbar .tool-btn[aria-pressed=true]{outline:2px solid Highlight}}
 .layer-item .ico{width:16px;height:16px;color:var(--text-3)}
 .layer-item[aria-selected=true] .ico{color:inherit}
 @media (forced-colors:active){#overlay .sel-box{stroke:Highlight}#overlay .handle{fill:Canvas;stroke:Highlight}}

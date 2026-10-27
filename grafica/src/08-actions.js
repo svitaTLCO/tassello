@@ -12,6 +12,7 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  readDraw:readDrawStatus,sheetSize:()=>focusSheetProp('pr-preset'),sheetDesc:()=>focusSheetProp('pr-desc'),a11yCheck:drawA11yCheck,
  zoomIn:()=>zoomDraw(1.25),zoomOut:()=>zoomDraw(.8),zoomFit:()=>zoomDraw(0),
  selectAll,groupItems,ungroupItems,lockItems,hideItems,distH:()=>distribute('h'),distV:()=>distribute('v'),smartGuides:()=>{prefs.drawSmart=!smartOn();savePrefs()},
+ toolSelect:()=>setTool('select'),toolNodes:()=>setTool('nodes'),toolPen:()=>setTool('pen'),nodeAdd,nodeDelete:deleteNode,nodeType:nodeToggle,pathClose,readPath,
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
 const COMMON_ACTIONS={filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
  switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),layoutMenu,layoutReset,showPlans:()=>paneToggle('planPane'),showAdjust:()=>paneToggle('adjPane'),showLayers:()=>paneToggle('layPane'),showProps:()=>paneToggle('propPane'),

@@ -12,6 +12,8 @@ function itemSvg(it,{href='',hit=false,img=false}={}){if(it.hidden)return '';con
   case 'line':{const xy=`x1="${it.x}" y1="${it.y}" x2="${it.x+it.w}" y2="${it.y+it.h}"`;return `<g${id}${tr}${op}><line ${xy} stroke="${esc(it.stroke)}" stroke-width="${it.sw}" stroke-linecap="round"/>${hit?`<line ${xy} stroke="transparent" stroke-width="${Math.max(it.sw,24)}"/>`:''}</g>`}
   case 'text':{const lines=String(it.text).split('\n'),ax=n2(it.align==='center'?it.x+it.w/2:it.align==='right'?it.x+it.w:it.x),anchor=it.align==='center'?'middle':it.align==='right'?'end':'start';
    return `<g${id}${tr}${op}>${hit?`<rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" fill="transparent"/>`:''}<text x="${ax}" y="${it.y}" font-family="${esc(it.font)}" font-size="${it.size}" font-weight="${it.bold?700:400}"${it.italic?' font-style="italic"':''} fill="${esc(it.fill)}" text-anchor="${anchor}" xml:space="preserve">${lines.map((l,i)=>`<tspan x="${ax}" dy="${n2(i?it.size*it.lineH:it.size*(it.lineH/2+.35))}">${esc(l)}</tspan>`).join('')}</text></g>`}
+  case 'path':{const d=`d="${pathD(it)}"`,cap=it.sw>0?` stroke-linecap="${it.cap||'round'}" stroke-linejoin="${it.join||'round'}"`:'';if(!hit||it.fill!=='none')return `<path${id} ${d} ${paint}${cap}${tr}${op}${pe}/>`;
+   return `<g${id}${tr}${op}><path ${d} ${paint}${cap}/><path ${d} fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/></g>`}
   case 'image':return `<image${id}${img?` data-img="${it.img}"`:''} href="${esc(href)}" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" preserveAspectRatio="none"${tr}${op}/>`}
  return ''}
 function renderSheet(){const p=Dw.p,k=sheetScale();for(const s of [sheet,overlay]){s.setAttribute('viewBox',`0 0 ${p.w} ${p.h}`);s.style.width=Math.round(p.w*k)+'px';s.style.height=Math.round(p.h*k)+'px'}
@@ -66,27 +68,30 @@ function renderProps(){const b=$('propBody'),it=selItem(),p=Dw.p,focusId=documen
   if(it.kind==='text')h+=`<label for="pr-text">Testo</label><textarea id="pr-text" data-prop="text" rows="3">${esc(it.text)}</textarea>`+selFld('font','Carattere',it.font,FONTS)+fld('size','Dimensione (px)',it.size)+`<label class="check"><input type="checkbox" data-prop="bold"${it.bold?' checked':''}> Grassetto</label> <label class="check"><input type="checkbox" data-prop="italic"${it.italic?' checked':''}> Corsivo</label>`+selFld('align','Allineamento',it.align,[['left','A sinistra'],['center','Al centro'],['right','A destra']])+colorFld('fill','Colore del testo',it.fill);
   if(it.kind==='rect'||it.kind==='ellipse')h+=colorFld('fill','Riempimento',it.fill,'Nessun riempimento')+colorFld('stroke','Contorno',it.stroke)+fld('sw','Spessore del contorno (px)',it.sw)+(it.kind==='rect'?fld('radius','Angoli arrotondati (px)',it.radius):'');
   if(it.kind==='line')h+=colorFld('stroke','Colore',it.stroke)+fld('sw','Spessore (px)',it.sw);
+  if(it.kind==='path')h+=pathProps(it);
   if(it.kind==='image'){const svg=Dw.imgs.get(it.img)?.type==='image/svg+xml';h+=svg?'<p class="hint">Le immagini SVG si mettono sul foglio così come sono: le regolazioni valgono per le foto.</p>':`<h3>Regolazioni della foto</h3>`+IMG_ADJ.map(id=>{const a=ADJ_BY[id];return rangeFld('adj.'+id,a.label,a.min,a.max,a.step,it.adj?.[id]||0,a.fmt)}).join('')+selFld('look','Look',it.look||'none',lookList())+((it.look||'none')!=='none'?rangeFld('lookAmt','Intensità del look',0,100,1,it.lookAmt??100,v=>fmtInt(v)+'%'):'')}
   h+=rangeFld('opacity','Opacità',0,100,1,it.opacity,v=>fmtInt(v)+'%')+`<label class="check"><input type="checkbox" data-prop="hidden"${it.hidden?' checked':''}> Nascosto</label>`;b.innerHTML=h}
  if(focusId&&$(focusId))$(focusId).focus()}
 // Aggiorna i valori senza ricostruire il pannello, così il campo che si sta usando non perde il focus.
 function syncProps(){const it=selItem(),a=document.activeElement;if(selIds().length>1){syncMulti();return}if(!it){if($('pr-sw_')&&a!==$('pr-sw_'))$('pr-sw_').value=Dw.p.w;if($('pr-sh_')&&a!==$('pr-sh_'))$('pr-sh_').value=Dw.p.h;return}if(!$('pr-name')){renderProps();return}const bx=box(it);
  for(const [k,v] of [['x',bx.x],['y',bx.y],['w',it.w],['h',it.h],['rot',n2(it.rot)],['size',it.size],['sw',it.sw],['radius',it.radius]]){const el=$('pr-'+k);if(el&&el!==a)el.value=v}
- const op=$('pr-opacity');if(op&&op!==a){op.value=it.opacity;op.setAttribute('aria-valuetext',it.opacity+'%');$('pr-opacity-o').textContent=it.opacity+'%'}}
+ const op=$('pr-opacity');if(op&&op!==a){op.value=it.opacity;op.setAttribute('aria-valuetext',it.opacity+'%');$('pr-opacity-o').textContent=it.opacity+'%'}if(it.kind==='path')syncNodes(it)}
 // Valori scritti nei campi: si controllano e diventano una modifica.
-const PROP_NAME={mx:'Posizione',my:'Posizione',name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',text:'Testo',font:'Carattere',size:'Dimensione del testo',bold:'Grassetto',italic:'Corsivo',align:'Allineamento',fill:'Colore',fillNone:'Riempimento',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',hidden:'Nascosto',look:'Look',lookAmt:'Intensità del look',sw_:'Larghezza del foglio',sh_:'Altezza del foglio',preset:'Formato del foglio',bg:'Sfondo',bgNone:'Sfondo',desc:'Descrizione'};
+const PROP_NAME={mx:'Posizione',my:'Posizione',name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',text:'Testo',font:'Carattere',size:'Dimensione del testo',bold:'Grassetto',italic:'Corsivo',align:'Allineamento',fill:'Colore',fillNone:'Riempimento',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',hidden:'Nascosto',look:'Look',lookAmt:'Intensità del look',nx:'Posizione del nodo',ny:'Posizione del nodo',ntype:'Tipo di nodo',nclosed:'Tracciato chiuso',nix:'Maniglia',niy:'Maniglia',nox:'Maniglia',noy:'Maniglia',sw_:'Larghezza del foglio',sh_:'Altezza del foglio',preset:'Formato del foglio',bg:'Sfondo',bgNone:'Sfondo',desc:'Descrizione'};
 function applyProp(key,el){const p=Dw.p,it=selItem(),v=el.type==='checkbox'?el.checked:el.value,n=num(v);
  const need=(lo,hi)=>{if(!(n>=lo&&n<=hi))throw Error(`Scrivi un numero tra ${fmtInt(lo)} e ${fmtInt(hi)}`);return n};
  if(selIds().length>1){applyMulti(key,v,need);return}
  if(!it){if(key==='preset'){const s=SHEETS.find(x=>x[0]===v);if(s){p.w=s[2];p.h=s[3]}}else if(key==='sw_')p.w=Math.round(need(16,10000));else if(key==='sh_')p.h=Math.round(need(16,10000));else if(key==='bg')p.bg=v;else if(key==='bgNone')p.bg=v?'none':'#ffffff';else if(key==='desc')p.desc=v;return}
  if(key.startsWith('adj.')){it.adj={...it.adj,[key.slice(4)]:Number(v)};return}
+ if(/^n(x|y|type|closed|ix|iy|ox|oy)$/.test(key)){applyNodeProp(it,key,v,need);return}
+ const o=it.subs&&(key==='w'||key==='h')?structuredClone(it):null;
  switch(key){case 'name':it.name=String(v).trim()||nextName(it.kind);break;
   case 'x':it.x+=Math.round(need(-1e5,1e5))-box(it).x;break;case 'y':it.y+=Math.round(need(-1e5,1e5))-box(it).y;break;
   case 'w':it.w=Math.round(need(it.kind==='line'?-1e5:1,1e5));break;case 'h':it.h=Math.round(need(it.kind==='line'?-1e5:1,1e5));break;
   case 'rot':it.rot=((need(-360,360)%360)+360)%360;break;case 'sw':it.sw=need(0,1000);break;case 'radius':it.radius=need(0,1e5);break;
   case 'size':it.size=need(1,2000);break;case 'opacity':case 'lookAmt':it[key]=Number(v);break;case 'fillNone':it.fill=v?'none':'#0e6f8a';break;
   default:it[key]=v}
- if(it.kind==='text'&&['text','font','size','bold','italic'].includes(key))measureText(it)}
+ if(it.kind==='text'&&['text','font','size','bold','italic'].includes(key))measureText(it);if(o)fitGeometry(it,o)}
 // Strumenti del foglio: ognuno risponde al puntatore (down, move, up) e ai tasti sul foglio (key); sel dice come
 // mostrare la scelta, overlay aggiunge quello che lo strumento disegna sopra il foglio. Selezione è quello di partenza.
 const toSheet=e=>{const r=sheet.getBoundingClientRect(),k=sheetScale();return {x:(e.clientX-r.left)/k,y:(e.clientY-r.top)/k}};
@@ -156,6 +161,6 @@ $('layList').addEventListener('click',e=>{const o=e.target.closest('[data-id]');
 $('propBody').addEventListener('input',e=>{const el=e.target,key=el.dataset.prop;if(!key||!(el.type==='range'||el.type==='color'||key==='text'))return;try{applyProp(key,el)}catch(err){return}
  if(el.type==='range'){const t=el.closest('.adj'),f=key.startsWith('adj.')?ADJ_BY[key.slice(4)].fmt:v=>fmtInt(v)+'%',txt=f(Number(el.value));el.setAttribute('aria-valuetext',txt);t.querySelector('output').textContent=txt}renderSheet();if(!selItem())renderLayers()});
 $('propBody').addEventListener('change',e=>{const el=e.target,key=el.dataset.prop;if(!key)return;const it=selItem();try{applyProp(key,el)}catch(err){toast(err.message);el.value=el.defaultValue;el.focus();return}
- const label=PROP_NAME[key.replace(/^adj\./,'')]||ADJ_BY[key.slice(4)]?.label||'Proprietà',n=selIds().length;settleD(n>1?`${label} di ${n} oggetti`:it?`${label} di ${it.name}`:label,{props:['preset','sw_','sh_','bgNone','fillNone','look','name','text','font','size','bold','italic'].includes(key)})});
+ const label=PROP_NAME[key.replace(/^adj\./,'')]||ADJ_BY[key.slice(4)]?.label||'Proprietà',n=selIds().length;settleD(n>1?`${label} di ${n} oggetti`:it?`${label} di ${it.name}`:label,{props:['preset','sw_','sh_','bgNone','fillNone','look','name','text','font','size','bold','italic','ntype','nclosed'].includes(key)})});
 $('propBody').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();(Dw.sel?$('layList'):sheetWrap).focus()}});
 new ResizeObserver(()=>{if(!Dw.zoom&&state.mode==='disegno')renderSheet()}).observe(drawStage);
