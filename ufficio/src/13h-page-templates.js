@@ -305,7 +305,7 @@ function pgTplOpen(p,from,own=false){const old=Pg.p,ph=pgAllItems(p).filter(x=>x
  announce(`Nuovo documento ${from?`dal modello «${from}»`:`«${p.title}»`}: ${p.pages.length===1?'una pagina':p.pages.length+' pagine'}${p.tiles.on?`, da stampare su ${pgTileSay(pgTileGrid(p))}`:''}. ${from&&todo?todo[0].toUpperCase()+todo.slice(1)+'. ':''}${old?'Ctrl+Z torna al documento di prima. ':''}F6 passa tra pagine, cornici, pagina e proprietà.`)}
 // I modelli dell'utente stanno nel browser come le bozze: in IndexedDB con le immagini, altrimenti in localStorage senza.
 const PG_MINE_KEY='tassello-ufficio.impagina.modelli';
-async function pgMineList(){try{if(db)return ((await storeCall(db,'readonly',st=>st.getAll(IDBKeyRange.bound('pmod:','pmod:￿'))))||[]).sort((a,b)=>b.ts-a.ts);return JSON.parse(localStorage.getItem(PG_MINE_KEY)||'[]')}catch(e){return []}}
+async function pgMineList(){try{if(db)return ((await storeCall(db,'readonly',st=>st.getAll(IDBKeyRange.bound('pmod:','pmod:\uffff'))))||[]).sort((a,b)=>b.ts-a.ts);return JSON.parse(localStorage.getItem(PG_MINE_KEY)||'[]')}catch(e){return []}}
 async function pgMinePut(m){if(db){await storeCall(db,'readwrite',st=>st.put(m,'pmod:'+m.id));return}const l=(await pgMineList()).filter(x=>x.id!==m.id);l.unshift({...m,imgs:{}});localStorage.setItem(PG_MINE_KEY,JSON.stringify(l))}
 async function pgMineDel(id){if(db){await storeCall(db,'readwrite',st=>st.delete('pmod:'+id));return}localStorage.setItem(PG_MINE_KEY,JSON.stringify((await pgMineList()).filter(x=>x.id!==id)))}
 async function pgMineImgs(list){for(const m of list)for(const [id,x] of Object.entries(m.imgs||{}))if(!Pg.imgs.has(id)&&x?.blob)try{await pgRegister(id,x.blob,x.name)}catch(e){}}
