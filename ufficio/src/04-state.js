@@ -6,7 +6,7 @@ const ROWHEIGHT=24,HEADERHEIGHT=27,BASECOL=64;
 const blankSheet=(name='Foglio1')=>({name,cells:{},widths:{},merges:[]});
 const state={mode:'word',excelTitle:'Calcolo1',wordTitle:'Documento1',wordHTML:'<p><br></p>',sheets:[blankSheet()],sheet:0,zoom:100,paper:'a4',sel:{r:0,c:0,r2:0,c2:0},doc:{...DOC_DEFAULT},styles:{},layout:{...LAYOUT_DEFAULT},comments:{},sections:{},biblio:{style:'apa',sources:[]},cc:{},merge:null,names:[],showComments:false,spell:true};
 // Stato dell'interfaccia, del ricalcolo, della cronologia e del salvataggio delle bozze.
-let currentTab='Inizio',tabExitArmed=false,speaking=false,sheetDrag=false;
+let tabExitArmed=false,speaking=false,sheetDrag=false;
 let calcMemo=new Map(),calcVersion=0,hist=[],redo=[];
 let db=null,draftTimer,suppressAutosave=false,activeWordRange=null;
 const lastColor={fontColor:'#c00000',hiliteColor:'#ffff00',fillColor:'#ffe699'};
@@ -32,7 +32,7 @@ function setMode(mode,{focus=true}={}){const leaving=state.mode;if(mode===leavin
  state.mode=mode;$('app').className=mode;document.documentElement.dataset.mode=mode;
  for(const [m,a] of Object.entries(APPS)){$(a.pane).classList.toggle('hidden',m!==mode);$(a.button).setAttribute('aria-pressed',m===mode)}
  $('docTitle').value=currentTitle();$('exportLabel').textContent=APPS[mode].export;updateTitle();
- currentTab='Inizio';renderTabs();renderRibbon();
+ renderBar();applyTiles();
  if(mode==='word'){updateWordStats();scheduleWordTidy(0)}else if(mode==='excel'){renderSheetTabs();renderedFirst=-1;renderGrid(true);setSelection(state.sel.r,state.sel.c);renderCharts()}else pageShow();
  printStyle();if(focus){if(mode==='impagina')pageFocus();else $(mode==='word'?'wordEditor':'gridScroll').focus();announce(mode==='word'?'Testo: documento':mode==='excel'?'Calcolo: foglio '+sheet().name:'Impagina: '+pageSummary())}schedulePersist()}
 // Porta il focus sull'area di lavoro dell'app attiva: il documento, il foglio o la pagina.

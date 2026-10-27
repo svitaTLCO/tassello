@@ -7,7 +7,6 @@ ed.addEventListener('contextmenu',e=>{if(e.target.closest?.('td,th,img,figure'))
 let navRaf=0;document.addEventListener('selectionchange',()=>{if(!isWord()||!state.layout.nav||!inEditor())return;cancelAnimationFrame(navRaf);navRaf=requestAnimationFrame(()=>renderNav())});
 $('navList').addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b)goHeading(docHeadings()[+b.dataset.nav])});
 $('navList').addEventListener('keydown',e=>{const items=$$('#navList [data-nav]'),i=items.indexOf(e.target);if(i<0)return;let j=null;if(e.key==='ArrowDown')j=Math.min(items.length-1,i+1);else if(e.key==='ArrowUp')j=Math.max(0,i-1);else if(e.key==='Home')j=0;else if(e.key==='End')j=items.length-1;else if(e.key==='Escape'){e.preventDefault();restoreWordFocus();return}if(j===null)return;e.preventDefault();items.forEach((b,k)=>b.tabIndex=k===j?0:-1);items[j].focus()});
-$('navClose').onclick=()=>runCommand('navPane');
 for(const id of ['hfHead','hfFoot'])$(id).addEventListener('click',()=>runCommand('headerFooter'));
 window.addEventListener('resize',()=>{if(isWord())scheduleWordTidy(150)});
 window.addEventListener('beforeprint',()=>{printStyle();if(isWord()){renumberNotes();renumberEndnotes();buildPrintSections()}});window.addEventListener('afterprint',clearPrintSections);
@@ -21,7 +20,7 @@ ed.addEventListener('paste',e=>{if(reading||formMode)e.preventDefault()},true);e
 // Commenti: riquadro, cursore su un testo commentato, annuncio quando si entra in un commento.
 $('cmtList').addEventListener('click',e=>{const b=e.target.closest('[data-ca]'),li=e.target.closest('[data-c]');if(!b||!li)return;const c=li.dataset.c;({go:()=>goComment(c),reply:()=>replyComment(c),edit:()=>editComment(c),done:()=>resolveComment(c),del:()=>deleteComment(c)})[b.dataset.ca]?.()});
 $('cmtList').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();restoreWordFocus()}});
-$('cmtClose').onclick=()=>runCommand('cmtPane');$('cmtAdd').addEventListener('mousedown',e=>e.preventDefault());$('cmtAdd').onclick=()=>runCommand('cmtNew');
+$('cmtAdd').addEventListener('mousedown',e=>e.preventDefault());$('cmtAdd').onclick=()=>runCommand('cmtNew');
 let lastCmtSeen=null,lfRaf=0;document.addEventListener('selectionchange',()=>{if(!isWord()||!inEditor())return;const b=commentAtCaret();if(b!==lastCmtSeen){lastCmtSeen=b;if(b&&state.comments[b]&&document.activeElement===ed){const d=state.comments[b];announce(`Commento di ${d.author}${d.done?', risolto':''}: ${d.text.slice(0,140)}`)}if(state.showComments||activeCmt)markActiveComment(b)}if(reading){cancelAnimationFrame(lfRaf);lfRaf=requestAnimationFrame(updateLineFocus)}});
 $('wordScroll').addEventListener('scroll',()=>{if(reading){cancelAnimationFrame(lfRaf);lfRaf=requestAnimationFrame(updateLineFocus)}},{passive:true});
 // Barra della modalità lettura e della dettatura

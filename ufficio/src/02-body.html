@@ -141,31 +141,31 @@
 <symbol id="i-distV" viewBox="0 0 24 24"><path d="M3 3h18M3 21h18"/><rect x="7" y="8" width="10" height="8" rx="1"/></symbol>
 <symbol id="i-mask" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9.5A4 4 0 0 1 12 8a4 4 0 0 1 7 2.5C19 15.6 12 20 12 20z"/></symbol>
 <symbol id="i-festone" viewBox="0 0 24 24"><path d="M2 5c6 3 14 3 20 0"/><path d="M5 6.3 7 12l2-5.1M11 7.4 12 13l1-5.6M15 6.9l2 5.1 2-5.7"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></symbol>
+<symbol id="i-mosaic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
 </defs></svg>
-<a class="skip" href="#docRegion" id="skipDoc">Vai al documento</a><a class="skip" href="#tabs" id="skipRibbon">Vai alla barra multifunzione</a>
+<a class="skip" href="#docRegion" id="skipDoc">Vai al documento</a><a class="skip" href="#tools" id="skipTools">Vai agli strumenti</a>
 <div class="word" id="app">
-<header class="titlebar" id="titlebar" aria-label="Barra del titolo">
-<button type="button" class="brand" id="brandBtn" aria-label="Tassello Ufficio: informazioni" data-tip="Informazioni su Tassello Ufficio"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#fff"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#fff"></path><path d="M86 0V8Q86 14 92 14H100Z" fill="var(--accent)" fill-opacity=".55"></path><rect y="54" width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect></svg><span class="brand-name">Tassello Ufficio</span></button>
+<header class="bar" id="bar" aria-label="Barra">
+<div class="tile brand-tile">
+<button type="button" class="brand" id="brandBtn" aria-label="Tassello Ufficio: informazioni" data-tip="Informazioni su Tassello Ufficio"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"></path><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"></path><rect y="54" width="46" height="46" rx="10" fill="#B35500"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"></rect></svg></button>
 <div class="app-switch" role="group" aria-label="Applicazione">
 <button type="button" id="switchWord" aria-pressed="true" aria-keyshortcuts="Control+Alt+W" data-tip="Testo (Ctrl+Alt+W)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h9"></path></svg></span><span class="app-name">Testo</span></button>
 <button type="button" id="switchExcel" aria-pressed="false" aria-keyshortcuts="Control+Alt+X" data-tip="Calcolo (Ctrl+Alt+X)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M5 5h14v14H5zM5 12h14M12 5v14"></path></svg></span><span class="app-name">Calcolo</span></button>
 <button type="button" id="switchPage" aria-pressed="false" aria-keyshortcuts="Control+Alt+I" data-tip="Impagina (Ctrl+Alt+I)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 11h8M12 4v16"></path></svg></span><span class="app-name">Impagina</span></button>
 </div>
-<div class="tb-group" role="group" aria-label="Accesso rapido">
-<button type="button" class="tb-btn" id="quickUndo" aria-label="Annulla" aria-keyshortcuts="Control+Z" data-tip="Annulla (Ctrl+Z)"><svg class="ico" aria-hidden="true"><use href="#i-undo"/></svg></button>
-<button type="button" class="tb-btn" id="quickRedo" aria-label="Ripeti" aria-keyshortcuts="Control+Y" data-tip="Ripeti (Ctrl+Y)"><svg class="ico" aria-hidden="true"><use href="#i-redo"/></svg></button>
 </div>
-<div class="title-center"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Documento1" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
-<button type="button" class="cmd-search" id="paletteBtn" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Cerca comandi</span><kbd aria-hidden="true">Alt+Q</kbd></button>
-<button type="button" class="top-action" id="openTop" aria-keyshortcuts="Control+O" data-tip="Apri (Ctrl+O)"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><span>Apri</span></button>
-<button type="button" class="top-action primary" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Salva DOCX/XLSX (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span>Salva file</span></button>
-<button type="button" class="tb-btn" id="kbdBtn" aria-label="Scorciatoie da tastiera" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg></button>
+<div class="tile doc-tile"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Documento1" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
+<div class="tile tools" id="tools" role="toolbar" aria-label="Strumenti e cassetti">
+<div id="quick"></div><span class="tsep" aria-hidden="true"></span>
+<button type="button" class="tb drw" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
+<div id="drawers"></div>
+</div>
+<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
+<button type="button" class="tile primary-tile" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Salva DOCX/XLSX (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span>Salva file</span></button>
 </header>
-<div class="tabrow" id="tabrow">
-<button type="button" class="filebtn" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
-<div class="tabs" id="tabs" role="tablist" aria-label="Schede della barra multifunzione"></div>
-</div>
-<div class="ribbon" id="ribbon" role="tabpanel" aria-labelledby="tab-Home"></div>
+<div class="drawer" id="ribbon" role="group" hidden></div>
 <div class="findbar" id="findbar" role="search" aria-label="Trova e sostituisci" hidden>
 <label for="findText">Trova</label><input id="findText" type="search" autocomplete="off" spellcheck="false" aria-describedby="findCount">
 <span id="findCount" class="find-count" role="status" aria-live="polite"></span>
@@ -178,10 +178,10 @@
 </div>
 <div class="read-bar" id="readBar" role="group" aria-label="Strumenti di lettura" hidden><b class="rb-title">Modalità lettura</b><label>Larghezza <select id="rdWidth"><option value="narrow">Stretta</option><option value="medium">Media</option><option value="wide">Ampia</option></select></label><label>Spaziatura <select id="rdSpace"><option value="normal">Normale</option><option value="wide">Ampia</option></select></label><label class="check"><input type="checkbox" id="rdFont"> Carattere ad alta leggibilità</label><span class="rd-size" role="group" aria-label="Dimensione del testo"><button type="button" class="btn sm" id="rdSmaller" aria-label="Testo più piccolo">A−</button><output id="rdSize" aria-live="polite">14 pt</output><button type="button" class="btn sm" id="rdBigger" aria-label="Testo più grande">A+</button></span><label>Colore pagina <select id="rdColor"><option value="white">Bianco</option><option value="sepia">Seppia</option><option value="dark">Scuro</option></select></label><label class="check"><input type="checkbox" id="rdLine"> Evidenzia la riga corrente</label><button type="button" class="btn sm" id="rdSpeak">Leggi ad alta voce</button><button type="button" class="btn sm primary" id="rdExit">Esci dalla lettura</button></div>
 <main class="main" id="docRegion" tabindex="-1" aria-label="Area di lavoro">
-<div class="editor-pane" id="wordPane"><aside class="nav-pane" id="navPane" aria-labelledby="navTitle" hidden><div class="nav-head"><h2 id="navTitle">Spostamento</h2><span class="nav-count" id="navCount"></span><button type="button" class="btn icon" id="navClose" aria-label="Chiudi il riquadro di spostamento" data-tip="Chiudi il riquadro"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button></div><p class="nav-hint" id="navHint">Frecce per scorrere i titoli, Invio per raggiungerli, Esc per tornare al documento.</p><ul class="nav-list" id="navList" aria-describedby="navHint"></ul></aside><div class="word-scroll" id="wordScroll"><div class="page" id="page" data-paper="a4"><div class="page-deco" id="pageDeco" aria-hidden="true"></div><div class="hf hf-head empty" id="hfHead" aria-hidden="true" data-tip="Intestazione: fai clic per modificarla"></div><div class="page-marks" id="pageMarks" aria-hidden="true"></div><div id="wordEditor" class="word-content empty" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Corpo del documento" aria-describedby="editorHint" aria-placeholder="Inizia a scrivere qui…" data-placeholder="Inizia a scrivere qui…" spellcheck="true"><p><br></p></div><div class="hf hf-foot empty" id="hfFoot" aria-hidden="true" data-tip="Piè di pagina: fai clic per modificarlo"></div></div><div class="line-focus" id="lineFocus" aria-hidden="true" hidden></div></div><aside class="cmt-pane" id="cmtPane" aria-labelledby="cmtTitle" hidden><div class="nav-head"><h2 id="cmtTitle">Commenti</h2><span class="nav-count" id="cmtCount"></span><button type="button" class="btn icon" id="cmtClose" aria-label="Chiudi il riquadro dei commenti" data-tip="Chiudi il riquadro"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="cmt-tools"><button type="button" class="btn sm" id="cmtAdd" aria-keyshortcuts="Control+Alt+M">Nuovo commento</button></div><ol class="cmt-list" id="cmtList"></ol></aside></div>
+<div class="editor-pane" id="wordPane"><aside class="nav-pane pane tile" id="navPane" aria-labelledby="navTitle" hidden><div class="nav-head"><h2 id="navTitle">Spostamento</h2><span class="nav-count" id="navCount"></span></div><p class="nav-hint" id="navHint">Frecce per scorrere i titoli, Invio per raggiungerli, Esc per tornare al documento.</p><ul class="nav-list" id="navList" aria-describedby="navHint"></ul></aside><div class="word-scroll" id="wordScroll"><div class="page" id="page" data-paper="a4"><div class="page-deco" id="pageDeco" aria-hidden="true"></div><div class="hf hf-head empty" id="hfHead" aria-hidden="true" data-tip="Intestazione: fai clic per modificarla"></div><div class="page-marks" id="pageMarks" aria-hidden="true"></div><div id="wordEditor" class="word-content empty" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Corpo del documento" aria-describedby="editorHint" aria-placeholder="Inizia a scrivere qui…" data-placeholder="Inizia a scrivere qui…" spellcheck="true"><p><br></p></div><div class="hf hf-foot empty" id="hfFoot" aria-hidden="true" data-tip="Piè di pagina: fai clic per modificarlo"></div></div><div class="line-focus" id="lineFocus" aria-hidden="true" hidden></div></div><aside class="cmt-pane pane tile" id="cmtPane" aria-labelledby="cmtTitle" hidden><div class="nav-head"><h2 id="cmtTitle">Commenti</h2><span class="nav-count" id="cmtCount"></span></div><div class="cmt-tools"><button type="button" class="btn sm" id="cmtAdd" aria-keyshortcuts="Control+Alt+M">Nuovo commento</button></div><ol class="cmt-list" id="cmtList"></ol></aside></div>
 <div id="excelPane" class="editor-pane hidden">
 <div class="formula-line" id="formulaLine" role="group" aria-label="Barra della formula"><label class="sr-only" for="nameBox">Casella nome, vai alla cella o all’intervallo</label><input id="nameBox" class="namebox" value="A1" autocomplete="off" spellcheck="false" aria-keyshortcuts="Control+G"><span class="fx" aria-hidden="true">ƒx</span><label class="sr-only" for="formulaInput">Contenuto della cella attiva</label><input id="formulaInput" autocomplete="off" spellcheck="false" placeholder="Valore o formula, es. =SOMMA(A1:A10)"></div>
-<div class="grid-area"><div id="gridScroll" class="grid-scroll" role="grid" tabindex="0" aria-label="Foglio" aria-multiselectable="true" aria-describedby="gridHint"><table class="sheetgrid" id="grid" role="presentation"></table></div><div class="chart-viewport" id="chartViewport"><div class="chart-pan" id="chartPan"><div class="chart-zoom" id="chartLayer" role="region" aria-label="Grafici del foglio" hidden></div></div></div></div>
+<div class="grid-area tile"><div id="gridScroll" class="grid-scroll" role="grid" tabindex="0" aria-label="Foglio" aria-multiselectable="true" aria-describedby="gridHint"><table class="sheetgrid" id="grid" role="presentation"></table></div><div class="chart-viewport" id="chartViewport"><div class="chart-pan" id="chartPan"><div class="chart-zoom" id="chartLayer" role="region" aria-label="Grafici del foglio" hidden></div></div></div></div>
 <div class="sheet-bar" id="sheetBar"><div class="sheet-tabs" id="sheetTabs" role="tablist" aria-label="Fogli di lavoro"></div><button type="button" class="sheet-add" id="addSheet" aria-label="Nuovo foglio" aria-keyshortcuts="Shift+F11" data-tip="Nuovo foglio (Maiusc+F11)"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
 <div id="excelPrint" class="print-sheet"></div>
 </div>
@@ -191,13 +191,13 @@
 <div class="pg-presets" id="pgPresets" role="group" aria-labelledby="pgStartTitle"></div>
 <p><button type="button" class="btn" data-pg-open="1"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg>Apri un progetto di Impagina</button></p></section>
 <div class="pg-work" id="pgWork" hidden>
-<aside class="pg-side" aria-label="Pagine e cornici">
+<aside class="pg-side pane tile" id="pgSidePane" aria-label="Pagine e cornici">
 <div class="pane-head"><h2 id="pgPagesTitle">Pagine</h2><span class="pane-count" id="pgPageCount"></span></div>
 <div class="lb pg-pages" id="pgPages" role="listbox" aria-labelledby="pgPagesTitle" aria-describedby="pgPagesKeys" tabindex="0"></div>
 <div class="pane-head"><h2 id="pgFramesTitle">Cornici, in ordine di lettura</h2><span class="pane-count" id="pgFrameCount"></span></div>
 <div class="lb pg-frames" id="pgFrames" role="listbox" aria-multiselectable="true" aria-labelledby="pgFramesTitle" aria-describedby="pgFramesKeys" tabindex="0"></div>
 </aside>
-<section class="pg-view" aria-labelledby="pgStageTitle"><h2 class="sr-only" id="pgStageTitle">Pagina</h2>
+<section class="pg-view tile" aria-labelledby="pgStageTitle"><h2 class="sr-only" id="pgStageTitle">Pagina</h2>
 <div class="pg-scroll" id="pgScroll"><div class="pg-sheet" id="pgStage" tabindex="0" role="application" aria-roledescription="pagina" aria-label="Pagina" aria-describedby="pgStageHint"><svg id="pgSvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg><svg id="pgOver" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg></div></div>
 <div class="viewbar" id="pgBar" role="group" aria-label="Vista della pagina">
 <button type="button" class="btn sm icon" data-action="pgPrevPage" aria-label="Pagina precedente" data-tip="Pagina precedente (Alt+PgSu)"><svg class="ico" aria-hidden="true"><use href="#i-up"/></svg></button><span id="pgPageInfo"></span><button type="button" class="btn sm icon" data-action="pgNextPage" aria-label="Pagina successiva" data-tip="Pagina successiva (Alt+PgGiù)"><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></button>
@@ -208,14 +208,16 @@
 <span id="pgZoomInfo" aria-hidden="true"></span>
 </div>
 </section>
-<aside class="pg-props" aria-labelledby="pgPropTitle"><div class="pane-head"><h2 id="pgPropTitle">Proprietà</h2></div><div class="insp-body" id="pgProps"></div></aside>
+<aside class="pg-props pane tile" id="pgPropsPane" aria-labelledby="pgPropTitle"><div class="pane-head"><h2 id="pgPropTitle">Proprietà</h2></div><div class="insp-body" id="pgProps"></div></aside>
 </div>
 </div>
 </main>
 <footer class="status" id="statusbar" aria-label="Barra di stato">
-<span id="statusText">Pronto</span><span class="status-word" id="wordStats"></span><span id="excelStats" class="status-excel"></span><span id="pgStats" class="status-page"></span><span class="grow"></span>
+<button type="button" class="st-btn lead" id="layoutBtn" aria-haspopup="menu" aria-expanded="false" data-tip="Mostra, riduci o togli i riquadri"><svg class="ico" aria-hidden="true"><use href="#i-mosaic"/></svg><span>Tasselli</span></button>
+<span class="chip" id="statusText">Pronto</span><span class="status-word" id="wordStats"></span><span id="excelStats" class="status-excel"></span><span id="pgStats" class="status-page"></span><span class="grow"></span>
+<button type="button" class="st-btn" id="kbdBtn" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg><span>Scorciatoie</span></button>
 <button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
-<div class="zoom" role="group" aria-label="Zoom"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="100" min="60" max="160" step="10" aria-label="Livello di zoom" aria-valuetext="100%"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true">100%</output></div>
+<div class="zoom chip" role="group" aria-label="Zoom"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="100" min="60" max="160" step="10" aria-label="Livello di zoom" aria-valuetext="100%"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true">100%</output></div>
 </footer>
 </div>
 <p id="pgStageHint" class="sr-only">PgGiù e PgSu scelgono la cornice successiva o precedente nell’ordine di lettura. Frecce per spostarla, con Maiusc dieci volte tanto; Ctrl più frecce per cambiarne le dimensioni. Maiusc+PgGiù aggiunge la cornice successiva alla scelta, Alt+Maiusc più frecce porta la scelta alla guida successiva. Invio apre il testo o le proprietà, Esc toglie la scelta, Canc elimina, Maiusc+F10 apre il menu. Più e meno cambiano lo zoom, zero mostra tutta la pagina. Alt+PgGiù e Alt+PgSu cambiano pagina, Alt+Maiusc+I descrive la pagina.</p>
@@ -270,7 +272,7 @@
 <div id="srLive" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 <div class="modalbg" id="modalbg" hidden><div id="modal" class="modal" role="dialog" aria-labelledby="dlgTitle" aria-describedby="dlgBody" aria-modal="true"></div></div>
 <div class="modalbg" id="palettebg" hidden><div class="palette" role="dialog" aria-modal="true" aria-label="Cerca comando">
-<input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. grassetto, tabella, somma" autocomplete="off" spellcheck="false">
+<div class="pal-field"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. grassetto, tabella, somma" autocomplete="off" spellcheck="false"><kbd aria-hidden="true">Esc</kbd></div>
 <div id="palList" role="listbox" aria-label="Comandi"></div>
 <p class="pal-hint" aria-hidden="true">↑ ↓ per scegliere · Invio per eseguire · Esc per chiudere</p>
 </div></div>

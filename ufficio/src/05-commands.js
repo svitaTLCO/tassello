@@ -402,6 +402,12 @@ def('p','Fonti',[
 def('p','Verifica',[
  ['pgCheck','Verifica dell’accessibilità','a11y','',{short:'Verifica accessibilità'}],
  ['pgDescribe','Descrivi la pagina e la cornice scelta','speak','Alt+Maiusc+I',{g:1,short:'Descrivi pagina'}]]);
+def('wp','Tasselli',[
+ ['layoutMenu','Tasselli: mostra, riduci o togli i riquadri','mosaic','',{short:'Tasselli'}],
+ ['layoutReset','Rimetti i tasselli come all’inizio','history','',{short:'Come all’inizio'}]]);
+def('p','Tasselli',[
+ ['showPgSide','Mostra o togli il riquadro Pagine e cornici','page','',{short:'Pagine e cornici',quiet:1,toggle:()=>paneSt('pgSidePane')!=='off'}],
+ ['showPgProps','Mostra o togli il riquadro Proprietà','gear','',{short:'Proprietà',quiet:1,toggle:()=>paneSt('pgPropsPane')!=='off'}]]);
 const KEYNAME={Invio:'enter',Spazio:' ',Canc:'delete',Esc:'escape',PgSu:'pageup',PgGiù:'pagedown',Home:'home',Fine:'end','←':'arrowleft','→':'arrowright','↑':'arrowup','↓':'arrowdown',Tab:'tab'};
 const keyCache=new Map();
 function parseKey(s){let key,mods;if(s.endsWith('++')){key='+';mods=s.slice(0,-2).split('+')}else{const p=s.split('+');key=p.pop();mods=p}return{ctrl:mods.includes('Ctrl'),alt:mods.includes('Alt'),shift:mods.includes('Maiusc'),key:(KEYNAME[key]||key).toLowerCase()}}

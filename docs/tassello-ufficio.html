@@ -10,25 +10,26 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='46' height='46' rx='10' fill='%232457C5'/%3E%3Cpath d='M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z' fill='%231E7A46'/%3E%3Cpath d='M86 0V8Q86 14 92 14H100Z' fill='%23fff' fill-opacity='.55'/%3E%3Crect y='54' width='46' height='46' rx='10' fill='%23B35500'/%3E%3Crect x='54' y='54' width='46' height='46' rx='10' fill='%237A3DB8'/%3E%3C/svg%3E">
 <style id="pageStyle">@page{size:A4 portrait;margin:18mm}</style>
 <style>
+/* Mosaico: la finestra è fatta di tasselli (--surface) appoggiati su una fuga (--grout) che prende il colore dell'app. */
 :root{--zoom:1;--accent:#2457c5;--accent-strong:#1b4398;--accent-text:#1b4398;--accent-soft:#e7edfa;--sel-tint:rgba(36,87,197,.13);
---bg:#f3f3f3;--chrome:#f7f7f7;--surface:#fff;--surface-2:#f3f3f3;--hover:#e8e8e8;--pressed:#dcdcdc;--line:#e1e1e1;--line-strong:#b3b3b3;--text:#1b1b1b;--text-2:#3d3d3d;--text-3:#575757;--canvas:#e6e6e6;--hdr:#f3f3f3;--focus:#1b1b1b;--danger:#b10e1c;
---shadow:0 12px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08);color-scheme:light;
+--grout:#dce3ef;--grout-deep:#cbd4e4;--gap:8px;--r:10px;--fold:var(--accent);--scrim:rgba(16,22,34,.16);
+--bg:var(--grout);--chrome:#fff;--surface:#fff;--surface-2:#f1f3f7;--hover:#e9edf3;--pressed:#dde2ea;--line:#e1e5ec;--line-strong:#a9b0bc;--text:#161b26;--text-2:#3e4757;--text-3:#596374;--canvas:#e8ebf0;--hdr:#f1f3f7;--focus:#161b26;--danger:#b10e1c;
+--shadow:0 12px 32px rgba(20,24,34,.18),0 2px 8px rgba(20,24,34,.08);--lift:0 18px 40px rgba(20,24,34,.26),0 2px 6px rgba(20,24,34,.1);color-scheme:light;
+--mono:'Cascadia Mono',Consolas,ui-monospace,'Courier New',monospace;
 font-family:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--text)}
-html[data-mode=excel]{--accent:#1e7a46;--accent-strong:#155c34;--accent-text:#155c34;--accent-soft:#e3f1e8;--sel-tint:rgba(30,122,70,.14)}
-.brand{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 6px;margin-right:4px;border:0;border-radius:8px;background:transparent;color:#fff;font:inherit;cursor:pointer}
-.brand:hover{background:rgba(255,255,255,.14)}
-.brand-mark{width:22px;height:22px;flex:none}
-.brand-name{font-weight:700;font-size:14px;letter-spacing:.01em;white-space:nowrap}
-@media (max-width:980px){.brand-name{display:none}.brand{padding:0 6px}}
-.app-logo svg{display:block}
-html[data-theme=dark]{color-scheme:dark;--bg:#1c1c1c;--chrome:#242424;--surface:#2c2c2c;--surface-2:#303030;--hover:#3a3a3a;--pressed:#464646;--line:#3d3d3d;--line-strong:#6a6a6a;--text:#f3f3f3;--text-2:#d9d9d9;--text-3:#bdbdbd;--canvas:#141414;--hdr:#2a2a2a;--focus:#fff;--accent-text:#9bbcf5;--accent-soft:#1c3156;--shadow:0 12px 32px rgba(0,0,0,.55)}
-html[data-theme=dark][data-mode=excel]{--accent-text:#82d3a4;--accent-soft:#163a26}
-html[data-contrast=high]{--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#002a66}
-html[data-contrast=high][data-mode=excel]{--accent-text:#003d1c}
-html[data-contrast=high][data-theme=dark]{--line:#fff;--line-strong:#fff;--text-2:#fff;--text-3:#fff;--hover:#4a4a4a;--accent-text:#b5d0ff}
-html[data-contrast=high][data-theme=dark][data-mode=excel]{--accent-text:#9ff0c2}
-html[data-contrast=high] .tool,html[data-contrast=high] .tab,html[data-contrast=high] .rb-select,html[data-contrast=high] .btn{border:1px solid var(--line-strong)}
+html[data-mode=excel]{--accent:#1e7a46;--accent-strong:#155c34;--accent-text:#155c34;--accent-soft:#e3f1e8;--sel-tint:rgba(30,122,70,.14);--grout:#dae7df;--grout-deep:#c8dacf}
+html[data-theme=dark]{color-scheme:dark;--grout:#0f131b;--grout-deep:#080b10;--scrim:rgba(0,0,0,.45);--chrome:#1e2026;--surface:#1e2026;--surface-2:#272a31;--hover:#2f333c;--pressed:#3a3f49;--line:#363a44;--line-strong:#6b7280;--text:#eef1f6;--text-2:#c9d0db;--text-3:#a3acbb;--canvas:#16181d;--hdr:#272a31;--focus:#fff;--accent-text:#9bbcf5;--accent-soft:#1c3156;--shadow:0 12px 32px rgba(0,0,0,.55);--lift:0 18px 40px rgba(0,0,0,.6)}
+html[data-theme=dark][data-mode=excel]{--accent-text:#82d3a4;--accent-soft:#163a26;--grout:#0e1511;--grout-deep:#070c09}
+html[data-contrast=high]{--grout:#fff;--grout-deep:#fff;--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#002a66}
+html[data-contrast=high][data-mode=excel]{--accent-text:#003d1c;--grout:#fff;--grout-deep:#fff}
+html[data-contrast=high][data-theme=dark]{--grout:#000;--grout-deep:#000;--line:#fff;--line-strong:#fff;--text-2:#fff;--text-3:#fff;--hover:#4a4a4a;--accent-text:#b5d0ff}
+html[data-contrast=high][data-theme=dark][data-mode=excel]{--accent-text:#9ff0c2;--grout:#000;--grout-deep:#000}
+html[data-contrast=high] .tool,html[data-contrast=high] .tb,html[data-contrast=high] .ditem,html[data-contrast=high] .rb-select,html[data-contrast=high] .btn{border:1px solid var(--line-strong)}
+/* In contrasto elevato la fuga diventa una linea di 2 px intorno a ogni tassello. */
+html[data-contrast=high] .tile{outline:2px solid var(--line-strong);outline-offset:-2px}
+html[data-contrast=high] .tessera,html[data-contrast=high] .chip,html[data-contrast=high] .st-btn{box-shadow:inset 0 0 0 2px var(--line-strong)}
 html[data-contrast=high] :focus-visible{outline-width:3px}
+@media (forced-colors:active){.tile,.tessera,.chip,.st-btn,.drawer,.dgroup,.palette,.pal-field,#palList{border:1px solid CanvasText}}
 *,*::before,*::after{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;overflow:hidden}
 body{background:var(--bg);color:var(--text)}
@@ -45,51 +46,65 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .ti-text{font-weight:600;font-size:15px;line-height:1;min-width:18px;text-align:center;font-family:'Segoe UI',system-ui,sans-serif;white-space:nowrap}
 .ti-text i{font-family:Georgia,serif}
 #app{display:flex;flex-direction:column;height:100dvh;min-width:0}
-/* Barra del titolo */
-.titlebar{height:46px;flex-shrink:0;background:var(--accent);color:#fff;display:flex;align-items:center;gap:6px;padding:0 10px}
-.titlebar :focus-visible{outline-color:#fff}
-.app-switch{display:flex;background:rgba(0,0,0,.2);border-radius:9px;padding:3px;gap:2px}
-.app-switch button{display:flex;align-items:center;gap:7px;height:28px;padding:0 10px 0 6px;border:0;border-radius:7px;background:transparent;color:#fff;font-weight:600}
-.app-switch button:hover{background:rgba(255,255,255,.14)}
-.app-switch button[aria-pressed=true]{background:#fff;color:var(--accent-strong)}
-.app-logo{width:19px;height:19px;border-radius:5px;display:grid;place-items:center;font-size:11px;font-weight:800;background:rgba(255,255,255,.22);color:#fff}
+/* Tasselli e angolo: l'angolo piegato del logo segna l'azione principale e il tassello in cui si lavora. */
+.tile{background:var(--surface);border-radius:var(--r);position:relative}
+.primary-tile::after,.tile.is-active::after,.pal-field::after{content:'';position:absolute;top:0;right:0;width:14px;height:14px;border-bottom-left-radius:4px;background:linear-gradient(to bottom left,var(--corner-bg,var(--grout)) 50%,var(--fold) 50%);pointer-events:none;z-index:8}
+/* Barra: una riga di tasselli al posto di titolo, schede e barra multifunzione. */
+.bar{display:flex;align-items:stretch;gap:var(--gap);padding:var(--gap) var(--gap) 0;flex-shrink:0;position:relative;z-index:30;min-width:0}
+.bar>.tile{height:48px;flex:0 0 auto}
+.brand-tile{display:flex;align-items:center;gap:4px;padding:0 6px}
+.brand{width:38px;height:38px;border:0;border-radius:8px;background:transparent;display:grid;place-items:center;padding:0}
+.brand:hover{background:var(--hover)}
+.brand-mark{width:24px;height:24px;flex:none}
+.app-switch{display:flex;gap:2px;padding:3px;border-radius:9px;background:var(--surface-2)}
+.app-switch button{display:flex;align-items:center;gap:7px;height:32px;padding:0 10px 0 6px;border:0;border-radius:7px;background:transparent;color:var(--text-2);font-weight:600}
+.app-switch button:hover{background:var(--hover);color:var(--text)}
+.app-switch button[aria-pressed=true]{background:var(--surface);color:var(--accent-text);box-shadow:0 1px 3px rgba(20,24,34,.16)}
+.app-logo{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;background:var(--pressed);color:var(--text-2)}
+.app-logo svg{display:block}
 .app-switch button[aria-pressed=true] .app-logo{background:var(--accent);color:#fff}
-.tb-group{display:flex;gap:2px;margin-left:4px}
-.tb-btn{border:0;background:transparent;color:#fff;width:34px;height:34px;border-radius:7px;display:grid;place-items:center}
-.tb-btn:hover{background:rgba(255,255,255,.16)}.tb-btn:active{background:rgba(255,255,255,.26)}
-.title-center{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-width:120px}
-.title-center input{width:min(300px,100%);min-width:0;text-align:center;background:rgba(255,255,255,.14);border:1px solid transparent;border-radius:7px;color:#fff;height:30px;padding:0 10px;font-weight:600}
-.title-center input:hover{border-color:rgba(255,255,255,.55)}
-.title-center input:focus{background:#fff;color:#1b1b1b;outline:2px solid #fff;outline-offset:1px}
-.save-state{font-size:12px;opacity:.92;white-space:nowrap}
-.cmd-search{display:flex;align-items:center;gap:8px;height:32px;min-width:210px;border-radius:7px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;padding:0 6px 0 10px;text-align:left}
-.cmd-search:hover{background:rgba(255,255,255,.22)}
-.cmd-search span{flex:1}
-.cmd-search kbd{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)}
-.top-action{height:32px;border-radius:7px;padding:0 12px;border:1px solid rgba(255,255,255,.6);background:transparent;color:#fff;display:flex;align-items:center;gap:7px;font-weight:600;white-space:nowrap}
-.top-action:hover{background:rgba(255,255,255,.14)}
-.top-action.primary{border-color:#fff;background:#fff;color:var(--accent-strong)}
-.top-action.primary:hover{background:#eef3fb}
-/* Schede */
-.tabrow{display:flex;align-items:flex-end;gap:6px;background:var(--chrome);padding:5px 10px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
-.filebtn{height:30px;margin-bottom:4px;padding:0 15px;border:0;border-radius:7px;background:var(--accent);color:#fff;font-weight:600;flex-shrink:0}
-.filebtn:hover{background:var(--accent-strong)}
-.filebtn:focus-visible{outline-offset:2px}
-.tabs{display:flex;gap:2px}
-.tab{border:0;background:transparent;color:var(--text-2);height:36px;padding:0 13px;border-radius:7px 7px 0 0;position:relative;white-space:nowrap;font-weight:500}
-.tab:hover{background:var(--hover);color:var(--text)}
-.tab[aria-selected=true]{color:var(--accent-text);font-weight:600}
-.tab[aria-selected=true]::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
-.tab:focus-visible{outline-offset:-2px}
-/* Barra multifunzione */
-.ribbon{flex-shrink:0;background:var(--chrome);overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;border-bottom:1px solid var(--line)}
-.ribbon-inner{display:flex;align-items:stretch;min-height:102px;padding:6px 6px 4px;margin:0 8px 8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);width:max-content;min-width:calc(100% - 16px)}
-.rbgroup{display:flex;flex-direction:column;padding:0 9px;position:relative;flex-shrink:0}
-.rbgroup+.rbgroup::before{content:'';position:absolute;left:0;top:6px;bottom:24px;width:1px;background:var(--line)}
-.rbitems{display:flex;align-items:flex-start;gap:3px;flex:1}
-.rbstack{display:flex;flex-direction:column;gap:5px;padding-top:2px}
-.rbrow{display:flex;align-items:center;gap:2px}
-.rb-label{font-size:11px;color:var(--text-3);text-align:center;padding-top:4px;white-space:nowrap}
+.doc-tile{display:flex;flex-direction:column;justify-content:center;gap:1px;padding:0 12px 0 14px;min-width:120px}
+.bar>.doc-tile{flex:0 1 220px}
+.doc-tile input{width:100%;min-width:0;height:24px;margin-left:-6px;padding:0 5px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);font-weight:700;font-size:14px}
+.doc-tile input:hover{border-color:var(--line-strong)}
+.doc-tile input:focus{background:var(--surface-2)}
+.save-state{font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{min-width:0;display:flex;align-items:center;gap:2px;padding:0 6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.bar>.tools{flex:1 1 0}
+.bar.tight>.doc-tile{flex-basis:150px}.bar.tight .tb.drw{padding:0 7px}.bar.tight .tb.drw .chev{display:none}
+.bar.wrap{flex-wrap:wrap}.bar.wrap>.tools{order:9;flex:1 1 100%;scrollbar-width:thin}.bar.wrap>.doc-tile{flex:1 1 160px}
+.tools>div{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.tb{flex-shrink:0;height:36px;min-width:36px;border:0;border-radius:8px;background:transparent;color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;white-space:nowrap}
+.tb.icon{width:36px;padding:0}
+.tb:hover{background:var(--hover)}.tb:active{background:var(--pressed)}
+.tb[aria-pressed=true],.tb[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text)}
+.tb.drw{font-weight:600}
+.tb .chev{width:12px;height:12px;stroke-width:2.2}
+.tb:focus-visible{outline-offset:-2px}
+.tsep{width:1px;height:22px;background:var(--line);margin:0 5px;flex-shrink:0}
+.tools.fit1 .h1,.tools.fit2 .h2{display:none}
+.search-tile{display:flex;align-items:center;gap:9px;padding:0 12px 0 14px;border:0;color:var(--text)}
+.search-tile:hover{background:var(--surface-2)}
+.search-tile kbd,.pal-field kbd{border:0;background:var(--surface-2);color:var(--text-2);font:500 11.5px/1 var(--mono);padding:4px 6px;border-radius:5px}
+.primary-tile{--fold:rgba(255,255,255,.55);display:flex;align-items:center;gap:8px;padding:0 22px 0 16px;border:0;background:var(--accent);color:#fff;font-weight:700;font-size:14px;white-space:nowrap}
+.primary-tile:hover{background:var(--accent-strong)}
+.bar :focus-visible{outline-color:var(--focus)}
+/* Cassetti: le categorie si aprono sopra il lavoro e si richiudono dopo il comando. */
+.drawer{position:fixed;z-index:60;padding:var(--gap);background:var(--grout-deep);border-radius:12px;box-shadow:var(--lift);max-width:calc(100vw - 16px);max-height:calc(100dvh - 76px);overflow:auto}
+.drawer-grid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(196px,max-content));gap:var(--gap)}
+.dgroup{background:var(--surface);border-radius:9px;padding:10px 6px 6px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.dgroup h3{margin:0;padding:0 8px 5px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.ditem{display:flex;align-items:center;gap:10px;width:100%;min-height:34px;border:0;border-radius:7px;background:transparent;color:var(--text);padding:0 8px;text-align:left}
+.ditem:hover{background:var(--hover)}
+.ditem:focus-visible{background:var(--accent-soft);color:var(--accent-text);outline-offset:-2px}
+.ditem .ico{color:var(--text-2)}.ditem:focus-visible .ico{color:inherit}
+.ditem .lbl{flex:1;min-width:0}
+.ditem kbd{border:0;background:var(--surface-2);color:var(--text-2);font:500 11px/1 var(--mono);padding:4px 5px;border-radius:5px}
+.ditem .dstate{width:16px;text-align:center;font-weight:700;color:var(--accent-text)}
+.ditem[aria-pressed=true] .dstate::before{content:'✓'}
+.ditem[aria-pressed=true]{font-weight:600}
+.dsel{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:36px;padding:0 4px 0 8px;color:var(--text-2)}
+.dcolor{display:flex;align-items:center;gap:6px;min-height:36px;padding:0 4px;color:var(--text-2)}
 .tool{display:inline-flex;justify-content:center;align-items:center;gap:5px;position:relative;height:30px;min-width:30px;padding:0 6px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);white-space:nowrap}
 .tool:hover{background:var(--hover)}.tool:active{background:var(--pressed)}
 .tool[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
@@ -123,7 +138,7 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .style-card .sample.h3{font-size:14px;color:var(--accent-text);font-weight:600}
 .style-card .sample.q{font-style:italic;color:var(--text-2)}
 /* Trova e sostituisci */
-.findbar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--line);flex-shrink:0}
+.findbar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:8px 14px;background:var(--surface);border-radius:var(--r);margin:var(--gap) var(--gap) 0;flex-shrink:0}
 .findbar label{font-weight:600;font-size:12px}
 .findbar input[type=search],.findbar input[type=text]{height:30px;width:200px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);padding:0 8px}
 .find-count{min-width:84px;color:var(--text-2);font-size:12px}
@@ -135,10 +150,28 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .check{display:inline-flex;align-items:center;gap:6px;font-weight:400!important}
 .check input{width:16px;height:16px;accent-color:var(--accent)}
 /* Area di lavoro */
-.main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;padding:var(--gap) var(--gap) 0}
+/* Riquadri laterali: si riducono a tessera, si spostano a destra o a sinistra, si allargano trascinando la fuga. */
+.pane{width:var(--w,270px);flex-shrink:0;display:flex;flex-direction:column;min-height:0;min-width:0}
+.pane-head{display:flex;align-items:center;gap:4px;padding:8px 6px 4px 14px;min-height:40px}.pane-head h2{font-size:14px;margin:0;flex:1}
+.pane-btn{width:30px;height:30px;border:0;border-radius:7px;background:transparent;color:var(--text-2);display:grid;place-items:center;flex-shrink:0;padding:0}
+.pane-btn:hover{background:var(--hover);color:var(--text)}.pane-btn[aria-expanded=true]{background:var(--pressed)}
+.pane-btn .ico{width:16px;height:16px}
+.tessera{width:44px;flex-shrink:0;border:0;border-radius:var(--r);background:var(--surface);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px 0}
+.tessera:hover{background:var(--surface-2)}
+.tessera[data-side=left]{margin-right:var(--gap)}.tessera[data-side=right]{margin-left:var(--gap)}
+.tessera .badge{min-width:20px;height:20px;padding:0 5px;border-radius:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.tessera .badge:empty{display:none}
+.tessera .vt{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:600;white-space:nowrap}
+.sep{flex:0 0 var(--gap);align-self:stretch;display:grid;place-items:center;cursor:col-resize;touch-action:none;border-radius:4px}
+.sep::before{content:'';width:4px;height:40px;max-height:60%;border-radius:2px;background:var(--accent);opacity:0;transition:opacity .12s}
+.sep:hover::before,.sep:focus-visible::before,.sep.dragging::before{opacity:1}
+.sep:focus-visible{outline-offset:0}
+.sep.h{cursor:row-resize}.sep.h::before{width:40px;height:4px;max-width:60%}
+@media (forced-colors:active){.sep::before{background:Highlight}}
 .main:focus-visible{outline-offset:-3px}
 .editor-pane{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
-.word-scroll{background:var(--canvas);overflow:auto;flex:1;padding:28px 18px 90px}
+.word-scroll{order:100;background:transparent;overflow:auto;flex:1;padding:28px 18px 90px}
 .page{width:794px;min-height:1123px;margin:0 auto;background:#fff;color:#171717;box-shadow:0 1px 3px rgba(0,0,0,.14),0 8px 24px rgba(0,0,0,.10);zoom:var(--zoom);position:relative;border-radius:2px}
 .page[data-paper=letter]{width:816px;min-height:1056px}
 .page[data-paper=a4-landscape]{width:1123px;min-height:794px}
@@ -205,11 +238,12 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 ::highlight(find-all){background-color:#ffe58a;color:#000}
 ::highlight(find-cur){background-color:#ff9c27;color:#000}
 /* Excel */
-.formula-line{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--chrome);border-bottom:1px solid var(--line);flex-shrink:0}
+#excelPane{gap:var(--gap)}
+.formula-line{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--surface);border-radius:var(--r);flex-shrink:0}
 .namebox{width:100px;height:28px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);padding:0 8px;font-weight:600}
 .fx{color:var(--text-3);font-style:italic;font-family:Georgia,serif;font-size:15px;padding:0 8px;border-left:1px solid var(--line);border-right:1px solid var(--line)}
 #formulaInput{flex:1;min-width:0;height:28px;border:1px solid var(--line-strong);border-radius:6px;padding:0 9px;background:var(--surface);color:var(--text)}
-.grid-area{display:flex;flex-direction:column;flex:1;min-height:0;position:relative}
+.grid-area{display:flex;flex-direction:column;flex:1;min-height:0;position:relative;background:var(--surface);border-radius:var(--r);overflow:hidden}
 .grid-scroll{position:relative;flex:1;overflow:auto;scrollbar-gutter:stable;background:#fff}
 .grid-scroll:focus-visible{outline-offset:-2px;outline:2px solid var(--accent)}
 .sheetgrid{zoom:var(--zoom);width:max-content;table-layout:fixed;border-collapse:separate;border-spacing:0;color:#1b1b1b;font-size:12px;font-family:Calibri,'Segoe UI',Arial,sans-serif}
@@ -234,7 +268,7 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 #formulaInput.ghost{color:var(--text-3);font-style:italic}
 .spacerrow td{height:0;max-height:none;padding:0;background:transparent;border:0!important;pointer-events:none}
 .grid-input{display:none;position:fixed;z-index:100;min-width:130px;min-height:24px;padding:2px 6px;border:2px solid var(--accent);outline:none;box-shadow:0 4px 14px rgba(0,0,0,.2);background:#fff;color:#111;font:12px Calibri,'Segoe UI',Arial;white-space:pre;overflow:visible}
-.sheet-bar{height:38px;display:flex;align-items:stretch;background:var(--chrome);border-top:1px solid var(--line);flex-shrink:0;padding:0 8px;gap:6px}
+.sheet-bar{height:38px;display:flex;align-items:stretch;background:var(--surface);border-radius:var(--r);flex-shrink:0;padding:0 8px;gap:6px}
 .sheet-tabs{display:flex;align-items:stretch;gap:2px;overflow-x:auto;scrollbar-width:thin}
 .sheet-tab{border:0;background:transparent;color:var(--text-2);padding:0 16px;white-space:nowrap;font-size:12px;position:relative}
 .sheet-tab:hover{background:var(--hover)}
@@ -259,13 +293,21 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .chart-preview{border:1px solid var(--line);border-radius:8px;background:#fff;min-height:150px;margin:4px 0 6px;overflow:hidden}.chart-preview svg{display:block;width:100%;height:auto}
 html[data-contrast=high] .chart{border:2px solid #000}
 /* Barra di stato */
-.status{flex-shrink:0;min-height:30px;background:var(--chrome);border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;color:var(--text-2);font-size:12px;padding:0 10px}
+.status{flex-shrink:0;display:flex;align-items:center;gap:var(--gap);color:var(--text-2);font-size:12.5px;padding:var(--gap);min-width:0}
 .status .grow{flex:1}
-.st-btn{border:0;background:transparent;color:var(--text-2);height:26px;padding:0 8px;border-radius:5px;display:inline-flex;align-items:center;gap:6px}
-.st-btn:hover{background:var(--hover)}
-.st-btn.icon{width:26px;padding:0;justify-content:center}
-.st-btn .ico{width:15px;height:15px}
-.zoom{display:flex;align-items:center;gap:2px}
+.chip{height:34px;border-radius:9px;background:var(--surface);display:inline-flex;align-items:center;gap:6px;padding:0 12px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.chip:empty{display:none}
+#statusText{display:block;line-height:34px;flex:0 1 auto}
+.st-btn{border:0;background:var(--surface);color:var(--text-2);height:34px;padding:0 12px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;flex-shrink:0;white-space:nowrap}
+.st-btn:hover{background:var(--surface-2);color:var(--text)}
+.st-btn[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text)}
+.st-btn.lead{font-weight:600;color:var(--text)}
+.st-btn.icon{width:28px;height:28px;padding:0;justify-content:center;background:transparent;border-radius:7px}
+.st-btn.icon:hover{background:var(--hover)}
+.st-btn .ico{width:16px;height:16px}
+.zoom{display:flex;align-items:center;gap:2px;padding:0 4px;flex-shrink:0}
+#wordStats,#excelStats,#pgStats{height:34px;line-height:34px;padding:0 12px;border-radius:9px;background:var(--surface);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#wordStats:empty,#excelStats:empty,#pgStats:empty,#app.excel #layoutBtn{display:none!important}
 .zoom input[type=range]{width:100px;accent-color:var(--accent)}
 .zoom output{min-width:40px;text-align:right}
 .status-excel{display:none}#app.excel .status-excel{display:block}#app.excel .status-word{display:none}
@@ -310,16 +352,26 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .file-tile b{font-size:15px}.file-tile span{color:var(--text-2);font-size:12.5px;line-height:1.4}
 .file-details{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:28px 0 0;max-width:600px}
 .file-details dt{color:var(--text-3)}.file-details dd{margin:0;font-weight:600}
-.palette{background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);width:min(620px,100%);align-self:flex-start;margin-top:9vh;overflow:hidden;display:flex;flex-direction:column;max-height:72vh}
-.palette input{border:0;border-bottom:1px solid var(--line);padding:16px 18px;font-size:16px;background:var(--surface);color:var(--text)}
-.palette input:focus-visible{outline:none;box-shadow:inset 0 -2px 0 var(--accent)}
-#palList{overflow:auto;padding:6px}
-.pal-opt{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer}
+/* Ricerca in alto al centro: il campo e i risultati sono due tasselli sulla fuga. */
+#palettebg{align-items:flex-start;padding:var(--gap) 12px;background:var(--scrim)}
+.palette{background:var(--grout-deep);color:var(--text);border-radius:13px;box-shadow:var(--lift);width:min(680px,100%);padding:var(--gap);display:flex;flex-direction:column;gap:var(--gap);max-height:min(600px,calc(100dvh - 16px));overflow:hidden}
+.pal-field{--corner-bg:var(--grout-deep);position:relative;display:flex;align-items:center;gap:10px;height:48px;flex-shrink:0;border-radius:10px;background:var(--surface);padding:0 12px 0 14px;box-shadow:inset 0 0 0 2px var(--accent)}
+.pal-field>.ico{color:var(--accent-text)}
+.palette input{flex:1;min-width:0;height:44px;border:0;padding:0;font-size:15.5px;background:transparent;color:var(--text)}
+.palette input:focus-visible{outline:none}
+#palList{overflow:auto;padding:6px;background:var(--surface);border-radius:10px;flex:1;min-height:0}
+.pal-group-h{display:flex;justify-content:space-between;gap:8px;padding:8px 10px 4px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.pal-group-h span+span{font:500 11px/1.4 var(--mono);letter-spacing:0}
+.pal-opt{display:flex;align-items:center;gap:12px;min-height:38px;padding:0 10px;border-radius:8px;cursor:pointer}
 .pal-opt .ico,.pal-opt .ti-text{color:var(--text-2)}
-.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 3px 0 0 var(--accent)}
-.pal-label{flex:1}.pal-cat{font-size:11.5px;color:var(--text-3)}
+.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text)}
+.pal-opt[aria-selected=true] .ico,.pal-opt[aria-selected=true] .pal-cat{color:inherit}
+.pal-opt kbd{border:0;background:var(--surface-2);font:500 11px/1 var(--mono);padding:4px 6px;border-radius:5px}
+.pal-opt[aria-selected=true] kbd{background:var(--surface)}
+.pal-hit{font-weight:700;color:var(--accent-text);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.pal-label{flex:1;min-width:0}.pal-cat{font-size:12px;color:var(--text-3);white-space:nowrap}
 .pal-empty{padding:16px;color:var(--text-3)}
-.pal-hint{margin:0;padding:8px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--text-3)}
+.pal-hint{margin:0;padding:0 6px;font-size:12px;color:var(--text-2)}
 .ctxmenu{position:fixed;z-index:420;min-width:230px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:5px}
 .ctxmenu [role^=menuitem]{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:7px 10px;border-radius:6px;text-align:left}
 .ctxmenu [role^=menuitem]:hover,.ctxmenu [role^=menuitem]:focus{background:var(--accent-soft);color:var(--accent-text);outline:none}
@@ -373,9 +425,9 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .pmark.forced{border-top-color:transparent}
 .pmark span{position:absolute;right:6px;top:-9px;font:600 10px/16px 'Segoe UI',sans-serif;background:#eef3fb;color:#2b3d5c;padding:0 7px;border-radius:8px;border:1px solid #c9d6ea}
 #wordPane{flex-direction:row}
-.nav-pane{width:250px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.nav-pane{display:flex;flex-direction:column;min-height:0}
 .nav-pane[hidden]{display:none}
-.nav-head{display:flex;align-items:center;gap:8px;padding:10px 10px 4px 14px}.nav-head h2{font-size:14px;margin:0;flex:1}
+.nav-head{display:flex;align-items:center;gap:4px;padding:8px 6px 4px 14px;min-height:40px}.nav-head h2{font-size:14px;margin:0;flex:1}
 .nav-count{font-size:12px;color:var(--text-3)}
 .nav-hint{font-size:12px;color:var(--text-3);margin:0 14px 8px}
 .nav-list{list-style:none;margin:0;padding:0 6px 12px;overflow:auto;flex:1}
@@ -393,7 +445,7 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .word-content span.cmt.cmt-done{background:transparent;border-bottom:1px dashed #a6a6a6}
 .word-content span.mfield{background:#e8eefc;color:#1f3864;border-radius:3px;padding:0 2px;white-space:nowrap}
 .word-content.mm-preview span.mfield{background:#e2f0d9;color:inherit}
-.cmt-pane{width:300px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.cmt-pane{display:flex;flex-direction:column;min-height:0}
 .cmt-pane[hidden]{display:none}
 .cmt-tools{padding:0 14px 8px}
 .cmt-list{list-style:none;margin:0;padding:0 10px 14px;overflow:auto;flex:1}
@@ -416,12 +468,12 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .dict-text{font-size:13px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px}
 @keyframes dictPulse{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.dict-dot{animation:none}}
-.read-bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 14px;background:var(--chrome);border-bottom:1px solid var(--line);font-size:13px}
+.read-bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 14px;background:var(--surface);border-radius:var(--r);margin:var(--gap) var(--gap) 0;font-size:13px}
 .read-bar[hidden]{display:none}
 .read-bar label{display:inline-flex;gap:6px;align-items:center}
 .read-bar .rb-title{margin-right:6px}
 .rd-size{display:inline-flex;align-items:center;gap:6px}.rd-size output{min-width:40px;text-align:center}
-#app.reading .titlebar,#app.reading .tabrow,#app.reading .ribbon,#app.reading .status,#app.reading .nav-pane{display:none!important}
+#app.reading .bar,#app.reading .drawer,#app.reading .status,#app.reading .nav-pane,#app.reading #navPaneTes,#app.reading #navPaneSep{display:none!important}
 #app.reading .page{width:min(100%,var(--rd-w,760px))!important;min-height:0!important;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 #app.reading .page[data-read-w=narrow]{--rd-w:600px}#app.reading .page[data-read-w=wide]{--rd-w:980px}
 #app.reading .word-content{padding:48px 56px!important;column-count:auto!important;zoom:var(--rd-zoom,1.27);caret-color:transparent}
@@ -480,22 +532,24 @@ html[data-theme=dark] .tip{background:#f3f3f3;color:#111}
 .msg.show{opacity:1}
 html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
-@media (forced-colors:active){.tool[aria-pressed=true],.style-card[aria-pressed=true],.sheet-tab[aria-selected=true],.tab[aria-selected=true],.pal-opt[aria-selected=true]{outline:2px solid Highlight}.sheetgrid td.sel{forced-color-adjust:none;background:Highlight;color:HighlightText}.sheetgrid td.active{outline:3px solid Highlight}.swatch{forced-color-adjust:none}}
+@media (forced-colors:active){.tool[aria-pressed=true],.tb[aria-pressed=true],.tb[aria-expanded=true],.ditem[aria-pressed=true],.style-card[aria-pressed=true],.sheet-tab[aria-selected=true],.pal-opt[aria-selected=true]{outline:2px solid Highlight}.sheetgrid td.sel{forced-color-adjust:none;background:Highlight;color:HighlightText}.sheetgrid td.active{outline:3px solid Highlight}.swatch{forced-color-adjust:none}}
 /* Nelle finestre strette i testi dei pulsanti spariscono alla vista ma restano agli screen reader: sono il loro nome. */
-@media (max-width:1100px){.top-action span,.cmd-search span,.save-state{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.cmd-search{min-width:0}}
-@media (max-width:720px){.titlebar{gap:3px;padding:0 4px}.app-switch button{padding:0 6px}.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.tb-group{display:none}.cmd-search kbd{display:none}.word-scroll{padding:10px}.file-side{width:180px}.file-info{padding:22px}.status #helpBtn span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
-@media print{.print-sheet{padding:4mm!important;display:block!important}.print-sheet table{table-layout:auto;border-collapse:collapse;font:10px Calibri,Arial}.print-sheet th,.print-sheet td{padding:3px 5px;min-width:20px;border:1px solid #bbb}.excel .grid-area{display:none!important}.print-sheet th{background:#f2f2f2}.titlebar,.tabrow,.ribbon,.findbar,.formula-line,.sheet-bar,.status,.filepanel,.skip,.tip,.msg{display:none!important}html,body,#app,.main,.word-scroll,.editor-pane{display:block!important;height:auto!important;padding:0!important;overflow:visible!important;background:#fff!important}.page{margin:0;width:100%!important;min-height:0!important;box-shadow:none!important;zoom:1!important}.word-content{min-height:0!important;padding:0!important}.word-content hr.pagebreak{border:0;margin:0}.word-content hr.pagebreak::after{display:none}.word-content .toc{border:0;padding:0}.nav-pane,.cmt-pane,.read-bar,.dict-bar,.line-focus,.page .hf,.page-marks{display:none!important}.word-content span.cmt,.word-content span.mfield{background:none!important;border:0!important}.word-content table.tb-none td,.word-content table.tb-none th{border-color:transparent!important}.word-content .toc a{border:0}.print-chart{break-inside:avoid;margin:14px 0}.print-chart svg{max-width:100%;height:auto}.print-chart figcaption{font:10px Calibri,Arial;color:#333;margin-top:4px}.chart-viewport{display:none!important}}
+@media (max-width:1500px){.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.app-switch button{padding:0 6px}}
+@media (max-width:1200px){.status .st-btn:not(.lead) span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
+@media (max-width:720px){.bar{gap:6px;padding:6px 6px 0}.brand{display:none}.save-state,.search-tile kbd{display:none}.bar>.doc-tile{flex-basis:140px;min-width:90px}.primary-tile span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.primary-tile{padding:0 16px}.word-scroll{padding:10px}.file-side{width:180px}.file-info{padding:22px}.drawer-grid{grid-template-columns:1fr!important}.status{overflow-x:auto;scrollbar-width:none}#wordStats,#excelStats,#pgStats{display:none!important}}
+/* Nelle finestre strette i tasselli si mettono in colonna e le tessere diventano orizzontali. */
+@media (max-width:860px){#wordPane{flex-direction:column;gap:var(--gap)}.word-scroll{order:0!important;flex:1 1 320px}.pane{width:auto;max-height:260px;order:1!important}.sep{display:none}.tessera{width:auto;height:44px;flex-direction:row;padding:0 14px;margin:0!important;order:1!important}.tessera .vt{writing-mode:horizontal-tb;transform:none}}
+@media print{.print-sheet{padding:4mm!important;display:block!important}.print-sheet table{table-layout:auto;border-collapse:collapse;font:10px Calibri,Arial}.print-sheet th,.print-sheet td{padding:3px 5px;min-width:20px;border:1px solid #bbb}.excel .grid-area{display:none!important}.print-sheet th{background:#f2f2f2}.bar,.drawer,.tessera,.sep,.findbar,.formula-line,.sheet-bar,.status,.filepanel,.skip,.tip,.msg{display:none!important}html,body,#app,.main,.word-scroll,.editor-pane{display:block!important;height:auto!important;padding:0!important;overflow:visible!important;background:#fff!important}.page{margin:0;width:100%!important;min-height:0!important;box-shadow:none!important;zoom:1!important}.word-content{min-height:0!important;padding:0!important}.word-content hr.pagebreak{border:0;margin:0}.word-content hr.pagebreak::after{display:none}.word-content .toc{border:0;padding:0}.nav-pane,.cmt-pane,.read-bar,.dict-bar,.line-focus,.page .hf,.page-marks{display:none!important}.word-content span.cmt,.word-content span.mfield{background:none!important;border:0!important}.word-content table.tb-none td,.word-content table.tb-none th{border-color:transparent!important}.word-content .toc a{border:0}.print-chart{break-inside:avoid;margin:14px 0}.print-chart svg{max-width:100%;height:auto}.print-chart figcaption{font:10px Calibri,Arial;color:#333;margin-top:4px}.chart-viewport{display:none!important}}
 /* Impagina: pagine e cornici a sinistra, la pagina al centro, le proprietà a destra */
-html[data-mode=impagina]{--accent:#b35500;--accent-strong:#8a4100;--accent-text:#8a4100;--accent-soft:#fbeee2;--sel-tint:rgba(179,85,0,.14)}
-html[data-theme=dark][data-mode=impagina]{--accent-text:#f5b37a;--accent-soft:#3d2614}
-html[data-contrast=high][data-mode=impagina]{--accent-text:#5c2b00}
-html[data-contrast=high][data-theme=dark][data-mode=impagina]{--accent-text:#ffc999}
+html[data-mode=impagina]{--accent:#b35500;--accent-strong:#8a4100;--accent-text:#8a4100;--accent-soft:#fbeee2;--sel-tint:rgba(179,85,0,.14);--grout:#ede2d8;--grout-deep:#e0d1c3}
+html[data-theme=dark][data-mode=impagina]{--accent-text:#f5b37a;--accent-soft:#3d2614;--grout:#17110c;--grout-deep:#0d0906}
+html[data-contrast=high][data-mode=impagina]{--accent-text:#5c2b00;--grout:#fff;--grout-deep:#fff}
+html[data-contrast=high][data-theme=dark][data-mode=impagina]{--accent-text:#ffc999;--grout:#000;--grout-deep:#000}
 html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([data-mode=impagina]) .p-only{display:none!important}
 .status-page{display:none}#app.impagina .status-page{display:block}#app.impagina .status-word,#app.impagina .zoom{display:none}
 #pagePane{min-width:0}
-.pg-work{display:grid;grid-template-columns:232px minmax(0,1fr) 320px;flex:1;min-height:0;min-width:0}
+.pg-work{display:flex;flex:1;min-height:0;min-width:0}
 .pg-side,.pg-props{background:var(--surface);display:flex;flex-direction:column;min-height:0;min-width:0}
-.pg-side{border-right:1px solid var(--line)}.pg-props{border-left:1px solid var(--line)}
 .pane-head{display:flex;align-items:center;gap:8px;padding:10px 10px 4px 14px}.pane-head h2{font-size:14px;margin:0;flex:1}
 .pane-count{font-size:12px;color:var(--text-3)}
 .lb{margin:0;padding:4px 6px 10px;overflow:auto;min-height:0}
@@ -513,7 +567,7 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 .lb-empty{padding:8px 10px;color:var(--text-3);font-size:12.5px}
 .pg-list-sep{font-size:11.5px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;padding:10px 8px 4px;border-top:1px solid var(--line);margin-top:6px}
 .pg-thumb{width:46px;height:auto;max-height:64px;flex:none;background:#fff;border:1px solid var(--line-strong);border-radius:2px}
-.pg-view{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--canvas)}
+.pg-view{order:100;flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--canvas);overflow:hidden}
 .pg-scroll{flex:1;min-height:160px;display:flex;overflow:auto;padding:20px}
 .pg-sheet{position:relative;margin:auto;flex:none;line-height:0;box-shadow:0 2px 12px rgba(0,0,0,.25);touch-action:none;background:#fff}
 .pg-sheet:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
@@ -552,7 +606,7 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 .pg-shape{display:block;align-self:flex-start;height:54px;width:auto;max-width:96px;border:2px solid var(--accent);border-radius:3px;background:var(--accent-soft);margin-bottom:6px}
 .pg-print{display:none}
 @media (forced-colors:active){#pgOver .sel-box{stroke:Highlight}#pgOver .handle{fill:Canvas;stroke:Highlight}.lb-item[aria-selected=true]{outline:2px solid Highlight}}
-@media (max-width:900px){.pg-work{grid-template-columns:1fr;grid-template-rows:minmax(300px,1fr) auto auto;overflow:auto}.pg-side{grid-row:2;border-right:0;border-top:1px solid var(--line);max-height:260px}.pg-props{grid-row:3;border-left:0;border-top:1px solid var(--line)}}
+@media (max-width:900px){.pg-work{flex-direction:column;gap:var(--gap);overflow:auto}.pg-view{min-height:300px;flex:none;order:0!important}}
 @media print{html[data-mode=impagina] #app,html[data-mode=impagina] .msg,html[data-mode=impagina] .tip{display:none!important}html[data-mode=impagina] .pg-print{display:block!important}.pg-print svg{display:block;break-after:page}.pg-print svg:last-child{break-after:auto}}
 </style></head>
 <body>
@@ -698,31 +752,31 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 <symbol id="i-distV" viewBox="0 0 24 24"><path d="M3 3h18M3 21h18"/><rect x="7" y="8" width="10" height="8" rx="1"/></symbol>
 <symbol id="i-mask" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9.5A4 4 0 0 1 12 8a4 4 0 0 1 7 2.5C19 15.6 12 20 12 20z"/></symbol>
 <symbol id="i-festone" viewBox="0 0 24 24"><path d="M2 5c6 3 14 3 20 0"/><path d="M5 6.3 7 12l2-5.1M11 7.4 12 13l1-5.6M15 6.9l2 5.1 2-5.7"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></symbol>
+<symbol id="i-mosaic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
 </defs></svg>
-<a class="skip" href="#docRegion" id="skipDoc">Vai al documento</a><a class="skip" href="#tabs" id="skipRibbon">Vai alla barra multifunzione</a>
+<a class="skip" href="#docRegion" id="skipDoc">Vai al documento</a><a class="skip" href="#tools" id="skipTools">Vai agli strumenti</a>
 <div class="word" id="app">
-<header class="titlebar" id="titlebar" aria-label="Barra del titolo">
-<button type="button" class="brand" id="brandBtn" aria-label="Tassello Ufficio: informazioni" data-tip="Informazioni su Tassello Ufficio"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#fff"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#fff"></path><path d="M86 0V8Q86 14 92 14H100Z" fill="var(--accent)" fill-opacity=".55"></path><rect y="54" width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect></svg><span class="brand-name">Tassello Ufficio</span></button>
+<header class="bar" id="bar" aria-label="Barra">
+<div class="tile brand-tile">
+<button type="button" class="brand" id="brandBtn" aria-label="Tassello Ufficio: informazioni" data-tip="Informazioni su Tassello Ufficio"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"></path><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"></path><rect y="54" width="46" height="46" rx="10" fill="#B35500"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"></rect></svg></button>
 <div class="app-switch" role="group" aria-label="Applicazione">
 <button type="button" id="switchWord" aria-pressed="true" aria-keyshortcuts="Control+Alt+W" data-tip="Testo (Ctrl+Alt+W)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h9"></path></svg></span><span class="app-name">Testo</span></button>
 <button type="button" id="switchExcel" aria-pressed="false" aria-keyshortcuts="Control+Alt+X" data-tip="Calcolo (Ctrl+Alt+X)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M5 5h14v14H5zM5 12h14M12 5v14"></path></svg></span><span class="app-name">Calcolo</span></button>
 <button type="button" id="switchPage" aria-pressed="false" aria-keyshortcuts="Control+Alt+I" data-tip="Impagina (Ctrl+Alt+I)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 11h8M12 4v16"></path></svg></span><span class="app-name">Impagina</span></button>
 </div>
-<div class="tb-group" role="group" aria-label="Accesso rapido">
-<button type="button" class="tb-btn" id="quickUndo" aria-label="Annulla" aria-keyshortcuts="Control+Z" data-tip="Annulla (Ctrl+Z)"><svg class="ico" aria-hidden="true"><use href="#i-undo"/></svg></button>
-<button type="button" class="tb-btn" id="quickRedo" aria-label="Ripeti" aria-keyshortcuts="Control+Y" data-tip="Ripeti (Ctrl+Y)"><svg class="ico" aria-hidden="true"><use href="#i-redo"/></svg></button>
 </div>
-<div class="title-center"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Documento1" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
-<button type="button" class="cmd-search" id="paletteBtn" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Cerca comandi</span><kbd aria-hidden="true">Alt+Q</kbd></button>
-<button type="button" class="top-action" id="openTop" aria-keyshortcuts="Control+O" data-tip="Apri (Ctrl+O)"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><span>Apri</span></button>
-<button type="button" class="top-action primary" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Salva DOCX/XLSX (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span>Salva file</span></button>
-<button type="button" class="tb-btn" id="kbdBtn" aria-label="Scorciatoie da tastiera" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg></button>
+<div class="tile doc-tile"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Documento1" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
+<div class="tile tools" id="tools" role="toolbar" aria-label="Strumenti e cassetti">
+<div id="quick"></div><span class="tsep" aria-hidden="true"></span>
+<button type="button" class="tb drw" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
+<div id="drawers"></div>
+</div>
+<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
+<button type="button" class="tile primary-tile" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Salva DOCX/XLSX (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span>Salva file</span></button>
 </header>
-<div class="tabrow" id="tabrow">
-<button type="button" class="filebtn" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
-<div class="tabs" id="tabs" role="tablist" aria-label="Schede della barra multifunzione"></div>
-</div>
-<div class="ribbon" id="ribbon" role="tabpanel" aria-labelledby="tab-Home"></div>
+<div class="drawer" id="ribbon" role="group" hidden></div>
 <div class="findbar" id="findbar" role="search" aria-label="Trova e sostituisci" hidden>
 <label for="findText">Trova</label><input id="findText" type="search" autocomplete="off" spellcheck="false" aria-describedby="findCount">
 <span id="findCount" class="find-count" role="status" aria-live="polite"></span>
@@ -735,10 +789,10 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 </div>
 <div class="read-bar" id="readBar" role="group" aria-label="Strumenti di lettura" hidden><b class="rb-title">Modalità lettura</b><label>Larghezza <select id="rdWidth"><option value="narrow">Stretta</option><option value="medium">Media</option><option value="wide">Ampia</option></select></label><label>Spaziatura <select id="rdSpace"><option value="normal">Normale</option><option value="wide">Ampia</option></select></label><label class="check"><input type="checkbox" id="rdFont"> Carattere ad alta leggibilità</label><span class="rd-size" role="group" aria-label="Dimensione del testo"><button type="button" class="btn sm" id="rdSmaller" aria-label="Testo più piccolo">A−</button><output id="rdSize" aria-live="polite">14 pt</output><button type="button" class="btn sm" id="rdBigger" aria-label="Testo più grande">A+</button></span><label>Colore pagina <select id="rdColor"><option value="white">Bianco</option><option value="sepia">Seppia</option><option value="dark">Scuro</option></select></label><label class="check"><input type="checkbox" id="rdLine"> Evidenzia la riga corrente</label><button type="button" class="btn sm" id="rdSpeak">Leggi ad alta voce</button><button type="button" class="btn sm primary" id="rdExit">Esci dalla lettura</button></div>
 <main class="main" id="docRegion" tabindex="-1" aria-label="Area di lavoro">
-<div class="editor-pane" id="wordPane"><aside class="nav-pane" id="navPane" aria-labelledby="navTitle" hidden><div class="nav-head"><h2 id="navTitle">Spostamento</h2><span class="nav-count" id="navCount"></span><button type="button" class="btn icon" id="navClose" aria-label="Chiudi il riquadro di spostamento" data-tip="Chiudi il riquadro"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button></div><p class="nav-hint" id="navHint">Frecce per scorrere i titoli, Invio per raggiungerli, Esc per tornare al documento.</p><ul class="nav-list" id="navList" aria-describedby="navHint"></ul></aside><div class="word-scroll" id="wordScroll"><div class="page" id="page" data-paper="a4"><div class="page-deco" id="pageDeco" aria-hidden="true"></div><div class="hf hf-head empty" id="hfHead" aria-hidden="true" data-tip="Intestazione: fai clic per modificarla"></div><div class="page-marks" id="pageMarks" aria-hidden="true"></div><div id="wordEditor" class="word-content empty" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Corpo del documento" aria-describedby="editorHint" aria-placeholder="Inizia a scrivere qui…" data-placeholder="Inizia a scrivere qui…" spellcheck="true"><p><br></p></div><div class="hf hf-foot empty" id="hfFoot" aria-hidden="true" data-tip="Piè di pagina: fai clic per modificarlo"></div></div><div class="line-focus" id="lineFocus" aria-hidden="true" hidden></div></div><aside class="cmt-pane" id="cmtPane" aria-labelledby="cmtTitle" hidden><div class="nav-head"><h2 id="cmtTitle">Commenti</h2><span class="nav-count" id="cmtCount"></span><button type="button" class="btn icon" id="cmtClose" aria-label="Chiudi il riquadro dei commenti" data-tip="Chiudi il riquadro"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="cmt-tools"><button type="button" class="btn sm" id="cmtAdd" aria-keyshortcuts="Control+Alt+M">Nuovo commento</button></div><ol class="cmt-list" id="cmtList"></ol></aside></div>
+<div class="editor-pane" id="wordPane"><aside class="nav-pane pane tile" id="navPane" aria-labelledby="navTitle" hidden><div class="nav-head"><h2 id="navTitle">Spostamento</h2><span class="nav-count" id="navCount"></span></div><p class="nav-hint" id="navHint">Frecce per scorrere i titoli, Invio per raggiungerli, Esc per tornare al documento.</p><ul class="nav-list" id="navList" aria-describedby="navHint"></ul></aside><div class="word-scroll" id="wordScroll"><div class="page" id="page" data-paper="a4"><div class="page-deco" id="pageDeco" aria-hidden="true"></div><div class="hf hf-head empty" id="hfHead" aria-hidden="true" data-tip="Intestazione: fai clic per modificarla"></div><div class="page-marks" id="pageMarks" aria-hidden="true"></div><div id="wordEditor" class="word-content empty" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Corpo del documento" aria-describedby="editorHint" aria-placeholder="Inizia a scrivere qui…" data-placeholder="Inizia a scrivere qui…" spellcheck="true"><p><br></p></div><div class="hf hf-foot empty" id="hfFoot" aria-hidden="true" data-tip="Piè di pagina: fai clic per modificarlo"></div></div><div class="line-focus" id="lineFocus" aria-hidden="true" hidden></div></div><aside class="cmt-pane pane tile" id="cmtPane" aria-labelledby="cmtTitle" hidden><div class="nav-head"><h2 id="cmtTitle">Commenti</h2><span class="nav-count" id="cmtCount"></span></div><div class="cmt-tools"><button type="button" class="btn sm" id="cmtAdd" aria-keyshortcuts="Control+Alt+M">Nuovo commento</button></div><ol class="cmt-list" id="cmtList"></ol></aside></div>
 <div id="excelPane" class="editor-pane hidden">
 <div class="formula-line" id="formulaLine" role="group" aria-label="Barra della formula"><label class="sr-only" for="nameBox">Casella nome, vai alla cella o all’intervallo</label><input id="nameBox" class="namebox" value="A1" autocomplete="off" spellcheck="false" aria-keyshortcuts="Control+G"><span class="fx" aria-hidden="true">ƒx</span><label class="sr-only" for="formulaInput">Contenuto della cella attiva</label><input id="formulaInput" autocomplete="off" spellcheck="false" placeholder="Valore o formula, es. =SOMMA(A1:A10)"></div>
-<div class="grid-area"><div id="gridScroll" class="grid-scroll" role="grid" tabindex="0" aria-label="Foglio" aria-multiselectable="true" aria-describedby="gridHint"><table class="sheetgrid" id="grid" role="presentation"></table></div><div class="chart-viewport" id="chartViewport"><div class="chart-pan" id="chartPan"><div class="chart-zoom" id="chartLayer" role="region" aria-label="Grafici del foglio" hidden></div></div></div></div>
+<div class="grid-area tile"><div id="gridScroll" class="grid-scroll" role="grid" tabindex="0" aria-label="Foglio" aria-multiselectable="true" aria-describedby="gridHint"><table class="sheetgrid" id="grid" role="presentation"></table></div><div class="chart-viewport" id="chartViewport"><div class="chart-pan" id="chartPan"><div class="chart-zoom" id="chartLayer" role="region" aria-label="Grafici del foglio" hidden></div></div></div></div>
 <div class="sheet-bar" id="sheetBar"><div class="sheet-tabs" id="sheetTabs" role="tablist" aria-label="Fogli di lavoro"></div><button type="button" class="sheet-add" id="addSheet" aria-label="Nuovo foglio" aria-keyshortcuts="Shift+F11" data-tip="Nuovo foglio (Maiusc+F11)"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
 <div id="excelPrint" class="print-sheet"></div>
 </div>
@@ -748,13 +802,13 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 <div class="pg-presets" id="pgPresets" role="group" aria-labelledby="pgStartTitle"></div>
 <p><button type="button" class="btn" data-pg-open="1"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg>Apri un progetto di Impagina</button></p></section>
 <div class="pg-work" id="pgWork" hidden>
-<aside class="pg-side" aria-label="Pagine e cornici">
+<aside class="pg-side pane tile" id="pgSidePane" aria-label="Pagine e cornici">
 <div class="pane-head"><h2 id="pgPagesTitle">Pagine</h2><span class="pane-count" id="pgPageCount"></span></div>
 <div class="lb pg-pages" id="pgPages" role="listbox" aria-labelledby="pgPagesTitle" aria-describedby="pgPagesKeys" tabindex="0"></div>
 <div class="pane-head"><h2 id="pgFramesTitle">Cornici, in ordine di lettura</h2><span class="pane-count" id="pgFrameCount"></span></div>
 <div class="lb pg-frames" id="pgFrames" role="listbox" aria-multiselectable="true" aria-labelledby="pgFramesTitle" aria-describedby="pgFramesKeys" tabindex="0"></div>
 </aside>
-<section class="pg-view" aria-labelledby="pgStageTitle"><h2 class="sr-only" id="pgStageTitle">Pagina</h2>
+<section class="pg-view tile" aria-labelledby="pgStageTitle"><h2 class="sr-only" id="pgStageTitle">Pagina</h2>
 <div class="pg-scroll" id="pgScroll"><div class="pg-sheet" id="pgStage" tabindex="0" role="application" aria-roledescription="pagina" aria-label="Pagina" aria-describedby="pgStageHint"><svg id="pgSvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg><svg id="pgOver" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg></div></div>
 <div class="viewbar" id="pgBar" role="group" aria-label="Vista della pagina">
 <button type="button" class="btn sm icon" data-action="pgPrevPage" aria-label="Pagina precedente" data-tip="Pagina precedente (Alt+PgSu)"><svg class="ico" aria-hidden="true"><use href="#i-up"/></svg></button><span id="pgPageInfo"></span><button type="button" class="btn sm icon" data-action="pgNextPage" aria-label="Pagina successiva" data-tip="Pagina successiva (Alt+PgGiù)"><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></button>
@@ -765,14 +819,16 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 <span id="pgZoomInfo" aria-hidden="true"></span>
 </div>
 </section>
-<aside class="pg-props" aria-labelledby="pgPropTitle"><div class="pane-head"><h2 id="pgPropTitle">Proprietà</h2></div><div class="insp-body" id="pgProps"></div></aside>
+<aside class="pg-props pane tile" id="pgPropsPane" aria-labelledby="pgPropTitle"><div class="pane-head"><h2 id="pgPropTitle">Proprietà</h2></div><div class="insp-body" id="pgProps"></div></aside>
 </div>
 </div>
 </main>
 <footer class="status" id="statusbar" aria-label="Barra di stato">
-<span id="statusText">Pronto</span><span class="status-word" id="wordStats"></span><span id="excelStats" class="status-excel"></span><span id="pgStats" class="status-page"></span><span class="grow"></span>
+<button type="button" class="st-btn lead" id="layoutBtn" aria-haspopup="menu" aria-expanded="false" data-tip="Mostra, riduci o togli i riquadri"><svg class="ico" aria-hidden="true"><use href="#i-mosaic"/></svg><span>Tasselli</span></button>
+<span class="chip" id="statusText">Pronto</span><span class="status-word" id="wordStats"></span><span id="excelStats" class="status-excel"></span><span id="pgStats" class="status-page"></span><span class="grow"></span>
+<button type="button" class="st-btn" id="kbdBtn" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg><span>Scorciatoie</span></button>
 <button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
-<div class="zoom" role="group" aria-label="Zoom"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="100" min="60" max="160" step="10" aria-label="Livello di zoom" aria-valuetext="100%"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true">100%</output></div>
+<div class="zoom chip" role="group" aria-label="Zoom"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="100" min="60" max="160" step="10" aria-label="Livello di zoom" aria-valuetext="100%"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true">100%</output></div>
 </footer>
 </div>
 <p id="pgStageHint" class="sr-only">PgGiù e PgSu scelgono la cornice successiva o precedente nell’ordine di lettura. Frecce per spostarla, con Maiusc dieci volte tanto; Ctrl più frecce per cambiarne le dimensioni. Maiusc+PgGiù aggiunge la cornice successiva alla scelta, Alt+Maiusc più frecce porta la scelta alla guida successiva. Invio apre il testo o le proprietà, Esc toglie la scelta, Canc elimina, Maiusc+F10 apre il menu. Più e meno cambiano lo zoom, zero mostra tutta la pagina. Alt+PgGiù e Alt+PgSu cambiano pagina, Alt+Maiusc+I descrive la pagina.</p>
@@ -827,7 +883,7 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 <div id="srLive" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 <div class="modalbg" id="modalbg" hidden><div id="modal" class="modal" role="dialog" aria-labelledby="dlgTitle" aria-describedby="dlgBody" aria-modal="true"></div></div>
 <div class="modalbg" id="palettebg" hidden><div class="palette" role="dialog" aria-modal="true" aria-label="Cerca comando">
-<input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. grassetto, tabella, somma" autocomplete="off" spellcheck="false">
+<div class="pal-field"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. grassetto, tabella, somma" autocomplete="off" spellcheck="false"><kbd aria-hidden="true">Esc</kbd></div>
 <div id="palList" role="listbox" aria-label="Comandi"></div>
 <p class="pal-hint" aria-hidden="true">↑ ↓ per scegliere · Invio per eseguire · Esc per chiudere</p>
 </div></div>
@@ -998,7 +1054,7 @@ const ROWHEIGHT=24,HEADERHEIGHT=27,BASECOL=64;
 const blankSheet=(name='Foglio1')=>({name,cells:{},widths:{},merges:[]});
 const state={mode:'word',excelTitle:'Calcolo1',wordTitle:'Documento1',wordHTML:'<p><br></p>',sheets:[blankSheet()],sheet:0,zoom:100,paper:'a4',sel:{r:0,c:0,r2:0,c2:0},doc:{...DOC_DEFAULT},styles:{},layout:{...LAYOUT_DEFAULT},comments:{},sections:{},biblio:{style:'apa',sources:[]},cc:{},merge:null,names:[],showComments:false,spell:true};
 // Stato dell'interfaccia, del ricalcolo, della cronologia e del salvataggio delle bozze.
-let currentTab='Inizio',tabExitArmed=false,speaking=false,sheetDrag=false;
+let tabExitArmed=false,speaking=false,sheetDrag=false;
 let calcMemo=new Map(),calcVersion=0,hist=[],redo=[];
 let db=null,draftTimer,suppressAutosave=false,activeWordRange=null;
 const lastColor={fontColor:'#c00000',hiliteColor:'#ffff00',fillColor:'#ffe699'};
@@ -1024,7 +1080,7 @@ function setMode(mode,{focus=true}={}){const leaving=state.mode;if(mode===leavin
  state.mode=mode;$('app').className=mode;document.documentElement.dataset.mode=mode;
  for(const [m,a] of Object.entries(APPS)){$(a.pane).classList.toggle('hidden',m!==mode);$(a.button).setAttribute('aria-pressed',m===mode)}
  $('docTitle').value=currentTitle();$('exportLabel').textContent=APPS[mode].export;updateTitle();
- currentTab='Inizio';renderTabs();renderRibbon();
+ renderBar();applyTiles();
  if(mode==='word'){updateWordStats();scheduleWordTidy(0)}else if(mode==='excel'){renderSheetTabs();renderedFirst=-1;renderGrid(true);setSelection(state.sel.r,state.sel.c);renderCharts()}else pageShow();
  printStyle();if(focus){if(mode==='impagina')pageFocus();else $(mode==='word'?'wordEditor':'gridScroll').focus();announce(mode==='word'?'Testo: documento':mode==='excel'?'Calcolo: foglio '+sheet().name:'Impagina: '+pageSummary())}schedulePersist()}
 // Porta il focus sull'area di lavoro dell'app attiva: il documento, il foglio o la pagina.
@@ -1443,6 +1499,12 @@ def('p','Fonti',[
 def('p','Verifica',[
  ['pgCheck','Verifica dell’accessibilità','a11y','',{short:'Verifica accessibilità'}],
  ['pgDescribe','Descrivi la pagina e la cornice scelta','speak','Alt+Maiusc+I',{g:1,short:'Descrivi pagina'}]]);
+def('wp','Tasselli',[
+ ['layoutMenu','Tasselli: mostra, riduci o togli i riquadri','mosaic','',{short:'Tasselli'}],
+ ['layoutReset','Rimetti i tasselli come all’inizio','history','',{short:'Come all’inizio'}]]);
+def('p','Tasselli',[
+ ['showPgSide','Mostra o togli il riquadro Pagine e cornici','page','',{short:'Pagine e cornici',quiet:1,toggle:()=>paneSt('pgSidePane')!=='off'}],
+ ['showPgProps','Mostra o togli il riquadro Proprietà','gear','',{short:'Proprietà',quiet:1,toggle:()=>paneSt('pgPropsPane')!=='off'}]]);
 const KEYNAME={Invio:'enter',Spazio:' ',Canc:'delete',Esc:'escape',PgSu:'pageup',PgGiù:'pagedown',Home:'home',Fine:'end','←':'arrowleft','→':'arrowright','↑':'arrowup','↓':'arrowdown',Tab:'tab'};
 const keyCache=new Map();
 function parseKey(s){let key,mods;if(s.endsWith('++')){key='+';mods=s.slice(0,-2).split('+')}else{const p=s.split('+');key=p.pop();mods=p}return{ctrl:mods.includes('Ctrl'),alt:mods.includes('Alt'),shift:mods.includes('Maiusc'),key:(KEYNAME[key]||key).toLowerCase()}}
@@ -1456,7 +1518,9 @@ function focusContext(){const a=document.activeElement;if(!a||a===document.body)
 function findShortcut(e,ctx){let fallback=null;for(const c of Object.values(C)){const spec=keysOf(c);if(!spec||c.native||!available(c))continue;if(c.ctx&&c.ctx!==ctx)continue;if((ctx==='input'||ctx==='cell')&&!c.g)continue;if(parsedKeys(spec).some(k=>keyMatch(e,k))){if(c.ctx===ctx)return c;fallback??=c}}return fallback}
 const safe=fn=>{try{return fn()}catch(e){return false}};
 async function runCommand(id){const c=C[id];if(!c)return;if(isWord()&&document.activeElement===$('wordEditor')&&inEditor())wordSelectionSave();if(reading&&isWord()&&!READ_OK.has(id)){toast('«'+c.label+'» non è disponibile in modalità lettura: premi Esc per tornare alla modifica');return}if(formMode&&isWord()&&!READ_OK.has(id)&&!['formFill','ccEdit','controlsMenu','save','print','exportHtml'].includes(id)){toast('«'+c.label+'» non è disponibile durante la compilazione del modulo: premi Esc per uscire');return}if(!available(c)){toast('«'+c.label+'» non è disponibile in '+appName());return}if(isCalc()&&id!=='editCell')finishCell();hideTip();await handleAction(id);if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}
-// Barra multifunzione: "!" pulsante grande, "^" grande con menu, "&" piccolo con menu, "%" scheda stile, "#" elenco a discesa, "@" colore, "/" nuova riga, suffisso "+" mostra l'etichetta.
+// Barra: gli strumenti di tutti i giorni restano in vista, le schede di una volta sono cassetti che si aprono sopra il lavoro.
+// Nei cassetti ogni gruppo di RIBBON diventa un elenco: "!", "^", "&", "%" e il suffisso "+" valgono come comandi semplici,
+// "#" è un elenco a discesa con la sua etichetta, "@" un colore, "/" non conta.
 const FONTS=['Calibri','Aptos','Arial','Cambria','Georgia','Segoe UI','Tahoma','Times New Roman','Verdana','Consolas'];
 const SELECTS={fontFamily:{label:'Tipo di carattere',w:136,opts:FONTS},fontSize:{label:'Dimensione carattere',w:62,opts:[8,9,10,11,12,14,16,18,20,24,28,36,48,72].map(String)},numberFormat:{label:'Formato numero',w:124,opts:['Generale','Numero','Valuta','Percentuale','Data','Ora','Data e ora','Testo']},docFont:{label:'Carattere del documento',w:150,opts:FONTS},lineSpacing:{label:'Interlinea',w:130,opts:[['1','Interlinea 1,0'],['1.15','Interlinea 1,15'],['1.5','Interlinea 1,5'],['2','Interlinea 2,0']]},paraSpacing:{label:'Spazio dopo il paragrafo',w:150,opts:[['0','Spazio dopo 0 pt'],['6','Spazio dopo 6 pt'],['8','Spazio dopo 8 pt'],['12','Spazio dopo 12 pt'],['18','Spazio dopo 18 pt']]}};
 const COLORS={fontColor:{icon:'t:A',apply:'fontColorApply',pick:'Scegli il colore del carattere'},hiliteColor:{icon:'highlight',apply:'hiliteColorApply',pick:'Scegli il colore di evidenziazione'},fillColor:{icon:'fill',apply:'fillColorApply',pick:'Scegli il colore di riempimento'}};
@@ -1487,25 +1551,72 @@ const RIBBON={
   Vista:[['Zoom','!zoomDown !pgZoomFit !zoomUp'],['Mostra','!pgGuides !pgGrid !pgSmart'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette'],['Esporta','!pgExportPng !print']]}};
 const TABS={w:['Inizio','Inserisci','Aspetto','Pagina','Note e indici','Stampa unione','Verifica','Vista','Tabella'],x:['Inizio','Inserisci','Pagina','Funzioni','Dati','Verifica','Vista','Tabella pivot'],p:['Inizio','Inserisci','Pagina','Cornice','Fonti','Verifica','Vista']};
 const slug=s=>s.replace(/\s+/g,'-');
+const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
 function tipText(c){const k=keysOf(c);return c.label+(k?' ('+k+')':'')}
-function cmdButton(id,size,showLabel){const c=C[id];if(!c||!available(c))return '';const pressed=c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:'',k=keysOf(c),keys=(k?` aria-keyshortcuts="${esc(ariaKeys(k))}"`:'')+(c.menu?' aria-haspopup="menu" aria-expanded="false"':'');
- if(size==='drop'||size==='dropsm')return `<button type="button" class="tool drop${size==='dropsm'?' sm':''}" data-action="${id}"${keys} aria-label="${esc(c.label)}" data-tip="${esc(c.label)}">${ICON('down')}</button>`;
- if(size==='lg')return `<button type="button" class="tool lg" data-action="${id}"${pressed}${keys} data-tip="${esc(tipText(c))}">${ICON(c.icon)}<span class="lbl">${esc(c.short||c.label)}${c.menu?ICON('down','ico chev'):''}</span></button>`;
- return `<button type="button" class="tool" data-action="${id}"${pressed}${keys} data-tip="${esc(tipText(c))}"${showLabel?'':` aria-label="${esc(c.label)}"`}>${ICON(c.icon)}${showLabel?`<span class="lbl">${esc(c.short||c.label)}</span>`:''}</button>`}
 function styleCard(id){const c=C[id];if(!c)return '';const k=keysOf(c);return `<button type="button" class="style-card" data-action="${id}" aria-pressed="${!!safe(c.toggle)}"${k?` aria-keyshortcuts="${esc(ariaKeys(k))}"`:''} data-tip="${esc(tipText(c))}"><span class="sample ${c.sample}" aria-hidden="true">AaBbCc</span><span>${esc(c.short)}</span></button>`}
 const SELECT_DEFAULT={fontFamily:'Calibri',fontSize:'11',numberFormat:'Generale',docFont:'Calibri',lineSpacing:'1.15',paraSpacing:'8'};
 function selectHtml(id){const s=SELECTS[id];return `<select class="rb-select" id="${id}" aria-label="${esc(s.label)}" data-tip="${esc(s.label)}" style="width:${s.w}px">${s.opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}"${v===SELECT_DEFAULT[id]?' selected':''}>${esc(l)}</option>`}).join('')}</select>`}
 function colorHtml(id){const k=COLORS[id],c=C[k.apply];return `<span class="split"><button type="button" class="tool" data-action="${k.apply}" aria-label="${esc(c.label)}" data-tip="${esc(c.label)}">${ICON(k.icon)}<span class="swatch" data-swatch="${id}" style="background:${lastColor[id]}"></span></button><span class="pick" data-tip="${esc(k.pick)}">${ICON('down')}<input type="color" id="${id}" value="${lastColor[id]}" aria-label="${esc(k.pick)}"></span></span>`}
-function renderGroup([name,spec],gi){let out='',stack=[[]];const flush=()=>{const rows=stack.filter(r=>r.length);if(rows.length)out+=`<div class="rbstack">${rows.map(r=>`<div class="rbrow">${r.join('')}</div>`).join('')}</div>`;stack=[[]]};
- for(const tok of spec.split(' ')){if(tok==='/'){stack.push([]);continue}const t0=tok[0];if(t0==='!'){flush();out+=cmdButton(tok.slice(1),'lg')}else if(t0==='^'){flush();const [a,b]=tok.slice(1).split(':');out+=`<span class="lgsplit">${cmdButton(a,'lg')}${cmdButton(b,'drop')}</span>`}else if(t0==='&'){const [a,b]=tok.slice(1).split(':');stack.at(-1).push(`<span class="smsplit">${cmdButton(a,'sm')}${cmdButton(b,'dropsm')}</span>`)}else if(t0==='%'){flush();out+=styleCard(tok.slice(1))}else if(t0==='#')stack.at(-1).push(selectHtml(tok.slice(1)));else if(t0==='@')stack.at(-1).push(colorHtml(tok.slice(1)));else stack.at(-1).push(cmdButton(tok.replace(/\+$/,''),'sm',tok.endsWith('+')))}
- flush();return `<div class="rbgroup" role="group" aria-labelledby="rbg${gi}"><div class="rbitems">${out}</div><div class="rb-label" id="rbg${gi}">${esc(name)}</div></div>`}
-function renderTabs(){const t=TABS[modeKey()];$('tabs').innerHTML=t.map(x=>`<button type="button" role="tab" class="tab" id="tab-${slug(x)}" data-tab="${esc(x)}" aria-selected="${x===currentTab}" aria-controls="ribbon" tabindex="${x===currentTab?0:-1}">${esc(x)}</button>`).join('')}
-function renderRibbon(){const groups=RIBBON[modeKey()][currentTab]||[];$('ribbon').setAttribute('aria-labelledby','tab-'+slug(currentTab));$('ribbon').innerHTML=`<div class="ribbon-inner">${groups.map(renderGroup).join('')}</div>`;syncSelects()}
-function selectTab(name,focus=true){currentTab=name;renderTabs();renderRibbon();if(focus)$('tab-'+slug(name))?.focus()}
 function setSel(id,v){const el=$(id);if(!el||document.activeElement===el)return;v=String(v);if(![...el.options].some(o=>o.value===v))el.add(new Option(v,v));el.value=v}
 function syncSelects(){if(isCalc()){const st=cell(state.sel.r,state.sel.c)?.s||{};setSel('fontFamily',st.font||'Calibri');setSel('fontSize',st.size||11);setSel('numberFormat',st.fmt||'Generale');return}if(!isWord())return;
  setSel('docFont',state.doc.font);setSel('lineSpacing',state.doc.line);setSel('paraSpacing',state.doc.space);if(!inEditor())return;const s=getSelection();let el=s.anchorNode;if(el?.nodeType===3)el=el.parentElement;if(!el)return;const cs=getComputedStyle(el);setSel('fontFamily',cs.fontFamily.split(',')[0].replace(/["']/g,'').trim());setSel('fontSize',Math.round(parseFloat(cs.fontSize)*.75*2)/2)}
-let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#ribbon [aria-pressed],#pgBar [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}syncSelects()},40)}
+let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#ribbon [aria-pressed],#tools [aria-pressed][data-action],#pgBar [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}syncSelects()},40)}
+// Strumenti sempre in vista. "|" separa i gruppi; con "|1" e "|2" il gruppo che segue sparisce quando la barra è
+// stretta (prima 1, poi 2), ma i suoi comandi restano nei cassetti e nella ricerca.
+const QUICK={w:'undo redo | bold italic underline |2 insertUnorderedList insertOrderedList justifyLeft justifyCenter |1 insertLink cmtNew',
+ x:'undo redo | bold italic underline |2 currency percent decPlus decMinus |1 autoSum sortAsc filter',
+ p:'undo redo | pgAddText pgAddImage pgAddRect |2 pgFront pgBack |1 pgPrevPage pgNextPage'};
+const cmdAttrs=c=>{const k=keysOf(c);return (c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:'')+(k?` aria-keyshortcuts="${esc(ariaKeys(k))}"`:'')+(c.menu?' aria-haspopup="menu" aria-expanded="false"':'')};
+function renderQuick(){let hide='';$('quick').innerHTML=QUICK[modeKey()].split(' ').map(id=>{if(id[0]==='|'){hide=id.length>1?' h'+id.slice(1):'';return `<span class="tsep${hide}" aria-hidden="true"></span>`}const c=C[id];if(!c||!available(c))return '';
+ return `<button type="button" class="tb icon${hide}" data-action="${id}"${cmdAttrs(c)} aria-label="${esc(c.label)}" data-tip="${esc(tipText(c))}">${ICON(c.icon)}</button>`}).join('')}
+function renderDrawers(){$('drawers').innerHTML=TABS[modeKey()].map(x=>`<button type="button" class="tb drw" id="drw-${slug(x)}" data-drawer="${esc(x)}" aria-expanded="false" aria-controls="ribbon">${esc(x)}${ICON('down','ico chev')}</button>`).join('')}
+function renderBar(){closeDrawer(false);renderQuick();renderDrawers();fitTools()}
+// Se la barra non basta, spariscono prima i gruppi segnati con 1, poi quelli segnati con 2; poi si stringono il nome
+// del file e i cassetti; se non basta ancora, gli strumenti vanno a capo su una riga loro. Si ricalcola sempre da zero,
+// così il risultato dipende solo dalla larghezza.
+function fitTools(){const t=$('tools'),bar=$('bar'),over=()=>t.scrollWidth>t.clientWidth,fit=()=>{t.classList.remove('fit1','fit2');for(const c of ['fit1','fit2']){if(!over())break;t.classList.add(c)}};
+ bar.classList.remove('wrap','tight');fit();if(over()){bar.classList.add('tight');fit()}if(over()){bar.classList.replace('tight','wrap');fit();if(over()){bar.classList.add('tight');fit()}}toolsRoving();placeDrawer()}
+new ResizeObserver(()=>fitTools()).observe($('tools'));
+// Una sola fermata di Tab per tutta la barra degli strumenti: le frecce passano da un pulsante all'altro.
+let toolFocus=0;
+const toolItems=()=>focusables($('tools'));
+function toolsRoving(){const l=toolItems();if(!l.length)return;toolFocus=clamp(toolFocus,0,l.length-1);l.forEach((b,i)=>b.tabIndex=i===toolFocus?0:-1)}
+// Cassetto aperto: un gruppo di tasselli sotto la barra. Dopo il comando si torna dove si stava lavorando.
+let drawerName=null,drawerOpenedAt=0,lastWork=null;
+document.addEventListener('focusin',e=>{if(e.target.closest?.('#docRegion'))lastWork=e.target});
+function drawerItem(id){const c=C[id];if(!c||!available(c))return '';const k=keysOf(c),short=c.short||c.label;
+ return `<button type="button" class="ditem" data-action="${id}"${cmdAttrs(c)}${short!==c.label?` data-tip="${esc(c.label)}"`:''}>${ICON(c.icon)}<span class="lbl">${esc(short)}${short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}</span>${c.toggle?'<span class="dstate" aria-hidden="true"></span>':''}${k?`<kbd aria-hidden="true">${esc(k.split(' / ')[0])}</kbd>`:''}</button>`}
+// Un segno del gruppo: comando, elenco a discesa con la sua etichetta o colore con il nome del comando che lo applica.
+function drawerToken(tok){if(tok==='/')return '';if(tok[0]==='#'){const id=tok.slice(1),s=SELECTS[id];return s?`<label class="dsel"><span>${esc(s.label)}</span>${selectHtml(id)}</label>`:''}
+ if(tok[0]==='@'){const id=tok.slice(1),k=COLORS[id],c=k&&C[k.apply];return c&&available(c)?`<div class="dcolor">${colorHtml(id)}<span aria-hidden="true">${esc(c.short||c.label)}</span></div>`:''}
+ return tok.replace(/^[!^&%]/,'').replace(/\+$/,'').split(':').map(drawerItem).join('')}
+function openDrawer(name,focus=false){const groups=RIBBON[modeKey()][name],btn=$('drw-'+slug(name)),d=$('ribbon');if(!groups||!btn)return;hideTip();closeMenu(false);drawerName=name;drawerOpenedAt=performance.now();
+ d.setAttribute('aria-labelledby',btn.id);
+ const parts=groups.map(([g,spec],gi)=>{const inner=spec.split(' ').map(drawerToken).join('');return inner?`<div class="dgroup" role="group" aria-labelledby="dg${gi}"><h3 id="dg${gi}">${esc(g)}</h3>${inner}</div>`:''}).filter(Boolean),n=parts.length;
+ d.innerHTML=`<div class="drawer-grid" style="--cols:${n<=5?n:Math.ceil(n/2)}">${parts.join('')}</div>`;
+ d.hidden=false;for(const b of $$('#drawers [data-drawer]'))b.setAttribute('aria-expanded',b===btn);placeDrawer();syncSelects();if(focus)d.querySelector('.ditem,select')?.focus()}
+function placeDrawer(){if(!drawerName)return;const d=$('ribbon'),r=$('drw-'+slug(drawerName)).getBoundingClientRect();d.style.top=($('bar').getBoundingClientRect().bottom+8)+'px';d.style.left=Math.max(8,Math.min(r.left-8,innerWidth-d.offsetWidth-8))+'px'}
+function closeDrawer(restore=true){if(!drawerName)return;const btn=$('drw-'+slug(drawerName)),d=$('ribbon');drawerName=null;d.hidden=true;d.innerHTML='';btn?.setAttribute('aria-expanded','false');if(restore)btn?.focus()}
+// I comandi che aprono un menu tengono aperto il cassetto, perché il menu si appoggia al loro pulsante; così anche i colori.
+const DRAWER_MENUS=new Set(['pgStyles','pgSignStyles','pgTheme','pgMask','pgPhotoGrid','pgMasterApply','pgField','pgLinkTo']);
+function drawerRun(b){const id=b.dataset.action;if(C[id]?.menu||/Menu$/.test(id)||DRAWER_MENUS.has(id)||b.closest('.split')){runCommand(id);return}
+ const inDrawer=$('ribbon').contains(document.activeElement),back=lastWork?.isConnected&&lastWork.offsetParent?lastWork:null;closeDrawer(inDrawer&&!back);
+ if(inDrawer&&back){if(isWord()&&back.closest('#wordEditor'))restoreWordFocus();else back.focus({preventScroll:true})}runCommand(id)}
+$('drawers').addEventListener('click',e=>{const b=e.target.closest('[data-drawer]');if(!b)return;if(drawerName!==b.dataset.drawer)openDrawer(b.dataset.drawer);else if(performance.now()-drawerOpenedAt>400)closeDrawer(false)});
+$('drawers').addEventListener('keydown',e=>{const b=e.target.closest('[data-drawer]');if(!b)return;if(e.key==='Enter'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();openDrawer(b.dataset.drawer,true)}else if(e.key==='Escape'&&drawerName){e.preventDefault();closeDrawer(true)}});
+$('tools').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const l=toolItems(),i=l.indexOf(document.activeElement);if(i<0)return;e.preventDefault();l[e.key==='Home'?0:e.key==='End'?l.length-1:(i+(e.key==='ArrowRight'?1:-1)+l.length)%l.length].focus()});
+// Con un cassetto aperto, le frecce sulla barra aprono il cassetto vicino, come in un menu.
+$('tools').addEventListener('focusin',e=>{const l=toolItems(),i=l.indexOf(e.target);if(i<0)return;toolFocus=i;l.forEach((b,k)=>b.tabIndex=k===i?0:-1);e.target.scrollIntoView({block:'nearest',inline:'nearest'});
+ if(drawerName){const n=e.target.dataset.drawer;if(!n)closeDrawer(false);else if(n!==drawerName)openDrawer(n)}});
+$('ribbon').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeDrawer(true);return}const items=$$('#ribbon .ditem'),i=items.indexOf(document.activeElement);if(i<0)return;
+ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const gs=$$('#ribbon .dgroup'),g=gs.indexOf(items[i].closest('.dgroup'));const first=gs[(g+(e.key==='ArrowRight'?1:-1)+gs.length)%gs.length]?.querySelector('.ditem');if(first){e.preventDefault();first.focus()}return}
+ const j=e.key==='ArrowDown'?(i+1)%items.length:e.key==='ArrowUp'?(i-1+items.length)%items.length:e.key==='Home'?0:e.key==='End'?items.length-1:null;if(j!==null){e.preventDefault();items[j].focus()}});
+$('ribbon').addEventListener('focusout',e=>{const to=e.relatedTarget;if(drawerName&&to&&!to.closest('#ribbon,#drawers,#menu'))closeDrawer(false)});
+document.addEventListener('pointerdown',e=>{if(drawerName&&!e.target.closest('#ribbon,#drawers,#menu'))closeDrawer(false)},true);
+// Strumenti rapidi: in Testo il clic non toglie il cursore dal documento, così il comando vale per la selezione.
+$('tools').addEventListener('mousedown',e=>{if(isWord()&&e.target.closest('button'))e.preventDefault()});
+$('tools').addEventListener('click',e=>{const b=e.target.closest('#quick button[data-action]');if(b)runCommand(b.dataset.action)});
+addEventListener('resize',fitTools);
 // Selezione e comandi di base dell'editor di Testo. La selezione viene ricordata quando il focus passa
 // alla barra multifunzione o a una finestra, e ripristinata prima di ogni comando.
 function wordSelectionSave(){const sel=getSelection();if(sel.rangeCount&&$('wordEditor').contains(sel.anchorNode))activeWordRange=sel.getRangeAt(0).cloneRange()}
@@ -1519,6 +1630,71 @@ function changeFont(name){return isCalc()?applyCellsStyle('font',name):isWord()?
 function changeColor(kind,color){const ink=kind==='fontColor';return isCalc()?applyCellsStyle(ink?'color':'fill',color):isWord()?wordCmd(ink?'foreColor':'hiliteColor',color):undefined}
 function wordChanged(){const ed=$('wordEditor');state.wordHTML=sanitizeHTML(ed.innerHTML);updateWordStats();scheduleWordTidy();schedulePersist()}
 function insertHtmlAtSelection(markup){restoreWordFocus();wordHistPush();document.execCommand('insertHTML',false,markup);wordChanged()}
+// Tasselli: i riquadri laterali si riducono a tessera, passano da un lato all'altro, si allargano trascinando la fuga
+// (o con le frecce quando la fuga ha il focus) e si tolgono dal piano. Lato, larghezza e tessera restano nelle preferenze.
+// In Testo, Spostamento e Commenti restano legati al documento come prima (state.layout.nav e state.showComments):
+// toglierli dal piano li chiude. In Calcolo non ci sono riquadri laterali.
+const PANES={
+ navPane:{mode:'w',title:'Spostamento',icon:'nav',side:'left',w:250,min:190,max:440,head:'.nav-head',unit:['titolo','titoli'],count:()=>parseInt($('navCount').textContent)||0,
+  on:()=>!!state.layout.nav,set:v=>{state.layout.nav=v;applyLayout();navSig='';renderNav(true);schedulePersist()},focus:()=>($('navList').querySelector('[tabindex="0"]')||$('navPane').querySelector('.pane-btn')).focus(),regions:()=>[$('navPane')]},
+ cmtPane:{mode:'w',title:'Commenti',icon:'comment',side:'right',w:300,min:230,max:480,head:'.nav-head',unit:['commento','commenti'],count:()=>parseInt($('cmtCount').textContent)||0,
+  on:()=>!!state.showComments,set:v=>toggleComments(v),focus:()=>($('cmtList').querySelector('button')||$('cmtAdd')).focus(),regions:()=>[$('cmtPane')]},
+ pgSidePane:{mode:'p',title:'Pagine e cornici',icon:'page',side:'left',w:232,min:190,max:420,head:'.pane-head',focus:()=>$('pgPages').focus(),regions:()=>[$('pgPages'),$('pgFrames')]},
+ pgPropsPane:{mode:'p',title:'Proprietà',icon:'gear',side:'right',w:320,min:250,max:480,head:'.pane-head',focus:()=>(focusables($('pgProps'))[0]||$('pgProps')).focus(),regions:()=>[$('pgProps')]}};
+const PANE_SAY={open:'aperto',tessera:'ridotto a tessera',off:'tolto dal piano'};
+const layoutOf=()=>prefs.layout||(prefs.layout={});
+function paneState(id){const L=layoutOf(),d=PANES[id];if(!L[id])L[id]={side:d.side,w:d.w,tes:false,off:false};return L[id]}
+const panesOf=m=>Object.keys(PANES).filter(id=>PANES[id].mode===m);
+const paneOn=id=>{const d=PANES[id];return d.on?d.on():!paneState(id).off};
+const paneSt=id=>!paneOn(id)?'off':paneState(id).tes?'tessera':'open';
+// Ogni riquadro riceve una tessera (il riquadro ridotto), una fuga da trascinare e due pulsanti nell'intestazione.
+for(const [id,d] of Object.entries(PANES)){const el=$(id);
+ el.insertAdjacentHTML('beforebegin',`<button type="button" class="tessera" id="${id}Tes" aria-controls="${id}" aria-expanded="false" data-tip="Espandi ${esc(d.title)}" hidden>${ICON(d.icon)}<span class="badge" aria-hidden="true"></span><span class="vt" aria-hidden="true">${esc(d.title)}</span></button>`);
+ el.insertAdjacentHTML('afterend',`<div class="sep" id="${id}Sep" data-pane="${id}" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="${id}" aria-label="Larghezza del riquadro ${esc(d.title)}" aria-valuemin="${d.min}" aria-valuemax="${d.max}" hidden></div>`);
+ el.querySelector(d.head).insertAdjacentHTML('beforeend',`<button type="button" class="pane-btn" data-pane-act="collapse" aria-label="Riduci a tessera il riquadro ${esc(d.title)}" data-tip="Riduci a tessera"></button><button type="button" class="pane-btn" data-pane-act="menu" aria-haspopup="menu" aria-expanded="false" aria-label="Opzioni del riquadro ${esc(d.title)}" data-tip="Sposta, riduci o togli">${ICON('more')}</button>`)}
+// Disposizione: a sinistra dell'area centrale gli ordini 0, 2, 4…, a destra 102, 104…; la fuga sta tra riquadro e centro.
+function applyTiles(){for(const m of ['w','p']){const ids=panesOf(m);ids.filter(id=>paneState(id).side==='left').forEach((id,i)=>placePane(id,2*i));ids.filter(id=>paneState(id).side==='right').forEach((id,i)=>placePane(id,102+2*i))}paneBadges()}
+function placePane(id,order){const s=paneState(id),d=PANES[id],st=paneSt(id),el=$(id),sep=$(id+'Sep'),tes=$(id+'Tes'),left=s.side==='left';s.w=clamp(s.w,d.min,d.max);
+ el.style.order=tes.style.order=order;sep.style.order=left?order+1:order-1;tes.dataset.side=s.side;el.style.setProperty('--w',s.w+'px');
+ el.hidden=st!=='open';sep.hidden=st!=='open';tes.hidden=st!=='tessera';sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');
+ el.querySelector('[data-pane-act=collapse]').innerHTML=ICON(left?'left':'right')}
+function paneBadges(){for(const [id,d] of Object.entries(PANES)){const n=d.count&&safe(d.count)||0,tes=$(id+'Tes');tes.querySelector('.badge').textContent=n?String(n):'';tes.setAttribute('aria-label',`${d.title}, riquadro ridotto${n?`: ${n} ${d.unit[n===1?0:1]}`:''}. Espandi`)}}
+for(const id of ['navCount','cmtCount'])new MutationObserver(paneBadges).observe($(id),{childList:true,characterData:true,subtree:true});
+// Quando un riquadro sparisce con il focus dentro, il focus torna al documento, al foglio o alla pagina.
+function workFocus(){if(isWord())restoreWordFocus();else if(isPage())pageFocus();else $('gridScroll').focus()}
+function paneSet(id,st,{focus=false,say=true}={}){const d=PANES[id],s=paneState(id),had=$(id).contains(document.activeElement)||$(id+'Tes')===document.activeElement,on=st!=='off';
+ if(d.on){if(d.on()!==on)d.set(on)}else s.off=!on;s.tes=st==='tessera';savePrefs();applyTiles();
+ if(focus||had){if(st==='open')d.focus();else if(st==='tessera')$(id+'Tes').focus();else workFocus()}
+ if(say)announce(d.title+': '+PANE_SAY[st]);refreshToggles()}
+function paneToggle(id){const off=paneSt(id)==='off';paneSet(id,off?'open':'off',{focus:off})}
+function paneMove(id){const s=paneState(id);s.side=s.side==='left'?'right':'left';savePrefs();applyTiles();announce(`${PANES[id].title} spostato a ${s.side==='left'?'sinistra':'destra'}`)}
+function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,Math.max(d.min,Math.min(d.max,innerWidth*.45))));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final)savePrefs()}
+function paneMenu(id,btn){const s=paneState(id),d=PANES[id],left=s.side==='left',r=btn.getBoundingClientRect();
+ openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Larghezza iniziale',icon:'fit',run:()=>setW(id,d.w)},'-',
+  {label:'Togli dal piano',desc:'Torna dal menu Tasselli, in basso a sinistra',icon:'close',run:()=>paneSet(id,'off',{focus:true})}],r.right-240,r.bottom+4,'Opzioni del riquadro '+d.title,btn)}
+// Menu Tasselli nella barra di stato: quali riquadri sono sul piano e alcune disposizioni pronte.
+function layoutMenu(){const m=modeKey(),ids=panesOf(m),btn=$('layoutBtn'),r=btn.getBoundingClientRect();if(!ids.length){toast('In Calcolo non ci sono riquadri da disporre');return}
+ const where=id=>{const st=paneSt(id);return st==='open'?(paneState(id).side==='left'?'A sinistra':'A destra'):st==='tessera'?'Ridotto a tessera':'Tolto dal piano'};
+ const items=ids.map(id=>({label:PANES[id].title,desc:where(id),check:true,checked:paneSt(id)!=='off',run:()=>paneToggle(id)}));
+ items.push('-',...(m==='w'?[{label:'Scrittura',desc:'Solo il foglio: Spostamento e Commenti tolti',icon:'page',run:()=>layoutPreset('off','Scrittura: solo il foglio')},{label:'Revisione',desc:'Spostamento e Commenti aperti',icon:'comment',run:()=>layoutPreset('open','Revisione: Spostamento e Commenti aperti')}]
+  :[{label:'Pagina grande',desc:'I riquadri ridotti a tessera',icon:'fit',run:()=>layoutPreset('tessera','Pagina grande')}]),{label:'Come all’inizio',desc:'Rimette ogni tassello al suo posto',icon:'history',run:layoutReset});
+ openMenu(items,r.left,r.top-6,'Tasselli',btn,true)}
+function layoutPreset(st,say){for(const id of panesOf(modeKey()))paneSet(id,st,{say:false});announce(say)}
+function layoutReset(){const L=layoutOf();for(const id of panesOf(modeKey()))delete L[id];savePrefs();applyTiles();announce('Tasselli rimessi come all’inizio')}
+// Fuga: si trascina con il mouse o con il dito; con il focus, le frecce allargano e stringono (con Maiusc di più).
+document.addEventListener('pointerdown',e=>{const sep=e.target.closest?.('.sep');if(!sep||e.button!==0)return;e.preventDefault();sep.setPointerCapture(e.pointerId);sep.classList.add('dragging');
+ const id=sep.dataset.pane,x0=e.clientX,w0=paneState(id).w,dir=paneState(id).side==='right'?-1:1;
+ const move=ev=>setW(id,w0+dir*(ev.clientX-x0),false);
+ const up=()=>{sep.removeEventListener('pointermove',move);sep.removeEventListener('pointerup',up);sep.removeEventListener('pointercancel',up);sep.classList.remove('dragging');savePrefs()};
+ sep.addEventListener('pointermove',move);sep.addEventListener('pointerup',up);sep.addEventListener('pointercancel',up)});
+document.addEventListener('keydown',e=>{const sep=e.target.closest?.('.sep');if(!sep||e.ctrlKey||e.altKey||e.metaKey)return;const step=e.shiftKey?64:16,id=sep.dataset.pane,d=PANES[id],s=paneState(id),grow=s.side==='left'?'ArrowRight':'ArrowLeft',shrink=s.side==='left'?'ArrowLeft':'ArrowRight';
+ if(e.key==='Enter'){e.preventDefault();paneSet(id,'tessera',{focus:true});return}
+ const v=e.key===grow?s.w+step:e.key===shrink?s.w-step:e.key==='Home'?d.min:e.key==='End'?d.max:null;if(v===null)return;e.preventDefault();setW(id,v)});
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-pane-act]');if(b){const id=b.closest('.pane').id;if(b.dataset.paneAct==='collapse')paneSet(id,'tessera',{focus:true});else paneMenu(id,b);return}
+ const t=e.target.closest?.('.tessera');if(t)paneSet(t.getAttribute('aria-controls'),'open',{focus:true})});
+// L'angolo piegato segna il tassello in cui si lavora: resta sull'ultimo anche quando il focus passa alla barra.
+let activeTile=null;
+document.addEventListener('focusin',e=>{const t=e.target.closest?.('#docRegion .tile');if(!t||t===activeTile)return;activeTile?.classList.remove('is-active');activeTile=t;t.classList.add('is-active')});
 function expandCollapsed(){const s=getSelection();if(s.rangeCount&&s.isCollapsed&&s.modify){s.modify('move','backward','word');s.modify('extend','forward','word')}}
 const anchorEl=()=>{let n=getSelection().anchorNode;return n?.nodeType===3?n.parentElement:n};
 function textStats(t){const words=t.trim()?t.trim().split(/\s+/).length:0;return{words,chars:t.replace(/\n/g,'').length,charsNoSp:t.replace(/\s/g,'').length}}
@@ -1590,7 +1766,7 @@ function cssContent(tpl){return String(tpl).split(/(\{pagina\}|\{pagine\})/i).fi
 const HF_BOXES=[['top-left','hl'],['top-center','hc'],['top-right','hr'],['bottom-left','fl'],['bottom-center','fc'],['bottom-right','fr']];
 function marginBoxes(hf,keys=HF_KEYS){const L=state.layout,font=hfFontCss(),col=hexColor(L.hfColor)?L.hfColor:'#404040',logo=logoCss();return HF_BOXES.map(([n],i)=>{const t=hf[keys[i]];let c=t?cssContent(t):'';if(logo&&i<3&&'lcr'[i]===L.logoPos)c=c?`${logo} "  " ${c}`:logo;return `@${n}{content:${c||'none'};font:${font};color:${col}}`}).join('')}
 function printStyle(){const L=state.layout,p=state.paper,base=p.startsWith('letter')?'letter':'A4',size=o=>`${base} ${o}`,mar=`${+L.mt}mm ${+L.mr}mm ${+L.mb}mm ${+L.ml}mm`;let css;if(isPage())css=pagePrintCss();else if(isCalc())css=`@page{size:${size(docOrient())};margin:18mm}`;else{const list=sectionList(),none=HF_BOXES.map(([n])=>`@${n}{content:none}`).join('');css=`@page{size:${size(docOrient())};margin:${mar};${marginBoxes(list[0].hf)}}`;if(L.evenDiff)css+=`@page :left{${marginBoxes(L,HF_EVEN)}}`;if(list.length>1)for(const s of list){css+=`@page s${s.i}{size:${size(s.orient)};margin:${mar};${marginBoxes(s.hf)}}`;if(L.evenDiff)css+=`@page s${s.i}:left{${marginBoxes(L,HF_EVEN)}}`}if(L.firstDiff)css+=`@page :first{${none}}`+(list.length>1?`@page s0:first{${none}}`:'');if(L.pageColor)css+=`@media print{html,body{background:${L.pageColor}!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}`;if(L.pbStyle&&L.pbStyle!=='none')css+=`@media print{#pbPrint{display:block!important;border:${L.pbStyle==='double'?Math.max(2.25,L.pbW*3):L.pbW}pt ${L.pbStyle==='single'?'solid':L.pbStyle} ${L.pbColor}}}`;if(L.wmText)css+='@media print{#wmPrint{display:flex!important}}'}$('pageStyle').textContent=css}
-function applyLayout(){const L=state.layout,ed=$('wordEditor'),px=mm=>Math.round(mm*MMPX)+'px';ed.style.padding=[L.mt,L.mr,L.mb,L.ml].map(px).join(' ');const multi=L.cols>1&&!sectBreaks().length;ed.style.columnCount=multi?String(L.cols):'';ed.style.columnGap=multi?px(L.colGap):'';$('page').classList.toggle('no-marks',!L.marks);$('navPane').hidden=!L.nav;$('hfHead').style.height=px(L.mt);$('hfFoot').style.height=px(L.mb);for(const el of [$('hfHead'),$('hfFoot')])el.style.padding=`0 ${px(L.mr)} 0 ${px(L.ml)}`;printStyle();ensureLogoDims();scheduleWordTidy(0)}
+function applyLayout(){const L=state.layout,ed=$('wordEditor'),px=mm=>Math.round(mm*MMPX)+'px';ed.style.padding=[L.mt,L.mr,L.mb,L.ml].map(px).join(' ');const multi=L.cols>1&&!sectBreaks().length;ed.style.columnCount=multi?String(L.cols):'';ed.style.columnGap=multi?px(L.colGap):'';$('page').classList.toggle('no-marks',!L.marks);applyTiles();$('hfHead').style.height=px(L.mt);$('hfFoot').style.height=px(L.mb);for(const el of [$('hfHead'),$('hfFoot')])el.style.padding=`0 ${px(L.mr)} 0 ${px(L.ml)}`;printStyle();ensureLogoDims();scheduleWordTidy(0)}
 function layoutChanged(msg){applyLayout();schedulePersist();refreshToggles();if(msg)announce(msg)}
 function setMargins(key){const m=MARGINS[key];if(!m)return;Object.assign(state.layout,{margins:key,mt:m.t,mb:m.b,ml:m.l,mr:m.r});layoutChanged(`Margini ${m.label.toLowerCase()}: superiore ${cmTxt(m.t)}, inferiore ${cmTxt(m.b)}, sinistro ${cmTxt(m.l)}, destro ${cmTxt(m.r)}`)}
 function wordMenuAnchor(id){const b=document.querySelector(`#ribbon [data-action="${id}"]`),r=b?.getBoundingClientRect();if(r&&r.width)return{x:r.left,y:r.bottom+2,el:b};const s=getSelection();let cr=null;if(inEditor()&&s.rangeCount){cr=s.getRangeAt(0).getBoundingClientRect();if(!cr.width&&!cr.height)cr=anchorEl()?.getBoundingClientRect()}return{x:cr?cr.left:200,y:cr?cr.bottom+4:200,el:null}}
@@ -1623,7 +1799,7 @@ function stepHeading(dir){const hs=docHeadings();if(!hs.length){toast('Il docume
 let navSig='';
 function currentHeadingIndex(hs){const b=curBlock();if(!b)return -1;let k=-1;hs.forEach((h,i)=>{if(h===b||h.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING)k=i});return k}
 function renderNav(force=false){if(!state.layout.nav||!isWord())return;const hs=docHeadings(),cur=currentHeadingIndex(hs),sig=hs.map(h=>h.tagName+h.textContent).join('|')+'#'+cur;if(sig===navSig&&!force)return;navSig=sig;const list=$('navList'),had=list.contains(document.activeElement)?+document.activeElement.dataset.nav:null;list.innerHTML=hs.length?hs.map((h,i)=>`<li><button type="button" class="nav-item lvl${h.tagName[1]}" data-nav="${i}" tabindex="${i===(had??Math.max(0,cur))?0:-1}"${i===cur?' aria-current="location"':''}><span class="sr-only">Titolo ${h.tagName[1]}: </span>${esc(h.textContent.trim().slice(0,120)||'(titolo vuoto)')}</button></li>`).join(''):'<li class="nav-empty">Nessun titolo. Applica gli stili Titolo 1, Titolo 2… per creare la struttura del documento.</li>';$('navCount').textContent=hs.length?`${hs.length} ${hs.length===1?'titolo':'titoli'}`:'';if(had!==null)list.querySelector(`[data-nav="${Math.min(had,hs.length-1)}"]`)?.focus()}
-function toggleNav(){state.layout.nav=!state.layout.nav;applyLayout();navSig='';renderNav(true);schedulePersist();if(state.layout.nav)setTimeout(()=>($('navList').querySelector('[tabindex="0"]')||$('navClose')).focus(),0);else restoreWordFocus()}
+function toggleNav(){state.layout.nav=!state.layout.nav;if(state.layout.nav)paneState('navPane').tes=false;applyLayout();navSig='';renderNav(true);schedulePersist();if(state.layout.nav)setTimeout(()=>($('navList').querySelector('[tabindex="0"]')||$('navPane').querySelector('.pane-btn')).focus(),0);else restoreWordFocus()}
 // Cronologia di Word: istantanee del documento con selezione, così annulla e ripeti coprono anche note, rientri, tabelle e testo alternativo.
 const wh={undo:[],redo:[],last:0,start:0,kind:'',tick:false,restoring:false};
 function nodePath(n,root){const p=[];while(n&&n!==root){const par=n.parentNode;if(!par)return null;p.unshift(Array.prototype.indexOf.call(par.childNodes,n));n=par}return n===root?p:null}
@@ -1747,7 +1923,7 @@ function markActiveComment(base){activeCmt=base;$('cmtActiveStyle').textContent=
 function renderComments(){const list=$('cmtList');if(!list)return;const order=commentOrder(),orphans=Object.keys(state.comments).filter(b=>!order.includes(b)&&!state.comments[b].deleted),all=[...order,...orphans];$('cmtCount').textContent=all.length?`${all.length} ${all.length===1?'commento':'commenti'}`:'';const had=list.contains(document.activeElement)?{c:document.activeElement.closest('[data-c]')?.dataset.c,a:document.activeElement.dataset.ca}:null;
  list.innerHTML=all.length?all.map(b=>{const d=state.comments[b],quote=cmtSpans(b).map(s=>s.textContent).join(' ').replace(/\s+/g,' ').trim().slice(0,120),who=esc(d.author||'Autore');return `<li class="cmt-item${d.done?' done':''}" data-c="${b}"><article aria-labelledby="cth-${b}"><h3 class="cmt-head" id="cth-${b}"><span class="cmt-av" aria-hidden="true">${esc(initials(d.author))}</span><span class="cmt-author">${who}</span><time datetime="${esc(d.date)}">${esc(fmtWhen(d.date))}</time>${d.done?'<span class="cmt-badge">Risolto</span>':''}</h3>${quote?`<blockquote class="cmt-quote"><span class="sr-only">Sul testo: </span>${esc(quote)}</blockquote>`:'<p class="cmt-quote orphan">Il testo commentato è stato eliminato</p>'}<p class="cmt-text">${esc(d.text).replace(/\n/g,'<br>')}</p>${(d.replies||[]).map(r=>`<div class="cmt-reply"><span class="cmt-author">${esc(r.author||'')}</span> <time>${esc(fmtWhen(r.date))}</time><p>${esc(r.text).replace(/\n/g,'<br>')}</p></div>`).join('')}<div class="cmt-actions">${quote?`<button type="button" class="btn sm" data-ca="go">Vai al testo<span class="sr-only"> del commento di ${who}</span></button>`:''}<button type="button" class="btn sm" data-ca="reply">Rispondi<span class="sr-only"> a ${who}</span></button><button type="button" class="btn sm" data-ca="edit">Modifica<span class="sr-only"> il commento di ${who}</span></button><button type="button" class="btn sm" data-ca="done">${d.done?'Riapri':'Risolvi'}<span class="sr-only"> il commento di ${who}</span></button><button type="button" class="btn sm" data-ca="del">Elimina<span class="sr-only"> il commento di ${who}</span></button></div></article></li>`}).join(''):'<li class="nav-empty">Nessun commento. Seleziona del testo e premi Ctrl+Alt+M per commentarlo.</li>';
  if(had?.c)(list.querySelector(`[data-c="${had.c}"] [data-ca="${had.a}"]`)||list.querySelector(`[data-c="${had.c}"] button`)||list.querySelector('button'))?.focus();markActiveComment(commentAtCaret()||activeCmt)}
-function toggleComments(force){state.showComments=force??!state.showComments;$('cmtPane').hidden=!state.showComments;if(state.showComments){renderComments();if(force===undefined)setTimeout(()=>($('cmtList').querySelector('button')||$('cmtClose')).focus(),0)}else if(force===undefined)restoreWordFocus();refreshToggles()}
+function toggleComments(force){state.showComments=force??!state.showComments;if(state.showComments)paneState('cmtPane').tes=false;applyTiles();if(state.showComments){renderComments();if(force===undefined)setTimeout(()=>($('cmtList').querySelector('button')||$('cmtClose')).focus(),0)}else if(force===undefined)restoreWordFocus();refreshToggles()}
 function goComment(base,dir=0){const sp=cmtSpans(base);if(!sp.length)return;const ed=$('wordEditor'),r=document.createRange();r.setStartBefore(sp[0]);r.setEndAfter(sp.at(-1));ed.focus({preventScroll:true});const s=getSelection();s.removeAllRanges();s.addRange(r);wordSelectionSave();scrollRangeIntoView(r);markActiveComment(base);const d=state.comments[base];announce(`Commento di ${d.author}${d.done?', risolto':''}: ${d.text}. Testo: ${sp.map(x=>x.textContent).join(' ').slice(0,100)}`)}
 function stepComment(dir){const order=commentOrder();if(!order.length){toast('Il documento non ha commenti');return}const cur=commentAtCaret();let i;if(cur)i=order.indexOf(cur)+dir;else{const b=curBlock();i=dir>0?order.findIndex(x=>b&&(b.compareDocumentPosition(cmtSpans(x)[0])&Node.DOCUMENT_POSITION_FOLLOWING)):order.length-1-[...order].reverse().findIndex(x=>b&&(b.compareDocumentPosition(cmtSpans(x)[0])&Node.DOCUMENT_POSITION_PRECEDING));if(i<0||i>=order.length)i=dir>0?0:order.length-1}if(i<0||i>=order.length){announce(dir>0?'Nessun commento successivo':'Nessun commento precedente');return}goComment(order[i])}
 function deleteComment(base){if(!base){toast('Porta il cursore su un testo commentato');return}wordHistPush();for(const s of cmtSpans(base))s.replaceWith(...s.childNodes);if(state.comments[base])state.comments[base].deleted=true;wordChanged();renderComments();announce('Commento eliminato')}
@@ -4272,7 +4448,7 @@ async function pgDataUrl(m){return m.data||=await pgBlobUrl(m.blob)}
 function pgUrlBlob(u){const i=u.indexOf(','),head=u.slice(0,i),mime=/^data:([^;,]+)/.exec(head)?.[1]||'application/octet-stream';if(!/;base64/i.test(head))return new Blob([decodeURIComponent(u.slice(i+1))],{type:mime});const bin=atob(u.slice(i+1)),a=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)a[k]=bin.charCodeAt(k);return new Blob([a],{type:mime})}
 async function pgWork(label,fn){status(label+'…');try{return await fn()}catch(e){console.error(e);toast(label+' non riuscito: '+e.message);return null}finally{status('Pronto')}}
 async function pageSave(){const p=Pg.p;if(!p)return;pgStorySync();const imgs={};const ok=await pgWork('Salvataggio del progetto',async()=>{for(const id of pgUsedImgs()){const m=Pg.imgs.get(id);if(m)imgs[id]={name:m.name,data:await pgDataUrl(m)}}return true});if(!ok)return;
- const blob=new Blob([JSON.stringify({programma:'Tassello Impagina',versione:'1.6.0',p,imgs})],{type:'application/json'});download(blob,extName(p.title+'.impagina','json'),'application/json');await pgPersist();toast(`Progetto salvato (${Math.max(1,Math.round(blob.size/1024)).toLocaleString('it-IT')} kB): si riapre con Apri, in Impagina${Pg.folder?'. La cartella collegata va ricollegata sull’altro computer':''}`)}
+ const blob=new Blob([JSON.stringify({programma:'Tassello Impagina',versione:'1.7.0',p,imgs})],{type:'application/json'});download(blob,extName(p.title+'.impagina','json'),'application/json');await pgPersist();toast(`Progetto salvato (${Math.max(1,Math.round(blob.size/1024)).toLocaleString('it-IT')} kB): si riapre con Apri, in Impagina${Pg.folder?'. La cartella collegata va ricollegata sull’altro computer':''}`)}
 async function pageLoadProject(o,name){let p;try{p=pgClean(o.p)}catch(e){toast(e.message);return}if(Pg.p&&pgAllItems(Pg.p).length&&!(await confirmAction(`Aprire «${name}»? Il progetto attuale di Impagina verrà chiuso: se non l’hai salvato, va perso.`)))return;
  for(const [id,x] of Object.entries(o.imgs||{}))if(typeof x?.data==='string'&&x.data.startsWith('data:image/'))try{await pgRegister(id,pgUrlBlob(x.data),str2(x.name,200)||id)}catch(e){}
  pgReset(p);$('docTitle').value=p.title;updateTitle();announce(`Aperto «${name}»: ${p.pages.length===1?'una pagina':p.pages.length+' pagine'}. ${pgStageLabel()}`);pgStage.focus()}
@@ -4652,33 +4828,39 @@ function pgGridMenu(){const a=document.querySelector('#ribbon [data-action="pgPh
 function pgPhotoGrid(k){const p=Pg.p,[,label,cells]=PG_GRIDS.find(x=>x[0]===k),sel=pgSel(),A=sel?.kind==='image'&&!sel.lock?pgBoxOf(sel):pgInner(p),g=p.gut*.6,gid=uid(),made=[],e=1e-6;
  pgEdit('Griglia di foto',q=>{const h=pgHolder(),keep=sel?.kind==='image'&&!sel.lock?sel:null;if(keep)pgRemove(q,h,keep);cells.forEach(([u,v,cw,ch],i)=>{const l=u>e?g/2:0,r=u+cw<1-e?g/2:0,t=v>e?g/2:0,b=v+ch<1-e?g/2:0,it=pgMk(q,'image',{x:A.x+u*A.w+l,y:A.y+v*A.h+t,w:cw*A.w-l-r,h:ch*A.h-t-b,fit:'fill',g:gid,img:i===0&&keep?keep.img:'',alt:i===0&&keep?keep.alt:'',mask:keep?.mask||'rect'});pgPut(h,it);made.push(it)})},{props:true});
  Pg.sel=made[0].id;Pg.multi={for:Pg.sel,ids:made.map(x=>x.id)};pgSelChanged({say:false});announce(`Griglia «${label}»: ${made.length} cornici per immagine, raggruppate. Scegli le foto: entrano nelle cornici vuote nell’ordine di lettura.`);$('pgImgInput').click()}
-async function help(){await modal('Tassello Ufficio',`<p><b>Tassello Ufficio 1.6.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per la produttività di base: un coltellino svizzero per i file, ordinato e leggero. Ognuno sta in un solo file HTML che funziona nel browser anche senza rete, senza suite da installare e senza account. Questo contiene tre app: <b>Testo</b> per scrivere, <b>Calcolo</b> per i fogli di calcolo e <b>Impagina</b> per comporre pagine, dai post per i social ai volantini, alle brochure e alle presentazioni. I documenti restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica e installare Tassello Ufficio come app, che si aggiorna da sola. Questo programma non si collega a internet (la dettatura usa il servizio del browser) e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello non sostituisce gli strumenti da professionisti e non è un clone delle app famose. Apre e salva DOCX e XLSX per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, grafici compresi; Alt+Q cerca qualsiasi comando o funzione; F1 elenca le scorciatoie; Alt+Maiusc+I legge posizione e formattazione; in Testo Maiusc+F10 apre il menu di tabelle e immagini, Alt+Maiusc+PgGiù e PgSu passano tra i titoli, Ctrl+Alt+M commenta, Alt+Maiusc+S seleziona il segnaposto successivo dei modelli; F9 aggiorna indici, riferimenti e numeri di pagina; Alt+= inserisce un’equazione; in modalità compilazione Tab passa da un campo all’altro e Spazio lo compila; Maiusc+F3 inserisce una funzione; Alt+F1 crea un grafico dalla selezione. Nei grafici le frecce leggono i punti, T mostra i dati come tabella e S li fa ascoltare come toni. In Impagina le pagine e le cornici sono elenchi che si scorrono con le frecce, le cornici sono nell’ordine di lettura e Alt+Maiusc+frecce lo cambia; sulla pagina PgGiù e PgSu scelgono la cornice, le frecce la spostano e Ctrl+frecce la ridimensionano; ogni proprietà ha un campo con il suo nome, Alt+Maiusc+I descrive la pagina e la verifica dell’accessibilità controlla testi alternativi, contrasto, ordine di lettura e testo che non entra nelle cornici. Schede, griglia, grafici, finestre e menu usano i ruoli ARIA standard, così gli screen reader (NVDA, JAWS, Assistente vocale) annunciano celle, valori, stati attivi e messaggi.</p><p><b>Testo:</b> stili modificabili e personalizzati (Titolo, Sottotitolo, Titolo 1-6 e i tuoi), copia formato, maiuscole e minuscole, incolla speciale, mostra formattazione, segni di formattazione, carattere avanzato (maiuscoletto, spaziatura, sottolineature), bordi e sfondo dei paragrafi, tabulazioni con riempimento, filigrana, colore e bordi pagina, capolettera, sezioni con orientamento, colonne, numerazione e intestazioni proprie, intestazioni con pagine pari diverse, formattazione e logo, note di chiusura, segnalibri, riferimenti incrociati che si aggiornano (testo, numero, pagina, sopra o sotto), indice delle figure e delle tabelle, indice analitico, citazioni e bibliografia APA o Chicago con gestione delle fonti, moduli compilabili accessibili (caselle, elenchi, date, testo) con modalità compilazione, caselle di testo, immagini con testo a capo, equazioni in MathML, ricerca per parole intere, espressioni regolari e stile, elenchi a più livelli con numerazione da ricominciare o continuare, tabelle con righe e colonne da inserire o eliminare, celle unite, bordi, riga di intestazione e didascalia, immagini con dimensione, posizione e didascalia, margini, colonne, intestazione e piè di pagina con numeri di pagina (anche nella stampa e nel PDF), confini di pagina, riquadro di spostamento, sommario cliccabile, note numerate in automatico, commenti, correzione automatica, stampa unione da un foglio di Calcolo, modelli (lettera, preventivo, verbale, relazione), dettatura, modalità lettura, indice di leggibilità Gulpease, cronologia delle versioni nel browser, verifica dell’accessibilità e grafici presi da Calcolo; apre e salva DOCX con stili, elenchi, note a piè di pagina e di chiusura, commenti con risposte e stato risolto, sezioni, intestazioni, segnalibri, campi REF, PAGEREF, NOTEREF, XE, INDEX e CITATION, fonti della bibliografia, controlli contenuto, cornici, immagini ancorate ed equazioni OMML di Microsoft Word.</p><p><b>Calcolo:</b> ${ROWS} righe × ${COLS} colonne per foglio, più fogli, tabelle pivot (righe, colonne, valori con somma, conteggio, media, massimo, minimo e percentuali, campi calcolati con formule sui totali, filtri, date raggruppate per anno, trimestre o mese, totali, dettagli e grafico pivot), blocca riquadri, formattazione condizionale (soglie, testo, duplicati, primi e ultimi, media, formule, barre dei dati e scale di colori), convalida dati con elenchi a discesa e messaggi, nomi definiti nelle formule, note nelle celle, ${FUNCS.length} funzioni in italiano o inglese con la finestra Inserisci funzione, matrici dinamiche (FILTRO, ORDINA, UNICI, SEQUENZA e altre, riferimento E2#), celle unite, inserimento ed eliminazione di righe e colonne con aggiornamento dei riferimenti, ordinamento, filtri, 12 tipi di grafico, CSV e XLSX con grafici, matrici dinamiche, regole, convalide, note e nomi nativi di Microsoft Excel.</p><p><b>Impagina:</b> documenti a più pagine con formati pronti (post 4:5, carosello, storia 9:16, volantino A4 e A5, brochure A4 a due colonne, newsletter, poster A2, A1 e A0, striscione, presentazione 16:9), margini, colonne, griglia e pagine mastro con numero di pagina, intestazione e logo. Cornici di testo, di immagine (adatta o riempi, con il punto focale), insegne e forme. Le <b>insegne</b> sono scritte d’effetto con stili pronti (classica, tramonto, fumetto, neon, timbro, ombra lunga, solo contorno, arco, cerchio, onda, foto nelle lettere): sfumature, un’immagine dentro le lettere, uno o due contorni, ombra morbida, lunga o in rilievo, effetto neon, scritta su arco, cerchio o onda, adattata alla cornice; restano testo vero, che si modifica scrivendo e che lo screen reader legge. La <b>stampa a tessere</b> divide poster e striscioni su fogli A4, A3, A5 o Lettera, con il margine che la stampante non raggiunge, la sovrapposizione per incollarli, i segni nei margini e un foglio di montaggio con lo schema numerato; il <b>festone</b> mette una lettera grande per foglio, su una bandierina o sul foglio intero, con i segni dei fori per il filo; il testo scorre da una cornice alla successiva, anche tra pagine, con stili di paragrafo e di carattere. Fonti locali: una cartella del computer (anche quella sincronizzata da Google Drive, OneDrive o Dropbox) che si rilegge con Aggiorna dalle fonti, dati CSV, XLSX, JSON o da un foglio di Calcolo per creare una pagina per riga come una stampa unione, feed RSS o Atom salvati o incollati, testo da DOCX, TXT o Markdown. Esporta in PNG, una pagina per file con i testi alternativi, e in PDF con la stampa del browser; il progetto si salva in un file da riaprire. Per comporre più in fretta: <b>Adatta a un altro formato</b> rifà il documento in un altro formato rispetto ai nuovi margini (dal post alla storia, al volantino, alla slide); i <b>temi di colore</b> ricolorano tutto il documento e correggono da soli il contrasto dove non basta; le immagini prendono una <b>sagoma</b> (arco, cerchio, pillola, esagono, stella, cuore, forma morbida) e le <b>griglie di foto</b> preparano da 2 a 6 cornici raggruppate che si riempiono scegliendo più foto insieme; più cornici si scelgono insieme (Maiusc+clic, Maiusc+frecce nell’elenco, Ctrl+A), si allineano tra loro, si distribuiscono a spazi uguali, si raggruppano (Ctrl+G) e si bloccano; trascinando, le <b>guide intelligenti</b> agganciano bordi e centri della pagina, dei margini e delle altre cornici, e da tastiera Alt+Maiusc+frecce porta la scelta alla guida successiva dicendo a che cosa si è allineata.</p><p><b>Privacy:</b> i documenti restano nel browser. Solo la dettatura usa un servizio esterno: in Chrome l’audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Impagina legge la cartella collegata solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Ufficio copre il lavoro di base, non tutto. Macro, revisioni (modifiche tracciate), elementi calcolati e slicer delle tabelle pivot, commenti in thread di Microsoft Excel (si leggono come note), icone della formattazione condizionale e grafici combinati o con assi secondari non vengono conservati; nell’editor le colonne delle sezioni non si vedono (compaiono in stampa, nel PDF e nel DOCX); nella stampa del browser la numerazione che ricomincia in una sezione e la prima pagina diversa delle sezioni successive valgono solo nel DOCX; i confini di pagina sullo schermo sono una stima e le intestazioni nella stampa richiedono Chrome o Edge recenti; l’apertura di DOCX/XLSX copre un sottoinsieme dei formati. Le versioni di Microsoft Excel precedenti al 2021 aprono le matrici dinamiche come formule matrice fisse. In Impagina le cornici non si ruotano, le insegne non hanno le deformazioni a maglia del vecchio WordArt (gonfio, prospettiva), la stampa a tessere va fatta al 100% senza adattare alla pagina, il testo va a capo senza sillabazione, i caratteri sono quelli installati sul computer, le pagine ripetute per ogni riga dei dati si impaginano una per una (un testo non continua da lì su altre pagine), e la cartella collegata va autorizzata di nuovo a ogni sessione; nei browser senza accesso alle cartelle (Firefox, Safari) la cartella si sceglie ogni volta. Conserva sempre una copia degli originali.</p><p><b>Marchi:</b> Microsoft, Office, Word ed Excel sono marchi di Microsoft Corporation. Tassello Ufficio non è collegato a Microsoft: apre e salva i formati DOCX e XLSX per essere compatibile.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Ufficio',`<p><b>Tassello Ufficio 1.7.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per la produttività di base: un coltellino svizzero per i file, ordinato e leggero. Ognuno sta in un solo file HTML che funziona nel browser anche senza rete, senza suite da installare e senza account. Questo contiene tre app: <b>Testo</b> per scrivere, <b>Calcolo</b> per i fogli di calcolo e <b>Impagina</b> per comporre pagine, dai post per i social ai volantini, alle brochure e alle presentazioni. I documenti restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica e installare Tassello Ufficio come app, che si aggiorna da sola. Questo programma non si collega a internet (la dettatura usa il servizio del browser) e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello non sostituisce gli strumenti da professionisti e non è un clone delle app famose. Apre e salva DOCX e XLSX per scambiare file con tutti, ma ha un disegno suo, con funzioni scelte per il lavoro di tutti i giorni e tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, grafici compresi; Alt+Q cerca qualsiasi comando o funzione; F1 elenca le scorciatoie; Alt+Maiusc+I legge posizione e formattazione; in Testo Maiusc+F10 apre il menu di tabelle e immagini, Alt+Maiusc+PgGiù e PgSu passano tra i titoli, Ctrl+Alt+M commenta, Alt+Maiusc+S seleziona il segnaposto successivo dei modelli; F9 aggiorna indici, riferimenti e numeri di pagina; Alt+= inserisce un’equazione; in modalità compilazione Tab passa da un campo all’altro e Spazio lo compila; Maiusc+F3 inserisce una funzione; Alt+F1 crea un grafico dalla selezione. Nei grafici le frecce leggono i punti, T mostra i dati come tabella e S li fa ascoltare come toni. In Impagina le pagine e le cornici sono elenchi che si scorrono con le frecce, le cornici sono nell’ordine di lettura e Alt+Maiusc+frecce lo cambia; sulla pagina PgGiù e PgSu scelgono la cornice, le frecce la spostano e Ctrl+frecce la ridimensionano; ogni proprietà ha un campo con il suo nome, Alt+Maiusc+I descrive la pagina e la verifica dell’accessibilità controlla testi alternativi, contrasto, ordine di lettura e testo che non entra nelle cornici. Schede, griglia, grafici, finestre e menu usano i ruoli ARIA standard, così gli screen reader (NVDA, JAWS, Assistente vocale) annunciano celle, valori, stati attivi e messaggi.</p><p><b>Testo:</b> stili modificabili e personalizzati (Titolo, Sottotitolo, Titolo 1-6 e i tuoi), copia formato, maiuscole e minuscole, incolla speciale, mostra formattazione, segni di formattazione, carattere avanzato (maiuscoletto, spaziatura, sottolineature), bordi e sfondo dei paragrafi, tabulazioni con riempimento, filigrana, colore e bordi pagina, capolettera, sezioni con orientamento, colonne, numerazione e intestazioni proprie, intestazioni con pagine pari diverse, formattazione e logo, note di chiusura, segnalibri, riferimenti incrociati che si aggiornano (testo, numero, pagina, sopra o sotto), indice delle figure e delle tabelle, indice analitico, citazioni e bibliografia APA o Chicago con gestione delle fonti, moduli compilabili accessibili (caselle, elenchi, date, testo) con modalità compilazione, caselle di testo, immagini con testo a capo, equazioni in MathML, ricerca per parole intere, espressioni regolari e stile, elenchi a più livelli con numerazione da ricominciare o continuare, tabelle con righe e colonne da inserire o eliminare, celle unite, bordi, riga di intestazione e didascalia, immagini con dimensione, posizione e didascalia, margini, colonne, intestazione e piè di pagina con numeri di pagina (anche nella stampa e nel PDF), confini di pagina, riquadro di spostamento, sommario cliccabile, note numerate in automatico, commenti, correzione automatica, stampa unione da un foglio di Calcolo, modelli (lettera, preventivo, verbale, relazione), dettatura, modalità lettura, indice di leggibilità Gulpease, cronologia delle versioni nel browser, verifica dell’accessibilità e grafici presi da Calcolo; apre e salva DOCX con stili, elenchi, note a piè di pagina e di chiusura, commenti con risposte e stato risolto, sezioni, intestazioni, segnalibri, campi REF, PAGEREF, NOTEREF, XE, INDEX e CITATION, fonti della bibliografia, controlli contenuto, cornici, immagini ancorate ed equazioni OMML di Microsoft Word.</p><p><b>Calcolo:</b> ${ROWS} righe × ${COLS} colonne per foglio, più fogli, tabelle pivot (righe, colonne, valori con somma, conteggio, media, massimo, minimo e percentuali, campi calcolati con formule sui totali, filtri, date raggruppate per anno, trimestre o mese, totali, dettagli e grafico pivot), blocca riquadri, formattazione condizionale (soglie, testo, duplicati, primi e ultimi, media, formule, barre dei dati e scale di colori), convalida dati con elenchi a discesa e messaggi, nomi definiti nelle formule, note nelle celle, ${FUNCS.length} funzioni in italiano o inglese con la finestra Inserisci funzione, matrici dinamiche (FILTRO, ORDINA, UNICI, SEQUENZA e altre, riferimento E2#), celle unite, inserimento ed eliminazione di righe e colonne con aggiornamento dei riferimenti, ordinamento, filtri, 12 tipi di grafico, CSV e XLSX con grafici, matrici dinamiche, regole, convalide, note e nomi nativi di Microsoft Excel.</p><p><b>Impagina:</b> documenti a più pagine con formati pronti (post 4:5, carosello, storia 9:16, volantino A4 e A5, brochure A4 a due colonne, newsletter, poster A2, A1 e A0, striscione, presentazione 16:9), margini, colonne, griglia e pagine mastro con numero di pagina, intestazione e logo. Cornici di testo, di immagine (adatta o riempi, con il punto focale), insegne e forme. Le <b>insegne</b> sono scritte d’effetto con stili pronti (classica, tramonto, fumetto, neon, timbro, ombra lunga, solo contorno, arco, cerchio, onda, foto nelle lettere): sfumature, un’immagine dentro le lettere, uno o due contorni, ombra morbida, lunga o in rilievo, effetto neon, scritta su arco, cerchio o onda, adattata alla cornice; restano testo vero, che si modifica scrivendo e che lo screen reader legge. La <b>stampa a tessere</b> divide poster e striscioni su fogli A4, A3, A5 o Lettera, con il margine che la stampante non raggiunge, la sovrapposizione per incollarli, i segni nei margini e un foglio di montaggio con lo schema numerato; il <b>festone</b> mette una lettera grande per foglio, su una bandierina o sul foglio intero, con i segni dei fori per il filo; il testo scorre da una cornice alla successiva, anche tra pagine, con stili di paragrafo e di carattere. Fonti locali: una cartella del computer (anche quella sincronizzata da Google Drive, OneDrive o Dropbox) che si rilegge con Aggiorna dalle fonti, dati CSV, XLSX, JSON o da un foglio di Calcolo per creare una pagina per riga come una stampa unione, feed RSS o Atom salvati o incollati, testo da DOCX, TXT o Markdown. Esporta in PNG, una pagina per file con i testi alternativi, e in PDF con la stampa del browser; il progetto si salva in un file da riaprire. Per comporre più in fretta: <b>Adatta a un altro formato</b> rifà il documento in un altro formato rispetto ai nuovi margini (dal post alla storia, al volantino, alla slide); i <b>temi di colore</b> ricolorano tutto il documento e correggono da soli il contrasto dove non basta; le immagini prendono una <b>sagoma</b> (arco, cerchio, pillola, esagono, stella, cuore, forma morbida) e le <b>griglie di foto</b> preparano da 2 a 6 cornici raggruppate che si riempiono scegliendo più foto insieme; più cornici si scelgono insieme (Maiusc+clic, Maiusc+frecce nell’elenco, Ctrl+A), si allineano tra loro, si distribuiscono a spazi uguali, si raggruppano (Ctrl+G) e si bloccano; trascinando, le <b>guide intelligenti</b> agganciano bordi e centri della pagina, dei margini e delle altre cornici, e da tastiera Alt+Maiusc+frecce porta la scelta alla guida successiva dicendo a che cosa si è allineata.</p><p><b>Privacy:</b> i documenti restano nel browser. Solo la dettatura usa un servizio esterno: in Chrome l’audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Impagina legge la cartella collegata solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Ufficio copre il lavoro di base, non tutto. Macro, revisioni (modifiche tracciate), elementi calcolati e slicer delle tabelle pivot, commenti in thread di Microsoft Excel (si leggono come note), icone della formattazione condizionale e grafici combinati o con assi secondari non vengono conservati; nell’editor le colonne delle sezioni non si vedono (compaiono in stampa, nel PDF e nel DOCX); nella stampa del browser la numerazione che ricomincia in una sezione e la prima pagina diversa delle sezioni successive valgono solo nel DOCX; i confini di pagina sullo schermo sono una stima e le intestazioni nella stampa richiedono Chrome o Edge recenti; l’apertura di DOCX/XLSX copre un sottoinsieme dei formati. Le versioni di Microsoft Excel precedenti al 2021 aprono le matrici dinamiche come formule matrice fisse. In Impagina le cornici non si ruotano, le insegne non hanno le deformazioni a maglia del vecchio WordArt (gonfio, prospettiva), la stampa a tessere va fatta al 100% senza adattare alla pagina, il testo va a capo senza sillabazione, i caratteri sono quelli installati sul computer, le pagine ripetute per ogni riga dei dati si impaginano una per una (un testo non continua da lì su altre pagine), e la cartella collegata va autorizzata di nuovo a ogni sessione; nei browser senza accesso alle cartelle (Firefox, Safari) la cartella si sceglie ogni volta. Conserva sempre una copia degli originali.</p><p><b>Marchi:</b> Microsoft, Office, Word ed Excel sono marchi di Microsoft Corporation. Tassello Ufficio non è collegato a Microsoft: apre e salva i formati DOCX e XLSX per essere compatibile.</p>`,[],'Chiudi',{noCancel:true})}
 const STATIC_KEYS={w:[['Navigazione nel documento',[['Esci dal documento','Esc poi Tab'],['Tab fuori da elenchi e tabelle','Inserisce una tabulazione'],['Tab o Maiusc+Tab in un elenco','Cambia livello dell’elenco'],['Tab o Maiusc+Tab in tabella','Cella successiva o precedente'],['Tab nell’ultima cella','Aggiunge una riga'],['Seleziona più celle da unire','Maiusc+frecce'],['Menu del browser con i suggerimenti di ortografia','Tasto Menu'],['Segui collegamento, voce di sommario, nota, riferimento incrociato o citazione','Ctrl+clic'],['Modalità compilazione: campo successivo o precedente','Tab / Maiusc+Tab'],['Compila il campo del modulo (casella, elenco, data, testo)','Spazio o Invio, oppure Alt+↓ fuori dalla compilazione'],['Esci dalla modalità compilazione','Esc'],['Modifica un’equazione','Cursore accanto all’equazione e Alt+='],['Riquadro di spostamento','F6 per raggiungerlo, frecce e Invio'],['Uscire dalla modalità lettura o fermare la dettatura','Esc']]]],x:[['Navigazione nel foglio',[['Sposta la cella attiva','← → ↑ ↓'],['Bordo dei dati','Ctrl+← → ↑ ↓'],['Estendi la selezione','Maiusc+frecce o Ctrl+Maiusc+frecce'],['Inizio riga','Home'],['Cella A1','Ctrl+Home'],['Ultima cella usata','Ctrl+Fine'],['Pagina su o giù','PgSu / PgGiù'],['Conferma e scendi o sali','Invio / Maiusc+Invio'],['Conferma e vai a destra o sinistra','Tab / Maiusc+Tab'],['Modifica la cella','F2 o inizia a scrivere'],['A capo nella cella','Alt+Invio'],['Annulla la modifica','Esc'],['Cancella e riscrivi','Backspace'],['Menu della cella','Maiusc+F10 o tasto Menu'],['Inserisci funzione','Maiusc+F3'],['Completa il nome di una funzione','Tab mentre scrivi la formula'],['Esci dal foglio','Esc poi Tab'],['Rinomina foglio (sulla linguetta)','F2'],['Elimina foglio (sulla linguetta)','Canc'],['Scegli dall’elenco a discesa della cella','Alt+↓'],['Nuova nota o modifica nota','Maiusc+F2'],['Vai a un nome definito','Ctrl+G e scrivi il nome'],['Mostra i dettagli di un valore della tabella pivot','Doppio clic o Maiusc+F10']]],['Navigazione nei grafici',[['Raggiungi i grafici','F6, oppure Esc e poi Tab dal foglio'],['Esplora i punti','← →, Home, Fine'],['Cambia serie','↑ ↓'],['Tabella dei dati','T'],['Ascolta la serie o tutte le serie','S / Maiusc+S'],['Leggi la descrizione','D'],['Formato grafico','Invio o F2'],['Sposta di una cella','Ctrl+frecce'],['Ridimensiona','Ctrl+Maiusc+frecce'],['Menu del grafico','Maiusc+F10'],['Elimina grafico','Canc'],['Torna al foglio','Esc']]]],p:[['Sulla pagina',[['Scegli la cornice successiva o precedente nell’ordine di lettura','PgGiù / PgSu'],['Sposta la cornice scelta di un’unità (con Maiusc di dieci)','← → ↑ ↓'],['Cambia larghezza e altezza','Ctrl+← → ↑ ↓'],['Modifica il testo o le proprietà della cornice','Invio'],['Togli la scelta: proprietà della pagina','Esc'],['Elimina la cornice','Canc'],['Aggiungi alla scelta la cornice successiva o precedente','Maiusc+PgGiù / Maiusc+PgSu'],['Aggiungi o togli dalla scelta con il puntatore','Maiusc+clic'],['Porta la scelta alla guida successiva (bordi, centri, margini, altre cornici)','Alt+Maiusc+← → ↑ ↓'],['Trascina senza agganciarti alle guide','Alt mentre trascini'],['Zoom avanti, indietro, tutta la pagina','+ / − / 0'],['Menu della cornice','Maiusc+F10']]],['Nell’elenco delle pagine',[['Scegli la pagina','↑ ↓, Home, Fine'],['Sposta la pagina prima o dopo','Alt+Maiusc+↑ / Alt+Maiusc+↓'],['Vai alla pagina','Invio'],['Elimina la pagina','Canc']]],['Nell’elenco delle cornici',[['Scegli la cornice','↑ ↓, Home, Fine'],['Cambia l’ordine di lettura','Alt+Maiusc+↑ / Alt+Maiusc+↓'],['Aggiungi alla scelta la cornice dopo o prima','Maiusc+↓ / Maiusc+↑'],['Aggiungi o togli la cornice dalla scelta','Spazio'],['Vai alle proprietà','Invio'],['Rinomina','F2'],['Elimina','Canc']]],['Nel testo della cornice',[['Stile Forte o Enfasi sulla selezione','Ctrl+B / Ctrl+I'],['Torna alla pagina','Esc']]]],
- g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Schede della barra multifunzione','← → poi Invio o ↓'],['Torna alla scheda dalla barra','Esc o ↑'],['Chiudi finestre e menu','Esc']]]]};
+ g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Strumenti e cassetti della barra','← → poi Invio o ↓'],['Chiudi il cassetto','Esc'],['Larghezza di un riquadro, sulla fuga','← → (con Maiusc di più)'],['Riduci il riquadro a tessera, sulla fuga','Invio'],['Chiudi finestre e menu','Esc']]]]};
 function shortcutsHtml(){const m=modeKey(),groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label+(c.ctx==='grid'?' (nel foglio)':c.ctx==='editor'?' (nel documento)':''),k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${appName()}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
 // Ricerca comandi (Alt+Q): combobox con elenco filtrato, navigabile con le frecce.
 let palItems=[],palIdx=0,palPrev=null;
 const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-function openPalette(){palPrev=document.activeElement;$('palettebg').hidden=false;$('palInput').value='';renderPalette();$('palInput').focus()}
+function openPalette(){palPrev=document.activeElement;closeDrawer(false);$('palettebg').hidden=false;$('palInput').value='';renderPalette();$('palInput').focus()}
 function closePalette(restore=true){$('palettebg').hidden=true;if(restore)refocus(palPrev)}
-function renderPalette(){const q=norm($('palInput').value.trim()),all=Object.values(C).filter(c=>available(c)&&!c.native&&c.id!=='palette');palItems=q?all.map(c=>{const hay=norm(c.label+' '+(c.short||'')+' '+c.cat+' '+c.id);let sc=norm(c.label).startsWith(q)?4:hay.includes(q)?3:q.split(/\s+/).every(w=>hay.includes(w))?2:0;return[c,sc]}).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]):all;if(q.length>=2&&isCalc())palItems=palItems.slice(0,60).concat(FUNCS.filter(f=>norm(f[0]).includes(q)||norm(f[1]).includes(q)||norm(f[4]).includes(q)).sort((a,b)=>(norm(b[0]).startsWith(q)?1:0)-(norm(a[0]).startsWith(q)?1:0)).slice(0,10).map(f=>({id:'fx:'+f[0],label:`Inserisci la funzione ${f[0]}`,icon:'t:ƒx',cat:'Funzione',keys:'',run:()=>insertFunctionByName(f[0])})));palItems=palItems.slice(0,80);palIdx=0;$('palList').innerHTML=palItems.length?palItems.map((c,i)=>{const k=keysOf(c);return `<div role="option" id="pal-${i}" class="pal-opt" data-i="${i}" aria-selected="${i===0}">${ICON(c.icon)}<span class="pal-label">${esc(c.label)}${k?`<span class="sr-only">, scorciatoia ${esc(k)}</span>`:''}</span><span class="pal-cat" aria-hidden="true">${esc(c.cat)}</span>${k?`<kbd aria-hidden="true">${esc(k)}</kbd>`:''}</div>`}).join(''):'<div class="pal-empty" role="option" aria-disabled="true" aria-selected="false" id="pal-empty">Nessun comando trovato</div>';palActive()}
+function palMark(label,q){const i=q?norm(label).indexOf(q):-1;return i<0?esc(label):esc(label.slice(0,i))+'<span class="pal-hit">'+esc(label.slice(i,i+q.length))+'</span>'+esc(label.slice(i+q.length))}
+function renderPalette(){const q=norm($('palInput').value.trim()),all=Object.values(C).filter(c=>available(c)&&!c.native&&c.id!=='palette');let groups;
+ if(q){groups=[['Comandi',all.map(c=>{const hay=norm(c.label+' '+(c.short||'')+' '+c.cat+' '+c.id);const sc=norm(c.label).startsWith(q)?4:hay.includes(q)?3:q.split(/\s+/).every(w=>hay.includes(w))?2:0;return[c,sc]}).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).slice(0,70)]];
+  if(q.length>=2&&isCalc())groups.push(['Funzioni',FUNCS.filter(f=>norm(f[0]).includes(q)||norm(f[1]).includes(q)||norm(f[4]).includes(q)).sort((a,b)=>(norm(b[0]).startsWith(q)?1:0)-(norm(a[0]).startsWith(q)?1:0)).slice(0,10).map(f=>({id:'fx:'+f[0],label:`Inserisci la funzione ${f[0]}`,icon:'t:ƒx',cat:'Funzione',keys:'',run:()=>insertFunctionByName(f[0])}))])}
+ else{const rec=((prefs.recent||{})[modeKey()]||[]).map(id=>C[id]).filter(c=>c&&available(c)&&!c.native&&c.id!=='palette');groups=[['Usati di recente',rec],['Tutti i comandi',all.filter(c=>!rec.includes(c))]]}
+ groups=groups.filter(g=>g[1].length);palItems=groups.flatMap(g=>g[1]);palIdx=0;let n=0;
+ $('palList').innerHTML=palItems.length?groups.map(([name,list],gi)=>`<div role="group" aria-labelledby="palg${gi}"><div class="pal-group-h" id="palg${gi}" aria-hidden="true"><span>${esc(name)}</span><span>${list.length}</span></div>${list.map(c=>{const k=keysOf(c),on=c.toggle?safe(c.toggle):null,i=n++;return `<div role="option" id="pal-${i}" class="pal-opt" data-i="${i}" aria-selected="${i===0}">${ICON(c.icon)}<span class="pal-label">${palMark(c.label,q)}${on===null?'':`<span class="sr-only">, ${on?'attivo':'non attivo'}</span>`}${k?`<span class="sr-only">, scorciatoia ${esc(k)}</span>`:''}</span><span class="pal-cat" aria-hidden="true">${esc(c.cat)}</span>${k?`<kbd aria-hidden="true">${esc(k.split(' / ')[0])}</kbd>`:''}</div>`}).join('')}</div>`).join(''):'<div class="pal-empty" role="option" aria-disabled="true" aria-selected="false" id="pal-empty">Nessun comando trovato</div>';palActive()}
 function palActive(){$$('#palList [role=option]').forEach((o,i)=>o.setAttribute('aria-selected',i===palIdx&&!!palItems.length));const id=palItems.length?'pal-'+palIdx:'pal-empty';$('palInput').setAttribute('aria-activedescendant',id);$(id)?.scrollIntoView({block:'nearest'})}
-function palRun(i){const c=palItems[i];if(!c)return;closePalette(true);setTimeout(()=>c.run?c.run():runCommand(c.id),0)}
+function palRun(i){const c=palItems[i];if(!c)return;if(!c.run){const R=prefs.recent||(prefs.recent={}),m=modeKey();R[m]=[c.id,...(R[m]||[]).filter(x=>x!==c.id)].slice(0,5);savePrefs()}closePalette(true);setTimeout(()=>c.run?c.run():runCommand(c.id),0)}
 // Menu contestuale generico (ruolo menu, frecce, Invio, Esc).
 let menuState=null;
-function openMenu(items,x,y,label='Menu',opener=null){closeMenu(false);const m=$('menu'),prev=document.activeElement;opener?.setAttribute('aria-expanded','true');m.setAttribute('aria-label',label);m.innerHTML=items.map((it,i)=>it==='-'?'<div class="menu-sep" role="separator"></div>':`<button type="button" role="${it.checked===undefined?'menuitem':it.check?'menuitemcheckbox':'menuitemradio'}"${it.checked===undefined?'':` aria-checked="${!!it.checked}"`} tabindex="-1" data-i="${i}"${it.disabled?' aria-disabled="true"':''}>${it.checked===undefined?ICON(it.icon):`<span class="mi-check" aria-hidden="true">${it.checked?'✓':''}</span>`}<span class="mi-text"><span class="mi-label">${esc(it.label)}</span>${it.desc?`<span class="mi-desc">${esc(it.desc)}</span>`:''}</span>${it.keys?`<kbd aria-hidden="true">${esc(it.keys)}</kbd>`:''}</button>`).join('');m.hidden=false;const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(4,Math.min(x,innerWidth-w-4))+'px';m.style.top=Math.max(4,Math.min(y,innerHeight-h-4))+'px';menuState={items,prev,opener};(m.querySelector('[aria-checked=true]:not([aria-disabled])')||m.querySelector('[role^=menuitem]:not([aria-disabled])'))?.focus()}
+function openMenu(items,x,y,label='Menu',opener=null,up=false){closeMenu(false);const m=$('menu'),prev=document.activeElement;opener?.setAttribute('aria-expanded','true');m.setAttribute('aria-label',label);m.innerHTML=items.map((it,i)=>it==='-'?'<div class="menu-sep" role="separator"></div>':`<button type="button" role="${it.checked===undefined?'menuitem':it.check?'menuitemcheckbox':'menuitemradio'}"${it.checked===undefined?'':` aria-checked="${!!it.checked}"`} tabindex="-1" data-i="${i}"${it.disabled?' aria-disabled="true"':''}>${it.checked===undefined?ICON(it.icon):`<span class="mi-check" aria-hidden="true">${it.checked?'✓':''}</span>`}<span class="mi-text"><span class="mi-label">${esc(it.label)}</span>${it.desc?`<span class="mi-desc">${esc(it.desc)}</span>`:''}</span>${it.keys?`<kbd aria-hidden="true">${esc(it.keys)}</kbd>`:''}</button>`).join('');m.hidden=false;const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(4,Math.min(x,innerWidth-w-4))+'px';m.style.top=Math.max(4,Math.min(up?y-h:y,innerHeight-h-4))+'px';menuState={items,prev,opener};(m.querySelector('[aria-checked=true]:not([aria-disabled])')||m.querySelector('[role^=menuitem]:not([aria-disabled])'))?.focus()}
 function closeMenu(restore=true){if(!menuState)return;const p=menuState.prev;menuState.opener?.setAttribute('aria-expanded','false');menuState=null;$('menu').hidden=true;if(restore)refocus(p)}
 function menuRun(i){const it=menuState?.items[i];if(!it||it.disabled)return;closeMenu(true);setTimeout(()=>it.run(),0)}
 const mi=(id,run)=>{const c=C[id];return{label:c.label,icon:c.icon,keys:keysOf(c),run:run||(()=>runCommand(id))}};
 // Comandi di Word dei pacchetti di impaginazione, tabelle, elenchi e oggetti.
 const SHEET_ACTIONS={pivotCalc:()=>pivotCalc(),pivotNew:pivotNew,pivotFields:()=>pivotFields(),pivotFilter:()=>pivotFilter(),pivotOptions:()=>pivotOptions(),pivotRefresh:()=>pivotRefresh(),pivotRefreshAll:()=>pivotRefreshAll(),pivotDrill:pivotDrill,pivotChart:pivotChart,pivotSelect:pivotSelect,pivotDelete:pivotDelete,freezeMenu:freezeMenu,cfMenu:cfMenu,cfManage:cfManage,dvDialog:dvDialog,dvPick:dvPick,dvCircle:()=>{dvCircle=!dvCircle;renderGrid(true);if(dvCircle){let n=0;const s=sheet(),u=usedBounds(s);for(const d of s.dv||[]){const a=parseArea(d.range);if(a)for(let r=a.r1;r<=Math.min(a.r2,u.r);r++)for(let c=a.c1;c<=Math.min(a.c2,u.c);c++)if(dvInvalid(r,c,s))n++}toast(n?`${n} celle con dati non validi evidenziate`:'Nessun dato non valido nel foglio')}},nameDefine:()=>nameDefine(),nameManager:nameManager,nameUse:nameUseMenu,noteEdit:noteEdit,noteDelete:noteDelete,noteNext:()=>noteStep(1),notePrev:()=>noteStep(-1),noteList:noteList};
-const WORD_ACTIONS={marginsMenu:marginsMenu,columnsMenu:columnsMenu,pageSetup:pageSetup,headerFooter:headerFooter,pageNumbers:pageNumbersMenu,navPane:toggleNav,pageMarks:()=>{state.layout.marks=!state.layout.marks;applyLayout();schedulePersist()},nextHeading:()=>stepHeading(1),prevHeading:()=>stepHeading(-1),followLink:()=>{if(!inEditor())restoreWordFocus();followLink()},wordMenu:wordMenu,
+const WORD_ACTIONS={marginsMenu:marginsMenu,columnsMenu:columnsMenu,pageSetup:pageSetup,headerFooter:headerFooter,pageNumbers:pageNumbersMenu,navPane:()=>paneToggle('navPane'),pageMarks:()=>{state.layout.marks=!state.layout.marks;applyLayout();schedulePersist()},nextHeading:()=>stepHeading(1),prevHeading:()=>stepHeading(-1),followLink:()=>{if(!inEditor())restoreWordFocus();followLink()},wordMenu:wordMenu,
  tblRowAbove:()=>tblOp('rowAbove'),tblRowBelow:()=>tblOp('rowBelow'),tblColLeft:()=>tblOp('colLeft'),tblColRight:()=>tblOp('colRight'),tblDelRow:()=>tblOp('delRow'),tblDelCol:()=>tblOp('delCol'),tblMerge:()=>tblOp('merge'),tblSplit:()=>tblOp('split'),tblDelete:()=>deleteTable(),tblHeader:toggleTableHeader,tblCaption:tableCaption,tblBorders:tableBordersMenu,tblWidth:toggleTableWidth,
  bulletMenu:()=>listMenu('ul'),numberMenu:()=>listMenu('ol'),listMulti:multiListMenu,listRestart:listRestart,listContinue:listContinue,listSetValue:listSetValue,lineMenu:lineMenu,paraDialog:paraDialog,stylesMenu:stylesMenu,
  formatTitle:()=>setParaClass('title'),formatSubtitle:()=>setParaClass('subtitle'),formatP:()=>setParaClass(''),formatH4:()=>formatWordTag('h4'),formatH5:()=>formatWordTag('h5'),formatH6:()=>formatWordTag('h6'),
  imgFormat:formatImage,imgGrow:()=>imgSize(1),imgShrink:()=>imgSize(-1),imgCaption:imageCaption,captionInsert:insertCaption,
- cmtNew:newComment,cmtPane:()=>toggleComments(),cmtNext:()=>stepComment(1),cmtPrev:()=>stepComment(-1),cmtResolve:()=>resolveComment(commentAtCaret()||activeCmt),cmtDelete:()=>deleteComment(commentAtCaret()||activeCmt),cmtDeleteAll:deleteAllComments,autoCorrect:autoCorrectDialog,readability:readability,dictate:toggleDictation,readingMode:toggleReading,versionSave:saveVersionNamed,versionHistory:versionsDialog,templates:templateDialog,nextPlaceholder:()=>{if(!inEditor())restoreWordFocus();nextPlaceholder()},
+ cmtNew:newComment,cmtPane:()=>paneToggle('cmtPane'),cmtNext:()=>stepComment(1),cmtPrev:()=>stepComment(-1),cmtResolve:()=>resolveComment(commentAtCaret()||activeCmt),cmtDelete:()=>deleteComment(commentAtCaret()||activeCmt),cmtDeleteAll:deleteAllComments,autoCorrect:autoCorrectDialog,readability:readability,dictate:toggleDictation,readingMode:toggleReading,versionSave:saveVersionNamed,versionHistory:versionsDialog,templates:templateDialog,nextPlaceholder:()=>{if(!inEditor())restoreWordFocus();nextPlaceholder()},
  formatPainter:formatPainter,formatCopy:()=>formatCopy(),formatPaste:formatPaste,caseMenu:caseMenu,changeCase:()=>changeCase(),pasteSpecial:pasteSpecial,revealFormat:revealFormat,showMarks:toggleMarks,fontDialog:fontDialog,smallCaps:toggleSmallCaps,paraBorders:paraBorders,tabsDialog:tabsDialog,styleManage:styleManageMenu,newStyle:newStyleFromSelection,watermark:watermarkDialog,pageColor:pageColorDialog,pageBorder:pageBorderDialog,dropCap:toggleDropCap,
  breaksMenu:breaksMenu,sectNext:()=>insertSectionBreak('next'),sectCont:()=>insertSectionBreak('cont'),sectSetup:sectionSetup,sectGoNext:()=>stepSection(1),sectGoPrev:()=>stepSection(-1),endnote:insertEndnote,bookmark:bookmarkDialog,crossRef:crossRefDialog,tofMenu:tofMenu,markEntry:markIndexEntry,insertIndex:insertIndex,citeMenu:citeMenu,sources:sourceManager,biblio:insertBiblio,updateFields:updateIndexes,controlsMenu:controlMenu,ccCheck:()=>insertControl('check'),ccDrop:()=>insertControl('drop'),ccDate:()=>insertControl('date'),ccText:()=>insertControl('text'),formFill:()=>toggleFormMode(),ccEdit:editControlAtCaret,textBox:insertTextBox,equation:equationDialog,
  mmSource:mergeSource,mmField:mergeFieldMenu,mmPreview:()=>mergePreview(0),mmPrev:()=>mergePreview(-1),mmNext:()=>mergePreview(1),mmFinish:mergeFinish};
@@ -4691,9 +4873,10 @@ let filePrev=null;
 function openFilePanel(){filePrev=document.activeElement;const w=isWord(),ed=$('wordEditor'),st=textStats(ed.innerText||''),dd=(k,v)=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`;$('fileBack').lastChild.textContent=w?'Torna al documento':isCalc()?'Torna al foglio':'Torna alla pagina';$('fileIntro').textContent=isPage()?'Il progetto resta sul tuo dispositivo: la bozza e le immagini sono salvate nel browser. Salva il progetto per riaprirlo, esporta in PNG per i social o in PDF con la stampa.':'I documenti restano sul tuo dispositivo: la bozza viene salvata nel browser, i file si scaricano nei formati Office.';$('fileDetails').innerHTML=isPage()?pageFileDetails(dd):dd('Nome',w?state.wordTitle:state.excelTitle)+dd('Tipo',w?'Documento di Testo (DOCX)':'Cartella di Calcolo (XLSX)')+(w?dd('Contenuto',`${pageCount()} pagine stimate, ${st.words} parole`)+dd('Formato pagina',{a4:'A4 verticale','a4-landscape':'A4 orizzontale',letter:'Lettera verticale','letter-landscape':'Lettera orizzontale'}[state.paper]):dd('Fogli',state.sheets.map(s=>s.name).join(', '))+dd('Celle con dati',state.sheets.reduce((n,s)=>n+Object.values(s.cells).filter(x=>x.v!=='').length,0).toLocaleString('it-IT')))+dd('Bozza',$('saveState').textContent);$('filepanel').hidden=false;$('fileBtn').setAttribute('aria-expanded','true');$('filepanel').querySelector('.file-side button')?.focus()}
 function closeFilePanel(restore=true){if($('filepanel').hidden)return;$('filepanel').hidden=true;$('fileBtn').setAttribute('aria-expanded','false');if(restore)(filePrev?.isConnected?filePrev:$('fileBtn')).focus()}
 // Aree raggiungibili con F6 e Maiusc+F6.
-function regions(){const l=[$('titlebar'),$('tabrow'),$('ribbon')];if(!$('findbar').hidden)l.push($('findbar'));if(isWord()){if(!$('readBar').hidden)l.push($('readBar'));if(!$('navPane').hidden)l.push($('navPane'));l.push($('wordEditor'));if(!$('cmtPane').hidden)l.push($('cmtPane'))}else if(isPage())l.push($('pgStart'),$('pgPages'),$('pgFrames'),$('pgStage'),$('pgBar'),$('pgProps'));else{l.push($('formulaLine'),$('gridScroll'));if(!$('chartLayer').hidden)l.push($('chartLayer'));l.push($('sheetBar'))}l.push($('statusbar'));return l.filter(el=>el.offsetWidth||el.offsetHeight)}
-const REGION_NAME={pgStart:'Scegli il formato',pgPages:'Pagine',pgFrames:'Cornici, in ordine di lettura',pgStage:'Pagina',pgBar:'Vista della pagina',pgProps:'Proprietà',readBar:'Strumenti di lettura',cmtPane:'Commenti',navPane:'Riquadro di spostamento',titlebar:'Barra del titolo',tabrow:'Schede della barra multifunzione',ribbon:'Barra multifunzione',findbar:'Trova e sostituisci',wordEditor:'Documento',formulaLine:'Barra della formula',gridScroll:'Foglio',sheetBar:'Linguette dei fogli',chartLayer:'Grafici del foglio',statusbar:'Barra di stato'};
-function focusRegion(el){if(el.id==='wordEditor'){restoreWordFocus();return}if(el.id==='pgProps'){(focusables(el)[0]||el).focus();announce($('pgPropTitle').textContent);return}if(['pgPages','pgFrames','pgStage'].includes(el.id)){el.focus();return}if(el.id==='cmtPane'){($('cmtList').querySelector('button')||$('cmtAdd')).focus();return}if(el.id==='navPane'){($('navList').querySelector('[tabindex="0"]')||$('navClose')).focus();return}if(el.id==='gridScroll'){el.focus();return}if(el.id==='tabrow'){$('tab-'+slug(currentTab))?.focus();return}if(el.id==='sheetBar'){$('sheet-'+state.sheet)?.focus();return}if(el.id==='chartLayer'){const ch=chartById(selChart)||chartsOf()[0];if(ch)focusChart(ch.id);return}focusables(el)[0]?.focus()}
+function regions(){const l=[$('bar')];if(drawerName)l.push($('ribbon'));if(!$('findbar').hidden)l.push($('findbar'));const side=s=>panesOf(modeKey()).filter(id=>paneState(id).side===s).flatMap(id=>{const st=paneSt(id);return st==='tessera'?[$(id+'Tes')]:st==='open'?PANES[id].regions():[]});
+ if(isWord()){if(!$('readBar').hidden)l.push($('readBar'));l.push(...side('left'),$('wordEditor'),...side('right'))}else if(isPage())l.push($('pgStart'),...side('left'),$('pgStage'),$('pgBar'),...side('right'));else{l.push($('formulaLine'),$('gridScroll'));if(!$('chartLayer').hidden)l.push($('chartLayer'));l.push($('sheetBar'))}l.push($('statusbar'));return l.filter(el=>el&&(el.offsetWidth||el.offsetHeight))}
+const REGION_NAME={pgStart:'Scegli il formato',pgPages:'Pagine',pgFrames:'Cornici, in ordine di lettura',pgStage:'Pagina',pgBar:'Vista della pagina',pgProps:'Proprietà',readBar:'Strumenti di lettura',cmtPane:'Commenti',navPane:'Riquadro di spostamento',bar:'Barra',ribbon:'Cassetto',findbar:'Trova e sostituisci',wordEditor:'Documento',formulaLine:'Barra della formula',gridScroll:'Foglio',sheetBar:'Linguette dei fogli',chartLayer:'Grafici del foglio',statusbar:'Barra di stato'};
+function focusRegion(el){if(el.id==='wordEditor'){restoreWordFocus();return}if(el.id==='pgProps'){(focusables(el)[0]||el).focus();announce($('pgPropTitle').textContent);return}if(['pgPages','pgFrames','pgStage'].includes(el.id)){el.focus();return}if(el.id==='cmtPane'){($('cmtList').querySelector('button')||$('cmtAdd')).focus();return}if(el.id==='navPane'){($('navList').querySelector('[tabindex="0"]')||$('navPane').querySelector('.pane-btn')).focus();return}if(el.id==='bar'){(toolItems()[toolFocus]||focusables(el)[0])?.focus();return}if(el.id==='ribbon'){el.querySelector('.ditem,select')?.focus();return}if(el.classList.contains('tessera')){el.focus();return}if(el.id==='gridScroll'){el.focus();return}if(el.id==='sheetBar'){$('sheet-'+state.sheet)?.focus();return}if(el.id==='chartLayer'){const ch=chartById(selChart)||chartsOf()[0];if(ch)focusChart(ch.id);return}focusables(el)[0]?.focus()}
 function cycleRegion(dir){const list=regions(),a=document.activeElement;let i=list.findIndex(r=>r.contains(a));i=i<0?(dir>0?0:list.length-1):(i+dir+list.length)%list.length;focusRegion(list[i]);if(!['wordEditor','gridScroll','pgPages','pgFrames','pgStage','pgProps'].includes(list[i].id))announce(REGION_NAME[list[i].id]||'')}
 // Formattazione dai pulsanti della barra: in Testo agisce sul testo selezionato, in Calcolo sulle celle selezionate.
 const TEXT_FORMATS=new Set([...words('bold italic underline strikeThrough superscript subscript insertOrderedList insertUnorderedList'),...words('Left Center Right Full').map(side=>'justify'+side)]);
@@ -4711,7 +4894,7 @@ const COMMON_ACTIONS={
  save:()=>fileSave(),open:()=>$('fileInput').click(),new:()=>newDocument(),backup:()=>projectBackup(),print:()=>window.print(),filePanel:()=>openFilePanel(),
  exportHtml:()=>{htmlExport();toast('Pagina HTML scaricata')},exportCSV:()=>exportCSV(),importCSV:()=>$('fileInput').click(),
  palette:()=>openPalette(),shortcuts:()=>showShortcuts(),help:()=>help(),formulaHelp:()=>formulaHelp(),
- nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),switchWord:()=>setMode('word'),switchExcel:()=>setMode('excel'),switchPage:()=>setMode('impagina'),
+ nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),switchWord:()=>setMode('word'),switchExcel:()=>setMode('excel'),switchPage:()=>setMode('impagina'),layoutMenu:()=>layoutMenu(),layoutReset:()=>layoutReset(),showPgSide:()=>paneToggle('pgSidePane'),showPgProps:()=>paneToggle('pgPropsPane'),
  readStatus:word=>toast(word?wordStatusText():excelStatusText()),
  undo:word=>word?wordUndo(false):restoreHistory('undo'),redo:word=>word?wordUndo(true):restoreHistory('redo'),
  cut:()=>clipboardCut(),copy:()=>clipboardCopy(),paste:()=>wordPaste(),pasteValues:()=>wordPaste(),
@@ -4759,7 +4942,7 @@ for(const [id,type] of [['chartCol','col'],['chartBar','bar'],['chartLine','line
 for(const id of ['fxCatRecent','fxCatMath','fxCatStat','fxCatLogic','fxCatText','fxCatDate','fxCatLookup','fxCatDyn','fxCatFin','fxCatInfo'])COMMON_ACTIONS[id]=()=>openFuncMenu(id);
 // Esegue un comando della barra, della tavolozza o di una scorciatoia; gli errori diventano un avviso.
 // In Impagina valgono i suoi comandi (PAGE_ACTIONS) e, dei comuni, solo quelli delle tre app (ALL_APPS).
-const ALL_APPS=new Set(['palette','shortcuts','help','nextRegion','prevRegion','switchWord','switchExcel','switchPage','themeDark','contrast','filePanel']);
+const ALL_APPS=new Set(['palette','shortcuts','help','nextRegion','prevRegion','switchWord','switchExcel','switchPage','themeDark','contrast','filePanel','layoutMenu','layoutReset','showPgSide','showPgProps']);
 async function handleAction(action){const word=isWord();
  try{if(isPage()){if(PAGE_ACTIONS[action])await PAGE_ACTIONS[action]();else if(ALL_APPS.has(action))await COMMON_ACTIONS[action](false);else toast('Comando non disponibile in Impagina');return}
   if(TEXT_FORMATS.has(action)){formatCommand(action,word);return}
@@ -4769,25 +4952,20 @@ async function handleAction(action){const word=isWord();
 // Scorciatoie globali: intercettate in cattura, prima dei gestori dei singoli controlli.
 window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;const ctx=focusContext();if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key==='/'){e.preventDefault();runCommand('shortcuts');return}if(e.key==='F5'&&isCalc()&&ctx==='grid'&&!e.ctrlKey&&!e.shiftKey){e.preventDefault();runCommand('goto');return}const c=findShortcut(e,ctx);if(!c)return;e.preventDefault();e.stopPropagation();runCommand(c.id)},true);
 $('skipDoc').onclick=e=>{e.preventDefault();focusDocument()};
-$('skipRibbon').onclick=e=>{e.preventDefault();$('tab-'+slug(currentTab))?.focus()};
-// Barra del titolo
+$('skipTools').onclick=e=>{e.preventDefault();(toolItems()[toolFocus]||$('fileBtn')).focus()};
+// Barra
 for(const [mode,a] of Object.entries(APPS))$(a.button).onclick=()=>setMode(mode);
 $('docTitle').addEventListener('input',e=>{if(isPage())pageRetitle(e.target.value);else state[isWord()?'wordTitle':'excelTitle']=e.target.value;updateTitle();schedulePersist()});
 $('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();focusDocument()});
-for(const id of ['quickUndo','quickRedo','saveTop'])$(id).addEventListener('mousedown',e=>{if(isWord())e.preventDefault()});
-$('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand(isPage()?'pgSave':'save');$('openTop').onclick=()=>runCommand('open');
+for(const id of ['paletteBtn','saveTop','layoutBtn'])$(id).addEventListener('mousedown',e=>{if(isWord())e.preventDefault()});
+$('saveTop').onclick=()=>runCommand(isPage()?'pgSave':'save');$('layoutBtn').onclick=()=>runCommand('layoutMenu');
 $('paletteBtn').onclick=()=>runCommand('palette');$('kbdBtn').onclick=()=>runCommand('shortcuts');$('helpBtn').onclick=()=>runCommand('help');$('fileBtn').onclick=openFilePanel;
-$('fileBtn').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('tab-'+slug(currentTab))?.focus()}});
-// Schede (tablist con attivazione automatica)
-$('tabs').addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t&&t.dataset.tab!==currentTab)selectTab(t.dataset.tab)});
-$('tabs').addEventListener('keydown',e=>{const t=e.target.closest('[role=tab]');if(!t)return;const list=$$('#tabs [role=tab]'),i=list.indexOf(t);let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft'){if(i===0){e.preventDefault();$('fileBtn').focus();return}j=i-1}else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();selectTab(list[j].dataset.tab);return}if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){e.preventDefault();focusables($('ribbon'))[0]?.focus()}});
-// Barra multifunzione
+// Cassetti
 $('ribbon').addEventListener('mousedown',e=>{if(isWord()&&e.target.closest('button[data-action]'))e.preventDefault()});
-// Pulsanti della barra: ognuno porta in data-action il nome del comando.
-$('ribbon').addEventListener('click',({target})=>{const action=target.closest('button[data-action]')?.dataset.action;if(action)runCommand(action)});
-// Elenchi e colori della barra: carattere, dimensione, formato numerico, colori, impostazioni del documento.
+// Pulsanti dei cassetti: ognuno porta in data-action il nome del comando.
+$('ribbon').addEventListener('click',({target})=>{const b=target.closest('button[data-action]');if(b)drawerRun(b)});
+// Elenchi e colori dei cassetti: carattere, dimensione, formato numerico, colori, impostazioni del documento.
 $('ribbon').addEventListener('change',e=>{const t=e.target,id=t.id;if(id==='fontFamily'){changeFont(t.value);announce('Carattere '+t.value)}else if(id==='fontSize'){changeFontSize(t.value);announce('Dimensione '+t.value)}else if(id==='numberFormat'){applyCellsStyle('fmt',t.value);announce('Formato '+t.value)}else if(COLORS[id]){lastColor[id]=t.value;$$(`[data-swatch="${id}"]`).forEach(s=>s.style.background=t.value);changeColor(id==='fontColor'?'fontColor':'fillColor',t.value);announce('Colore applicato '+t.value)}else if(id in{docFont:1,lineSpacing:1,paraSpacing:1}){state.doc[{docFont:'font',lineSpacing:'line',paraSpacing:'space'}[id]]=t.value;applyDocStyle();updateWordStats();schedulePersist();announce(t.selectedOptions[0]?.text||t.value)}else return;if(t.isConnected)t.focus({preventScroll:true})});
-$('ribbon').addEventListener('keydown',e=>{const t=e.target,list=focusables($('ribbon')),i=list.indexOf(t);if(e.key==='Escape'||(e.key==='ArrowUp'&&!t.matches('select,input'))){e.preventDefault();$('tab-'+slug(currentTab))?.focus();return}if(i<0||t.matches('select'))return;let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft')j=(i-1+list.length)%list.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();list[j].focus()}});
 // Tooltip (si chiudono con Esc e non coprono il puntatore)
 document.addEventListener('pointerover',e=>{if(e.target.closest?.('#tip'))return;const el=e.target.closest?.('[data-tip]');clearTimeout(tipTimer);if(!el){tip.hidden=true;return}tipTimer=setTimeout(()=>showTip(el),450)});
 document.addEventListener('focusin',e=>{const el=e.target.closest?.('[data-tip]');clearTimeout(tipTimer);tip.hidden=true;if(el&&el.matches(':focus-visible,:focus-within'))tipTimer=setTimeout(()=>showTip(el),350)});
@@ -4904,7 +5082,6 @@ ed.addEventListener('contextmenu',e=>{if(e.target.closest?.('td,th,img,figure'))
 let navRaf=0;document.addEventListener('selectionchange',()=>{if(!isWord()||!state.layout.nav||!inEditor())return;cancelAnimationFrame(navRaf);navRaf=requestAnimationFrame(()=>renderNav())});
 $('navList').addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(b)goHeading(docHeadings()[+b.dataset.nav])});
 $('navList').addEventListener('keydown',e=>{const items=$$('#navList [data-nav]'),i=items.indexOf(e.target);if(i<0)return;let j=null;if(e.key==='ArrowDown')j=Math.min(items.length-1,i+1);else if(e.key==='ArrowUp')j=Math.max(0,i-1);else if(e.key==='Home')j=0;else if(e.key==='End')j=items.length-1;else if(e.key==='Escape'){e.preventDefault();restoreWordFocus();return}if(j===null)return;e.preventDefault();items.forEach((b,k)=>b.tabIndex=k===j?0:-1);items[j].focus()});
-$('navClose').onclick=()=>runCommand('navPane');
 for(const id of ['hfHead','hfFoot'])$(id).addEventListener('click',()=>runCommand('headerFooter'));
 window.addEventListener('resize',()=>{if(isWord())scheduleWordTidy(150)});
 window.addEventListener('beforeprint',()=>{printStyle();if(isWord()){renumberNotes();renumberEndnotes();buildPrintSections()}});window.addEventListener('afterprint',clearPrintSections);
@@ -4918,7 +5095,7 @@ ed.addEventListener('paste',e=>{if(reading||formMode)e.preventDefault()},true);e
 // Commenti: riquadro, cursore su un testo commentato, annuncio quando si entra in un commento.
 $('cmtList').addEventListener('click',e=>{const b=e.target.closest('[data-ca]'),li=e.target.closest('[data-c]');if(!b||!li)return;const c=li.dataset.c;({go:()=>goComment(c),reply:()=>replyComment(c),edit:()=>editComment(c),done:()=>resolveComment(c),del:()=>deleteComment(c)})[b.dataset.ca]?.()});
 $('cmtList').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();restoreWordFocus()}});
-$('cmtClose').onclick=()=>runCommand('cmtPane');$('cmtAdd').addEventListener('mousedown',e=>e.preventDefault());$('cmtAdd').onclick=()=>runCommand('cmtNew');
+$('cmtAdd').addEventListener('mousedown',e=>e.preventDefault());$('cmtAdd').onclick=()=>runCommand('cmtNew');
 let lastCmtSeen=null,lfRaf=0;document.addEventListener('selectionchange',()=>{if(!isWord()||!inEditor())return;const b=commentAtCaret();if(b!==lastCmtSeen){lastCmtSeen=b;if(b&&state.comments[b]&&document.activeElement===ed){const d=state.comments[b];announce(`Commento di ${d.author}${d.done?', risolto':''}: ${d.text.slice(0,140)}`)}if(state.showComments||activeCmt)markActiveComment(b)}if(reading){cancelAnimationFrame(lfRaf);lfRaf=requestAnimationFrame(updateLineFocus)}});
 $('wordScroll').addEventListener('scroll',()=>{if(reading){cancelAnimationFrame(lfRaf);lfRaf=requestAnimationFrame(updateLineFocus)}},{passive:true});
 // Barra della modalità lettura e della dettatura
@@ -4945,7 +5122,7 @@ window.addEventListener('beforeunload',()=>{if(db)return;try{localStorage.setIte
 // Avvio: preferenze, archivio delle bozze e ultima bozza, poi il disegno dell'interfaccia.
 async function start(){applyPrefs();try{document.execCommand('defaultParagraphSeparator',false,'p')}catch(e){}
  try{db=await dbOpen();await pageRestore();await restoreDraft();setPaper(state.paper);setZoom(state.zoom);applyDocStyle();
-  for(const draw of [renderTabs,renderRibbon,renderSheetTabs,updateWordStats,updateTitle])draw();
+  for(const draw of [renderBar,applyTiles,renderSheetTabs,updateWordStats,updateTitle])draw();
   if(isCalc()){renderGrid();renderCharts();updateExcelStats()}
   status('Pronto · i dati restano sul dispositivo')}
  catch(e){console.error('Avvio non riuscito',e);toast('Avvio non riuscito: '+e.message)}}

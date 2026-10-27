@@ -1,25 +1,20 @@
 // Scorciatoie globali: intercettate in cattura, prima dei gestori dei singoli controlli.
 window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;const ctx=focusContext();if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key==='/'){e.preventDefault();runCommand('shortcuts');return}if(e.key==='F5'&&isCalc()&&ctx==='grid'&&!e.ctrlKey&&!e.shiftKey){e.preventDefault();runCommand('goto');return}const c=findShortcut(e,ctx);if(!c)return;e.preventDefault();e.stopPropagation();runCommand(c.id)},true);
 $('skipDoc').onclick=e=>{e.preventDefault();focusDocument()};
-$('skipRibbon').onclick=e=>{e.preventDefault();$('tab-'+slug(currentTab))?.focus()};
-// Barra del titolo
+$('skipTools').onclick=e=>{e.preventDefault();(toolItems()[toolFocus]||$('fileBtn')).focus()};
+// Barra
 for(const [mode,a] of Object.entries(APPS))$(a.button).onclick=()=>setMode(mode);
 $('docTitle').addEventListener('input',e=>{if(isPage())pageRetitle(e.target.value);else state[isWord()?'wordTitle':'excelTitle']=e.target.value;updateTitle();schedulePersist()});
 $('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();focusDocument()});
-for(const id of ['quickUndo','quickRedo','saveTop'])$(id).addEventListener('mousedown',e=>{if(isWord())e.preventDefault()});
-$('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand(isPage()?'pgSave':'save');$('openTop').onclick=()=>runCommand('open');
+for(const id of ['paletteBtn','saveTop','layoutBtn'])$(id).addEventListener('mousedown',e=>{if(isWord())e.preventDefault()});
+$('saveTop').onclick=()=>runCommand(isPage()?'pgSave':'save');$('layoutBtn').onclick=()=>runCommand('layoutMenu');
 $('paletteBtn').onclick=()=>runCommand('palette');$('kbdBtn').onclick=()=>runCommand('shortcuts');$('helpBtn').onclick=()=>runCommand('help');$('fileBtn').onclick=openFilePanel;
-$('fileBtn').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('tab-'+slug(currentTab))?.focus()}});
-// Schede (tablist con attivazione automatica)
-$('tabs').addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t&&t.dataset.tab!==currentTab)selectTab(t.dataset.tab)});
-$('tabs').addEventListener('keydown',e=>{const t=e.target.closest('[role=tab]');if(!t)return;const list=$$('#tabs [role=tab]'),i=list.indexOf(t);let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft'){if(i===0){e.preventDefault();$('fileBtn').focus();return}j=i-1}else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();selectTab(list[j].dataset.tab);return}if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){e.preventDefault();focusables($('ribbon'))[0]?.focus()}});
-// Barra multifunzione
+// Cassetti
 $('ribbon').addEventListener('mousedown',e=>{if(isWord()&&e.target.closest('button[data-action]'))e.preventDefault()});
-// Pulsanti della barra: ognuno porta in data-action il nome del comando.
-$('ribbon').addEventListener('click',({target})=>{const action=target.closest('button[data-action]')?.dataset.action;if(action)runCommand(action)});
-// Elenchi e colori della barra: carattere, dimensione, formato numerico, colori, impostazioni del documento.
+// Pulsanti dei cassetti: ognuno porta in data-action il nome del comando.
+$('ribbon').addEventListener('click',({target})=>{const b=target.closest('button[data-action]');if(b)drawerRun(b)});
+// Elenchi e colori dei cassetti: carattere, dimensione, formato numerico, colori, impostazioni del documento.
 $('ribbon').addEventListener('change',e=>{const t=e.target,id=t.id;if(id==='fontFamily'){changeFont(t.value);announce('Carattere '+t.value)}else if(id==='fontSize'){changeFontSize(t.value);announce('Dimensione '+t.value)}else if(id==='numberFormat'){applyCellsStyle('fmt',t.value);announce('Formato '+t.value)}else if(COLORS[id]){lastColor[id]=t.value;$$(`[data-swatch="${id}"]`).forEach(s=>s.style.background=t.value);changeColor(id==='fontColor'?'fontColor':'fillColor',t.value);announce('Colore applicato '+t.value)}else if(id in{docFont:1,lineSpacing:1,paraSpacing:1}){state.doc[{docFont:'font',lineSpacing:'line',paraSpacing:'space'}[id]]=t.value;applyDocStyle();updateWordStats();schedulePersist();announce(t.selectedOptions[0]?.text||t.value)}else return;if(t.isConnected)t.focus({preventScroll:true})});
-$('ribbon').addEventListener('keydown',e=>{const t=e.target,list=focusables($('ribbon')),i=list.indexOf(t);if(e.key==='Escape'||(e.key==='ArrowUp'&&!t.matches('select,input'))){e.preventDefault();$('tab-'+slug(currentTab))?.focus();return}if(i<0||t.matches('select'))return;let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft')j=(i-1+list.length)%list.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();list[j].focus()}});
 // Tooltip (si chiudono con Esc e non coprono il puntatore)
 document.addEventListener('pointerover',e=>{if(e.target.closest?.('#tip'))return;const el=e.target.closest?.('[data-tip]');clearTimeout(tipTimer);if(!el){tip.hidden=true;return}tipTimer=setTimeout(()=>showTip(el),450)});
 document.addEventListener('focusin',e=>{const el=e.target.closest?.('[data-tip]');clearTimeout(tipTimer);tip.hidden=true;if(el&&el.matches(':focus-visible,:focus-within'))tipTimer=setTimeout(()=>showTip(el),350)});
