@@ -4,6 +4,7 @@ const I_ACTIONS={open:()=>pickFile(),export:exportDialog,closePhoto,auto:applyAu
  lookMenu,lutImport:()=>$('lutInput').click(),lookAmount:()=>I.r.look==='none'?toast('Scegli prima un look'):liveRange('Intensità del look','lookAmt'),lookOff:()=>setLook('none'),
  planMenu,stepNext:()=>stepGo(1),stepPrev:()=>stepGo(-1),stepAuto,planFree:()=>choosePlan('libera'),
  undo:()=>photoUndo(false),redo:()=>photoUndo(true)};
+Object.assign(I_ACTIONS,PHOTO_TOOL_ACTIONS);
 const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newDraw:newDrawingCmd,
  addRect:()=>addItem('rect'),addEllipse:()=>addItem('ellipse'),addLine:()=>addItem('line'),addText:()=>{addItem('text');$('pr-text')?.focus();$('pr-text')?.select()},addImage:()=>{pickMode='image';$('drawInput').click()},
  duplicateItem,deleteItem,cut:()=>copyItem(true),copy:()=>copyItem(false),paste:pasteItem,

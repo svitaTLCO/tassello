@@ -33,6 +33,23 @@ def('i','Piani',[
  ['stepPrev','Passo precedente del piano','left','Ctrl+Maiusc+Invio',{g:1,short:'Indietro'}],
  ['stepAuto','Applica di nuovo la proposta del passo','wand','',{short:'Proposta'}],
  ['planFree','Tutti i controlli, senza piano','gear','',{short:'Tutti i controlli'}]]);
+def('i','Selezione',[
+ ['toolRect','Selezione rettangolare','selRect','R',{ctx:'photo',short:'Rettangolo',quiet:1,toggle:()=>T.tool==='rect'}],
+ ['toolEllipse','Selezione ellittica','selEllipse','E',{ctx:'photo',short:'Ellisse',quiet:1,toggle:()=>T.tool==='ellipse'}],
+ ['toolLasso','Lazo, a mano libera','lasso','L',{ctx:'photo',short:'Lazo',quiet:1,toggle:()=>T.tool==='lasso'}],
+ ['toolPoly','Lazo poligonale','poly','P',{ctx:'photo',short:'Lazo poligonale',quiet:1,toggle:()=>T.tool==='poly'}],
+ ['toolBrush','Pennello di selezione','brush','B',{ctx:'photo',short:'Pennello',quiet:1,toggle:()=>T.tool==='brush'}],
+ ['toolWand','Bacchetta magica','wand','W',{ctx:'photo',short:'Bacchetta magica',quiet:1,toggle:()=>T.tool==='wand'}],
+ ['toolRange','Intervallo di colore','picker','I',{ctx:'photo',short:'Intervallo di colore',quiet:1,toggle:()=>T.tool==='range'}],
+ ['selAll','Seleziona tutta la foto','selAll','Ctrl+A',{ctx:'photo',short:'Tutto'}],
+ ['selNone','Deseleziona','selNone','Ctrl+D',{short:'Deseleziona'}],
+ ['selInvert','Inverti la selezione','invert','Maiusc+F7',{short:'Inverti'}],
+ ['selFeather','Sfuma la selezione…','feather','',{short:'Sfuma'}],
+ ['selGrow','Espandi o contrai la selezione…','grow','',{short:'Espandi o contrai'}],
+ ['selRefine','Rifinisci i bordi della selezione…','refine','',{short:'Rifinisci i bordi'}],
+ ['selMeasure','Selezione con le misure…','ruler','',{short:'Con le misure'}],
+ ['selDescribe','Descrivi la selezione','speak','Alt+Maiusc+S',{g:1,short:'Descrivi'}],
+ ['selShow','Mostra in rosso la parte non selezionata','eye','',{short:'Mostra in rosso',toggle:()=>!!prefs.quickMask}]]);
 def('d','File',[
  ['openDraw','Apri un disegno SVG o inserisci immagini','open','Ctrl+O',{g:1,short:'Apri'}],
  ['saveSvg','Salva il disegno (SVG, si riapre modificabile)','save','Ctrl+S',{g:1,short:'Salva'}],

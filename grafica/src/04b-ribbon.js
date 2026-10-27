@@ -4,6 +4,7 @@ const RIBBON={
  i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll readStatus'],['Piano','planMenu stepPrev stepNext planFree'],['Cronologia','undo redo']],
   Inquadra:[['Ruota','rotateLeft rotateRight flipH'],['Formato','ratioMenu straighten resetGeometry']],
   Look:[['Look','lookMenu lutImport lookAmount lookOff']],
+  Seleziona:[['Strumenti','toolRect toolEllipse toolLasso toolPoly toolBrush toolWand toolRange'],['Selezione','selAll selNone selInvert selMeasure'],['Bordo','selFeather selGrow selRefine'],['Vista','selShow selDescribe']],
   Vista:[['Confronto','compare'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  d:{Inizio:[['Disegno','openDraw saveSvg exportDraw'],['Appunti','paste cut copy duplicateItem'],['Inserisci','addText addImage addRect addEllipse'],['Cronologia','undo redo']],
   Inserisci:[['Forme','addRect addEllipse addLine'],['Testo','addText'],['Immagini','addImage']],

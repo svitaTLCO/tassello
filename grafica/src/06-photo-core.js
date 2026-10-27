@@ -18,7 +18,7 @@ const ADJ_BY=Object.fromEntries(ADJ.map(([id,label,group,min,max,step,fmt,hint])
 // Formati dell'inquadratura come larghezza diviso altezza; 0 tiene il formato della foto.
 const RATIOS=[['orig','Formato della foto',0],['1:1','Quadrato 1:1',1],['4:5','Verticale 4:5, post',4/5],['9:16','Verticale 9:16, storie',9/16],['2:3','Verticale 2:3',2/3],['3:2','Orizzontale 3:2',3/2],['4:3','Orizzontale 4:3',4/3],['16:9','Panoramico 16:9',16/9],['a4','Foglio A4 verticale',210/297]];
 const ratioName=id=>(RATIOS.find(x=>x[0]===id)||RATIOS[0])[1];
-const newRecipe=()=>({adj:Object.fromEntries(ADJ.map(a=>[a[0],0])),rot:0,flip:false,angle:0,ratio:'orig',cx:.5,cy:.5,look:'none',lookAmt:100});
+const newRecipe=()=>({adj:Object.fromEntries(ADJ.map(a=>[a[0],0])),rot:0,flip:false,angle:0,ratio:'orig',cx:.5,cy:.5,look:'none',lookAmt:100,sel:null});
 // La foto aperta: il file originale, l'immagine decodificata e la ricetta, con la cronologia per Annulla e Ripeti.
 // base è la ricetta dell'ultima modifica conclusa: i cursori cambiano r mentre si trascinano e la modifica entra
 // nella cronologia solo quando si rilasciano.
@@ -31,7 +31,7 @@ function photoUndo(redo){const from=redo?I.redo:I.hist,to=redo?I.hist:I.redo,e=f
 // Dopo ogni modifica: anteprima, pannello, pulsanti attivi e bozza.
 function recipeChanged({panel=false}={}){requestRender();if(panel)renderPanel();else syncPanel();refreshToggles();schedulePersist('immagini')}
 const changedAdj=r=>ADJ.filter(a=>r.adj[a[0]]);
-const hasEdits=()=>snap()!==JSON.stringify(newRecipe());
+const hasEdits=()=>JSON.stringify({...I.r,sel:null})!==JSON.stringify(newRecipe());
 // Apertura: la foto nuova riparte da una ricetta vuota e dal primo passo del piano scelto.
 async function openPhoto(file){const bmp=await work('Apertura della foto',()=>decodePhoto(file));if(!bmp)return false;
  I.bmp?.close();Object.assign(I,{file,name:file.name,title:baseName(file.name),bmp,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false});I.base=snap();
