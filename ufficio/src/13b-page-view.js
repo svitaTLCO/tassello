@@ -187,7 +187,9 @@ pgStage.addEventListener('pointerup',pgEndDrag);pgStage.addEventListener('pointe
 pgStage.addEventListener('dblclick',e=>{const it=pgHit(pgPt(e));if(it)pgOpenItem(it)});
 pgStage.addEventListener('contextmenu',e=>{e.preventDefault();const it=pgHit(pgPt(e));if(it&&it.id!==Pg.sel)pgSelect(it.id,{say:false});pgItemMenu(e.clientX,e.clientY)});
 // Invio su una cornice: il testo va all'editor, l'immagine vuota alla scelta del file, le altre alle proprietà.
-function pgOpenItem(it){if(it.kind==='text'){$('pgStory')?.focus();announce('Testo di '+it.name+': '+($('pgStory')?.textContent.slice(0,80)||'vuoto'));return}if(it.kind==='image'&&!it.img&&!it.field){runCommand('pgChooseImage');return}focusables($('pgProps'))[0]?.focus()}
+// Il riquadro delle proprietà può essere ridotto a tessera o tolto dal piano: i comandi che portano lì lo riaprono.
+function pgShowProps(){if(paneSt('pgPropsPane')!=='open')paneSet('pgPropsPane','open',{say:false})}
+function pgOpenItem(it){if(it.kind==='text'){pgShowProps();$('pgStory')?.focus();announce('Testo di '+it.name+': '+($('pgStory')?.textContent.slice(0,80)||'vuoto'));return}if(it.kind==='image'&&!it.img&&!it.field){runCommand('pgChooseImage');return}pgShowProps();focusables($('pgProps'))[0]?.focus()}
 // Tastiera sulla pagina: frecce per spostare, Ctrl+frecce per ridimensionare (con Maiusc dieci volte tanto),
 // PgSu e PgGiù per la cornice precedente o successiva nell'ordine di lettura, Invio per lavorarci, Esc per non sceglierne nessuna.
 pgStage.addEventListener('keydown',e=>{if(!Pg.p)return;const it=pgSel(),arrows={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
@@ -199,7 +201,7 @@ pgStage.addEventListener('keydown',e=>{if(!Pg.p)return;const it=pgSel(),arrows={
   else{pgEdit('Sposta',()=>{it.x+=ax*step;it.y+=ay*step},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}`)}return}
  if(e.key==='PageUp'||e.key==='PageDown'){if(e.altKey||e.ctrlKey)return;e.preventDefault();pgSelectStep(e.key==='PageDown'?1:-1,e.shiftKey);return}
  if(e.key==='Escape'&&Pg.sel){e.preventDefault();pgSelect(null);return}
- if(e.key==='Enter'){e.preventDefault();if(it)pgOpenItem(it);else focusables($('pgProps'))[0]?.focus();return}
+ if(e.key==='Enter'){e.preventDefault();if(it)pgOpenItem(it);else{pgShowProps();focusables($('pgProps'))[0]?.focus()}return}
  if(!e.ctrlKey&&!e.altKey&&(e.key==='+'||e.key==='-'||e.key==='0')){e.preventDefault();runCommand(e.key==='+'?'zoomUp':e.key==='-'?'zoomDown':'pgZoomFit');return}
  if((e.shiftKey&&e.key==='F10')||e.key==='ContextMenu'){e.preventDefault();const r=pgStage.getBoundingClientRect();pgItemMenu(r.left+20,r.top+20)}});
 // Elenco delle pagine: frecce per scegliere, Alt+Maiusc+frecce per spostare la pagina, Invio per andare alla pagina.
@@ -219,7 +221,7 @@ $('pgFrames').addEventListener('keydown',e=>{const items=pgReadOrder(pgHolder())
  if(e.altKey&&e.shiftKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();runCommand(e.key==='ArrowUp'?'pgReadUp':'pgReadDown');return}
  let j=null;if(e.key==='ArrowDown')j=Math.min(items.length-1,i+1);else if(e.key==='ArrowUp')j=Math.max(0,i<0?0:i-1);else if(e.key==='Home')j=0;else if(e.key==='End')j=items.length-1;if(j!==null){e.preventDefault();pgSelect(items[j].id);return}
  if(e.key==='Enter'){e.preventDefault();if(!Pg.sel)pgSelect(items[0].id,{say:false});pgOpenItem(pgSel());return}
- if(e.key==='F2'){e.preventDefault();if(!Pg.sel)pgSelect(items[0].id,{say:false});$('pp-name')?.focus();$('pp-name')?.select();return}
+ if(e.key==='F2'){e.preventDefault();if(!Pg.sel)pgSelect(items[0].id,{say:false});pgShowProps();$('pp-name')?.focus();$('pp-name')?.select();return}
  if(e.key==='Escape'&&Pg.sel){e.preventDefault();pgSelect(null);return}
  if((e.shiftKey&&e.key==='F10')||e.key==='ContextMenu'){e.preventDefault();const r=$('pgf-'+Pg.sel)?.getBoundingClientRect()||$('pgFrames').getBoundingClientRect();pgItemMenu(r.left+20,r.bottom)}});
 $('pgFrames').addEventListener('click',e=>{const o=e.target.closest('[id^=pgf-]');if(o&&o.id!=='pgf-empty'){if(e.shiftKey||e.ctrlKey||e.metaKey)pgToggleSel(o.id.slice(4));else pgSelect(o.id.slice(4),{say:false})}$('pgFrames').focus()});
