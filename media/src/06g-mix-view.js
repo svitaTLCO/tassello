@@ -12,8 +12,10 @@ function regionLabel(r,i,n){const t=trackOf(r.track),parts=[`Regione ${i+1} di $
  const over=regionsOn(r.track).find(o=>o!==r&&o.start<regionEnd(r)-1e-6&&regionEnd(o)>r.start+1e-6);if(over)parts.push(`si sovrappone a «${over.name}»`);if(A.region===r.id)parts.push('aperta nell’editor');return parts.join(', ')}
 function arWidth(){return Math.max(arScroll.clientWidth,HEAD_W+Math.ceil((Math.max(projDur(),P.t,P.cycle.b)+30)*P.pxs))}
 // Picchi dei suoni per le miniature delle regioni: il valore più alto ogni centesimo di secondo.
+// Il suono aperto nell'editor ha già i suoi picchi, aggiornati a ogni modifica: la miniatura si ricava da quelli.
 const PEAKS=new Map();
-function srcPeaks(id){const b=SOURCES.get(id);if(!b)return null;const c=PEAKS.get(id);if(c?.buf===b)return c;const per=Math.max(1,Math.round(b.sampleRate/100)),n=Math.ceil(b.length/per),mx=new Float32Array(n);
+function srcPeaks(id){const b=SOURCES.get(id);if(!b)return null;const c=PEAKS.get(id);if(c?.buf===b)return c;const per=Math.max(1,Math.round(b.sampleRate/100)),n=Math.ceil(b.length/per),mx=new Float32Array(n),ed=b===A.buf&&getPeaks().levels[0];
+ if(ed){const st=ed.st,last=st.length-2;for(let k=0,i=0;k<n;k++){const a0=k*per,b0=a0+per;while(i<last&&st[i+1]<=a0)i++;let m=0;for(let j=i;j<=last&&st[j]<b0;j++)for(const p of ed.ch){const v=p.mx[j]>-p.mn[j]?p.mx[j]:-p.mn[j];if(v>m)m=v}mx[k]=m}const out={buf:b,mx};PEAKS.set(id,out);return out}
  for(let ch=0;ch<b.numberOfChannels;ch++){const d=b.getChannelData(ch);for(let i=0;i<n;i++){let m=mx[i];const e=Math.min(d.length,(i+1)*per);for(let j=i*per;j<e;j++){const v=d[j]<0?-d[j]:d[j];if(v>m)m=v}mx[i]=m}}const out={buf:b,mx};PEAKS.set(id,out);return out}
 function drawRegionWave(cv,r){const pk=srcPeaks(r.src);if(!pk)return;const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);g.fillStyle='rgba(255,255,255,.82)';const mid=h/2,k=fromDb(r.gain);
  for(let x=0;x<w;x++){const a=Math.floor((r.off+x/w*r.dur)*100),b=Math.max(a+1,Math.floor((r.off+(x+1)/w*r.dur)*100));let m=0;for(let i=a;i<b&&i<pk.mx.length;i++)if(pk.mx[i]>m)m=pk.mx[i];const y=Math.min(mid,m*k*mid);g.fillRect(x,mid-y,1,Math.max(1,2*y))}}

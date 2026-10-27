@@ -70,7 +70,12 @@ document.addEventListener('visibilitychange',()=>{if(!VE.playing)return;if(docum
 // Fotogramma da fermo: si portano gli elementi al punto giusto e si disegna quando sono pronti.
 let frameToken=0,frameReq=false;
 function requestFrame(){if(VE.playing||frameReq)return;frameReq=true;requestAnimationFrame(()=>{frameReq=false;showFrame(V.t)})}
-async function seekEl(el,time){if(el.readyState<1)await once(el,'loadedmetadata',6000).catch(()=>{});if(Math.abs(el.currentTime-time)<0.5/V.p.fps&&el.readyState>=2)return;el.currentTime=time;await once(el,'seeked',6000).catch(()=>{})}
+// Una ricerca alla volta per elemento: se ne arriva un'altra mentre il video cerca ancora (trascinando l'indicatore),
+// si tiene solo l'ultima posizione e la si chiede appena la prima è pronta. Così l'immagine si aggiorna mentre ci si
+// muove, invece di restare ferma finché non ci si ferma.
+function seekEl(el,time){el._want=time;if(el._seek)return el._seek;const near=x=>Math.abs(el.currentTime-x)<0.5/V.p.fps;
+ const p=el._seek=(async()=>{if(el.readyState<1)await once(el,'loadedmetadata',6000).catch(()=>{});const t=el._want;if(!(near(t)&&el.readyState>=2)){el.currentTime=t;await once(el,'seeked',6000).catch(()=>{})}})();
+ p.finally(()=>{if(el._seek===p)el._seek=null;if(!near(el._want))requestFrame()});return p}
 async function showFrame(t){if(isAudio())return;const tok=++frameToken,want=syncMedia(t,false);await Promise.all(want.filter(w=>w.active&&w.slot).map(w=>{const el=w.slot.el;el.pause();w.slot.gain.gain.value=0;return seekEl(el,w.expected)}));if(tok!==frameToken||VE.playing)return;drawFrame(vg,t);updateVideoUI()}
 // Esportazione in tempo reale: MediaRecorder registra il canvas e l'audio del montaggio.
 function recorderTypes(){if(typeof MediaRecorder==='undefined')return[];const list=[['video/mp4;codecs=avc1.640028,mp4a.40.2','mp4','MP4 (H.264 e AAC): si apre su tutti i dispositivi'],['video/mp4;codecs=avc1.42E01F,mp4a.40.2','mp4','MP4 (H.264 e AAC): si apre su tutti i dispositivi'],['video/mp4','mp4','MP4'],['video/webm;codecs=vp9,opus','webm','WebM (VP9 e Opus): leggero, per il web'],['video/webm;codecs=vp8,opus','webm','WebM (VP8 e Opus)'],['video/webm','webm','WebM']],seen=new Set();return list.filter(([m,ext])=>{if(seen.has(ext)||!MediaRecorder.isTypeSupported(m))return false;seen.add(ext);return true})}
@@ -112,8 +117,10 @@ async function analyzeFlashes(){const T=totalDur();if(T<=0){toast('La linea temp
 // Solo audio: mixaggio fuori linea delle clip e della traccia audio, molto più veloce del tempo reale.
 // Le clip accelerate o rallentate mantengono l'intonazione, come nell'anteprima.
 const decoded=new Map();
-async function decodedAudio(id){if(decoded.has(id))return decoded.get(id);const rt=MEDIA.get(id);let buf=null;if(rt){try{const r=await decodeAudioFile(rt.blob);buf=r.buffer?await resampleBuffer(r.buffer,48000):null}catch(e){buf=null}}decoded.set(id,buf);return buf}
-async function mixdown(){const rate=48000,T=totalDur(),n=Math.max(1,Math.ceil(T*rate)),L=new Float32Array(n),R=new Float32Array(n);
+async function decodedAudio(id){if(decoded.has(id))return decoded.get(id);const rt=MEDIA.get(id);let buf=null;if(rt){try{const r=await decodeAudioFile(rt.blob,{rate:48000});buf=r.buffer?await resampleBuffer(r.buffer,48000):null}catch(e){buf=null}}decoded.set(id,buf);return buf}
+// L'audio decodificato dei file serve solo durante il mixaggio (un'ora di video occupa più di un GB): poi si libera.
+async function mixdown(){try{return await mixAll()}finally{decoded.clear()}}
+async function mixAll(){const rate=48000,T=totalDur(),n=Math.max(1,Math.ceil(T*rate)),L=new Float32Array(n),R=new Float32Array(n);
  const add=(buf,srcIn,srcOut,start,speed,gainAt)=>{const a=Math.floor(srcIn*rate),b=Math.min(buf.length,Math.ceil(srcOut*rate));if(b<=a)return;let ch=[0,1].map(c=>buf.getChannelData(Math.min(c,buf.numberOfChannels-1)).slice(a,b));if(Math.abs(speed-1)>1e-3)ch=wsola(ch,rate,speed);const off=Math.round(start*rate);
   for(let i=0;i<ch[0].length;i+=64){const g=gainAt(start+i/rate);for(let k=i;k<Math.min(i+64,ch[0].length);k++){const j=off+k;if(j>=n||j<0)continue;L[j]+=ch[0][k]*g;R[j]+=ch[1][k]*g}}};
  for(const s of layout()){if(s.c.kind!=='media'||s.c.mute)continue;const m=mediaMeta(s.c.media);if(!m||m.type==='image')continue;status('Mixaggio: '+m.name);const buf=await decodedAudio(m.id);if(buf)add(buf,s.c.in,s.c.out,s.start,s.c.speed||1,t=>clipGain(s,t))}

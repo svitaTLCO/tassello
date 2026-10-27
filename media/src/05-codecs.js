@@ -52,12 +52,13 @@ function makeBuffer(channels,rate){const len=channels[0]?.length||0;if(!len)retu
 // Cambio di frequenza con il motore audio del browser (OfflineAudioContext).
 async function resampleBuffer(buf,rate){if(!buf||buf.sampleRate===rate)return buf;const oc=new OfflineAudioContext(buf.numberOfChannels,Math.max(1,Math.round(buf.length*rate/buf.sampleRate)),rate),s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start();return oc.startRendering()}
 // Decodifica di qualunque file audio (o dell'audio di un video) che il browser sa leggere. I WAV passano dal lettore
-// interno, che conserva la frequenza originale, i bit in virgola mobile e i marcatori.
-let decodeCtx=null;
-async function decodeAudioFile(file){const buf=await file.arrayBuffer();let wav=null;try{wav=readWav(buf)}catch(e){if(/WAV/.test(e.message)&&!/non supportato/.test(e.message))throw e}
+// interno, che conserva la frequenza originale, i bit in virgola mobile e i marcatori. Con rate gli altri formati
+// escono già a quella frequenza, convertiti dal decodificatore stesso invece che in un secondo passaggio.
+let decodeCtx=null;const decodeAt=new Map();
+async function decodeAudioFile(file,{rate=0}={}){const buf=await file.arrayBuffer();let wav=null;try{wav=readWav(buf)}catch(e){if(/WAV/.test(e.message)&&!/non supportato/.test(e.message))throw e}
  if(wav)return{buffer:wav.buffer,markers:wav.markers};
- decodeCtx??=new (window.AudioContext||window.webkitAudioContext)();let out;
- try{out=await decodeCtx.decodeAudioData(buf)}catch(e){throw Error(`Il browser non sa leggere l’audio di «${file.name}»`)}
+ decodeCtx??=new (window.AudioContext||window.webkitAudioContext)();if(rate&&!decodeAt.has(rate))decodeAt.set(rate,new OfflineAudioContext(1,1,rate));let out;
+ try{out=await (rate?decodeAt.get(rate):decodeCtx).decodeAudioData(buf)}catch(e){throw Error(`Il browser non sa leggere l’audio di «${file.name}»`)}
  return{buffer:out,markers:[]}}
 // Codifica compressa: restituisce i pacchetti, la configurazione del decodificatore e il formato.
 const CODECS={aac:{codec:'mp4a.40.2',label:'M4A (AAC)',ext:'m4a',mime:'audio/mp4'},opus:{codec:'opus',label:'WebM (Opus)',ext:'webm',mime:'audio/webm'}};

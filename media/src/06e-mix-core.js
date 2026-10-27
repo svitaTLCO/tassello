@@ -30,7 +30,7 @@ function projectChanged({live=false}={}){P.version++;if(P.sel&&!regionOf(P.sel))
 // tutto suo (gli altri usi dello stesso suono, per esempio una regione duplicata, non cambiano).
 function openRegion(r,{focus=true,quiet=false}={}){const src=SOURCES.get(r.src);if(!src){toast('L’audio di questa regione non è disponibile');return false}stopPlayback(false);
  const rate=src.sampleRate,a=clamp(Math.round(r.off*rate),0,src.length-1),b=clamp(a+Math.round(r.dur*rate),a+1,src.length);
- A.region=null;setAudioDoc(makeBuffer(sliceCh(src,a,b),rate),{title:r.name,markers:(r.markers||[]).map(m=>({...m}))});A.region=r.id;A.own=null;A.bound={src:r.src,off:r.off,dur:r.dur};
+ A.region=null;setAudioDoc(copyRange(src,a,b),{title:r.name,markers:(r.markers||[]).map(m=>({...m}))});A.region=r.id;A.own=null;A.bound={src:r.src,off:r.off,dur:r.dur};
  showEditor(true);updateEditorBar();if(focus)$('wave').focus();if(!quiet)announce(`Editor: regione «${r.name}» della traccia «${trackOf(r.track)?.name||''}», ${sayTime(r.dur)}`);return true}
 function closeRegionEditor(){A.region=null;A.own=null;A.bound=null;setAudioDoc(null,{title:'',markers:[]});updateEditorBar()}
 function regionFromEditor(){const r=regionOf(A.region);if(!r)return;
@@ -39,9 +39,14 @@ function regionFromEditor(){const r=regionOf(A.region);if(!r)return;
 function regionMarkersFromEditor(){const r=A.region&&regionOf(A.region);if(r)r.markers=A.markers.map(m=>({...m}))}
 // Se la regione nell'editor cambia altrove (annulla, taglio, divisione), l'editor la riapre; se sparisce, si svuota.
 function checkEditorBinding(){if(!A.region)return;const r=regionOf(A.region);if(!r){closeRegionEditor();return}const b=A.bound;if(!b||b.src!==r.src||Math.abs(b.off-r.off)>1e-6||Math.abs(b.dur-r.dur)>1e-6)openRegion(r,{focus:false,quiet:true});else if(A.title!==r.name){A.title=r.name;updateEditorBar()}}
+// Al più limit lavori insieme; ogni promessa restituisce {v} oppure {e}, così un errore non resta senza risposta.
+function pooled(tasks,limit){const queue=[],out=tasks.map(task=>new Promise(res=>queue.push({task,res})));let active=0;
+ const go=()=>{while(active<limit&&queue.length){const {task,res}=queue.shift();active++;Promise.resolve().then(task).then(v=>({v}),e=>({e})).then(r=>{active--;res(r);go()})}};go();return out}
 // Importazione: ogni file diventa una traccia con una regione, all'indicatore (o all'inizio se il progetto è vuoto).
+// Fino a tre file si decodificano insieme, su più processori; le tracce entrano comunque nell'ordine dei file.
 async function importAudioTracks(files,{at=null}={}){files=[...files];const wasEmpty=!P.regions.length,start=at??(wasEmpty?0:P.t);let first=null,n=0;
- for(const [i,f] of files.entries()){status(`Lettura di «${f.name}» (${i+1} di ${files.length})…`);let res;try{res=await decodeAudioFile(f)}catch(e){toast(e.message);continue}if(!res?.buffer){toast(`«${f.name}» non contiene audio`);continue}
+ const jobs=pooled(files.map(f=>()=>decodeAudioFile(f)),Math.min(3,Math.max(1,(navigator.hardwareConcurrency||2)-1)));
+ for(const [i,f] of files.entries()){status(`Lettura di «${f.name}» (${i+1} di ${files.length})…`);const job=await jobs[i];if(job.e){toast(job.e.message);continue}const res=job.v;if(!res?.buffer){toast(`«${f.name}» non contiene audio`);continue}
   const src=addSource(res.buffer),name=baseName(f.name);pCommit('Importa '+f.name,()=>{const t=newTrack(name);P.tracks.push(t);const r=newRegion(t.id,src,start,name);r.markers=res.markers||[];P.regions.push(r);P.track=t.id;P.sel=r.id;first??=r});n++}
  status();if(!first)return null;if(wasEmpty&&/^Audio\d*$/.test(P.title)){P.title=baseName(files[0].name);if(isAudio()){$('docTitle').value=P.title;updateTitle()}}
  if(wasEmpty&&n===1)openRegion(first,{focus:false,quiet:true});ensureArVisible(start);focusLane(first.track);

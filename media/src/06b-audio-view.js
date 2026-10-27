@@ -21,9 +21,8 @@ function fitCanvas(cv){const r=cv.getBoundingClientRect(),dpr=devicePixelRatio||
 let drawPending=false;
 function drawAudio(){if(drawPending)return;drawPending=true;requestAnimationFrame(()=>{drawPending=false;if(isAudio())drawAudioNow()})}
 function columnStats(c,a,b){const pk=getPeaks();let lo=1e9,hi=-1e9,sq=0,n=0;const spp=b-a;
- if(spp<256||!pk.levels.length){const d=A.buf.getChannelData(c),e=Math.min(d.length,Math.ceil(b));for(let i=Math.max(0,Math.floor(a));i<e;i++){const x=d[i];if(x<lo)lo=x;if(x>hi)hi=x;sq+=x*x;n++}return n?{lo,hi,rms:Math.sqrt(sq/n)}:null}
- let lv=pk.levels[0];for(const l of pk.levels)if(l.block<=spp)lv=l;const p=lv.ch[c],i0=Math.max(0,Math.floor(a/lv.block)),i1=Math.min(p.mn.length,Math.max(i0+1,Math.ceil(b/lv.block)));
- for(let i=i0;i<i1;i++){if(p.mn[i]<lo)lo=p.mn[i];if(p.mx[i]>hi)hi=p.mx[i];sq+=p.sq[i];n++}return n?{lo,hi,rms:Math.sqrt(sq/n)}:null}
+ if(spp<PEAK_BLOCK||!pk.levels.length){const d=A.buf.getChannelData(c),e=Math.min(d.length,Math.ceil(b));for(let i=Math.max(0,Math.floor(a));i<e;i++){const x=d[i];if(x<lo)lo=x;if(x>hi)hi=x;sq+=x*x;n++}return n?{lo,hi,rms:Math.sqrt(sq/n)}:null}
+ let lv=pk.levels[0];for(const l of pk.levels)if(l.block<=spp)lv=l;return levelStats(lv,c,a,b)}
 function drawAudioNow(){const {g,w,h}=fitCanvas($('waveCanvas')),P=palette;g.fillStyle=P['wave-bg'];g.fillRect(0,0,w,h);
  $('waveEmpty').hidden=!!A.buf;$('aOverviewBox').style.visibility=A.buf?'':'hidden';
  if(!A.buf){drawRuler();return}
@@ -35,19 +34,27 @@ function drawAudioNow(){const {g,w,h}=fitCanvas($('waveCanvas')),P=palette;g.fil
  g.font='11px "Segoe UI",system-ui,sans-serif';g.textBaseline='top';
  for(const [i,m] of A.markers.entries()){const x=Math.round(xOf(m.pos))+0.5;if(x<-200||x>w+2)continue;g.fillStyle=P.marker;g.fillRect(x-0.5,0,2,h);const t=`${i+1}. ${m.label}`,tw=Math.min(180,g.measureText(t).width+8);g.fillRect(x,0,tw,15);g.fillStyle=P['wave-bg'];g.save();g.beginPath();g.rect(x,0,tw,15);g.clip();g.fillText(t,x+4,2);g.restore()}
  const cx=xOf(A.cursor);if(cx>=-1&&cx<=w+1){g.fillStyle=aplay.playing?P['text-3']:P.playhead;g.fillRect(Math.round(cx)-1,0,2,h)}
- if(aplay.playing){const px=xOf(playPos());g.fillStyle=P.playhead;g.fillRect(Math.round(px)-1,0,2,h)}
+ saveLayer($('waveCanvas'),w,h);layerKey=viewKey();if(aplay.playing){const px=xOf(playPos());g.fillStyle=P.playhead;g.fillRect(Math.round(px)-1,0,2,h)}
  drawRuler();drawOverview()}
+// Durante l'ascolto si muove solo l'indicatore: forma d'onda e panoramica restano in un'immagine, che a ogni fotogramma
+// si copia aggiungendo l'indicatore. Si ridisegna tutto solo quando cambia la vista (zoom, scorrimento, modifiche).
+const layers=new Map();let layerKey='';
+const viewKey=()=>[A.version,AV.start,AV.spp,aplay.playing,$('waveCanvas').width,$('waveCanvas').height].join('|');
+function saveLayer(cv,w,h){let l=layers.get(cv);if(!l){l=document.createElement('canvas');layers.set(cv,l)}if(l.width!==cv.width||l.height!==cv.height){l.width=cv.width;l.height=cv.height}l.cw=w;l.ch=h;const g=l.getContext('2d');g.clearRect(0,0,l.width,l.height);g.drawImage(cv,0,0)}
+function restoreLayer(cv){const l=layers.get(cv);if(!l||l.width!==cv.width||l.height!==cv.height)return null;const g=cv.getContext('2d'),dpr=devicePixelRatio||1;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);g.drawImage(l,0,0);g.setTransform(dpr,0,0,dpr,0,0);return{g,w:l.cw,h:l.ch}}
+function drawPlayheadOnly(pos){const a=restoreLayer($('waveCanvas')),o=restoreLayer($('aOverview'));if(!a||!o){drawAudioNow();return}
+ a.g.fillStyle=palette.playhead;a.g.fillRect(Math.round((pos-AV.start)/AV.spp)-1,0,2,a.h);o.g.fillStyle=palette.playhead;o.g.fillRect(pos/alen()*o.w-1,0,2,o.h)}
 function niceStep(pxPerSec,minPx=90){const steps=[0.001,0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5,1,2,5,10,15,30,60,120,300,600,900,1800,3600];return steps.find(s=>s*pxPerSec>=minPx)||7200}
 function drawTicks(g,w,h,t0,pxPerSec,color){const step=niceStep(pxPerSec),dec=step<0.01?3:step<0.1?2:step<1?1:0,first=Math.ceil(t0/step)*step;g.fillStyle=color;g.strokeStyle=color;g.font='11px "Segoe UI",system-ui,sans-serif';g.textBaseline='top';
  for(let t=first;(t-t0)*pxPerSec<w;t+=step){const x=Math.round((t-t0)*pxPerSec)+0.5;g.fillRect(x-0.5,h-7,1,7);g.fillText(fmtTime(t,dec),x+3,2);const sub=step/5;for(let k=1;k<5;k++){const xs=Math.round((t-t0+k*sub)*pxPerSec)+0.5;if(xs<w)g.fillRect(xs-0.5,h-3,1,3)}}}
 function drawRuler(){const {g,w,h}=fitCanvas($('aRuler'));g.clearRect(0,0,w,h);if(!A.buf)return;drawTicks(g,w,h,AV.start/A.rate,A.rate/AV.spp,palette.ruler)}
-function drawOverview(){const {g,w,h}=fitCanvas($('aOverview')),P=palette;g.fillStyle=P['wave-bg'];g.fillRect(0,0,w,h);if(!A.buf)return;const L=alen(),pk=getPeaks(),lv=pk.levels.at(-1),k=lv.ch[0].mn.length/w,mid=h/2;g.fillStyle=P.wave;
- for(let x=0;x<w;x++){let hi=0;for(let c=0;c<A.nch;c++){const p=lv.ch[c];for(let i=Math.floor(x*k);i<Math.min(p.mn.length,Math.ceil((x+1)*k));i++)hi=Math.max(hi,p.mx[i],-p.mn[i])}g.fillRect(x,mid-hi*(mid-2),1,Math.max(1,2*hi*(mid-2)))}
- const vx=AV.start/L*w,vw=Math.max(3,waveWidth()*AV.spp/L*w);g.strokeStyle=P.accent;g.lineWidth=2;g.strokeRect(vx+1,1,vw-2,h-2);g.fillStyle=P.playhead;g.fillRect((aplay.playing?playPos():A.cursor)/L*w-1,0,2,h)}
+function drawOverview(){const {g,w,h}=fitCanvas($('aOverview')),P=palette;g.fillStyle=P['wave-bg'];g.fillRect(0,0,w,h);if(!A.buf)return;const L=alen(),lv=getPeaks().levels.at(-1),mid=h/2;g.fillStyle=P.wave;
+ for(let x=0;x<w;x++){let hi=0;for(let c=0;c<A.nch;c++){const s=levelStats(lv,c,x/w*L,(x+1)/w*L);if(s)hi=Math.max(hi,s.hi,-s.lo)}g.fillRect(x,mid-hi*(mid-2),1,Math.max(1,2*hi*(mid-2)))}
+ const vx=AV.start/L*w,vw=Math.max(3,waveWidth()*AV.spp/L*w);g.strokeStyle=P.accent;g.lineWidth=2;g.strokeRect(vx+1,1,vw-2,h-2);saveLayer($('aOverview'),w,h);g.fillStyle=P.playhead;g.fillRect((aplay.playing?playPos():A.cursor)/L*w-1,0,2,h)}
 function drawMeter(cv,db){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const f=v=>clamp((v+60)/60,0,1),x=f(db)*w;g.fillStyle='#1e7a46';g.fillRect(0,0,Math.min(x,f(-12)*w),h);if(x>f(-12)*w){g.fillStyle='#b38600';g.fillRect(f(-12)*w,0,Math.min(x,f(-3)*w)-f(-12)*w,h)}if(x>f(-3)*w){g.fillStyle='#c50f1f';g.fillRect(f(-3)*w,0,x-f(-3)*w,h)}g.fillStyle=palette['text-3'];for(const d of [-48,-36,-24,-12,-6,-3])g.fillRect(f(d)*w,h-4,1,4)}
 const meterBuf=new Float32Array(2048);
 function aTick(){if(!aplay.playing)return;const pos=playPos();if(prefs.follow){const W=waveWidth(),end=AV.start+W*AV.spp;if(pos>end||pos<AV.start){AV.start=pos-W*AV.spp*0.05;viewClamp()}}
- drawAudioNow();if(aplay.analyser){aplay.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}aplay.raf=requestAnimationFrame(aTick)}
+ if(layerKey!==viewKey())drawAudioNow();else drawPlayheadOnly(pos);if(aplay.analyser){aplay.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}aplay.raf=requestAnimationFrame(aTick)}
 function playUI(on){const b=document.querySelector('#editorArea [data-action=playRegion]');if(b)b.textContent=on?'Pausa':'Ascolta la regione';if(!on)drawMeter($('aMeter'),-Infinity)}
 // Testi per gli screen reader: posizione, selezione e marcatore sotto il cursore.
 const timeDec=()=>prefs.step<0.1?2:1;

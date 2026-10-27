@@ -12,13 +12,15 @@ const sec=n=>n/A.rate;
 const smp=s=>Math.round(clamp(s,0,adur())*A.rate);
 const chName=()=>A.nch===1?'mono':A.nch===2?'stereo':A.nch+' canali';
 function sliceCh(buf,a,b){return Array.from({length:buf.numberOfChannels},(_,c)=>buf.getChannelData(c).slice(a,b))}
+// Un tratto come AudioBuffer nuovo, copiando i campioni una volta sola.
+function copyRange(buf,a,b){if(b<=a)return null;const nb=new AudioBuffer({length:b-a,numberOfChannels:buf.numberOfChannels,sampleRate:buf.sampleRate});for(let c=0;c<buf.numberOfChannels;c++)nb.copyToChannel(buf.getChannelData(c).subarray(a,b),c);return nb}
 // Sostituisce i campioni [a, b) con ins (un array per canale) o li toglie se ins è null.
 function spliceAudio(a,b,ins){const old=A.buf,len=alen(),insLen=ins?ins[0].length:0,newLen=len-(b-a)+insLen;
- if(old&&insLen===b-a&&insLen){for(let c=0;c<A.nch;c++)old.getChannelData(c).set(ins[c],a);return}
- if(newLen<=0){A.buf=null;return}
+ if(old&&insLen===b-a&&insLen){for(let c=0;c<A.nch;c++)old.getChannelData(c).set(ins[c],a);peakSplice(old,a,b,insLen);return}
+ if(newLen<=0){A.buf=null;peakCache=null;return}
  const nb=new AudioBuffer({length:newLen,numberOfChannels:A.nch,sampleRate:A.rate});
  for(let c=0;c<A.nch;c++){const d=nb.getChannelData(c);if(old){const o=old.getChannelData(c);d.set(o.subarray(0,a),0);d.set(o.subarray(b),a+insLen)}if(ins)d.set(ins[c],a)}
- A.buf=nb}
+ A.buf=nb;peakSplice(old,a,b,insLen)}
 const snapA=()=>({cursor:A.cursor,selA:A.selA,selB:A.selB,markers:A.markers.map(m=>({...m})),rate:A.rate,nch:A.nch});
 function restoreA(s){Object.assign(A,{cursor:s.cursor,selA:s.selA,selB:s.selB,markers:s.markers.map(m=>({...m})),rate:s.rate,nch:s.nch})}
 function pushHist(entry){lastScope='editor';ahist.push(entry);aredo=[];let total=ahist.reduce((n,e)=>n+e.bytes,0);while(ahist.length>1&&(ahist.length>HIST_MAX||total>HIST_BYTES))total-=ahist.shift().bytes}
@@ -37,16 +39,34 @@ function audioReplaceAll(label,buf,{markers}={}){stopPlayback(false);const old=A
 function metaEdit(label,fn){const before=snapA();fn();const after=snapA();pushHist({label,bytes:200,undo:()=>restoreA(before),redo:()=>restoreA(after)});audioMetaChanged()}
 function audioUndo(redoing){const from=redoing?aredo:ahist,to=redoing?ahist:aredo;if(!from.length){toast(redoing?'Niente da ripetere':'Niente da annullare');return}stopPlayback(false);const e=from.pop();redoing?e.redo():e.undo();to.push(e);audioChanged();announce((redoing?'Ripetuto: ':'Annullato: ')+e.label)}
 function clampSel(){const L=alen();A.cursor=clamp(Math.round(A.cursor),0,L);A.selA=clamp(Math.round(A.selA),0,L);A.selB=clamp(Math.round(A.selB),A.selA,L);A.markers=A.markers.filter(m=>m.pos>=0&&m.pos<=L).sort((x,y)=>x.pos-y.pos)}
-function audioChanged(){A.version++;clampSel();peakCache=null;envCache=null;pauseCache=null;viewClamp();drawAudio();updateAudioUI();if(A.region)regionFromEditor();schedulePersist('audio')}
+function audioChanged(){A.version++;clampSel();if(!peakKeep)peakCache=null;peakKeep=false;envCache=null;pauseCache=null;viewClamp();drawAudio();updateAudioUI();if(A.region)regionFromEditor();schedulePersist('audio')}
 function audioMetaChanged(){clampSel();drawAudio();updateAudioUI();regionMarkersFromEditor();schedulePersist('audio')}
-// Picchi per disegnare la forma d'onda: minimo, massimo e potenza ogni 256 campioni, poi livelli 4 volte più grossi.
-let peakCache=null;
-function getPeaks(){if(peakCache)return peakCache;const levels=[];if(!A.buf)return peakCache={levels};let block=256;
- const base=[];for(let c=0;c<A.nch;c++){const d=A.buf.getChannelData(c),n=Math.ceil(d.length/block),mn=new Float32Array(n),mx=new Float32Array(n),sq=new Float32Array(n);
-  for(let i=0;i<n;i++){let lo=1e9,hi=-1e9,s=0;const end=Math.min(d.length,(i+1)*block);for(let j=i*block;j<end;j++){const x=d[j];if(x<lo)lo=x;if(x>hi)hi=x;s+=x*x}mn[i]=lo;mx[i]=hi;sq[i]=s/(end-i*block)}base.push({mn,mx,sq})}
- levels.push({block,ch:base});
- while(levels.at(-1).ch[0].mn.length>2000){const prev=levels.at(-1),next=[];block*=4;for(const p of prev.ch){const n=Math.ceil(p.mn.length/4),mn=new Float32Array(n),mx=new Float32Array(n),sq=new Float32Array(n);for(let i=0;i<n;i++){let lo=1e9,hi=-1e9,s=0,k=0;for(let j=i*4;j<Math.min(p.mn.length,i*4+4);j++){if(p.mn[j]<lo)lo=p.mn[j];if(p.mx[j]>hi)hi=p.mx[j];s+=p.sq[j];k++}mn[i]=lo;mx[i]=hi;sq[i]=s/k}next.push({mn,mx,sq})}levels.push({block,ch:next})}
- return peakCache={levels}}
+// Picchi per disegnare la forma d'onda: minimo, massimo e somma dei quadrati a blocchi di 256 campioni, poi livelli
+// che ne uniscono 4. Ogni blocco ricorda dove comincia (st, con la fine del suono in fondo): dopo una modifica si
+// ricalcolano solo i blocchi del tratto cambiato e gli altri si spostano, così il costo non cresce con la regione.
+const PEAK_BLOCK=256;
+let peakCache=null,peakKeep=false;
+function peakBlocks(buf,a,b){const n=Math.max(0,Math.ceil((b-a)/PEAK_BLOCK)),st=new Float64Array(n),ch=[];for(let i=0;i<n;i++)st[i]=a+i*PEAK_BLOCK;
+ for(let c=0;c<buf.numberOfChannels;c++){const d=buf.getChannelData(c),mn=new Float32Array(n),mx=new Float32Array(n),sq=new Float32Array(n);
+  for(let i=0;i<n;i++){let lo=1e9,hi=-1e9,s=0;const j0=a+i*PEAK_BLOCK,e=Math.min(b,j0+PEAK_BLOCK);for(let j=j0;j<e;j++){const x=d[j];if(x<lo)lo=x;if(x>hi)hi=x;s+=x*x}mn[i]=lo;mx[i]=hi;sq[i]=s}ch.push({mn,mx,sq})}
+ return{st,ch}}
+const blockSlice=(lv,i,j,shift=0)=>({st:shift?lv.st.subarray(i,j).map(x=>x+shift):lv.st.subarray(i,j),ch:lv.ch.map(p=>({mn:p.mn.subarray(i,j),mx:p.mx.subarray(i,j),sq:p.sq.subarray(i,j)}))});
+function joinBlocks(parts,nch,L){const n=parts.reduce((k,p)=>k+p.st.length,0),st=new Float64Array(n+1),ch=Array.from({length:nch},()=>({mn:new Float32Array(n),mx:new Float32Array(n),sq:new Float32Array(n)}));let at=0;
+ for(const p of parts){st.set(p.st,at);for(let c=0;c<nch;c++){ch[c].mn.set(p.ch[c].mn,at);ch[c].mx.set(p.ch[c].mx,at);ch[c].sq.set(p.ch[c].sq,at)}at+=p.st.length}st[n]=L;return{block:PEAK_BLOCK,st,ch}}
+function peakLevels(base){const levels=[base];while(levels.at(-1).st.length-1>2000){const p=levels.at(-1),n0=p.st.length-1,n=Math.ceil(n0/4),st=new Float64Array(n+1);for(let i=0;i<n;i++)st[i]=p.st[i*4];st[n]=p.st[n0];
+  const ch=p.ch.map(q=>{const mn=new Float32Array(n),mx=new Float32Array(n),sq=new Float32Array(n);for(let i=0;i<n;i++){let lo=1e9,hi=-1e9,s=0;for(let j=i*4;j<Math.min(n0,i*4+4);j++){if(q.mn[j]<lo)lo=q.mn[j];if(q.mx[j]>hi)hi=q.mx[j];s+=q.sq[j]}mn[i]=lo;mx[i]=hi;sq[i]=s}return{mn,mx,sq}});
+  levels.push({block:p.block*4,st,ch})}return levels}
+function getPeaks(){if(A.buf&&peakCache?.buf===A.buf)return peakCache;if(!A.buf)return{buf:null,levels:[]};const L=alen();return peakCache={buf:A.buf,levels:peakLevels(joinBlocks([peakBlocks(A.buf,0,L)],A.nch,L))}}
+// Ultimo blocco che comincia entro x.
+function peakIndex(st,x){let lo=0,hi=st.length-2;if(hi<0)return 0;while(lo<hi){const m=(lo+hi+1)>>1;if(st[m]<=x)lo=m;else hi=m-1}return lo}
+// Dopo spliceAudio: i blocchi prima del tratto restano, quelli dopo si spostano di d, quelli in mezzo si ricalcolano.
+function peakSplice(old,a,b,insLen){const pc=peakCache;peakKeep=false;if(!pc||pc.buf!==old||!A.buf||!pc.levels.length){peakCache=null;return}
+ const base=pc.levels[0],st=base.st,n=st.length-1,d=insLen-(b-a),L=A.buf.length,i0=peakIndex(st,a);let i1=i0;while(i1<n&&st[i1]<b)i1++;
+ const mid=peakBlocks(A.buf,st[i0],i1<n?st[i1]+d:L);
+ peakCache={buf:A.buf,levels:peakLevels(joinBlocks([blockSlice(base,0,i0),mid,blockSlice(base,i1,n,d)],A.nch,L))};peakKeep=true}
+// Minimo, massimo e livello medio di un tratto da un livello di picchi; i blocchi ai bordi contano interi.
+function levelStats(lv,c,a,b){const st=lv.st,p=lv.ch[c],last=st.length-2;if(last<0||!p)return null;let lo=1e9,hi=-1e9,s=0,n=0;
+ for(let i=peakIndex(st,a);i<=last&&st[i]<b;i++){if(p.mn[i]<lo)lo=p.mn[i];if(p.mx[i]>hi)hi=p.mx[i];s+=p.sq[i];n+=st[i+1]-st[i]}return n?{lo,hi,rms:Math.sqrt(s/n)}:null}
 // Livello ogni centesimo di secondo (il canale più forte), in dB: serve a trovare pause e parlato.
 let envCache=null;
 function getEnv(){if(envCache)return envCache;const win=Math.max(1,Math.round(A.rate/100)),L=alen(),n=Math.ceil(L/win),db=new Float32Array(n);
@@ -89,14 +109,14 @@ async function conformAudio(buf){if(!buf)return null;if(!A.buf&&!alen()){A.rate=
 async function insertAudioFile(file){const res=await work('Lettura di «'+file.name+'»',()=>decodeAudioFile(file));if(!res?.buffer)return;const ins=await conformAudio(res.buffer),at=A.cursor;audioEdit('Inserisci '+file.name,at,at,ins);announce(`Inserito ${file.name}, ${sayTime(res.buffer.duration)}, al cursore; ora è selezionato`)}
 // Appunti dell'audio: copia, taglia, incolla e incolla mescolando.
 function needSel(){if(!A.buf){toast('Nessun audio aperto');return false}if(!hasSel()){toast('Prima seleziona una parte: Maiusc con le frecce, oppure I e O');return false}return true}
-function audioCopy(){if(!needSel())return;aclip=makeBuffer(sliceCh(A.buf,A.selA,A.selB),A.rate);announce('Copiati '+sayTime(aclip.duration))}
-function audioCut(){if(!needSel())return;aclip=makeBuffer(sliceCh(A.buf,A.selA,A.selB),A.rate);const d=aclip.duration;audioEdit('Taglia',A.selA,A.selB,null);announce('Tagliati '+sayTime(d))}
+function audioCopy(){if(!needSel())return;aclip=copyRange(A.buf,A.selA,A.selB);announce('Copiati '+sayTime(aclip.duration))}
+function audioCut(){if(!needSel())return;aclip=copyRange(A.buf,A.selA,A.selB);const d=aclip.duration;audioEdit('Taglia',A.selA,A.selB,null);announce('Tagliati '+sayTime(d))}
 async function audioPaste(){if(!aclip){toast('Gli appunti dell’audio sono vuoti: copia o taglia prima una parte');return}const ins=await conformAudio(aclip),a=hasSel()?A.selA:A.cursor,b=hasSel()?A.selB:A.cursor;audioEdit('Incolla',a,b,ins);announce('Incollati '+sayTime(aclip.duration)+(b>a?' al posto della selezione':' al cursore'))}
 async function audioPasteMix(){if(!aclip){toast('Gli appunti dell’audio sono vuoti: copia o taglia prima una parte');return}if(!A.buf){audioPaste();return}const ins=await conformAudio(aclip),a=A.cursor,n=ins[0].length,b=Math.min(alen(),a+n),out=[];
  for(let c=0;c<A.nch;c++){const cur=A.buf.getChannelData(c).subarray(a,b),m=new Float32Array(n);m.set(cur);for(let i=0;i<n;i++)m[i]+=ins[c][i];out.push(m)}
  audioEdit('Incolla mescolando',a,b,out);const peak=Math.max(...out.map(d=>d.reduce((p,x)=>Math.max(p,Math.abs(x)),0)));announce('Mescolati '+sayTime(n/A.rate)+(peak>1?'. Attenzione: il livello supera il fondo scala, normalizza o attenua la parte selezionata':''))}
 function deleteSelection(){if(!needSel())return;const d=sec(A.selB-A.selA);audioEdit('Elimina',A.selA,A.selB,null);announce('Eliminati '+sayTime(d)+', cursore a '+sayTime(sec(A.cursor)))}
-function trimToSelection(){if(!needSel())return;const a=A.selA,b=A.selB;stopPlayback(false);const old=A.buf,before=snapA(),nb=makeBuffer(sliceCh(old,a,b),A.rate);A.buf=nb;A.markers=A.markers.filter(m=>m.pos>=a&&m.pos<=b).map(m=>({...m,pos:m.pos-a}));A.cursor=0;A.selA=0;A.selB=0;const after=snapA();
+function trimToSelection(){if(!needSel())return;const a=A.selA,b=A.selB;stopPlayback(false);const old=A.buf,before=snapA(),nb=copyRange(old,a,b);A.buf=nb;A.markers=A.markers.filter(m=>m.pos>=a&&m.pos<=b).map(m=>({...m,pos:m.pos-a}));A.cursor=0;A.selA=0;A.selB=0;const after=snapA();
  pushHist({label:'Ritaglia',bytes:(old.length+nb.length)*A.nch*4,undo:()=>{A.buf=old;restoreA(before)},redo:()=>{A.buf=nb;restoreA(after)}});audioChanged();zoomFitAudio();announce('Tenuta solo la selezione: ora l’audio dura '+sayTime(adur()))}
 function silenceSel(){if(!needSel())return;audioEdit('Silenzia',A.selA,A.selB,Array.from({length:A.nch},()=>new Float32Array(A.selB-A.selA)),{sel:[A.selA,A.selB]});announce('Selezione silenziata')}
 function duplicateSel(){if(!needSel())return;const part=sliceCh(A.buf,A.selA,A.selB),b=A.selB;audioEdit('Duplica',b,b,part);announce('Selezione duplicata subito dopo: la copia è selezionata')}

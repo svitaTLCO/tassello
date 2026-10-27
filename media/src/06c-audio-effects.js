@@ -3,7 +3,7 @@
 // che fa ascoltare i primi secondi con l'effetto applicato, e Ctrl+R ripete l'ultimo effetto.
 const mapCh=(ch,f)=>ch.map(d=>{const o=new Float32Array(d.length);for(let i=0;i<d.length;i++)o[i]=f(d[i],i,d);return o});
 // Picco di un tratto dai picchi già calcolati per il disegno, senza copiare i campioni.
-function rangePeak(a,b){const lv=getPeaks().levels[0];if(!lv)return 0;let pk=0;for(const p of lv.ch)for(let i=Math.floor(a/lv.block);i<Math.min(p.mn.length,Math.ceil(b/lv.block));i++)pk=Math.max(pk,p.mx[i],-p.mn[i]);return pk}
+function rangePeak(a,b){const lv=getPeaks().levels[0];if(!lv)return 0;let pk=0;for(let c=0;c<lv.ch.length;c++){const s=levelStats(lv,c,a,b);if(s)pk=Math.max(pk,s.hi,-s.lo)}return pk}
 const headroom=pk=>pk>0?-toDb(pk):0;
 const peakOf=ch=>ch.reduce((p,d)=>{for(let i=0;i<d.length;i++){const x=Math.abs(d[i]);if(x>p)p=x}return p},0);
 const fadeCurve=t=>0.5-0.5*Math.cos(Math.PI*clamp(t,0,1));
