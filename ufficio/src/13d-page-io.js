@@ -32,6 +32,7 @@ function pgClean(o){if(!o||typeof o!=='object'||!Array.isArray(o.pages)||!o.page
   if(x.kind==='text'){it.story=str(x.story,40);it.valign=['top','middle','bottom'].includes(x.valign)?x.valign:'top';it.cols=Math.round(it.cols)}
   if(x.kind==='image'){it.img=key(String(x.img||''))?String(x.img):'';it.fit=x.fit==='fit'?'fit':'fill';it.field=str(x.field,40);it.file=str(x.file,300);
    const a={};for(const [k,,,lo,hi] of PG_ADJ)if(x.adj?.[k])a[k]=num(x.adj[k],0,lo,hi);if(Object.keys(a).length)it.adj=a;if(PG_LOOKS.some(l=>l.id!=='none'&&l.id===x.look)){it.look=x.look;if(x.lookAmt!=null)it.lookAmt=num(x.lookAmt,100,0,100)}}
+  if(x.kind==='qr')Object.assign(it,{text:str(x.text,1000),ec:PG_QR_LV[x.ec]!=null?x.ec:'M',dark:col(x.dark)&&x.dark!=='none'?x.dark:'#000000',light:col(x.light)&&x.light!=='none'?x.light:'#ffffff',quiet:[0,2,4].includes(+x.quiet)?+x.quiet:4,field:str(x.field,40)});
   if(x.kind==='sign'){const one=(k,list)=>list.some(e=>e[0]===x[k])?x[k]:it[k];Object.assign(it,{text:str(x.text,500),style:PG_SIGN_STYLES[x.style]?x.style:'',font:FONTS.includes(x.font)?x.font:it.font,bold:!!x.bold,italic:!!x.italic,caps:!!x.caps,fit:x.fit!==false,size:num(x.size,48,1,1e4),ls:num(x.ls,0,-5,40),align:['left','center','right'].includes(x.align)?x.align:'center',shape:one('shape',PG_SIGN_SHAPES),curve:num(x.curve,50,0,100),fillType:one('fillType',PG_SIGN_FILLS),angle:num(x.angle,0,0,360),ow:num(x.ow,0,0,15),ow2:num(x.ow2,0,0,15),shadow:one('shadow',PG_SIGN_SHADOWS),glow:num(x.glow,0,0,100),img:key(String(x.img||''))?String(x.img):''});for(const k of ['c1','c2','oc','oc2','shc','gc'])if(col(x[k])&&x[k]!=='none')it[k]=x[k]}
   return it};
  const holder=(h,extra)=>{const items=(Array.isArray(h?.items)?h.items:[]).slice(0,500).map(item).filter(Boolean),ids=new Set(items.map(x=>x.id));return{id:key(String(h?.id))?String(h.id):uid(),items,read:(Array.isArray(h?.read)?h.read:[]).map(String).filter(id=>ids.has(id)),...extra(h)}};
@@ -91,7 +92,7 @@ async function pgPrint(){const p=Pg.p;pgStorySync();await pgPreloadFieldImages(p
 // Alt+Maiusc+I: la pagina, le cornici nell'ordine di lettura e la cornice scelta.
 function pgDescribe(){const p=Pg.p,h=pgHolder(),items=pgReadOrder(h).filter(x=>!x.deco),pg=pgCurPage(),over=h.items.filter(it=>pgFrameLay(it)?.over).length;
  toast(`${Pg.mid?`${h.name}, usato da ${p.pages.filter(x=>x.master===h.id).length} pagine`:`Pagina ${Pg.pi+1} di ${p.pages.length}${pg.master?', '+(pgMasterOf(pg)?.name||''):', senza mastro'}${pg.data&&p.data?`, ripetuta per ${p.data.rows.length} righe, in anteprima la riga ${Math.min(Pg.row,p.data.rows.length-1)+1}`:''}`}, ${PG_PRESETS.find(x=>x[0]===p.preset)?.[1]||`${fmtU(p.w)} per ${pgU(p.h)}`}. `+
-  (items.length?`In ordine di lettura: ${items.map((it,i)=>`${i+1}, ${it.name}, ${PG_KIND[it.kind].toLowerCase()} ${pgItemInfo(it)}`).join('; ')}. `:'Nessuna cornice da leggere. ')+(h.items.length>items.length?`${h.items.length-items.length} decorative. `:'')+(over?`Testo che non entra in ${over===1?'una cornice':over+' cornici'}. `:'')+(Pg.sel?'Scelta: '+pgDescribeItem(pgSel())+'.':'Nessuna cornice scelta.'))}
+  (items.length?`In ordine di lettura: ${items.map((it,i)=>`${i+1}, ${it.name}, ${pgKindSay(it.kind)} ${pgItemInfo(it)}`).join('; ')}. `:'Nessuna cornice da leggere. ')+(h.items.length>items.length?`${h.items.length-items.length} decorative. `:'')+(over?`Testo che non entra in ${over===1?'una cornice':over+' cornici'}. `:'')+(Pg.sel?'Scelta: '+pgDescribeItem(pgSel())+'.':'Nessuna cornice scelta.'))}
 // Ordine di lettura dalla disposizione: dall'alto in basso, e da sinistra a destra per le cornici affiancate. Le cornici
 // decorative e quelle che coprono tutta la pagina non fanno righe, se no unirebbero tutto: gli sfondi vengono per primi,
 // le decorative in fondo.
@@ -117,6 +118,7 @@ function pgIssues(){const p=Pg.p,out=[],mm=p.unit==='mm',big=mm?24:p.w/36,bigBol
     if(it.fillType==='image')out.push({...A,msg:`${nm}: le lettere mostrano un’immagine. Controlla a occhio che la scritta si legga, o aggiungi un contorno.`});
     else if(bg.color){const worst=inks.map(c=>pgCon(c,bg)).filter(c=>c!=null).sort((a,b)=>a-b)[0];if(worst!=null&&worst<need)out.push({...A,msg:`${nm}: contrasto ${pgFmt(worst)}:1 tra la scritta e ${bg.by?'«'+bg.by.name+'»':'lo sfondo'}, ne serve almeno ${need}:1${it.glow>0?'. Il neon si legge su un fondo scuro':''}.`})}else if(bg.image)out.push({...A,msg:`${nm}: la scritta è sopra l’immagine «${bg.image.name}». Controlla a occhio che si legga.`});
     if(it.fillType==='none'&&M.size*it.ow/100<(mm?.4*MM:2))out.push({...A,msg:`${nm}: il contorno delle lettere vuote è molto sottile, difficile da leggere.`});if(M.size<small)out.push({...A,msg:`${nm}: scritta molto piccola (${pgFmt(pgToPt(M.size))} ${ptName()}).`});continue}
+   if(it.kind==='qr'){pgQrIssues(it,nm,A,isPg&&ii>=0?insts[ii].row:null,out);continue}
    if((it.kind==='rect'||it.kind==='ellipse'||it.kind==='tri')&&!it.deco&&!it.alt.trim())out.push({...A,msg:`${nm}: la forma non è decorativa ma non ha un testo alternativo.`,fix:'alt'});
    if(it.kind!=='text')continue;const s=p.stories[it.story];
    if(p.data)for(const f of storyText(s).matchAll(FIELD_RE)){const low=f[1].trim().toLowerCase();if(!PG_BUILTIN[low]&&!fields.has(low)){out.push({...A,msg:`${nm}: il campo «${f[1]}» non c’è nei dati${p.data?` (campi: ${p.data.fields.join(', ')})`:': scegli i dati dalla scheda Fonti'}.`});break}}
@@ -233,7 +235,7 @@ const PAGE_ACTIONS={new:pageNewDialog,pgTemplates:pageNewDialog,open:()=>$('pgFi
  zoomUp:()=>pgZoom(1.25),zoomDown:()=>pgZoom(.8),zoomReset:()=>{Pg.zoom=1;pgRenderStage();announce('Zoom 100%')},pgZoomFit:()=>pgZoom(0),
  pgSave:pageSave,pgSaveTpl,pgExportPng,pgDescribe,pgCheck,
  pgAddPage,pgDupPage,pgDelPage,pgPrevPage:()=>pgStepPage(-1),pgNextPage:()=>pgStepPage(1),pgDataRepeat,pgRowPrev:()=>pgStepRow(-1),pgRowNext:()=>pgStepRow(1),
- pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
+ pgAddQr,pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
  pgPageNum:()=>pgMasterAdd('num'),pgHeader:()=>pgMasterAdd('head'),pgLogo:()=>pgMasterAdd('logo'),pgField:pgFieldMenu,
  pgEditText:()=>{if(pgNeed('text'))pgOpenItem(pgSel())},pgDup,pgDelete,pgCut:()=>pgCopy(true),pgCopy:()=>pgCopy(false),pgPaste,
  pgFront:()=>pgOrder('front'),pgBack:()=>pgOrder('back'),pgForward:()=>pgOrder('forward'),pgBackward:()=>pgOrder('backward'),

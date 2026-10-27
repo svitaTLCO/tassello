@@ -25,7 +25,7 @@ ORDER = [
     '07b-funcs.js', '07-formula.js', '07c-calc-core.js',
     '08-excel.js', '08b-fx.js', '08c-charts.js', '08d-sheet-extras.js', '08e-pivot.js',
     '11-export.js', '11b-docx.js', '11c-xlsx-extras.js', '11d-pivot-xlsx.js', '11e-docx-d.js', '11f-xlsx-read.js', '11g-clipboard.js',
-    '13-page-core.js', '13b-page-view.js', '13c-page-sources.js', '13d-page-io.js', '13e-page-signs.js', '13f-page-tiles.js', '13g-page-design.js', '13h-page-templates.js', '13i-page-photo.js',
+    '13-page-core.js', '13b-page-view.js', '13c-page-sources.js', '13d-page-io.js', '13e-page-signs.js', '13f-page-tiles.js', '13g-page-design.js', '13h-page-templates.js', '13i-page-photo.js', '13j-page-qr.js',
     '09-actions.js', '10-events.js', '10b-word-events.js', '10c-print.js', '12-start.js',
 ]
 

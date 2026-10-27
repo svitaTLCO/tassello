@@ -333,6 +333,7 @@ def('p','Inserisci',[
  ['pgAddEllipse','Inserisci un’ellisse','ellipse','',{short:'Ellisse'}],
  ['pgAddLine','Inserisci una linea','lineI','',{short:'Linea'}],
  ['pgAddTri','Inserisci un triangolo','triangle','',{short:'Triangolo'}],
+ ['pgAddQr','Inserisci un codice QR, fatto senza internet','qr','',{short:'Codice QR'}],
  ['pgAddSign','Inserisci un’insegna, una scritta d’effetto','sign','',{short:'Insegna'}],
  ['pgSignStyles','Stili delle insegne','down','',{menu:1,short:'Stili delle insegne'}],
  ['pgPageNum','Numero di pagina nel mastro','t:#','',{short:'Numero di pagina'}],
