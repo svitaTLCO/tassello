@@ -1,5 +1,5 @@
 // Ogni comando del registro corrisponde a una funzione: prima quelle dell'app attiva, poi quelle comuni.
-const toggleMarkPane=()=>{const p=$('markPane');p.hidden=!p.hidden;if(!p.hidden)$('markList').focus();else $('wave').focus()};
+const toggleMarkPane=()=>paneSet('markPane',paneState('markPane').st==='open'?'off':'open',{focus:true,say:false});
 // In Audio alcuni comandi valgono per l'editor della regione o per le tracce secondo dove si sta lavorando.
 const songOrEditor=(song,editor)=>()=>inEditorArea()?editor():song();
 const undoScope=()=>document.activeElement?.closest?.('#editorArea,#markPane')?'editor':document.activeElement?.closest?.('#arrange')?'project':lastScope;
@@ -28,14 +28,14 @@ const V_ACTIONS={saveProject:saveProjectZip,exportVideo:exportVideoDialog,export
  undo:()=>vUndo(false),redo:()=>vUndo(true),cut:()=>videoCopy(true),copy:()=>videoCopy(false),paste:videoPaste,playPause:vPlayPause,stop:()=>{const o=VE.origin??0;vStop();seekTo(o,{say:true})},
  toStart:()=>seekTo(0,{say:true}),toEnd:()=>seekTo(totalDur(),{say:true}),zoomIn:()=>zoomTimeline(1.5),zoomOut:()=>zoomTimeline(1/1.5),zoomFit:zoomFitTimeline,readStatus:readVideoStatus};
 const COMMON_ACTIONS={new:()=>isAudio()?newAudio():newVideo(),open:()=>pickFile('open'),filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
- switchAudio:()=>setMode('audio'),switchVideo:()=>setMode('video'),goTo:goToDialog,follow:()=>{prefs.follow=!prefs.follow;savePrefs()},
+ switchAudio:()=>setMode('audio'),switchVideo:()=>setMode('video'),layoutMenu,layoutReset,showLibrary:()=>paneToggle('libPane'),showInspector:()=>paneToggle('inspPane'),bigPreview:()=>layoutPreset('tessera'),goTo:goToDialog,follow:()=>{prefs.follow=!prefs.follow;savePrefs()},
  themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};
 async function handleAction(id){const f=(isAudio()?A_ACTIONS[id]:V_ACTIONS[id])??COMMON_ACTIONS[id];if(!f){toast('Comando non disponibile');return}await f()}
 // Passa da Audio a Video e viceversa: ferma la riproduzione dell'app che si lascia e ridisegna l'altra.
 function setMode(mode,{focus=true}={}){if(mode===state.mode)return;if(mode==='video')stopPlayback(true);else vStop();state.mode=mode;const audio=mode==='audio';
  $('app').className=mode;document.documentElement.dataset.mode=mode;$('audioPane').classList.toggle('hidden',!audio);$('videoPane').classList.toggle('hidden',audio);$('switchAudio').setAttribute('aria-pressed',audio);$('switchVideo').setAttribute('aria-pressed',!audio);
  $('docTitle').value=audio?P.title:V.p.title;$('saveTopLabel').textContent=audio?'Esporta':'Salva progetto';$('saveTop').dataset.tip=audio?'Esporta il brano (Ctrl+S)':'Salva il progetto (Ctrl+S)';updateTitle();
- currentTab=TABS[mode[0]][0];renderTabs();renderRibbon();themeChanged();if(audio){renderArrange();viewClamp();drawAudio();updateAudioUI()}else{resizeCanvas();drawTimeline();renderLibrary();renderInspector();updateVideoUI()}
+ renderBar();applyLayout(false);themeChanged();if(audio){renderArrange();viewClamp();drawAudio();updateAudioUI()}else{resizeCanvas();drawTimeline();renderLibrary();renderInspector();updateVideoUI()}
  if(focus){if(audio)focusLane(P.track);else($(lastTrack)||playheadEl).focus();announce(audio?'Audio: tracce':'Video: linea temporale')}schedulePersist(mode)}
 function updateTitle(){document.title=($('docTitle').value.trim()||'Senza titolo')+' — '+(isAudio()?'Audio':'Video')+' · Tassello Media'}
 // Apertura dei file: ogni app decide che cosa fare di audio, video, immagini, progetti e testi.

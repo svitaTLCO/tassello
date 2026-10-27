@@ -126,5 +126,4 @@ $('markList').addEventListener('keydown',e=>{const list=A.markers,i=list.findInd
  else if(e.key==='F2'){e.preventDefault();markerRename(m)}else if(e.key==='Delete'){e.preventDefault();markerDelete(m)}else if(e.key===' '){e.preventDefault();A.cursor=m.pos;audioPlayPause()}});
 $('markList').addEventListener('click',e=>{const li=e.target.closest('[data-id]');if(!li)return;markActive=li.dataset.id;const m=A.markers.find(x=>x.id===markActive);renderMarkers();if(m)moveCursor(m.pos,false,{listen:false})});
 $('markList').addEventListener('dblclick',e=>{const li=e.target.closest('[data-id]');if(li)markerRename(A.markers.find(x=>x.id===li.dataset.id))});
-$('markClose').onclick=()=>{$('markPane').hidden=true;refreshToggles();waveEl.focus();announce('Riquadro dei marcatori chiuso')};
-addEventListener('resize',()=>{if(isAudio()){viewClamp();drawAudio();renderArrange()}else drawTimeline()});
+addEventListener('resize',relayout);

@@ -3,7 +3,7 @@ redrawAll=()=>{if(isAudio()){drawAudio();renderArrange()}else{drawTimeline();req
 async function start(){applyPrefs();$('stepSel').value=String(prefs.step);if(!$('stepSel').value){prefs.step=0.1;$('stepSel').value='0.1'}$('vSubs').setAttribute('aria-pressed',prefs.showSubs);
  suppressAutosave=true;try{db=await openStore();await restoreAudio().catch(e=>console.warn('Bozza audio non recuperabile',e));await restoreVideo().catch(e=>console.warn('Progetto video non recuperabile',e));await gcMedia();await gcSources();const ui=await dbGet('ui').catch(()=>null);if(ui?.mode==='video')setMode('video',{focus:false})}
  catch(e){console.error('Avvio non riuscito',e);toast('Avvio non riuscito: '+e.message)}finally{suppressAutosave=false}
- $('docTitle').value=isAudio()?P.title:V.p.title;updateTitle();renderTabs();renderRibbon();resizeCanvas();showEditor(!!A.buf);zoomFitAudio();updateAudioUI();renderArrange();updateEditorBar();renderLibrary();renderInspector();drawTimeline();updateVideoUI();
+ $('docTitle').value=isAudio()?P.title:V.p.title;updateTitle();renderBar();applyLayout(false);resizeCanvas();showEditor(!!A.buf);zoomFitAudio();updateAudioUI();renderArrange();updateEditorBar();renderLibrary();renderInspector();drawTimeline();updateVideoUI();
  status(db?'Pronto · i file restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze: esporta il lavoro prima di chiudere')}
 // Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si può installare come app
 // che funziona anche senza rete e si aggiorna dal sito.

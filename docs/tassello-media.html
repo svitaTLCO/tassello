@@ -10,22 +10,29 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='46' height='46' rx='10' fill='%232457C5'/%3E%3Cpath d='M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z' fill='%231E7A46'/%3E%3Cpath d='M86 0V8Q86 14 92 14H100Z' fill='%23fff' fill-opacity='.55'/%3E%3Crect y='54' width='46' height='46' rx='10' fill='%23B35500'/%3E%3Crect x='54' y='54' width='46' height='46' rx='10' fill='%237A3DB8'/%3E%3C/svg%3E">
 <style>
-:root{--accent:#b35500;--accent-strong:#8a4100;--accent-text:#8a4100;--accent-soft:#fbeee3;--sel-tint:rgba(179,85,0,.18);
---bg:#f3f3f3;--chrome:#f7f7f7;--surface:#fff;--surface-2:#f3f3f3;--hover:#e8e8e8;--pressed:#dcdcdc;--line:#e1e1e1;--line-strong:#b3b3b3;--text:#1b1b1b;--text-2:#3d3d3d;--text-3:#575757;--canvas:#e6e6e6;--focus:#1b1b1b;--danger:#b10e1c;
---wave-bg:#ffffff;--wave:#8a4100;--wave-rms:#d9893f;--wave-mid:#d0d0d0;--wave-sel:rgba(179,85,0,.22);--playhead:#c50f1f;--marker:#2457c5;--ruler:#575757;
---shadow:0 12px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08);color-scheme:light;
+/* Mosaico: la finestra è fatta di tasselli (--surface) appoggiati su una fuga (--grout) che prende il colore dell'app. */
+:root{--accent:#b35500;--accent-strong:#8a4100;--accent-text:#8a4100;--accent-soft:#fbebdd;--sel-tint:rgba(179,85,0,.18);
+--grout:#ede2d8;--grout-deep:#e0d1c3;--gap:8px;--r:10px;--fold:var(--accent);--scrim:rgba(16,22,34,.16);--stage:#1c1e22;
+--bg:var(--grout);--chrome:#fff;--surface:#fff;--surface-2:#f1f3f7;--hover:#e9edf3;--pressed:#dde2ea;--line:#e1e5ec;--line-strong:#a9b0bc;--text:#161b26;--text-2:#3e4757;--text-3:#596374;--canvas:#f1f3f7;--focus:#161b26;--danger:#b10e1c;
+--wave-bg:#ffffff;--wave:#8a4100;--wave-rms:#d9893f;--wave-mid:#d0d0d0;--wave-sel:rgba(179,85,0,.22);--playhead:#c50f1f;--marker:#2457c5;--ruler:#596374;
+--shadow:0 12px 32px rgba(20,24,34,.18),0 2px 8px rgba(20,24,34,.08);--lift:0 18px 40px rgba(20,24,34,.26),0 2px 6px rgba(20,24,34,.1);color-scheme:light;
+--mono:'Cascadia Mono',Consolas,ui-monospace,'Courier New',monospace;
 font-family:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--text)}
-html[data-mode=video]{--accent:#7a3db8;--accent-strong:#5e2c91;--accent-text:#5e2c91;--accent-soft:#f1e9fa;--sel-tint:rgba(122,61,184,.18)}
-html[data-theme=dark]{color-scheme:dark;--bg:#1c1c1c;--chrome:#242424;--surface:#2c2c2c;--surface-2:#303030;--hover:#3a3a3a;--pressed:#464646;--line:#3d3d3d;--line-strong:#6a6a6a;--text:#f3f3f3;--text-2:#d9d9d9;--text-3:#bdbdbd;--canvas:#141414;--focus:#fff;--accent-text:#f2a05a;--accent-soft:#3d2310;
---wave-bg:#1f1f1f;--wave:#f2a05a;--wave-rms:#a35a1c;--wave-mid:#444;--wave-sel:rgba(242,160,90,.25);--playhead:#ff6b6b;--marker:#9bbcf5;--ruler:#bdbdbd;--shadow:0 12px 32px rgba(0,0,0,.55)}
-html[data-theme=dark][data-mode=video]{--accent-text:#c19af0;--accent-soft:#2c1d40}
-html[data-contrast=high]{--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#5c2b00;--wave:#000;--wave-rms:#5c2b00;--wave-mid:#000;--wave-sel:rgba(0,0,0,.2);--playhead:#b10e1c;--marker:#002a66;--ruler:#000}
+html[data-mode=video]{--accent:#7a3db8;--accent-strong:#5e2c91;--accent-text:#5e2c91;--accent-soft:#f1e9fa;--sel-tint:rgba(122,61,184,.18);--grout:#e4dded;--grout-deep:#d6cce4}
+html[data-theme=dark]{color-scheme:dark;--grout:#17110c;--grout-deep:#0d0906;--scrim:rgba(0,0,0,.45);--chrome:#1e2026;--surface:#1e2026;--surface-2:#272a31;--hover:#2f333c;--pressed:#3a3f49;--line:#363a44;--line-strong:#6b7280;--text:#eef1f6;--text-2:#c9d0db;--text-3:#a3acbb;--canvas:#16181d;--focus:#fff;--accent-text:#f2a05a;--accent-soft:#3a2410;
+--wave-bg:#1a1c21;--wave:#f2a05a;--wave-rms:#a35a1c;--wave-mid:#444;--wave-sel:rgba(242,160,90,.25);--playhead:#ff6b6b;--marker:#9bbcf5;--ruler:#a3acbb;--shadow:0 12px 32px rgba(0,0,0,.55);--lift:0 18px 40px rgba(0,0,0,.6)}
+html[data-theme=dark][data-mode=video]{--accent-text:#c19af0;--accent-soft:#2c1d40;--grout:#120e18;--grout-deep:#0a070e}
+html[data-contrast=high]{--grout:#fff;--grout-deep:#fff;--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#5c2b00;--wave:#000;--wave-rms:#5c2b00;--wave-mid:#000;--wave-sel:rgba(0,0,0,.2);--playhead:#b10e1c;--marker:#002a66;--ruler:#000}
 html[data-contrast=high][data-mode=video]{--accent-text:#3d1a63}
-html[data-contrast=high][data-theme=dark]{--line:#fff;--line-strong:#fff;--text-2:#fff;--text-3:#fff;--hover:#4a4a4a;--accent-text:#ffc48f;--wave:#fff;--wave-rms:#ffc48f;--wave-mid:#fff;--wave-sel:rgba(255,255,255,.28);--playhead:#ff8080;--marker:#b5d0ff;--ruler:#fff}
+html[data-contrast=high][data-theme=dark]{--grout:#000;--grout-deep:#000;--line:#fff;--line-strong:#fff;--text-2:#fff;--text-3:#fff;--hover:#4a4a4a;--accent-text:#ffc48f;--wave:#fff;--wave-rms:#ffc48f;--wave-mid:#fff;--wave-sel:rgba(255,255,255,.28);--playhead:#ff8080;--marker:#b5d0ff;--ruler:#fff}
 html[data-contrast=high][data-theme=dark][data-mode=video]{--accent-text:#dcc2ff}
 @media (forced-colors:active){:root{--wave-bg:Canvas;--wave:CanvasText;--wave-rms:CanvasText;--wave-mid:GrayText;--wave-sel:Highlight;--playhead:Highlight;--marker:LinkText;--ruler:CanvasText}}
-html[data-contrast=high] .tool,html[data-contrast=high] .tab,html[data-contrast=high] .btn,html[data-contrast=high] .tp-btn{border:1px solid var(--line-strong)}
+html[data-contrast=high] .tb,html[data-contrast=high] .ditem,html[data-contrast=high] .btn,html[data-contrast=high] .tp-btn{border:1px solid var(--line-strong)}
+/* In contrasto elevato la fuga diventa una linea di 2 px intorno a ogni tassello. */
+html[data-contrast=high] .tile{outline:2px solid var(--line-strong);outline-offset:-2px}
+html[data-contrast=high] .tessera,html[data-contrast=high] .chip,html[data-contrast=high] .st-btn{box-shadow:inset 0 0 0 2px var(--line-strong)}
 html[data-contrast=high] :focus-visible{outline-width:3px}
+@media (forced-colors:active){.tile,.tessera,.chip,.st-btn,.drawer,.dgroup,.palette,.pal-field,#palList{border:1px solid CanvasText}}
 *,*::before,*::after{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;overflow:hidden}
 body{background:var(--bg);color:var(--text)}
@@ -41,66 +48,62 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:block}
 .ti-text{font-weight:600;font-size:15px;line-height:1;min-width:18px;text-align:center;font-family:'Segoe UI',system-ui,sans-serif;white-space:nowrap}
 #app{display:flex;flex-direction:column;height:100dvh;min-width:0}
-/* Barra del titolo */
-.titlebar{height:46px;flex-shrink:0;background:var(--accent);color:#fff;display:flex;align-items:center;gap:6px;padding:0 10px}
-.titlebar :focus-visible{outline-color:#fff}
-.brand{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 6px;margin-right:4px;border:0;border-radius:8px;background:transparent;color:#fff;font:inherit;cursor:pointer}
-.brand:hover{background:rgba(255,255,255,.14)}
-.brand-mark{width:22px;height:22px;flex:none}
-.brand-name{font-weight:700;font-size:14px;letter-spacing:.01em;white-space:nowrap}
-@media (max-width:980px){.brand-name{display:none}.brand{padding:0 6px}}
-.app-switch{display:flex;background:rgba(0,0,0,.2);border-radius:9px;padding:3px;gap:2px}
-.app-switch button{display:flex;align-items:center;gap:7px;height:28px;padding:0 10px 0 6px;border:0;border-radius:7px;background:transparent;color:#fff;font-weight:600}
-.app-switch button:hover{background:rgba(255,255,255,.14)}
-.app-switch button[aria-pressed=true]{background:#fff;color:var(--accent-strong)}
-.app-logo{width:19px;height:19px;border-radius:5px;display:grid;place-items:center;background:rgba(255,255,255,.22);color:#fff}
+/* Tasselli e angolo: l'angolo piegato del logo segna l'azione principale e il tassello in cui si lavora. */
+.tile{background:var(--surface);border-radius:var(--r);position:relative}
+.primary-tile::after,.tile.is-active::after,.pal-field::after{content:'';position:absolute;top:0;right:0;width:14px;height:14px;border-bottom-left-radius:4px;background:linear-gradient(to bottom left,var(--corner-bg,var(--grout)) 50%,var(--fold) 50%);pointer-events:none;z-index:8}
+/* Barra: una riga di tasselli al posto di titolo, schede e barra multifunzione. */
+.bar{display:flex;align-items:stretch;gap:var(--gap);padding:var(--gap) var(--gap) 0;flex-shrink:0;position:relative;z-index:30;min-width:0}
+.bar>.tile{height:48px;flex:0 0 auto}
+.brand-tile{display:flex;align-items:center;gap:4px;padding:0 6px}
+.brand{width:38px;height:38px;border:0;border-radius:8px;background:transparent;display:grid;place-items:center;padding:0}
+.brand:hover{background:var(--hover)}
+.brand-mark{width:24px;height:24px;flex:none}
+.app-switch{display:flex;gap:2px;padding:3px;border-radius:9px;background:var(--surface-2)}
+.app-switch button{display:flex;align-items:center;gap:7px;height:32px;padding:0 10px 0 6px;border:0;border-radius:7px;background:transparent;color:var(--text-2);font-weight:600}
+.app-switch button:hover{background:var(--hover);color:var(--text)}
+.app-switch button[aria-pressed=true]{background:var(--surface);color:var(--accent-text);box-shadow:0 1px 3px rgba(20,24,34,.16)}
+.app-logo{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;background:var(--pressed);color:var(--text-2)}
 .app-logo svg{display:block}
 .app-switch button[aria-pressed=true] .app-logo{background:var(--accent);color:#fff}
-.tb-group{display:flex;gap:2px;margin-left:4px}
-.tb-btn{border:0;background:transparent;color:#fff;width:34px;height:34px;border-radius:7px;display:grid;place-items:center}
-.tb-btn:hover{background:rgba(255,255,255,.16)}.tb-btn:active{background:rgba(255,255,255,.26)}
-.title-center{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-width:120px}
-.title-center input{width:min(300px,100%);min-width:0;text-align:center;background:rgba(255,255,255,.14);border:1px solid transparent;border-radius:7px;color:#fff;height:30px;padding:0 10px;font-weight:600}
-.title-center input:hover{border-color:rgba(255,255,255,.55)}
-.title-center input:focus{background:#fff;color:#1b1b1b;outline:2px solid #fff;outline-offset:1px}
-.save-state{font-size:12px;opacity:.92;white-space:nowrap}
-.cmd-search{display:flex;align-items:center;gap:8px;height:32px;min-width:210px;border-radius:7px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;padding:0 6px 0 10px;text-align:left}
-.cmd-search:hover{background:rgba(255,255,255,.22)}
-.cmd-search span{flex:1}
-.cmd-search kbd{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)}
-.top-action{height:32px;border-radius:7px;padding:0 12px;border:1px solid rgba(255,255,255,.6);background:transparent;color:#fff;display:flex;align-items:center;gap:7px;font-weight:600;white-space:nowrap}
-.top-action:hover{background:rgba(255,255,255,.14)}
-.top-action.primary{border-color:#fff;background:#fff;color:var(--accent-strong)}
-.top-action.primary:hover{background:#fdf6ef}
-html[data-mode=video] .top-action.primary:hover{background:#f7f2fc}
-/* Schede */
-.tabrow{display:flex;align-items:flex-end;gap:6px;background:var(--chrome);padding:5px 10px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
-.filebtn{height:30px;margin-bottom:4px;padding:0 15px;border:0;border-radius:7px;background:var(--accent);color:#fff;font-weight:600;flex-shrink:0}
-.filebtn:hover{background:var(--accent-strong)}
-.tabs{display:flex;gap:2px}
-.tab{border:0;background:transparent;color:var(--text-2);height:36px;padding:0 13px;border-radius:7px 7px 0 0;position:relative;white-space:nowrap;font-weight:500}
-.tab:hover{background:var(--hover);color:var(--text)}
-.tab[aria-selected=true]{color:var(--accent-text);font-weight:600}
-.tab[aria-selected=true]::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
-.tab:focus-visible{outline-offset:-2px}
-/* Barra multifunzione */
-.ribbon{flex-shrink:0;background:var(--chrome);overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;border-bottom:1px solid var(--line)}
-.ribbon-inner{display:flex;align-items:stretch;min-height:102px;padding:6px 6px 4px;margin:0 8px 8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);width:max-content;min-width:calc(100% - 16px)}
-.rbgroup{display:flex;flex-direction:column;padding:0 9px;position:relative;flex-shrink:0}
-.rbgroup+.rbgroup::before{content:'';position:absolute;left:0;top:6px;bottom:24px;width:1px;background:var(--line)}
-.rbitems{display:flex;align-items:flex-start;gap:3px;flex:1}
-.rbstack{display:flex;flex-direction:column;gap:5px;padding-top:2px}
-.rbrow{display:flex;align-items:center;gap:2px}
-.rb-label{font-size:11px;color:var(--text-3);text-align:center;padding-top:4px;white-space:nowrap}
-.tool{display:inline-flex;justify-content:center;align-items:center;gap:5px;position:relative;height:30px;min-width:30px;padding:0 6px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);white-space:nowrap}
-.tool:hover{background:var(--hover)}.tool:active{background:var(--pressed)}
-.tool[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
-.tool.lg{flex-direction:column;justify-content:flex-start;height:70px;min-width:54px;max-width:98px;padding:6px 6px 4px;white-space:normal;font-size:12px;line-height:1.2;gap:5px;text-align:center}
-.tool.lg .ico{width:26px;height:26px;stroke-width:1.5}
-.tool.lg .ti-text{font-size:21px;height:26px;display:flex;align-items:center;justify-content:center}
-.tool .lbl{font-size:12px}
-.chev{width:10px;height:10px;display:inline-block;vertical-align:middle;margin-left:2px;stroke-width:2}
-.tool[aria-expanded=true]{background:var(--pressed)}
+.doc-tile{display:flex;flex-direction:column;justify-content:center;gap:1px;padding:0 12px 0 14px;min-width:120px}
+.bar>.doc-tile{flex:0 1 220px}
+.doc-tile input{width:100%;min-width:0;height:24px;margin-left:-6px;padding:0 5px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);font-weight:700;font-size:14px}
+.doc-tile input:hover{border-color:var(--line-strong)}
+.doc-tile input:focus{background:var(--surface-2)}
+.save-state{font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{min-width:0;display:flex;align-items:center;gap:2px;padding:0 6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.bar>.tools{flex:1 1 0}
+.bar.wrap{flex-wrap:wrap}.bar.wrap>.tools{order:9;flex:1 1 100%;scrollbar-width:thin}.bar.wrap>.doc-tile{flex:1 1 160px}
+.tools>div{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.tb{flex-shrink:0;height:36px;min-width:36px;border:0;border-radius:8px;background:transparent;color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;white-space:nowrap}
+.tb.icon{width:36px;padding:0}
+.tb:hover{background:var(--hover)}.tb:active{background:var(--pressed)}
+.tb[aria-pressed=true],.tb[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text)}
+.tb.drw{font-weight:600}
+.tb .chev{width:12px;height:12px;stroke-width:2.2}
+.tb:focus-visible{outline-offset:-2px}
+.tsep{width:1px;height:22px;background:var(--line);margin:0 5px;flex-shrink:0}
+.tools.fit1 .h1,.tools.fit2 .h2{display:none}
+.search-tile{display:flex;align-items:center;gap:9px;padding:0 12px 0 14px;border:0;color:var(--text)}
+.search-tile:hover{background:var(--surface-2)}
+.search-tile kbd,.pal-field kbd{border:0;background:var(--surface-2);color:var(--text-2);font:500 11.5px/1 var(--mono);padding:4px 6px;border-radius:5px}
+.primary-tile{--fold:rgba(255,255,255,.55);display:flex;align-items:center;gap:8px;padding:0 22px 0 16px;border:0;background:var(--accent);color:#fff;font-weight:700;font-size:14px;white-space:nowrap}
+.primary-tile:hover{background:var(--accent-strong)}
+.bar :focus-visible{outline-color:var(--focus)}
+/* Cassetti: le categorie si aprono sopra il lavoro e si richiudono dopo il comando. */
+.drawer{position:fixed;z-index:60;padding:var(--gap);background:var(--grout-deep);border-radius:12px;box-shadow:var(--lift);max-width:calc(100vw - 16px);max-height:calc(100dvh - 76px);overflow:auto}
+.drawer-grid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(196px,max-content));gap:var(--gap)}
+.dgroup{background:var(--surface);border-radius:9px;padding:10px 6px 6px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.dgroup h3{margin:0;padding:0 8px 5px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.ditem{display:flex;align-items:center;gap:10px;width:100%;min-height:34px;border:0;border-radius:7px;background:transparent;color:var(--text);padding:0 8px;text-align:left}
+.ditem:hover{background:var(--hover)}
+.ditem:focus-visible{background:var(--accent-soft);color:var(--accent-text);outline-offset:-2px}
+.ditem .ico{color:var(--text-2)}.ditem:focus-visible .ico{color:inherit}
+.ditem .lbl{flex:1;min-width:0}
+.ditem kbd{border:0;background:var(--surface-2);color:var(--text-2);font:500 11px/1 var(--mono);padding:4px 5px;border-radius:5px}
+.ditem .dstate{width:16px;text-align:center;font-weight:700;color:var(--accent-text)}
+.ditem[aria-pressed=true] .dstate::before{content:'✓'}
+.ditem[aria-pressed=true]{font-weight:600}
 .rb-select{height:28px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);padding:0 4px}
 .rb-select:hover{border-color:var(--text-3)}
 .btn{display:inline-flex;justify-content:center;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);white-space:nowrap}
@@ -112,11 +115,12 @@ html[data-mode=video] .top-action.primary:hover{background:#f7f2fc}
 .check{display:inline-flex;align-items:center;gap:6px;font-weight:400!important}
 .check input{width:16px;height:16px;accent-color:var(--accent)}
 /* Area di lavoro */
-.main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;padding:var(--gap) var(--gap) 0}
 .main:focus-visible{outline-offset:-3px}
 .editor-pane{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
 /* Trasporto: riproduzione, registrazione e orologio */
-.transport{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:6px 10px;background:var(--chrome);border-bottom:1px solid var(--line);flex-shrink:0}
+.transport{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:6px 10px;background:var(--surface);flex-shrink:0}
+#aTransport{border-radius:var(--r)}
 .tp-group{display:flex;align-items:center;gap:3px}
 .tp-btn{width:36px;height:36px;border:1px solid transparent;border-radius:50%;background:transparent;color:var(--text);display:grid;place-items:center}
 .tp-btn:hover{background:var(--hover)}.tp-btn:active{background:var(--pressed)}
@@ -126,8 +130,8 @@ html[data-mode=video] .top-action.primary:hover{background:#f7f2fc}
 .tp-btn.rec{color:#c50f1f}
 html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .tp-btn .ico{width:20px;height:20px}
-.clock{display:flex;flex-direction:column;align-items:flex-start;padding:3px 10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;min-width:150px}
-.clock b{font:600 20px/1.1 'Cascadia Mono',Consolas,'Courier New',monospace;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.clock{display:flex;flex-direction:column;align-items:flex-start;padding:3px 10px;background:var(--surface-2);border-radius:8px;min-width:150px}
+.clock b{font:600 20px/1.1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:.02em}
 .clock small{font-size:11px;color:var(--text-3)}
 .meter{width:150px;height:14px;display:block;border-radius:3px;background:var(--surface-2);border:1px solid var(--line)}
 .tp-info{font-size:12px;color:var(--text-2);display:flex;flex-direction:column;gap:2px}
@@ -135,7 +139,7 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .tp-sel label{font-size:12px;color:var(--text-2)}
 /* Editor audio */
 #audioPane{flex-direction:row}
-.wave-col{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0}
+.wave-col{display:flex;flex-direction:column;gap:var(--gap);flex:1;min-width:0;min-height:0;order:100}
 .wave-wrap{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--canvas);padding:8px 10px;gap:4px}
 .ruler{height:24px;flex-shrink:0;position:relative}
 .ruler canvas,.overview canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -148,16 +152,16 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .wave-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--text-2);pointer-events:none}
 .wave-empty b{display:block;font-size:17px;color:var(--text);margin-bottom:6px}
 .wave-empty .row{display:flex;gap:8px;justify-content:center;margin-top:12px;pointer-events:auto;flex-wrap:wrap}
-.selbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 14px;padding:7px 10px;background:var(--chrome);border-top:1px solid var(--line);flex-shrink:0}
+.selbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 14px;padding:7px 10px;background:var(--surface);border-top:1px solid var(--line);flex-shrink:0;border-radius:0 0 var(--r) var(--r)}
 .selbar .fld{display:flex;flex-direction:column;gap:2px}
 .selbar label{font-size:11.5px;color:var(--text-2);font-weight:600}
 .timefield{width:118px;height:28px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);padding:0 8px;font:13px 'Cascadia Mono',Consolas,'Courier New',monospace;font-variant-numeric:tabular-nums}
 .selbar output{display:block;height:28px;line-height:28px;font:13px 'Cascadia Mono',Consolas,monospace;color:var(--text-2)}
 /* Tracce del progetto audio e editor della regione */
 #audioPane .wave-col{min-height:0}
-.arrange{flex:1 1 55%;min-height:140px;display:flex;flex-direction:column;border-bottom:2px solid var(--line-strong);background:var(--canvas);position:relative}
-.ar-bar,.ed-bar{display:flex;align-items:center;gap:8px;padding:5px 10px;flex-shrink:0;background:var(--chrome);border-bottom:1px solid var(--line);flex-wrap:wrap}
-.ar-bar h2,.ed-bar h2{font-size:13px;margin:0}
+.arrange{flex:1 1 55%;min-height:140px;display:flex;flex-direction:column;background:var(--surface);position:relative;overflow:hidden}
+.ar-bar,.ed-bar{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 14px;min-height:40px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ar-bar h2,.ed-bar h2{font-size:14px;margin:0}
 .ar-bar .grow,.ed-bar .grow{flex:1}
 .ar-scroll{flex:1;min-height:0;overflow:auto;position:relative;scrollbar-width:thin}
 .ar-inner{position:relative;min-width:100%}
@@ -191,14 +195,31 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .ar-empty{position:absolute;left:0;right:0;top:80px;bottom:0;display:grid;place-items:center;text-align:center;padding:16px;color:var(--text-2);pointer-events:none}
 .ar-empty b{display:block;font-size:16px;color:var(--text);margin-bottom:6px}
 .ar-empty .row{display:flex;gap:8px;justify-content:center;margin-top:12px;pointer-events:auto;flex-wrap:wrap}
-.editor-area{flex:1 1 45%;min-height:0;display:flex;flex-direction:column}
+.editor-area{flex:1 1 45%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.editor-area.closed .ed-bar{border-bottom:0}
 .editor-area.closed{flex:0 0 auto}.editor-area.closed .wave-wrap,.editor-area.closed .selbar{display:none}
 .editor-area .wave{min-height:90px}.editor-area .wave-box{min-height:90px}
 .ar-row.drop .ar-lane{outline:2px dashed var(--accent);outline-offset:-3px}
 .btn[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
 @media (forced-colors:active){.trk-btn[aria-pressed=true]{outline:2px solid Highlight}.ar-line,.ar-cycle{background:Highlight}}
-.side-pane{width:270px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.pane-head{display:flex;align-items:center;gap:8px;padding:10px 10px 4px 14px}.pane-head h2{font-size:14px;margin:0;flex:1}
+/* Riquadri laterali: si riducono a tessera, si spostano a destra o a sinistra, si allargano trascinando la fuga. */
+.pane{width:var(--w,270px);flex-shrink:0;display:flex;flex-direction:column;min-height:0;min-width:0}
+.pane-head{display:flex;align-items:center;gap:4px;padding:8px 6px 4px 14px;min-height:40px}.pane-head h2{font-size:14px;margin:0;flex:1}
+.pane-btn{width:30px;height:30px;border:0;border-radius:7px;background:transparent;color:var(--text-2);display:grid;place-items:center;flex-shrink:0;padding:0}
+.pane-btn:hover{background:var(--hover);color:var(--text)}.pane-btn[aria-expanded=true]{background:var(--pressed)}
+.pane-btn .ico{width:16px;height:16px}
+.tessera{width:44px;flex-shrink:0;border:0;border-radius:var(--r);background:var(--surface);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px 0}
+.tessera:hover{background:var(--surface-2)}
+.tessera[data-side=left]{margin-right:var(--gap)}.tessera[data-side=right]{margin-left:var(--gap)}
+.tessera .badge{min-width:20px;height:20px;padding:0 5px;border-radius:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.tessera .badge:empty{display:none}
+.tessera .vt{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:600;white-space:nowrap}
+.sep{flex:0 0 var(--gap);align-self:stretch;display:grid;place-items:center;cursor:col-resize;touch-action:none;border-radius:4px}
+.sep::before{content:'';width:4px;height:40px;max-height:60%;border-radius:2px;background:var(--accent);opacity:0;transition:opacity .12s}
+.sep:hover::before,.sep:focus-visible::before,.sep.dragging::before{opacity:1}
+.sep:focus-visible{outline-offset:0}
+.sep.h{cursor:row-resize}.sep.h::before{width:40px;height:4px;max-width:60%}
+@media (forced-colors:active){.sep::before{background:Highlight}}
 .pane-count{font-size:12px;color:var(--text-3)}
 .pane-hint{font-size:12px;color:var(--text-3);margin:0 14px 8px;line-height:1.35}
 .pane-tools{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px}
@@ -213,14 +234,13 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .lb-item .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-empty{padding:8px 10px;color:var(--text-3);font-size:12.5px}
 /* Editor video */
-#videoPane{display:grid;grid-template-columns:250px minmax(0,1fr) 300px;grid-template-rows:minmax(0,1fr) auto;min-height:0}
-.library{grid-column:1;grid-row:1;border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0}
-.viewer{grid-column:2;grid-row:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--canvas)}
-.inspector{grid-column:3;grid-row:1;border-left:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0}
-.stage{flex:1;min-height:120px;position:relative}
+#videoPane{min-height:0}
+.v-top{flex:1;min-height:0;display:flex}
+.viewer{order:100;flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.stage{flex:1;min-height:120px;position:relative;background:var(--stage);border-radius:var(--r) var(--r) 0 0}
 .stage canvas{position:absolute;inset:10px;margin:auto;max-width:calc(100% - 20px);max-height:calc(100% - 20px);background:#000;box-shadow:0 2px 12px rgba(0,0,0,.25);border-radius:3px;display:block;cursor:pointer}
 .stage canvas:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.viewer .transport{border-top:1px solid var(--line);border-bottom:0}
+.viewer .transport{border-radius:0 0 var(--r) var(--r)}
 .media-item{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center}
 .media-item .thumb{width:64px;height:36px;border-radius:4px;background:#222 center/cover no-repeat;display:grid;place-items:center;color:#fff}
 .media-item .thumb .ico{width:18px;height:18px}
@@ -239,8 +259,8 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .insp-body dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:8px 0 0}
 .insp-body dt{color:var(--text-3)}.insp-body dd{margin:0;font-weight:600}
 .insp-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
-.timeline{grid-column:1/-1;grid-row:2;border-top:1px solid var(--line);background:var(--chrome);display:flex;flex-direction:column;height:clamp(200px,32vh,310px);min-height:0}
-.tl-bar{display:flex;align-items:center;gap:10px;padding:5px 10px;flex-shrink:0;border-bottom:1px solid var(--line)}
+.timeline{background:var(--surface);display:flex;flex-direction:column;height:var(--tl-h,clamp(200px,32vh,310px));min-height:0;flex-shrink:0;overflow:hidden}
+.tl-bar{display:flex;align-items:center;gap:10px;padding:6px 10px 6px 14px;min-height:40px;flex-shrink:0;border-bottom:1px solid var(--line)}
 .tl-bar h2{font-size:13px;margin:0}
 .tl-bar .grow{flex:1}
 .tl-body{flex:1;min-height:0;display:grid;grid-template-columns:118px minmax(0,1fr)}
@@ -266,16 +286,22 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .tl-handle{position:absolute;top:0;width:16px;height:26px;margin-left:-8px;z-index:6;border:0;padding:0;background:transparent;cursor:ew-resize}
 .tl-handle::before{content:'';position:absolute;left:2px;right:2px;top:2px;height:14px;background:var(--playhead);clip-path:polygon(0 0,100% 0,100% 60%,50% 100%,0 60%)}
 .tl-handle:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
-@media (max-width:1100px){#videoPane{grid-template-columns:210px minmax(0,1fr) 260px}}
-@media (max-width:860px){#videoPane{grid-template-columns:1fr;grid-template-rows:auto minmax(220px,1fr) auto auto}.library{grid-column:1;grid-row:3;max-height:220px}.viewer{grid-column:1;grid-row:2}.inspector{grid-column:1;grid-row:4;max-height:300px}.timeline{grid-row:1;height:auto;max-height:44vh}#audioPane{flex-direction:column}.side-pane{width:auto;max-height:200px;border-left:0;border-top:1px solid var(--line)}}
+/* Nelle finestre strette i tasselli si mettono in colonna e le tessere diventano orizzontali. */
+@media (max-width:860px){#videoPane{overflow:auto}.v-top{flex-direction:column;gap:var(--gap);flex:none}.viewer{min-height:240px;order:0!important}.timeline{order:-1;height:auto;max-height:44vh}#audioPane{flex-direction:column;gap:var(--gap)}.wave-col{order:0!important}.pane{width:auto;max-height:240px;order:1!important}.sep{display:none}.tessera{width:auto;height:44px;flex-direction:row;padding:0 14px;margin:0!important;order:1!important}.tessera .vt{writing-mode:horizontal-tb;transform:none}}
 /* Barra di stato */
-.status{flex-shrink:0;min-height:30px;background:var(--chrome);border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;color:var(--text-2);font-size:12px;padding:0 10px}
+.status{flex-shrink:0;display:flex;align-items:center;gap:var(--gap);color:var(--text-2);font-size:12.5px;padding:var(--gap);min-width:0}
 .status .grow{flex:1}
-.st-btn{border:0;background:transparent;color:var(--text-2);height:26px;padding:0 8px;border-radius:5px;display:inline-flex;align-items:center;gap:6px}
-.st-btn:hover{background:var(--hover)}
-.st-btn.icon{width:26px;padding:0;justify-content:center}
-.st-btn .ico{width:15px;height:15px}
-.zoom{display:flex;align-items:center;gap:2px}
+.chip{height:34px;border-radius:9px;background:var(--surface);display:inline-flex;align-items:center;gap:6px;padding:0 12px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.chip:empty{display:none}
+#statusText{display:block;line-height:34px;flex:0 1 auto}
+.st-btn{border:0;background:var(--surface);color:var(--text-2);height:34px;padding:0 12px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;flex-shrink:0;white-space:nowrap}
+.st-btn:hover{background:var(--surface-2);color:var(--text)}
+.st-btn[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text)}
+.st-btn.lead{font-weight:600;color:var(--text)}
+.st-btn.icon{width:28px;height:28px;padding:0;justify-content:center;background:transparent;border-radius:7px}
+.st-btn.icon:hover{background:var(--hover)}
+.st-btn .ico{width:16px;height:16px}
+.zoom{display:flex;align-items:center;gap:2px;padding:0 4px;flex-shrink:0}
 .zoom input[type=range]{width:110px;accent-color:var(--accent)}
 .zoom output{min-width:62px;text-align:right}
 /* Finestre e menu */
@@ -327,16 +353,26 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .file-tile b{font-size:15px}.file-tile span{color:var(--text-2);font-size:12.5px;line-height:1.4}
 .file-details{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:28px 0 0;max-width:600px}
 .file-details dt{color:var(--text-3)}.file-details dd{margin:0;font-weight:600}
-.palette{background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);width:min(620px,100%);align-self:flex-start;margin-top:9vh;overflow:hidden;display:flex;flex-direction:column;max-height:72vh}
-.palette input{border:0;border-bottom:1px solid var(--line);padding:16px 18px;font-size:16px;background:var(--surface);color:var(--text)}
-.palette input:focus-visible{outline:none;box-shadow:inset 0 -2px 0 var(--accent)}
-#palList{overflow:auto;padding:6px}
-.pal-opt{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer}
+/* Ricerca in alto al centro: il campo e i risultati sono due tasselli sulla fuga. */
+#palettebg{align-items:flex-start;padding:var(--gap) 12px;background:var(--scrim)}
+.palette{background:var(--grout-deep);color:var(--text);border-radius:13px;box-shadow:var(--lift);width:min(680px,100%);padding:var(--gap);display:flex;flex-direction:column;gap:var(--gap);max-height:min(600px,calc(100dvh - 16px));overflow:hidden}
+.pal-field{--corner-bg:var(--grout-deep);position:relative;display:flex;align-items:center;gap:10px;height:48px;flex-shrink:0;border-radius:10px;background:var(--surface);padding:0 12px 0 14px;box-shadow:inset 0 0 0 2px var(--accent)}
+.pal-field>.ico{color:var(--accent-text)}
+.palette input{flex:1;min-width:0;height:44px;border:0;padding:0;font-size:15.5px;background:transparent;color:var(--text)}
+.palette input:focus-visible{outline:none}
+#palList{overflow:auto;padding:6px;background:var(--surface);border-radius:10px;flex:1;min-height:0}
+.pal-group-h{display:flex;justify-content:space-between;gap:8px;padding:8px 10px 4px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.pal-group-h span+span{font:500 11px/1.4 var(--mono);letter-spacing:0}
+.pal-opt{display:flex;align-items:center;gap:12px;min-height:38px;padding:0 10px;border-radius:8px;cursor:pointer}
 .pal-opt .ico,.pal-opt .ti-text{color:var(--text-2)}
-.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 3px 0 0 var(--accent)}
-.pal-label{flex:1}.pal-cat{font-size:11.5px;color:var(--text-3)}
+.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text)}
+.pal-opt[aria-selected=true] .ico,.pal-opt[aria-selected=true] .pal-cat{color:inherit}
+.pal-opt kbd{border:0;background:var(--surface-2);font:500 11px/1 var(--mono);padding:4px 6px;border-radius:5px}
+.pal-opt[aria-selected=true] kbd{background:var(--surface)}
+.pal-hit{font-weight:700;color:var(--accent-text);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.pal-label{flex:1;min-width:0}.pal-cat{font-size:12px;color:var(--text-3);white-space:nowrap}
 .pal-empty{padding:16px;color:var(--text-3)}
-.pal-hint{margin:0;padding:8px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--text-3)}
+.pal-hint{margin:0;padding:0 6px;font-size:12px;color:var(--text-2)}
 .ctxmenu{position:fixed;z-index:420;min-width:230px;max-width:440px;max-height:72vh;overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:5px}
 .ctxmenu [role^=menuitem]{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:7px 10px;border-radius:6px;text-align:left}
 .ctxmenu [role^=menuitem]:hover,.ctxmenu [role^=menuitem]:focus{background:var(--accent-soft);color:var(--accent-text);outline:none}
@@ -353,10 +389,11 @@ html[data-theme=dark] .tip{background:#f3f3f3;color:#111}
 html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 .drop-over::after{content:'Rilascia per aprire';position:fixed;inset:12px;border:3px dashed var(--accent);border-radius:14px;background:var(--sel-tint);display:grid;place-items:center;font-size:22px;font-weight:600;color:var(--accent-text);z-index:600;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
-@media (forced-colors:active){.tool[aria-pressed=true],.tp-btn[aria-pressed=true],.tab[aria-selected=true],.pal-opt[aria-selected=true],.lb-item[aria-selected=true],.item[aria-selected=true]{outline:2px solid Highlight}.tl-playhead{background:Highlight}.item{forced-color-adjust:none}}
+@media (forced-colors:active){.tb[aria-pressed=true],.tb[aria-expanded=true],.ditem[aria-pressed=true],.tp-btn[aria-pressed=true],.pal-opt[aria-selected=true],.lb-item[aria-selected=true],.item[aria-selected=true]{outline:2px solid Highlight}.tl-playhead{background:Highlight}.item{forced-color-adjust:none}}
 /* Nelle finestre strette i testi dei pulsanti spariscono alla vista ma restano agli screen reader: sono il loro nome. */
-@media (max-width:1100px){.top-action span,.cmd-search span,.save-state{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.cmd-search{min-width:0}}
-@media (max-width:720px){.titlebar{gap:3px;padding:0 4px}.app-switch button{padding:0 6px}.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.tb-group{display:none}.cmd-search kbd{display:none}.file-side{width:180px}.file-info{padding:22px}.status #helpBtn span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.clock{min-width:0}.meter{display:none}}
+@media (max-width:1500px){.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.app-switch button{padding:0 6px}}
+@media (max-width:1200px){.status .st-btn:not(.lead) span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
+@media (max-width:720px){.bar{gap:6px;padding:6px 6px 0}.brand{display:none}.save-state,.search-tile kbd{display:none}.bar>.doc-tile{flex-basis:140px;min-width:90px}.primary-tile span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.primary-tile{padding:0 16px}.file-side{width:180px}.file-info{padding:22px}.clock{min-width:0}.meter{display:none}.drawer-grid{grid-template-columns:1fr!important}.status{overflow-x:auto;scrollbar-width:none}#docInfo{display:none}.zoom input[type=range]{width:80px}}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -463,34 +500,33 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <symbol id="i-metronome" viewBox="0 0 24 24"><path d="M9 3h6l4 18H5z"/><path d="M12 15l5-8"/><path d="M7 16h10"/></symbol>
 <symbol id="i-tracks" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><rect x="6" y="4" width="7" height="4" rx="1" fill="currentColor" opacity=".35"/><rect x="11" y="10" width="8" height="4" rx="1" fill="currentColor" opacity=".35"/><rect x="4" y="16" width="9" height="4" rx="1" fill="currentColor" opacity=".35"/></symbol>
 <symbol id="i-follow" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M15 9l3 3-3 3M21 12h-3"/></symbol>
+<symbol id="i-tiles" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></symbol>
 </defs></svg>
-<a class="skip" href="#workRegion" id="skipWork">Vai all’area di lavoro</a><a class="skip" href="#tabs" id="skipRibbon">Vai alla barra multifunzione</a>
+<a class="skip" href="#workRegion" id="skipWork">Vai all’area di lavoro</a><a class="skip" href="#tools" id="skipTools">Vai agli strumenti</a>
 <div class="audio" id="app">
-<header class="titlebar" id="titlebar" aria-label="Barra del titolo">
-<button type="button" class="brand" id="brandBtn" aria-label="Tassello Media: informazioni" data-tip="Informazioni su Tassello Media"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#fff" fill-opacity=".82"></path><rect y="54" width="46" height="46" rx="10" fill="#fff"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#fff"></rect><path d="M86 0V8Q86 14 92 14H100Z" fill="var(--accent)" fill-opacity=".55"></path></svg><span class="brand-name">Tassello Media</span></button>
+<header class="bar" id="bar" aria-label="Barra">
+<div class="tile brand-tile">
+<button type="button" class="brand" id="brandBtn" aria-label="Tassello Media: informazioni" data-tip="Informazioni su Tassello Media"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"></path><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"></path><rect y="54" width="46" height="46" rx="10" fill="#B35500"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"></rect></svg></button>
 <div class="app-switch" role="group" aria-label="Applicazione">
 <button type="button" id="switchAudio" aria-pressed="true" aria-keyshortcuts="Control+Alt+A" data-tip="Audio (Ctrl+Alt+A)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 10v4M9 6v12M14 8v8M19 11v2"></path></svg></span><span class="app-name">Audio</span></button>
 <button type="button" id="switchVideo" aria-pressed="false" aria-keyshortcuts="Control+Alt+V" data-tip="Video (Ctrl+Alt+V)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M4 5h16v14H4z"></path><path d="M10 9v6l5-3z" fill="currentColor"></path></svg></span><span class="app-name">Video</span></button>
 </div>
-<div class="tb-group" role="group" aria-label="Accesso rapido">
-<button type="button" class="tb-btn" id="quickUndo" aria-label="Annulla" aria-keyshortcuts="Control+Z" data-tip="Annulla (Ctrl+Z)"><svg class="ico" aria-hidden="true"><use href="#i-undo"/></svg></button>
-<button type="button" class="tb-btn" id="quickRedo" aria-label="Ripeti" aria-keyshortcuts="Control+Y" data-tip="Ripeti (Ctrl+Y)"><svg class="ico" aria-hidden="true"><use href="#i-redo"/></svg></button>
 </div>
-<div class="title-center"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Audio1" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
-<button type="button" class="cmd-search" id="paletteBtn" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Cerca comandi</span><kbd aria-hidden="true">Alt+Q</kbd></button>
-<button type="button" class="top-action" id="openTop" aria-keyshortcuts="Control+O" data-tip="Apri (Ctrl+O)"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><span>Apri</span></button>
-<button type="button" class="top-action primary" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta il brano (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
-<button type="button" class="tb-btn" id="kbdBtn" aria-label="Scorciatoie da tastiera" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg></button>
+<div class="tile doc-tile"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Audio1" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
+<div class="tile tools" id="tools" role="toolbar" aria-label="Strumenti e cassetti">
+<div id="quick"></div><span class="tsep" aria-hidden="true"></span>
+<button type="button" class="tb drw" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
+<div id="drawers"></div>
+</div>
+<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
+<button type="button" class="tile primary-tile" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta il brano (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
 </header>
-<div class="tabrow" id="tabrow">
-<button type="button" class="filebtn" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
-<div class="tabs" id="tabs" role="tablist" aria-label="Schede della barra multifunzione"></div>
-</div>
-<div class="ribbon" id="ribbon" role="tabpanel" aria-labelledby="tab-Inizio"></div>
+<div class="drawer" id="drawer" role="group" hidden></div>
 <main class="main" id="workRegion" tabindex="-1" aria-label="Area di lavoro">
 <div class="editor-pane" id="audioPane">
 <div class="wave-col">
-<div class="transport" id="aTransport" role="toolbar" aria-label="Riproduzione del brano">
+<div class="transport tile" id="aTransport" role="toolbar" aria-label="Riproduzione del brano">
 <div class="tp-group">
 <button type="button" class="tp-btn" data-action="toStart" aria-label="Vai all’inizio" data-tip="Vai all’inizio (Home sull’indicatore)"><svg class="ico" aria-hidden="true"><use href="#i-toStart"/></svg></button>
 <button type="button" class="tp-btn main-play" id="aPlay" data-action="playPause" aria-label="Riproduci il brano" aria-keyshortcuts="Control+Space" data-tip="Riproduci o pausa (Spazio sulle tracce, Ctrl+Spazio ovunque)"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></button>
@@ -505,7 +541,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <button type="button" class="btn sm" id="arTempo" data-action="tempoSettings" data-tip="Tempo, battuta, griglia e metronomo">120 BPM · 4/4</button>
 <div class="tp-info" id="aInfo" aria-hidden="true"></div>
 </div>
-<section class="arrange" id="arrange" aria-labelledby="arTitle">
+<section class="arrange tile" id="arrange" aria-labelledby="arTitle">
 <div class="ar-bar"><h2 id="arTitle">Tracce</h2><span class="pane-count" id="arInfo"></span><span class="grow"></span><button type="button" class="btn sm" data-action="newTrack">Nuova traccia</button><button type="button" class="btn sm" data-action="importTrack">Importa audio…</button></div>
 <div class="ar-scroll" id="arScroll"><div class="ar-inner" id="arInner">
 <div class="ar-row ar-rulerrow"><div class="ar-head ar-corner" aria-hidden="true">Tempo</div><div class="ar-ruler" id="arRuler"><canvas id="arRulerCanvas" aria-hidden="true"></canvas><div class="ar-cycle" id="arCycle" aria-hidden="true" hidden></div><div class="tl-handle" id="arPlayhead" role="slider" tabindex="0" aria-label="Indicatore del brano" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0 secondi" aria-describedby="arPlayheadHint"></div></div></div>
@@ -514,7 +550,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </div></div>
 <div class="ar-empty" id="arEmpty"><div><b>Il progetto è vuoto</b>Registra dal microfono, importa uno o più file audio (ognuno diventa una traccia) oppure trascinali qui.<div class="row"><button type="button" class="btn primary" data-action="recordAudio">Registra</button><button type="button" class="btn" data-action="importTrack">Importa audio…</button><button type="button" class="btn" data-action="newTrack">Nuova traccia vuota</button></div></div></div>
 </section>
-<section class="editor-area" id="editorArea" aria-labelledby="edTitle">
+<section class="editor-area tile" id="editorArea" aria-labelledby="edTitle">
 <div class="ed-bar"><h2 id="edTitle">Editor della regione</h2><span class="pane-count" id="edInfo">nessuna regione aperta</span><span class="grow"></span><div class="tp-sel"><label for="aRate">Velocità di ascolto</label><select id="aRate" class="rb-select"><option value="0.5">0,5×</option><option value="0.75">0,75×</option><option value="1" selected>1×</option><option value="1.25">1,25×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></div><button type="button" class="btn sm" data-action="playRegion">Ascolta la regione</button><button type="button" class="btn sm" id="aLoop" data-action="loop" aria-pressed="false">Ciclo sulla selezione</button><button type="button" class="btn icon" data-action="toggleEditor" aria-label="Nascondi l’editor della regione" data-tip="Nascondi l’editor (Ctrl+E)"><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></button></div>
 <div class="wave-wrap">
 <div class="ruler" aria-hidden="true"><canvas id="aRuler"></canvas></div>
@@ -531,21 +567,22 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </div>
 </section>
 </div>
-<aside class="side-pane" id="markPane" aria-labelledby="markTitle" hidden>
-<div class="pane-head"><h2 id="markTitle">Marcatori</h2><span class="pane-count" id="markCount"></span><button type="button" class="btn icon" id="markClose" aria-label="Chiudi il riquadro dei marcatori" data-tip="Chiudi il riquadro"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+<aside class="side-pane pane tile" id="markPane" aria-labelledby="markTitle" hidden>
+<div class="pane-head"><h2 id="markTitle">Marcatori</h2><span class="pane-count" id="markCount"></span></div>
 <p class="pane-hint" id="markHint">Frecce per scorrere, Invio per spostare il cursore sul marcatore, F2 per rinominarlo, Canc per eliminarlo.</p>
 <div class="pane-tools"><button type="button" class="btn sm" data-action="markerAdd">Aggiungi al cursore</button><button type="button" class="btn sm" data-action="markersFromPauses">Sulle pause</button></div>
 <ul class="lb" id="markList" role="listbox" tabindex="0" aria-labelledby="markTitle" aria-describedby="markHint"></ul>
 </aside>
 </div>
 <div class="editor-pane hidden" id="videoPane">
-<aside class="library" aria-labelledby="libTitle">
+<div class="v-top" id="vTop">
+<aside class="library pane tile" id="libPane" aria-labelledby="libTitle">
 <div class="pane-head"><h2 id="libTitle">Raccolta</h2><span class="pane-count" id="libCount"></span></div>
 <p class="pane-hint" id="libHint">Invio aggiunge il file alla linea temporale, Maiusc+F10 apre il menu, Canc lo toglie dalla raccolta.</p>
 <div class="pane-tools"><button type="button" class="btn sm" data-action="importMedia">Importa file…</button></div>
 <ul class="lb" id="libList" role="listbox" tabindex="0" aria-labelledby="libTitle" aria-describedby="libHint"></ul>
 </aside>
-<section class="viewer" aria-labelledby="viewTitle">
+<section class="viewer tile" id="viewer" aria-labelledby="viewTitle">
 <h2 id="viewTitle" class="sr-only">Anteprima</h2>
 <div class="stage" id="stage"><canvas id="viewCanvas" width="1280" height="720" tabindex="0" role="img" aria-roledescription="anteprima video" aria-label="Anteprima del video" aria-describedby="viewHint"></canvas></div>
 <div class="transport" id="vTransport" role="toolbar" aria-label="Riproduzione video">
@@ -563,11 +600,12 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <button type="button" class="tp-btn" id="vSubs" data-action="subShow" aria-pressed="true" aria-label="Mostra i sottotitoli nell’anteprima" data-tip="Mostra i sottotitoli nell’anteprima"><svg class="ico" aria-hidden="true"><use href="#i-subs"/></svg></button>
 </div>
 </section>
-<aside class="inspector" aria-labelledby="inspTitle">
+<aside class="inspector pane tile" id="inspPane" aria-labelledby="inspTitle">
 <div class="pane-head"><h2 id="inspTitle">Proprietà</h2></div>
 <form class="insp-body" id="inspBody" tabindex="-1" aria-labelledby="inspTitle" novalidate></form>
 </aside>
-<section class="timeline" id="timeline" aria-labelledby="tlTitle">
+</div>
+<section class="timeline tile" id="timeline" aria-labelledby="tlTitle">
 <div class="tl-bar"><h2 id="tlTitle">Linea temporale</h2><span class="pane-count" id="tlInfo"></span><span class="grow"></span><button type="button" class="btn sm" data-action="addTitle">Titolo</button><button type="button" class="btn sm" data-action="addSub">Sottotitolo</button><button type="button" class="btn sm" data-action="split">Dividi</button></div>
 <div class="tl-body">
 <div class="tl-heads" aria-hidden="true"><div class="tl-rulerhead">Tempo</div><div class="tall"><svg class="ico" aria-hidden="true"><use href="#i-film"/></svg>Video</div><div><svg class="ico" aria-hidden="true"><use href="#i-titleT"/></svg>Titoli</div><div><svg class="ico" aria-hidden="true"><use href="#i-music"/></svg>Audio</div><div><svg class="ico" aria-hidden="true"><use href="#i-subs"/></svg>Sottotitoli</div></div>
@@ -586,9 +624,11 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </div>
 </main>
 <footer class="status" id="statusbar" aria-label="Barra di stato">
-<span id="statusText">Pronto</span><span id="docInfo"></span><span class="grow"></span>
+<button type="button" class="st-btn lead" id="layoutBtn" aria-haspopup="menu" aria-expanded="false" data-tip="Mostra, riduci o togli i riquadri"><svg class="ico" aria-hidden="true"><use href="#i-tiles"/></svg><span>Tasselli</span></button>
+<span class="chip" id="statusText">Pronto</span><span class="chip" id="docInfo"></span><span class="grow"></span>
+<button type="button" class="st-btn" id="kbdBtn" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg><span>Scorciatoie</span></button>
 <button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
-<div class="zoom" role="group" aria-label="Zoom orizzontale"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom" data-tip="Riduci zoom (−)"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="0" min="0" max="100" step="1" aria-label="Zoom orizzontale" aria-valuetext="Tutto il file"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom" data-tip="Aumenta zoom (+)"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true"></output></div>
+<div class="zoom chip" role="group" aria-label="Zoom orizzontale"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom" data-tip="Riduci zoom (−)"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="0" min="0" max="100" step="1" aria-label="Zoom orizzontale" aria-valuetext="Tutto il file"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom" data-tip="Aumenta zoom (+)"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true"></output></div>
 </footer>
 </div>
 <p id="waveHint" class="sr-only">Editor della regione. Frecce sinistra e destra spostano il cursore del passo scelto, Pagina su e giù di cinque secondi, Ctrl più frecce alla pausa precedente o successiva, Home e Fine all’inizio e alla fine; con Maiusc si seleziona. Spazio ascolta o mette in pausa, Maiusc+Spazio ascolta la selezione, P e D ascoltano due secondi prima o dopo il cursore. I e O fissano inizio e fine della selezione, anche durante l’ascolto. Esc toglie la selezione. Maiusc+F10 apre il menu, Alt+Maiusc+I legge posizione e livello.</p>
@@ -609,7 +649,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </div>
 <div class="modalbg" id="modalbg" hidden><div id="modal" class="modal" role="dialog" aria-labelledby="dlgTitle" aria-describedby="dlgBody" aria-modal="true"></div></div>
 <div class="modalbg" id="palettebg" hidden><div class="palette" role="dialog" aria-modal="true" aria-label="Cerca comando">
-<input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. normalizza, dissolvenza, sottotitoli" autocomplete="off" spellcheck="false">
+<div class="pal-field"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. normalizza, dissolvenza, sottotitoli" autocomplete="off" spellcheck="false"><kbd aria-hidden="true">Esc</kbd></div>
 <div id="palList" role="listbox" aria-label="Comandi"></div>
 <p class="pal-hint" aria-hidden="true">↑ ↓ per scegliere · Invio per eseguire · Esc per chiudere</p>
 </div></div>
@@ -918,6 +958,13 @@ def('v','Riproduzione',[
  ['projectSettings','Impostazioni del progetto: formato, fotogrammi, sfondo…','gear','',{short:'Progetto'}],
  ['a11yCheck','Verifica l’accessibilità del video','a11y','',{short:'Verifica accessibilità'}],
  ['focusTimeline','Vai alla linea temporale','','Ctrl+Alt+L',{g:1}]]);
+def('av','Tasselli',[
+ ['layoutMenu','Tasselli: mostra, riduci o togli i riquadri','tiles','',{short:'Tasselli'}],
+ ['layoutReset','Rimetti i tasselli come all’inizio','history','',{short:'Come all’inizio'}]]);
+def('v','Tasselli',[
+ ['showLibrary','Mostra o togli il riquadro Raccolta','open','',{short:'Raccolta',quiet:1,toggle:()=>paneState('libPane').st!=='off'}],
+ ['showInspector','Mostra o togli il riquadro Proprietà','gear','',{short:'Proprietà',quiet:1,toggle:()=>paneState('inspPane').st!=='off'}],
+ ['bigPreview','Anteprima grande: Raccolta e Proprietà ridotte a tessera','fit','',{short:'Anteprima grande'}]]);
 const KEYNAME={Invio:'enter',Spazio:' ',Canc:'delete',Esc:'escape',PgSu:'pageup',PgGiù:'pagedown',Home:'home',Fine:'end','←':'arrowleft','→':'arrowright','↑':'arrowup','↓':'arrowdown',Tab:'tab'};
 const keyCache=new Map();
 function parseKey(s){let key,mods;if(s.endsWith('++')){key='+';mods=s.slice(0,-2).split('+')}else{const p=s.split('+');key=p.pop();mods=p}return{ctrl:mods.includes('Ctrl'),alt:mods.includes('Alt'),shift:mods.includes('Maiusc'),key:(KEYNAME[key]||key).toLowerCase()}}
@@ -933,65 +980,170 @@ const safe=fn=>{try{return fn()}catch(e){return false}};
 async function runCommand(id){const c=C[id];if(!c)return;if(!available(c)){toast('«'+c.label+'» non è disponibile in '+(isAudio()?'Audio':'Video'));return}hideTip();
  try{await handleAction(id)}catch(e){console.error(e);toast(e.message||String(e));return}
  if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}
-let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#ribbon [aria-pressed][data-action],.transport [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}},40)}
+let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#tools [aria-pressed][data-action],#drawer [aria-pressed][data-action],.transport [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}},40)}
 // Ricerca comandi (Alt+Q): combobox con elenco filtrato, navigabile con le frecce.
 let palItems=[],palIdx=0,palPrev=null;
 const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-function openPalette(){palPrev=document.activeElement;$('palettebg').hidden=false;$('palInput').value='';renderPalette();$('palInput').focus()}
+function openPalette(){palPrev=document.activeElement;closeDrawer(false);$('palettebg').hidden=false;$('palInput').value='';renderPalette();$('palInput').focus()}
 function closePalette(restore=true){$('palettebg').hidden=true;if(restore)refocus(palPrev)}
-function renderPalette(){const q=norm($('palInput').value.trim()),all=Object.values(C).filter(c=>available(c)&&c.id!=='palette');palItems=(q?all.map(c=>{const hay=norm(c.label+' '+(c.short||'')+' '+c.cat+' '+c.id);const sc=norm(c.label).startsWith(q)?4:hay.includes(q)?3:q.split(/\s+/).every(w=>hay.includes(w))?2:0;return[c,sc]}).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]):all).slice(0,80);palIdx=0;
- $('palList').innerHTML=palItems.length?palItems.map((c,i)=>{const k=keysOf(c),on=c.toggle?safe(c.toggle):null;return `<div role="option" id="pal-${i}" class="pal-opt" data-i="${i}" aria-selected="${i===0}">${ICON(c.icon)}<span class="pal-label">${esc(c.label)}${on===null?'':`<span class="sr-only">, ${on?'attivo':'non attivo'}</span>`}${k?`<span class="sr-only">, scorciatoia ${esc(k)}</span>`:''}</span><span class="pal-cat" aria-hidden="true">${esc(c.cat)}</span>${k?`<kbd aria-hidden="true">${esc(k)}</kbd>`:''}</div>`}).join(''):'<div class="pal-empty" role="option" aria-disabled="true" aria-selected="false" id="pal-empty">Nessun comando trovato</div>';palActive()}
+function palMark(label,q){const i=q?norm(label).indexOf(q):-1;return i<0?esc(label):esc(label.slice(0,i))+'<span class="pal-hit">'+esc(label.slice(i,i+q.length))+'</span>'+esc(label.slice(i+q.length))}
+function renderPalette(){const q=norm($('palInput').value.trim()),all=Object.values(C).filter(c=>available(c)&&c.id!=='palette');let groups;
+ if(q)groups=[['Comandi',all.map(c=>{const hay=norm(c.label+' '+(c.short||'')+' '+c.cat+' '+c.id);const sc=norm(c.label).startsWith(q)?4:hay.includes(q)?3:q.split(/\s+/).every(w=>hay.includes(w))?2:0;return[c,sc]}).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).slice(0,80)]];
+ else{const rec=((prefs.recent||{})[state.mode[0]]||[]).map(id=>C[id]).filter(c=>c&&available(c)&&c.id!=='palette');groups=[['Usati di recente',rec],['Tutti i comandi',all.filter(c=>!rec.includes(c))]]}
+ groups=groups.filter(g=>g[1].length);palItems=groups.flatMap(g=>g[1]);palIdx=0;let n=0;
+ $('palList').innerHTML=palItems.length?groups.map(([name,list],gi)=>`<div role="group" aria-labelledby="palg${gi}"><div class="pal-group-h" id="palg${gi}" aria-hidden="true"><span>${esc(name)}</span><span>${list.length}</span></div>${list.map(c=>{const k=keysOf(c),on=c.toggle?safe(c.toggle):null,i=n++;return `<div role="option" id="pal-${i}" class="pal-opt" data-i="${i}" aria-selected="${i===0}">${ICON(c.icon)}<span class="pal-label">${palMark(c.label,q)}${on===null?'':`<span class="sr-only">, ${on?'attivo':'non attivo'}</span>`}${k?`<span class="sr-only">, scorciatoia ${esc(k)}</span>`:''}</span><span class="pal-cat" aria-hidden="true">${esc(c.cat)}</span>${k?`<kbd aria-hidden="true">${esc(k.split(' / ')[0])}</kbd>`:''}</div>`}).join('')}</div>`).join(''):'<div class="pal-empty" role="option" aria-disabled="true" aria-selected="false" id="pal-empty">Nessun comando trovato</div>';palActive()}
 function palActive(){$$('#palList [role=option]').forEach((o,i)=>o.setAttribute('aria-selected',i===palIdx&&!!palItems.length));const id=palItems.length?'pal-'+palIdx:'pal-empty';$('palInput').setAttribute('aria-activedescendant',id);$(id)?.scrollIntoView({block:'nearest'})}
-function palRun(i){const c=palItems[i];if(!c)return;closePalette(true);setTimeout(()=>runCommand(c.id),0)}
+function palRun(i){const c=palItems[i];if(!c)return;const R=prefs.recent||(prefs.recent={}),m=state.mode[0];R[m]=[c.id,...(R[m]||[]).filter(x=>x!==c.id)].slice(0,5);savePrefs();closePalette(true);setTimeout(()=>runCommand(c.id),0)}
 // Menu contestuale generico (ruolo menu, frecce, Invio, Esc).
 let menuState=null;
-function openMenu(items,x,y,label='Menu',opener=null){closeMenu(false);const m=$('menu'),prev=document.activeElement;opener?.setAttribute('aria-expanded','true');m.setAttribute('aria-label',label);m.innerHTML=items.map((it,i)=>it==='-'?'<div class="menu-sep" role="separator"></div>':`<button type="button" role="${it.checked===undefined?'menuitem':'menuitemradio'}"${it.checked===undefined?'':` aria-checked="${!!it.checked}"`} tabindex="-1" data-i="${i}"${it.disabled?' aria-disabled="true"':''}>${it.checked===undefined?ICON(it.icon):`<span class="mi-check" aria-hidden="true">${it.checked?'✓':''}</span>`}<span class="mi-text"><span class="mi-label">${esc(it.label)}</span>${it.desc?`<span class="mi-desc">${esc(it.desc)}</span>`:''}</span>${it.keys?`<kbd aria-hidden="true">${esc(it.keys)}</kbd>`:''}</button>`).join('');m.hidden=false;const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(4,Math.min(x,innerWidth-w-4))+'px';m.style.top=Math.max(4,Math.min(y,innerHeight-h-4))+'px';menuState={items,prev,opener};(m.querySelector('[aria-checked=true]:not([aria-disabled])')||m.querySelector('[role^=menuitem]:not([aria-disabled])'))?.focus()}
+function openMenu(items,x,y,label='Menu',opener=null,up=false){closeMenu(false);const m=$('menu'),prev=document.activeElement;opener?.setAttribute('aria-expanded','true');m.setAttribute('aria-label',label);m.innerHTML=items.map((it,i)=>it==='-'?'<div class="menu-sep" role="separator"></div>':`<button type="button" role="${it.checked===undefined?'menuitem':it.box?'menuitemcheckbox':'menuitemradio'}"${it.checked===undefined?'':` aria-checked="${!!it.checked}"`} tabindex="-1" data-i="${i}"${it.disabled?' aria-disabled="true"':''}>${it.checked===undefined?ICON(it.icon):`<span class="mi-check" aria-hidden="true">${it.checked?'✓':''}</span>`}<span class="mi-text"><span class="mi-label">${esc(it.label)}</span>${it.desc?`<span class="mi-desc">${esc(it.desc)}</span>`:''}</span>${it.keys?`<kbd aria-hidden="true">${esc(it.keys)}</kbd>`:''}</button>`).join('');m.hidden=false;const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(4,Math.min(x,innerWidth-w-4))+'px';m.style.top=Math.max(4,Math.min(up?y-h:y,innerHeight-h-4))+'px';menuState={items,prev,opener};(m.querySelector('[aria-checked=true]:not([aria-disabled])')||m.querySelector('[role^=menuitem]:not([aria-disabled])'))?.focus()}
 function closeMenu(restore=true){if(!menuState)return;const p=menuState.prev;menuState.opener?.setAttribute('aria-expanded','false');menuState=null;$('menu').hidden=true;if(restore)refocus(p)}
 function menuRun(i){const it=menuState?.items[i];if(!it||it.disabled)return;closeMenu(true);setTimeout(()=>it.run(),0)}
 const mi=(id,run)=>{const c=C[id];return{label:c.label,icon:c.icon,keys:keysOf(c),run:run||(()=>runCommand(id))}};
 // Posizione per un menu aperto da un pulsante della barra, o dall'elemento con il focus.
-function menuAnchor(action){const el=document.querySelector(`#ribbon [data-action="${action}"]`)||document.activeElement,r=el?.getBoundingClientRect?.()||{left:200,bottom:200};return{x:r.left,y:r.bottom,el:el?.closest?.('#ribbon')?el:null}}
+function menuAnchor(action){const el=document.querySelector(`#drawer [data-action="${action}"],#tools [data-action="${action}"]`)||document.activeElement,r=el?.getBoundingClientRect?.()||{left:200,bottom:200};return{x:r.left,y:r.bottom,el:el?.closest?.('#drawer,#tools')?el:null}}
 // Scorciatoie che dipendono dall'area con il focus: non passano dal registro, ma la guida le elenca.
-const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Schede della barra multifunzione','← → poi Invio o ↓'],['Torna alla scheda dalla barra','Esc o ↑'],['Chiudi finestre e menu','Esc']]]],
+const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Strumenti e cassetti della barra','← → poi Invio o ↓'],['Chiudi il cassetto','Esc'],['Larghezza di un riquadro, sulla fuga','← → (con Maiusc di più)'],['Riduci il riquadro a tessera, sulla fuga','Invio'],['Chiudi finestre e menu','Esc']]]],
  a:[['Sull’indicatore del brano',[['Un passo della griglia indietro o avanti (un secondo o un tempo)','← →'],['Un passo piccolo','Maiusc+← / Maiusc+→'],['Cinque secondi o una battuta','PgSu / PgGiù'],['Bordo di regione precedente o successivo','↑ / ↓'],['Inizio o fine del brano','Home / Fine'],['Riproduci o pausa il brano','Spazio'],['Inizio o fine del ciclo all’indicatore','I / O'],['Attiva o disattiva il ciclo','C'],['Registra sulla traccia scelta','R'],['Alle tracce','Invio']]],['Nelle tracce',[['Regione precedente o successiva','← →'],['Traccia sopra o sotto','↑ / ↓'],['Sposta la regione di un passo (con Maiusc di un passo piccolo)','Ctrl+← / Ctrl+→'],['Porta la regione sulla traccia sopra o sotto','Ctrl+↑ / Ctrl+↓'],['Apri la regione nell’editor','Invio'],['Proprietà della regione','Alt+Invio'],['Rinomina la regione','F2'],['Elimina la regione','Canc'],['Muto o solo della traccia','M / S'],['Registra su questa traccia','R'],['Riproduci o pausa il brano','Spazio'],['Menu della regione','Maiusc+F10'],['Zoom avanti, indietro, tutto','+ / − / 0']]],['Nell’editor della regione (forma d’onda)',[['Sposta il cursore del passo scelto','← →'],['Cinque secondi indietro o avanti','PgSu / PgGiù'],['Pausa precedente o successiva nel parlato','Ctrl+← / Ctrl+→'],['Inizio o fine del file','Home / Fine'],['Estendi la selezione','Maiusc con i tasti di spostamento'],['Ascolta o metti in pausa','Spazio'],['Ascolta la selezione','Maiusc+Spazio'],['Ascolta 2 secondi prima o dopo il cursore','P / D'],['Inizio o fine della selezione al cursore (anche durante l’ascolto)','I / O'],['Aggiungi un marcatore (anche durante l’ascolto)','M o Ctrl+M'],['Leggi il livello al cursore','L'],['Elimina la selezione','Canc o Backspace'],['Zoom avanti, indietro, tutto, selezione','+ / − / 0 / Z'],['Ferma l’ascolto o togli la selezione','Esc'],['Menu della forma d’onda','Maiusc+F10']]],['Nel riquadro dei marcatori',[['Scegli un marcatore','↑ ↓'],['Porta il cursore sul marcatore','Invio'],['Seleziona fino al marcatore successivo','Maiusc+Invio'],['Rinomina','F2'],['Elimina','Canc']]],['Nei campi del tempo',[['Conferma il tempo scritto','Invio'],['Torna alla forma d’onda','Esc']]]],
  v:[['Sull’indicatore di riproduzione',[['Un fotogramma indietro o avanti','← →'],['Un secondo indietro o avanti','Maiusc+← / Maiusc+→'],['Cinque secondi indietro o avanti','PgSu / PgGiù'],['Taglio precedente o successivo','↑ / ↓'],['Inizio o fine del montaggio','Home / Fine'],['Riproduci o pausa','Spazio'],['Indietro, pausa, avanti veloce','J / K / L'],['Dividi la clip all’indicatore','S'],['Taglia inizio o fine della clip all’indicatore','Q / W'],['Zoom avanti, indietro, tutto','+ / − / 0']]],['Nelle tracce',[['Elemento precedente o successivo','← →'],['Primo o ultimo elemento','Home / Fine'],['Sposta l’elemento di un secondo indietro o avanti: le clip attaccate in quella direzione si spostano insieme','Ctrl+← / Ctrl+→'],['Sposta l’elemento di un fotogramma','Ctrl+Maiusc+← / Ctrl+Maiusc+→'],['Modifica le proprietà','Invio'],['Elimina l’elemento','Canc'],['Menu dell’elemento','Maiusc+F10'],['Traccia sopra o sotto','↑ / ↓']]],['Nella raccolta',[['Scegli un file','↑ ↓'],['Aggiungi alla linea temporale','Invio'],['Menu del file','Maiusc+F10'],['Togli dalla raccolta','Canc']]]]};
 function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${isAudio()?'Audio':'Video'}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
-async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.2.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli e lampeggiamenti pericolosi.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori.</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.3.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli e lampeggiamenti pericolosi.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori.</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
 // Aree raggiungibili con F6 e Maiusc+F6.
 let lastTrack='trk-main';
-function regions(){const l=[$('titlebar'),$('tabrow'),$('ribbon')];if(isAudio()){l.push($('aTransport'),$('arrange'));if(!$('editorArea').classList.contains('closed'))l.push($('wave'),$('selbar'));if(!$('markPane').hidden)l.push($('markPane'))}else l.push($('libList').closest('.library'),$('vTransport'),$('timeline'),$('inspBody').closest('.inspector'));l.push($('statusbar'));return l.filter(el=>el.offsetWidth||el.offsetHeight)}
-const REGION_NAME={titlebar:'Barra del titolo',tabrow:'Schede della barra multifunzione',ribbon:'Barra multifunzione',aTransport:'Riproduzione del brano',arrange:'Tracce',wave:'Editor della regione',selbar:'Posizione e selezione',markPane:'Marcatori',vTransport:'Riproduzione video',timeline:'Linea temporale',statusbar:'Barra di stato'};
-function focusRegion(el){if(el.id==='tabrow'){$('tab-'+slug(currentTab))?.focus();return}if(el.id==='markPane'){$('markList').focus();return}if(el.classList.contains('library')){$('libList').focus();return}if(el.id==='timeline'){($(lastTrack)||$('playhead')).focus();return}if(el.classList.contains('inspector')){(focusables($('inspBody'))[0]||$('inspBody')).focus();announce('Proprietà');return}if(el.id==='wave'){el.focus();return}if(el.id==='arrange'){focusLane(P.track);return}focusables(el)[0]?.focus()}
+function regions(){const l=[$('bar')];if(drawerName)l.push($('drawer'));const side=s=>panesOf(state.mode[0]).filter(id=>paneState(id).side===s).map(id=>{const st=paneState(id).st;return st==='open'?$(id):st==='tessera'?$(id+'Tes'):null});
+ l.push(...side('left'));if(isAudio()){l.push($('aTransport'),$('arrange'));if(!$('editorArea').classList.contains('closed'))l.push($('wave'),$('selbar'))}else l.push($('vTransport'));l.push(...side('right'));if(!isAudio())l.push($('timeline'));l.push($('statusbar'));return l.filter(el=>el&&(el.offsetWidth||el.offsetHeight))}
+const REGION_NAME={bar:'Barra',drawer:'Cassetto',aTransport:'Riproduzione del brano',arrange:'Tracce',wave:'Editor della regione',selbar:'Posizione e selezione',markPane:'Marcatori',vTransport:'Riproduzione video',timeline:'Linea temporale',statusbar:'Barra di stato'};
+function focusRegion(el){if(el.id==='bar'){(toolItems()[toolFocus]||focusables(el)[0])?.focus();return}if(el.id==='drawer'){el.querySelector('.ditem')?.focus();return}if(el.classList.contains('tessera')){el.focus();return}if(el.id==='markPane'){$('markList').focus();return}if(el.id==='libPane'){$('libList').focus();return}if(el.id==='timeline'){($(lastTrack)||$('playhead')).focus();return}if(el.id==='inspPane'){(focusables($('inspBody'))[0]||$('inspBody')).focus();announce('Proprietà');return}if(el.id==='wave'){el.focus();return}if(el.id==='arrange'){focusLane(P.track);return}focusables(el)[0]?.focus()}
 function cycleRegion(dir){const list=regions(),a=document.activeElement;let i=list.findIndex(r=>r.contains(a));i=i<0?(dir>0?0:list.length-1):(i+dir+list.length)%list.length;focusRegion(list[i]);const name=REGION_NAME[list[i].id];if(name&&!['wave','timeline','arrange'].includes(list[i].id))announce(name)}
-// Barra multifunzione: "!" pulsante grande, "/" nuova riga di pulsanti piccoli, suffisso "+" mostra l'etichetta.
+// Barra: gli strumenti di tutti i giorni restano in vista, le categorie sono cassetti che si aprono sopra il lavoro
+// e si richiudono dopo il comando. Ogni cassetto elenca per gruppi i comandi del registro.
 const RIBBON={
- a:{Tracce:[['Tracce','!newTrack !importTrack !recordAudio'],['Traccia scelta','!trackSettings trackMute+ / trackSolo+ trackRename+ / trackDuplicate+ trackDelete+'],['Regione scelta','!regionEdit regionSplit+ / regionDuplicate+ regionLoop+ / regionDelete+ regionProps+'],['Tempo','!tempoSettings metronome+ / countInToggle+ / cycle+'],['Riproduzione','!playPause stop+ / cycleRegion+'],['Cronologia','!undo !redo']],
-  Editor:[['Appunti','!paste cut / copy pasteMix+'],['Modifica','!deleteSel !trim silence+ / duplicate+ insertSilence+'],['Selezione','!selectAll selectRange+ / selectNone+ selMarkers+'],['Ascolto','!playRegion !playSel loop+ / scrub+'],['Cronologia','!undo !redo']],
-  Effetti:[['Volume','!amplify !normalize fadeIn+ / fadeOut+'],['Tempo','!speed !tempo reverse+ / truncate+'],['Pulizia','!noiseGate captureNoise+ / !eq compressor+ / removeDC+ echo+'],['Canali','toMono+ / toStereo+ / swapChannels+'],['Formato','!resample'],['Ripeti','!repeatEffect']],
-  Inserisci:[['Suoni','!insertFile !generate !recordAudio'],['Marcatori','!markerAdd markerPrev+ / markerNext+ markerRename+ / markerDelete+ markersClear+'],['Automatici','!markersFromPauses']],
-  Analisi:[['Misura','!stats !readLevel'],['Pause','!prevPause !nextPause !pauseSettings'],['Distorsioni','!findClip']],
-  Esporta:[['Brano','!saveAudio !exportStems !saveAudioProject'],['Regione','!exportParts'],['Marcatori','!exportLabels !importLabels']],
-  Vista:[['Zoom','!zoomIn !zoomOut !zoomFit !zoomSel'],['Mostra','!toggleEditor !markPane !follow !snap'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]},
- v:{Inizio:[['Appunti','!paste cut / copy'],['File','!importMedia !addToTimeline'],['Montaggio','!split trimStart+ / trimEnd+ duplicateItem+ / deleteItem+'],['Posizione','moveEarlier+ swapPrev+ / moveLater+ swapNext+ / snap+'],['Riproduzione','!playPause stop+ / prevEdit+ nextEdit+'],['Cronologia','!undo !redo']],
-  Inserisci:[['Testo','!addTitle !addSub !addCard'],['Audio','!recordVoice'],['File','!importMedia']],
-  Clip:[['Transizione','!transitionMenu'],['Aspetto','!filterMenu !adjust rotate+ / flip+ fitMode+'],['Tempo e suono','!clipSpeed !clipVolume clipMute+ / fadeInV+ fadeOutV+']],
-  Sottotitoli:[['Sottotitoli','!addSub !subImport !subExport'],['Visualizzazione','!subShow !subBurn']],
-  Esporta:[['Video','!exportVideo !exportMix !exportFrame'],['Progetto','!saveProject !projectSettings'],['Accessibilità','!a11yCheck']],
-  Vista:[['Zoom','!zoomIn !zoomOut !zoomFit'],['Mostra','!follow !subShow !snap'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]}};
+ a:{Tracce:[['Tracce','newTrack importTrack recordAudio'],['Traccia scelta','trackSettings trackMute trackSolo trackRename trackDuplicate trackDelete'],['Regione scelta','regionEdit regionSplit regionDuplicate regionLoop regionDelete regionProps'],['Tempo','tempoSettings metronome countInToggle cycle'],['Riproduzione','playPause stop cycleRegion'],['Cronologia','undo redo']],
+  Editor:[['Appunti','paste cut copy pasteMix'],['Modifica','deleteSel trim silence duplicate insertSilence'],['Selezione','selectAll selectRange selectNone selMarkers'],['Ascolto','playRegion playSel loop scrub'],['Cronologia','undo redo']],
+  Effetti:[['Volume','amplify normalize fadeIn fadeOut'],['Tempo','speed tempo reverse truncate'],['Pulizia','noiseGate captureNoise eq compressor removeDC echo'],['Canali','toMono toStereo swapChannels'],['Formato','resample'],['Ripeti','repeatEffect']],
+  Inserisci:[['Suoni','insertFile generate recordAudio'],['Marcatori','markerAdd markerPrev markerNext markerRename markerDelete markersClear'],['Automatici','markersFromPauses']],
+  Analisi:[['Misura','stats readLevel'],['Pause','prevPause nextPause pauseSettings'],['Distorsioni','findClip']],
+  Esporta:[['Brano','saveAudio exportStems saveAudioProject'],['Regione','exportParts'],['Marcatori','exportLabels importLabels']],
+  Vista:[['Zoom','zoomIn zoomOut zoomFit zoomSel'],['Tasselli','toggleEditor markPane layoutMenu layoutReset'],['Mostra','follow snap'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
+ v:{Inizio:[['Appunti','paste cut copy'],['File','importMedia addToTimeline'],['Montaggio','split trimStart trimEnd duplicateItem deleteItem'],['Posizione','moveEarlier swapPrev moveLater swapNext snap'],['Riproduzione','playPause stop prevEdit nextEdit'],['Cronologia','undo redo']],
+  Inserisci:[['Testo','addTitle addSub addCard'],['Audio','recordVoice'],['File','importMedia']],
+  Clip:[['Transizione','transitionMenu'],['Aspetto','filterMenu adjust rotate flip fitMode'],['Tempo e suono','clipSpeed clipVolume clipMute fadeInV fadeOutV']],
+  Sottotitoli:[['Sottotitoli','addSub subImport subExport'],['Visualizzazione','subShow subBurn']],
+  Esporta:[['Video','exportVideo exportMix exportFrame'],['Progetto','saveProject projectSettings'],['Accessibilità','a11yCheck']],
+  Vista:[['Zoom','zoomIn zoomOut zoomFit'],['Tasselli','showLibrary showInspector bigPreview layoutMenu layoutReset'],['Mostra','follow subShow snap'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]}};
 const TABS={a:Object.keys(RIBBON.a),v:Object.keys(RIBBON.v)};
-let currentTab='Inizio';
+// Strumenti sempre in vista. "|" separa i gruppi; con "|1" e "|2" il gruppo che segue sparisce quando la barra è
+// stretta (prima 1, poi 2), ma i suoi comandi restano nei cassetti e nella ricerca.
+const QUICK={a:'undo redo |2 regionSplit regionDuplicate regionDelete |1 normalize fadeIn fadeOut',
+ v:'undo redo |2 split trimStart trimEnd deleteItem |1 transitionMenu filterMenu'};
 const slug=s=>s.replace(/\s+/g,'-');
 function tipText(c){const k=keysOf(c);return c.label+(k?' ('+k+')':'')}
-function cmdButton(id,size,showLabel){const c=C[id];if(!c||!available(c))return '';const pressed=c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:'',k=keysOf(c),keys=(k?` aria-keyshortcuts="${esc(ariaKeys(k))}"`:'')+(c.menu?' aria-haspopup="menu" aria-expanded="false"':'');
- if(size==='lg')return `<button type="button" class="tool lg" data-action="${id}"${pressed}${keys} data-tip="${esc(tipText(c))}">${ICON(c.icon)}<span class="lbl">${esc(c.short||c.label)}${c.menu?ICON('down','ico chev'):''}</span>${c.short&&c.short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}</button>`;
- return `<button type="button" class="tool" data-action="${id}"${pressed}${keys} data-tip="${esc(tipText(c))}"${showLabel?'':` aria-label="${esc(c.label)}"`}>${ICON(c.icon)}${showLabel?`<span class="lbl">${esc(c.short||c.label)}</span>${c.short&&c.short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}`:''}</button>`}
-function renderGroup([name,spec],gi){let out='',stack=[[]];const flush=()=>{const rows=stack.filter(r=>r.length);if(rows.length)out+=`<div class="rbstack">${rows.map(r=>`<div class="rbrow">${r.join('')}</div>`).join('')}</div>`;stack=[[]]};
- for(const tok of spec.split(' ')){if(tok==='/'){stack.push([]);continue}if(tok[0]==='!'){flush();out+=cmdButton(tok.slice(1),'lg')}else stack.at(-1).push(cmdButton(tok.replace(/\+$/,''),'sm',tok.endsWith('+')))}
- flush();return `<div class="rbgroup" role="group" aria-labelledby="rbg${gi}"><div class="rbitems">${out}</div><div class="rb-label" id="rbg${gi}">${esc(name)}</div></div>`}
-function renderTabs(){const t=TABS[state.mode[0]];if(!t.includes(currentTab))currentTab=t[0];$('tabs').innerHTML=t.map(x=>`<button type="button" role="tab" class="tab" id="tab-${slug(x)}" data-tab="${esc(x)}" aria-selected="${x===currentTab}" aria-controls="ribbon" tabindex="${x===currentTab?0:-1}">${esc(x)}</button>`).join('')}
-function renderRibbon(){const groups=RIBBON[state.mode[0]][currentTab]||[];$('ribbon').setAttribute('aria-labelledby','tab-'+slug(currentTab));$('ribbon').innerHTML=`<div class="ribbon-inner">${groups.map(renderGroup).join('')}</div>`}
-function selectTab(name,focus=true){currentTab=name;renderTabs();renderRibbon();if(focus)$('tab-'+slug(name))?.focus()}
+const cmdAttrs=c=>{const k=keysOf(c);return (c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:'')+(k?` aria-keyshortcuts="${esc(ariaKeys(k))}"`:'')+(c.menu?' aria-haspopup="menu" aria-expanded="false"':'')};
+function renderQuick(){let hide='';$('quick').innerHTML=QUICK[state.mode[0]].split(' ').map(id=>{if(id[0]==='|'){hide=id.length>1?' h'+id.slice(1):'';return `<span class="tsep${hide}" aria-hidden="true"></span>`}const c=C[id];if(!c||!available(c))return '';
+ return `<button type="button" class="tb icon${hide}" data-action="${id}"${cmdAttrs(c)} aria-label="${esc(c.label)}" data-tip="${esc(tipText(c))}">${ICON(c.icon)}</button>`}).join('')}
+function renderDrawers(){$('drawers').innerHTML=TABS[state.mode[0]].map(x=>`<button type="button" class="tb drw" id="drw-${slug(x)}" data-drawer="${esc(x)}" aria-expanded="false" aria-controls="drawer">${esc(x)}${ICON('down','ico chev')}</button>`).join('')}
+function renderBar(){closeDrawer(false);renderQuick();renderDrawers();fitTools()}
+// Se la barra non basta, spariscono prima i gruppi segnati con 1, poi quelli segnati con 2; se non basta ancora,
+// gli strumenti vanno a capo su una riga loro. Si ricalcola sempre da zero, così il risultato dipende solo dalla larghezza.
+function fitTools(){const t=$('tools'),bar=$('bar'),fit=()=>{t.classList.remove('fit1','fit2');for(const c of ['fit1','fit2']){if(t.scrollWidth<=t.clientWidth)break;t.classList.add(c)}};
+ bar.classList.remove('wrap');fit();if(t.scrollWidth>t.clientWidth){bar.classList.add('wrap');fit()}toolsRoving();placeDrawer()}
+new ResizeObserver(()=>fitTools()).observe($('tools'));
+// Una sola fermata di Tab per tutta la barra degli strumenti: le frecce passano da un pulsante all'altro.
+let toolFocus=0;
+const toolItems=()=>focusables($('tools'));
+function toolsRoving(){const l=toolItems();if(!l.length)return;toolFocus=clamp(toolFocus,0,l.length-1);l.forEach((b,i)=>b.tabIndex=i===toolFocus?0:-1)}
+// Cassetto aperto: un gruppo di tasselli sotto la barra. Dopo il comando si torna dove si stava lavorando.
+let drawerName=null,drawerOpenedAt=0,lastWork=null;
+document.addEventListener('focusin',e=>{if(e.target.closest?.('#workRegion'))lastWork=e.target});
+function drawerItem(id){const c=C[id];if(!c||!available(c))return '';const k=keysOf(c),short=c.short||c.label;
+ return `<button type="button" class="ditem" data-action="${id}"${cmdAttrs(c)}${short!==c.label?` data-tip="${esc(c.label)}"`:''}>${ICON(c.icon)}<span class="lbl">${esc(short)}${short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}</span>${c.toggle?'<span class="dstate" aria-hidden="true"></span>':''}${k?`<kbd aria-hidden="true">${esc(k.split(' / ')[0])}</kbd>`:''}</button>`}
+function openDrawer(name,focus=false){const groups=RIBBON[state.mode[0]][name],btn=$('drw-'+slug(name)),d=$('drawer');if(!groups||!btn)return;hideTip();closeMenu(false);drawerName=name;drawerOpenedAt=performance.now();
+ d.setAttribute('aria-labelledby',btn.id);
+ d.innerHTML=`<div class="drawer-grid" style="--cols:${groups.length<=4?groups.length:3}">${groups.map(([g,spec],gi)=>`<div class="dgroup" role="group" aria-labelledby="dg${gi}"><h3 id="dg${gi}">${esc(g)}</h3>${spec.split(' ').map(drawerItem).join('')}</div>`).join('')}</div>`;
+ d.hidden=false;for(const b of $$('#drawers [data-drawer]'))b.setAttribute('aria-expanded',b===btn);placeDrawer();if(focus)d.querySelector('.ditem')?.focus()}
+function placeDrawer(){if(!drawerName)return;const d=$('drawer'),r=$('drw-'+slug(drawerName)).getBoundingClientRect();d.style.top=($('bar').getBoundingClientRect().bottom+8)+'px';d.style.left=Math.max(8,Math.min(r.left-8,innerWidth-d.offsetWidth-8))+'px'}
+function closeDrawer(restore=true){if(!drawerName)return;const btn=$('drw-'+slug(drawerName)),d=$('drawer');drawerName=null;d.hidden=true;d.innerHTML='';btn?.setAttribute('aria-expanded','false');if(restore)btn?.focus()}
+function drawerRun(b){const id=b.dataset.action;if(C[id]?.menu){runCommand(id);return}const back=lastWork?.isConnected&&lastWork.offsetParent?lastWork:null;closeDrawer(!back);back?.focus({preventScroll:true});runCommand(id)}
+$('drawers').addEventListener('click',e=>{const b=e.target.closest('[data-drawer]');if(!b)return;if(drawerName!==b.dataset.drawer)openDrawer(b.dataset.drawer);else if(performance.now()-drawerOpenedAt>400)closeDrawer(false)});
+$('drawers').addEventListener('keydown',e=>{const b=e.target.closest('[data-drawer]');if(!b)return;if(e.key==='Enter'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();openDrawer(b.dataset.drawer,true)}else if(e.key==='Escape'&&drawerName){e.preventDefault();closeDrawer(true)}});
+$('tools').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const l=toolItems(),i=l.indexOf(document.activeElement);if(i<0)return;e.preventDefault();l[e.key==='Home'?0:e.key==='End'?l.length-1:(i+(e.key==='ArrowRight'?1:-1)+l.length)%l.length].focus()});
+// Con un cassetto aperto, le frecce sulla barra aprono il cassetto vicino, come in un menu.
+$('tools').addEventListener('focusin',e=>{const l=toolItems(),i=l.indexOf(e.target);if(i<0)return;toolFocus=i;l.forEach((b,k)=>b.tabIndex=k===i?0:-1);e.target.scrollIntoView({block:'nearest',inline:'nearest'});
+ if(drawerName){const n=e.target.dataset.drawer;if(!n)closeDrawer(false);else if(n!==drawerName)openDrawer(n)}});
+$('drawer').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeDrawer(true);return}const items=$$('#drawer .ditem'),i=items.indexOf(document.activeElement);if(i<0)return;
+ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const gs=$$('#drawer .dgroup'),g=gs.indexOf(items[i].closest('.dgroup'));const first=gs[(g+(e.key==='ArrowRight'?1:-1)+gs.length)%gs.length]?.querySelector('.ditem');if(first){e.preventDefault();first.focus()}return}
+ const j=e.key==='ArrowDown'?(i+1)%items.length:e.key==='ArrowUp'?(i-1+items.length)%items.length:e.key==='Home'?0:e.key==='End'?items.length-1:null;if(j!==null){e.preventDefault();items[j].focus()}});
+$('drawer').addEventListener('focusout',e=>{const to=e.relatedTarget;if(drawerName&&to&&!to.closest('#drawer,#drawers,#menu'))closeDrawer(false)});
+document.addEventListener('pointerdown',e=>{if(drawerName&&!e.target.closest('#drawer,#drawers,#menu'))closeDrawer(false)},true);
+addEventListener('resize',fitTools);
+// Tasselli: i riquadri laterali si riducono a tessera, passano da un lato all'altro, si allargano trascinando la fuga
+// (o con le frecce quando la fuga ha il focus) e si tolgono dal piano. La disposizione di ogni app resta nelle preferenze.
+const PANES={
+ markPane:{mode:'a',title:'Marcatori',icon:'markers',side:'right',w:270,min:200,max:440,off:true,count:()=>A.markers.length,unit:['marcatore','marcatori'],focus:()=>$('markList').focus()},
+ libPane:{mode:'v',title:'Raccolta',icon:'open',side:'left',w:250,min:190,max:440,count:()=>V.p.media.length,unit:['file','file'],focus:()=>$('libList').focus()},
+ inspPane:{mode:'v',title:'Proprietà',icon:'gear',side:'right',w:300,min:230,max:480,focus:()=>(focusables($('inspBody'))[0]||$('inspBody')).focus()}};
+const PANE_SAY={open:'aperto',tessera:'ridotto a tessera',off:'tolto dal piano'};
+const layoutOf=()=>prefs.layout||(prefs.layout={});
+function paneState(id){const L=layoutOf(),d=PANES[id];if(!L[id])L[id]={side:d.side,w:d.w,st:d.off?'off':'open'};return L[id]}
+const panesOf=m=>Object.keys(PANES).filter(id=>PANES[id].mode===m);
+// Ogni riquadro riceve una tessera (il riquadro ridotto), una fuga da trascinare e due pulsanti nell'intestazione.
+for(const [id,d] of Object.entries(PANES)){const el=$(id);
+ el.insertAdjacentHTML('beforebegin',`<button type="button" class="tessera" id="${id}Tes" aria-controls="${id}" aria-expanded="false" data-tip="Espandi ${esc(d.title)}" hidden>${ICON(d.icon)}<span class="badge" aria-hidden="true"></span><span class="vt" aria-hidden="true">${esc(d.title)}</span></button>`);
+ el.insertAdjacentHTML('afterend',`<div class="sep" id="${id}Sep" data-pane="${id}" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="${id}" aria-label="Larghezza del riquadro ${esc(d.title)}" aria-valuemin="${d.min}" aria-valuemax="${d.max}"></div>`);
+ el.querySelector('.pane-head').insertAdjacentHTML('beforeend',`<button type="button" class="pane-btn" data-pane-act="collapse" aria-label="Riduci a tessera il riquadro ${esc(d.title)}" data-tip="Riduci a tessera"></button><button type="button" class="pane-btn" data-pane-act="menu" aria-haspopup="menu" aria-expanded="false" aria-label="Opzioni del riquadro ${esc(d.title)}" data-tip="Sposta, riduci o togli">${ICON('more')}</button>`)}
+$('timeline').insertAdjacentHTML('beforebegin','<div class="sep h" id="tlSep" role="separator" tabindex="0" aria-orientation="horizontal" aria-controls="timeline" aria-label="Altezza della linea temporale" aria-valuemin="140"></div>');
+// Disposizione: a sinistra dell'area centrale gli ordini 0, 2, 4…, a destra 102, 104…; la fuga sta tra riquadro e centro.
+function applyLayout(redraw=true){for(const m of ['a','v']){const ids=panesOf(m);ids.filter(id=>paneState(id).side==='left').forEach((id,i)=>placePane(id,2*i));ids.filter(id=>paneState(id).side==='right').forEach((id,i)=>placePane(id,102+2*i))}
+ const h=layoutOf().tlH;$('timeline').style.setProperty('--tl-h',h?h+'px':'');$('tlSep').setAttribute('aria-valuenow',h||$('timeline').offsetHeight||0);paneBadges();if(redraw)relayout()}
+function placePane(id,order){const s=paneState(id),d=PANES[id],el=$(id),sep=$(id+'Sep'),tes=$(id+'Tes'),left=s.side==='left';s.w=clamp(s.w,d.min,d.max);
+ el.style.order=tes.style.order=order;sep.style.order=left?order+1:order-1;tes.dataset.side=s.side;el.style.setProperty('--w',s.w+'px');
+ el.hidden=s.st!=='open';sep.hidden=s.st!=='open';tes.hidden=s.st!=='tessera';sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');
+ el.querySelector('[data-pane-act=collapse]').innerHTML=ICON(left?'left':'right')}
+function paneBadges(){for(const [id,d] of Object.entries(PANES)){const n=d.count&&safe(d.count)||0,tes=$(id+'Tes');tes.querySelector('.badge').textContent=n?String(n):'';tes.setAttribute('aria-label',`${d.title}, riquadro ridotto${n?`: ${n} ${d.unit[n===1?0:1]}`:''}. Espandi`)}}
+for(const id of ['libList','markList'])new MutationObserver(paneBadges).observe($(id),{childList:true});
+// Ridisegno delle aree che dipendono dalla larghezza: forma d'onda e tracce in Audio, linea temporale in Video.
+function relayout(){if(isAudio()){viewClamp();drawAudio();renderArrange()}else drawTimeline()}
+let relayoutRaf=0;
+function relayoutSoon(){if(!relayoutRaf)relayoutRaf=requestAnimationFrame(()=>{relayoutRaf=0;relayout()})}
+// Quando un riquadro sparisce con il focus dentro, il focus torna dove si stava lavorando.
+function workFocus(){const w=lastWork?.isConnected&&lastWork.offsetParent&&!lastWork.closest('.pane')?lastWork:null;if(w)w.focus();else if(isAudio())focusLane(P.track);else($(lastTrack)||$('playhead')).focus()}
+function paneSet(id,st,{focus=false,say=true}={}){const s=paneState(id),d=PANES[id],had=$(id).contains(document.activeElement)||$(id+'Tes')===document.activeElement;s.st=st;savePrefs();applyLayout();
+ if(focus||had){if(st==='open')d.focus();else if(st==='tessera')$(id+'Tes').focus();else workFocus()}
+ if(say)announce(d.title+': '+PANE_SAY[st]);refreshToggles()}
+function paneToggle(id){const off=paneState(id).st==='off';paneSet(id,off?'open':'off',{focus:off})}
+function paneMove(id){const s=paneState(id);s.side=s.side==='left'?'right':'left';savePrefs();applyLayout();announce(`${PANES[id].title} spostato a ${s.side==='left'?'sinistra':'destra'}`)}
+function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,Math.max(d.min,Math.min(d.max,innerWidth*.45))));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final){savePrefs();relayout()}else relayoutSoon()}
+function setTlH(h,final=true){const max=Math.round(innerHeight*.6),v=Math.round(clamp(h,140,Math.max(140,max))),sep=$('tlSep');layoutOf().tlH=v;$('timeline').style.setProperty('--tl-h',v+'px');sep.setAttribute('aria-valuemax',max);sep.setAttribute('aria-valuenow',v);sep.setAttribute('aria-valuetext',v+' pixel');if(final){savePrefs();relayout()}else relayoutSoon()}
+function paneMenu(id,btn){const s=paneState(id),d=PANES[id],left=s.side==='left',r=btn.getBoundingClientRect();
+ openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Larghezza iniziale',icon:'fit',run:()=>setW(id,d.w)},'-',
+  {label:'Togli dal piano',desc:'Torna dal menu Tasselli, in basso a sinistra',icon:'close',run:()=>paneSet(id,'off',{focus:true})}],r.right-240,r.bottom+4,'Opzioni del riquadro '+d.title,btn)}
+// Menu Tasselli nella barra di stato: quali riquadri sono sul piano e alcune disposizioni pronte.
+function layoutMenu(){const m=state.mode[0],btn=$('layoutBtn'),r=btn.getBoundingClientRect(),ed=!$('editorArea').classList.contains('closed');
+ const where=id=>{const s=paneState(id);return s.st==='open'?(s.side==='left'?'A sinistra':'A destra'):s.st==='tessera'?'Ridotto a tessera':'Tolto dal piano'};
+ const items=panesOf(m).map(id=>({label:PANES[id].title,desc:where(id),box:true,checked:paneState(id).st!=='off',run:()=>paneToggle(id)}));
+ if(m==='a')items.unshift({label:'Editor della regione',desc:ed?'Aperto':'Chiuso',box:true,checked:ed,run:()=>runCommand('toggleEditor')});
+ items.push('-');if(m==='v')items.push({label:'Montaggio',desc:'Raccolta e proprietà aperte',icon:'tiles',run:()=>layoutPreset('open')},{label:'Anteprima grande',desc:'Raccolta e proprietà ridotte a tessera',icon:'fit',run:()=>layoutPreset('tessera')});
+ items.push({label:'Come all’inizio',desc:'Rimette ogni tassello al suo posto',icon:'history',run:layoutReset});
+ openMenu(items,r.left,r.top-6,'Tasselli',btn,true)}
+function layoutPreset(st){for(const id of panesOf('v'))paneState(id).st=st;savePrefs();applyLayout();announce(st==='open'?'Disposizione per il montaggio':'Anteprima grande')}
+function layoutReset(){const L=layoutOf(),m=state.mode[0];for(const id of panesOf(m))delete L[id];if(m==='v')delete L.tlH;savePrefs();applyLayout();announce('Tasselli rimessi come all’inizio')}
+// Fuga: si trascina con il mouse o con il dito; con il focus, le frecce allargano e stringono (con Maiusc di più).
+document.addEventListener('pointerdown',e=>{const sep=e.target.closest?.('.sep');if(!sep||e.button!==0)return;e.preventDefault();sep.setPointerCapture(e.pointerId);sep.classList.add('dragging');
+ const tl=sep.id==='tlSep',id=sep.dataset.pane,x0=e.clientX,y0=e.clientY,v0=tl?$('timeline').offsetHeight:paneState(id).w,dir=!tl&&paneState(id).side==='right'?-1:1;
+ const move=ev=>tl?setTlH(v0-(ev.clientY-y0),false):setW(id,v0+dir*(ev.clientX-x0),false);
+ const up=()=>{sep.removeEventListener('pointermove',move);sep.removeEventListener('pointerup',up);sep.removeEventListener('pointercancel',up);sep.classList.remove('dragging');savePrefs();relayout()};
+ sep.addEventListener('pointermove',move);sep.addEventListener('pointerup',up);sep.addEventListener('pointercancel',up)});
+document.addEventListener('keydown',e=>{const sep=e.target.closest?.('.sep');if(!sep||e.ctrlKey||e.altKey||e.metaKey)return;const step=e.shiftKey?64:16;
+ if(sep.id==='tlSep'){const h=$('timeline').offsetHeight,v=e.key==='ArrowUp'?h+step:e.key==='ArrowDown'?h-step:e.key==='Home'?140:e.key==='End'?innerHeight:null;if(v===null)return;e.preventDefault();setTlH(v);return}
+ const id=sep.dataset.pane,d=PANES[id],s=paneState(id),grow=s.side==='left'?'ArrowRight':'ArrowLeft',shrink=s.side==='left'?'ArrowLeft':'ArrowRight';
+ if(e.key==='Enter'){e.preventDefault();paneSet(id,'tessera',{focus:true});return}
+ const v=e.key===grow?s.w+step:e.key===shrink?s.w-step:e.key==='Home'?d.min:e.key==='End'?d.max:null;if(v===null)return;e.preventDefault();setW(id,v)});
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-pane-act]');if(b){const id=b.closest('.pane').id;if(b.dataset.paneAct==='collapse')paneSet(id,'tessera',{focus:true});else paneMenu(id,b);return}
+ const t=e.target.closest?.('.tessera');if(t)paneSet(t.getAttribute('aria-controls'),'open',{focus:true})});
+// L'angolo piegato segna il tassello in cui si lavora: resta sull'ultimo anche quando il focus passa alla barra.
+let activeTile=null;
+document.addEventListener('focusin',e=>{const t=e.target.closest?.('#workRegion .tile');if(!t||t===activeTile)return;activeTile?.classList.remove('is-active');activeTile=t;t.classList.add('is-active')});
 // Formati audio e di testo. Il WAV si legge e si scrive qui, con i marcatori nei blocchi cue e LIST adtl
 // (li leggono anche molti programmi professionali); gli altri formati li decodifica il browser.
 // La codifica compressa usa WebCodecs: AAC in M4A oppure Opus in WebM, più veloce del tempo reale.
@@ -1599,8 +1751,7 @@ $('markList').addEventListener('keydown',e=>{const list=A.markers,i=list.findInd
  else if(e.key==='F2'){e.preventDefault();markerRename(m)}else if(e.key==='Delete'){e.preventDefault();markerDelete(m)}else if(e.key===' '){e.preventDefault();A.cursor=m.pos;audioPlayPause()}});
 $('markList').addEventListener('click',e=>{const li=e.target.closest('[data-id]');if(!li)return;markActive=li.dataset.id;const m=A.markers.find(x=>x.id===markActive);renderMarkers();if(m)moveCursor(m.pos,false,{listen:false})});
 $('markList').addEventListener('dblclick',e=>{const li=e.target.closest('[data-id]');if(li)markerRename(A.markers.find(x=>x.id===li.dataset.id))});
-$('markClose').onclick=()=>{$('markPane').hidden=true;refreshToggles();waveEl.focus();announce('Riquadro dei marcatori chiuso')};
-addEventListener('resize',()=>{if(isAudio()){viewClamp();drawAudio();renderArrange()}else drawTimeline()});
+addEventListener('resize',relayout);
 // Effetti audio. Ognuno lavora sulla selezione, o su tutto l'audio se non c'è selezione, e riceve un array
 // di canali (Float32Array): restituisce i canali nuovi, anche di lunghezza diversa. Le finestre hanno l'anteprima,
 // che fa ascoltare i primi secondi con l'effetto applicato, e Ctrl+R ripete l'ultimo effetto.
@@ -1725,7 +1876,7 @@ function findClip(){if(!A.buf)return;const L=alen();for(let i=A.cursor+1;i<L;i++
 async function pauseSettings(){const cur=prefs.pauseDb==='auto'?'auto':String(prefs.pauseDb);const r=await modal('Soglia delle pause',`<p>Le pause servono a Ctrl+frecce, ai marcatori automatici, ad Accorcia le pause e al doppio clic. Con la soglia automatica si parte dal rumore di fondo del file${A.buf?`: ora vale ${fmtDb(pauseThreshold())}`:''}.</p>`,[{id:'db',label:'Soglia',type:'select',value:cur,options:[['auto','Automatica'],...[-60,-55,-50,-45,-40,-35,-30,-25,-20].map(v=>[String(v),fmtDb(v)])]},{id:'min',label:'Durata minima di una pausa (secondi)',type:'number',min:0.05,max:10,step:0.05,value:prefs.minPause||0.3}],'Salva');
  if(!r)return;prefs.pauseDb=r.db==='auto'?'auto':Number(r.db);prefs.minPause=clamp(num(r.min)||0.3,0.05,10);savePrefs();pauseCache=null;announce(A.buf?`Trovate ${getPauses().list.length} pause`:'Impostazioni salvate')}
 async function markersFromPauses(){if(!A.buf){toast('Nessun audio aperto');return}const starts=getPauses().list.filter(p=>p.b<alen()).map(p=>p.b),fresh=starts.filter(s=>!A.markers.some(m=>Math.abs(m.pos-s)<A.rate*0.5));if(!fresh.length){toast('Nessuna pausa nuova trovata: prova a cambiare la soglia in Analisi');return}
- if(!(await confirmAction(`Aggiungo ${fresh.length} marcatori, uno all’inizio di ogni parte che segue una pausa?`,'Aggiungi')))return;let n=A.markers.length;metaEdit('Marcatori sulle pause',()=>{for(const s of fresh)A.markers.push({id:uid(),pos:s,label:'Parte '+(++n)});A.markers.sort((a,b)=>a.pos-b.pos)});$('markPane').hidden=false;refreshToggles();announce(fresh.length+' marcatori aggiunti')}
+ if(!(await confirmAction(`Aggiungo ${fresh.length} marcatori, uno all’inizio di ogni parte che segue una pausa?`,'Aggiungi')))return;let n=A.markers.length;metaEdit('Marcatori sulle pause',()=>{for(const s of fresh)A.markers.push({id:uid(),pos:s,label:'Parte '+(++n)});A.markers.sort((a,b)=>a.pos-b.pos)});paneSet('markPane','open',{say:false});announce(fresh.length+' marcatori aggiunti')}
 // Esportazione: il brano (tutte le tracce mixate), la regione nell'editor o la sua selezione. WAV sempre,
 // M4A (AAC) e WebM (Opus) se il browser sa codificarli; nel WAV del brano i marcatori delle regioni diventano cue.
 async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.buf){toast('Il progetto è vuoto: niente da esportare');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
@@ -1868,7 +2019,7 @@ async function restoreAudio(){let meta=await dbGet('audio-project');
 async function gcSources(){try{const used=new Set(P.regions.map(r=>'asrc:'+r.src));for(const k of await dbKeys())if(String(k).startsWith('asrc:')&&!used.has(k))await dbDel(k)}catch(e){}}
 // Progetto in un file: ZIP con progetto-audio.json e un WAV per ogni suono (32 bit in virgola mobile, senza perdite).
 async function saveAudioProjectZip(){if(!P.tracks.length){toast('Il progetto è vuoto');return}const used=[...new Set(P.regions.map(r=>r.src))].filter(id=>SOURCES.has(id));
- const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.2.0',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
+ const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.3.0',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(P.title+' (progetto audio)','zip'));P.exported=P.version;schedulePersist('audio');toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Audio`)}
 async function openAudioProjectZip(entries){let data;try{data=JSON.parse(await entries['progetto-audio.json'].text())}catch(e){toast('Il file progetto-audio.json è danneggiato');return}
  if(audioModified()&&!(await confirmAction('Aprendo il progetto sostituisci quello attuale. Continuare?','Apri')))return;const p=cleanAudioProject(data.progetto||data),bufs=new Map();
@@ -2194,7 +2345,7 @@ async function gcMedia(){try{const keys=await dbKeys(),used=new Set(V.p.media.ma
 // Progetto in un file: ZIP con progetto.json e la cartella media, senza compressione.
 async function saveProjectZip(){if(!V.p.media.length&&!V.p.main.length&&!V.p.titles.length&&!V.p.subs.length){toast('Il progetto è vuoto');return}const files=[],p=structuredClone(V.p);
  for(const m of p.media){const rt=MEDIA.get(m.id);if(!rt)continue;m.file=`media/${m.id}-${safeFileName(m.name)}`;files.push({name:m.file,data:rt.blob})}
- files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.2.0',progetto:p},null,1)});
+ files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.3.0',progetto:p},null,1)});
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(V.p.title+' (progetto video)','zip'));toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Video`)}
 async function openProjectZip(file){const entries=await work('Apertura del progetto',()=>unzipBlob(file));if(!entries)return false;const json=entries['progetto.json'];if(!json)return false;let data;try{data=JSON.parse(await json.text())}catch(e){toast('Il file progetto.json è danneggiato');return true}
  const p=data.progetto||data,blobs={};for(const m of p.media||[]){const b=entries[m.file];if(b)blobs[m.id]=new File([b],m.name||'file',{type:b.type})}
@@ -2679,7 +2830,7 @@ async function fastFlashes(){vStop();const ui=progressDialog('Analisi dei lampeg
  catch(e){console.error('Analisi fotogramma per fotogramma non riuscita',e);fastBroken=true;toast('Analisi non riuscita: riprova, si userà l’analisi in tempo reale');return null}
  finally{ui.end()}}
 // Ogni comando del registro corrisponde a una funzione: prima quelle dell'app attiva, poi quelle comuni.
-const toggleMarkPane=()=>{const p=$('markPane');p.hidden=!p.hidden;if(!p.hidden)$('markList').focus();else $('wave').focus()};
+const toggleMarkPane=()=>paneSet('markPane',paneState('markPane').st==='open'?'off':'open',{focus:true,say:false});
 // In Audio alcuni comandi valgono per l'editor della regione o per le tracce secondo dove si sta lavorando.
 const songOrEditor=(song,editor)=>()=>inEditorArea()?editor():song();
 const undoScope=()=>document.activeElement?.closest?.('#editorArea,#markPane')?'editor':document.activeElement?.closest?.('#arrange')?'project':lastScope;
@@ -2708,14 +2859,14 @@ const V_ACTIONS={saveProject:saveProjectZip,exportVideo:exportVideoDialog,export
  undo:()=>vUndo(false),redo:()=>vUndo(true),cut:()=>videoCopy(true),copy:()=>videoCopy(false),paste:videoPaste,playPause:vPlayPause,stop:()=>{const o=VE.origin??0;vStop();seekTo(o,{say:true})},
  toStart:()=>seekTo(0,{say:true}),toEnd:()=>seekTo(totalDur(),{say:true}),zoomIn:()=>zoomTimeline(1.5),zoomOut:()=>zoomTimeline(1/1.5),zoomFit:zoomFitTimeline,readStatus:readVideoStatus};
 const COMMON_ACTIONS={new:()=>isAudio()?newAudio():newVideo(),open:()=>pickFile('open'),filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
- switchAudio:()=>setMode('audio'),switchVideo:()=>setMode('video'),goTo:goToDialog,follow:()=>{prefs.follow=!prefs.follow;savePrefs()},
+ switchAudio:()=>setMode('audio'),switchVideo:()=>setMode('video'),layoutMenu,layoutReset,showLibrary:()=>paneToggle('libPane'),showInspector:()=>paneToggle('inspPane'),bigPreview:()=>layoutPreset('tessera'),goTo:goToDialog,follow:()=>{prefs.follow=!prefs.follow;savePrefs()},
  themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};
 async function handleAction(id){const f=(isAudio()?A_ACTIONS[id]:V_ACTIONS[id])??COMMON_ACTIONS[id];if(!f){toast('Comando non disponibile');return}await f()}
 // Passa da Audio a Video e viceversa: ferma la riproduzione dell'app che si lascia e ridisegna l'altra.
 function setMode(mode,{focus=true}={}){if(mode===state.mode)return;if(mode==='video')stopPlayback(true);else vStop();state.mode=mode;const audio=mode==='audio';
  $('app').className=mode;document.documentElement.dataset.mode=mode;$('audioPane').classList.toggle('hidden',!audio);$('videoPane').classList.toggle('hidden',audio);$('switchAudio').setAttribute('aria-pressed',audio);$('switchVideo').setAttribute('aria-pressed',!audio);
  $('docTitle').value=audio?P.title:V.p.title;$('saveTopLabel').textContent=audio?'Esporta':'Salva progetto';$('saveTop').dataset.tip=audio?'Esporta il brano (Ctrl+S)':'Salva il progetto (Ctrl+S)';updateTitle();
- currentTab=TABS[mode[0]][0];renderTabs();renderRibbon();themeChanged();if(audio){renderArrange();viewClamp();drawAudio();updateAudioUI()}else{resizeCanvas();drawTimeline();renderLibrary();renderInspector();updateVideoUI()}
+ renderBar();applyLayout(false);themeChanged();if(audio){renderArrange();viewClamp();drawAudio();updateAudioUI()}else{resizeCanvas();drawTimeline();renderLibrary();renderInspector();updateVideoUI()}
  if(focus){if(audio)focusLane(P.track);else($(lastTrack)||playheadEl).focus();announce(audio?'Audio: tracce':'Video: linea temporale')}schedulePersist(mode)}
 function updateTitle(){document.title=($('docTitle').value.trim()||'Senza titolo')+' — '+(isAudio()?'Audio':'Video')+' · Tassello Media'}
 // Apertura dei file: ogni app decide che cosa fare di audio, video, immagini, progetti e testi.
@@ -2749,21 +2900,15 @@ function closeFilePanel(restore=true){if($('filepanel').hidden)return;$('filepan
 // Scorciatoie globali: intercettate in cattura, prima dei gestori dei singoli controlli.
 window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;if(e.key==='MediaPlayPause'){e.preventDefault();runCommand('playPause');return}const ctx=focusContext();if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key==='/'){e.preventDefault();runCommand('shortcuts');return}const c=findShortcut(e,ctx);if(!c)return;e.preventDefault();e.stopPropagation();runCommand(c.id)},true);
 $('skipWork').onclick=e=>{e.preventDefault();if(isAudio())focusLane(P.track);else($(lastTrack)||playheadEl).focus()};
-$('skipRibbon').onclick=e=>{e.preventDefault();$('tab-'+slug(currentTab))?.focus()};
-// Pulsanti con data-action in tutta la pagina: barra multifunzione, trasporto, riquadri e finestre vuote.
-document.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.closest('#menu'))return;runCommand(b.dataset.action)});
-// Barra del titolo
+$('skipTools').onclick=e=>{e.preventDefault();(toolItems()[toolFocus]||$('fileBtn')).focus()};
+// Pulsanti con data-action in tutta la pagina: barra, cassetti, trasporto, riquadri e finestre vuote.
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.closest('#menu'))return;if(b.closest('#drawer'))drawerRun(b);else runCommand(b.dataset.action)});
+// Barra
 for(const [id,mode] of [['switchAudio','audio'],['switchVideo','video']])$(id).onclick=()=>setMode(mode);
 $('docTitle').addEventListener('input',e=>{const v=e.target.value;if(isAudio())P.title=v;else{V.p.title=v}updateTitle();schedulePersist()});
 $('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();if(isAudio())focusLane(P.track);else($(lastTrack)||playheadEl).focus()});
-$('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand(isAudio()?'saveAudio':'saveProject');$('openTop').onclick=()=>runCommand('open');
+$('saveTop').onclick=()=>runCommand(isAudio()?'saveAudio':'saveProject');$('layoutBtn').onclick=()=>runCommand('layoutMenu');
 $('paletteBtn').onclick=()=>runCommand('palette');$('kbdBtn').onclick=()=>runCommand('shortcuts');$('helpBtn').onclick=()=>runCommand('help');$('brandBtn').onclick=()=>runCommand('help');$('fileBtn').onclick=openFilePanel;
-$('fileBtn').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('tab-'+slug(currentTab))?.focus()}});
-// Schede (tablist con attivazione automatica)
-$('tabs').addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t&&t.dataset.tab!==currentTab)selectTab(t.dataset.tab)});
-$('tabs').addEventListener('keydown',e=>{const t=e.target.closest('[role=tab]');if(!t)return;const list=$$('#tabs [role=tab]'),i=list.indexOf(t);let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft'){if(i===0){e.preventDefault();$('fileBtn').focus();return}j=i-1}else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();selectTab(list[j].dataset.tab);return}if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){e.preventDefault();focusables($('ribbon'))[0]?.focus()}});
-// Barra multifunzione: frecce tra i pulsanti, Esc o freccia su per tornare alla scheda.
-$('ribbon').addEventListener('keydown',e=>{const t=e.target,list=focusables($('ribbon')),i=list.indexOf(t);if(e.key==='Escape'||(e.key==='ArrowUp'&&!t.matches('select,input'))){e.preventDefault();$('tab-'+slug(currentTab))?.focus();return}if(i<0||t.matches('select'))return;let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft')j=(i-1+list.length)%list.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();list[j].focus()}});
 // Barre di trasporto: frecce tra i pulsanti, come una barra degli strumenti.
 for(const id of ['aTransport','vTransport'])$(id).addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)||e.target.matches('select,input'))return;const list=focusables($(id)).filter(el=>el.matches('button')),i=list.indexOf(e.target);if(i<0)return;e.preventDefault();const j=e.key==='Home'?0:e.key==='End'?list.length-1:(i+(e.key==='ArrowRight'?1:-1)+list.length)%list.length;list[j].focus()});
 // Tooltip (si chiudono con Esc e non coprono il puntatore)
@@ -2806,7 +2951,7 @@ redrawAll=()=>{if(isAudio()){drawAudio();renderArrange()}else{drawTimeline();req
 async function start(){applyPrefs();$('stepSel').value=String(prefs.step);if(!$('stepSel').value){prefs.step=0.1;$('stepSel').value='0.1'}$('vSubs').setAttribute('aria-pressed',prefs.showSubs);
  suppressAutosave=true;try{db=await openStore();await restoreAudio().catch(e=>console.warn('Bozza audio non recuperabile',e));await restoreVideo().catch(e=>console.warn('Progetto video non recuperabile',e));await gcMedia();await gcSources();const ui=await dbGet('ui').catch(()=>null);if(ui?.mode==='video')setMode('video',{focus:false})}
  catch(e){console.error('Avvio non riuscito',e);toast('Avvio non riuscito: '+e.message)}finally{suppressAutosave=false}
- $('docTitle').value=isAudio()?P.title:V.p.title;updateTitle();renderTabs();renderRibbon();resizeCanvas();showEditor(!!A.buf);zoomFitAudio();updateAudioUI();renderArrange();updateEditorBar();renderLibrary();renderInspector();drawTimeline();updateVideoUI();
+ $('docTitle').value=isAudio()?P.title:V.p.title;updateTitle();renderBar();applyLayout(false);resizeCanvas();showEditor(!!A.buf);zoomFitAudio();updateAudioUI();renderArrange();updateEditorBar();renderLibrary();renderInspector();drawTimeline();updateVideoUI();
  status(db?'Pronto · i file restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze: esporta il lavoro prima di chiudere')}
 // Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si può installare come app
 // che funziona anche senza rete e si aggiorna dal sito.
