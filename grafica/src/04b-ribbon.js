@@ -4,6 +4,7 @@ const RIBBON={
  i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll readStatus'],['Piano','planMenu stepPrev stepNext planFree'],['Cronologia','undo redo']],
   Inquadra:[['Ruota','rotateLeft rotateRight flipH'],['Formato','ratioMenu straighten resetGeometry']],
   Look:[['Look','lookMenu lutImport lookAmount lookOff']],
+  Dettaglio:[['Curve','curveS curveAdd curveDel curveReset'],['Dettaglio','fxClarity fxDehaze fxSharpen fxNoise'],['Colore','bwToggle']],
   Seleziona:[['Strumenti','toolRect toolEllipse toolLasso toolPoly toolBrush toolWand toolRange'],['Selezione','selAll selNone selInvert selMeasure'],['Bordo','selFeather selGrow selRefine'],['Vista','selShow selDescribe']],
   Maschere:[['Nuova','maskFromSel maskBrush maskLinear maskRadial'],['Maschera','maskPaint maskRedraw maskAddSel maskSubSel maskInvert'],['Gestisci','maskPrev maskNext maskHide maskOverlay maskRename maskDelete maskDescribe']],
   Sfondo:[['Scontorno','cutAuto cutBox cutKeep cutDrop cutRecalc cutRemove'],['Sfondo','cutBgNone cutBgColor cutBgBlur cutColor'],['Vista','cutMatte cutDescribe']],

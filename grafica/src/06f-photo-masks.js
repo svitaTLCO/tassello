@@ -88,11 +88,12 @@ function feather(m,w,h,R){if(R<1)return m;const {a}=blurField(m,w,h,R/2);for(let
 const Phi=x=>{const z=Math.abs(x)/Math.SQRT2,t=1/(1+.3275911*z),e=1-t*(.254829592+t*(-.284496736+t*(1.421413741+t*(-1.453152027+t*1.061405429))))*Math.exp(-z*z);return x>=0?(1+e)/2:(1-e)/2};
 function grow(m,w,h,R){const r=Math.abs(R);if(r<.5)return m;const {a,s}=blurField(m,w,h,r),sg=R>0?-1:1,lo=Phi(sg*r/s-.5/s)*65535,hi=Phi(sg*r/s+.5/s)*65535,k=255/Math.max(1,hi-lo);
  for(let i=0;i<m.length;i++){const v=a[i];m[i]=v<=lo?0:v>=hi?255:((v-lo)*k+.5)|0}return m}
-// Media su una finestra quadrata di raggio r (i bordi contano solo i pixel che ci sono), sul posto.
-function boxMean(f,w,h,r){const t=new Float32Array(f.length),cs=new Float64Array(w);
- for(let o=0;o<w*h;o+=w){let acc=0;for(let x=0;x<=Math.min(r,w-1);x++)acc+=f[o+x];for(let x=0;x<w;x++){t[o+x]=acc/(Math.min(x+r,w-1)-Math.max(x-r,0)+1);if(x+r+1<w)acc+=f[o+x+r+1];if(x-r>=0)acc-=f[o+x-r]}}
+// Media su una finestra quadrata di raggio r (i bordi contano solo i pixel che ci sono), sul posto. I reciproci dei
+// conteggi si calcolano una volta; t è un'area di lavoro facoltativa, da riusare tra una chiamata e l'altra.
+function boxMean(f,w,h,r,t=new Float32Array(f.length)){const cs=new Float64Array(w),ix=new Float32Array(w),e=Math.min(r,w-1);for(let x=0;x<w;x++)ix[x]=1/(Math.min(x+r,w-1)-Math.max(x-r,0)+1);
+ for(let o=0;o<w*h;o+=w){let acc=0;for(let x=0;x<=e;x++)acc+=f[o+x];const a=w-r-1;for(let x=0;x<w;x++){t[o+x]=acc*ix[x];if(x<a)acc+=f[o+x+r+1];if(x>=r)acc-=f[o+x-r]}}
  for(let y=0;y<=Math.min(r,h-1);y++)for(let x=0,o=y*w;x<w;x++)cs[x]+=t[o+x];
- for(let y=0;y<h;y++){const o=y*w,cnt=Math.min(y+r,h-1)-Math.max(y-r,0)+1,a=(y+r+1)*w,s=(y-r)*w;for(let x=0;x<w;x++){f[o+x]=cs[x]/cnt;if(y+r+1<h)cs[x]+=t[a+x];if(y-r>=0)cs[x]-=t[s+x]}}return f}
+ for(let y=0;y<h;y++){const o=y*w,k=1/(Math.min(y+r,h-1)-Math.max(y-r,0)+1),a=(y+r+1)*w,s=(y-r)*w,add=y+r+1<h,sub=y-r>=0;for(let x=0;x<w;x++){f[o+x]=cs[x]*k;if(add)cs[x]+=t[a+x];if(sub)cs[x]-=t[s+x]}}return f}
 // Rifinitura dei bordi con il filtro guidato a colori (He, Sun e Tang; versione veloce di He e Sun): in ogni finestra
 // la maschera diventa una funzione lineare dei colori della foto, così il bordo segue i contorni veri, capelli e foglie
 // compresi, invece della linea tracciata. I coefficienti si calcolano su una copia ridotta e si applicano a ogni pixel.
@@ -142,8 +143,8 @@ function applyLocal(img,m,a,amt=1,inv=false){const [TR,TG,TB]=toneTables(a),d=im
  for(let j=0,i=0;j<m.length;j++,i+=4){const w=(inv?255-m[j]:m[j])*k;if(!w)continue;let R=TR[d[i]],G=TG[d[i+1]],B=TB[d[i+2]];
   if(color){const Y=.2126*R+.7152*G+.0722*B,mx=R>G?(R>B?R:B):(G>B?G:B),mn=R<G?(R<B?R:B):(G<B?G:B),s=sat*(1+vib*(1-(mx-mn)));R=Y+(R-Y)*s;G=Y+(G-Y)*s;B=Y+(B-Y)*s}
   d[i]+=(R*255-d[i])*w;d[i+1]+=(G*255-d[i+1])*w;d[i+2]+=(B*255-d[i+2])*w}}
-// Dopo lo sviluppo: le maschere con le loro regolazioni, una sull'altra nell'ordine dell'elenco.
-function developLocal(img,r,mc){for(const m of r.masks||[])if(!m.off&&m.ops?.length&&ADJ.some(([id])=>m.adj[id])&&m.amt!==0)applyLocal(img,maskOf(m.ops,mc),m.adj,(m.amt??100)/100,m.inv);if(r.cut&&typeof applyCut==='function')applyCut(img,r,mc)}
+// Dopo lo sviluppo: chiarezza e nitidezza, poi le maschere con le loro regolazioni, una sull'altra nell'ordine dell'elenco.
+function developLocal(img,r,mc){if(r.fx&&(r.fx.clarity||r.fx.sharp))fxPost(img,r.fx,mc);for(const m of r.masks||[])if(!m.off&&m.ops?.length&&ADJ.some(([id])=>m.adj[id])&&m.amt!==0)applyLocal(img,maskOf(m.ops,mc),m.adj,(m.amt??100)/100,m.inv);if(r.cut&&typeof applyCut==='function')applyCut(img,r,mc)}
 // Nomi dei colori, dalla tinta, dalla saturazione e dalla luminosità: servono a descrivere a parole selezioni e punti.
 function colorName(r,g,b){const mx=Math.max(r,g,b)/255,mn=Math.min(r,g,b)/255,l=(mx+mn)/2,c=mx-mn,s=c?c/(1-Math.abs(2*l-1)):0;
  if(c<.07||s<.1)return l<.1?'nero':l<.3?'grigio scuro':l<.62?'grigio':l<.9?'grigio chiaro':'bianco';

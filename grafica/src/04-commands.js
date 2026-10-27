@@ -80,6 +80,16 @@ def('i','Sfondo',[
  ['cutColor','Colore dello sfondo…','fill','',{short:'Colore…'}],
  ['cutMatte','Anteprima della trasparenza su scacchiera, bianco, nero o grigio','checker','',{short:'Anteprima su'}],
  ['cutDescribe','Descrivi lo scontorno','speak','Alt+Maiusc+B',{g:1,short:'Descrivi'}]]);
+def('i','Dettaglio',[
+ ['curveS','Curva a S: più contrasto','curves','',{short:'Curva a S'}],
+ ['curveAdd','Aggiungi un punto alla curva','plus','',{short:'Aggiungi un punto'}],
+ ['curveDel','Togli il punto scelto della curva','minus','',{short:'Togli il punto'}],
+ ['curveReset','Riporta dritta la curva del canale','history','',{short:'Curva dritta'}],
+ ['bwToggle','Bianco e nero con il miscelatore','bw','',{short:'Bianco e nero',quiet:1,toggle:()=>!!I.r.fx?.bw}],
+ ['fxClarity','Chiarezza…','clarity','',{short:'Chiarezza'}],
+ ['fxDehaze','Foschia…','dehaze','',{short:'Foschia'}],
+ ['fxSharpen','Nitidezza…','sharpen','',{short:'Nitidezza'}],
+ ['fxNoise','Riduzione del rumore…','noise','',{short:'Riduzione del rumore'}]]);
 def('d','File',[
  ['openDraw','Apri un disegno SVG o inserisci immagini','open','Ctrl+O',{g:1,short:'Apri'}],
  ['saveSvg','Salva il disegno (SVG, si riapre modificabile)','save','Ctrl+S',{g:1,short:'Salva'}],
