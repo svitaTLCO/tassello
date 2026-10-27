@@ -201,7 +201,8 @@ function pgItemShape(it,L,ctx,href,fv,edge){const op=it.opacity<100?` opacity="$
    const id='mk'+(++pgDefSeq),line=edge?`<path d="${d}" fill="none"${stroke} stroke-linejoin="round"/>`:'',back=it.fill!=='none'?`<path d="${d}" fill="${fv}"/>`:'';
    return `<g${op}>${back}${m?`<defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs><g clip-path="url(#${id})">${pic()}</g>`:''}${line}</g>`}}
  return ''}
-function pgPageSvg(p,I,ii,lay,href=m=>m.url){const m=pgMasterOf(I.pg),ctx={row:I.row,n:I.n,total:I.total,title:p.title,date:pgToday()};return (p.bg&&p.bg!=='none'?`<rect width="${pr2(p.w)}" height="${pr2(p.h)}" fill="${esc(p.bg)}"/>`:'')+[...(m?m.items:[]),...I.pg.items].map(it=>pgItemSvg(it,lay.get(ii+'|'+it.id),ctx,href)).join('')}
+// Con bleed (l'abbondanza per il taglio) lo sfondo e le cornici a filo della pagina continuano oltre il bordo.
+function pgPageSvg(p,I,ii,lay,href=m=>m.url,bleed=0){const m=pgMasterOf(I.pg),ctx={row:I.row,n:I.n,total:I.total,title:p.title,date:pgToday()},b=bleed;return (p.bg&&p.bg!=='none'?`<rect${b?` x="${pr2(-b)}" y="${pr2(-b)}"`:''} width="${pr2(p.w+2*b)}" height="${pr2(p.h+2*b)}" fill="${esc(p.bg)}"/>`:'')+[...(m?m.items:[]),...I.pg.items].map(it=>pgItemSvg(b?pgBleedItem(it,p,b):it,lay.get(ii+'|'+it.id),ctx,href)).join('')}
 // Misure per l'interfaccia: millimetri e punti nei documenti da stampa, pixel in quelli per lo schermo.
 const pgMM=()=>Pg.p?.unit==='mm';
 const toU=v=>pgMM()?v/MM:v,fromU=v=>pgMM()?v*MM:v,pgToPt=v=>pgMM()?v*.75:v,pgFromPt=v=>pgMM()?v/.75:v;

@@ -386,6 +386,8 @@ def('p','Pagina e griglia',[
  ['pgMasterNew','Nuovo mastro','new','',{short:'Nuovo mastro'}],
  ['pgStyles','Stili di paragrafo e di carattere','styles','',{short:'Stili'}],
  ['pgZoomFit','Mostra tutta la pagina','zoomFit','',{short:'Tutta la pagina'}],
+ ['pgBleed','Abbondanza per il taglio, per la tipografia','crop','',{short:'Abbondanza'}],
+ ['pgCropMarks','Segni di taglio negli angoli del foglio','crop','',{short:'Segni di taglio',toggle:()=>!!Pg.p?.marks}],
  ['pgTiles','Stampa a tessere su più fogli da incollare','tiles','',{short:'Stampa a tessere',toggle:()=>!!Pg.p?.tiles?.on}],
  ['pgTileSetup','Fogli, margini e sovrapposizione delle tessere','margins','',{short:'Fogli e margini'}],
  ['pgFestone','Festone di lettere, una per foglio','festone','',{short:'Festone'}],
