@@ -13,14 +13,14 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  zoomIn:()=>zoomDraw(1.25),zoomOut:()=>zoomDraw(.8),zoomFit:()=>zoomDraw(0),
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
 const COMMON_ACTIONS={filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
- switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),
+ switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),layoutMenu,layoutReset,showPlans:()=>paneToggle('planPane'),showAdjust:()=>paneToggle('adjPane'),showLayers:()=>paneToggle('layPane'),showProps:()=>paneToggle('propPane'),
  themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};
 async function handleAction(id){const f=(isImmagini()?I_ACTIONS[id]:D_ACTIONS[id])??COMMON_ACTIONS[id];if(!f){toast('Comando non disponibile');return}await f()}
 // Passa da Immagini a Disegno e viceversa: ogni app tiene il suo titolo, la sua barra e il suo lavoro.
 function setMode(mode,{focus=true}={}){const img=mode==='immagini',home=()=>img?(I.bmp?$('photo'):$('planList')):sheetWrap;if(mode===state.mode){if(focus)home().focus();return}
  state.mode=mode;$('app').className=mode;document.documentElement.dataset.mode=mode;$('photoPane').classList.toggle('hidden',!img);$('drawPane').classList.toggle('hidden',img);$('switchImmagini').setAttribute('aria-pressed',img);$('switchDisegno').setAttribute('aria-pressed',!img);
- $('docTitle').value=img?I.title:Dw.p.title;$('saveTopLabel').textContent=img?'Esporta':'Salva';$('saveTop').dataset.tip=img?'Esporta la foto (Ctrl+S)':'Salva il disegno in SVG (Ctrl+S)';$('openTop').dataset.tip=img?'Apri una foto (Ctrl+O)':'Apri un disegno o inserisci immagini (Ctrl+O)';updateTitle();
- currentTab=TABS[mode[0]][0];renderTabs();renderRibbon();themeChanged();if(img){showPhoto();renderPanel()}else{renderSheet();renderLayers();renderProps()}refreshToggles();
+ $('docTitle').value=img?I.title:Dw.p.title;$('saveTopLabel').textContent=img?'Esporta':'Salva';$('saveTop').dataset.tip=img?'Esporta la foto (Ctrl+S)':'Salva il disegno in SVG (Ctrl+S)';updateTitle();
+ renderBar();applyLayout();themeChanged();if(img){showPhoto();renderPanel()}else{renderSheet();renderLayers();renderProps()}refreshToggles();
  if(focus){home().focus();announce(img?'Immagini':'Disegno: foglio')}schedulePersist(mode)}
 // Apertura dei file. Immagini: una foto per volta, un file .cube diventa un look. Disegno: un SVG di Disegno si riapre,
 // le altre immagini e gli altri SVG entrano nel foglio.

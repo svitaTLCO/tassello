@@ -10,22 +10,29 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='46' height='46' rx='10' fill='%232457C5'/%3E%3Cpath d='M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z' fill='%231E7A46'/%3E%3Cpath d='M86 0V8Q86 14 92 14H100Z' fill='%23fff' fill-opacity='.55'/%3E%3Crect y='54' width='46' height='46' rx='10' fill='%23B35500'/%3E%3Crect x='54' y='54' width='46' height='46' rx='10' fill='%237A3DB8'/%3E%3C/svg%3E">
 <style>
+/* Mosaico: la finestra è fatta di tasselli (--surface) appoggiati su una fuga (--grout) che prende il colore dell'app. */
 :root{--accent:#b0306a;--accent-strong:#8c2453;--accent-text:#8c2453;--accent-soft:#fbeaf2;--sel-tint:rgba(176,48,106,.18);
---bg:#f3f3f3;--chrome:#f7f7f7;--surface:#fff;--surface-2:#f3f3f3;--hover:#e8e8e8;--pressed:#dcdcdc;--line:#e1e1e1;--line-strong:#b3b3b3;--text:#1b1b1b;--text-2:#3d3d3d;--text-3:#575757;--canvas:#e6e6e6;--focus:#1b1b1b;--danger:#b10e1c;
+--grout:#eddde5;--grout-deep:#e0cad5;--gap:8px;--r:10px;--fold:var(--accent);--scrim:rgba(16,22,34,.16);
+--bg:var(--grout);--chrome:#fff;--surface:#fff;--surface-2:#f1f3f7;--hover:#e9edf3;--pressed:#dde2ea;--line:#e1e5ec;--line-strong:#a9b0bc;--text:#161b26;--text-2:#3e4757;--text-3:#596374;--canvas:#e4e5e7;--focus:#161b26;--danger:#b10e1c;
 --hist-bg:#ffffff;--hist-l:#6b6b6b;--hist-r:#d13438;--hist-g:#2e8b3d;--hist-b:#2f6fd6;--hist-clip:#c50f1f;
---shadow:0 12px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08);color-scheme:light;
+--shadow:0 12px 32px rgba(20,24,34,.18),0 2px 8px rgba(20,24,34,.08);--lift:0 18px 40px rgba(20,24,34,.26),0 2px 6px rgba(20,24,34,.1);color-scheme:light;
+--mono:'Cascadia Mono',Consolas,ui-monospace,'Courier New',monospace;
 font-family:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--text)}
-html[data-theme=dark]{color-scheme:dark;--bg:#1c1c1c;--chrome:#242424;--surface:#2c2c2c;--surface-2:#303030;--hover:#3a3a3a;--pressed:#464646;--line:#3d3d3d;--line-strong:#6a6a6a;--text:#f3f3f3;--text-2:#d9d9d9;--text-3:#bdbdbd;--canvas:#141414;--focus:#fff;--accent-text:#f59ac2;--accent-soft:#3f1a2c;
---hist-bg:#1f1f1f;--hist-l:#bdbdbd;--hist-r:#ff7b7f;--hist-g:#6fd37f;--hist-b:#7fa8ff;--hist-clip:#ff6b6b;--shadow:0 12px 32px rgba(0,0,0,.55)}
-html[data-contrast=high]{--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#5e1638;--hist-l:#000;--hist-clip:#b10e1c}
-html[data-contrast=high][data-theme=dark]{--line:#fff;--line-strong:#fff;--text-2:#fff;--text-3:#fff;--hover:#4a4a4a;--accent-text:#ffc2dc;--hist-l:#fff;--hist-clip:#ff8080}
+html[data-theme=dark]{color-scheme:dark;--grout:#170e13;--grout-deep:#0d070a;--scrim:rgba(0,0,0,.45);--chrome:#1e2026;--surface:#1e2026;--surface-2:#272a31;--hover:#2f333c;--pressed:#3a3f49;--line:#363a44;--line-strong:#6b7280;--text:#eef1f6;--text-2:#c9d0db;--text-3:#a3acbb;--canvas:#141518;--focus:#fff;--accent-text:#f59ac2;--accent-soft:#3f1a2c;
+--hist-bg:#1a1c21;--hist-l:#bdbdbd;--hist-r:#ff7b7f;--hist-g:#6fd37f;--hist-b:#7fa8ff;--hist-clip:#ff6b6b;--shadow:0 12px 32px rgba(0,0,0,.55);--lift:0 18px 40px rgba(0,0,0,.6)}
+html[data-contrast=high]{--grout:#fff;--grout-deep:#fff;--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#5e1638;--hist-l:#000;--hist-clip:#b10e1c}
+html[data-contrast=high][data-theme=dark]{--grout:#000;--grout-deep:#000;--line:#fff;--line-strong:#fff;--text-2:#fff;--text-3:#fff;--hover:#4a4a4a;--accent-text:#ffc2dc;--hist-l:#fff;--hist-clip:#ff8080}
 @media (forced-colors:active){:root{--hist-bg:Canvas;--hist-l:CanvasText;--hist-r:CanvasText;--hist-g:CanvasText;--hist-b:CanvasText;--hist-clip:Highlight}}
-html[data-mode=disegno]{--accent:#0e6f8a;--accent-strong:#0a5468;--accent-text:#0a5468;--accent-soft:#e3f2f6;--sel-tint:rgba(14,111,138,.18)}
-html[data-theme=dark][data-mode=disegno]{--accent-text:#7fd0e6;--accent-soft:#12303a}
-html[data-contrast=high][data-mode=disegno]{--accent-text:#063644}
-html[data-contrast=high][data-theme=dark][data-mode=disegno]{--accent-text:#b5e9f7}
-html[data-contrast=high] .tool,html[data-contrast=high] .tab,html[data-contrast=high] .btn{border:1px solid var(--line-strong)}
+html[data-mode=disegno]{--accent:#0e6f8a;--accent-strong:#0a5468;--accent-text:#0a5468;--accent-soft:#e3f2f6;--sel-tint:rgba(14,111,138,.18);--grout:#d9e8ec;--grout-deep:#c6dce2}
+html[data-theme=dark][data-mode=disegno]{--accent-text:#7fd0e6;--accent-soft:#12303a;--grout:#0c1315;--grout-deep:#060b0d}
+html[data-contrast=high][data-mode=disegno]{--accent-text:#063644;--grout:#fff;--grout-deep:#fff}
+html[data-contrast=high][data-theme=dark][data-mode=disegno]{--accent-text:#b5e9f7;--grout:#000;--grout-deep:#000}
+html[data-contrast=high] .tb,html[data-contrast=high] .ditem,html[data-contrast=high] .btn{border:1px solid var(--line-strong)}
+/* In contrasto elevato la fuga diventa una linea di 2 px intorno a ogni tassello. */
+html[data-contrast=high] .tile{outline:2px solid var(--line-strong);outline-offset:-2px}
+html[data-contrast=high] .tessera,html[data-contrast=high] .chip,html[data-contrast=high] .st-btn{box-shadow:inset 0 0 0 2px var(--line-strong)}
 html[data-contrast=high] :focus-visible{outline-width:3px}
+@media (forced-colors:active){.tile,.tessera,.chip,.st-btn,.drawer,.dgroup,.palette,.pal-field,#palList{border:1px solid CanvasText}}
 *,*::before,*::after{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;overflow:hidden}
 body{background:var(--bg);color:var(--text)}
@@ -41,66 +48,62 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:block}
 .ti-text{font-weight:600;font-size:15px;line-height:1;min-width:18px;text-align:center;font-family:'Segoe UI',system-ui,sans-serif;white-space:nowrap}
 #app{display:flex;flex-direction:column;height:100dvh;min-width:0}
-/* Barra del titolo */
-.titlebar{height:46px;flex-shrink:0;background:var(--accent);color:#fff;display:flex;align-items:center;gap:6px;padding:0 10px}
-.titlebar :focus-visible{outline-color:#fff}
-.brand{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 6px;margin-right:4px;border:0;border-radius:8px;background:transparent;color:#fff;font:inherit;cursor:pointer}
-.brand:hover{background:rgba(255,255,255,.14)}
-.brand-mark{width:22px;height:22px;flex:none}
-.brand-name{font-weight:700;font-size:14px;letter-spacing:.01em;white-space:nowrap}
-@media (max-width:980px){.brand-name{display:none}.brand{padding:0 6px}}
-.app-switch{display:flex;background:rgba(0,0,0,.2);border-radius:9px;padding:3px;gap:2px}
-.app-switch button{display:flex;align-items:center;gap:7px;height:28px;padding:0 10px 0 6px;border:0;border-radius:7px;background:transparent;color:#fff;font-weight:600}
-.app-switch button:hover{background:rgba(255,255,255,.14)}
-.app-switch button[aria-pressed=true]{background:#fff;color:var(--accent-strong)}
-.app-logo{width:19px;height:19px;border-radius:5px;display:grid;place-items:center;background:rgba(255,255,255,.22);color:#fff}
+/* Tasselli e angolo: l'angolo piegato del logo segna l'azione principale e il tassello in cui si lavora. */
+.tile{background:var(--surface);border-radius:var(--r);position:relative}
+.primary-tile::after,.tile.is-active::after,.pal-field::after{content:'';position:absolute;top:0;right:0;width:14px;height:14px;border-bottom-left-radius:4px;background:linear-gradient(to bottom left,var(--corner-bg,var(--grout)) 50%,var(--fold) 50%);pointer-events:none;z-index:8}
+/* Barra: una riga di tasselli al posto di titolo, schede e barra multifunzione. */
+.bar{display:flex;align-items:stretch;gap:var(--gap);padding:var(--gap) var(--gap) 0;flex-shrink:0;position:relative;z-index:30;min-width:0}
+.bar>.tile{height:48px;flex:0 0 auto}
+.brand-tile{display:flex;align-items:center;gap:4px;padding:0 6px}
+.brand{width:38px;height:38px;border:0;border-radius:8px;background:transparent;display:grid;place-items:center;padding:0}
+.brand:hover{background:var(--hover)}
+.brand-mark{width:24px;height:24px;flex:none}
+.app-switch{display:flex;gap:2px;padding:3px;border-radius:9px;background:var(--surface-2)}
+.app-switch button{display:flex;align-items:center;gap:7px;height:32px;padding:0 10px 0 6px;border:0;border-radius:7px;background:transparent;color:var(--text-2);font-weight:600}
+.app-switch button:hover{background:var(--hover);color:var(--text)}
+.app-switch button[aria-pressed=true]{background:var(--surface);color:var(--accent-text);box-shadow:0 1px 3px rgba(20,24,34,.16)}
+.app-logo{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;background:var(--pressed);color:var(--text-2)}
 .app-logo svg{display:block}
 .app-switch button[aria-pressed=true] .app-logo{background:var(--accent);color:#fff}
-.tb-group{display:flex;gap:2px;margin-left:4px}
-.tb-btn{border:0;background:transparent;color:#fff;width:34px;height:34px;border-radius:7px;display:grid;place-items:center}
-.tb-btn:hover{background:rgba(255,255,255,.16)}.tb-btn:active{background:rgba(255,255,255,.26)}
-.title-center{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-width:120px}
-.title-center input{width:min(300px,100%);min-width:0;text-align:center;background:rgba(255,255,255,.14);border:1px solid transparent;border-radius:7px;color:#fff;height:30px;padding:0 10px;font-weight:600}
-.title-center input:hover{border-color:rgba(255,255,255,.55)}
-.title-center input:focus{background:#fff;color:#1b1b1b;outline:2px solid #fff;outline-offset:1px}
-.save-state{font-size:12px;opacity:.92;white-space:nowrap}
-.cmd-search{display:flex;align-items:center;gap:8px;height:32px;min-width:210px;border-radius:7px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;padding:0 6px 0 10px;text-align:left}
-.cmd-search:hover{background:rgba(255,255,255,.22)}
-.cmd-search span{flex:1}
-.cmd-search kbd{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)}
-.top-action{height:32px;border-radius:7px;padding:0 12px;border:1px solid rgba(255,255,255,.6);background:transparent;color:#fff;display:flex;align-items:center;gap:7px;font-weight:600;white-space:nowrap}
-.top-action:hover{background:rgba(255,255,255,.14)}
-.top-action.primary{border-color:#fff;background:#fff;color:var(--accent-strong)}
-.top-action.primary:hover{background:#fbf0f5}
-html[data-mode=disegno] .top-action.primary:hover{background:#eef7fa}
-/* Schede */
-.tabrow{display:flex;align-items:flex-end;gap:6px;background:var(--chrome);padding:5px 10px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
-.filebtn{height:30px;margin-bottom:4px;padding:0 15px;border:0;border-radius:7px;background:var(--accent);color:#fff;font-weight:600;flex-shrink:0}
-.filebtn:hover{background:var(--accent-strong)}
-.tabs{display:flex;gap:2px}
-.tab{border:0;background:transparent;color:var(--text-2);height:36px;padding:0 13px;border-radius:7px 7px 0 0;position:relative;white-space:nowrap;font-weight:500}
-.tab:hover{background:var(--hover);color:var(--text)}
-.tab[aria-selected=true]{color:var(--accent-text);font-weight:600}
-.tab[aria-selected=true]::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
-.tab:focus-visible{outline-offset:-2px}
-/* Barra multifunzione */
-.ribbon{flex-shrink:0;background:var(--chrome);overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;border-bottom:1px solid var(--line)}
-.ribbon-inner{display:flex;align-items:stretch;min-height:102px;padding:6px 6px 4px;margin:0 8px 8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);width:max-content;min-width:calc(100% - 16px)}
-.rbgroup{display:flex;flex-direction:column;padding:0 9px;position:relative;flex-shrink:0}
-.rbgroup+.rbgroup::before{content:'';position:absolute;left:0;top:6px;bottom:24px;width:1px;background:var(--line)}
-.rbitems{display:flex;align-items:flex-start;gap:3px;flex:1}
-.rbstack{display:flex;flex-direction:column;gap:5px;padding-top:2px}
-.rbrow{display:flex;align-items:center;gap:2px}
-.rb-label{font-size:11px;color:var(--text-3);text-align:center;padding-top:4px;white-space:nowrap}
-.tool{display:inline-flex;justify-content:center;align-items:center;gap:5px;position:relative;height:30px;min-width:30px;padding:0 6px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);white-space:nowrap}
-.tool:hover{background:var(--hover)}.tool:active{background:var(--pressed)}
-.tool[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
-.tool.lg{flex-direction:column;justify-content:flex-start;height:70px;min-width:54px;max-width:98px;padding:6px 6px 4px;white-space:normal;font-size:12px;line-height:1.2;gap:5px;text-align:center}
-.tool.lg .ico{width:26px;height:26px;stroke-width:1.5}
-.tool.lg .ti-text{font-size:21px;height:26px;display:flex;align-items:center;justify-content:center}
-.tool .lbl{font-size:12px}
-.chev{width:10px;height:10px;display:inline-block;vertical-align:middle;margin-left:2px;stroke-width:2}
-.tool[aria-expanded=true]{background:var(--pressed)}
+.doc-tile{display:flex;flex-direction:column;justify-content:center;gap:1px;padding:0 12px 0 14px;min-width:120px}
+.bar>.doc-tile{flex:0 1 220px}
+.doc-tile input{width:100%;min-width:0;height:24px;margin-left:-6px;padding:0 5px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);font-weight:700;font-size:14px}
+.doc-tile input:hover{border-color:var(--line-strong)}
+.doc-tile input:focus{background:var(--surface-2)}
+.save-state{font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{min-width:0;display:flex;align-items:center;gap:2px;padding:0 6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.bar>.tools{flex:1 1 0}
+.bar.wrap{flex-wrap:wrap}.bar.wrap>.tools{order:9;flex:1 1 100%;scrollbar-width:thin}.bar.wrap>.doc-tile{flex:1 1 160px}
+.tools>div{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.tb{flex-shrink:0;height:36px;min-width:36px;border:0;border-radius:8px;background:transparent;color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;white-space:nowrap}
+.tb.icon{width:36px;padding:0}
+.tb:hover{background:var(--hover)}.tb:active{background:var(--pressed)}
+.tb[aria-pressed=true],.tb[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text)}
+.tb.drw{font-weight:600}
+.tb .chev{width:12px;height:12px;stroke-width:2.2}
+.tb:focus-visible{outline-offset:-2px}
+.tsep{width:1px;height:22px;background:var(--line);margin:0 5px;flex-shrink:0}
+.tools.fit1 .h1,.tools.fit2 .h2{display:none}
+.search-tile{display:flex;align-items:center;gap:9px;padding:0 12px 0 14px;border:0;color:var(--text)}
+.search-tile:hover{background:var(--surface-2)}
+.search-tile kbd,.pal-field kbd{border:0;background:var(--surface-2);color:var(--text-2);font:500 11.5px/1 var(--mono);padding:4px 6px;border-radius:5px}
+.primary-tile{--fold:rgba(255,255,255,.55);display:flex;align-items:center;gap:8px;padding:0 22px 0 16px;border:0;background:var(--accent);color:#fff;font-weight:700;font-size:14px;white-space:nowrap}
+.primary-tile:hover{background:var(--accent-strong)}
+.bar :focus-visible{outline-color:var(--focus)}
+/* Cassetti: le categorie si aprono sopra il lavoro e si richiudono dopo il comando. */
+.drawer{position:fixed;z-index:60;padding:var(--gap);background:var(--grout-deep);border-radius:12px;box-shadow:var(--lift);max-width:calc(100vw - 16px);max-height:calc(100dvh - 76px);overflow:auto}
+.drawer-grid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(196px,max-content));gap:var(--gap)}
+.dgroup{background:var(--surface);border-radius:9px;padding:10px 6px 6px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.dgroup h3{margin:0;padding:0 8px 5px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.ditem{display:flex;align-items:center;gap:10px;width:100%;min-height:34px;border:0;border-radius:7px;background:transparent;color:var(--text);padding:0 8px;text-align:left}
+.ditem:hover{background:var(--hover)}
+.ditem:focus-visible{background:var(--accent-soft);color:var(--accent-text);outline-offset:-2px}
+.ditem .ico{color:var(--text-2)}.ditem:focus-visible .ico{color:inherit}
+.ditem .lbl{flex:1;min-width:0}
+.ditem kbd{border:0;background:var(--surface-2);color:var(--text-2);font:500 11px/1 var(--mono);padding:4px 5px;border-radius:5px}
+.ditem .dstate{width:16px;text-align:center;font-weight:700;color:var(--accent-text)}
+.ditem[aria-pressed=true] .dstate::before{content:'✓'}
+.ditem[aria-pressed=true]{font-weight:600}
 .rb-select{height:28px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);padding:0 4px}
 .rb-select:hover{border-color:var(--text-3)}
 .btn{display:inline-flex;justify-content:center;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);white-space:nowrap}
@@ -112,12 +115,28 @@ html[data-mode=disegno] .top-action.primary:hover{background:#eef7fa}
 .check{display:inline-flex;align-items:center;gap:6px;font-weight:400!important}
 .check input{width:16px;height:16px;accent-color:var(--accent)}
 /* Area di lavoro */
-.main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;padding:var(--gap) var(--gap) 0}
 .main:focus-visible{outline-offset:-3px}
 .editor-pane{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
 .btn[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
-.side-pane{width:270px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.pane-head{display:flex;align-items:center;gap:8px;padding:10px 10px 4px 14px}.pane-head h2{font-size:14px;margin:0;flex:1}
+/* Riquadri laterali: si riducono a tessera, si spostano a destra o a sinistra, si allargano trascinando la fuga. */
+.pane{width:var(--w,270px);flex-shrink:0;display:flex;flex-direction:column;min-height:0;min-width:0}
+.pane-head{display:flex;align-items:center;gap:4px;padding:8px 6px 4px 14px;min-height:40px}.pane-head h2{font-size:14px;margin:0;flex:1}
+.pane-btn{width:30px;height:30px;border:0;border-radius:7px;background:transparent;color:var(--text-2);display:grid;place-items:center;flex-shrink:0;padding:0}
+.pane-btn:hover{background:var(--hover);color:var(--text)}.pane-btn[aria-expanded=true]{background:var(--pressed)}
+.pane-btn .ico{width:16px;height:16px}
+.tessera{width:44px;flex-shrink:0;border:0;border-radius:var(--r);background:var(--surface);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px 0}
+.tessera:hover{background:var(--surface-2)}
+.tessera[data-side=left]{margin-right:var(--gap)}.tessera[data-side=right]{margin-left:var(--gap)}
+.tessera .badge{min-width:20px;height:20px;padding:0 5px;border-radius:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.tessera .badge:empty{display:none}
+.tessera .vt{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:600;white-space:nowrap}
+.sep{flex:0 0 var(--gap);align-self:stretch;display:grid;place-items:center;cursor:col-resize;touch-action:none;border-radius:4px}
+.sep::before{content:'';width:4px;height:40px;max-height:60%;border-radius:2px;background:var(--accent);opacity:0;transition:opacity .12s}
+.sep:hover::before,.sep:focus-visible::before,.sep.dragging::before{opacity:1}
+.sep:focus-visible{outline-offset:0}
+.sep.h{cursor:row-resize}.sep.h::before{width:40px;height:4px;max-width:60%}
+@media (forced-colors:active){.sep::before{background:Highlight}}
 .pane-count{font-size:12px;color:var(--text-3)}
 .pane-hint{font-size:12px;color:var(--text-3);margin:0 14px 8px;line-height:1.35}
 .pane-tools{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px}
@@ -144,33 +163,39 @@ html[data-mode=disegno] .top-action.primary:hover{background:#eef7fa}
 .insp-body dt{color:var(--text-3)}.insp-body dd{margin:0;font-weight:600}
 .insp-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 /* Barra di stato */
-.status{flex-shrink:0;min-height:30px;background:var(--chrome);border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;color:var(--text-2);font-size:12px;padding:0 10px}
+.status{flex-shrink:0;display:flex;align-items:center;gap:var(--gap);color:var(--text-2);font-size:12.5px;padding:var(--gap);min-width:0}
 .status .grow{flex:1}
-.st-btn{border:0;background:transparent;color:var(--text-2);height:26px;padding:0 8px;border-radius:5px;display:inline-flex;align-items:center;gap:6px}
-.st-btn:hover{background:var(--hover)}
-.st-btn.icon{width:26px;padding:0;justify-content:center}
-.st-btn .ico{width:15px;height:15px}
-.zoom{display:flex;align-items:center;gap:2px}
+.chip{height:34px;border-radius:9px;background:var(--surface);display:inline-flex;align-items:center;gap:6px;padding:0 12px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.chip:empty{display:none}
+#statusText{display:block;line-height:34px;flex:0 1 auto}
+.st-btn{border:0;background:var(--surface);color:var(--text-2);height:34px;padding:0 12px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;flex-shrink:0;white-space:nowrap}
+.st-btn:hover{background:var(--surface-2);color:var(--text)}
+.st-btn[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text)}
+.st-btn.lead{font-weight:600;color:var(--text)}
+.st-btn.icon{width:28px;height:28px;padding:0;justify-content:center;background:transparent;border-radius:7px}
+.st-btn.icon:hover{background:var(--hover)}
+.st-btn .ico{width:16px;height:16px}
+.zoom{display:flex;align-items:center;gap:2px;padding:0 4px;flex-shrink:0}
 .zoom input[type=range]{width:110px;accent-color:var(--accent)}
 .zoom output{min-width:62px;text-align:right}
 /* Immagini: i piani a sinistra, la foto al centro, le regolazioni a destra */
-#photoPane{display:grid;grid-template-columns:240px minmax(0,1fr) 310px;flex:1;min-height:0}
-.plans{border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+#photoPane,#drawPane{flex-direction:row}
+.plans{display:flex;flex-direction:column;min-height:0}
 .plan-item{flex-direction:column;align-items:flex-start;gap:2px}
 .plan-item .d{font-size:11.5px;color:var(--text-3);white-space:normal}
 .plan-item[aria-selected=true] .d{color:inherit}
-.viewer{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--canvas)}
+.viewer{order:100;flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--canvas);overflow:hidden}
 .stage{flex:1;min-height:160px;position:relative;display:grid;place-items:center;overflow:hidden}
 .stage canvas{display:block;box-shadow:0 2px 12px rgba(0,0,0,.25)}
 .stage canvas.alpha{background:repeating-conic-gradient(#c8c8c8 0 25%,#fff 0 50%) 0 0/16px 16px}
 .stage canvas:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.stage-badge{position:absolute;left:12px;top:10px;background:var(--surface);color:var(--text);border:1px solid var(--line-strong);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600}
+.stage-badge{position:absolute;left:12px;top:10px;background:var(--surface);color:var(--text);border:0;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600}
 .photo-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--text-2)}
 .photo-empty b{display:block;font-size:17px;color:var(--text);margin-bottom:6px}
 .photo-empty .row{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
-.viewbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;background:var(--chrome);border-top:1px solid var(--line);flex-shrink:0;font-size:12px;color:var(--text-2)}
+.viewbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;background:var(--surface);border-top:1px solid var(--line);flex-shrink:0;font-size:12px;color:var(--text-2)}
 .viewbar .grow{flex:1}
-.adjust{border-left:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0;min-width:0}
+.adjust{display:flex;flex-direction:column;min-height:0;min-width:0}
 .hist-box{padding:0 14px 8px}
 .hist{width:100%;height:92px;display:block;border-radius:6px;background:var(--hist-bg);border:1px solid var(--line);forced-color-adjust:none}
 .hist-text{margin:6px 0 0;font-size:12px;color:var(--text-2);line-height:1.35}
@@ -191,7 +216,6 @@ html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 .adj .btn.icon .ico{width:14px;height:14px}
 .adj.changed label::after{content:' •';color:var(--accent-text)}
 /* Disegno: i livelli a sinistra, il foglio al centro, le proprietà a destra */
-#drawPane{display:grid;grid-template-columns:240px minmax(0,1fr) 310px;flex:1;min-height:0}
 .draw-stage{flex:1;min-height:160px;display:flex;overflow:auto;padding:16px}
 .sheet-wrap{position:relative;margin:auto;flex:none;line-height:0;box-shadow:0 2px 12px rgba(0,0,0,.25);touch-action:none}
 .sheet-wrap.transparent{background:repeating-conic-gradient(#c8c8c8 0 25%,#fff 0 50%) 0 0/16px 16px}
@@ -205,8 +229,8 @@ html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 .layer-item .ico{width:16px;height:16px;color:var(--text-3)}
 .layer-item[aria-selected=true] .ico{color:inherit}
 @media (forced-colors:active){#overlay .sel-box{stroke:Highlight}#overlay .handle{fill:Canvas;stroke:Highlight}}
-@media (max-width:1100px){#photoPane,#drawPane{grid-template-columns:200px minmax(0,1fr) 270px}}
-@media (max-width:860px){#photoPane,#drawPane{grid-template-columns:1fr;grid-template-rows:minmax(240px,1fr) auto auto;overflow:auto}.plans{grid-row:2;border-right:0;border-top:1px solid var(--line);max-height:220px}.adjust{grid-row:3;border-left:0;border-top:1px solid var(--line)}}
+/* Nelle finestre strette i tasselli si mettono in colonna e le tessere diventano orizzontali. */
+@media (max-width:860px){#photoPane,#drawPane{flex-direction:column;gap:var(--gap);overflow:auto}.viewer{min-height:260px;flex:none;order:0!important}.pane{width:auto;max-height:280px;order:1!important}.sep{display:none}.tessera{width:auto;height:44px;flex-direction:row;padding:0 14px;margin:0!important;order:1!important}.tessera .vt{writing-mode:horizontal-tb;transform:none}}
 /* Finestre e menu */
 .modalbg{display:flex;justify-content:center;align-items:center;position:fixed;inset:0;z-index:350;padding:18px;background:rgba(0,0,0,.42)}
 .modal{background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);max-width:520px;width:100%;max-height:calc(100dvh - 36px);overflow:auto;padding:22px 24px}
@@ -252,16 +276,26 @@ html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 .file-tile b{font-size:15px}.file-tile span{color:var(--text-2);font-size:12.5px;line-height:1.4}
 .file-details{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:28px 0 0;max-width:600px}
 .file-details dt{color:var(--text-3)}.file-details dd{margin:0;font-weight:600}
-.palette{background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);width:min(620px,100%);align-self:flex-start;margin-top:9vh;overflow:hidden;display:flex;flex-direction:column;max-height:72vh}
-.palette input{border:0;border-bottom:1px solid var(--line);padding:16px 18px;font-size:16px;background:var(--surface);color:var(--text)}
-.palette input:focus-visible{outline:none;box-shadow:inset 0 -2px 0 var(--accent)}
-#palList{overflow:auto;padding:6px}
-.pal-opt{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer}
+/* Ricerca in alto al centro: il campo e i risultati sono due tasselli sulla fuga. */
+#palettebg{align-items:flex-start;padding:var(--gap) 12px;background:var(--scrim)}
+.palette{background:var(--grout-deep);color:var(--text);border-radius:13px;box-shadow:var(--lift);width:min(680px,100%);padding:var(--gap);display:flex;flex-direction:column;gap:var(--gap);max-height:min(600px,calc(100dvh - 16px));overflow:hidden}
+.pal-field{--corner-bg:var(--grout-deep);position:relative;display:flex;align-items:center;gap:10px;height:48px;flex-shrink:0;border-radius:10px;background:var(--surface);padding:0 12px 0 14px;box-shadow:inset 0 0 0 2px var(--accent)}
+.pal-field>.ico{color:var(--accent-text)}
+.palette input{flex:1;min-width:0;height:44px;border:0;padding:0;font-size:15.5px;background:transparent;color:var(--text)}
+.palette input:focus-visible{outline:none}
+#palList{overflow:auto;padding:6px;background:var(--surface);border-radius:10px;flex:1;min-height:0}
+.pal-group-h{display:flex;justify-content:space-between;gap:8px;padding:8px 10px 4px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.pal-group-h span+span{font:500 11px/1.4 var(--mono);letter-spacing:0}
+.pal-opt{display:flex;align-items:center;gap:12px;min-height:38px;padding:0 10px;border-radius:8px;cursor:pointer}
 .pal-opt .ico,.pal-opt .ti-text{color:var(--text-2)}
-.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 3px 0 0 var(--accent)}
-.pal-label{flex:1}.pal-cat{font-size:11.5px;color:var(--text-3)}
+.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text)}
+.pal-opt[aria-selected=true] .ico,.pal-opt[aria-selected=true] .pal-cat{color:inherit}
+.pal-opt kbd{border:0;background:var(--surface-2);font:500 11px/1 var(--mono);padding:4px 6px;border-radius:5px}
+.pal-opt[aria-selected=true] kbd{background:var(--surface)}
+.pal-hit{font-weight:700;color:var(--accent-text);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.pal-label{flex:1;min-width:0}.pal-cat{font-size:12px;color:var(--text-3);white-space:nowrap}
 .pal-empty{padding:16px;color:var(--text-3)}
-.pal-hint{margin:0;padding:8px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--text-3)}
+.pal-hint{margin:0;padding:0 6px;font-size:12px;color:var(--text-2)}
 .ctxmenu{position:fixed;z-index:420;min-width:230px;max-width:440px;max-height:72vh;overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:5px}
 .ctxmenu [role^=menuitem]{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:7px 10px;border-radius:6px;text-align:left}
 .ctxmenu [role^=menuitem]:hover,.ctxmenu [role^=menuitem]:focus{background:var(--accent-soft);color:var(--accent-text);outline:none}
@@ -279,9 +313,10 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 .drop-over::after{content:'Rilascia per aprire';position:fixed;inset:12px;border:3px dashed var(--accent);border-radius:14px;background:var(--sel-tint);display:grid;place-items:center;font-size:22px;font-weight:600;color:var(--accent-text);z-index:600;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 /* Nelle finestre strette i testi dei pulsanti spariscono alla vista ma restano agli screen reader: sono il loro nome. */
-@media (max-width:1100px){.top-action span,.cmd-search span,.save-state{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.cmd-search{min-width:0}}
-@media (forced-colors:active){.tool[aria-pressed=true],.tab[aria-selected=true],.pal-opt[aria-selected=true],.lb-item[aria-selected=true]{outline:2px solid Highlight}}
-@media (max-width:720px){.titlebar{gap:3px;padding:0 4px}.app-switch button{padding:0 6px}.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.tb-group{display:none}.cmd-search kbd{display:none}.file-side{width:180px}.file-info{padding:22px}.status #helpBtn span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
+@media (max-width:1500px){.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.app-switch button{padding:0 6px}}
+@media (max-width:1200px){.status .st-btn:not(.lead) span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
+@media (forced-colors:active){.tb[aria-pressed=true],.tb[aria-expanded=true],.ditem[aria-pressed=true],.pal-opt[aria-selected=true],.lb-item[aria-selected=true]{outline:2px solid Highlight}}
+@media (max-width:720px){.bar{gap:6px;padding:6px 6px 0}.brand{display:none}.save-state,.search-tile kbd{display:none}.bar>.doc-tile{flex-basis:140px;min-width:90px}.primary-tile span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.primary-tile{padding:0 16px}.file-side{width:180px}.file-info{padding:22px}.drawer-grid{grid-template-columns:1fr!important}.status{overflow-x:auto;scrollbar-width:none}#docInfo{display:none}}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -348,38 +383,37 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></symbol>
 <symbol id="i-level" viewBox="0 0 24 24"><path d="M3 17 21 7"/><path d="M3 12h18" stroke-dasharray="2 2"/></symbol>
 <symbol id="i-draw" viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="m14 7 3 3"/></symbol>
+<symbol id="i-tiles" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></symbol>
 </defs></svg>
-<a class="skip" href="#workRegion" id="skipWork">Vai all’area di lavoro</a><a class="skip" href="#tabs" id="skipRibbon">Vai alla barra multifunzione</a>
+<a class="skip" href="#workRegion" id="skipWork">Vai all’area di lavoro</a><a class="skip" href="#tools" id="skipTools">Vai agli strumenti</a>
 <div class="immagini" id="app">
-<header class="titlebar" id="titlebar" aria-label="Barra del titolo">
-<button type="button" class="brand" id="brandBtn" aria-label="Tassello Grafica: informazioni" data-tip="Informazioni su Tassello Grafica"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#fff" fill-opacity=".82"></path><rect y="54" width="46" height="46" rx="10" fill="#fff"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#fff"></rect><path d="M86 0V8Q86 14 92 14H100Z" fill="var(--accent)" fill-opacity=".55"></path></svg><span class="brand-name">Tassello Grafica</span></button>
+<header class="bar" id="bar" aria-label="Barra">
+<div class="tile brand-tile">
+<button type="button" class="brand" id="brandBtn" aria-label="Tassello Grafica: informazioni" data-tip="Informazioni su Tassello Grafica"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"></path><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"></path><rect y="54" width="46" height="46" rx="10" fill="#B35500"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"></rect></svg></button>
 <div class="app-switch" role="group" aria-label="Applicazione">
 <button type="button" id="switchImmagini" aria-pressed="true" aria-keyshortcuts="Control+Alt+I" data-tip="Immagini (Ctrl+Alt+I)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M4 5h16v14H4z"></path><path d="m4 17 5-5 4 4 2-2 5 5" stroke-width="2"></path></svg></span><span class="app-name">Immagini</span></button>
 <button type="button" id="switchDisegno" aria-pressed="false" aria-keyshortcuts="Control+Alt+D" data-tip="Disegno (Ctrl+Alt+D)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M5 19l3-1 10-10-2-2L6 16z"></path></svg></span><span class="app-name">Disegno</span></button>
 </div>
-<div class="tb-group" role="group" aria-label="Accesso rapido">
-<button type="button" class="tb-btn" id="quickUndo" aria-label="Annulla" aria-keyshortcuts="Control+Z" data-tip="Annulla (Ctrl+Z)"><svg class="ico" aria-hidden="true"><use href="#i-undo"/></svg></button>
-<button type="button" class="tb-btn" id="quickRedo" aria-label="Ripeti" aria-keyshortcuts="Control+Y" data-tip="Ripeti (Ctrl+Y)"><svg class="ico" aria-hidden="true"><use href="#i-redo"/></svg></button>
 </div>
-<div class="title-center"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Foto" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
-<button type="button" class="cmd-search" id="paletteBtn" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Cerca comandi</span><kbd aria-hidden="true">Alt+Q</kbd></button>
-<button type="button" class="top-action" id="openTop" aria-keyshortcuts="Control+O" data-tip="Apri una foto (Ctrl+O)"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><span>Apri</span></button>
-<button type="button" class="top-action primary" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta la foto (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
-<button type="button" class="tb-btn" id="kbdBtn" aria-label="Scorciatoie da tastiera" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg></button>
+<div class="tile doc-tile"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Foto" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
+<div class="tile tools" id="tools" role="toolbar" aria-label="Strumenti e cassetti">
+<div id="quick"></div><span class="tsep" aria-hidden="true"></span>
+<button type="button" class="tb drw" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
+<div id="drawers"></div>
+</div>
+<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
+<button type="button" class="tile primary-tile" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta la foto (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
 </header>
-<div class="tabrow" id="tabrow">
-<button type="button" class="filebtn" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
-<div class="tabs" id="tabs" role="tablist" aria-label="Schede della barra multifunzione"></div>
-</div>
-<div class="ribbon" id="ribbon" role="tabpanel" aria-labelledby="tab-Inizio"></div>
+<div class="drawer" id="drawer" role="group" hidden></div>
 <main class="main" id="workRegion" tabindex="-1" aria-label="Area di lavoro">
 <div class="editor-pane" id="photoPane">
-<aside class="plans" aria-labelledby="planTitle">
+<aside class="plans pane tile" id="planPane" aria-labelledby="planTitle">
 <div class="pane-head"><h2 id="planTitle">Piani</h2></div>
 <p class="pane-hint" id="planHint">Scegli che cosa vuoi ottenere: il piano mostra un passo alla volta solo i controlli che servono.</p>
 <div class="lb" id="planList" role="listbox" aria-labelledby="planTitle" aria-describedby="planKeys" tabindex="0"></div>
 </aside>
-<section class="viewer" aria-labelledby="viewTitle">
+<section class="viewer tile" id="photoViewer" aria-labelledby="viewTitle">
 <h2 class="sr-only" id="viewTitle">Foto</h2>
 <div class="stage" id="stage">
 <canvas id="photo" tabindex="0" role="img" aria-label="Foto" aria-describedby="photoHint" hidden></canvas>
@@ -392,7 +426,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <span class="grow"></span><span id="photoInfo" aria-hidden="true"></span>
 </div>
 </section>
-<aside class="adjust" aria-labelledby="adjTitle">
+<aside class="adjust pane tile" id="adjPane" aria-labelledby="adjTitle">
 <div class="pane-head"><h2 id="adjTitle">Regolazioni</h2><button type="button" class="btn sm" data-action="resetAll">Ripristina</button></div>
 <div class="hist-box"><canvas class="hist" id="hist" aria-hidden="true"></canvas><p class="hist-text" id="histText">Nessuna foto aperta.</p></div>
 <div class="step-head" id="stepHead" hidden></div>
@@ -400,12 +434,12 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </aside>
 </div>
 <div class="editor-pane hidden" id="drawPane">
-<aside class="plans" aria-labelledby="layTitle">
+<aside class="plans pane tile" id="layPane" aria-labelledby="layTitle">
 <div class="pane-head"><h2 id="layTitle">Livelli</h2><span class="pane-count" id="layCount"></span></div>
 <p class="pane-hint" id="layHint">Dall’oggetto più in alto a quello più in basso. Alt+Maiusc+frecce lo porta sopra o sotto gli altri.</p>
 <div class="lb" id="layList" role="listbox" aria-labelledby="layTitle" aria-describedby="layKeys" tabindex="0"></div>
 </aside>
-<section class="viewer" aria-labelledby="sheetTitle">
+<section class="viewer tile" id="drawViewer" aria-labelledby="sheetTitle">
 <h2 class="sr-only" id="sheetTitle">Foglio</h2>
 <div class="draw-stage" id="drawStage"><div class="sheet-wrap" id="sheetWrap" tabindex="0" role="application" aria-roledescription="foglio" aria-label="Foglio" aria-describedby="sheetHint"><svg id="sheet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg><svg id="overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg></div></div>
 <div class="viewbar" id="drawbar" role="toolbar" aria-label="Vista del foglio">
@@ -415,14 +449,16 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <span class="grow"></span><span id="drawInfo" aria-hidden="true"></span>
 </div>
 </section>
-<aside class="adjust" aria-labelledby="propTitle">
+<aside class="adjust pane tile" id="propPane" aria-labelledby="propTitle">
 <div class="pane-head"><h2 id="propTitle">Proprietà</h2></div>
 <div class="insp-body" id="propBody"></div>
 </aside>
 </div>
 </main>
 <footer class="status" id="statusbar" aria-label="Barra di stato">
-<span id="statusText">Pronto</span><span id="docInfo"></span><span class="grow"></span>
+<button type="button" class="st-btn lead" id="layoutBtn" aria-haspopup="menu" aria-expanded="false" data-tip="Mostra, riduci o togli i riquadri"><svg class="ico" aria-hidden="true"><use href="#i-tiles"/></svg><span>Tasselli</span></button>
+<span class="chip" id="statusText">Pronto</span><span class="chip" id="docInfo"></span><span class="grow"></span>
+<button type="button" class="st-btn" id="kbdBtn" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg><span>Scorciatoie</span></button>
 <button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
 </footer>
 </div>
@@ -441,7 +477,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </div>
 <div class="modalbg" id="modalbg" hidden><div id="modal" class="modal" role="dialog" aria-labelledby="dlgTitle" aria-describedby="dlgBody" aria-modal="true"></div></div>
 <div class="modalbg" id="palettebg" hidden><div class="palette" role="dialog" aria-modal="true" aria-label="Cerca comando">
-<input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. esposizione, ruota, bianco e nero" autocomplete="off" spellcheck="false">
+<div class="pal-field"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. esposizione, ruota, bianco e nero" autocomplete="off" spellcheck="false"><kbd aria-hidden="true">Esc</kbd></div>
 <div id="palList" role="listbox" aria-label="Comandi"></div>
 <p class="pal-hint" aria-hidden="true">↑ ↓ per scegliere · Invio per eseguire · Esc per chiudere</p>
 </div></div>
@@ -636,6 +672,15 @@ def('id','Generale',[
  ['redo','Ripeti','redo','Ctrl+Y / Ctrl+Maiusc+Z',{short:'Ripeti'}],
  ['themeDark','Tema scuro','moon','',{short:'Tema scuro',toggle:()=>prefs.theme==='dark'}],
  ['contrast','Contrasto elevato','contrast','',{short:'Contrasto elevato',toggle:()=>prefs.contrast}]]);
+def('id','Tasselli',[
+ ['layoutMenu','Tasselli: mostra, riduci o togli i riquadri','tiles','',{short:'Tasselli'}],
+ ['layoutReset','Rimetti i tasselli come all’inizio','history','',{short:'Come all’inizio'}]]);
+def('i','Tasselli',[
+ ['showPlans','Mostra o togli il riquadro Piani','plan','',{short:'Piani',quiet:1,toggle:()=>paneState('planPane').st!=='off'}],
+ ['showAdjust','Mostra o togli il riquadro Regolazioni','light','',{short:'Regolazioni',quiet:1,toggle:()=>paneState('adjPane').st!=='off'}]]);
+def('d','Tasselli',[
+ ['showLayers','Mostra o togli il riquadro Livelli','level','',{short:'Livelli',quiet:1,toggle:()=>paneState('layPane').st!=='off'}],
+ ['showProps','Mostra o togli il riquadro Proprietà','gear','',{short:'Proprietà',quiet:1,toggle:()=>paneState('propPane').st!=='off'}]]);
 const KEYNAME={Invio:'enter',Spazio:' ',Canc:'delete',Esc:'escape',PgSu:'pageup',PgGiù:'pagedown',Home:'home',Fine:'end','←':'arrowleft','→':'arrowright','↑':'arrowup','↓':'arrowdown',Tab:'tab'};
 const keyCache=new Map();
 function parseKey(s){let key,mods;if(s.endsWith('++')){key='+';mods=s.slice(0,-2).split('+')}else{const p=s.split('+');key=p.pop();mods=p}return{ctrl:mods.includes('Ctrl'),alt:mods.includes('Alt'),shift:mods.includes('Maiusc'),key:(KEYNAME[key]||key).toLowerCase()}}
@@ -651,60 +696,156 @@ const safe=fn=>{try{return fn()}catch(e){return false}};
 async function runCommand(id){const c=C[id];if(!c)return;if(!available(c)){toast('«'+c.label+'» non è disponibile in '+appName());return}hideTip();
  try{await handleAction(id)}catch(e){console.error(e);toast(e.message||String(e));return}
  if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}
-let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#ribbon [aria-pressed][data-action],#viewbar [aria-pressed][data-action],#adjBody [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}},40)}
+let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#tools [aria-pressed][data-action],#drawer [aria-pressed][data-action],#viewbar [aria-pressed][data-action],#adjBody [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}},40)}
 // Ricerca comandi (Alt+Q): combobox con elenco filtrato, navigabile con le frecce.
 let palItems=[],palIdx=0,palPrev=null;
 const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-function openPalette(){palPrev=document.activeElement;$('palettebg').hidden=false;$('palInput').value='';renderPalette();$('palInput').focus()}
+function openPalette(){palPrev=document.activeElement;closeDrawer(false);$('palettebg').hidden=false;$('palInput').value='';renderPalette();$('palInput').focus()}
 function closePalette(restore=true){$('palettebg').hidden=true;if(restore)refocus(palPrev)}
-function renderPalette(){const q=norm($('palInput').value.trim()),all=Object.values(C).filter(c=>available(c)&&c.id!=='palette');palItems=(q?all.map(c=>{const hay=norm(c.label+' '+(c.short||'')+' '+c.cat+' '+c.id);const sc=norm(c.label).startsWith(q)?4:hay.includes(q)?3:q.split(/\s+/).every(w=>hay.includes(w))?2:0;return[c,sc]}).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]):all).slice(0,80);palIdx=0;
- $('palList').innerHTML=palItems.length?palItems.map((c,i)=>{const k=keysOf(c),on=c.toggle?safe(c.toggle):null;return `<div role="option" id="pal-${i}" class="pal-opt" data-i="${i}" aria-selected="${i===0}">${ICON(c.icon)}<span class="pal-label">${esc(c.label)}${on===null?'':`<span class="sr-only">, ${on?'attivo':'non attivo'}</span>`}${k?`<span class="sr-only">, scorciatoia ${esc(k)}</span>`:''}</span><span class="pal-cat" aria-hidden="true">${esc(c.cat)}</span>${k?`<kbd aria-hidden="true">${esc(k)}</kbd>`:''}</div>`}).join(''):'<div class="pal-empty" role="option" aria-disabled="true" aria-selected="false" id="pal-empty">Nessun comando trovato</div>';palActive()}
+function palMark(label,q){const i=q?norm(label).indexOf(q):-1;return i<0?esc(label):esc(label.slice(0,i))+'<span class="pal-hit">'+esc(label.slice(i,i+q.length))+'</span>'+esc(label.slice(i+q.length))}
+function renderPalette(){const q=norm($('palInput').value.trim()),all=Object.values(C).filter(c=>available(c)&&c.id!=='palette');let groups;
+ if(q)groups=[['Comandi',all.map(c=>{const hay=norm(c.label+' '+(c.short||'')+' '+c.cat+' '+c.id);const sc=norm(c.label).startsWith(q)?4:hay.includes(q)?3:q.split(/\s+/).every(w=>hay.includes(w))?2:0;return[c,sc]}).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).slice(0,80)]];
+ else{const rec=((prefs.recent||{})[state.mode[0]]||[]).map(id=>C[id]).filter(c=>c&&available(c)&&c.id!=='palette');groups=[['Usati di recente',rec],['Tutti i comandi',all.filter(c=>!rec.includes(c))]]}
+ groups=groups.filter(g=>g[1].length);palItems=groups.flatMap(g=>g[1]);palIdx=0;let n=0;
+ $('palList').innerHTML=palItems.length?groups.map(([name,list],gi)=>`<div role="group" aria-labelledby="palg${gi}"><div class="pal-group-h" id="palg${gi}" aria-hidden="true"><span>${esc(name)}</span><span>${list.length}</span></div>${list.map(c=>{const k=keysOf(c),on=c.toggle?safe(c.toggle):null,i=n++;return `<div role="option" id="pal-${i}" class="pal-opt" data-i="${i}" aria-selected="${i===0}">${ICON(c.icon)}<span class="pal-label">${palMark(c.label,q)}${on===null?'':`<span class="sr-only">, ${on?'attivo':'non attivo'}</span>`}${k?`<span class="sr-only">, scorciatoia ${esc(k)}</span>`:''}</span><span class="pal-cat" aria-hidden="true">${esc(c.cat)}</span>${k?`<kbd aria-hidden="true">${esc(k.split(' / ')[0])}</kbd>`:''}</div>`}).join('')}</div>`).join(''):'<div class="pal-empty" role="option" aria-disabled="true" aria-selected="false" id="pal-empty">Nessun comando trovato</div>';palActive()}
 function palActive(){$$('#palList [role=option]').forEach((o,i)=>o.setAttribute('aria-selected',i===palIdx&&!!palItems.length));const id=palItems.length?'pal-'+palIdx:'pal-empty';$('palInput').setAttribute('aria-activedescendant',id);$(id)?.scrollIntoView({block:'nearest'})}
-function palRun(i){const c=palItems[i];if(!c)return;closePalette(true);setTimeout(()=>runCommand(c.id),0)}
+function palRun(i){const c=palItems[i];if(!c)return;const R=prefs.recent||(prefs.recent={}),m=state.mode[0];R[m]=[c.id,...(R[m]||[]).filter(x=>x!==c.id)].slice(0,5);savePrefs();closePalette(true);setTimeout(()=>runCommand(c.id),0)}
 // Menu contestuale generico (ruolo menu, frecce, Invio, Esc).
 let menuState=null;
-function openMenu(items,x,y,label='Menu',opener=null){closeMenu(false);const m=$('menu'),prev=document.activeElement;opener?.setAttribute('aria-expanded','true');m.setAttribute('aria-label',label);m.innerHTML=items.map((it,i)=>it==='-'?'<div class="menu-sep" role="separator"></div>':`<button type="button" role="${it.checked===undefined?'menuitem':'menuitemradio'}"${it.checked===undefined?'':` aria-checked="${!!it.checked}"`} tabindex="-1" data-i="${i}"${it.disabled?' aria-disabled="true"':''}>${it.checked===undefined?ICON(it.icon):`<span class="mi-check" aria-hidden="true">${it.checked?'✓':''}</span>`}<span class="mi-text"><span class="mi-label">${esc(it.label)}</span>${it.desc?`<span class="mi-desc">${esc(it.desc)}</span>`:''}</span>${it.keys?`<kbd aria-hidden="true">${esc(it.keys)}</kbd>`:''}</button>`).join('');m.hidden=false;const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(4,Math.min(x,innerWidth-w-4))+'px';m.style.top=Math.max(4,Math.min(y,innerHeight-h-4))+'px';menuState={items,prev,opener};(m.querySelector('[aria-checked=true]:not([aria-disabled])')||m.querySelector('[role^=menuitem]:not([aria-disabled])'))?.focus()}
+function openMenu(items,x,y,label='Menu',opener=null,up=false){closeMenu(false);const m=$('menu'),prev=document.activeElement;opener?.setAttribute('aria-expanded','true');m.setAttribute('aria-label',label);m.innerHTML=items.map((it,i)=>it==='-'?'<div class="menu-sep" role="separator"></div>':`<button type="button" role="${it.checked===undefined?'menuitem':it.box?'menuitemcheckbox':'menuitemradio'}"${it.checked===undefined?'':` aria-checked="${!!it.checked}"`} tabindex="-1" data-i="${i}"${it.disabled?' aria-disabled="true"':''}>${it.checked===undefined?ICON(it.icon):`<span class="mi-check" aria-hidden="true">${it.checked?'✓':''}</span>`}<span class="mi-text"><span class="mi-label">${esc(it.label)}</span>${it.desc?`<span class="mi-desc">${esc(it.desc)}</span>`:''}</span>${it.keys?`<kbd aria-hidden="true">${esc(it.keys)}</kbd>`:''}</button>`).join('');m.hidden=false;const w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(4,Math.min(x,innerWidth-w-4))+'px';m.style.top=Math.max(4,Math.min(up?y-h:y,innerHeight-h-4))+'px';menuState={items,prev,opener};(m.querySelector('[aria-checked=true]:not([aria-disabled])')||m.querySelector('[role^=menuitem]:not([aria-disabled])'))?.focus()}
 function closeMenu(restore=true){if(!menuState)return;const p=menuState.prev;menuState.opener?.setAttribute('aria-expanded','false');menuState=null;$('menu').hidden=true;if(restore)refocus(p)}
 function menuRun(i){const it=menuState?.items[i];if(!it||it.disabled)return;closeMenu(true);setTimeout(()=>it.run(),0)}
 const mi=(id,run)=>{const c=C[id];return{label:c.label,icon:c.icon,keys:keysOf(c),run:run||(()=>runCommand(id))}};
 // Posizione per un menu aperto da un pulsante della barra, o dall'elemento con il focus.
-function menuAnchor(action){const el=document.querySelector(`#ribbon [data-action="${action}"]`)||document.activeElement,r=el?.getBoundingClientRect?.()||{left:200,bottom:200};return{x:r.left,y:r.bottom,el:el?.closest?.('#ribbon')?el:null}}
+function menuAnchor(action){const el=document.querySelector(`#drawer [data-action="${action}"],#tools [data-action="${action}"]`)||document.activeElement,r=el?.getBoundingClientRect?.()||{left:200,bottom:200};return{x:r.left,y:r.bottom,el:el?.closest?.('#drawer,#tools')?el:null}}
 // Scorciatoie che dipendono dall'area con il focus: non passano dal registro, ma la guida le elenca.
-const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Schede della barra multifunzione','← → poi Invio o ↓'],['Torna alla scheda dalla barra','Esc o ↑'],['Chiudi finestre e menu','Esc']]]],
+const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Strumenti e cassetti della barra','← → poi Invio o ↓'],['Chiudi il cassetto','Esc'],['Larghezza di un riquadro, sulla fuga','← → (con Maiusc di più)'],['Riduci il riquadro a tessera, sulla fuga','Invio'],['Chiudi finestre e menu','Esc']]]],
  i:[['Sulla foto',[['Descrivi la foto e la sua luce','Alt+Maiusc+I'],['Mostra l’originale finché non premi di nuovo','\\'],['Menu della foto','Maiusc+F10']]],['Nei piani',[['Scegli un piano','↑ ↓'],['Primo o ultimo piano','Home / Fine'],['Inizia il piano dal primo passo','Invio']]],['Nei cursori delle regolazioni',[['Cambia il valore di un passo','← → o ↑ ↓'],['Cambia il valore di un passo ampio','PgSu / PgGiù'],['Valore minimo o massimo','Home / Fine'],['Riporta a zero','Canc']]]],
  d:[['Sul foglio',[['Sposta l’oggetto scelto di un pixel (con Maiusc di dieci)','← → ↑ ↓'],['Cambia larghezza e altezza (per un testo la dimensione)','Ctrl+← → ↑ ↓'],['Scegli l’oggetto sopra o sotto','PgSu / PgGiù'],['Vai alle proprietà dell’oggetto','Invio'],['Togli la scelta: proprietà del foglio','Esc'],['Elimina l’oggetto','Canc'],['Zoom avanti, indietro, tutto il foglio','+ / − / 0'],['Menu dell’oggetto','Maiusc+F10']]],['Nei livelli',[['Scegli l’oggetto sopra o sotto','↑ ↓'],['Primo o ultimo','Home / Fine'],['Porta l’oggetto sopra o sotto gli altri','Alt+Maiusc+↑ / Alt+Maiusc+↓'],['Vai alle proprietà','Invio'],['Rinomina','F2'],['Elimina','Canc']]],['Nelle proprietà',[['Conferma un valore scritto','Invio o Tab'],['Torna ai livelli','Esc']]]]};
 function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${appName()}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
-async function help(){await modal('Tassello Grafica',`<p><b>Tassello Grafica 0.2.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Questa è una versione di prova con due app: <b>Immagini</b>, per migliorare le foto passo per passo, e <b>Disegno</b>, per comporre forme, testi e immagini e salvarli in SVG. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Grafica non sostituisce i programmi di fotoritocco professionali e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (una foto per i social, un ritratto, un documento da rendere leggibile, un volantino, un’immagine per un post) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie. Alt+Maiusc+I descrive la foto: dimensioni, inquadratura, luminosità media, quanta parte è bruciata nelle luci o chiusa nelle ombre, e le regolazioni cambiate. Ogni regolazione è un cursore con il suo nome e il suo valore; Canc la riporta a zero. L’istogramma è descritto a parole sotto il grafico, e se una modifica brucia le luci o chiude le ombre lo senti subito. In Disegno i livelli sono un elenco che si scorre con le frecce, sul foglio le frecce spostano l’oggetto scelto e Ctrl+frecce ne cambia le dimensioni, ogni proprietà ha un campo con il suo nome, Alt+Maiusc+I descrive il foglio e l’oggetto scelto, e la verifica dell’accessibilità controlla il contrasto dei testi e la descrizione del disegno.</p><p><b>Immagini:</b> i <b>piani</b> ti guidano secondo quello che vuoi ottenere (foto per i social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro): un passo alla volta, solo i controlli che servono, con una proposta automatica da accettare o ritoccare. Con <b>Tutti i controlli</b> lavori senza piano. Inquadratura: rotazione, riflessione, raddrizzamento e formati pronti (quadrato, 4:5, 9:16, 3:2, 16:9, A4). Luce: esposizione, contrasto, alte luci, ombre, bianchi e neri. Colore: temperatura, tinta, vividezza e saturazione. Vignettatura. Look pronti (bianco e nero, seppia, caldo, freddo, pellicola, vivace, tenue) e look importati da file LUT .cube, con la loro intensità. Apre JPEG, PNG, WebP, AVIF, GIF e BMP; esporta JPEG, PNG o WebP alla dimensione che scegli; <b>Usa in Disegno</b> porta la foto nel foglio.</p><p><b>Disegno:</b> un foglio con i formati di oggi (post, quadrato, storia, 16:9, banner, A4, icona) o della misura che vuoi, con sfondo pieno o trasparente. Rettangoli, ellissi, linee, testi su più righe e immagini (foto e SVG), con posizione, dimensioni, rotazione, colori, contorno, angoli arrotondati e opacità; sulle foto le regolazioni e i look di Immagini. Ordine dei livelli, allineamento al foglio, duplica, copia e incolla. Salva in SVG, che si apre in ogni browser e programma di grafica e che Disegno riapre modificabile, con titolo e descrizione per chi non vede; esporta PNG o JPEG.</p><p><b>Privacy:</b> foto e disegni restano nel browser e sul tuo computer; gli originali non vengono mai modificati. Il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Immagini lavora su una foto alla volta. Le foto HEIC degli iPhone e i file RAW delle fotocamere non si aprono: esportale prima in JPEG. Non ci sono ancora pennelli, ritocchi locali, nitidezza e riduzione del rumore; l’anteprima è ridotta alla dimensione dello schermo e la foto intera viene calcolata all’esportazione. Il file esportato è in sRGB, a 8 bit per canale. Disegno non ha ancora la penna per le curve, i pennelli, i gruppi né la scelta di più oggetti insieme; i testi usano i caratteri installati sul computer, quindi un SVG aperto altrove può mostrare un carattere diverso; gli SVG di altri programmi entrano come immagini. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Grafica',`<p><b>Tassello Grafica 0.3.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Questa è una versione di prova con due app: <b>Immagini</b>, per migliorare le foto passo per passo, e <b>Disegno</b>, per comporre forme, testi e immagini e salvarli in SVG. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Grafica non sostituisce i programmi di fotoritocco professionali e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (una foto per i social, un ritratto, un documento da rendere leggibile, un volantino, un’immagine per un post) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie. Alt+Maiusc+I descrive la foto: dimensioni, inquadratura, luminosità media, quanta parte è bruciata nelle luci o chiusa nelle ombre, e le regolazioni cambiate. Ogni regolazione è un cursore con il suo nome e il suo valore; Canc la riporta a zero. L’istogramma è descritto a parole sotto il grafico, e se una modifica brucia le luci o chiude le ombre lo senti subito. In Disegno i livelli sono un elenco che si scorre con le frecce, sul foglio le frecce spostano l’oggetto scelto e Ctrl+frecce ne cambia le dimensioni, ogni proprietà ha un campo con il suo nome, Alt+Maiusc+I descrive il foglio e l’oggetto scelto, e la verifica dell’accessibilità controlla il contrasto dei testi e la descrizione del disegno.</p><p><b>Immagini:</b> i <b>piani</b> ti guidano secondo quello che vuoi ottenere (foto per i social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro): un passo alla volta, solo i controlli che servono, con una proposta automatica da accettare o ritoccare. Con <b>Tutti i controlli</b> lavori senza piano. Inquadratura: rotazione, riflessione, raddrizzamento e formati pronti (quadrato, 4:5, 9:16, 3:2, 16:9, A4). Luce: esposizione, contrasto, alte luci, ombre, bianchi e neri. Colore: temperatura, tinta, vividezza e saturazione. Vignettatura. Look pronti (bianco e nero, seppia, caldo, freddo, pellicola, vivace, tenue) e look importati da file LUT .cube, con la loro intensità. Apre JPEG, PNG, WebP, AVIF, GIF e BMP; esporta JPEG, PNG o WebP alla dimensione che scegli; <b>Usa in Disegno</b> porta la foto nel foglio.</p><p><b>Disegno:</b> un foglio con i formati di oggi (post, quadrato, storia, 16:9, banner, A4, icona) o della misura che vuoi, con sfondo pieno o trasparente. Rettangoli, ellissi, linee, testi su più righe e immagini (foto e SVG), con posizione, dimensioni, rotazione, colori, contorno, angoli arrotondati e opacità; sulle foto le regolazioni e i look di Immagini. Ordine dei livelli, allineamento al foglio, duplica, copia e incolla. Salva in SVG, che si apre in ogni browser e programma di grafica e che Disegno riapre modificabile, con titolo e descrizione per chi non vede; esporta PNG o JPEG.</p><p><b>Privacy:</b> foto e disegni restano nel browser e sul tuo computer; gli originali non vengono mai modificati. Il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Immagini lavora su una foto alla volta. Le foto HEIC degli iPhone e i file RAW delle fotocamere non si aprono: esportale prima in JPEG. Non ci sono ancora pennelli, ritocchi locali, nitidezza e riduzione del rumore; l’anteprima è ridotta alla dimensione dello schermo e la foto intera viene calcolata all’esportazione. Il file esportato è in sRGB, a 8 bit per canale. Disegno non ha ancora la penna per le curve, i pennelli, i gruppi né la scelta di più oggetti insieme; i testi usano i caratteri installati sul computer, quindi un SVG aperto altrove può mostrare un carattere diverso; gli SVG di altri programmi entrano come immagini. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
 // Aree raggiungibili con F6 e Maiusc+F6.
-function regions(){const l=[$('titlebar'),$('tabrow'),$('ribbon'),...(isImmagini()?[$('planList').closest('.plans'),$('stage'),$('viewbar'),$('adjBody').closest('.adjust')]:[$('layList').closest('.plans'),$('drawStage'),$('drawbar'),$('propBody').closest('.adjust')]),$('statusbar')];return l.filter(el=>el.offsetWidth||el.offsetHeight)}
-const REGION_NAME={titlebar:'Barra del titolo',tabrow:'Schede della barra multifunzione',ribbon:'Barra multifunzione',viewbar:'Vista della foto',drawbar:'Vista del foglio',statusbar:'Barra di stato'};
-function focusRegion(el){if(el.id==='tabrow'){$('tab-'+slug(currentTab))?.focus();return}if(el.id==='drawStage'){sheetWrap.focus();return}if(el.contains($('layList'))){$('layList').focus();return}if(el.contains($('propBody'))){focusables($('propBody'))[0]?.focus();announce($('propTitle').textContent);return}if(el.classList.contains('plans')){$('planList').focus();return}if(el.id==='stage'){(I.bmp?$('photo'):focusables(el)[0])?.focus();return}if(el.classList.contains('adjust')){(focusables($('stepHead'))[0]||focusables($('adjBody'))[0]||focusables(el)[0])?.focus();announce('Regolazioni');return}focusables(el)[0]?.focus()}
+function regions(){const l=[$('bar')];if(drawerName)l.push($('drawer'));const side=s=>panesOf(state.mode[0]).filter(id=>paneState(id).side===s).map(id=>{const st=paneState(id).st;return st==='open'?$(id):st==='tessera'?$(id+'Tes'):null});
+ l.push(...side('left'),...(isImmagini()?[$('stage'),$('viewbar')]:[$('drawStage'),$('drawbar')]),...side('right'),$('statusbar'));return l.filter(el=>el&&(el.offsetWidth||el.offsetHeight))}
+const REGION_NAME={bar:'Barra',drawer:'Cassetto',viewbar:'Vista della foto',drawbar:'Vista del foglio',statusbar:'Barra di stato'};
+function focusRegion(el){if(el.id==='bar'){(toolItems()[toolFocus]||focusables(el)[0])?.focus();return}if(el.id==='drawer'){el.querySelector('.ditem')?.focus();return}if(el.classList.contains('tessera')){el.focus();return}if(el.id==='drawStage'){sheetWrap.focus();return}if(el.contains($('layList'))){$('layList').focus();return}if(el.contains($('propBody'))){focusables($('propBody'))[0]?.focus();announce($('propTitle').textContent);return}if(el.classList.contains('plans')){$('planList').focus();return}if(el.id==='stage'){(I.bmp?$('photo'):focusables(el)[0])?.focus();return}if(el.classList.contains('adjust')){(focusables($('stepHead'))[0]||focusables($('adjBody'))[0]||focusables(el)[0])?.focus();announce('Regolazioni');return}focusables(el)[0]?.focus()}
 function cycleRegion(dir){const list=regions(),a=document.activeElement;let i=list.findIndex(r=>r.contains(a));i=i<0?(dir>0?0:list.length-1):(i+dir+list.length)%list.length;focusRegion(list[i]);const name=REGION_NAME[list[i].id];if(name)announce(name)}
-// Barra multifunzione: "!" pulsante grande, "/" nuova riga di pulsanti piccoli, suffisso "+" mostra l'etichetta.
+// Barra: gli strumenti di tutti i giorni restano in vista, le categorie sono cassetti che si aprono sopra il lavoro
+// e si richiudono dopo il comando. Ogni cassetto elenca per gruppi i comandi del registro.
 const RIBBON={
- i:{Inizio:[['Foto','!open !export'],['Regolazioni','!auto !compare / resetAll+ / readStatus+'],['Piano','!planMenu stepPrev+ / stepNext+ / planFree+'],['Cronologia','!undo !redo']],
-  Inquadra:[['Ruota','!rotateLeft !rotateRight / flipH+'],['Formato','!ratioMenu !straighten / resetGeometry+']],
-  Look:[['Look','!lookMenu !lutImport / lookAmount+ / lookOff+']],
-  Vista:[['Confronto','!compare'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]},
- d:{Inizio:[['Disegno','!openDraw !saveSvg !exportDraw'],['Appunti','!paste cut / copy / duplicateItem+'],['Inserisci','!addText !addImage / addRect+ / addEllipse+'],['Cronologia','!undo !redo']],
-  Inserisci:[['Forme','!addRect !addEllipse !addLine'],['Testo','!addText'],['Immagini','!addImage']],
-  Disponi:[['Ordine','!bringFront !sendBack / forward+ / backward+'],['Allinea al foglio','alignLeft alignCenter alignRight / alignTop alignMiddle alignBottom'],['Oggetto','!duplicateItem !deleteItem / readDraw+']],
-  Foglio:[['Foglio','!sheetSize !sheetDesc / newDraw+'],['Accessibilità','!a11yCheck']],
-  Vista:[['Zoom','!zoomIn !zoomOut !zoomFit'],['Tema','!themeDark !contrast'],['Guida','!shortcuts !palette !help']]}};
+ i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll readStatus'],['Piano','planMenu stepPrev stepNext planFree'],['Cronologia','undo redo']],
+  Inquadra:[['Ruota','rotateLeft rotateRight flipH'],['Formato','ratioMenu straighten resetGeometry']],
+  Look:[['Look','lookMenu lutImport lookAmount lookOff']],
+  Vista:[['Confronto','compare'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
+ d:{Inizio:[['Disegno','openDraw saveSvg exportDraw'],['Appunti','paste cut copy duplicateItem'],['Inserisci','addText addImage addRect addEllipse'],['Cronologia','undo redo']],
+  Inserisci:[['Forme','addRect addEllipse addLine'],['Testo','addText'],['Immagini','addImage']],
+  Disponi:[['Ordine','bringFront sendBack forward backward'],['Allinea al foglio','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Oggetto','duplicateItem deleteItem readDraw']],
+  Foglio:[['Foglio','sheetSize sheetDesc newDraw'],['Accessibilità','a11yCheck']],
+  Vista:[['Zoom','zoomIn zoomOut zoomFit'],['Tasselli','showLayers showProps layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]}};
 const TABS={i:Object.keys(RIBBON.i),d:Object.keys(RIBBON.d)};
-let currentTab='Inizio';
+// Strumenti sempre in vista. "|" separa i gruppi; con "|1" e "|2" il gruppo che segue sparisce quando la barra è
+// stretta (prima 1, poi 2), ma i suoi comandi restano nei cassetti e nella ricerca.
+const QUICK={i:'undo redo |2 rotateLeft rotateRight flipH |1 auto compare',
+ d:'undo redo |2 addRect addEllipse addLine addText |1 bringFront sendBack duplicateItem deleteItem'};
 const slug=s=>s.replace(/\s+/g,'-');
 function tipText(c){const k=keysOf(c);return c.label+(k?' ('+k+')':'')}
-function cmdButton(id,size,showLabel){const c=C[id];if(!c||!available(c))return '';const pressed=c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:'',k=keysOf(c),keys=(k?` aria-keyshortcuts="${esc(ariaKeys(k))}"`:'')+(c.menu?' aria-haspopup="menu" aria-expanded="false"':'');
- if(size==='lg')return `<button type="button" class="tool lg" data-action="${id}"${pressed}${keys} data-tip="${esc(tipText(c))}">${ICON(c.icon)}<span class="lbl">${esc(c.short||c.label)}${c.menu?ICON('down','ico chev'):''}</span>${c.short&&c.short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}</button>`;
- return `<button type="button" class="tool" data-action="${id}"${pressed}${keys} data-tip="${esc(tipText(c))}"${showLabel?'':` aria-label="${esc(c.label)}"`}>${ICON(c.icon)}${showLabel?`<span class="lbl">${esc(c.short||c.label)}</span>${c.short&&c.short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}`:''}</button>`}
-function renderGroup([name,spec],gi){let out='',stack=[[]];const flush=()=>{const rows=stack.filter(r=>r.length);if(rows.length)out+=`<div class="rbstack">${rows.map(r=>`<div class="rbrow">${r.join('')}</div>`).join('')}</div>`;stack=[[]]};
- for(const tok of spec.split(' ')){if(tok==='/'){stack.push([]);continue}if(tok[0]==='!'){flush();out+=cmdButton(tok.slice(1),'lg')}else stack.at(-1).push(cmdButton(tok.replace(/\+$/,''),'sm',tok.endsWith('+')))}
- flush();return `<div class="rbgroup" role="group" aria-labelledby="rbg${gi}"><div class="rbitems">${out}</div><div class="rb-label" id="rbg${gi}">${esc(name)}</div></div>`}
-function renderTabs(){const t=TABS[state.mode[0]];if(!t.includes(currentTab))currentTab=t[0];$('tabs').innerHTML=t.map(x=>`<button type="button" role="tab" class="tab" id="tab-${slug(x)}" data-tab="${esc(x)}" aria-selected="${x===currentTab}" aria-controls="ribbon" tabindex="${x===currentTab?0:-1}">${esc(x)}</button>`).join('')}
-function renderRibbon(){const groups=RIBBON[state.mode[0]][currentTab]||[];$('ribbon').setAttribute('aria-labelledby','tab-'+slug(currentTab));$('ribbon').innerHTML=`<div class="ribbon-inner">${groups.map(renderGroup).join('')}</div>`}
-function selectTab(name,focus=true){currentTab=name;renderTabs();renderRibbon();if(focus)$('tab-'+slug(name))?.focus()}
+const cmdAttrs=c=>{const k=keysOf(c);return (c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:'')+(k?` aria-keyshortcuts="${esc(ariaKeys(k))}"`:'')+(c.menu?' aria-haspopup="menu" aria-expanded="false"':'')};
+function renderQuick(){let hide='';$('quick').innerHTML=QUICK[state.mode[0]].split(' ').map(id=>{if(id[0]==='|'){hide=id.length>1?' h'+id.slice(1):'';return `<span class="tsep${hide}" aria-hidden="true"></span>`}const c=C[id];if(!c||!available(c))return '';
+ return `<button type="button" class="tb icon${hide}" data-action="${id}"${cmdAttrs(c)} aria-label="${esc(c.label)}" data-tip="${esc(tipText(c))}">${ICON(c.icon)}</button>`}).join('')}
+function renderDrawers(){$('drawers').innerHTML=TABS[state.mode[0]].map(x=>`<button type="button" class="tb drw" id="drw-${slug(x)}" data-drawer="${esc(x)}" aria-expanded="false" aria-controls="drawer">${esc(x)}${ICON('down','ico chev')}</button>`).join('')}
+function renderBar(){closeDrawer(false);renderQuick();renderDrawers();fitTools()}
+// Se la barra non basta, spariscono prima i gruppi segnati con 1, poi quelli segnati con 2; se non basta ancora,
+// gli strumenti vanno a capo su una riga loro. Si ricalcola sempre da zero, così il risultato dipende solo dalla larghezza.
+function fitTools(){const t=$('tools'),bar=$('bar'),fit=()=>{t.classList.remove('fit1','fit2');for(const c of ['fit1','fit2']){if(t.scrollWidth<=t.clientWidth)break;t.classList.add(c)}};
+ bar.classList.remove('wrap');fit();if(t.scrollWidth>t.clientWidth){bar.classList.add('wrap');fit()}toolsRoving();placeDrawer()}
+new ResizeObserver(()=>fitTools()).observe($('tools'));
+// Una sola fermata di Tab per tutta la barra degli strumenti: le frecce passano da un pulsante all'altro.
+let toolFocus=0;
+const toolItems=()=>focusables($('tools'));
+function toolsRoving(){const l=toolItems();if(!l.length)return;toolFocus=clamp(toolFocus,0,l.length-1);l.forEach((b,i)=>b.tabIndex=i===toolFocus?0:-1)}
+// Cassetto aperto: un gruppo di tasselli sotto la barra. Dopo il comando si torna dove si stava lavorando.
+let drawerName=null,drawerOpenedAt=0,lastWork=null;
+document.addEventListener('focusin',e=>{if(e.target.closest?.('#workRegion'))lastWork=e.target});
+function drawerItem(id){const c=C[id];if(!c||!available(c))return '';const k=keysOf(c),short=c.short||c.label;
+ return `<button type="button" class="ditem" data-action="${id}"${cmdAttrs(c)}${short!==c.label?` data-tip="${esc(c.label)}"`:''}>${ICON(c.icon)}<span class="lbl">${esc(short)}${short!==c.label?`<span class="sr-only">: ${esc(c.label)}</span>`:''}</span>${c.toggle?'<span class="dstate" aria-hidden="true"></span>':''}${k?`<kbd aria-hidden="true">${esc(k.split(' / ')[0])}</kbd>`:''}</button>`}
+function openDrawer(name,focus=false){const groups=RIBBON[state.mode[0]][name],btn=$('drw-'+slug(name)),d=$('drawer');if(!groups||!btn)return;hideTip();closeMenu(false);drawerName=name;drawerOpenedAt=performance.now();
+ d.setAttribute('aria-labelledby',btn.id);
+ d.innerHTML=`<div class="drawer-grid" style="--cols:${groups.length<=4?groups.length:3}">${groups.map(([g,spec],gi)=>`<div class="dgroup" role="group" aria-labelledby="dg${gi}"><h3 id="dg${gi}">${esc(g)}</h3>${spec.split(' ').map(drawerItem).join('')}</div>`).join('')}</div>`;
+ d.hidden=false;for(const b of $$('#drawers [data-drawer]'))b.setAttribute('aria-expanded',b===btn);placeDrawer();if(focus)d.querySelector('.ditem')?.focus()}
+function placeDrawer(){if(!drawerName)return;const d=$('drawer'),r=$('drw-'+slug(drawerName)).getBoundingClientRect();d.style.top=($('bar').getBoundingClientRect().bottom+8)+'px';d.style.left=Math.max(8,Math.min(r.left-8,innerWidth-d.offsetWidth-8))+'px'}
+function closeDrawer(restore=true){if(!drawerName)return;const btn=$('drw-'+slug(drawerName)),d=$('drawer');drawerName=null;d.hidden=true;d.innerHTML='';btn?.setAttribute('aria-expanded','false');if(restore)btn?.focus()}
+function drawerRun(b){const id=b.dataset.action;if(C[id]?.menu){runCommand(id);return}const back=lastWork?.isConnected&&lastWork.offsetParent?lastWork:null;closeDrawer(!back);back?.focus({preventScroll:true});runCommand(id)}
+$('drawers').addEventListener('click',e=>{const b=e.target.closest('[data-drawer]');if(!b)return;if(drawerName!==b.dataset.drawer)openDrawer(b.dataset.drawer);else if(performance.now()-drawerOpenedAt>400)closeDrawer(false)});
+$('drawers').addEventListener('keydown',e=>{const b=e.target.closest('[data-drawer]');if(!b)return;if(e.key==='Enter'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();openDrawer(b.dataset.drawer,true)}else if(e.key==='Escape'&&drawerName){e.preventDefault();closeDrawer(true)}});
+$('tools').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const l=toolItems(),i=l.indexOf(document.activeElement);if(i<0)return;e.preventDefault();l[e.key==='Home'?0:e.key==='End'?l.length-1:(i+(e.key==='ArrowRight'?1:-1)+l.length)%l.length].focus()});
+// Con un cassetto aperto, le frecce sulla barra aprono il cassetto vicino, come in un menu.
+$('tools').addEventListener('focusin',e=>{const l=toolItems(),i=l.indexOf(e.target);if(i<0)return;toolFocus=i;l.forEach((b,k)=>b.tabIndex=k===i?0:-1);e.target.scrollIntoView({block:'nearest',inline:'nearest'});
+ if(drawerName){const n=e.target.dataset.drawer;if(!n)closeDrawer(false);else if(n!==drawerName)openDrawer(n)}});
+$('drawer').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeDrawer(true);return}const items=$$('#drawer .ditem'),i=items.indexOf(document.activeElement);if(i<0)return;
+ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const gs=$$('#drawer .dgroup'),g=gs.indexOf(items[i].closest('.dgroup'));const first=gs[(g+(e.key==='ArrowRight'?1:-1)+gs.length)%gs.length]?.querySelector('.ditem');if(first){e.preventDefault();first.focus()}return}
+ const j=e.key==='ArrowDown'?(i+1)%items.length:e.key==='ArrowUp'?(i-1+items.length)%items.length:e.key==='Home'?0:e.key==='End'?items.length-1:null;if(j!==null){e.preventDefault();items[j].focus()}});
+$('drawer').addEventListener('focusout',e=>{const to=e.relatedTarget;if(drawerName&&to&&!to.closest('#drawer,#drawers,#menu'))closeDrawer(false)});
+document.addEventListener('pointerdown',e=>{if(drawerName&&!e.target.closest('#drawer,#drawers,#menu'))closeDrawer(false)},true);
+addEventListener('resize',fitTools);
+// Tasselli: i riquadri laterali si riducono a tessera, passano da un lato all'altro, si allargano trascinando la fuga
+// (o con le frecce quando la fuga ha il focus) e si tolgono dal piano. La disposizione di ogni app resta nelle preferenze.
+// La foto e il foglio si ridisegnano da soli quando cambia la loro larghezza: qui basta spostare i riquadri.
+const PANES={
+ planPane:{mode:'i',title:'Piani',icon:'plan',side:'left',w:240,min:190,max:420,focus:()=>$('planList').focus()},
+ adjPane:{mode:'i',title:'Regolazioni',icon:'light',side:'right',w:310,min:250,max:480,focus:()=>(focusables($('stepHead'))[0]||focusables($('adjBody'))[0]||$('adjBody')).focus()},
+ layPane:{mode:'d',title:'Livelli',icon:'level',side:'left',w:240,min:190,max:420,count:()=>Dw.p.items.length,unit:['oggetto','oggetti'],focus:()=>$('layList').focus()},
+ propPane:{mode:'d',title:'Proprietà',icon:'gear',side:'right',w:310,min:250,max:480,focus:()=>(focusables($('propBody'))[0]||$('propBody')).focus()}};
+const PANE_SAY={open:'aperto',tessera:'ridotto a tessera',off:'tolto dal piano'};
+const layoutOf=()=>prefs.layout||(prefs.layout={});
+function paneState(id){const L=layoutOf(),d=PANES[id];if(!L[id])L[id]={side:d.side,w:d.w,st:'open'};return L[id]}
+const panesOf=m=>Object.keys(PANES).filter(id=>PANES[id].mode===m);
+// Ogni riquadro riceve una tessera (il riquadro ridotto), una fuga da trascinare e due pulsanti nell'intestazione.
+for(const [id,d] of Object.entries(PANES)){const el=$(id);
+ el.insertAdjacentHTML('beforebegin',`<button type="button" class="tessera" id="${id}Tes" aria-controls="${id}" aria-expanded="false" data-tip="Espandi ${esc(d.title)}" hidden>${ICON(d.icon)}<span class="badge" aria-hidden="true"></span><span class="vt" aria-hidden="true">${esc(d.title)}</span></button>`);
+ el.insertAdjacentHTML('afterend',`<div class="sep" id="${id}Sep" data-pane="${id}" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="${id}" aria-label="Larghezza del riquadro ${esc(d.title)}" aria-valuemin="${d.min}" aria-valuemax="${d.max}"></div>`);
+ el.querySelector('.pane-head').insertAdjacentHTML('beforeend',`<button type="button" class="pane-btn" data-pane-act="collapse" aria-label="Riduci a tessera il riquadro ${esc(d.title)}" data-tip="Riduci a tessera"></button><button type="button" class="pane-btn" data-pane-act="menu" aria-haspopup="menu" aria-expanded="false" aria-label="Opzioni del riquadro ${esc(d.title)}" data-tip="Sposta, riduci o togli">${ICON('more')}</button>`)}
+// Disposizione: a sinistra dell'area centrale gli ordini 0, 2, 4…, a destra 102, 104…; la fuga sta tra riquadro e centro.
+function applyLayout(){for(const m of ['i','d']){const ids=panesOf(m);ids.filter(id=>paneState(id).side==='left').forEach((id,i)=>placePane(id,2*i));ids.filter(id=>paneState(id).side==='right').forEach((id,i)=>placePane(id,102+2*i))}paneBadges()}
+function placePane(id,order){const s=paneState(id),d=PANES[id],el=$(id),sep=$(id+'Sep'),tes=$(id+'Tes'),left=s.side==='left';s.w=clamp(s.w,d.min,d.max);
+ el.style.order=tes.style.order=order;sep.style.order=left?order+1:order-1;tes.dataset.side=s.side;el.style.setProperty('--w',s.w+'px');
+ el.hidden=s.st!=='open';sep.hidden=s.st!=='open';tes.hidden=s.st!=='tessera';sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');
+ el.querySelector('[data-pane-act=collapse]').innerHTML=ICON(left?'left':'right')}
+function paneBadges(){for(const [id,d] of Object.entries(PANES)){const n=d.count&&safe(d.count)||0,tes=$(id+'Tes');tes.querySelector('.badge').textContent=n?String(n):'';tes.setAttribute('aria-label',`${d.title}, riquadro ridotto${n?`: ${n} ${d.unit[n===1?0:1]}`:''}. Espandi`)}}
+new MutationObserver(paneBadges).observe($('layList'),{childList:true});
+// Quando un riquadro sparisce con il focus dentro, il focus torna sulla foto o sul foglio.
+function workFocus(){const w=lastWork?.isConnected&&lastWork.offsetParent&&!lastWork.closest('.pane')?lastWork:null;(w||workHome()).focus()}
+function paneSet(id,st,{focus=false,say=true}={}){const s=paneState(id),d=PANES[id],had=$(id).contains(document.activeElement)||$(id+'Tes')===document.activeElement;s.st=st;savePrefs();applyLayout();
+ if(focus||had){if(st==='open')d.focus();else if(st==='tessera')$(id+'Tes').focus();else workFocus()}
+ if(say)announce(d.title+': '+PANE_SAY[st]);refreshToggles()}
+function paneToggle(id){const off=paneState(id).st==='off';paneSet(id,off?'open':'off',{focus:off})}
+function paneMove(id){const s=paneState(id);s.side=s.side==='left'?'right':'left';savePrefs();applyLayout();announce(`${PANES[id].title} spostato a ${s.side==='left'?'sinistra':'destra'}`)}
+function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,Math.max(d.min,Math.min(d.max,innerWidth*.45))));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final)savePrefs()}
+function paneMenu(id,btn){const s=paneState(id),d=PANES[id],left=s.side==='left',r=btn.getBoundingClientRect();
+ openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Larghezza iniziale',icon:'fit',run:()=>setW(id,d.w)},'-',
+  {label:'Togli dal piano',desc:'Torna dal menu Tasselli, in basso a sinistra',icon:'close',run:()=>paneSet(id,'off',{focus:true})}],r.right-240,r.bottom+4,'Opzioni del riquadro '+d.title,btn)}
+// Menu Tasselli nella barra di stato: quali riquadri sono sul piano e alcune disposizioni pronte.
+function layoutMenu(){const m=state.mode[0],btn=$('layoutBtn'),r=btn.getBoundingClientRect(),ids=panesOf(m),img=m==='i';
+ const where=id=>{const s=paneState(id);return s.st==='open'?(s.side==='left'?'A sinistra':'A destra'):s.st==='tessera'?'Ridotto a tessera':'Tolto dal piano'};
+ const items=ids.map(id=>({label:PANES[id].title,desc:where(id),box:true,checked:paneState(id).st!=='off',run:()=>paneToggle(id)}));
+ items.push('-',{label:img?'Foto grande':'Foglio grande',desc:'I riquadri ridotti a tessera',icon:'fit',run:()=>layoutPreset('tessera')},{label:'Come all’inizio',desc:'Rimette ogni tassello al suo posto',icon:'history',run:layoutReset});
+ openMenu(items,r.left,r.top-6,'Tasselli',btn,true)}
+function layoutPreset(st){for(const id of panesOf(state.mode[0]))paneState(id).st=st;savePrefs();applyLayout();announce(isImmagini()?'Foto grande':'Foglio grande')}
+function layoutReset(){const L=layoutOf();for(const id of panesOf(state.mode[0]))delete L[id];savePrefs();applyLayout();announce('Tasselli rimessi come all’inizio')}
+// Fuga: si trascina con il mouse o con il dito; con il focus, le frecce allargano e stringono (con Maiusc di più).
+document.addEventListener('pointerdown',e=>{const sep=e.target.closest?.('.sep');if(!sep||e.button!==0)return;e.preventDefault();sep.setPointerCapture(e.pointerId);sep.classList.add('dragging');
+ const id=sep.dataset.pane,x0=e.clientX,w0=paneState(id).w,dir=paneState(id).side==='right'?-1:1;
+ const move=ev=>setW(id,w0+dir*(ev.clientX-x0),false);
+ const up=()=>{sep.removeEventListener('pointermove',move);sep.removeEventListener('pointerup',up);sep.removeEventListener('pointercancel',up);sep.classList.remove('dragging');savePrefs()};
+ sep.addEventListener('pointermove',move);sep.addEventListener('pointerup',up);sep.addEventListener('pointercancel',up)});
+document.addEventListener('keydown',e=>{const sep=e.target.closest?.('.sep');if(!sep||e.ctrlKey||e.altKey||e.metaKey)return;const step=e.shiftKey?64:16,id=sep.dataset.pane,d=PANES[id],s=paneState(id),grow=s.side==='left'?'ArrowRight':'ArrowLeft',shrink=s.side==='left'?'ArrowLeft':'ArrowRight';
+ if(e.key==='Enter'){e.preventDefault();paneSet(id,'tessera',{focus:true});return}
+ const v=e.key===grow?s.w+step:e.key===shrink?s.w-step:e.key==='Home'?d.min:e.key==='End'?d.max:null;if(v===null)return;e.preventDefault();setW(id,v)});
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-pane-act]');if(b){const id=b.closest('.pane').id;if(b.dataset.paneAct==='collapse')paneSet(id,'tessera',{focus:true});else paneMenu(id,b);return}
+ const t=e.target.closest?.('.tessera');if(t)paneSet(t.getAttribute('aria-controls'),'open',{focus:true})});
+// L'angolo piegato segna il tassello in cui si lavora: resta sull'ultimo anche quando il focus passa alla barra.
+let activeTile=null;
+document.addEventListener('focusin',e=>{const t=e.target.closest?.('#workRegion .tile');if(!t||t===activeTile)return;activeTile?.classList.remove('is-active');activeTile=t;t.classList.add('is-active')});
 // Apertura delle foto: il browser decodifica JPEG, PNG, WebP, AVIF, GIF e BMP e raddrizza la foto secondo
 // l'orientamento scritto dalla fotocamera. HEIC e RAW non si possono aprire: si spiega che cosa fare.
 const isHeic=f=>/\.(?:heic|heif)$/i.test(f.name)||/^image\/hei[cf]/i.test(f.type);
@@ -1213,7 +1354,7 @@ function dataUrlToBlob(u){const i=u.indexOf(','),head=u.slice(0,i),body=u.slice(
 async function drawingSvg({meta=true}={}){const p=Dw.p,parts=[],originals={};
  for(const it of p.items){let href='';if(it.kind==='image'){const m=Dw.imgs.get(it.img);if(!m)continue;if(hasImgEdits(it)&&m.type!=='image/svg+xml'){href=await blobToDataUrl(await processImage(m,it,Infinity,m.type==='image/png'?'image/png':'image/jpeg'));if(meta)originals[it.img]=await blobToDataUrl(m.blob)}else href=await blobToDataUrl(m.blob)}parts.push(itemSvg(it,{href,img:meta}))}
  const label=p.desc?' aria-labelledby="titolo descrizione"':' aria-labelledby="titolo"';
- return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}" role="img"${label}><title id="titolo">${esc(p.title)}</title>${p.desc?`<desc id="descrizione">${esc(p.desc)}</desc>`:''}${meta?`<metadata id="tassello-disegno">${esc(JSON.stringify({programma:'Tassello Grafica',versione:'0.2.0',p,originals}))}</metadata>`:''}${p.bg==='none'?'':`<rect width="${p.w}" height="${p.h}" fill="${esc(p.bg)}"/>`}${parts.join('')}</svg>\n`}
+ return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}" role="img"${label}><title id="titolo">${esc(p.title)}</title>${p.desc?`<desc id="descrizione">${esc(p.desc)}</desc>`:''}${meta?`<metadata id="tassello-disegno">${esc(JSON.stringify({programma:'Tassello Grafica',versione:'0.3.0',p,originals}))}</metadata>`:''}${p.bg==='none'?'':`<rect width="${p.w}" height="${p.h}" fill="${esc(p.bg)}"/>`}${parts.join('')}</svg>\n`}
 async function saveSvg(){if(!Dw.p.items.length&&!(await confirmAction('Il foglio è vuoto: vuoi salvarlo lo stesso?','Salva')))return;const svg=await work('Salvataggio del disegno',()=>drawingSvg());if(!svg)return;const blob=new Blob([svg],{type:'image/svg+xml'});download(blob,extName(Dw.p.title,'svg'),'image/svg+xml');toast(`Salvato in SVG, ${fmtBytes(blob.size)}: si riapre modificabile con Disegno${Dw.p.desc?'':'. Manca la descrizione per chi non vede il disegno'}`)}
 // Un SVG salvato da Disegno si riapre modificabile; gli altri SVG entrano nel foglio come immagini.
 async function openSvg(file){const doc=new DOMParser().parseFromString(await file.text(),'image/svg+xml'),meta=doc.getElementById('tassello-disegno');let data=null;try{data=meta&&JSON.parse(meta.textContent)}catch(e){}
@@ -1262,14 +1403,14 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  zoomIn:()=>zoomDraw(1.25),zoomOut:()=>zoomDraw(.8),zoomFit:()=>zoomDraw(0),
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
 const COMMON_ACTIONS={filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
- switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),
+ switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),layoutMenu,layoutReset,showPlans:()=>paneToggle('planPane'),showAdjust:()=>paneToggle('adjPane'),showLayers:()=>paneToggle('layPane'),showProps:()=>paneToggle('propPane'),
  themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};
 async function handleAction(id){const f=(isImmagini()?I_ACTIONS[id]:D_ACTIONS[id])??COMMON_ACTIONS[id];if(!f){toast('Comando non disponibile');return}await f()}
 // Passa da Immagini a Disegno e viceversa: ogni app tiene il suo titolo, la sua barra e il suo lavoro.
 function setMode(mode,{focus=true}={}){const img=mode==='immagini',home=()=>img?(I.bmp?$('photo'):$('planList')):sheetWrap;if(mode===state.mode){if(focus)home().focus();return}
  state.mode=mode;$('app').className=mode;document.documentElement.dataset.mode=mode;$('photoPane').classList.toggle('hidden',!img);$('drawPane').classList.toggle('hidden',img);$('switchImmagini').setAttribute('aria-pressed',img);$('switchDisegno').setAttribute('aria-pressed',!img);
- $('docTitle').value=img?I.title:Dw.p.title;$('saveTopLabel').textContent=img?'Esporta':'Salva';$('saveTop').dataset.tip=img?'Esporta la foto (Ctrl+S)':'Salva il disegno in SVG (Ctrl+S)';$('openTop').dataset.tip=img?'Apri una foto (Ctrl+O)':'Apri un disegno o inserisci immagini (Ctrl+O)';updateTitle();
- currentTab=TABS[mode[0]][0];renderTabs();renderRibbon();themeChanged();if(img){showPhoto();renderPanel()}else{renderSheet();renderLayers();renderProps()}refreshToggles();
+ $('docTitle').value=img?I.title:Dw.p.title;$('saveTopLabel').textContent=img?'Esporta':'Salva';$('saveTop').dataset.tip=img?'Esporta la foto (Ctrl+S)':'Salva il disegno in SVG (Ctrl+S)';updateTitle();
+ renderBar();applyLayout();themeChanged();if(img){showPhoto();renderPanel()}else{renderSheet();renderLayers();renderProps()}refreshToggles();
  if(focus){home().focus();announce(img?'Immagini':'Disegno: foglio')}schedulePersist(mode)}
 // Apertura dei file. Immagini: una foto per volta, un file .cube diventa un look. Disegno: un SVG di Disegno si riapre,
 // le altre immagini e gli altri SVG entrano nel foglio.
@@ -1300,21 +1441,15 @@ window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;con
 // Il punto di lavoro di ogni app: la foto (o i piani se non c'è) in Immagini, il foglio in Disegno.
 const workHome=()=>isImmagini()?(I.bmp?$('photo'):$('planList')):sheetWrap;
 $('skipWork').onclick=e=>{e.preventDefault();workHome().focus()};
-$('skipRibbon').onclick=e=>{e.preventDefault();$('tab-'+slug(currentTab))?.focus()};
-// Pulsanti con data-action in tutta la pagina: barra multifunzione, vista, pannello e foto vuota.
-document.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.closest('#menu'))return;runCommand(b.dataset.action)});
-// Barra del titolo
+$('skipTools').onclick=e=>{e.preventDefault();(toolItems()[toolFocus]||$('fileBtn')).focus()};
+// Pulsanti con data-action in tutta la pagina: barra, cassetti, vista, pannello e foto vuota.
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.closest('#menu'))return;if(b.closest('#drawer'))drawerRun(b);else runCommand(b.dataset.action)});
+// Barra
 $('switchImmagini').onclick=()=>setMode('immagini');$('switchDisegno').onclick=()=>setMode('disegno');
 $('docTitle').addEventListener('input',e=>{if(isImmagini())I.title=e.target.value;else Dw.p.title=e.target.value;updateTitle();schedulePersist()});
 $('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();workHome().focus()});
-$('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand(isImmagini()?'export':'saveSvg');$('openTop').onclick=()=>runCommand(isImmagini()?'open':'openDraw');
+$('saveTop').onclick=()=>runCommand(isImmagini()?'export':'saveSvg');$('layoutBtn').onclick=()=>runCommand('layoutMenu');
 $('paletteBtn').onclick=()=>runCommand('palette');$('kbdBtn').onclick=()=>runCommand('shortcuts');$('helpBtn').onclick=()=>runCommand('help');$('brandBtn').onclick=()=>runCommand('help');$('fileBtn').onclick=openFilePanel;
-$('fileBtn').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('tab-'+slug(currentTab))?.focus()}});
-// Schede (tablist con attivazione automatica)
-$('tabs').addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t&&t.dataset.tab!==currentTab)selectTab(t.dataset.tab)});
-$('tabs').addEventListener('keydown',e=>{const t=e.target.closest('[role=tab]');if(!t)return;const list=$$('#tabs [role=tab]'),i=list.indexOf(t);let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft'){if(i===0){e.preventDefault();$('fileBtn').focus();return}j=i-1}else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();selectTab(list[j].dataset.tab);return}if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){e.preventDefault();focusables($('ribbon'))[0]?.focus()}});
-// Barra multifunzione: frecce tra i pulsanti, Esc o freccia su per tornare alla scheda.
-$('ribbon').addEventListener('keydown',e=>{const t=e.target,list=focusables($('ribbon')),i=list.indexOf(t);if(e.key==='Escape'||(e.key==='ArrowUp'&&!t.matches('select,input'))){e.preventDefault();$('tab-'+slug(currentTab))?.focus();return}if(i<0||t.matches('select'))return;let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft')j=(i-1+list.length)%list.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();list[j].focus()}});
 // Vista della foto e del foglio: frecce tra i pulsanti, come una barra degli strumenti.
 for(const id of ['viewbar','drawbar'])$(id).addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const list=focusables($(id)).filter(el=>el.matches('button')),i=list.indexOf(e.target);if(i<0)return;e.preventDefault();const j=e.key==='Home'?0:e.key==='End'?list.length-1:(i+(e.key==='ArrowRight'?1:-1)+list.length)%list.length;list[j].focus()});
 // Tooltip (si chiudono con Esc e non coprono il puntatore)
@@ -1364,7 +1499,7 @@ new ResizeObserver(()=>{if(I.bmp&&isImmagini())requestRender();drawHist()}).obse
 async function start(){applyPrefs();
  suppressAutosave=true;try{db=await openStore();await restorePhoto().catch(e=>console.warn('Bozza della foto non recuperabile',e));await restoreDrawing().catch(e=>console.warn('Bozza del disegno non recuperabile',e))}
  catch(e){console.error('Avvio non riuscito',e);toast('Avvio non riuscito: '+e.message)}finally{suppressAutosave=false}
- planCursor=Math.max(0,PLANS.findIndex(p=>p.id===I.plan));$('docTitle').value=I.title;updateTitle();renderTabs();renderRibbon();renderPlans();renderPanel();showPhoto();renderLayers();renderProps();refreshToggles();
+ planCursor=Math.max(0,PLANS.findIndex(p=>p.id===I.plan));$('docTitle').value=I.title;updateTitle();renderBar();applyLayout();renderPlans();renderPanel();showPhoto();renderLayers();renderProps();refreshToggles();
  const ui=await dbGet('ui').catch(()=>null);if(ui?.mode==='disegno'){suppressAutosave=true;setMode('disegno',{focus:false});suppressAutosave=false}
  status(db?'Pronto · i file restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze: esporta il lavoro prima di chiudere')}
 // Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si potrà installare come app;

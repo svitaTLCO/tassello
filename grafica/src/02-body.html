@@ -63,38 +63,37 @@
 <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></symbol>
 <symbol id="i-level" viewBox="0 0 24 24"><path d="M3 17 21 7"/><path d="M3 12h18" stroke-dasharray="2 2"/></symbol>
 <symbol id="i-draw" viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="m14 7 3 3"/></symbol>
+<symbol id="i-tiles" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></symbol>
 </defs></svg>
-<a class="skip" href="#workRegion" id="skipWork">Vai all’area di lavoro</a><a class="skip" href="#tabs" id="skipRibbon">Vai alla barra multifunzione</a>
+<a class="skip" href="#workRegion" id="skipWork">Vai all’area di lavoro</a><a class="skip" href="#tools" id="skipTools">Vai agli strumenti</a>
 <div class="immagini" id="app">
-<header class="titlebar" id="titlebar" aria-label="Barra del titolo">
-<button type="button" class="brand" id="brandBtn" aria-label="Tassello Grafica: informazioni" data-tip="Informazioni su Tassello Grafica"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#fff" fill-opacity=".82"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#fff" fill-opacity=".82"></path><rect y="54" width="46" height="46" rx="10" fill="#fff"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#fff"></rect><path d="M86 0V8Q86 14 92 14H100Z" fill="var(--accent)" fill-opacity=".55"></path></svg><span class="brand-name">Tassello Grafica</span></button>
+<header class="bar" id="bar" aria-label="Barra">
+<div class="tile brand-tile">
+<button type="button" class="brand" id="brandBtn" aria-label="Tassello Grafica: informazioni" data-tip="Informazioni su Tassello Grafica"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"></rect><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"></path><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"></path><rect y="54" width="46" height="46" rx="10" fill="#B35500"></rect><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"></rect></svg></button>
 <div class="app-switch" role="group" aria-label="Applicazione">
 <button type="button" id="switchImmagini" aria-pressed="true" aria-keyshortcuts="Control+Alt+I" data-tip="Immagini (Ctrl+Alt+I)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M4 5h16v14H4z"></path><path d="m4 17 5-5 4 4 2-2 5 5" stroke-width="2"></path></svg></span><span class="app-name">Immagini</span></button>
 <button type="button" id="switchDisegno" aria-pressed="false" aria-keyshortcuts="Control+Alt+D" data-tip="Disegno (Ctrl+Alt+D)"><span class="app-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M5 19l3-1 10-10-2-2L6 16z"></path></svg></span><span class="app-name">Disegno</span></button>
 </div>
-<div class="tb-group" role="group" aria-label="Accesso rapido">
-<button type="button" class="tb-btn" id="quickUndo" aria-label="Annulla" aria-keyshortcuts="Control+Z" data-tip="Annulla (Ctrl+Z)"><svg class="ico" aria-hidden="true"><use href="#i-undo"/></svg></button>
-<button type="button" class="tb-btn" id="quickRedo" aria-label="Ripeti" aria-keyshortcuts="Control+Y" data-tip="Ripeti (Ctrl+Y)"><svg class="ico" aria-hidden="true"><use href="#i-redo"/></svg></button>
 </div>
-<div class="title-center"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Foto" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
-<button type="button" class="cmd-search" id="paletteBtn" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Cerca comandi</span><kbd aria-hidden="true">Alt+Q</kbd></button>
-<button type="button" class="top-action" id="openTop" aria-keyshortcuts="Control+O" data-tip="Apri una foto (Ctrl+O)"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><span>Apri</span></button>
-<button type="button" class="top-action primary" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta la foto (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
-<button type="button" class="tb-btn" id="kbdBtn" aria-label="Scorciatoie da tastiera" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg></button>
+<div class="tile doc-tile"><label class="sr-only" for="docTitle">Nome del file</label><input id="docTitle" value="Foto" autocomplete="off" spellcheck="false"><span class="save-state" id="saveState">Bozza sul dispositivo</span></div>
+<div class="tile tools" id="tools" role="toolbar" aria-label="Strumenti e cassetti">
+<div id="quick"></div><span class="tsep" aria-hidden="true"></span>
+<button type="button" class="tb drw" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
+<div id="drawers"></div>
+</div>
+<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
+<button type="button" class="tile primary-tile" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta la foto (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
 </header>
-<div class="tabrow" id="tabrow">
-<button type="button" class="filebtn" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
-<div class="tabs" id="tabs" role="tablist" aria-label="Schede della barra multifunzione"></div>
-</div>
-<div class="ribbon" id="ribbon" role="tabpanel" aria-labelledby="tab-Inizio"></div>
+<div class="drawer" id="drawer" role="group" hidden></div>
 <main class="main" id="workRegion" tabindex="-1" aria-label="Area di lavoro">
 <div class="editor-pane" id="photoPane">
-<aside class="plans" aria-labelledby="planTitle">
+<aside class="plans pane tile" id="planPane" aria-labelledby="planTitle">
 <div class="pane-head"><h2 id="planTitle">Piani</h2></div>
 <p class="pane-hint" id="planHint">Scegli che cosa vuoi ottenere: il piano mostra un passo alla volta solo i controlli che servono.</p>
 <div class="lb" id="planList" role="listbox" aria-labelledby="planTitle" aria-describedby="planKeys" tabindex="0"></div>
 </aside>
-<section class="viewer" aria-labelledby="viewTitle">
+<section class="viewer tile" id="photoViewer" aria-labelledby="viewTitle">
 <h2 class="sr-only" id="viewTitle">Foto</h2>
 <div class="stage" id="stage">
 <canvas id="photo" tabindex="0" role="img" aria-label="Foto" aria-describedby="photoHint" hidden></canvas>
@@ -107,7 +106,7 @@
 <span class="grow"></span><span id="photoInfo" aria-hidden="true"></span>
 </div>
 </section>
-<aside class="adjust" aria-labelledby="adjTitle">
+<aside class="adjust pane tile" id="adjPane" aria-labelledby="adjTitle">
 <div class="pane-head"><h2 id="adjTitle">Regolazioni</h2><button type="button" class="btn sm" data-action="resetAll">Ripristina</button></div>
 <div class="hist-box"><canvas class="hist" id="hist" aria-hidden="true"></canvas><p class="hist-text" id="histText">Nessuna foto aperta.</p></div>
 <div class="step-head" id="stepHead" hidden></div>
@@ -115,12 +114,12 @@
 </aside>
 </div>
 <div class="editor-pane hidden" id="drawPane">
-<aside class="plans" aria-labelledby="layTitle">
+<aside class="plans pane tile" id="layPane" aria-labelledby="layTitle">
 <div class="pane-head"><h2 id="layTitle">Livelli</h2><span class="pane-count" id="layCount"></span></div>
 <p class="pane-hint" id="layHint">Dall’oggetto più in alto a quello più in basso. Alt+Maiusc+frecce lo porta sopra o sotto gli altri.</p>
 <div class="lb" id="layList" role="listbox" aria-labelledby="layTitle" aria-describedby="layKeys" tabindex="0"></div>
 </aside>
-<section class="viewer" aria-labelledby="sheetTitle">
+<section class="viewer tile" id="drawViewer" aria-labelledby="sheetTitle">
 <h2 class="sr-only" id="sheetTitle">Foglio</h2>
 <div class="draw-stage" id="drawStage"><div class="sheet-wrap" id="sheetWrap" tabindex="0" role="application" aria-roledescription="foglio" aria-label="Foglio" aria-describedby="sheetHint"><svg id="sheet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg><svg id="overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg></div></div>
 <div class="viewbar" id="drawbar" role="toolbar" aria-label="Vista del foglio">
@@ -130,14 +129,16 @@
 <span class="grow"></span><span id="drawInfo" aria-hidden="true"></span>
 </div>
 </section>
-<aside class="adjust" aria-labelledby="propTitle">
+<aside class="adjust pane tile" id="propPane" aria-labelledby="propTitle">
 <div class="pane-head"><h2 id="propTitle">Proprietà</h2></div>
 <div class="insp-body" id="propBody"></div>
 </aside>
 </div>
 </main>
 <footer class="status" id="statusbar" aria-label="Barra di stato">
-<span id="statusText">Pronto</span><span id="docInfo"></span><span class="grow"></span>
+<button type="button" class="st-btn lead" id="layoutBtn" aria-haspopup="menu" aria-expanded="false" data-tip="Mostra, riduci o togli i riquadri"><svg class="ico" aria-hidden="true"><use href="#i-tiles"/></svg><span>Tasselli</span></button>
+<span class="chip" id="statusText">Pronto</span><span class="chip" id="docInfo"></span><span class="grow"></span>
+<button type="button" class="st-btn" id="kbdBtn" aria-haspopup="dialog" aria-keyshortcuts="F1" data-tip="Scorciatoie da tastiera (F1)"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg><span>Scorciatoie</span></button>
 <button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
 </footer>
 </div>
@@ -156,7 +157,7 @@
 </div>
 <div class="modalbg" id="modalbg" hidden><div id="modal" class="modal" role="dialog" aria-labelledby="dlgTitle" aria-describedby="dlgBody" aria-modal="true"></div></div>
 <div class="modalbg" id="palettebg" hidden><div class="palette" role="dialog" aria-modal="true" aria-label="Cerca comando">
-<input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. esposizione, ruota, bianco e nero" autocomplete="off" spellcheck="false">
+<div class="pal-field"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input id="palInput" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="Cerca un comando" placeholder="Cerca un comando… es. esposizione, ruota, bianco e nero" autocomplete="off" spellcheck="false"><kbd aria-hidden="true">Esc</kbd></div>
 <div id="palList" role="listbox" aria-label="Comandi"></div>
 <p class="pal-hint" aria-hidden="true">↑ ↓ per scegliere · Invio per eseguire · Esc per chiudere</p>
 </div></div>

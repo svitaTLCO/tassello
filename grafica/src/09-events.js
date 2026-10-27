@@ -3,21 +3,15 @@ window.addEventListener('keydown',e=>{if(e.isComposing||overlayOpen())return;con
 // Il punto di lavoro di ogni app: la foto (o i piani se non c'è) in Immagini, il foglio in Disegno.
 const workHome=()=>isImmagini()?(I.bmp?$('photo'):$('planList')):sheetWrap;
 $('skipWork').onclick=e=>{e.preventDefault();workHome().focus()};
-$('skipRibbon').onclick=e=>{e.preventDefault();$('tab-'+slug(currentTab))?.focus()};
-// Pulsanti con data-action in tutta la pagina: barra multifunzione, vista, pannello e foto vuota.
-document.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.closest('#menu'))return;runCommand(b.dataset.action)});
-// Barra del titolo
+$('skipTools').onclick=e=>{e.preventDefault();(toolItems()[toolFocus]||$('fileBtn')).focus()};
+// Pulsanti con data-action in tutta la pagina: barra, cassetti, vista, pannello e foto vuota.
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.closest('#menu'))return;if(b.closest('#drawer'))drawerRun(b);else runCommand(b.dataset.action)});
+// Barra
 $('switchImmagini').onclick=()=>setMode('immagini');$('switchDisegno').onclick=()=>setMode('disegno');
 $('docTitle').addEventListener('input',e=>{if(isImmagini())I.title=e.target.value;else Dw.p.title=e.target.value;updateTitle();schedulePersist()});
 $('docTitle').addEventListener('keydown',ev=>{if(ev.key!=='Enter'&&ev.key!=='Escape')return;ev.preventDefault();workHome().focus()});
-$('quickUndo').onclick=()=>runCommand('undo');$('quickRedo').onclick=()=>runCommand('redo');$('saveTop').onclick=()=>runCommand(isImmagini()?'export':'saveSvg');$('openTop').onclick=()=>runCommand(isImmagini()?'open':'openDraw');
+$('saveTop').onclick=()=>runCommand(isImmagini()?'export':'saveSvg');$('layoutBtn').onclick=()=>runCommand('layoutMenu');
 $('paletteBtn').onclick=()=>runCommand('palette');$('kbdBtn').onclick=()=>runCommand('shortcuts');$('helpBtn').onclick=()=>runCommand('help');$('brandBtn').onclick=()=>runCommand('help');$('fileBtn').onclick=openFilePanel;
-$('fileBtn').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('tab-'+slug(currentTab))?.focus()}});
-// Schede (tablist con attivazione automatica)
-$('tabs').addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t&&t.dataset.tab!==currentTab)selectTab(t.dataset.tab)});
-$('tabs').addEventListener('keydown',e=>{const t=e.target.closest('[role=tab]');if(!t)return;const list=$$('#tabs [role=tab]'),i=list.indexOf(t);let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft'){if(i===0){e.preventDefault();$('fileBtn').focus();return}j=i-1}else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();selectTab(list[j].dataset.tab);return}if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){e.preventDefault();focusables($('ribbon'))[0]?.focus()}});
-// Barra multifunzione: frecce tra i pulsanti, Esc o freccia su per tornare alla scheda.
-$('ribbon').addEventListener('keydown',e=>{const t=e.target,list=focusables($('ribbon')),i=list.indexOf(t);if(e.key==='Escape'||(e.key==='ArrowUp'&&!t.matches('select,input'))){e.preventDefault();$('tab-'+slug(currentTab))?.focus();return}if(i<0||t.matches('select'))return;let j=null;if(e.key==='ArrowRight')j=(i+1)%list.length;else if(e.key==='ArrowLeft')j=(i-1+list.length)%list.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=list.length-1;if(j!==null){e.preventDefault();list[j].focus()}});
 // Vista della foto e del foglio: frecce tra i pulsanti, come una barra degli strumenti.
 for(const id of ['viewbar','drawbar'])$(id).addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const list=focusables($(id)).filter(el=>el.matches('button')),i=list.indexOf(e.target);if(i<0)return;e.preventDefault();const j=e.key==='Home'?0:e.key==='End'?list.length-1:(i+(e.key==='ArrowRight'?1:-1)+list.length)%list.length;list[j].focus()});
 // Tooltip (si chiudono con Esc e non coprono il puntatore)
