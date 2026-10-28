@@ -34,8 +34,7 @@ function selDescribe(){const m=selMask();toast(m?describeMask(m,lastMc.w,lastMc.
 function colorAt([u,v],orig=false){const px=orig?lastMc.px:shownPx(),w=px.width,h=px.height,X=Math.min(w-1,Math.floor(u*w)),Y=Math.min(h-1,Math.floor(v*h)),d=px.data;let r=0,g=0,b=0,n=0;
  for(let y=Math.max(0,Y-1);y<=Math.min(h-1,Y+1);y++)for(let x=Math.max(0,X-1);x<=Math.min(w-1,X+1);x++){const o=(y*w+x)*4;r+=d[o];g+=d[o+1];b+=d[o+2];n++}return [r/n,g/n,b/n]}
 const posSay=([u,v])=>`${fmtPct(u)} da sinistra, ${fmtPct(v)} dall’alto`;
-function sayCursor(){const p=[T.u,T.v],m=selMask(),i=m?Math.min(lastMc.h-1,Math.floor(p[1]*lastMc.h))*lastMc.w+Math.min(lastMc.w-1,Math.floor(p[0]*lastMc.w)):-1;
- announce(`${posSay(p)}: ${colorName(...colorAt(p))}${m?m[i]>=128?', nella selezione':', fuori dalla selezione':''}${T.down?', pennello giù':''}`)}
+function sayCursor(){const p=[T.u,T.v];announce(`${posSay(p)}: ${cursorAt(p).text}${T.down?', pennello giù':''}`)}
 // Scelta dello strumento: la foto diventa un'area interattiva (le frecce muovono il cursore) finché lo strumento è attivo.
 function setPhotoTool(id){if(!I.bmp){toast('Apri prima una foto');return}if(T.tool===id){endTool();return}const t=PHOTO_TOOLS[id];T.tool=id;T.pts=[];if(t.sel)T.mode=T.selMode||'new';else if(t.modes&&!t.modes.some(([v])=>v===T.mode))T.mode=t.modes[0][0];T.drag=T.down=false;toolChanged();photoCv.focus();announce(`${PHOTO_TOOLS[id].label}. ${PHOTO_TOOLS[id].keys} Esc chiude lo strumento.`)}
 function endTool(say=true){if(!T.tool)return;const t=PHOTO_TOOLS[T.tool];T.tool=null;T.pts=[];T.drag=T.down=T.wait=false;toolChanged();if(say)announce(t.label+': chiuso')}

@@ -29,7 +29,7 @@ function itemMenu(x,y){const many=selItems(),it=selItem();
 // Zoom: 0 vuol dire che il foglio entra tutto nello spazio disponibile.
 function zoomDraw(f){const k=f?clamp(sheetScale()*f,.05,8):0;Dw.zoom=k;renderSheet();announce(k?`Zoom ${fmtInt(k*100)}%`:'Si vede tutto il foglio')}
 function focusSheetProp(id){if(Dw.sel)selectItem(null,{say:false});$(id)?.focus()}
-function readDrawStatus(){const p=Dw.p,it=selItem(),n=selIds().length;toast(`«${p.title}», foglio ${fmtInt(p.w)} per ${fmtInt(p.h)} pixel${p.bg==='none'?' trasparente':''}, ${p.items.length===1?'un oggetto':p.items.length+' oggetti'}.${p.desc?'':' Senza descrizione.'} ${n>1?describeSel()+'.':it?'Scelto: '+describeItem(it)+`, livello ${p.items.length-p.items.indexOf(it)} di ${p.items.length} dall’alto${it.g?', in un gruppo':''}.`:'Nessun oggetto scelto.'}`)}
+function readDrawStatus(){const p=Dw.p,it=selItem(),n=selIds().length;toast(`«${p.title}», foglio ${fmtInt(p.w)} per ${fmtInt(p.h)} pixel, ${p.bg==='none'?'trasparente':'sfondo '+cName(p.bg)}, ${p.items.length===1?'un oggetto':p.items.length+' oggetti'}.${p.desc?` Descrizione: ${p.desc.trim()}${/[.!?]$/.test(p.desc.trim())?'':'.'}`:' Senza descrizione.'} ${n>1?describeSel()+'.':it?'Scelto: '+describeItem(it)+`, livello ${p.items.length-p.items.indexOf(it)} di ${p.items.length} dall’alto${it.g?', in un gruppo':''}.`:'Nessun oggetto scelto.'}`)}
 // SVG: si apre in ogni programma. Con meta dentro c'è anche il disegno modificabile e, per le immagini regolate e per
 // quelle nascoste, l'originale, con le maschere calcolate compresse; per le immagini da esportare basta il disegno visibile.
 // Le maschere e lo scontorno di un'immagine sono già nei suoi pixel, lo scontorno trasparente in un elemento mask.

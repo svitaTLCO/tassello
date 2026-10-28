@@ -7,7 +7,7 @@ const PLANS=[
  {id:'libera',name:'Tutti i controlli',desc:'Nessun piano: inquadratura, luce, colore, effetti e look insieme.'},
  {id:'social',name:'Foto per i social',desc:'Il formato giusto, una luce viva e un file leggero.',steps:[
   {title:'Formato',text:'Scegli il formato: 4:5 per i post, 9:16 per le storie, quadrato per tutto il resto. Poi sposta il ritaglio sul soggetto.',controls:['ratio','cx','cy'],auto:{ratio:'4:5'}},
-  {title:'Luce',text:'La proposta porta la luce a un livello medio e recupera le zone troppo chiare o troppo scure. Ritocca a occhio.',controls:['exposure','contrast','highlights','shadows'],auto:'light'},
+  {title:'Luce',text:'La proposta porta la luce a un livello medio e recupera le zone troppo chiare o troppo scure. Ritocca i cursori: quando ti fermi senti l’effetto sulla luce.',controls:['exposure','contrast','highlights','shadows'],auto:'light'},
   {title:'Colore',text:'Vividezza ravviva i colori spenti senza esagerare con la pelle; un look dà carattere a tutta la foto.',controls:['vibrance','temp','look','lookAmt'],auto:{adj:{vibrance:20}}},
   {title:'Esporta',text:'JPEG di 2048 pixel sul lato lungo: nitido sui telefoni e leggero da inviare.',export:{format:'jpeg',size:'2048',quality:85}}]},
  {id:'ritratto',name:'Ritratto',desc:'Pelle naturale, volto in luce, sfondo che non distrae.',steps:[

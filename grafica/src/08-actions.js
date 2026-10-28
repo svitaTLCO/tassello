@@ -17,7 +17,7 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  boolUnion:()=>boolOp('union'),boolSubtract:()=>boolOp('subtract'),boolIntersect:()=>boolOp('intersect'),boolExclude:()=>boolOp('exclude'),boolCut,
  addPolygon:()=>addItem('poly'),addStar:()=>addItem('poly',{star:true,sides:5,inner:45,fill:'#e8a33d',name:nextName('poly','Stella')}),addArrow:()=>addItem('arrow'),addBubble:()=>addItem('bubble'),addArrowLine:()=>addItem('line',{end:'arrow',name:nextName('line','Linea con freccia')}),
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
-Object.assign(D_ACTIONS,DRAW_PHOTO_ACTIONS);
+Object.assign(D_ACTIONS,DRAW_PHOTO_ACTIONS,DRAW_DESCRIBE_ACTIONS);
 const COMMON_ACTIONS={filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
  switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),layoutMenu,layoutReset,showPlans:()=>paneToggle('planPane'),showAdjust:()=>paneToggle('adjPane'),showLayers:()=>paneToggle('layPane'),showProps:()=>paneToggle('propPane'),
  themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};

@@ -142,7 +142,7 @@
 </section>
 <aside class="adjust pane tile" id="adjPane" aria-labelledby="adjTitle">
 <div class="pane-head"><h2 id="adjTitle">Regolazioni</h2><button type="button" class="btn sm" data-action="resetAll">Ripristina</button></div>
-<div class="hist-box"><canvas class="hist" id="hist" aria-hidden="true"></canvas><p class="hist-text" id="histText">Nessuna foto aperta.</p></div>
+<div class="hist-box"><div class="hist-nav" id="histNav" tabindex="0" role="application" aria-roledescription="istogramma" aria-label="Istogramma della foto" aria-describedby="histText histKeys"><canvas class="hist" id="hist" aria-hidden="true"></canvas></div><p class="hist-text" id="histText">Nessuna foto aperta.</p></div>
 <div class="step-head" id="stepHead" hidden></div>
 <div class="insp-body" id="adjBody"></div>
 </aside>
@@ -176,9 +176,10 @@
 <button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
 </footer>
 </div>
-<p id="photoHint" class="sr-only">Foto con le regolazioni applicate. Alt+Maiusc+I descrive la foto e la sua luce, la barra rovesciata mostra l’originale, Maiusc+F10 apre il menu.</p>
+<p id="photoHint" class="sr-only">Foto con le regolazioni applicate. Alt+Maiusc+I descrive la foto, Alt+Maiusc+D le zone, i colori e la dominante, Alt+Maiusc+L la luce, Alt+Maiusc+O il confronto con l’originale; X esplora la foto con le frecce; la barra rovesciata mostra l’originale, Maiusc+F10 apre il menu.</p>
 <p id="toolHint" class="sr-only"></p>
-<p id="sheetHint" class="sr-only">Frecce per spostare l’oggetto scelto di un pixel, con Maiusc di dieci; Ctrl più frecce per cambiarne le dimensioni. PgSu e PgGiù scelgono l’oggetto sopra o sotto, Invio porta alle proprietà, Esc toglie la scelta, Canc elimina l’oggetto, Maiusc+F10 apre il menu. Più e meno cambiano lo zoom, zero mostra tutto il foglio. Alt+Maiusc+I descrive il foglio.</p>
+<p id="histKeys" class="sr-only">Frecce a destra e a sinistra per le 16 fasce di tono, Su e Giù per luminosità, rosso, verde e blu, Home e Fine per il nero e il bianco pieni, T per la tabella, D per la descrizione, S per ascoltarlo e Maiusc+S per i tre colori, Esc per fermare l’ascolto o tornare alla foto.</p>
+<p id="sheetHint" class="sr-only">Frecce per spostare l’oggetto scelto di un pixel, con Maiusc di dieci; Ctrl più frecce per cambiarne le dimensioni. PgSu e PgGiù scelgono l’oggetto sopra o sotto, Invio porta alle proprietà, Esc toglie la scelta, Canc elimina l’oggetto, Maiusc+F10 apre il menu. Più e meno cambiano lo zoom, zero mostra tutto il foglio. Alt+Maiusc+I descrive il foglio e l’oggetto scelto, Alt+Maiusc+R i suoi dintorni, Alt+Maiusc+D la composizione.</p>
 <p id="layKeys" class="sr-only">Frecce su e giù per scegliere un oggetto, Alt+Maiusc più frecce per portarlo sopra o sotto gli altri, Invio per le proprietà, F2 per rinominarlo, Canc per eliminarlo, Maiusc+F10 per il menu.</p>
 <p id="planKeys" class="sr-only">Frecce su e giù per scegliere un piano, Invio per iniziarlo dal primo passo.</p>
 <div class="msg" id="toast" role="status" aria-atomic="true" aria-live="polite"></div>

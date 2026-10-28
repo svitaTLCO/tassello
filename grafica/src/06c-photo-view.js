@@ -12,7 +12,7 @@ function geometryPixels(fast=false){const [w,h]=previewSize(fast),r=I.r,key=JSON
 function requestRender(fast=false){renderFast=(renderQueued?renderFast:true)&&fast;if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderPhoto(renderFast)})}
 function renderPhoto(fast){if(!I.bmp){I.stats=null;drawHist();drawAnts();return}const src=geometryPixels(fast);if(!outPx||outPx.width!==src.width||outPx.height!==src.height)outPx=new ImageData(src.width,src.height);
  lastMc=maskCtx(I.r,src.width,src.height,src,srcCache[fast?'fast':'full'].key);const img=I.compare?src:develop(src,outPx,I.r,lutOf(I.r.look),lastMc);if(photoCv.width!==img.width||photoCv.height!==img.height){photoCv.width=img.width;photoCv.height=img.height}photoCtx.putImageData(img,0,0);fitStage();
- const prev=I.stats;I.stats=measure(img);photoCv.classList.toggle('alpha',I.stats.alpha);drawHist();warnClipping(prev,I.stats);photoCv.setAttribute('aria-label',photoLabel());$('photoInfo').textContent=photoInfo();drawAnts()}
+ const prev=I.stats;I.stats=measure(img);photoCv.classList.toggle('alpha',I.stats.alpha);drawHist();warnClipping(prev,I.stats);photoEffect(fast);photoCv.setAttribute('aria-label',photoLabel());$('photoInfo').textContent=photoInfo();drawAnts()}
 // La foto occupa lo spazio disponibile senza deformarsi e senza superare la sua misura reale.
 function fitStage(){if(!I.bmp)return;const st=$('stage'),pad=24,[w,h]=outSize(I.r,I.bmp.width,I.bmp.height),k=Math.min((st.clientWidth-pad)/w,(st.clientHeight-pad)/h,1);photoCv.style.width=Math.max(1,Math.floor(w*k))+'px';photoCv.style.height=Math.max(1,Math.floor(h*k))+'px';placeOverlays()}
 function showPhoto(){const has=!!I.bmp;photoCv.hidden=!has;if(!has){antsCv.hidden=overCv.hidden=true;endTool(false)}$('photoEmpty').hidden=has;$('compareBadge').hidden=!(has&&I.compare);if(!has){for(const slot of Object.values(srcCache))Object.assign(slot,{key:'',px:null});$('photoInfo').textContent='';$('docInfo').textContent=''}requestRender()}
@@ -26,13 +26,15 @@ function drawHist(){const dpr=devicePixelRatio||1,W=Math.max(1,Math.round(histCv
  ctx.beginPath();ctx.moveTo(0,H);for(let i=0;i<256;i++)ctx.lineTo(x(i),scale(st.H[0][i]));ctx.lineTo(W,H);ctx.closePath();ctx.globalAlpha=.45;ctx.fillStyle=palette['hist-l'];ctx.fill();ctx.globalAlpha=1;
  if(!matchMedia('(forced-colors: active)').matches)[['hist-r',1],['hist-g',2],['hist-b',3]].forEach(([c,k])=>{ctx.beginPath();for(let i=0;i<256;i++)ctx[i?'lineTo':'moveTo'](x(i),scale(st.H[k][i]));ctx.strokeStyle=palette[c];ctx.lineWidth=dpr;ctx.globalAlpha=.8;ctx.stroke();ctx.globalAlpha=1});
  const mark=(left)=>{const s=7*dpr;ctx.beginPath();if(left){ctx.moveTo(2,2);ctx.lineTo(2+s,2);ctx.lineTo(2,2+s)}else{ctx.moveTo(W-2,2);ctx.lineTo(W-2-s,2);ctx.lineTo(W-2,2+s)}ctx.closePath();ctx.fillStyle=palette['hist-clip'];ctx.fill()};
- if(st.low>=CLIP_WARN)mark(true);if(st.high>=CLIP_WARN)mark(false);
+ if(st.low>=CLIP_WARN)mark(true);if(st.high>=CLIP_WARN)mark(false);histCursor(ctx,W,H);
  txt.textContent=histSentence(st);txt.classList.toggle('warn',st.low>=CLIP_WARN||st.high>=CLIP_WARN)}
 // Oltre l'1% di pixel bruciati (anche in un canale solo) o neri la foto perde dettagli: si scrive e, quando si passa la
 // soglia, si annuncia.
 const CLIP_WARN=.01,CH_NAME=['rosso','verde','blu'];
 function clipDetail(st){const out=[];if(st.white>=.001&&st.white<st.high-.0005)out.push(`bianco pieno ${fmtPct(st.white,1)}`);const ch=st.ch.map((v,k)=>v>=.001?`nel ${CH_NAME[k]} ${fmtPct(v,1)}`:'').filter(Boolean);if(ch.length)out.push(`colori al massimo ${ch.length>1?ch.slice(0,-1).join(', ')+' e '+ch.at(-1):ch[0]}`);return out.join('; ')}
-function histSentence(st){const parts=[`Luminosità media ${fmtPct(st.mean)}.`];
+// La frase dice anche com'è la luce a parole e la gamma dei toni (dal 2° al 98° percentile): poco più di metà vuol dire
+// foto piatta. Con lo sfondo trasparente si misura solo il soggetto.
+function histSentence(st){const p2=pctl(st,.02),p98=pctl(st,.98),parts=[`Luminosità media ${fmtPct(st.mean)}, foto ${lightWord(st.mean)}; toni da ${fmtInt(p2*100)} a ${fmtPct(p98)}${p98-p2<.5?': poco contrasto':''}.`];if(st.alpha)parts.push('Misurata sul soggetto: lo sfondo è trasparente.');
  if(st.high>=CLIP_WARN){const d=clipDetail(st),col=st.high-st.white>=CLIP_WARN/2;parts.push(`Luci bruciate: ${fmtPct(st.high,1)} della foto${d?` (${d})`:''}, prova ad abbassare Esposizione, Alte luci o Bianchi${col?', o Saturazione per i colori più accesi':''}.`)}
  if(st.low>=CLIP_WARN)parts.push(`Ombre chiuse: ${fmtPct(st.low,1)} della foto, prova ad alzare Ombre o Neri.`);if(st.high<CLIP_WARN&&st.low<CLIP_WARN)parts.push('Nessuna parte bruciata o chiusa.');return parts.join(' ')}
 // L'avviso parte quando ci si ferma, 600 ms dopo l'ultimo disegno, con la quota di quel momento; si sente anche quando si
@@ -41,7 +43,8 @@ let clipSeen=null,clipTimer;
 const clipNow=st=>({bmp:I.bmp,high:st.high>=CLIP_WARN,low:st.low>=CLIP_WARN,hv:st.high,lv:st.low});
 function clipChange(prev,st){const up=[],down=[];if(st.high!==prev.high)(st.high?up:down).push(st.high?`luci bruciate, ${fmtPct(st.hv,1)}`:`luci bruciate da ${fmtPct(prev.hv,1)} a ${fmtPct(st.hv,1)}: recuperate`);if(st.low!==prev.low)(st.low?up:down).push(st.low?`ombre chiuse, ${fmtPct(st.lv,1)}`:`ombre chiuse da ${fmtPct(prev.lv,1)} a ${fmtPct(st.lv,1)}: riaperte`);
  const d=down.join(' e ');return (up.length?'Attenzione: '+up.join(' e ')+'.':'')+(d?(up.length?' ':'')+d[0].toUpperCase()+d.slice(1)+'.':'')}
-function warnClipping(prev,st){if(I.compare)return;const now=clipNow(st);if(!prev||clipSeen?.bmp!==I.bmp){clipSeen=now;return}clearTimeout(clipTimer);if(now.high===clipSeen.high&&now.low===clipSeen.low)return;
+// Con l'effetto delle modifiche acceso l'avviso è dentro l'effetto, che si dice poco dopo: qui si tiene solo il conto.
+function warnClipping(prev,st){if(I.compare)return;const now=clipNow(st);if(!prev||clipSeen?.bmp!==I.bmp||effectOn()){clipSeen=now;clearTimeout(clipTimer);return}clearTimeout(clipTimer);if(now.high===clipSeen.high&&now.low===clipSeen.low)return;
  clipTimer=setTimeout(()=>{if(!I.stats||I.compare||clipSeen?.bmp!==I.bmp)return;const n=clipNow(I.stats),t=clipChange(clipSeen,n);clipSeen=n;if(t)announce(t)},600)}
 // Piani nel riquadro di sinistra: elenco con la scelta attiva, Invio per iniziare.
 let planCursor=0;

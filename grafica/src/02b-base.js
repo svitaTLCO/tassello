@@ -91,6 +91,17 @@ function applyPrefs(){document.documentElement.dataset.theme=prefs.theme==='dark
 let palette={};
 function themeChanged(){const probe=document.createElement('span');document.body.append(probe);const read=v=>{probe.style.color=`var(${v})`;return getComputedStyle(probe).color};palette=Object.fromEntries(['--hist-bg','--hist-l','--hist-r','--hist-g','--hist-b','--hist-clip','--accent','--text-3','--line'].map(v=>[v.slice(2),read(v)]));probe.remove();redrawAll?.()}
 let redrawAll=null;
+// Suoni senza file, con Web Audio, sull'idea dei grafici di Ufficio: note da sinistra a destra nello spazio stereo. Ogni
+// parte ha i valori da 0 a 1 (l'altezza, da 220 a 880 Hz; null è una pausa), se vuole le posizioni nello stereo (pans, da
+// −1 a 1), la forma d'onda, un nome detto quando comincia e le note con un colpo breve in più (marks). toneHalt ferma.
+let toneStop=null;
+function toneHalt(){if(!toneStop)return false;toneStop();toneStop=null;return true}
+function toneSeq(parts,{dur=.08,gap=.015,pause=.45,say='',end='Fine dell’ascolto'}={}){toneHalt();const AC=window.AudioContext||window.webkitAudioContext;if(!AC){toast('Il browser non può suonare: manca Web Audio');return false}
+ const ctx=new AC(),timers=[];let t=ctx.currentTime+.5;
+ const note=(f,at,len,pan,wave,vol)=>{const o=ctx.createOscillator(),g=ctx.createGain(),p=ctx.createStereoPanner?ctx.createStereoPanner():null;o.type=wave;o.frequency.value=f;g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(vol,at+.012);g.gain.linearRampToValueAtTime(0,at+len);o.connect(g);if(p){p.pan.value=clamp(pan,-1,1);g.connect(p);p.connect(ctx.destination)}else g.connect(ctx.destination);o.start(at);o.stop(at+len+.03)};
+ for(const part of parts){const n=part.vals.length;if(part.label){const at=t;timers.push(setTimeout(()=>announce(part.label),Math.max(0,(at-ctx.currentTime-.4)*1000)))}
+  part.vals.forEach((v,i)=>{const pan=part.pans?.[i]??(n>1?-.8+1.6*i/(n-1):0);if(v!=null)note(220*4**clamp(v,0,1),t,dur,pan,part.wave||'sine',.2);if(part.marks?.has(i))note(1760,t,.03,pan,'square',.05);t+=dur+gap});t+=pause}
+ if(say)announce(say);const stop=setTimeout(()=>{toneStop=null;ctx.close();announce(end)},(t-ctx.currentTime)*1000+200);toneStop=()=>{clearTimeout(stop);timers.forEach(clearTimeout);ctx.close()};return true}
 // Lavori lunghi: messaggio nella barra di stato e cursore di attesa; gli errori diventano un messaggio leggibile.
 async function work(label,fn){status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{document.body.style.cursor='';status()}}
 // Il testo della barra di stato si annuncia anche (passa da announce, che accoda), salvo quiet: per esempio le

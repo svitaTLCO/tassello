@@ -23,7 +23,7 @@ const hasFill=it=>it.kind!=='line'&&it.kind!=='image',hasStroke=it=>it.kind!=='t
 function describeSel(){const many=selItems();if(many.length<2)return many[0]?describeItem(many[0]):'Nessun oggetto scelto';const B=boxOf(many);return `${many.length} oggetti scelti: ${namesOf(many)}; insieme x ${fmtInt(B.x)}, y ${fmtInt(B.y)}, ${fmtInt(B.w)} per ${fmtInt(B.h)}`}
 // pick cambia la scelta senza ridisegnare (prima di una modifica, che ridisegna già); setSel ridisegna e annuncia.
 function pick(ids,primary){Dw.sel=primary??null;Dw.multi={for:Dw.sel,ids}}
-function selChanged({say=true}={}){Dw.last={label:'',t:0};Dw.lastAlign='';renderLayers();renderOverlay();renderProps();refreshToggles();sheetWrap.setAttribute('aria-label',sheetLabel());$('lay-'+Dw.sel)?.scrollIntoView({block:'nearest'});if(say)announce(Dw.sel?describeSel():'Nessun oggetto scelto: le proprietà sono quelle del foglio')}
+function selChanged({say=true}={}){Dw.last={label:'',t:0};Dw.lastAlign='';Dw.relBurst=null;renderLayers();renderOverlay();renderProps();refreshToggles();sheetWrap.setAttribute('aria-label',sheetLabel());$('lay-'+Dw.sel)?.scrollIntoView({block:'nearest'});if(say)announce(Dw.sel?describeSel():'Nessun oggetto scelto: le proprietà sono quelle del foglio')}
 function setSel(ids,primary,opts){ids=[...new Set(ids)].filter(itemOf);pick(ids,primary&&ids.includes(primary)?primary:ids.at(-1));selChanged(opts)}
 // Aggiunge o toglie un oggetto, con il suo gruppo, dalla scelta.
 function toggleSel(id){const it=itemOf(id);if(!it)return;const cur=new Set(selIds()),grp=groupIds(it),had=cur.has(id);for(const g of grp)had?cur.delete(g):cur.add(g);const rest=[...cur];setSel(rest,had?rest.at(-1):id,{say:false});
@@ -65,9 +65,10 @@ function snapStep(ax,ay){const many=selItems();if(!many.length){needItem();retur
  for(const [v,lab] of ax?L.X:L.Y)for(const [e,elab] of edges){const d=v-e;if(d*dir>.5&&(!best||Math.abs(d)<Math.abs(best.d)))best={d,lab,elab}}
  if(!best){toast('Nessuna guida in quella direzione');return}editD('Aggancia alla guida',()=>{for(const it of items){if(ax)it.x=n2(it.x+best.d);else it.y=n2(it.y+best.d)}});Dw.lastAlign=alignSay(items);
  announce(`${items.length>1?'Gli oggetti scelti':'«'+items[0].name+'»'}: ${best.elab} è allineato al ${best.lab}`)}
-// Frecce sul foglio: la scelta si sposta; se finisce allineata a qualcosa lo si sente, una volta sola.
-function moveKeys(many,ax,ay,step){const ok=movable(many);if(!ok.length||!editD('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true}))return;const B=boxOf(ok),a=alignSay(ok);
- announce(`${ok.length>1?ok.length+' oggetti, ':''}x ${fmtInt(B.x)}, y ${fmtInt(B.y)}${a&&a!==Dw.lastAlign?'. '+a[0].toUpperCase()+a.slice(1):''}`);Dw.lastAlign=a}
+// Frecce sul foglio: la scelta si sposta; se finisce allineata a qualcosa lo si sente, una volta sola, e così quando
+// comincia o smette di coprire, di toccare o di stare sotto un altro oggetto, o esce dal foglio (relChange, 07l).
+function moveKeys(many,ax,ay,step){const ok=movable(many);if(!ok.length)return;const t=Date.now();if(!Dw.relBurst||t-Dw.relBurst.t>500)Dw.relBurst={base:relKeys(ok)};Dw.relBurst.t=t;const before=Dw.relBurst.base;if(!editD('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true}))return;const B=boxOf(ok),a=alignSay(ok),r=relChange(ok,before);
+ announce(`${ok.length>1?ok.length+' oggetti, ':''}x ${fmtInt(B.x)}, y ${fmtInt(B.y)}${a&&a!==Dw.lastAlign?'. '+a[0].toUpperCase()+a.slice(1):''}${r?'. '+r[0].toUpperCase()+r.slice(1):''}`);Dw.lastAlign=a}
 // Più oggetti si ridimensionano insieme sul riquadro che li contiene: posizioni e misure in proporzione, i testi
 // cambiano dimensione. B è il riquadro di prima, N quello nuovo.
 function scaleItem(it,o,B,N){const sx=B.w?N.w/B.w:1,sy=B.h?N.h/B.h:1,b=box(o),nx=N.x+(b.x-B.x)*sx,ny=N.y+(b.y-B.y)*sy;
