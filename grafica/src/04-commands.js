@@ -163,6 +163,8 @@ def('d','Combina',[
  ['boolSubtract','Sottrai le forme davanti da quella in fondo','subtract','',{short:'Sottrai'}],
  ['boolIntersect','Interseca: tieni l’area in comune','intersect','',{short:'Interseca'}],
  ['boolExclude','Escludi l’area in comune','exclude','',{short:'Escludi'}]]);
+def('d','Tracciato',[
+ ['simplifyPath','Semplifica il tracciato…','simplify','',{short:'Semplifica'}]]);
 def('d','Combina',[
  ['boolCut','Taglia le forme lungo le linee scelte','cutLine','',{short:'Taglia con una linea'}]]);
 def('d','Inserisci',[

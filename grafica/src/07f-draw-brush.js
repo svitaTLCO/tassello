@@ -4,7 +4,8 @@
 // toglie i tratti che tocca. Da tastiera il cursore del foglio disegna: Spazio abbassa e alza la matita.
 $$('svg defs')[0].insertAdjacentHTML('beforeend',`<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></symbol>
 <symbol id="i-brush" viewBox="0 0 24 24"><path d="M20 4c-3 1-8 6-10 9l2 2c3-2 8-7 9-10z"/><path d="M9 14c-3 0-4 2-4 4s-1 2-2 2c3 1 8 0 8-4z"/></symbol>
-<symbol id="i-eraser" viewBox="0 0 24 24"><path d="M4 16l9-10 7 7-7 7H8z"/><path d="M9 11l6 6M8 20h12"/></symbol>`);
+<symbol id="i-eraser" viewBox="0 0 24 24"><path d="M4 16l9-10 7 7-7 7H8z"/><path d="M9 11l6 6M8 20h12"/></symbol>
+<symbol id="i-simplify" viewBox="0 0 24 24"><path d="M3 17l3-4 2 3 3-6 2 4 3-5 2 3 3-4" stroke-dasharray="2 2"/><path d="M3 20C8 9 15 9 21 13"/></symbol>`);
 // Colore e spessori degli strumenti: gli ultimi usati, oppure una misura adatta al foglio.
 const INK_DIV={pen:216,pencil:180,brush:45,eraser:36};
 const inkSize=t=>prefs.drawInk?.[t]||Math.max(1,Math.round(Math.min(Dw.p.w,Dw.p.h)/INK_DIV[t]));
@@ -59,14 +60,16 @@ function brushPoly(pts,size){const r=p=>Math.max(.3,size/2*(.25+.75*p)),arc=(x,y
  const len=pts.reduce((l,p,i)=>i?l+Math.hypot(p[0]-pts[i-1][0],p[1]-pts[i-1][1]):0,0);if(pts.length<2||len<.5){const [x,y,p]=pts[0],w=r(p);return Array.from({length:12},(_,k)=>[x+Math.cos(k*Math.PI/6)*w,y+Math.sin(k*Math.PI/6)*w])}
  const L=[],R=[],ang=[];pts.forEach(([x,y,p],i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],t=Math.atan2(b[1]-a[1],b[0]-a[0]),w=r(p);ang.push(t);L.push([x-Math.sin(t)*w,y+Math.cos(t)*w]);R.push([x+Math.sin(t)*w,y-Math.cos(t)*w])});
  const e=pts.at(-1),f=pts[0];return [...L,...arc(e[0],e[1],r(e[2]),ang.at(-1)+Math.PI/2),...R.reverse(),...arc(f[0],f[1],r(f[2]),ang[0]-Math.PI/2)]}
-// Rifà il contorno di una pennellata dalla sua linea centrale (relativa al riquadro, come i nodi).
-function brushOutline(it){const B=it.brush,poly=rdp(brushPoly(B.pts,B.size),.35);it.subs=[strokeSub(poly,true)];const b=pathBounds(it.subs);normPath(it,true);B.pts=B.pts.map(([x,y,p])=>[n2(x-b.x0),n2(y-b.y0),p])}
-// Un tratto finito diventa un oggetto: i punti sono in coordinate del foglio, con la pressione da 0 a 1. Il tratto fatto
-// da tastiera non trema e non si ammorbidisce: gli angoli restano angoli.
+// Rifà il contorno di una pennellata dalla sua linea centrale (relativa al riquadro, come i nodi), adattato a curve
+// con lo scarto fit: 0,4 pixel dello schermo quando si disegna, o quello scelto con Semplifica.
+function brushOutline(it){const B=it.brush;it.subs=[drawFitSub(brushPoly(B.pts,B.size),true,B.fit||.35)];const b=pathBounds(it.subs);normPath(it,true);B.pts=B.pts.map(([x,y,p])=>[n2(x-b.x0),n2(y-b.y0),p])}
+// Un tratto finito diventa un oggetto: i punti sono in coordinate del foglio, con la pressione da 0 a 1. La matita si
+// adatta a curve già mentre il tratto diventa oggetto, entro mezzo pixel dello schermo: meno nodi, stesso aspetto. Il
+// tratto fatto da tastiera non trema e non si ammorbidisce: gli angoli restano angoli.
 function addStroke(tool,raw,kb=false){const sm=kb?p=>p:soften;const k=sheetScale(),pts=[];for(const p of raw)if(!pts.length||Math.hypot(p[0]-pts.at(-1)[0],p[1]-pts.at(-1)[1])*k>=1)pts.push(p);if(!pts.length)return null;
  const it={id:uid(),kind:'path',tool,name:nextName('path',kindName({tool})),x:0,y:0,w:0,h:0,rot:0,opacity:100,radius:0,subs:[]};
- if(tool==='brush'){Object.assign(it,{fill:inkColor(),stroke:'#1b1b1b',sw:0,brush:{size:inkSize('brush'),pts:rdp(sm(pts),.4/k,inkSize('brush')/2).map(([x,y,p])=>[n2(x),n2(y),Math.round(p*100)/100])}});brushOutline(it)}
- else{const line=pts.length<2?[pts[0],[pts[0][0]+.01,pts[0][1]]]:rdp(sm(pts),kb?.5:1.2/k);Object.assign(it,{fill:'none',stroke:inkColor(),sw:inkSize('pencil'),subs:[strokeSub(line,false)]});normPath(it)}
+ if(tool==='brush'){Object.assign(it,{fill:inkColor(),stroke:'#1b1b1b',sw:0,brush:{size:inkSize('brush'),fit:n2(.4/k),pts:rdp(sm(pts),.4/k,inkSize('brush')/2).map(([x,y,p])=>[n2(x),n2(y),Math.round(p*100)/100])}});brushOutline(it)}
+ else{const line=pts.length<2?[pts[0],[pts[0][0]+.01,pts[0][1]]]:sm(pts);Object.assign(it,{fill:'none',stroke:inkColor(),sw:inkSize('pencil'),subs:[drawFitSub(line,false,kb?.5:.5/k,kb?20:70)]});normPath(it)}
  pick([it.id],it.id);editD(tool==='brush'?'Pennellata':'Tratto di matita',p=>{p.items.push(it)},{props:true});return it}
 const strokeSay=it=>{const L=nodeList(it),f=nodeVis(it,L[0].n),b=box(it);return `«${it.name}», ${it.brush?`larga ${fmtInt(it.brush.size)} pixel`:`spessa ${fmtInt(it.sw)} pixel`}, nel riquadro x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}, ${L.length} nodi`};
 // Il tratto in corso, con il puntatore o con la tastiera: anteprima sopra il foglio, poi un oggetto.
@@ -113,4 +116,19 @@ function toolProps(){const t=Dw.tool;if(!['pen','pencil','brush','eraser'].inclu
  +(t==='brush'?'<small class="hint">Con la penna di una tavoletta lo spessore segue la pressione; disegnando da tastiera i numeri da 1 a 9 la portano dal 10 al 90 per cento, Maiusc+0 al massimo.</small>':'')+'<h3>Foglio</h3>'}
 // Cambiando colore o spessore di un tratto, lo strumento li ricorda per il tratto successivo.
 function strokeProp(it,key,v,need){if(key==='bsize'){it.brush.size=need(1,2000);brushOutline(it);setInk('brush',it.brush.size)}else if(key==='fill'&&it.tool==='brush'||key==='stroke'&&it.tool!=='brush')setInk('color',v);else if(key==='sw'&&it.tool==='pencil')setInk('pencil',num(v))}
+// Semplifica il tracciato: ogni parte si ripercorre fitta e si riadatta a curve con lo scarto scelto (le pennellate
+// semplificano la linea centrale e rifanno il contorno). Il cursore Quantità mostra subito il risultato sul foglio e
+// quanti nodi restano; Annulla rimette tutto com'era, Semplifica è un passo solo da annullare. Una parte che non perde
+// nodi resta com'era.
+const simpTol=a=>.05*Math.pow(400,a/100),simpSay=a=>`${fmtInt(a)}%, scarto fino a ${fmtNum(simpTol(a),simpTol(a)<1?2:1)} pixel`;
+function simplifyItem(it,o,tol){Object.assign(it,structuredClone(o));if(it.brush){it.brush.pts=rdp(it.brush.pts,tol,it.brush.size/2);it.brush.fit=n2(Math.max(it.brush.fit||.35,tol));brushOutline(it);if(nodeList(it).length>=nodeList(o).length)Object.assign(it,structuredClone(o));return}
+ it.subs=it.subs.map(s=>{const p=flatten({x:0,y:0,subs:[s]},1)[0],f=p.length>2&&drawFitSub(p,s.closed,tol,it.tool?70:40);return f&&f.nodes.length<s.nodes.length?f:s});normPath(it)}
+async function simplifyPaths(){const items=needSel().filter(x=>x.kind==='path'&&!x.lock);if(!items.length){if(selItems().length)toast('Semplifica vale per i tracciati, i tratti e i testi diventati tracciati: le forme si convertono prima con Converti in tracciato');return}
+ const orig=items.map(x=>structuredClone(x)),count=()=>items.reduce((s,x)=>s+nodeList(x).length,0),before=count(),say=()=>`Nodi: ${fmtInt(before)} prima, ${fmtInt(count())} dopo.`,
+  apply=a=>{items.forEach((it,i)=>simplifyItem(it,orig[i],simpTol(a)));renderSheet();if($('dlgSimp'))$('dlgSimp').textContent=say()};let a=prefs.drawSimp??40;apply(a);
+ const r=await modal('Semplifica il tracciato',`<p>Toglie i nodi che non servono e riadatta le curve: più alta è la quantità, più il tracciato si allontana da quello di adesso. Il foglio mostra subito il risultato.</p><p id="dlgSimp" role="status">${esc(say())}</p>`,
+  [{id:'amt',label:'Quantità',type:'range',min:1,max:100,value:a,fmt:simpSay}],'Semplifica',{onOpen:pane=>{const el=pane.querySelector('#dlg_amt');el.addEventListener('input',()=>apply(Number(el.value)))}});
+ if(!r){items.forEach((it,i)=>Object.assign(it,structuredClone(orig[i])));renderSheet();announce('Semplifica annullato: i tracciati sono com’erano');return}
+ a=Number(r.amt);prefs.drawSimp=a;savePrefs();apply(a);const after=count();settleD(items.length>1?`Semplifica ${items.length} tracciati`:'Semplifica '+items[0].name,{props:true});
+ announce(`${items.length>1?items.length+' tracciati semplificati':`«${items[0].name}» semplificato`}: da ${fmtInt(before)} a ${fmtInt(after)} nodi${before?`, ${fmtInt((1-after/before)*100)}% in meno`:''}, con uno scarto fino a ${fmtNum(simpTol(a),simpTol(a)<1?2:1)} pixel.`)}
 STATIC_KEYS.d.push(['Matita e pennello',[['Muovi il cursore di dieci pixel (con Maiusc di uno)','← → ↑ ↓'],['Muovi il cursore in diagonale','Home / Fine / PgSu / PgGiù'],['Abbassa o alza la matita: inizia e finisce il tratto','Spazio'],['Annulla il tratto in corso','Esc'],['Pressione del pennello, dal 10 al 90 per cento (Maiusc+0 piena)','1 … 9 / Maiusc+0']]],['Gomma',[['Cancella i tratti sotto il cursore','Spazio']]]);
