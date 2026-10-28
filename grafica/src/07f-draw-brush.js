@@ -22,9 +22,6 @@ function rdp(pts,tol,w=0){if(pts.length<3)return pts;const keep=new Uint8Array(p
  return pts.filter((_,i)=>keep[i])}
 // Media mobile su tre punti: toglie il tremolio del puntatore senza spostare gli estremi.
 const soften=pts=>pts.map((p,i)=>i&&i<pts.length-1?p.map((v,k)=>k<2?(pts[i-1][k]+v*2+pts[i+1][k])/4:v):p);
-// Nodi levigati: curvi dove il tratto gira poco, d'angolo dove gira di colpo (più di 70 gradi).
-function strokeSub(pts,closed){const s={closed,nodes:pts.map(([x,y])=>({x:n2(x),y:n2(y),ix:0,iy:0,ox:0,oy:0,s:0}))},N=s.nodes;
- N.forEach((n,i)=>{const p=N[i-1]||(closed?N.at(-1):null),q=N[i+1]||(closed?N[0]:null);if(p&&q){let d=Math.abs(Math.atan2(q.y-n.y,q.x-n.x)-Math.atan2(n.y-p.y,n.x-p.x));if(d>Math.PI)d=2*Math.PI-d;if(d>1.22)return}smoothNode(s,i)});return s}
 // Adattamento a curve (Schneider): i punti fitti di un tratto diventano poche curve di Bézier che passano a meno di tol
 // pixel dai punti. Gli angoli restano angoli (dove la spezzata semplificata gira più di corner gradi), i tratti dritti
 // diventano rette, i nodi tra due curve sono curvi con le maniglie allineate.
