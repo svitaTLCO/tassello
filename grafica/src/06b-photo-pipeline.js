@@ -78,9 +78,12 @@ function parseCube(text,fileName){let size=0,title='',min=[0,0,0],max=[1,1,1];co
  if([0,1,2].some(k=>!(max[k]>min[k])))throw Error('File .cube non valido: DOMAIN_MAX deve essere maggiore di DOMAIN_MIN.');
  return {name:title||baseName(fileName),size,data:new Float32Array(vals),min,max}}
 // Istogramma e misure della luce: luminosità per l'istogramma, rosso, verde e blu, parti bruciate e chiuse, trasparenza.
-function measure(img){const d=img.data,H=[new Uint32Array(256),new Uint32Array(256),new Uint32Array(256),new Uint32Array(256)],[HY,HR,HG,HB]=H;let n=0,sum=0,hi=0,lo=0,alpha=false;
- for(let i=0;i<d.length;i+=4){if(d[i+3]<250)alpha=true;if(d[i+3]<8)continue;const r=d[i],g=d[i+1],b=d[i+2],y=(54*r+183*g+19*b)>>8;HY[y]++;HR[r]++;HG[g]++;HB[b]++;sum+=y;n++;if(r>=253&&g>=253&&b>=253)hi++;else if(r<=2&&g<=2&&b<=2)lo++}
- return {H,n,mean:n?sum/n/255:0,high:n?hi/n:0,low:n?lo/n:0,alpha}}
+// Sono bruciati anche i pixel con un canale solo al massimo (un fiore rosso saturo perde i dettagli come il cielo bianco):
+// high li conta tutti, white solo il bianco pieno, ch[k] quelli bruciati nel solo rosso, verde o blu (o in due canali).
+function measure(img){const d=img.data,H=[new Uint32Array(256),new Uint32Array(256),new Uint32Array(256),new Uint32Array(256)],[HY,HR,HG,HB]=H,ch=[0,0,0];let n=0,sum=0,hi=0,wh=0,lo=0,alpha=false;
+ for(let i=0;i<d.length;i+=4){if(d[i+3]<250)alpha=true;if(d[i+3]<8)continue;const r=d[i],g=d[i+1],b=d[i+2],y=(54*r+183*g+19*b)>>8;HY[y]++;HR[r]++;HG[g]++;HB[b]++;sum+=y;n++;
+  if(r>=253||g>=253||b>=253){hi++;if(r>=253&&g>=253&&b>=253)wh++;else{if(r>=253)ch[0]++;if(g>=253)ch[1]++;if(b>=253)ch[2]++}}else if(r<=2&&g<=2&&b<=2)lo++}
+ return {H,n,mean:n?sum/n/255:0,high:n?hi/n:0,white:n?wh/n:0,ch:ch.map(c=>n?c/n:0),low:n?lo/n:0,alpha}}
 function pctl(st,p){const HY=st.H[0],t=st.n*p;let acc=0;for(let i=0;i<256;i++){acc+=HY[i];if(acc>=t)return i/255}return 1}
 // Regolazione automatica, dai pixel inquadrati e non ancora regolati: luce media verso il grigio medio,
 // bianchi e neri verso i bordi dell'istogramma, ombre e alte luci se servono, bilanciamento del bianco attenuato.

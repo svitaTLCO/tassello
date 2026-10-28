@@ -67,7 +67,7 @@ function snapStep(ax,ay){const many=selItems();if(!many.length){needItem();retur
  announce(`${items.length>1?'Gli oggetti scelti':'«'+items[0].name+'»'}: ${best.elab} è allineato al ${best.lab}`)}
 // Frecce sul foglio: la scelta si sposta; se finisce allineata a qualcosa lo si sente, una volta sola.
 function moveKeys(many,ax,ay,step){const ok=movable(many);if(!ok.length||!editD('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true}))return;const B=boxOf(ok),a=alignSay(ok);
- announce(`${ok.length>1?ok.length+' oggetti, ':''}x ${fmtInt(B.x)}, y ${fmtInt(B.y)}${a&&a!==Dw.lastAlign?'. '+a:''}`);Dw.lastAlign=a}
+ announce(`${ok.length>1?ok.length+' oggetti, ':''}x ${fmtInt(B.x)}, y ${fmtInt(B.y)}${a&&a!==Dw.lastAlign?'. '+a[0].toUpperCase()+a.slice(1):''}`);Dw.lastAlign=a}
 // Più oggetti si ridimensionano insieme sul riquadro che li contiene: posizioni e misure in proporzione, i testi
 // cambiano dimensione. B è il riquadro di prima, N quello nuovo.
 function scaleItem(it,o,B,N){const sx=B.w?N.w/B.w:1,sy=B.h?N.h/B.h:1,b=box(o),nx=N.x+(b.x-B.x)*sx,ny=N.y+(b.y-B.y)*sy;
@@ -75,8 +75,9 @@ function scaleItem(it,o,B,N){const sx=B.w?N.w/B.w:1,sy=B.h?N.h/B.h:1,b=box(o),nx
  const nb=box(it);it.x=n2(it.x+nx-nb.x);it.y=n2(it.y+ny-nb.y)}
 function scaleDrag(d,dx,dy,shift){const B=d.B,H=d.h;let x=B.x,y=B.y,w=B.w,h=B.h;if(H.includes('e'))w=B.w+dx;if(H.includes('s'))h=B.h+dy;if(H.includes('w')){w=B.w-dx;x=B.x+dx}if(H.includes('n')){h=B.h-dy;y=B.y+dy}w=Math.max(1,w);h=Math.max(1,h);
  if(shift&&B.w&&B.h){const k=Math.max(w/B.w,h/B.h);w=B.w*k;h=B.h*k;if(H.includes('w'))x=B.x+B.w-w;if(H.includes('n'))y=B.y+B.h-h}for(const [it,o] of d.os)scaleItem(it,o,B,{x,y,w,h})}
-function scaleKeys(many,ax,ay,step){const ok=movable(many,'ridimensionarlo');if(!ok.length)return;const B=boxOf(ok),N={x:B.x,y:B.y,w:Math.max(1,B.w+ax*step),h:Math.max(1,B.h+ay*step)},os=ok.map(x=>[x,structuredClone(x)]);
- if(editD('Ridimensiona',()=>{for(const [it,o] of os)scaleItem(it,o,B,N)},{merge:true}))announce(`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}`)}
+// Se tra gli oggetti c'è chi mantiene le proporzioni (un'immagine, di solito), il riquadro comune cresce in proporzione.
+function scaleKeys(many,ax,ay,step){const ok=movable(many,'ridimensionarlo');if(!ok.length)return;const B=boxOf(ok),keep=ok.some(keepsRatio),k=ax?Math.max(1,B.w+ax*step)/B.w:Math.max(1,B.h+ay*step)/B.h,N=keep?{x:B.x,y:B.y,w:B.w*k,h:B.h*k}:{x:B.x,y:B.y,w:Math.max(1,B.w+ax*step),h:Math.max(1,B.h+ay*step)},os=ok.map(x=>[x,structuredClone(x)]);
+ if(editD('Ridimensiona',()=>{for(const [it,o] of os)scaleItem(it,o,B,N)},{merge:true}))announce(`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}${keep?', proporzioni mantenute':''}`)}
 // Proprietà di più oggetti: posizione del riquadro comune, colori, contorno e opacità per tutti, e i comandi per disporli.
 function multiProps(many){const B=boxOf(many),f=many.find(x=>hasFill(x)&&x.fill!=='none'),s=many.find(hasStroke),btn=id=>{const c=C[id];return `<button type="button" class="btn sm" id="pm-${id}" data-action="${id}"${c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:''} aria-label="${esc(c.label)}" data-tip="${esc(c.label)}">${ICON(c.icon)}</button>`};
  return `<p class="hint">${esc(describeSel())}. Qui le modifiche valgono per tutti; per un oggetto solo sceglilo nei livelli.</p><div class="row2"><div>${fld('mx','X',n2(B.x))}</div><div>${fld('my','Y',n2(B.y))}</div></div>`

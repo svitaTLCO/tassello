@@ -30,14 +30,16 @@ let spoken=0,keyAct={seq:0,sig:''};
 addEventListener('keydown',e=>{keyAct={seq:keyAct.seq+1,sig:[e.ctrlKey||e.metaKey,e.altKey,e.shiftKey,e.key].join()}},true);
 addEventListener('pointerdown',()=>{keyAct={seq:keyAct.seq+1,sig:'puntatore'}},true);
 const queueSay=(list,msg)=>{const {seq,sig}=keyAct;list=list.filter(p=>p.seq===seq||p.sig!==sig);if(list.at(-1)?.msg!==msg)list.push({msg,seq,sig});return list};
+// I messaggi accodati diventano una frase dopo l'altra: si mette il punto a quelli che non ce l'hanno.
+const sayJoin=list=>list.map(p=>p.msg).reduce((a,m)=>a?a+(/[.!?…:;]$/.test(a)?' ':'. ')+m:m,'');
 let toastTimer,toastWait=null,toastList=[];
 // Messaggio temporaneo, letto dagli screen reader: resta a schermo in proporzione alla lunghezza.
-function toast(message){message=String(message??'').trim();if(!message)return;spoken++;const box=$('toast');clearTimeout(toastTimer);clearTimeout(toastWait);toastList=queueSay(toastList,message);const text=toastList.map(p=>p.msg).join(' ');box.textContent='';
+function toast(message){message=String(message??'').trim();if(!message)return;spoken++;const box=$('toast');clearTimeout(toastTimer);clearTimeout(toastWait);toastList=queueSay(toastList,message);const text=sayJoin(toastList);box.textContent='';
  toastWait=setTimeout(()=>{toastList=[];box.textContent=text;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,text.length*55))}
 // Con join il messaggio si aggiunge anche a quello appena letto, entro 800 ms (per esempio un avviso dopo Annulla).
 let liveTimer,liveList=[],lastSaid={t:0,msg:''};
 function announce(msg,{join=false}={}){msg=String(msg??'').trim();if(!msg)return;spoken++;const el=$('srLive');if(!liveList.length&&join&&Date.now()-lastSaid.t<800)liveList=[{msg:lastSaid.msg,seq:-1,sig:''}];
- liveList=queueSay(liveList,msg);const text=liveList.map(p=>p.msg).join(' ');lastSaid={t:Date.now(),msg:text};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{liveList=[];el.textContent=text},70)}
+ liveList=queueSay(liveList,msg);const text=sayJoin(liveList);lastSaid={t:Date.now(),msg:text};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{liveList=[];el.textContent=text},70)}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden],.hidden')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body)t.focus({preventScroll:true})}

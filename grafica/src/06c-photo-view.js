@@ -28,11 +28,21 @@ function drawHist(){const dpr=devicePixelRatio||1,W=Math.max(1,Math.round(histCv
  const mark=(left)=>{const s=7*dpr;ctx.beginPath();if(left){ctx.moveTo(2,2);ctx.lineTo(2+s,2);ctx.lineTo(2,2+s)}else{ctx.moveTo(W-2,2);ctx.lineTo(W-2-s,2);ctx.lineTo(W-2,2+s)}ctx.closePath();ctx.fillStyle=palette['hist-clip'];ctx.fill()};
  if(st.low>=CLIP_WARN)mark(true);if(st.high>=CLIP_WARN)mark(false);
  txt.textContent=histSentence(st);txt.classList.toggle('warn',st.low>=CLIP_WARN||st.high>=CLIP_WARN)}
-// Oltre l'1% di pixel completamente bianchi o neri la foto perde dettagli: si scrive e, al primo passaggio, si annuncia.
-const CLIP_WARN=.01;
-function histSentence(st){const parts=[`Luminosità media ${fmtPct(st.mean)}.`];if(st.high>=CLIP_WARN)parts.push(`Luci bruciate: ${fmtPct(st.high,1)} della foto, prova ad abbassare Esposizione, Alte luci o Bianchi.`);if(st.low>=CLIP_WARN)parts.push(`Ombre chiuse: ${fmtPct(st.low,1)} della foto, prova ad alzare Ombre o Neri.`);if(st.high<CLIP_WARN&&st.low<CLIP_WARN)parts.push('Nessuna parte bruciata o chiusa.');return parts.join(' ')}
-let clipSaid=0;
-function warnClipping(prev,st){if(!prev||I.compare||Date.now()-clipSaid<1500)return;const msg=[];if(st.high>=CLIP_WARN&&prev.high<CLIP_WARN)msg.push(`luci bruciate, ${fmtPct(st.high,1)}`);if(st.low>=CLIP_WARN&&prev.low<CLIP_WARN)msg.push(`ombre chiuse, ${fmtPct(st.low,1)}`);if(msg.length){clipSaid=Date.now();announce('Attenzione: '+msg.join(' e '),{join:true})}}
+// Oltre l'1% di pixel bruciati (anche in un canale solo) o neri la foto perde dettagli: si scrive e, quando si passa la
+// soglia, si annuncia.
+const CLIP_WARN=.01,CH_NAME=['rosso','verde','blu'];
+function clipDetail(st){const out=[];if(st.white>=.001&&st.white<st.high-.0005)out.push(`bianco pieno ${fmtPct(st.white,1)}`);const ch=st.ch.map((v,k)=>v>=.001?`nel ${CH_NAME[k]} ${fmtPct(v,1)}`:'').filter(Boolean);if(ch.length)out.push(`colori al massimo ${ch.length>1?ch.slice(0,-1).join(', ')+' e '+ch.at(-1):ch[0]}`);return out.join('; ')}
+function histSentence(st){const parts=[`Luminosità media ${fmtPct(st.mean)}.`];
+ if(st.high>=CLIP_WARN){const d=clipDetail(st),col=st.high-st.white>=CLIP_WARN/2;parts.push(`Luci bruciate: ${fmtPct(st.high,1)} della foto${d?` (${d})`:''}, prova ad abbassare Esposizione, Alte luci o Bianchi${col?', o Saturazione per i colori più accesi':''}.`)}
+ if(st.low>=CLIP_WARN)parts.push(`Ombre chiuse: ${fmtPct(st.low,1)} della foto, prova ad alzare Ombre o Neri.`);if(st.high<CLIP_WARN&&st.low<CLIP_WARN)parts.push('Nessuna parte bruciata o chiusa.');return parts.join(' ')}
+// L'avviso parte quando ci si ferma, 600 ms dopo l'ultimo disegno, con la quota di quel momento; si sente anche quando si
+// torna sotto la soglia. clipSeen ricorda lo stato già detto (o quello all'apertura della foto, che non si annuncia).
+let clipSeen=null,clipTimer;
+const clipNow=st=>({bmp:I.bmp,high:st.high>=CLIP_WARN,low:st.low>=CLIP_WARN,hv:st.high,lv:st.low});
+function clipChange(prev,st){const up=[],down=[];if(st.high!==prev.high)(st.high?up:down).push(st.high?`luci bruciate, ${fmtPct(st.hv,1)}`:`luci bruciate da ${fmtPct(prev.hv,1)} a ${fmtPct(st.hv,1)}: recuperate`);if(st.low!==prev.low)(st.low?up:down).push(st.low?`ombre chiuse, ${fmtPct(st.lv,1)}`:`ombre chiuse da ${fmtPct(prev.lv,1)} a ${fmtPct(st.lv,1)}: riaperte`);
+ const d=down.join(' e ');return (up.length?'Attenzione: '+up.join(' e ')+'.':'')+(d?(up.length?' ':'')+d[0].toUpperCase()+d.slice(1)+'.':'')}
+function warnClipping(prev,st){if(I.compare)return;const now=clipNow(st);if(!prev||clipSeen?.bmp!==I.bmp){clipSeen=now;return}clearTimeout(clipTimer);if(now.high===clipSeen.high&&now.low===clipSeen.low)return;
+ clipTimer=setTimeout(()=>{if(!I.stats||I.compare||clipSeen?.bmp!==I.bmp)return;const n=clipNow(I.stats),t=clipChange(clipSeen,n);clipSeen=n;if(t)announce(t)},600)}
 // Piani nel riquadro di sinistra: elenco con la scelta attiva, Invio per iniziare.
 let planCursor=0;
 function renderPlans(){const list=$('planList');planCursor=clamp(planCursor,0,PLANS.length-1);list.innerHTML=PLANS.map((p,i)=>`<div role="option" id="plan-${p.id}" class="lb-item plan-item${i===planCursor?' active':''}" data-plan="${p.id}" aria-selected="${p.id===I.plan}"><span class="n">${esc(p.name)}</span><span class="d">${esc(p.desc)}</span></div>`).join('');list.setAttribute('aria-activedescendant','plan-'+PLANS[planCursor].id)}

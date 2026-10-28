@@ -25,7 +25,11 @@ function retouchSpot(p){if(!lastMc)return;const s=spotSource(p);if(!s){announce(
  addRetouch({t:'heal',x,y,sx,sy,r:U5(T.size/2)},'Correttivo puntuale',`Corretto a ${posSay(p)}, con la zona ${placeDir(p,s)}.`)}
 const placeDir=(p,s)=>{const a=Math.atan2(s[1]-p[1],s[0]-p[0])*180/Math.PI,dirs=['a destra','in basso a destra','sotto','in basso a sinistra','a sinistra','in alto a sinistra','sopra','in alto a destra'];return dirs[Math.round(((a+360)%360)/45)%8]};
 function retouchClone(a,b){const [sx,sy]=uvUnits(a),[x,y]=uvUnits(b);addRetouch({t:T.heal?'heal':'clone',x,y,sx,sy,r:U5(T.size/2),h:T.hard},T.heal?'Timbro con riparazione':'Timbro clone',`Copiata la zona a ${posSay(a)} su ${posSay(b)}.`)}
-function retouchEye(p){const [x,y]=uvUnits(p);addRetouch({t:'eye',x,y,r:U5(T.size/2)},'Occhi rossi',`Rosso tolto a ${posSay(p)}.`)}
+// Prima di togliere il rosso si guarda se nel cerchio c'è: la parte di pixel che redEye cambierebbe davvero.
+function redShare([u,v]){if(!lastMc)return 0;const px=lastMc.px,w=px.width,h=px.height,d=px.data,cx=u*w,cy=v*h,R=Math.max(1,T.size/2*lastMc.k);let n=0,red=0;
+ for(let y=Math.max(0,Math.floor(cy-R));y<=Math.min(h-1,Math.ceil(cy+R));y++)for(let x=Math.max(0,Math.floor(cx-R));x<=Math.min(w-1,Math.ceil(cx+R));x++){if(Math.hypot(x+.5-cx,y+.5-cy)>=R)continue;const o=(y*w+x)*4;n++;if(d[o]/((d[o+1]+d[o+2])/2+8)>1.4)red++}return n?red/n:0}
+function retouchEye(p){const q=redShare(p);if(q<.02){announce(`Nel cerchio a ${posSay(p)} non c’è rosso da togliere: sposta il cursore sulla pupilla o allarga il cerchio con le parentesi quadre.`);return}
+ const [x,y]=uvUnits(p);addRetouch({t:'eye',x,y,r:U5(T.size/2)},'Occhi rossi',`Rosso tolto a ${posSay(p)}: era il ${fmtPct(q)} del cerchio.`)}
 function retouchLast(){if(!I.r.heal?.length){toast('Non ci sono ritocchi');return}edit('Togli l’ultimo ritocco',r=>{r.heal=r.heal.slice(0,-1)},{panel:true});announce(`Tolto l’ultimo ritocco: ne restano ${I.r.heal.length}`)}
 function retouchClear(){if(!I.r.heal?.length){toast('Non ci sono ritocchi');return}edit('Togli tutti i ritocchi',r=>{r.heal=[]},{panel:true});announce('Tolti tutti i ritocchi: Ctrl+Z per riaverli')}
 function retouchSay(r=I.r){const l=r.heal||[],n=t=>l.filter(o=>o.t===t).length,pl=(k,one,many)=>k===1?one:k+' '+many;
