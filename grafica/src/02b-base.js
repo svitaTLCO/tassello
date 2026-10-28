@@ -24,7 +24,7 @@ const fmtBytes=n=>n>=1e9?fmtNum(n/1e9,2)+' GB':n>=1e6?fmtNum(n/1e6,1)+' MB':fmtI
 const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
 let toastTimer;
 // Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
-function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),4200)}
+function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,String(message).length*55))}
 // Con join il messaggio si aggiunge a quello appena annunciato invece di sostituirlo (per esempio un avviso dopo Annulla).
 let liveTimer,lastSaid={t:0,msg:''};function announce(msg,{join=false}={}){const el=$('srLive');if(join&&Date.now()-lastSaid.t<800)msg=lastSaid.msg+' '+msg;lastSaid={t:Date.now(),msg};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
