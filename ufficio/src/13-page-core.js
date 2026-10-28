@@ -167,21 +167,26 @@ function pgLayout(p,insts,{raw=false}={}){const res=new Map(),jobs=new Map(),tot
    const r=frameRegions(it)[0],free=r.y+r.h-(f.lines.at(-1).top+f.lines.at(-1).lh),d=free*(it.valign==='middle'?.5:1);if(d>0)f.lines=f.lines.map(l=>({...l,top:l.top+d,base:l.base+d}))}}
  return res}
 // Scontorno del testo: le cornici con wrap ('box' il riquadro, 'shape' la forma) allontanano di wrapGap il testo delle altre
-// cornici della stessa pagina (e del suo mastro). Le cornici di testo ruotate non ne tengono conto.
-function pgWrapObs(I,it){if(pgRot(it))return null;const m=pgMasterOf(I.pg),A=pgRectOf(it),out=[];
- for(const o of [...(m?.items||[]),...I.pg.items]){if(!o.wrap||o===it||o.hidden)continue;let B=pgBoxOf(o);if(o.kind==='line'){const e=Math.max(o.sw,.5)/2;B={x:B.x-e,y:B.y-e,w:B.w+2*e,h:B.h+2*e}}const g=o.wrapGap||0;
-  if(B.x-g<A.x+A.w&&B.x+B.w+g>A.x&&B.y-g<A.y+A.h&&B.y+B.h+g>A.y)out.push({it:o,B,g,mode:o.wrap==='shape'&&o.kind!=='line'?'shape':'box'})}return out.length?out:null}
+// cornici della stessa pagina (e del suo mastro). In una cornice di testo ruotata le righe sono diritte rispetto alla
+// cornice: l'ostacolo si guarda dal suo punto di vista, come una forma (il riquadro sulla pagina diventa un rettangolo inclinato).
+function pgWrapObs(I,it){const m=pgMasterOf(I.pg),A=pgRectOf(it),fr=pgRot(it)?it:null,out=[];
+ for(const o of [...(m?.items||[]),...I.pg.items]){if(!o.wrap||o===it||o.hidden)continue;let B=pgBoxOf(o);if(o.kind==='line'){const e=Math.max(o.sw,.5)/2;B={x:B.x-e,y:B.y-e,w:B.w+2*e,h:B.h+2*e}}const g=o.wrapGap||0,box=o.wrap!=='shape'||o.kind==='line';let page=null;
+  if(fr){const R=pgRectOf(o),P=(box?[[B.x,B.y],[B.x+B.w,B.y],[B.x,B.y+B.h],[B.x+B.w,B.y+B.h]]:[[R.x,R.y],[R.x+R.w,R.y],[R.x,R.y+R.h],[R.x+R.w,R.y+R.h]].map(([x,y])=>{const q=pgTurn(o,x,y);return [q.x,q.y]})).map(([x,y])=>pgTurn(fr,x,y,true)),X=P.map(q=>q.x),Y=P.map(q=>q.y);
+   if(box)page=B;B={x:Math.min(...X),y:Math.min(...Y),w:Math.max(...X)-Math.min(...X),h:Math.max(...Y)-Math.min(...Y)}}
+  if(B.x-g<A.x+A.w&&B.x+B.w+g>A.x&&B.y-g<A.y+A.h&&B.y+B.h+g>A.y)out.push({it:o,B,g,mode:fr||!box?'shape':'box',fr,page})}return out.length?out:null}
 // Il tratto libero più largo della riga tra y e y+h; null se è più stretto di minW. Senza ostacoli, tutta la colonna.
 function pgFreeSpan(R,y,h,minW){let segs=[[R.x,R.x+R.w]],hit=false;for(const o of R.obs){const e=pgWrapExt(o,y,y+h);if(!e||e[1]<=R.x||e[0]>=R.x+R.w)continue;hit=true;segs=segs.flatMap(([a,b])=>e[1]<=a||e[0]>=b?[[a,b]]:[...(e[0]>a?[[a,e[0]]]:[]),...(e[1]<b?[[e[1],b]]:[])])}
  if(!hit)return {x:R.x,w:R.w};let best=null;for(const [a,b] of segs)if(b-a>=minW&&(!best||b-a>best.w))best={x:a,w:b-a};return best}
 // Quanto occupa un ostacolo in orizzontale tra y0 e y1, distanza compresa: il riquadro, o la forma letta riga per riga.
-function pgWrapExt(o,y0,y1){const {B,g}=o;if(y1<=B.y-g||y0>=B.y+B.h+g)return null;if(o.mode==='box')return [B.x-g,B.x+B.w+g];const P=o.prof||(o.prof=pgWrapProfile(o.it,B));let a=Infinity,b=-Infinity;
+function pgWrapExt(o,y0,y1){const {B,g}=o;if(y1<=B.y-g||y0>=B.y+B.h+g)return null;if(o.mode==='box')return [B.x-g,B.x+B.w+g];const P=o.prof||(o.prof=pgWrapProfile(o.it,B,o.fr,o.page));let a=Infinity,b=-Infinity;
  for(let r=Math.max(0,Math.floor((y0-g-B.y)*P.k)),r1=Math.min(P.rows-1,Math.ceil((y1+g-B.y)*P.k));r<=r1;r++)if(P.min[r]<=P.max[r]){a=Math.min(a,P.min[r]);b=Math.max(b,P.max[r])}return a<=b?[B.x+a/P.k-g,B.x+(b+1)/P.k+g]:null}
 // La forma disegnata in piccolo (al più 160 punti per lato, ruotata come sulla pagina): per ogni riga il primo e l'ultimo punto pieno.
+// Con fr (la cornice di testo ruotata) si disegna come la vede la cornice; con page si disegna quel riquadro della pagina.
 const pgWrapCache=new Map();
-function pgWrapProfile(it,B){const key=JSON.stringify([it.kind,it.x,it.y,it.w,it.h,it.rot||0,it.mask||'']);let P=pgWrapCache.get(key);if(P)return P;const k=Math.min(1,160/Math.max(B.w,B.h,1)),W=Math.max(1,Math.ceil(B.w*k)),H=Math.max(1,Math.ceil(B.h*k)),c=new OffscreenCanvas(W,H).getContext('2d');
- c.setTransform(k,0,0,k,-B.x*k,-B.y*k);const r=pgRot(it)*Math.PI/180,{x,y,w,h}=pgRectOf(it);if(r){c.translate(x+w/2,y+h/2);c.rotate(r);c.translate(-x-w/2,-y-h/2)}
- if(it.kind==='shape'){const E=pgElemPath(it),path=new Path2D();path.addPath(new Path2D(E.d),new DOMMatrix(E.m));c.fill(path,E.rule?'evenodd':'nonzero')}else c.fill(new Path2D(it.kind==='ellipse'?`M${x} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x+w} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x} ${y+h/2}Z`:it.kind==='tri'?`M${x} ${y}L${x+w} ${y}L${x+w/2} ${y+h}Z`:it.kind==='image'&&it.mask&&it.mask!=='rect'?pgMaskPath(it):`M${x} ${y}h${w}v${h}h${-w}Z`));
+function pgWrapProfile(it,B,fr=null,page=null){const key=JSON.stringify([it.kind,it.x,it.y,it.w,it.h,it.rot||0,it.mask||'',it.shape||'',fr?[fr.x,fr.y,fr.w,fr.h,fr.rot]:0,page]);let P=pgWrapCache.get(key);if(P)return P;const k=Math.min(1,160/Math.max(B.w,B.h,1)),W=Math.max(1,Math.ceil(B.w*k)),H=Math.max(1,Math.ceil(B.h*k)),c=new OffscreenCanvas(W,H).getContext('2d');
+ c.setTransform(k,0,0,k,-B.x*k,-B.y*k);if(fr){const f=pgRectOf(fr);c.translate(f.x+f.w/2,f.y+f.h/2);c.rotate(-pgRot(fr)*Math.PI/180);c.translate(-f.x-f.w/2,-f.y-f.h/2)}
+ const r=pgRot(it)*Math.PI/180,{x,y,w,h}=pgRectOf(it);if(page)c.fillRect(page.x,page.y,page.w,page.h);else{if(r){c.translate(x+w/2,y+h/2);c.rotate(r);c.translate(-x-w/2,-y-h/2)}
+ if(it.kind==='shape'){const E=pgElemPath(it),path=new Path2D();path.addPath(new Path2D(E.d),new DOMMatrix(E.m));c.fill(path,E.rule?'evenodd':'nonzero')}else c.fill(new Path2D(it.kind==='ellipse'?`M${x} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x+w} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x} ${y+h/2}Z`:it.kind==='tri'?`M${x} ${y}L${x+w} ${y}L${x+w/2} ${y+h}Z`:it.kind==='image'&&it.mask&&it.mask!=='rect'?pgMaskPath(it):`M${x} ${y}h${w}v${h}h${-w}Z`))}
  const d=c.getImageData(0,0,W,H).data,min=new Float32Array(H).fill(Infinity),max=new Float32Array(H).fill(-Infinity);for(let yy=0;yy<H;yy++)for(let xx=0;xx<W;xx++)if(d[(yy*W+xx)*4+3]>40){if(xx<min[yy])min[yy]=xx;max[yy]=xx}
  P={k,rows:H,min,max};if(pgWrapCache.size>300)pgWrapCache.clear();pgWrapCache.set(key,P);return P}
 // Immagine di una cornice: quella scelta, oppure quella che ha per nome il valore del campo dei dati.

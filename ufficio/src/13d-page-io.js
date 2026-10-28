@@ -88,9 +88,11 @@ async function pgExportPng(){const p=Pg.p;pgStorySync();const mm=pgMM(),all=pgIn
 function pagePrintCss(){const p=Pg.p;if(p?.tiles?.on)return pgTilePrintCss();if(p&&pgBleedOn(p)){const S=pgSheet(p);return `@page{size:${pr2(S.w/MM)}mm ${pr2(S.h/MM)}mm;margin:0}`}return p?`@page{size:${pr2(p.w/MM)}mm ${pr2(p.h/MM)}mm;margin:0}`:'@page{size:A4 portrait;margin:18mm}'}
 let pgPrinting=false;
 function pgBuildPrint(){const p=Pg.p,box=$('pgPrint');if(!p){box.replaceChildren();return}Pg.hq=true;try{pgPrintMarkup(p,box)}finally{Pg.hq=false}}
-function pgPrintMarkup(p,box){const insts=pgInstances(p),lay=pgLayout(p,insts);if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay);return}
+function pgPrintMarkup(p,box){const insts=pgInstances(p),lay=pgLayout(p,insts);
  // Dopo ogni pagina, una copia non visibile delle sue tabelle: lo screen reader le legge come tabelle vere anche nel PDF.
+ // Nella stampa a tessere le copie vanno dopo tutti i fogli.
  const sr=I=>{const m=pgMasterOf(I.pg),ctx={n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()};return [...(m?.items||[]),...I.pg.items].filter(it=>it.kind==='table'&&!it.hidden).map(it=>pgTableHtml(it,ctx,'sr-only')).join('')};
+ if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay)+insts.map(sr).join('');return}
  box.innerHTML=insts.map((I,ii)=>(pgBleedOn(p)?pgSheetSvg(p,I,ii,lay,m=>m.url):`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" style="width:${pr2(p.w/MM)}mm;height:${pr2(p.h/MM)}mm" role="img" aria-label="Pagina ${I.n}${I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:insts.length,row:I.row,title:p.title,date:pgToday()})):''}">${pgPageSvg(p,I,ii,lay)}</svg>`)+sr(I)).join('')}
 window.addEventListener('beforeprint',()=>{if(isPage()&&!pgPrinting)pgBuildPrint()});window.addEventListener('afterprint',()=>{pgPrinting=false;$('pgPrint').replaceChildren()});
 async function pgPrint(){const p=Pg.p;pgStorySync();await pgPreloadFieldImages(pgInstances(p));await pgWork('Preparazione delle foto regolate',()=>pgDevPreload(pgInstances(p)));pgBuildPrint();pgPrinting=true;
