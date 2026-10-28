@@ -89,11 +89,13 @@ function pagePrintCss(){const p=Pg.p;if(p?.tiles?.on)return pgTilePrintCss();if(
 let pgPrinting=false;
 function pgBuildPrint(){const p=Pg.p,box=$('pgPrint');if(!p){box.replaceChildren();return}Pg.hq=true;try{pgPrintMarkup(p,box)}finally{Pg.hq=false}}
 function pgPrintMarkup(p,box){const insts=pgInstances(p),lay=pgLayout(p,insts);
- // Dopo ogni pagina, una copia non visibile delle sue tabelle: lo screen reader le legge come tabelle vere anche nel PDF.
- // Nella stampa a tessere le copie vanno dopo tutti i fogli.
- const sr=I=>{const m=pgMasterOf(I.pg),ctx={n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()};return [...(m?.items||[]),...I.pg.items].filter(it=>it.kind==='table'&&!it.hidden).map(it=>pgTableHtml(it,ctx,'sr-only')).join('')};
- if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay)+insts.map(sr).join('');return}
- box.innerHTML=insts.map((I,ii)=>(pgBleedOn(p)?pgSheetSvg(p,I,ii,lay,m=>m.url):`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" style="width:${pr2(p.w/MM)}mm;height:${pr2(p.h/MM)}mm" role="img" aria-label="Pagina ${I.n}${I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:insts.length,row:I.row,title:p.title,date:pgToday()})):''}">${pgPageSvg(p,I,ii,lay)}</svg>`)+sr(I)).join('')}
+ // Dentro ogni pagina, una copia delle sue tabelle con il testo trasparente: lo screen reader le legge come tabelle vere
+ // anche nel PDF. Il browser mette nei tag del PDF solo quello che disegna, e un testo nascosto o tagliato non ci arriva;
+ // dentro il riquadro della pagina la copia non aggiunge una pagina bianca. Nella stampa a tessere va nell'ultimo foglio.
+ const sr=I=>{const m=pgMasterOf(I.pg),ctx={n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()};return [...(m?.items||[]),...I.pg.items].filter(it=>it.kind==='table'&&!it.hidden)
+  .map(it=>pgTableHtml(it,ctx,'pg-sr')).join('')};
+ if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay);for(const s of [...box.children]){const d=document.createElement('div');d.className='pg-pp';s.replaceWith(d);d.append(s)}box.lastElementChild?.insertAdjacentHTML('beforeend',insts.map(sr).join(''));return}
+ box.innerHTML=insts.map((I,ii)=>'<div class="pg-pp">'+(pgBleedOn(p)?pgSheetSvg(p,I,ii,lay,m=>m.url):`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" style="width:${pr2(p.w/MM)}mm;height:${pr2(p.h/MM)}mm" role="img" aria-label="Pagina ${I.n}${I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:insts.length,row:I.row,title:p.title,date:pgToday()})):''}">${pgPageSvg(p,I,ii,lay)}</svg>`)+sr(I)+'</div>').join('')}
 window.addEventListener('beforeprint',()=>{if(isPage()&&!pgPrinting)pgBuildPrint()});window.addEventListener('afterprint',()=>{pgPrinting=false;$('pgPrint').replaceChildren()});
 async function pgPrint(){const p=Pg.p;pgStorySync();await pgPreloadFieldImages(pgInstances(p));await pgWork('Preparazione delle foto regolate',()=>pgDevPreload(pgInstances(p)));pgBuildPrint();pgPrinting=true;
  await Promise.all([...new Set($$('#pgPrint image').map(i=>i.getAttribute('href')))].map(u=>{const im=new Image();im.src=u;return im.decode().catch(()=>{})}));await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));printStyle();window.print()}
