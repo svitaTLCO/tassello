@@ -14,7 +14,7 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  zoomIn:()=>zoomDraw(1.25),zoomOut:()=>zoomDraw(.8),zoomFit:()=>zoomDraw(0),
  selectAll,groupItems,ungroupItems,lockItems,hideItems,distH:()=>distribute('h'),distV:()=>distribute('v'),smartGuides:()=>{prefs.drawSmart=!smartOn();savePrefs()},
  toolSelect:()=>setTool('select'),toolNodes:()=>setTool('nodes'),toolPen:()=>setTool('pen'),toolPencil:()=>setTool('pencil'),toolBrush:()=>setTool('brush'),toolEraser:()=>setTool('eraser'),nodeAdd,nodeDelete:deleteNode,nodeType:nodeToggle,pathClose,readPath,toPath,gradientItem:toggleGrad,shadowItem:toggleShadow,textOnPath,textOffPath,
- boolUnion:()=>boolOp('union'),boolSubtract:()=>boolOp('subtract'),boolIntersect:()=>boolOp('intersect'),boolExclude:()=>boolOp('exclude'),
+ boolUnion:()=>boolOp('union'),boolSubtract:()=>boolOp('subtract'),boolIntersect:()=>boolOp('intersect'),boolExclude:()=>boolOp('exclude'),boolCut,
  addPolygon:()=>addItem('poly'),addStar:()=>addItem('poly',{star:true,sides:5,inner:45,fill:'#e8a33d',name:nextName('poly','Stella')}),addArrow:()=>addItem('arrow'),addBubble:()=>addItem('bubble'),addArrowLine:()=>addItem('line',{end:'arrow',name:nextName('line','Linea con freccia')}),
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
 Object.assign(D_ACTIONS,DRAW_PHOTO_ACTIONS);

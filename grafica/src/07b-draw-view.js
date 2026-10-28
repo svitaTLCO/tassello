@@ -14,7 +14,11 @@ function itemShape(it,{href='',hit=false,img=false,mask=''}={}){if(it.hidden||is
   case 'text':{const font=`font-family="${esc(it.font)}" font-size="${it.size}" font-weight="${it.bold?700:400}"${it.italic?' font-style="italic"':''}`;if(it.subs)return textPathSvg(it,{id,tr,op,hit,font});const lines=textLines(it),ax=n2(it.align==='center'?it.x+it.w/2:it.align==='right'?it.x+it.w:it.x),anchor=it.align==='center'?'middle':it.align==='right'?'end':'start';
    return `<g${id}${tr}${op}>${hit?`<rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" fill="transparent"/>`:''}<text x="${ax}" y="${it.y}" ${font} fill="${fillOf(it)}"${it.ls?` letter-spacing="${it.ls}"`:''} text-anchor="${anchor}" xml:space="preserve">${lines.map((l,i)=>`<tspan x="${ax}" dy="${n2(i?it.size*it.lineH:it.size*(it.lineH/2+.35))}">${esc(l)}</tspan>`).join('')}</text></g>`}
   // Un testo diventato tracciato porta il suo testo come titolo, per chi legge l'SVG con uno screen reader.
-  case 'path':{const E=pathEnds(it),d=`d="${E?.d||pathD(it)}"`,t=it.alt?`<title>${esc(it.alt)}</title>`:'';if(!E&&(!hit||it.fill!=='none'))return `<path${id} ${d} ${paint}${tr}${op}${pe}${t?`>${t}</path>`:'/>'}`;
+  case 'path':{const E=pathEnds(it),d=`d="${E?.d||pathD(it)}"`,t=it.alt?`<title>${esc(it.alt)}</title>`:'';
+   // Nel tracciato composto di forme e linee le parti aperte hanno il contorno ma non il riempimento: restano linee.
+   if(it.fill!=='none'&&it.subs.some(s=>s.closed)&&it.subs.some(s=>!s.closed)){const D=c=>pathD({x:it.x,y:it.y,subs:it.subs.filter(s=>s.closed===c)});
+    return `<g${id}${tr}${op}>${t}<path d="${D(true)}" ${paint}/><path d="${D(false)}" fill="none"${strokeAttrs(it,true)}/>${hit?`<path d="${D(false)}" fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/>`:''}</g>`}
+   if(!E&&(!hit||it.fill!=='none'))return `<path${id} ${d} ${paint}${tr}${op}${pe}${t?`>${t}</path>`:'/>'}`;
    return `<g${id}${tr}${op}>${t}<path ${d} ${paint}/>${E?.caps||''}${hit&&it.fill==='none'?`<path ${d} fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/>`:''}</g>`}
   case 'poly':case 'arrow':case 'bubble':return `<path${id} d="${shapeD(it)}" ${paint}${tr}${op}${pe}/>`;
   // L'immagine ritagliata sta in un gruppo con il clipPath, così la sua rotazione non gira anche la forma. mask è il PNG
