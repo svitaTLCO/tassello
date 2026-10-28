@@ -7,7 +7,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>HTML_ESC[ch]);
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
 const uid=()=>Math.random().toString(36).slice(2,10);
 // Nomi dei file: niente caratteri vietati da Windows, al massimo 80 caratteri, estensione corretta.
-const IMG_EXT=/\.(?:jpe?g|png|webp|avif|gif|bmp|heic|heif|tiff?|cube|json)$/i;
+const IMG_EXT=/\.(?:jpe?g|png|webp|avif|gif|bmp|heic|heif|tiff?|cube|json|cr2|cr3|nef|nrw|arw|srf|sr2|orf|rw2|raf|dng|pef|srw|x3f|3fr|iiq)$/i;
 function safeFileName(name){const s=String(name||'').replace(/[\x00-\x1f\\/:*?"<>|]/g,'_').trim().slice(0,80);return s||'Senza titolo'}
 const baseName=name=>String(name||'').replace(IMG_EXT,'');
 const extName=(name,ext)=>`${safeFileName(baseName(name))}.${ext}`;
