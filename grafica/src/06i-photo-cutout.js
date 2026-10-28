@@ -12,7 +12,7 @@ const newCut=()=>({method:'auto',box:null,keep:[],drop:[],edge:50,raster:null,us
 // che restituisce sono l'avanzamento, scritto nella barra di stato e annunciato ogni pochi secondi.
 async function runChunks(gen,label){let r,pct=0,said=Date.now();status(label+'…');document.body.style.cursor='progress';
  try{for(;;){const t=performance.now();do{r=gen.next();if(typeof r.value==='number')pct=r.value}while(!r.done&&performance.now()-t<28);if(r.done)return r.value;
-  status(`${label}: ${fmtPct(pct)}`);if(Date.now()-said>3500){said=Date.now();announce(`${label}: ${fmtPct(pct)}`)}await new Promise(res=>setTimeout(res,0))}}
+  status(`${label}: ${fmtPct(pct)}`,{quiet:true});if(Date.now()-said>3500){said=Date.now();announce(`${label}: ${fmtPct(pct)}`)}await new Promise(res=>setTimeout(res,0))}}
  finally{document.body.style.cursor='';status()}}
 // Flusso massimo (Boykov e Kolmogorov) su una griglia con 8 vicini. Due alberi crescono dalla sorgente (il soggetto) e
 // dal pozzo (lo sfondo) finché si toccano; si spinge il flusso lungo il percorso trovato e i nodi rimasti senza genitore
@@ -209,7 +209,7 @@ Object.assign(PHOTO_TOOLS,{
  cutKeep:{label:'Tieni',kind:'paint',color:'#20c060',keys:'Dipingi sulle parti del soggetto che sono state tolte. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta.',opts:['size'],done:p=>cutStroke('keep',p)},
  cutDrop:{label:'Togli',kind:'paint',color:'#ff3050',keys:'Dipingi sulle parti di sfondo rimaste. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta.',opts:['size'],done:p=>cutStroke('drop',p)}});
 function cutSetBg(bg){if(!needCut())return;edit('Sfondo: '+CUT_BG[bg].toLowerCase(),r=>{r.cut.bg=bg},{panel:true});announce('Sfondo: '+CUT_BG[bg].toLowerCase())}
-async function cutColor(){if(!needCut())return;const v=await modal('Colore dello sfondo','<p>Il colore pieno che va dietro al soggetto. Scrivi un colore esadecimale, come #FFFFFF per il bianco.</p>',[{id:'c',label:'Colore',type:'color',value:I.r.cut.color}],'Applica');if(v)edit('Colore dello sfondo',r=>{r.cut.color=v.c;r.cut.bg='color'},{panel:true})&&announce('Sfondo: colore '+v.c)}
+async function cutColor(){if(!needCut())return;const v=await modal('Colore dello sfondo','<p>Il colore pieno che va dietro al soggetto: sceglilo nel campo qui sotto, che apre il selettore dei colori del sistema.</p>',[{id:'c',label:'Colore',type:'color',value:I.r.cut.color}],'Applica');if(v)edit('Colore dello sfondo',r=>{r.cut.color=v.c;r.cut.bg='color'},{panel:true})&&announce('Sfondo: '+hexName(v.c))}
 function cutRemove(){if(!needCut())return;edit('Rimetti lo sfondo',r=>{r.cut=null},{panel:true});announce('Sfondo rimesso com’era: Ctrl+Z per toglierlo di nuovo')}
 function cutRecalc(){if(!needCut())return;cutRun({...I.r.cut,method:prefs.cutMethod||'auto'},'Ricalcola lo scontorno')}
 // Anteprima della trasparenza: su scacchiera o su un colore; non cambia il file esportato.

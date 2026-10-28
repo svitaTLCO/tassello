@@ -80,12 +80,14 @@ function scaleKeys(many,ax,ay,step){const ok=movable(many,'ridimensionarlo');if(
  if(editD('Ridimensiona',()=>{for(const [it,o] of os)scaleItem(it,o,B,N)},{merge:true}))announce(`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}${keep?', proporzioni mantenute':''}`)}
 // Proprietà di più oggetti: posizione del riquadro comune, colori, contorno e opacità per tutti, e i comandi per disporli.
 function multiProps(many){const B=boxOf(many),f=many.find(x=>hasFill(x)&&x.fill!=='none'),s=many.find(hasStroke),btn=id=>{const c=C[id];return `<button type="button" class="btn sm" id="pm-${id}" data-action="${id}"${c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:''} aria-label="${esc(c.label)}" data-tip="${esc(c.label)}">${ICON(c.icon)}</button>`};
- return `<p class="hint">${esc(describeSel())}. Qui le modifiche valgono per tutti; per un oggetto solo sceglilo nei livelli.</p><div class="row2"><div>${fld('mx','X',n2(B.x))}</div><div>${fld('my','Y',n2(B.y))}</div></div>`
+ return `<p class="hint">${esc(describeSel())}. Qui le modifiche valgono per tutti; per un oggetto solo sceglilo nei livelli.</p><div class="row2"><div>${fld('mx','X',n2(B.x))}</div><div>${fld('my','Y',n2(B.y))}</div></div><div class="row2"><div>${fld('mw','Larghezza',n2(B.w))}</div><div>${fld('mh','Altezza',n2(B.h))}</div></div>`
   +(f?colorFld('fill','Riempimento',f.fill):'')+(s?colorFld('stroke','Contorno',s.stroke)+fld('sw','Spessore del contorno (px)',s.sw):'')+rangeFld('opacity','Opacità',0,100,1,selItem().opacity,v=>fmtInt(v)+'%')
   +`<h3>Disponi</h3><div class="btns">${['groupItems','ungroupItems','lockItems','hideItems'].map(btn).join('')}</div><div class="btns">${['alignLeft','alignCenter','alignRight','alignTop','alignMiddle','alignBottom','distH','distV'].map(btn).join('')}</div>`}
-function syncMulti(){if(!$('pr-mx')){renderProps();return}const a=document.activeElement,B=boxOf(selItems());for(const [k,v] of [['mx',n2(B.x)],['my',n2(B.y)]]){const el=$('pr-'+k);if(el!==a)el.value=v}}
+function syncMulti(){if(!$('pr-mx')){renderProps();return}const a=document.activeElement,B=boxOf(selItems());for(const [k,v] of [['mx',n2(B.x)],['my',n2(B.y)],['mw',n2(B.w)],['mh',n2(B.h)]]){const el=$('pr-'+k);if(el&&el!==a)el.value=v}}
 function applyMulti(key,v,need){const many=selItems(),ok=many.filter(x=>!x.lock);
  if(key==='mx'||key==='my'){if(!ok.length)throw Error('Gli oggetti scelti sono bloccati');const k=key==='mx'?'x':'y',d=need(-1e5,1e5)-boxOf(ok)[k];for(const it of ok)it[k]=n2(it[k]+d)}
+ // Larghezza e altezza del riquadro comune: come con Ctrl+frecce, in proporzione se qualcuno la mantiene.
+ else if(key==='mw'||key==='mh'){if(!ok.length)throw Error('Gli oggetti scelti sono bloccati');const B=boxOf(ok),n=need(1,1e5),keep=ok.some(keepsRatio),k=key==='mw'?n/B.w:n/B.h,N=keep?{...B,w:B.w*k,h:B.h*k}:{...B,[key==='mw'?'w':'h']:n},os=ok.map(x=>[x,structuredClone(x)]);for(const [it,o] of os)scaleItem(it,o,B,N);propSay=`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}${keep?', proporzioni mantenute':''}`}
  else if(key==='opacity')for(const it of many)it.opacity=Number(v);
  else if(key==='fill'||key==='stroke'){for(const it of many)if(key==='fill'?hasFill(it):hasStroke(it))it[key]=v}
  else if(key==='sw'){const n=need(0,1000);for(const it of many)if(hasStroke(it))it.sw=n}}

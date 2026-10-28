@@ -18,8 +18,8 @@ for(const [id,d] of Object.entries(PANES)){const el=$(id);
 // Disposizione: a sinistra dell'area centrale gli ordini 0, 2, 4…, a destra 102, 104…; la fuga sta tra riquadro e centro.
 function applyLayout(){for(const m of ['i','d']){const ids=panesOf(m);ids.filter(id=>paneState(id).side==='left').forEach((id,i)=>placePane(id,2*i));ids.filter(id=>paneState(id).side==='right').forEach((id,i)=>placePane(id,102+2*i))}paneBadges()}
 function placePane(id,order){const s=paneState(id),d=PANES[id],el=$(id),sep=$(id+'Sep'),tes=$(id+'Tes'),left=s.side==='left';s.w=clamp(s.w,d.min,d.max);
- el.style.order=tes.style.order=order;sep.style.order=left?order+1:order-1;tes.dataset.side=s.side;el.style.setProperty('--w',s.w+'px');
- el.hidden=s.st!=='open';sep.hidden=s.st!=='open';tes.hidden=s.st!=='tessera';sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');
+ el.style.order=tes.style.order=order;sep.style.order=left?order+1:order-1;tes.dataset.side=sep.dataset.side=s.side;el.style.setProperty('--w',s.w+'px');
+ el.hidden=s.st!=='open';sep.hidden=s.st!=='open';tes.hidden=s.st!=='tessera';sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuemax',paneMax(id));sep.setAttribute('aria-valuetext',s.w+' pixel');
  el.querySelector('[data-pane-act=collapse]').innerHTML=ICON(left?'left':'right')}
 function paneBadges(){for(const [id,d] of Object.entries(PANES)){const n=d.count&&safe(d.count)||0,tes=$(id+'Tes');tes.querySelector('.badge').textContent=n?String(n):'';tes.setAttribute('aria-label',`${d.title}, riquadro ridotto${n?`: ${n} ${d.unit[n===1?0:1]}`:''}. Espandi`)}}
 new MutationObserver(paneBadges).observe($('layList'),{childList:true});
@@ -30,10 +30,15 @@ function paneSet(id,st,{focus=false,say=true}={}){const s=paneState(id),d=PANES[
  if(say)announce(d.title+': '+PANE_SAY[st]);refreshToggles()}
 function paneToggle(id){const off=paneState(id).st==='off';paneSet(id,off?'open':'off',{focus:off})}
 function paneMove(id){const s=paneState(id);s.side=s.side==='left'?'right':'left';savePrefs();applyLayout();announce(`${PANES[id].title} spostato a ${s.side==='left'?'sinistra':'destra'}`)}
-function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,Math.max(d.min,Math.min(d.max,innerWidth*.45))));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final)savePrefs()}
+// Il riquadro non supera il 45% della finestra: la fuga lo dice come massimo, anche quando la finestra cambia misura.
+const paneMax=id=>Math.max(PANES[id].min,Math.min(PANES[id].max,Math.round(innerWidth*.45)));
+function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,paneMax(id)));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuemax',paneMax(id));sep.setAttribute('aria-valuetext',s.w+' pixel');if(final)savePrefs()}
+addEventListener('resize',()=>{for(const id of Object.keys(PANES))$(id+'Sep').setAttribute('aria-valuemax',paneMax(id))});
 function paneMenu(id,btn){const s=paneState(id),d=PANES[id],left=s.side==='left',r=btn.getBoundingClientRect();
- openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Larghezza iniziale',icon:'fit',run:()=>setW(id,d.w)},'-',
+ openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Più largo',icon:'plus',run:()=>paneWider(id,1)},{label:'Più stretto',icon:'minus',run:()=>paneWider(id,-1)},{label:'Larghezza iniziale',icon:'fit',run:()=>{setW(id,d.w);announce(`${d.title}: larghezza iniziale, ${paneState(id).w} pixel`)}},'-',
   {label:'Togli dal piano',desc:'Torna dal menu Tasselli, in basso a sinistra',icon:'close',run:()=>paneSet(id,'off',{focus:true})}],r.right-240,r.bottom+4,'Opzioni del riquadro '+d.title,btn)}
+// Più largo e più stretto di 32 pixel, dal menu del riquadro: chi non trascina la fuga la cambia lo stesso.
+function paneWider(id,dir){const s=paneState(id),w0=s.w;setW(id,s.w+dir*32);announce(s.w===w0?`${PANES[id].title}: già ${dir>0?'alla larghezza massima':'alla larghezza minima'}, ${s.w} pixel`:`${PANES[id].title}: ${s.w} pixel`)}
 // Menu Tasselli nella barra di stato: quali riquadri sono sul piano e alcune disposizioni pronte.
 function layoutMenu(){const m=state.mode[0],btn=$('layoutBtn'),r=btn.getBoundingClientRect(),ids=panesOf(m),img=m==='i';
  const where=id=>{const s=paneState(id);return s.st==='open'?(s.side==='left'?'A sinistra':'A destra'):s.st==='tessera'?'Ridotto a tessera':'Tolto dal piano'};

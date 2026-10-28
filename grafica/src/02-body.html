@@ -114,7 +114,7 @@
 <button type="button" class="tb drw" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
 <div id="drawers"></div>
 </div>
-<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
+<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi, Alt Q" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
 <button type="button" class="tile primary-tile" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta la foto (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
 </header>
 <div class="drawer" id="drawer" role="group" hidden></div>
@@ -128,7 +128,7 @@
 <section class="viewer tile" id="photoViewer" aria-labelledby="viewTitle">
 <h2 class="sr-only" id="viewTitle">Foto</h2>
 <div class="stage" id="stage">
-<canvas id="photo" tabindex="0" role="img" aria-label="Foto" aria-describedby="photoHint" hidden></canvas>
+<canvas id="photo" tabindex="0" role="application" aria-roledescription="foto" aria-label="Foto" aria-describedby="photoHint" hidden></canvas>
 <canvas id="photoAnts" class="overlay" aria-hidden="true" hidden></canvas><canvas id="photoOver" class="overlay" aria-hidden="true" hidden></canvas>
 <span class="stage-badge" id="compareBadge" hidden>Originale</span>
 <div class="photo-empty" id="photoEmpty"><div><b>Apri una foto per iniziare</b>JPEG, PNG, WebP, AVIF o GIF: puoi anche trascinarla qui. La foto resta sul tuo dispositivo e l’originale non viene mai modificato.<div class="row"><button type="button" class="btn primary" data-action="open">Apri una foto…</button></div></div></div>
@@ -151,7 +151,7 @@
 <aside class="plans pane tile" id="layPane" aria-labelledby="layTitle">
 <div class="pane-head"><h2 id="layTitle">Livelli</h2><span class="pane-count" id="layCount"></span></div>
 <p class="pane-hint" id="layHint">Dall’oggetto più in alto a quello più in basso. Alt+Maiusc+frecce lo porta sopra o sotto gli altri.</p>
-<div class="lb" id="layList" role="listbox" aria-labelledby="layTitle" aria-describedby="layKeys" tabindex="0"></div>
+<div class="lb" id="layList" role="listbox" aria-multiselectable="true" aria-labelledby="layTitle" aria-describedby="layKeys" tabindex="0"></div>
 </aside>
 <section class="viewer tile" id="drawViewer" aria-labelledby="sheetTitle">
 <h2 class="sr-only" id="sheetTitle">Foglio</h2>

@@ -181,6 +181,8 @@ function colorName(r,g,b){const mx=Math.max(r,g,b)/255,mn=Math.min(r,g,b)/255,l=
  if(hue>=10&&hue<50&&l<.42)return l<.18?'marrone scuro':'marrone';if(hue>=18&&hue<55&&l>.62&&s<.6)return 'beige';
  const name=hue<12||hue>=345?(l>.7?'rosa':'rosso'):hue<40?'arancione':hue<66?'giallo':hue<160?'verde':hue<195?'azzurro':hue<255?'blu':hue<290?'viola':hue<330?'fucsia':'rosa';
  return name+(l<.25?' scuro':l>.75&&name!=='rosa'?' chiaro':'')+(s<.28?' tenue':'')}
+// Il nome di un colore scritto in esadecimale, con il codice tra parentesi: «blu scuro (#1b3a6b)».
+function hexName(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return String(hex||'');const v=parseInt(m[1],16);return `${colorName(v>>16,v>>8&255,v&255)} (#${m[1].toLowerCase()})`}
 // Dove sta una zona della foto: posizione del centro in terzi.
 function placeName(cx,cy){const v=cy<1/3?'in alto':cy>2/3?'in basso':'',o=cx<1/3?'a sinistra':cx>2/3?'a destra':'';return v&&o?v+' '+o:v||o||'al centro'}
 // Descrizione a parole di una maschera: quanta parte copre, dove, quante zone, quanto morbido è il bordo, quali colori.

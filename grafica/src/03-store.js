@@ -20,8 +20,10 @@ const dbKeys=()=>storeCall('readonly',st=>st.getAllKeys());
 function schedulePersist(app=state.mode){if(suppressAutosave)return;dirtyApps.add(app);clearTimeout(draftTimer);$('saveState').textContent='Salvataggio bozza…';draftTimer=setTimeout(persistNow,SAVE_DELAY)}
 async function persistNow(){clearTimeout(draftTimer);const label=$('saveState'),apps=[...dirtyApps];dirtyApps.clear();let note='';
  try{for(const app of apps)note=(await (app==='immagini'?persistPhoto():persistDrawing()))||note;await dbPut('ui',{mode:state.mode});
-  label.textContent=note||'Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(note)status(note)}
- catch(e){console.warn('Bozza non salvata',e);label.textContent='Bozza non salvata';status('Bozza non salvata: esporta la foto per non perdere il lavoro')}}
+  label.textContent=note||'Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(note)status(note);draftFailed=false}
+ // Una bozza che non si salva si annuncia una volta, finché non torna a salvarsi.
+ catch(e){console.warn('Bozza non salvata',e);label.textContent='Bozza non salvata';const msg=apps.includes('immagini')?'Bozza non salvata: esporta la foto per non perdere il lavoro':'Bozza non salvata: salva il disegno in SVG per non perdere il lavoro';status(msg,{quiet:draftFailed});draftFailed=true}}
+let draftFailed=false;
 // Chiudendo o ricaricando la pagina si salva subito quello che aspettava SAVE_DELAY. Una scrittura alla volta, ognuna
 // in attesa della fine della precedente, non fa in tempo: la pagina sparisce prima. Così tutte le scritture entrano in
 // una transazione sola, aperta qui; i passi di persistNow si risolvono subito e commit la chiude prima che la pagina sparisca.

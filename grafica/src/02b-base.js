@@ -13,8 +13,9 @@ const baseName=name=>String(name||'').replace(IMG_EXT,'');
 const extName=(name,ext)=>`${safeFileName(baseName(name))}.${ext}`;
 function download(content,fileName,mime){const payload=content instanceof Blob?content:new Blob([content],{type:mime||'application/octet-stream'}),url=URL.createObjectURL(payload),link=Object.assign(document.createElement('a'),{href:url,download:fileName});link.style.display='none';document.body.append(link);link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);link.remove()}
 // Numeri all'italiana: quelli scritti dall'utente con la virgola o il punto, quelli mostrati con la virgola,
-// il segno meno tipografico e, per le regolazioni, il segno più.
-const num=v=>{const s=String(v??'').trim().replace(/\s/g,'').replace(/−/g,'-').replace(',','.');return s===''?NaN:Number(s)};
+// il segno meno tipografico e, per le regolazioni, il segno più. Il punto tra gruppi di tre cifre separa le migliaia
+// («1.200» è milleduecento), come lo mostra fmtInt; altrimenti è la virgola dei decimali («1.5» è uno e mezzo).
+const num=v=>{let s=String(v??'').trim().replace(/\s/g,'').replace(/−/g,'-');if(/^-?[1-9]\d{0,2}(\.\d{3})+(,\d*)?$/.test(s))s=s.replace(/\./g,'');s=s.replace(',','.');return s===''?NaN:Number(s)};
 const fmtNum=(n,d=1)=>Number(n).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).replace(/^-/,'−');
 const fmtInt=n=>Math.round(n).toLocaleString('it-IT');
 const fmtSigned=(n,d=0)=>(n>0?'+':'')+fmtNum(n,d);
@@ -66,7 +67,10 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
  (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
- $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad,box=$('dlgErr');box.textContent='';setTimeout(()=>{box.textContent=err.msg},60);if(err.field)$('dlg_'+err.field)?.focus();return}finish(v)};
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad,box=$('dlgErr'),f=err.field&&$('dlg_'+err.field);box.textContent='';setTimeout(()=>{box.textContent=err.msg},60);
+  for(const el of $$('[aria-invalid]',pane))el.removeAttribute('aria-invalid');if(f){f.setAttribute('aria-invalid','true');f.setAttribute('aria-describedby',[...new Set([...(f.getAttribute('aria-describedby')||'').split(' ').filter(Boolean),'dlgErr'])].join(' '));f.focus()}return}finish(v)};
+ // Correggendo il campo il messaggio d'errore sparisce.
+ $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute('aria-invalid')){e.target.removeAttribute('aria-invalid');$('dlgErr').textContent=''}});
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);
@@ -89,4 +93,6 @@ function themeChanged(){const probe=document.createElement('span');document.body
 let redrawAll=null;
 // Lavori lunghi: messaggio nella barra di stato e cursore di attesa; gli errori diventano un messaggio leggibile.
 async function work(label,fn){status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{document.body.style.cursor='';status()}}
-function status(text){$('statusText').textContent=text||'Pronto'}
+// Il testo della barra di stato si annuncia anche (passa da announce, che accoda), salvo quiet: per esempio le
+// percentuali di un lavoro lungo, che ha già i suoi annunci ogni tanto. Senza testo si legge «Pronto».
+function status(text,{quiet=false}={}){$('statusText').textContent=text||$('statusText').dataset.idle||'Pronto';if(text&&!quiet)announce(text)}
