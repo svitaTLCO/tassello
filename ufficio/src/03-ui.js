@@ -1,9 +1,17 @@
 // Annunci per screen reader, finestre di dialogo accessibili, tooltip e preferenze di visualizzazione.
 const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
-let toastTimer;
-// Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
-function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),4200)}
-let liveTimer;function announce(msg){const el=$('srLive');el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
+// Due messaggi in fila diventano una frase sola: il punto si aggiunge solo se manca.
+const joinSay=(a,b)=>!a||a===b?b:a+(/[.!?:;…]$/.test(a)?' ':'. ')+b;
+// saidN conta gli annunci: runCommand lo confronta per non aggiungere «… attivato» dopo il messaggio dell'azione.
+let toastTimer,toastShow,toastNext='',saidN=0;
+// Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale. Un
+// messaggio che arriva prima che il precedente sia scritto gli si accoda, e il riquadro resta in proporzione alla lunghezza.
+function toast(message){const box=$('toast');saidN++;toastNext=joinSay(toastNext,String(message??''));clearTimeout(toastTimer);clearTimeout(toastShow);box.textContent='';toastShow=setTimeout(()=>{box.textContent=toastNext;box.classList.add('show');toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,toastNext.length*60));toastNext=''},40)}
+let liveTimer,liveNext='';function announce(msg){msg=String(msg??'').trim();if(!msg)return;saidN++;const el=$('srLive');liveNext=joinSay(liveNext,msg);el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=liveNext;liveNext=''},70)}
+// Le descrizioni lunghe (più di due frasi) vanno in una finestra, che resta finché non si chiude e che lo screen reader
+// legge all'apertura, una frase per paragrafo; quelle brevi restano un messaggio.
+function sayLong(title,text){text=String(text??'').trim();const parts=text.split(/(?<=[.!?])\s+(?=[A-ZÀ-ÖØ-Þ«"0-9])/);if(parts.length<=2&&text.length<=200)return toast(text);saidN++;
+ return modal(title,parts.map(p=>`<p>${esc(p)}</p>`).join('')+'<p class="hint">Esc o Invio per chiudere.</p>',[],'Chiudi',{noCancel:true})}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden]')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body){if(t.id==='wordEditor')restoreWordFocus();else t.focus({preventScroll:true})}}
@@ -15,7 +23,7 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
   if(x.type==='select')return lab+`<select id="${id}"${desc}>${x.options.map(opt=>`<option value="${esc(opt.value)}"${String(opt.value)===String(x.value??'')?' selected':''}>${esc(opt.label)}</option>`).join('')}</select>`+hint;
   if(x.type==='textarea')return lab+`<textarea id="${id}" rows="${x.rows||3}"${desc}>${esc(x.value||'')}</textarea>`+hint;
   return lab+`<input id="${id}" type="${x.type||'text'}" value="${esc(x.value??'')}"${x.min!==undefined?` min="${x.min}"`:''}${x.max!==undefined?` max="${x.max}"`:''} autocomplete="off"${desc}>`+hint};
- pane.className='modal'+(opts.wide?' wide':'');
+ pane.className='modal'+(opts.wide?' wide':'');pane.setAttribute('aria-describedby','dlgBody');
  pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<div class="modal-actions">${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
  bg.hidden=false;
  const finish=v=>{bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
