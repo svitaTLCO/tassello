@@ -24,7 +24,7 @@ function alignItem(how){const many=needSel();if(!many.length)return;if(units(man
  if(editD('Allinea',()=>{for(const it of ok){it.x=n2(it.x+dx);it.y=n2(it.y+dy)}}))announce(`${what} è allineato ${say}`);else toast(`${what} è già allineato ${say}`)}
 function itemMenu(x,y){const many=selItems(),it=selItem();
  const items=many.length>1?[mi('groupItems'),mi('ungroupItems'),mi('lockItems'),mi('hideItems'),'-',mi('boolUnion'),mi('boolSubtract'),mi('boolIntersect'),mi('boolExclude'),...(many.some(x=>x.kind==='image')?[mi('imgClip')]:[]),'-',mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('sendBack'),'-',mi('alignLeft'),mi('alignCenter'),mi('alignTop'),mi('alignMiddle'),mi('distH'),mi('distV'),'-',mi('deleteItem')]
-  :it?[mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('forward'),mi('backward'),mi('sendBack'),'-',mi('alignCenter'),mi('alignMiddle'),'-',...(SHAPE_SUBS[it.kind]?[mi('toPath')]:it.kind==='path'?[mi('toolNodes')]:[]),...(isPhotoImg(it)?[mi('imgMasks'),mi('imgCutout')]:[]),...(clipShape(it)||isClipShape(it)?[mi('imgUnclip')]:[]),mi('lockItems'),mi('hideItems'),...(it.g?[mi('ungroupItems')]:[]),'-',mi('deleteItem')]:[mi('addText'),mi('addRect'),mi('addImage'),mi('paste'),mi('selectAll'),'-',mi('sheetSize')];
+  :it?[mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('forward'),mi('backward'),mi('sendBack'),'-',mi('alignCenter'),mi('alignMiddle'),'-',...(SHAPE_SUBS[it.kind]||it.kind==='text'?[mi('toPath')]:it.kind==='path'?[mi('toolNodes')]:[]),...(isPhotoImg(it)?[mi('imgMasks'),mi('imgCutout')]:[]),...(clipShape(it)||isClipShape(it)?[mi('imgUnclip')]:[]),mi('lockItems'),mi('hideItems'),...(it.g?[mi('ungroupItems')]:[]),'-',mi('deleteItem')]:[mi('addText'),mi('addRect'),mi('addImage'),mi('paste'),mi('selectAll'),'-',mi('sheetSize')];
  openMenu(items,x,y,many.length>1?`Menu di ${many.length} oggetti`:it?'Menu di '+it.name:'Menu del foglio')}
 // Zoom: 0 vuol dire che il foglio entra tutto nello spazio disponibile.
 function zoomDraw(f){const k=f?clamp(sheetScale()*f,.05,8):0;Dw.zoom=k;renderSheet();announce(k?`Zoom ${fmtInt(k*100)}%`:'Si vede tutto il foglio')}
@@ -71,13 +71,17 @@ const covers=(a,b)=>a.x<=b.x&&a.y<=b.y&&a.x+a.w>=b.x+b.w&&a.y+a.h>=b.y+b.h,overl
 // Che cosa c'è sotto un testo: il colore di una forma piena che lo contiene, un'immagine, oppure lo sfondo del foglio.
 function behind(it){const items=Dw.p.items,b=box(it);for(let i=items.indexOf(it)-1;i>=0;i--){const o=items[i];if(o.hidden||isClipShape(o))continue;const ob=box(o);if(!overlaps(ob,b))continue;if(o.kind==='image')return {image:o};if(o.grad&&o.fill!=='none'&&covers(ob,b))return {grad:o};if(['rect','ellipse','poly','arrow','bubble'].includes(o.kind)&&o.fill!=='none'&&!o.rot&&o.opacity===100&&covers(ob,b))return {color:o.fill,by:o}}return Dw.p.bg==='none'?{none:true}:{color:Dw.p.bg}}
 function drawIssues(){const p=Dw.p,out=[];if(!p.desc.trim())out.push({msg:'Manca la descrizione del disegno: serve a chi non lo vede e diventa il testo alternativo quando lo pubblichi.',fix:'desc'});
- for(const it of p.items){if(it.kind!=='text'||it.hidden||!it.text.trim())continue;const big=it.size>=p.w/22||(it.bold&&it.size>=p.w/28),need=big?3:4.5,bg=behind(it);
+ // I testi diventati tracciati contano come testi: si leggono ancora, ma nel file non sono più testo.
+ const lost=p.items.filter(it=>!it.hidden&&it.alt&&altOf(it)&&!norm(p.desc).replace(/\s+/g,' ').includes(norm(altOf(it)))).map(it=>'«'+altOf(it)+'»');
+ if(lost.length)out.push({msg:`${lost.length===1?'Un testo è diventato tracciato':lost.length+' testi sono diventati tracciati'}: nel file salvato e nelle immagini esportate non ${lost.length===1?'è':'sono'} più testo. Scrivi ${lost.length>1?lost.slice(0,-1).join(', ')+' e '+lost.at(-1):lost[0]} nella descrizione del disegno, che diventa il testo alternativo.`,fix:'desc'});
+ for(const it of p.items){if(it.hidden)continue;if(it.alt!=null&&!altOf(it))out.push({it,msg:`«${it.name}» era un testo ed è diventato un tracciato senza il testo per chi non vede: scrivilo nelle sue proprietà.`});
+  const T=it.kind==='text'?it:it.alt?{...it,text:it.alt,size:it.tsize||0,bold:it.tbold}:null;if(!T||!T.text.trim())continue;const size=T.size,big=size>=p.w/22||(T.bold&&size>=p.w/28),need=big?3:4.5,bg=behind(it);
   if(bg.image)out.push({it,msg:`«${it.name}» è sopra l’immagine «${bg.image.name}»: controlla a occhio che si legga, o mettici sotto una forma piena.`});
   else if(bg.none)out.push({it,msg:`«${it.name}»: il foglio è trasparente, quindi il contrasto dipende da dove verrà messo il disegno.`});
   else if(bg.grad)out.push({it,msg:`«${it.name}» è sopra la sfumatura di «${bg.grad.name}»: controlla a occhio che si legga in ogni punto.`});
   else if(it.grad&&it.fill!=='none')out.push({it,msg:`«${it.name}» è colorato con una sfumatura: controlla a occhio il contrasto in ogni punto.`});
   else{const c=contrastRatio(it.fill,bg.color);if(c!=null&&c<need)out.push({it,msg:`«${it.name}»: contrasto ${fmtNum(c,1)}:1 con ${bg.by?'«'+bg.by.name+'»':'lo sfondo'}, ne serve almeno ${fmtNum(need,1)}:1${big?' per un testo grande':''}.`})}
-  if(it.size<Math.max(10,p.w/90))out.push({it,msg:`«${it.name}»: testo molto piccolo (${it.size} pixel su un foglio largo ${fmtInt(p.w)}), difficile da leggere sui telefoni.`});
+  if(size<Math.max(10,p.w/90))out.push({it,msg:`«${it.name}»: testo molto piccolo (${fmtInt(size)} pixel su un foglio largo ${fmtInt(p.w)}), difficile da leggere sui telefoni.`});
   if(it.opacity<100)out.push({it,msg:`«${it.name}»: il testo è trasparente al ${it.opacity}%, il contrasto reale è più basso.`});
   if(it.blur)out.push({it,msg:`«${it.name}»: il testo è sfocato, quindi si legge male.`})}
  return out}

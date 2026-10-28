@@ -7,7 +7,7 @@ const FONTS=[['system-ui, sans-serif','Senza grazie del sistema'],["'Segoe UI', 
 const KIND_NAME={rect:'Rettangolo',ellipse:'Ellisse',line:'Linea',text:'Testo',image:'Immagine',path:'Tracciato',poly:'Poligono',arrow:'Freccia',bubble:'Fumetto'};
 const KIND_ICON={rect:'rect',ellipse:'ellipse',line:'lineI',text:'textI',image:'image',path:'pathI',poly:'polygon',arrow:'arrowR',bubble:'bubble'};
 // Quello che si aggiunge alla descrizione di un oggetto, secondo il tipo.
-const KIND_SAY={path:it=>(it.tool?`, tratto a mano libera di ${nodeList(it).length} nodi`:`, ${pathSummary(it)}`)+endsSay(it)};
+const KIND_SAY={path:it=>it.alt?`${altOf(it)===it.name?'':` «${altOf(it)}»`}, ${it.subs.length===1?'un contorno':it.subs.length+' contorni'}`:(it.tool?`, tratto a mano libera di ${nodeList(it).length} nodi`:`, ${pathSummary(it)}`)+endsSay(it)};
 const newDrawing=()=>({title:'Senza titolo',w:1080,h:1350,bg:'#ffffff',desc:'',items:[]});
 // Il disegno aperto, l'oggetto scelto, la cronologia e le immagini (file originali, indirizzi per l'anteprima);
 // ras sono le maschere calcolate delle immagini (lo scontorno), per id, come rasters in Immagini.
