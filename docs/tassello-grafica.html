@@ -557,8 +557,8 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </div></div>
 <div id="menu" class="ctxmenu" role="menu" hidden></div>
 <div id="tip" class="tip" aria-hidden="true" hidden></div>
-<input id="fileInput" class="hidden" type="file" accept="image/*,.heic,.heif,.avif,.webp" tabindex="-1" aria-hidden="true">
-<input id="drawInput" class="hidden" type="file" multiple accept="image/*,.svg" tabindex="-1" aria-hidden="true">
+<input id="fileInput" class="hidden" type="file" accept="image/*,.heic,.heif,.avif,.webp,.cr2,.cr3,.nef,.nrw,.arw,.srf,.sr2,.orf,.rw2,.raf,.dng,.pef,.srw,.x3f,.3fr,.iiq" tabindex="-1" aria-hidden="true">
+<input id="drawInput" class="hidden" type="file" multiple accept="image/*,.svg,.heic,.heif,.avif,.webp,.cr2,.cr3,.nef,.nrw,.arw,.srf,.sr2,.orf,.rw2,.raf,.dng,.pef,.srw,.x3f,.3fr,.iiq" tabindex="-1" aria-hidden="true">
 <input id="lutInput" class="hidden" type="file" accept=".cube" tabindex="-1" aria-hidden="true">
 <script>
 (()=>{'use strict';
@@ -571,7 +571,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>HTML_ESC[ch]);
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
 const uid=()=>Math.random().toString(36).slice(2,10);
 // Nomi dei file: niente caratteri vietati da Windows, al massimo 80 caratteri, estensione corretta.
-const IMG_EXT=/\.(?:jpe?g|png|webp|avif|gif|bmp|heic|heif|tiff?|cube|json)$/i;
+const IMG_EXT=/\.(?:jpe?g|png|webp|avif|gif|bmp|heic|heif|tiff?|cube|json|cr2|cr3|nef|nrw|arw|srf|sr2|orf|rw2|raf|dng|pef|srw|x3f|3fr|iiq)$/i;
 function safeFileName(name){const s=String(name||'').replace(/[\x00-\x1f\\/:*?"<>|]/g,'_').trim().slice(0,80);return s||'Senza titolo'}
 const baseName=name=>String(name||'').replace(IMG_EXT,'');
 const extName=(name,ext)=>`${safeFileName(baseName(name))}.${ext}`;
@@ -588,7 +588,7 @@ const fmtBytes=n=>n>=1e9?fmtNum(n/1e9,2)+' GB':n>=1e6?fmtNum(n/1e6,1)+' MB':fmtI
 const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
 let toastTimer;
 // Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
-function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),4200)}
+function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,String(message).length*55))}
 // Con join il messaggio si aggiunge a quello appena annunciato invece di sostituirlo (per esempio un avviso dopo Annulla).
 let liveTimer,lastSaid={t:0,msg:''};function announce(msg,{join=false}={}){const el=$('srLive');if(join&&Date.now()-lastSaid.t<800)msg=lastSaid.msg+' '+msg;lastSaid={t:Date.now(),msg};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
@@ -650,8 +650,11 @@ const state={mode:'immagini'};
 let db=null,draftTimer=null,suppressAutosave=false;
 const dirtyApps=new Set();
 function openStore(){return new Promise(done=>{let open;try{open=indexedDB.open(DRAFT_DB,1)}catch(e){done(null);return}open.addEventListener('upgradeneeded',()=>open.result.createObjectStore('docs'));open.addEventListener('success',()=>done(open.result));open.addEventListener('error',()=>done(null));open.addEventListener('blocked',()=>done(null))})}
-// Una richiesta sull'archivio 'docs' dentro una transazione; si risolve quando la transazione è conclusa.
-function storeCall(mode,work){return new Promise((ok,fail)=>{if(!db){ok(undefined);return}let tx;try{tx=db.transaction('docs',mode)}catch(e){fail(e);return}const req=work(tx.objectStore('docs'));tx.addEventListener('complete',()=>ok(req?.result));tx.addEventListener('error',()=>fail(tx.error));tx.addEventListener('abort',()=>fail(tx.error||Error('Archivio non disponibile')))})}
+// Una richiesta sull'archivio 'docs' dentro una transazione; si risolve quando la transazione è conclusa. Alla chiusura
+// della pagina (flushTx, vedi pagehide) le scritture vanno subito nella transazione aperta lì e le letture danno un
+// elenco vuoto: servono solo a togliere le immagini non più usate, che si tolgono al salvataggio successivo.
+let flushTx=null;
+function storeCall(mode,work){return new Promise((ok,fail)=>{if(!db){ok(undefined);return}if(flushTx){if(mode==='readonly'){ok([]);return}try{work(flushTx.objectStore('docs'));ok(undefined)}catch(e){fail(e)}return}let tx;try{tx=db.transaction('docs',mode)}catch(e){fail(e);return}const req=work(tx.objectStore('docs'));tx.addEventListener('complete',()=>ok(req?.result));tx.addEventListener('error',()=>fail(tx.error));tx.addEventListener('abort',()=>fail(tx.error||Error('Archivio non disponibile')))})}
 const dbGet=key=>storeCall('readonly',st=>st.get(key));
 const dbPut=(key,value)=>storeCall('readwrite',st=>st.put(value,key));
 const dbDel=key=>storeCall('readwrite',st=>st.delete(key));
@@ -662,7 +665,10 @@ async function persistNow(){clearTimeout(draftTimer);const label=$('saveState'),
  try{for(const app of apps)note=(await (app==='immagini'?persistPhoto():persistDrawing()))||note;await dbPut('ui',{mode:state.mode});
   label.textContent=note||'Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(note)status(note)}
  catch(e){console.warn('Bozza non salvata',e);label.textContent='Bozza non salvata';status('Bozza non salvata: esporta la foto per non perdere il lavoro')}}
-addEventListener('pagehide',()=>{if(dirtyApps.size)persistNow()});
+// Chiudendo o ricaricando la pagina si salva subito quello che aspettava SAVE_DELAY. Una scrittura alla volta, ognuna
+// in attesa della fine della precedente, non fa in tempo: la pagina sparisce prima. Così tutte le scritture entrano in
+// una transazione sola, aperta qui; i passi di persistNow si risolvono subito e commit la chiude prima che la pagina sparisca.
+addEventListener('pagehide',()=>{if(!dirtyApps.size||!db)return;let tx;try{tx=db.transaction('docs','readwrite')}catch(e){return}flushTx=tx;persistNow().finally(()=>{flushTx=null;try{tx.commit()}catch(e){}})});
 // Registro unico dei comandi: barra multifunzione, ricerca comandi, menu, scorciatoie e guida leggono da qui.
 // modes: 'i' Immagini, 'd' Disegno, 'id' entrambe. g: la scorciatoia vale anche dentro i campi di testo.
 // ctx: la scorciatoia vale solo con il focus in quell'area (photo, sheet, list).
@@ -828,6 +834,10 @@ def('d','Combina',[
  ['boolSubtract','Sottrai le forme davanti da quella in fondo','subtract','',{short:'Sottrai'}],
  ['boolIntersect','Interseca: tieni l’area in comune','intersect','',{short:'Interseca'}],
  ['boolExclude','Escludi l’area in comune','exclude','',{short:'Escludi'}]]);
+def('d','Tracciato',[
+ ['simplifyPath','Semplifica il tracciato…','simplify','',{short:'Semplifica'}]]);
+def('d','Combina',[
+ ['boolCut','Taglia le forme lungo le linee scelte','cutLine','',{short:'Taglia con una linea'}]]);
 def('d','Inserisci',[
  ['addPolygon','Inserisci un poligono','polygon','',{short:'Poligono'}],
  ['addStar','Inserisci una stella','star','',{short:'Stella'}],
@@ -911,7 +921,7 @@ const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc
  d:[['Sul foglio',[['Sposta l’oggetto scelto di un pixel (con Maiusc di dieci)','← → ↑ ↓'],['Cambia larghezza e altezza (per un testo la dimensione)','Ctrl+← → ↑ ↓'],['Scegli l’oggetto sopra o sotto','PgSu / PgGiù'],['Vai alle proprietà dell’oggetto','Invio'],['Togli la scelta: proprietà del foglio','Esc'],['Elimina l’oggetto','Canc'],['Zoom avanti, indietro, tutto il foglio','+ / − / 0'],['Menu dell’oggetto','Maiusc+F10']]],['Nei livelli',[['Scegli l’oggetto sopra o sotto','↑ ↓'],['Primo o ultimo','Home / Fine'],['Porta l’oggetto sopra o sotto gli altri','Alt+Maiusc+↑ / Alt+Maiusc+↓'],['Vai alle proprietà','Invio'],['Rinomina','F2'],['Elimina','Canc']]],['Nelle proprietà',[['Conferma un valore scritto','Invio o Tab'],['Torna ai livelli','Esc']]]]};
 function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${appName()}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
-async function help(){await modal('Tassello Grafica',`<p><b>Tassello Grafica 1.1.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Immagini</b>, per migliorare le foto passo per passo, e <b>Disegno</b>, per comporre forme, testi e immagini e salvarli in SVG. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica e installare Tassello Grafica come app, che si aggiorna da sola. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Grafica non sostituisce i programmi di fotoritocco professionali e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (una foto per i social, un ritratto, un documento da rendere leggibile, un volantino, un’immagine per un post) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie. Alt+Maiusc+I descrive la foto: dimensioni, inquadratura, luminosità media, quanta parte è bruciata nelle luci o chiusa nelle ombre, e le regolazioni cambiate. Ogni regolazione è un cursore con il suo nome e il suo valore; Canc la riporta a zero. Gli strumenti sulla foto si usano anche da tastiera: le frecce muovono un cursore che dice il colore sotto il punto, Invio usa il punto, Spazio abbassa il pennello; ogni selezione, maschera e scontorno si può far descrivere (Alt+Maiusc+S, M, B) e il contorno della selezione è bianco e nero, più spesso con il contrasto elevato. Una selezione si può anche scrivere con le misure. L’istogramma è descritto a parole sotto il grafico, e se una modifica brucia le luci o chiude le ombre lo senti subito. In Disegno i livelli sono un elenco che si scorre con le frecce, sul foglio le frecce spostano l’oggetto scelto e Ctrl+frecce ne cambia le dimensioni, ogni proprietà ha un campo con il suo nome, Alt+Maiusc+I descrive il foglio e l’oggetto scelto, e spostando la scelta con le frecce si sente a che cosa si è allineata. I nodi dei tracciati sono un elenco nelle proprietà, Alt+Maiusc+P descrive il tracciato a parole, e un cursore sul foglio disegna da tastiera con la Penna, la Matita e il Pennello. La verifica dell’accessibilità controlla il contrasto dei testi e la descrizione del disegno.</p><p><b>Immagini:</b> i <b>piani</b> ti guidano secondo quello che vuoi ottenere (foto per i social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro): un passo alla volta, solo i controlli che servono, con una proposta automatica da accettare o ritoccare. Con <b>Tutti i controlli</b> lavori senza piano. Inquadratura: rotazione, riflessione, raddrizzamento e formati pronti (quadrato, 4:5, 9:16, 3:2, 16:9, A4). Luce: esposizione, contrasto, alte luci, ombre, bianchi e neri. Colore: temperatura, tinta, vividezza e saturazione; curve per canale; tinta, saturazione e luminosità di otto colori; bianco e nero con il miscelatore. Dettaglio: chiarezza, foschia, nitidezza e riduzione del rumore. Vignettatura. Look pronti (bianco e nero, seppia, caldo, freddo, pellicola, vivace, tenue) e look importati da file LUT .cube, con la loro intensità. <b>Selezioni</b>: rettangolo, ellisse, lazo, lazo poligonale, pennello, bacchetta magica e intervallo di colore, da sfumare, espandere o rifinire sui contorni veri. <b>Maschere</b> con regolazioni loro: dalla selezione, a pennello, sfumature lineari e radiali. <b>Togli lo sfondo</b> sceglie il soggetto senza rete e senza intelligenza artificiale (fondo uniforme o GrabCut), con i tratti Tieni e Togli; dietro resta la trasparenza, un colore pieno o la foto sfocata. <b>Ritocco</b>: correttivo puntuale, timbro clone, occhi rossi. Le regolazioni si copiano da una foto e si incollano su un’altra. Apre JPEG, PNG, WebP, AVIF, GIF e BMP; esporta JPEG, PNG o WebP alla dimensione che scegli; <b>Usa in Disegno</b> porta la foto nel foglio.</p><p><b>Disegno:</b> un foglio con i formati di oggi (post, quadrato, storia, 16:9, banner, A4, icona) o della misura che vuoi, con sfondo pieno o trasparente. Rettangoli, ellissi, poligoni, stelle, frecce, fumetti, linee con le estremità a freccia o a punto, testi su più righe, a capo nel riquadro o lungo una curva, e immagini (foto e SVG); sulle foto le regolazioni e i look di Immagini e, aprendole con i suoi strumenti, selezioni, maschere locali, scontorno con Tieni e Togli e ritocco, che restano modificabili; un’immagine si può ritagliare dentro una forma o un tracciato. Tracciati con la Penna e lo strumento Nodi, Converti in tracciato, e unisci, sottrai, interseca ed escludi tra le forme. Matita a mano libera, Pennello che segue la pressione della penna e Gomma per i tratti. Sfumature, contorno tratteggiato, ombra, sfocatura e fusione. Scelta di più oggetti, gruppi, blocco, allineamento al foglio o tra gli oggetti, distribuzione e guide intelligenti; duplica, copia e incolla. Salva in SVG, che si apre in ogni browser e programma di grafica e che Disegno riapre modificabile, con titolo e descrizione per chi non vede; esporta PNG o JPEG.</p><p><b>Privacy:</b> foto e disegni restano nel browser e sul tuo computer; gli originali non vengono mai modificati. Il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Immagini lavora su una foto alla volta. Le foto HEIC degli iPhone e i file RAW delle fotocamere non si aprono: esportale prima in JPEG. Lo scontorno usa algoritmi classici: con capelli sottili o sfondi dei colori del soggetto va corretto a mano con Tieni e Togli. L’anteprima è ridotta alla dimensione dello schermo e la foto intera viene calcolata all’esportazione. Il file esportato è in sRGB, a 8 bit per canale. In Disegno i testi non si convertono in tracciati; i testi usano i caratteri installati sul computer, quindi un SVG aperto altrove può mostrare un carattere diverso; gli SVG di altri programmi entrano come immagini. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Grafica',`<p><b>Tassello Grafica 1.2.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Immagini</b>, per migliorare le foto passo per passo, e <b>Disegno</b>, per comporre forme, testi e immagini e salvarli in SVG. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica e installare Tassello Grafica come app, che si aggiorna da sola. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Grafica non sostituisce i programmi di fotoritocco professionali e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (una foto per i social, un ritratto, un documento da rendere leggibile, un volantino, un’immagine per un post) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie. Alt+Maiusc+I descrive la foto: dimensioni, inquadratura, luminosità media, quanta parte è bruciata nelle luci o chiusa nelle ombre, e le regolazioni cambiate. Ogni regolazione è un cursore con il suo nome e il suo valore; Canc la riporta a zero. Gli strumenti sulla foto si usano anche da tastiera: le frecce muovono un cursore che dice il colore sotto il punto, Invio usa il punto, Spazio abbassa il pennello; ogni selezione, maschera e scontorno si può far descrivere (Alt+Maiusc+S, M, B) e il contorno della selezione è bianco e nero, più spesso con il contrasto elevato. Una selezione si può anche scrivere con le misure. L’istogramma è descritto a parole sotto il grafico, e se una modifica brucia le luci o chiude le ombre lo senti subito. In Disegno i livelli sono un elenco che si scorre con le frecce, sul foglio le frecce spostano l’oggetto scelto e Ctrl+frecce ne cambia le dimensioni, ogni proprietà ha un campo con il suo nome, Alt+Maiusc+I descrive il foglio e l’oggetto scelto, e spostando la scelta con le frecce si sente a che cosa si è allineata. I nodi dei tracciati sono un elenco nelle proprietà, Alt+Maiusc+P descrive il tracciato a parole, e un cursore sul foglio disegna da tastiera con la Penna, la Matita e il Pennello. La verifica dell’accessibilità controlla il contrasto dei testi (anche di quelli diventati tracciati) e la descrizione del disegno, dove ricorda di scrivere i testi diventati tracciati.</p><p><b>Immagini:</b> i <b>piani</b> ti guidano secondo quello che vuoi ottenere (foto per i social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro): un passo alla volta, solo i controlli che servono, con una proposta automatica da accettare o ritoccare. Con <b>Tutti i controlli</b> lavori senza piano. Inquadratura: rotazione, riflessione, raddrizzamento e formati pronti (quadrato, 4:5, 9:16, 3:2, 16:9, A4). Luce: esposizione, contrasto, alte luci, ombre, bianchi e neri. Colore: temperatura, tinta, vividezza e saturazione; curve per canale; tinta, saturazione e luminosità di otto colori; bianco e nero con il miscelatore. Dettaglio: chiarezza, foschia, nitidezza e riduzione del rumore. Vignettatura. Look pronti (bianco e nero, seppia, caldo, freddo, pellicola, vivace, tenue) e look importati da file LUT .cube, con la loro intensità. <b>Selezioni</b>: rettangolo, ellisse, lazo, lazo poligonale, pennello, bacchetta magica e intervallo di colore, da sfumare, espandere o rifinire sui contorni veri. <b>Maschere</b> con regolazioni loro: dalla selezione, a pennello, sfumature lineari e radiali. <b>Togli lo sfondo</b> sceglie il soggetto senza rete e senza intelligenza artificiale (fondo uniforme o GrabCut), con un riquadro intorno al soggetto e i tratti Tieni e Togli, che ricalcolano solo la zona intorno; il bordo segue i colori di capelli e pelo e si ripulisce dal colore del vecchio sfondo; dietro resta la trasparenza, un colore pieno o la foto sfocata. <b>Ritocco</b>: correttivo puntuale, timbro clone, occhi rossi. Le regolazioni si copiano da una foto e si incollano su un’altra. Apre JPEG, PNG, WebP, AVIF, GIF e BMP, le foto HEIC degli iPhone e, dei file RAW delle fotocamere, l’anteprima JPEG che vi ha messo la fotocamera; esporta JPEG, PNG o WebP alla dimensione che scegli; <b>Usa in Disegno</b> porta la foto nel foglio.</p><p><b>Disegno:</b> un foglio con i formati di oggi (post, quadrato, storia, 16:9, banner, A4, icona) o della misura che vuoi, con sfondo pieno o trasparente. Rettangoli, ellissi, poligoni, stelle, frecce, fumetti, linee con le estremità a freccia o a punto, testi su più righe, a capo nel riquadro o lungo una curva, e immagini (foto e SVG; le foto HEIC e l’anteprima dei RAW entrano nel foglio in JPEG, o in PNG se hanno la trasparenza); sulle foto le regolazioni e i look di Immagini e, aprendole con i suoi strumenti, selezioni, maschere locali, scontorno con Tieni e Togli e ritocco, che restano modificabili; un’immagine si può ritagliare dentro una forma o un tracciato. Tracciati con la Penna e lo strumento Nodi. <b>Converti in tracciato</b> vale per le forme e per i testi: le lettere diventano contorni presi dal file del carattere (tra quelli installati, con il permesso del browser, o scelto da te: .ttf, .otf o .ttc), con righe, allineamento, spaziatura, crenatura e curva com’erano, e il testo resta come descrizione per chi non vede. Unisci, sottrai, interseca ed escludi tra le forme; le linee restano linee: intersecate con una forma tengono i tratti dentro, sottratte (con la linea in fondo) quelli fuori, unite o escluse entrano aperte nel tracciato, con il contorno e senza riempimento. <b>Taglia con una linea</b> divide una forma lungo le linee che la attraversano da parte a parte. Matita a mano libera e Pennello che segue la pressione della penna, con pochi nodi già mentre disegni; <b>Semplifica il tracciato</b> ne toglie altri con la quantità che scegli, guardando il risultato; Gomma per i tratti. Sfumature, contorno tratteggiato, ombra, sfocatura e fusione. Scelta di più oggetti, gruppi, blocco, allineamento al foglio o tra gli oggetti, distribuzione e guide intelligenti; duplica, copia e incolla. Salva in SVG, che si apre in ogni browser e programma di grafica e che Disegno riapre modificabile, con titolo e descrizione per chi non vede; esporta PNG o JPEG.</p><p><b>Privacy:</b> foto e disegni restano nel browser e sul tuo computer; gli originali non vengono mai modificati. Il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Immagini lavora su una foto alla volta. Le foto HEIC si aprono solo se il sistema ha il decodificatore HEVC (su Windows l’estensione «Estensioni video HEVC»; altrimenti esportale in JPEG dal telefono o da Foto), e le HEIF fatte di più immagini sovrapposte non si ricompongono. Di un file RAW si apre l’anteprima JPEG che la fotocamera ha già sviluppato, con la sua misura, a volte più piccola della foto: non è uno sviluppo del RAW. Lo scontorno usa algoritmi classici: con soggetti che toccano i bordi, capelli sottili, vetro o sfondi dei colori del soggetto servono un riquadro o qualche tratto Tieni e Togli. L’anteprima è ridotta alla dimensione dello schermo e la foto intera viene calcolata all’esportazione. Il file esportato è in sRGB, a 8 bit per canale. In Disegno i testi usano i caratteri installati sul computer, quindi un SVG aperto altrove può mostrare un carattere diverso: per fissarli, convertili in tracciati. Per convertirli serve il permesso di leggere i caratteri installati (Chrome ed Edge) o il file del carattere; i caratteri variabili con contorni CFF2 non si leggono, e legature e varianti delle lettere non si applicano. Gli SVG di altri programmi entrano come immagini. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
 // Aree raggiungibili con F6 e Maiusc+F6.
 function regions(){const l=[$('bar')];if(drawerName)l.push($('drawer'));const side=s=>panesOf(state.mode[0]).filter(id=>paneState(id).side===s).map(id=>{const st=paneState(id).st;return st==='open'?$(id):st==='tessera'?$(id+'Tes'):null});
  l.push(...side('left'),...(isImmagini()?[$('stage'),$('viewbar')]:[$('drawStage'),$('drawbar')]),...side('right'),$('statusbar'));return l.filter(el=>el&&(el.offsetWidth||el.offsetHeight))}
@@ -932,7 +942,7 @@ const RIBBON={
   Vista:[['Confronto','compare'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  d:{Inizio:[['Disegno','openDraw saveSvg exportDraw'],['Appunti','paste cut copy duplicateItem'],['Inserisci','addText addImage addRect addEllipse'],['Cronologia','undo redo']],
   Inserisci:[['Forme','addRect addEllipse addPolygon addStar addArrow addBubble'],['Linee','addLine addArrowLine'],['Testo','addText'],['Immagini','addImage']],
-  Disegna:[['Strumenti','toolSelect toolNodes toolPen toolPencil toolBrush toolEraser'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath toPath'],['Combina','boolUnion boolSubtract boolIntersect boolExclude']],
+  Disegna:[['Strumenti','toolSelect toolNodes toolPen toolPencil toolBrush toolEraser'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath toPath simplifyPath'],['Combina','boolUnion boolSubtract boolIntersect boolExclude boolCut']],
   Disponi:[['Scelta','selectAll groupItems ungroupItems lockItems hideItems'],['Ordine','bringFront sendBack forward backward'],['Allinea','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Distribuisci','distH distV smartGuides'],['Oggetto','duplicateItem deleteItem readDraw']],
   Stile:[['Riempimento ed effetti','gradientItem shadowItem'],['Testo','textOnPath textOffPath']],
   Immagine:[['Immagine','imgEdit imgMasks imgCutout imgPhotoReset'],['Ritaglio','imgClip imgUnclip']],
@@ -1042,19 +1052,134 @@ document.addEventListener('click',e=>{const b=e.target.closest?.('[data-pane-act
 let activeTile=null;
 document.addEventListener('focusin',e=>{const t=e.target.closest?.('#workRegion .tile');if(!t||t===activeTile)return;activeTile?.classList.remove('is-active');activeTile=t;t.classList.add('is-active')});
 // Apertura delle foto: il browser decodifica JPEG, PNG, WebP, AVIF, GIF e BMP e raddrizza la foto secondo
-// l'orientamento scritto dalla fotocamera. HEIC e RAW non si possono aprire: si spiega che cosa fare.
+// l'orientamento scritto dalla fotocamera. Le foto HEIC le ricompone heifDecode (05b) con il decodificatore HEVC del
+// sistema. Dei RAW si apre l'anteprima JPEG che la fotocamera ha messo nel file (rawDecode, 05c).
 const isHeic=f=>/\.(?:heic|heif)$/i.test(f.name)||/^image\/hei[cf]/i.test(f.type);
 const isRaw=f=>/\.(?:cr2|cr3|nef|nrw|arw|srf|sr2|orf|rw2|raf|dng|pef|srw|x3f|3fr|iiq)$/i.test(f.name);
 const isPhotoFile=f=>/^image\//i.test(f.type)||/\.(?:jpe?g|png|webp|avif|gif|bmp|heic|heif)$/i.test(f.name)||isRaw(f);
 // Oltre questa dimensione la foto non si apre: l'esportazione a piena risoluzione richiederebbe troppa memoria.
 const MAX_PIXELS=60e6;
 async function decodePhoto(file){
- if(isHeic(file))throw Error('Le foto HEIC degli iPhone non si aprono in Chrome ed Edge. Sul telefono scegli Impostazioni › Fotocamera › Formati › Più compatibile, oppure condividi la foto come JPEG.');
- if(isRaw(file))throw Error('I file RAW delle fotocamere non si aprono ancora: esporta prima la foto in JPEG dalla fotocamera o dal suo programma.');
  if(/svg/i.test(file.type)||/\.svg$/i.test(file.name))throw Error('I disegni SVG si apriranno in Disegno: Immagini lavora sulle foto.');
- let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){throw Error(`«${file.name}» non è un’immagine che il browser sa aprire`)}
+ let bmp;if(isHeic(file))bmp=await heifDecode(file);else if(isRaw(file))bmp=await rawDecode(file);else try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){throw Error(`«${file.name}» non è un’immagine che il browser sa aprire`)}
  if(bmp.width*bmp.height>MAX_PIXELS){const w=bmp.width,h=bmp.height;bmp.close();throw Error(`La foto è troppo grande (${fmtInt(w)} × ${fmtInt(h)} pixel): il limite è di ${fmtInt(MAX_PIXELS/1e6)} milioni di pixel.`)}
  return bmp}
+// HEIC e HEIF (le foto degli iPhone): il contenitore si legge qui, le immagini HEVC le decodifica il sistema con
+// WebCodecs (VideoDecoder), senza WebAssembly. Si leggono ftyp, meta con pitm, iinf, iloc, iref, idat e le proprietà
+// (iprp: ipco e ipma) con hvcC, ispe, irot, imir e clap. La foto principale può essere un'immagine sola, una griglia
+// di riquadri (grid) o una trasformazione di un'altra (iden); si decodificano i riquadri, si ricompongono e si
+// raddrizzano. Le sovrapposizioni (iovl) e le altre composizioni non si ricostruiscono: si spiega che cosa fare.
+const HEIF_HELP='Esporta la foto in JPEG dal telefono (su iPhone: Impostazioni › Fotocamera › Formati › Più compatibile, oppure condividila come JPEG) o dall’app Foto del computer';
+const heifErr=m=>Error(m+'. '+HEIF_HELP+'.');
+const heif4=(v,p)=>String.fromCharCode(v.getUint8(p),v.getUint8(p+1),v.getUint8(p+2),v.getUint8(p+3));
+// Scatole ISO BMFF tra start ed end: tipo, inizio del contenuto e fine. Le dimensioni 1 (a 64 bit) e 0 (fino in fondo) valgono.
+function heifBoxes(v,start,end){const out=[];for(let p=start;p+8<=end;){let size=v.getUint32(p),hdr=8;if(size===1){size=Number(v.getBigUint64(p+8));hdr=16}else if(!size)size=end-p;if(size<hdr||p+size>end)break;out.push({type:heif4(v,p+4),start:p+hdr,end:p+size});p+=size}return out}
+// Interi senza segno di n byte (0, 1, 2, 4 o 8), letti in avanti.
+const heifUint=(v,p,n)=>n===0?0:n===1?v.getUint8(p):n===2?v.getUint16(p):n===4?v.getUint32(p):n===8?Number(v.getBigUint64(p)):NaN;
+function heifParse(buf){const v=new DataView(buf),top=heifBoxes(v,0,buf.byteLength),ftyp=top.find(b=>b.type==='ftyp');if(!ftyp)throw heifErr('Il file non è una foto HEIF valida');
+ const brands=[];for(let p=ftyp.start;p+4<=ftyp.end;p+=4)if(p!==ftyp.start+4)brands.push(heif4(v,p));const meta=top.find(b=>b.type==='meta');if(!meta)throw heifErr('Il file HEIF non contiene immagini');
+ const kids=heifBoxes(v,meta.start+4,meta.end),box=t=>kids.find(b=>b.type===t),H={brands,items:new Map(),props:[],refs:[],idat:null,v};
+ const pitm=box('pitm');if(pitm)H.primary=v.getUint8(pitm.start)?v.getUint32(pitm.start+4):v.getUint16(pitm.start+4);
+ const idat=box('idat');if(idat)H.idat=[idat.start,idat.end];
+ const item=id=>{let it=H.items.get(id);if(!it)H.items.set(id,it={id,type:'',ext:[],method:0,props:[]});return it};
+ const iinf=box('iinf');if(iinf){const ver=v.getUint8(iinf.start);for(const b of heifBoxes(v,iinf.start+(ver?8:6),iinf.end)){if(b.type!=='infe')continue;const ev=v.getUint8(b.start);if(ev<2)continue;const p=b.start+4,id=ev===2?v.getUint16(p):v.getUint32(p),q=p+(ev===2?2:4)+2;const it=item(id);it.type=heif4(v,q);it.hidden=!!(v.getUint32(b.start)&1)}}
+ const iloc=box('iloc');if(iloc){let p=iloc.start;const ver=v.getUint8(p);p+=4;const a=v.getUint8(p),b=v.getUint8(p+1);p+=2;const os=a>>4,ls=a&15,bs=b>>4,is=ver?b&15:0,n=ver<2?v.getUint16(p):v.getUint32(p);p+=ver<2?2:4;
+  for(let i=0;i<n;i++){const id=ver<2?v.getUint16(p):v.getUint32(p);p+=ver<2?2:4;const it=item(id);if(ver){it.method=v.getUint16(p)&15;p+=2}p+=2;const base=heifUint(v,p,bs);p+=bs;const ne=v.getUint16(p);p+=2;
+   for(let e=0;e<ne;e++){if(is)p+=is;const off=heifUint(v,p,os);p+=os;const len=heifUint(v,p,ls);p+=ls;it.ext.push([base+off,len])}}}
+ const iref=box('iref');if(iref){const ver=v.getUint8(iref.start),w=ver?4:2,rd=p=>ver?v.getUint32(p):v.getUint16(p);for(const b of heifBoxes(v,iref.start+4,iref.end)){let p=b.start;const from=rd(p);p+=w;const n=v.getUint16(p);p+=2;const to=[];for(let i=0;i<n;i++,p+=w)to.push(rd(p));H.refs.push({type:b.type,from,to})}}
+ const iprp=box('iprp');if(iprp){const sub=heifBoxes(v,iprp.start,iprp.end),ipco=sub.find(b=>b.type==='ipco');if(ipco)H.props=heifBoxes(v,ipco.start,ipco.end);
+  for(const ipma of sub.filter(b=>b.type==='ipma')){let p=ipma.start;const ver=v.getUint8(p),big=v.getUint32(p)&1;p+=4;const n=v.getUint32(p);p+=4;
+   for(let i=0;i<n;i++){const id=ver<1?v.getUint16(p):v.getUint32(p);p+=ver<1?2:4;const c=v.getUint8(p++),it=item(id);for(let k=0;k<c;k++){const x=big?v.getUint16(p):v.getUint8(p);p+=big?2:1;const idx=x&(big?0x7fff:0x7f);if(idx&&H.props[idx-1])it.props.push(H.props[idx-1])}}}}
+ if(!H.items.has(H.primary))throw heifErr('Il file HEIF non indica la foto principale');return H}
+const heifProp=(it,t)=>it.props.find(b=>b.type===t);
+// I dati di un'immagine: i pezzi indicati da iloc, nel file (metodo 0) o dentro idat (metodo 1).
+function heifData(H,it){const parts=it.ext.map(([o,l])=>{const s=it.method===1?H.idat[0]+o:o;return new Uint8Array(H.v.buffer,s,l||((it.method===1?H.idat[1]:H.v.byteLength)-s))});if(parts.length===1)return parts[0];const out=new Uint8Array(parts.reduce((a,p)=>a+p.length,0));let o=0;for(const p of parts){out.set(p,o);o+=p.length}return out}
+// Il codice del codec per WebCodecs, dalla configurazione hvcC: profilo, compatibilità (bit rovesciati), livello e vincoli.
+function heifCodec(c){const sp=c[1]>>6,tier=c[1]>>5&1,prof=c[1]&31,f=(c[2]<<24|c[3]<<16|c[4]<<8|c[5])>>>0;let rev=0;for(let i=0;i<32;i++)if(f>>>i&1)rev|=1<<(31-i);
+ const cons=[...c.subarray(6,12)];while(cons.length&&!cons[cons.length-1])cons.pop();return ['hvc1',(sp?'ABC'[sp-1]:'')+prof,(rev>>>0).toString(16).toUpperCase(),(tier?'H':'L')+c[12],...cons.map(x=>x.toString(16).toUpperCase())].join('.')}
+// Riquadri HEVC decodificati uno dopo l'altro con lo stesso decodificatore; ogni riquadro si disegna al suo posto.
+async function heifTiles(H,list,draw){const cfgOf=it=>{const c=heifProp(it,'hvcC'),e=heifProp(it,'ispe');if(!c)throw heifErr('Questa foto HEIF non è in HEVC e il browser non sa aprirla');const d=new Uint8Array(H.v.buffer,c.start,c.end-c.start);return {codec:heifCodec(d),description:d,codedWidth:e?H.v.getUint32(e.start+4):undefined,codedHeight:e?H.v.getUint32(e.start+8):undefined}};
+ if(typeof VideoDecoder==='undefined')throw heifErr('Questo browser non sa decodificare le foto HEIC');
+ let cfg=null,dec=null,err=null;const pending=new Map();
+ const open=async c=>{const ok=await VideoDecoder.isConfigSupported(c).then(r=>r.supported,()=>false);if(!ok)throw Error(`Il sistema non ha il decodificatore HEVC che serve per le foto HEIC. ${HEIF_HELP}; oppure, su Windows, installa l’estensione «Estensioni video HEVC» dal Microsoft Store e riapri la foto.`);
+  dec=new VideoDecoder({output:f=>{const k=pending.get(f.timestamp);pending.delete(f.timestamp);try{if(k)draw(f,k)}finally{f.close()}},error:e=>{err=e}});dec.configure(c)};
+ try{for(let i=0;i<list.length;i++){const it=list[i],c=cfgOf(it);if(!cfg||cfg.codec!==c.codec||cfg.description.join()!==c.description.join()){if(dec){await dec.flush();dec.close()}await open(c);cfg=c}
+   pending.set(i,{i,it});dec.decode(new EncodedVideoChunk({type:'key',timestamp:i,data:heifData(H,it)}));if(dec.decodeQueueSize>8)await new Promise(r=>dec.addEventListener('dequeue',r,{once:true}))}
+  await dec?.flush()}catch(e){throw err||e}finally{if(dec&&dec.state!=='closed')dec.close()}
+ if(err)throw heifErr('La foto HEIC non si decodifica: '+(err.message||err));if(pending.size)throw heifErr('Alcuni riquadri della foto HEIC non si decodificano')}
+// Trasformazioni nell'ordine in cui sono elencate: ritaglio (clap), rotazione antioraria (irot), specchiatura (imir).
+function heifTransform(H,it,cv){const v=H.v;for(const b of it.props){let out;const W=cv.width,Ht=cv.height;
+  if(b.type==='clap'){const r=k=>v.getInt32(b.start+k*4)/(v.getInt32(b.start+k*4+4)||1),cw=Math.round(r(0)),ch=Math.round(r(2)),x=Math.round(r(4)+(W-1)/2-(cw-1)/2),y=Math.round(r(6)+(Ht-1)/2-(ch-1)/2);
+   if(cw>0&&ch>0&&(cw<W||ch<Ht)){out=new OffscreenCanvas(cw,ch);out.getContext('2d').drawImage(cv,-Math.max(0,x),-Math.max(0,y))}}
+  else if(b.type==='irot'){const a=v.getUint8(b.start)&3;if(a){out=new OffscreenCanvas(a&1?Ht:W,a&1?W:Ht);const c=out.getContext('2d');c.translate(out.width/2,out.height/2);c.rotate(-a*Math.PI/2);c.drawImage(cv,-W/2,-Ht/2)}}
+  else if(b.type==='imir'){const ax=v.getUint8(b.start)&1;out=new OffscreenCanvas(W,Ht);const c=out.getContext('2d');if(ax)c.setTransform(-1,0,0,1,W,0);else c.setTransform(1,0,0,-1,0,Ht);c.drawImage(cv,0,0)}
+  if(out)cv=out}return cv}
+// Un'immagine della foto, già ricomposta e trasformata.
+async function heifImage(H,id,depth=0){const it=H.items.get(id);if(!it||depth>4)throw heifErr('La foto HEIF è incompleta');const dimg=H.refs.find(r=>r.type==='dimg'&&r.from===id)?.to||[];let cv;
+ if(it.type==='hvc1'){const e=heifProp(it,'ispe');cv=new OffscreenCanvas(e?H.v.getUint32(e.start+4):1,e?H.v.getUint32(e.start+8):1);const x=cv.getContext('2d');
+  await heifTiles(H,[it],f=>{if(cv.width!==f.displayWidth||cv.height!==f.displayHeight){cv.width=f.displayWidth;cv.height=f.displayHeight}x.drawImage(f,0,0)})}
+ else if(it.type==='grid'){const d=heifData(H,it),dv=new DataView(d.buffer,d.byteOffset,d.byteLength),big=d[1]&1,rows=d[2]+1,cols=d[3]+1,W=big?dv.getUint32(4):dv.getUint16(4),Ht=big?dv.getUint32(8):dv.getUint16(6);
+  if(dimg.length<rows*cols)throw heifErr('La griglia della foto HEIC è incompleta');if(W*Ht>MAX_PIXELS)throw Error(`La foto è troppo grande (${fmtInt(W)} × ${fmtInt(Ht)} pixel): il limite è di ${fmtInt(MAX_PIXELS/1e6)} milioni di pixel.`);
+  cv=new OffscreenCanvas(W,Ht);const x=cv.getContext('2d');let tw=0,th=0;await heifTiles(H,dimg.slice(0,rows*cols).map(t=>H.items.get(t)),(f,{i})=>{tw||=f.displayWidth;th||=f.displayHeight;x.drawImage(f,(i%cols)*tw,Math.floor(i/cols)*th)})}
+ else if(it.type==='iden'&&dimg.length)cv=await heifImage(H,dimg[0],depth+1);
+ else throw heifErr(it.type==='iovl'?'Questa foto HEIF è una sovrapposizione di più immagini, che Immagini non sa ricomporre':`Questa foto HEIF usa un tipo d’immagine (${it.type||'sconosciuto'}) che Immagini non sa aprire`);
+ return heifTransform(H,it,cv)}
+// Le foto AV1 in un contenitore HEIF (AVIF con un altro nome) le apre il browser da solo.
+async function heifDecode(file){const H=heifParse(await file.arrayBuffer());if(H.items.get(H.primary).type==='av01')return createImageBitmap(file,{imageOrientation:'from-image'}).catch(()=>{throw heifErr('Questa foto HEIF è in AV1 e il browser non sa aprirla')});
+ return createImageBitmap(await heifImage(H,H.primary))}
+// RAW delle fotocamere: si apre l'anteprima JPEG più grande che la fotocamera ha messo nel file, già sviluppata da lei
+// (non è uno sviluppo del RAW). Quasi tutti i RAW sono TIFF (CR2, NEF, ARW, DNG, ORF, RW2, PEF…): l'anteprima sta in un
+// IFD come JPEGInterchangeFormat o come strip JPEG, nel RW2 nel tag JpgFromRaw. Il CR3 è ISO BMFF: il JPEG intero è il
+// primo campione della prima traccia, quello piccolo nella scatola PRVW. Il RAF dice nell'intestazione dove sta il
+// JPEG. Le anteprime nascoste altrove (nelle note del produttore di ORF e PEF) si trovano cercando i JPEG nel file.
+// I dati grezzi in JPEG senza perdita (SOF3) non sono anteprime e si scartano.
+const RAW_FMT={cr2:'CR2',cr3:'CR3',nef:'NEF',nrw:'NRW',arw:'ARW',srf:'SRF',sr2:'SR2',orf:'ORF',rw2:'RW2',raf:'RAF',dng:'DNG',pef:'PEF',srw:'SRW',x3f:'X3F','3fr':'3FR',iiq:'IIQ'};
+// Un JPEG che comincia in off: misura, orientamento scritto nel suo EXIF e fine (dopo FFD9). null se non è un JPEG
+// che il browser sa aprire.
+function rawJpeg(u,off,max=u.length){if(u[off]!==255||u[off+1]!==216||u[off+2]!==255)return null;let p=off+2,w=0,h=0,orient=0;
+ while(p+2<=max){if(u[p]!==255)return null;const m=u[p+1];if(m===255){p++;continue}if(m===217)return w?{off,end:p+2,w,h,orient}:null;if(m>=208&&m<=215){p+=2;continue}if(p+4>max)return null;const len=u[p+2]<<8|u[p+3];
+  if(m===225&&u[p+4]===69&&u[p+5]===120&&u[p+6]===105&&u[p+7]===102)orient=rawTiffOrient(u,p+10,p+2+len)||orient;
+  if(m>=192&&m<=207&&m!==196&&m!==200&&m!==204){if(m!==192&&m!==193&&m!==194)return null;h=u[p+5]<<8|u[p+6];w=u[p+7]<<8|u[p+8]}
+  p+=2+len;
+  // Dopo SOS i dati compressi arrivano fino al marcatore seguente: FF00, FFFF e le ripartenze (FFD0–FFD7) non contano.
+  if(m===218){if(!w||!h)return null;while(p+1<max&&!(u[p]===255&&u[p+1]&&u[p+1]!==255&&!(u[p+1]>=208&&u[p+1]<=215)))p++}}
+ return null}
+// TIFF dentro il file, a partire da base: lettura degli IFD in ordine, con i sotto-IFD, sapendo l'ordine dei byte.
+function rawTiff(u,base,end=u.length){const v=new DataView(u.buffer,u.byteOffset),le=u[base]===73,g16=p=>v.getUint16(p,le),g32=p=>v.getUint32(p,le),magic=g16(base+2);
+ if(!(u[base]===73&&u[base+1]===73||u[base]===77&&u[base+1]===77)||![42,0x4f52,0x5352,0x55].includes(magic))return null;
+ const ifds=[],seen=new Set(),todo=[g32(base+4)];
+ // Ogni voce: tipo e numero di valori; i valori stanno nella voce se occupano al massimo 4 byte, altrimenti all'indirizzo indicato.
+ const SZ=[0,1,1,2,4,8,1,1,2,4,8,4,8,4];
+ while(todo.length&&ifds.length<40){const o=todo.shift();if(!o||seen.has(o)||base+o+2>end)continue;seen.add(o);const n=g16(base+o),tags=new Map();
+  for(let i=0;i<n&&base+o+2+i*12+12<=end;i++){const e=base+o+2+i*12,tag=g16(e),type=g16(e+2),cnt=g32(e+4),bytes=(SZ[type]||1)*cnt,at=bytes>4?base+g32(e+8):e+8;
+   const val=k=>type===3?g16(at+k*2):g32(at+k*4);tags.set(tag,{type,cnt,at,val,list:()=>Array.from({length:Math.min(cnt,64)},(_,k)=>val(k))})}
+  ifds.push(tags);const next=g32(base+o+2+n*12);if(next)todo.push(next);for(const t of [330,34665])if(tags.has(t))todo.push(...tags.get(t).list())}
+ return {ifds,orient:ifds[0]?.get(274)?.val(0)||1}}
+const rawTiffOrient=(u,base,end)=>{try{return rawTiff(u,base,end)?.orient}catch(e){return 0}};
+// Le anteprime possibili: posizione e lunghezza, poi rawJpeg controlla che siano davvero JPEG.
+function rawCandidates(u,name){const v=new DataView(u.buffer,u.byteOffset),c=[];let orient=1;const head=String.fromCharCode(...u.subarray(0,16));
+ if(head.startsWith('FUJIFILMCCD-RAW')){c.push([v.getUint32(84),v.getUint32(88)])}
+ else if(head.slice(4,8)==='ftyp'){const walk=(s,e,f)=>{for(let p=s;p+8<=e;){let size=v.getUint32(p),hdr=8;if(size===1){size=Number(v.getBigUint64(p+8));hdr=16}else if(!size)size=e-p;if(size<hdr)break;f(String.fromCharCode(...u.subarray(p+4,p+8)),p+hdr,p+size);p+=size}};
+  // CR3: tracce nella scatola moov (stsz dice la misura del primo campione, stco o co64 dove sta), PRVW e CMT1 nelle scatole uuid.
+  walk(0,u.length,(t,s,e)=>{if(t==='moov')walk(s,e,(t2,s2,e2)=>{if(t2==='uuid')walk(s2+16,e2,(t3,s3,e3)=>{if(t3==='CMT1')orient=rawTiff(u,s3,e3)?.orient||1});
+    if(t2!=='trak')return;let size=0,off=0;const deep=(a,b)=>walk(a,b,(t3,s3,e3)=>{if(['mdia','minf','stbl'].includes(t3))deep(s3,e3);else if(t3==='stsz')size=v.getUint32(s3+4)||v.getUint32(s3+12);else if(t3==='co64')off=Number(v.getBigUint64(s3+8));else if(t3==='stco')off=v.getUint32(s3+8)});deep(s2,e2);if(size&&off)c.push([off,size])});
+   if(t==='uuid')for(let p=s+16;p+12<e;p++)if(u[p]===255&&u[p+1]===216){c.push([p,e-p]);break}})}
+ else{const T=rawTiff(u,0);if(T){orient=T.orient;for(const d of T.ifds){const at=(t,k=0)=>d.get(t)?.val(k);
+   if(d.has(513))c.push([at(513),at(514)||u.length-at(513)]);if(d.has(46))c.push([d.get(46).at,d.get(46).cnt]);
+   // Strip JPEG (compressione 6 o 7): le strip una dopo l'altra formano un JPEG solo.
+   if(d.has(273)&&[6,7].includes(at(259))){const so=d.get(273).list(),sc=d.get(279)?.list()||[];c.push([so[0],sc.reduce((a,b)=>a+b,0)||u.length-so[0]])}}}}
+ return {c,orient}}
+async function rawDecode(file){const u=new Uint8Array(await file.arrayBuffer()),fmt=RAW_FMT[(file.name.match(/\.(\w+)$/)||[])[1]?.toLowerCase()]||'RAW',{c,orient}=rawCandidates(u,file.name);
+ let best=null;const take=j=>{if(j&&(!best||j.w*j.h>best.w*best.h))best=j};for(const [o,l] of c)if(o>0&&o<u.length)take(rawJpeg(u,o,Math.min(u.length,o+(l>0?l:u.length))));
+ // Se le anteprime trovate sono piccole si cercano altri JPEG nel file (ORF e PEF le tengono nelle note del produttore).
+ if(!best||Math.max(best.w,best.h)<1200)for(let p=0,k=0;p<u.length-3&&k<400;p++){if(u[p]!==255||u[p+1]!==216||u[p+2]!==255)continue;k++;const j=rawJpeg(u,p);if(j){take(j);p=j.end-1}}
+ if(!best)throw Error(`In questo file ${fmt} non c’è un’anteprima JPEG che si possa aprire: esporta la foto in JPEG dalla fotocamera o dal suo programma.`);
+ const blob=new Blob([u.subarray(best.off,best.end)],{type:'image/jpeg'}),o=best.orient>1?1:orient;let bmp=await createImageBitmap(blob,{imageOrientation:'from-image'});
+ // Il JPEG senza orientamento suo prende quello del RAW: 3 capovolta, 6 da girare a destra, 8 a sinistra (con 2, 4, 5, 7 riflesse).
+ if(o>1&&o<=8){const W=bmp.width,H=bmp.height,sw=o>=5,cv=new OffscreenCanvas(sw?H:W,sw?W:H),x=cv.getContext('2d');
+  x.setTransform(...{2:[-1,0,0,1,W,0],3:[-1,0,0,-1,W,H],4:[1,0,0,-1,0,H],5:[0,1,1,0,0,0],6:[0,1,-1,0,H,0],7:[0,-1,-1,0,H,W],8:[0,-1,1,0,0,W]}[o]);x.drawImage(bmp,0,0);bmp.close();bmp=await createImageBitmap(cv)}
+ bmp.rawInfo={fmt,w:bmp.width,h:bmp.height};return bmp}
+const rawNote=({fmt,w,h})=>`Del file ${fmt} si apre l’anteprima JPEG che la fotocamera ha già sviluppato e messo nel file, di ${fmtInt(w)} per ${fmtInt(h)} pixel: non è uno sviluppo del RAW.`;
 // Immagini: una foto alla volta, modificata senza toccare l'originale. Il file aperto resta com'è; le modifiche
 // sono una ricetta (inquadratura, regolazioni, look) che si applica all'anteprima e, all'esportazione, alla foto intera.
 // Regolazioni: [id, nome, gruppo, minimo, massimo, passo, formato del valore, spiegazione letta con il cursore].
@@ -1093,7 +1218,8 @@ const hasEdits=()=>JSON.stringify({...I.r,sel:null})!==JSON.stringify(newRecipe(
 async function openPhoto(file){const bmp=await work('Apertura della foto',()=>decodePhoto(file));if(!bmp)return false;
  I.bmp?.close();photoChanged();Object.assign(I,{file,name:file.name,title:baseName(file.name),bmp,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false});I.base=snap();
  $('docTitle').value=I.title;updateTitle();showPhoto();renderPanel();renderPlans();refreshToggles();schedulePersist('immagini');
- const intro=enterStep();announce(`Aperta «${file.name}», ${fmtInt(bmp.width)} per ${fmtInt(bmp.height)} pixel.${intro?' '+intro:''}`);$('photo').focus();return true}
+ // Di un RAW si dice, a schermo e a voce (il messaggio è una regione viva), che è l'anteprima della fotocamera.
+ const intro=enterStep();announce(`Aperta «${file.name}», ${fmtInt(bmp.width)} per ${fmtInt(bmp.height)} pixel.${intro?' '+intro:''}`);if(bmp.rawInfo)toast(rawNote(bmp.rawInfo));$('photo').focus();return true}
 async function closePhoto(){if(photoLink.id){linkBack();return}if(!I.bmp)return;if(hasEdits()&&!(await confirmAction('Le modifiche non esportate andranno perse. L’originale resta com’è sul tuo computer. Vuoi chiudere la foto?','Chiudi la foto')))return;
  I.bmp.close();photoChanged();Object.assign(I,{file:null,name:'',title:'Foto',bmp:null,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false,stats:null});I.base=snap();
  $('docTitle').value=I.title;updateTitle();showPhoto();renderPanel();refreshToggles();schedulePersist('immagini');announce('Foto chiusa');$('photoEmpty').querySelector('button')?.focus()}
@@ -1222,8 +1348,8 @@ function renderPhoto(fast){if(!I.bmp){I.stats=null;drawHist();drawAnts();return}
 // La foto occupa lo spazio disponibile senza deformarsi e senza superare la sua misura reale.
 function fitStage(){if(!I.bmp)return;const st=$('stage'),pad=24,[w,h]=outSize(I.r,I.bmp.width,I.bmp.height),k=Math.min((st.clientWidth-pad)/w,(st.clientHeight-pad)/h,1);photoCv.style.width=Math.max(1,Math.floor(w*k))+'px';photoCv.style.height=Math.max(1,Math.floor(h*k))+'px';placeOverlays()}
 function showPhoto(){const has=!!I.bmp;photoCv.hidden=!has;if(!has){antsCv.hidden=overCv.hidden=true;endTool(false)}$('photoEmpty').hidden=has;$('compareBadge').hidden=!(has&&I.compare);if(!has){for(const slot of Object.values(srcCache))Object.assign(slot,{key:'',px:null});$('photoInfo').textContent='';$('docInfo').textContent=''}requestRender()}
-const photoInfo=()=>{const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height);return `${fmtInt(w)} × ${fmtInt(h)} px`+(I.r.ratio!=='orig'?' · '+I.r.ratio.replace('a4','A4'):'')};
-function photoLabel(){const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),n=changedAdj(I.r).length+(I.r.look!=='none'?1:0);return `${I.compare?'Originale di ':'Foto '}«${I.name}», ${fmtInt(w)} per ${fmtInt(h)} pixel${I.r.ratio!=='orig'?', '+ratioName(I.r.ratio):''}${I.compare?'':n?`, ${n===1?'una modifica':n+' modifiche'}`:', senza modifiche'}`}
+const photoInfo=()=>{const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height);return `${fmtInt(w)} × ${fmtInt(h)} px`+(I.bmp.rawInfo?` · anteprima del ${I.bmp.rawInfo.fmt}`:'')+(I.r.ratio!=='orig'?' · '+I.r.ratio.replace('a4','A4'):'')};
+function photoLabel(){const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),n=changedAdj(I.r).length+(I.r.look!=='none'?1:0);return `${I.compare?'Originale di ':'Foto '}«${I.name}», ${fmtInt(w)} per ${fmtInt(h)} pixel${I.bmp.rawInfo?`, anteprima JPEG del ${I.bmp.rawInfo.fmt}`:''}${I.r.ratio!=='orig'?', '+ratioName(I.r.ratio):''}${I.compare?'':n?`, ${n===1?'una modifica':n+' modifiche'}`:', senza modifiche'}`}
 // Istogramma: luminosità come area, rosso, verde e blu come linee; segni ai bordi se ci sono luci bruciate o ombre chiuse.
 const histCv=$('hist');
 function drawHist(){const dpr=devicePixelRatio||1,W=Math.max(1,Math.round(histCv.clientWidth*dpr)),H=Math.max(1,Math.round(histCv.clientHeight*dpr));if(histCv.width!==W||histCv.height!==H){histCv.width=W;histCv.height=H}const ctx=histCv.getContext('2d');ctx.fillStyle=palette['hist-bg']||'#fff';ctx.fillRect(0,0,W,H);
@@ -1392,7 +1518,7 @@ function adjPaste(){const c=prefs.adjClip;if(!c){toast('Non ci sono regolazioni 
 // Descrizione a voce della foto: dimensioni, inquadratura, luce e modifiche.
 function readPhotoStatus(){if(!I.bmp){toast('Nessuna foto aperta: Ctrl+O per aprirne una');return}const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),r=I.r,ch=changedAdj(r).map(([id,label,,,,,fmt])=>label+' '+fmt(r.adj[id])),geo=[];
  if(r.ratio!=='orig')geo.push('formato '+ratioName(r.ratio));if(r.rot)geo.push('ruotata di '+r.rot+' gradi');if(r.flip)geo.push('riflessa');if(r.angle)geo.push('raddrizzata di '+fmtNum(r.angle,1)+' gradi');
- const plan=planOf();toast(`«${I.name}», ${fmtInt(w)} per ${fmtInt(h)} pixel${geo.length?', '+geo.join(', '):''}${I.compare?'. Stai guardando l’originale':''}. ${I.stats?histSentence(I.stats):''} ${ch.length?'Regolazioni: '+ch.join(', ')+'.':'Nessuna regolazione.'}${fxSummary().length?' '+fxSummary().join(', ').replace(/^./,x=>x.toUpperCase())+'.':''}${r.look!=='none'?` Look ${lookName(r.look)} al ${fmtInt(r.lookAmt)}%.`:''}${plan.steps?` Piano ${plan.name}, passo ${I.step+1} di ${plan.steps.length}: ${plan.steps[I.step].title}.`:''}${I.r.masks.length?` Maschere: ${I.r.masks.map(m=>`${m.name}${m.off?' (nascosta)':''}${maskAdjList(m).length?', '+maskAdjList(m).join(', '):', senza regolazioni'}`).join('; ')}.`:''}${I.r.heal.length?' '+retouchSay():''}${I.r.sel?' '+selSummary():''}`)}
+ const plan=planOf();toast(`«${I.name}», ${fmtInt(w)} per ${fmtInt(h)} pixel${I.bmp.rawInfo?', anteprima JPEG della fotocamera, non uno sviluppo del RAW':''}${geo.length?', '+geo.join(', '):''}${I.compare?'. Stai guardando l’originale':''}. ${I.stats?histSentence(I.stats):''} ${ch.length?'Regolazioni: '+ch.join(', ')+'.':'Nessuna regolazione.'}${fxSummary().length?' '+fxSummary().join(', ').replace(/^./,x=>x.toUpperCase())+'.':''}${r.look!=='none'?` Look ${lookName(r.look)} al ${fmtInt(r.lookAmt)}%.`:''}${plan.steps?` Piano ${plan.name}, passo ${I.step+1} di ${plan.steps.length}: ${plan.steps[I.step].title}.`:''}${I.r.masks.length?` Maschere: ${I.r.masks.map(m=>`${m.name}${m.off?' (nascosta)':''}${maskAdjList(m).length?', '+maskAdjList(m).join(', '):', senza regolazioni'}`).join('; ')}.`:''}${I.r.heal.length?' '+retouchSay():''}${I.r.sel?' '+selSummary():''}`)}
 function toggleCompare(){if(!I.bmp){toast('Apri prima una foto');return}I.compare=!I.compare;$('compareBadge').hidden=!I.compare;requestRender()}
 async function resetAll(){if(!I.bmp||!hasEdits()){toast('La foto è già com’era');return}edit('Ripristina tutto',r=>{Object.assign(r,newRecipe())},{panel:true});announce('Foto ripristinata com’era: Ctrl+Z per tornare indietro')}
 function photoMenu(x,y){const items=[mi('auto',applyAuto),mi('compare'),'-',mi('rotateLeft'),mi('rotateRight'),mi('ratioMenu'),mi('lookMenu'),'-',mi('readStatus'),mi('export')];openMenu(items,x,y,'Menu della foto')}
@@ -1455,6 +1581,12 @@ const rasters=new Map();
 function rasterCanvas(R){if(R.cv)return R.cv;const cv=new OffscreenCanvas(R.w,R.h),c=cv.getContext('2d'),img=c.createImageData(R.w,R.h),d=img.data;for(let i=0,j=0;i<R.data.length;i++,j+=4){d[j]=d[j+1]=d[j+2]=255;d[j+3]=R.data[i]}c.putImageData(img,0,0);return R.cv=cv}
 function rasterLayer(op,mc){const R=mc.ras.get(op.id);if(!R)return new Uint8Array(mc.w*mc.h);const W=mc.W,H=mc.H;
  return canvasLayer(mc,c=>{c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.setTransform(mc.U.scale(W/mc.S/R.w,H/mc.S/R.h));c.drawImage(rasterCanvas(R),0,0)})}
+// Maschera calcolata seguita dalla rifinitura (lo scontorno): il filtro guidato vuole della maschera solo le medie nei
+// blocchi della sua griglia, e quelle si ottengono disegnando la maschera piccola direttamente alla misura della griglia.
+// Così all'esportazione non serve la maschera intermedia a piena misura, che su una foto grande era la parte più lenta.
+function rasterRefine(op,ref,mc){const R=mc.ras.get(op.id),m=new Uint8Array(mc.w*mc.h);if(!R)return m;const Rp=Math.max(1,ref.r*mc.k),{s,gw,gh}=guidedGrid(mc.w,mc.h,Rp),cv=new OffscreenCanvas(gw,gh),c=cv.getContext('2d',{willReadFrequently:true});
+ c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.setTransform(new DOMMatrix().scale(1/s).multiply(mc.U.scale(mc.W/mc.S/R.w,mc.H/mc.S/R.h)));c.drawImage(rasterCanvas(R),0,0);
+ const a=c.getImageData(0,0,gw,gh).data,P=new Float32Array(gw*gh);for(let q=0;q<P.length;q++)P[q]=a[q*4+3]/255;return guidedRefine(m,mc.px,mc.w,mc.h,Rp,ref.e??1e-3,!!ref.c,P)}
 const LAYERS={rect:shapeLayer,poly:shapeLayer,ellipse:shapeLayer,brush:brushLayer,linear:linearLayer,radial:radialLayer,wand:wandLayer,range:rangeLayer,raster:rasterLayer};
 // Unione con il massimo, sottrazione e intersezione con il minimo: con i bordi morbidi danno passaggi puliti.
 function combine(m,L,mode){if(!m||mode==='new')return mode==='sub'||mode==='int'?new Uint8Array(L.length):L;const n=L.length;
@@ -1496,13 +1628,27 @@ function boxMean(f,w,h,r,t=new Float32Array(f.length)){const cs=new Float64Array
 // Rifinitura dei bordi con il filtro guidato a colori (He, Sun e Tang; versione veloce di He e Sun): in ogni finestra
 // la maschera diventa una funzione lineare dei colori della foto, così il bordo segue i contorni veri, capelli e foglie
 // compresi, invece della linea tracciata. I coefficienti si calcolano su una copia ridotta e si applicano a ogni pixel.
-function guidedRefine(m,px,w,h,R,eps=1e-3){const s=Math.max(1,Math.floor(R/4),Math.ceil(Math.sqrt(w*h/6e5))),gw=Math.ceil(w/s),gh=Math.ceil(h/s),n=gw*gh,r=Math.max(1,Math.round(R/s)),d=px.data;
+// Con col (lo scontorno) nella fascia del bordo conta anche il colore: dai blocchi tutti soggetto e tutti sfondo lì vicino
+// si stimano il colore del soggetto F e quello dello sfondo B, e la trasparenza è la posizione del pixel tra i due
+// (proiezione sul segmento da B a F). Vale tanto più quanto F e B sono diversi e quanto il filtro guidato è incerto: i
+// capelli scuri su un cielo chiaro escono ciocca per ciocca, mentre una foglia dello sfondo lontana dal bordo resta fuori;
+// dove i colori si somigliano resta il filtro guidato.
+// La griglia del filtro: passo s (almeno un quarto del raggio, e al massimo circa 600.000 celle), righe e colonne.
+function guidedGrid(w,h,R){const s=Math.max(1,Math.floor(R/4),Math.ceil(Math.sqrt(w*h/6e5)));return {s,gw:Math.ceil(w/s),gh:Math.ceil(h/s)}}
+// P0, se c'è, sono già le medie della maschera nei blocchi della griglia (vedi rasterRefine): m allora serve solo da uscita.
+function guidedRefine(m,px,w,h,R,eps=1e-3,col=false,P0=null){const {s,gw,gh}=guidedGrid(w,h,R),n=gw*gh,r=Math.max(1,Math.round(R/s)),d=px.data;
  const F=()=>new Float32Array(n),Ir=F(),Ig=F(),Ib=F(),P=F(),xi=new Int32Array(w),aR=new Int32Array(gw),aG=new Int32Array(gw),aB=new Int32Array(gw),aP=new Int32Array(gw);for(let x=0;x<w;x++)xi[x]=(x/s)|0;
  // Medie dei blocchi s×s, sommate per righe in interi: molto più veloce che accumulare direttamente nella griglia.
  for(let gy=0;gy<gh;gy++){aR.fill(0);aG.fill(0);aB.fill(0);aP.fill(0);const y0=gy*s,y1=Math.min(h,y0+s);
   for(let y=y0;y<y1;y++)for(let x=0,i=y*w,o=i*4;x<w;x++,i++,o+=4){const j=xi[x];aR[j]+=d[o];aG[j]+=d[o+1];aB[j]+=d[o+2];aP[j]+=m[i]}
   for(let j=0,q=gy*gw;j<gw;j++,q++){const c=255*(y1-y0)*Math.min(s,w-j*s);Ir[q]=aR[j]/c;Ig[q]=aG[j]/c;Ib[q]=aB[j]/c;P[q]=aP[j]/c}}
+ if(P0)P.set(P0);
  const prod=(a,b)=>{const o=F();for(let j=0;j<n;j++)o[j]=a[j]*b[j];return boxMean(o,gw,gh,r)},rp=prod(Ir,P),gp=prod(Ig,P),bp=prod(Ib,P),rr=prod(Ir,Ir),rg=prod(Ir,Ig),rb=prod(Ir,Ib),gg=prod(Ig,Ig),gb=prod(Ig,Ib),bb=prod(Ib,Ib);
+ // Colori del soggetto e dello sfondo vicini: medie dei blocchi pieni e vuoti in una finestra due volte più larga.
+ const FB=col?[F(),F(),F(),F(),F(),F(),F(),F()]:null;if(col){const [fr,fg,fb,wf,br,bgr,bbl,wb]=FB;for(let j=0;j<n;j++){const a=P[j]>=.98?1:0,b=P[j]<=.02?1:0;fr[j]=Ir[j]*a;fg[j]=Ig[j]*a;fb[j]=Ib[j]*a;wf[j]=a;br[j]=Ir[j]*b;bgr[j]=Ig[j]*b;bbl[j]=Ib[j]*b;wb[j]=b}
+  const tmp=F();for(const a of FB)boxMean(a,gw,gh,2*r+1,tmp);
+  // wf diventa la fiducia: zero se manca uno dei due colori, piena se distano almeno un quarto della scala.
+  for(let j=0;j<n;j++){const a=wf[j],b=wb[j];if(a<1e-3||b<1e-3){wf[j]=0;continue}fr[j]/=a;fg[j]/=a;fb[j]/=a;br[j]/=b;bgr[j]/=b;bbl[j]/=b;const dist=Math.hypot(fr[j]-br[j],fg[j]-bgr[j],fb[j]-bbl[j]);wf[j]=clamp((dist-.1)/.15,0,1)}}
  for(const a of [Ir,Ig,Ib,P])boxMean(a,gw,gh,r);
  const Ar=F(),Ag=F(),Ab=F(),Bq=F();
  for(let j=0;j<n;j++){const mr=Ir[j],mg=Ig[j],mb=Ib[j],mp=P[j],cr=rp[j]-mr*mp,cg=gp[j]-mg*mp,cb=bp[j]-mb*mp,
@@ -1511,18 +1657,26 @@ function guidedRefine(m,px,w,h,R,eps=1e-3){const s=Math.max(1,Math.floor(R/4),Ma
   ar=(cr*i0+cg*i1+cb*i2)/det,ag=(cr*i1+cg*i4+cb*i5)/det,ab=(cr*i2+cg*i5+cb*i8)/det;Ar[j]=ar;Ag[j]=ag;Ab[j]=ab;Bq[j]=mp-ar*mr-ag*mg-ab*mb}
  for(const a of [Ar,Ag,Ab,Bq])boxMean(a,gw,gh,r);
  // Ritorno alla misura piena: coefficienti interpolati e applicati ai colori di ogni pixel. Dove nella finestra la
- // maschera era tutta piena o tutta vuota il risultato è già noto e non si calcola.
- const {x0,x1,fx}=gridCols(w,gw,s),G=()=>new Float32Array(gw),RA=G(),RG=G(),RB=G(),RQ=G(),RP=G(),k=1/255;
- for(let y=0,i=0;y<h;y++){gridRow(Ar,gw,gh,y,s,RA);gridRow(Ag,gw,gh,y,s,RG);gridRow(Ab,gw,gh,y,s,RB);gridRow(Bq,gw,gh,y,s,RQ);gridRow(P,gw,gh,y,s,RP);
-  for(let x=0;x<w;x++,i++){const a=x0[x],b=x1[x],t=fx[x],pm=RP[a]+(RP[b]-RP[a])*t;if(pm<=.002){m[i]=0;continue}if(pm>=.998){m[i]=255;continue}
-   const o=i*4,q=(RA[a]+(RA[b]-RA[a])*t)*d[o]*k+(RG[a]+(RG[b]-RG[a])*t)*d[o+1]*k+(RB[a]+(RB[b]-RB[a])*t)*d[o+2]*k+RQ[a]+(RQ[b]-RQ[a])*t;m[i]=q<=0?0:q>=1?255:(q*255+.5)|0}}
+ // maschera era tutta piena o tutta vuota il risultato è già noto: i pixel tra due celle della griglia così si riempiono
+ // in un colpo, e le righe senza bordo non leggono nemmeno i coefficienti.
+ const {x0,x1,fx}=gridCols(w,gw,s),G=()=>new Float32Array(gw),RA=G(),RG=G(),RB=G(),RQ=G(),RP=G(),RC=col?FB.map(G):null,k=1/255,L=(R,a,b,t)=>R[a]+(R[b]-R[a])*t,js=new Int32Array(gw+1),mix=new Uint8Array(gw);
+ for(let j=0,x=0;j<=gw;j++){while(x<w&&x0[x]<j)x++;js[j]=x}
+ for(let y=0;y<h;y++){const row=y*w;gridRow(P,gw,gh,y,s,RP);let any=false;
+  for(let j=0;j<gw;j++){const a=RP[j],b=RP[j+1<gw?j+1:j],lo=a<b?a:b,hi=a<b?b:a;mix[j]=0;if(hi<=.002)m.fill(0,row+js[j],row+js[j+1]);else if(lo>=.998)m.fill(255,row+js[j],row+js[j+1]);else{mix[j]=1;any=true}}
+  if(!any)continue;gridRow(Ar,gw,gh,y,s,RA);gridRow(Ag,gw,gh,y,s,RG);gridRow(Ab,gw,gh,y,s,RB);gridRow(Bq,gw,gh,y,s,RQ);if(col)FB.forEach((a,c)=>gridRow(a,gw,gh,y,s,RC[c]));
+  for(let j=0;j<gw;j++)if(mix[j])for(let x=js[j],i=row+x;x<js[j+1];x++,i++){const a=x0[x],b=x1[x],t=fx[x],pm=RP[a]+(RP[b]-RP[a])*t;if(pm<=.002){m[i]=0;continue}if(pm>=.998){m[i]=255;continue}
+   const o=i*4,cr=d[o]*k,cg=d[o+1]*k,cb=d[o+2]*k;let q=L(RA,a,b,t)*cr+L(RG,a,b,t)*cg+L(RB,a,b,t)*cb+L(RQ,a,b,t);
+   if(col){const cf=L(RC[3],a,b,t);if(cf>0){const Fr=L(RC[0],a,b,t),Fg=L(RC[1],a,b,t),Fb=L(RC[2],a,b,t),Br=L(RC[4],a,b,t),Bg=L(RC[5],a,b,t),Bb=L(RC[6],a,b,t),er=Fr-Br,eg=Fg-Bg,eb=Fb-Bb;
+     const u=q<0?0:q>1?1:q,v=6.4*u*(1-u);q+=cf*(v<1?v:1)*(((cr-Br)*er+(cg-Bg)*eg+(cb-Bb)*eb)/(er*er+eg*eg+eb*eb)-q)}}
+   m[i]=q<=0?0:q>=1?255:(q*255+.5)|0}}
  return m}
 function rasterOps(ops,mc,from=null,start=0){let m=from;for(let i=start;i<ops.length;i++){const op=ops[i],t=op.t,n=mc.w*mc.h;
  if(t==='invert'){m??=new Uint8Array(n);for(let j=0;j<n;j++)m[j]=255-m[j]}
  else if(t==='all'){m=new Uint8Array(n).fill(255)}
  else if(t==='feather'){if(m)feather(m,mc.w,mc.h,op.r*mc.k)}
  else if(t==='grow'){if(m)grow(m,mc.w,mc.h,op.r*mc.k)}
- else if(t==='refine'){if(m&&mc.px)guidedRefine(m,mc.px,mc.w,mc.h,Math.max(1,op.r*mc.k),op.e??1e-3)}
+ else if(t==='refine'){if(m&&mc.px)guidedRefine(m,mc.px,mc.w,mc.h,Math.max(1,op.r*mc.k),op.e??1e-3,!!op.c)}
+ else if(t==='raster'&&!m&&ops[i+1]?.t==='refine'&&mc.px)m=rasterRefine(op,ops[++i],mc);
  else if(LAYERS[t])m=combine(m,LAYERS[t](op,mc),op.mode||'add')}
  return m||new Uint8Array(mc.w*mc.h)}
 // Maschere dell'anteprima ricordate per chiave: aggiungere un tratto ricalcola solo l'ultima operazione.
@@ -1875,10 +2029,22 @@ function* grabcut(px,w,h,T,iters=4,guess=null,boost=null){const n=w*h,d=px.data,
  for(let it=0;it<iters;it++){if(it){fgI=pick(1);bgI=pick(0);if(!fgI.length||!bgI.length)break;const cf=new Uint8Array(fgI.length),cb=new Uint8Array(bgI.length);
    for(let i=0;i<fgI.length;i++){const o=fgI[i]*4;cf[i]=gmmBest(fg,d[o],d[o+1],d[o+2])}for(let i=0;i<bgI.length;i++){const o=bgI[i]*4;cb[i]=gmmBest(bg,d[o],d[o+1],d[o+2])}fg=gmmFit(d,fgI,cf,K);bg=gmmFit(d,bgI,cb,K)}
   yield .05+.9*(it+.2)/iters;
-  const cap=new Float64Array(n*8),tr=new Float64Array(n);for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++){for(let k=0;k<4;k++){const X=x+NB_DX[k],Y=y+NB_DY[k];if(X<0||X>=w||Y>=h)continue;const q=Y*w+X,v=W[p*4+k];cap[p*8+k]=v;cap[q*8+(k^4)]=v}
-   const t=T[p];if(t===1)tr[p]=HARD;else if(t===0)tr[p]=-HARD;else{const o=p*4;tr[p]=gmmLog(fg,d[o],d[o+1],d[o+2])-gmmLog(bg,d[o],d[o+1],d[o+2])}}
-  yield .05+.9*(it+.4)/iters;yield* maxflow(w,h,cap,tr,tree);for(let p=0;p<n;p++)if(T[p]===2)lab[p]=tree[p]===1?1:0;yield .05+.9*(it+1)/iters}
+  // Capacità intere, in sedicesimi: niente residui decimali minuscoli che il flusso continuerebbe a spingere.
+  const cap=new Int32Array(n*8),tr=new Int32Array(n);for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++){for(let k=0;k<4;k++){const X=x+NB_DX[k],Y=y+NB_DY[k];if(X<0||X>=w||Y>=h)continue;const q=Y*w+X,v=Math.round(W[p*4+k]*16);cap[p*8+k]=v;cap[q*8+(k^4)]=v}
+   const t=T[p];if(t===1)tr[p]=HARD*16;else if(t===0)tr[p]=-HARD*16;else{const o=p*4,v=gmmLog(fg,d[o],d[o+1],d[o+2])-gmmLog(bg,d[o],d[o+1],d[o+2]);tr[p]=Math.round((v>HARD?HARD:v<-HARD?-HARD:v)*16)}}
+  // Ci si ferma quando le etichette non cambiano quasi più (meno di un pixel su mille).
+  yield .05+.9*(it+.4)/iters;yield* maxflow(w,h,cap,tr,tree);let ch=0;for(let p=0;p<n;p++)if(T[p]===2){const v=tree[p]===1?1:0;if(v!==lab[p]){lab[p]=v;ch++}}yield .05+.9*(it+1)/iters;if(it&&ch<n*.001)break}
  return lab}
+// GrabCut a due livelli (come le bande di Lombaert e altri): prima su una copia a metà lato, per la forma e i modelli di
+// colore; poi alla misura di lavoro si ricalcola solo una fascia di pochi pixel intorno al contorno trovato, con il resto
+// fermo. Il flusso massimo, che è la parte lenta, lavora così su molti meno pixel.
+function* cutLevels(px,w,h,T,guess,boost){const W=Math.ceil(w/2),H=Math.ceil(h/2),m=W*H,d=px.data,acc=new Float32Array(m*4),d2=new Uint8ClampedArray(m*4),T2=new Uint8Array(m).fill(2),g2=new Uint8Array(m),b2=new Uint8Array(m);
+ for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++){const q=(y>>1)*W+(x>>1),o=p*4;for(let c=0;c<3;c++)acc[q*4+c]+=d[o+c];acc[q*4+3]++;if(T[p]===1)T2[q]=1;else if(T[p]===0&&T2[q]!==1)T2[q]=0;if(guess[p])g2[q]=1;if(boost[p]>b2[q])b2[q]=boost[p]}
+ for(let q=0;q<m;q++){const k=acc[q*4+3];for(let c=0;c<3;c++)d2[q*4+c]=acc[q*4+c]/k}
+ const scaled=function*(g,a,b){let r;while(!(r=g.next()).done)yield typeof r.value==='number'?a+(b-a)*r.value:r.value;return r.value};
+ const lab2=yield* scaled(grabcut({data:d2},W,H,T2,5,g2,b2),0,.75),up=new Uint8Array(w*h),edge=new Uint8Array(w*h);for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++)up[p]=lab2[(y>>1)*W+(x>>1)];
+ for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++)if(x<w-1&&up[p]!==up[p+1]||y<h-1&&up[p]!==up[p+w])edge[p]=1;const band=morph(edge,w,h,4,true),Tf=new Uint8Array(w*h);
+ for(let p=0;p<w*h;p++)Tf[p]=T[p]!==2?T[p]:band[p]?2:up[p];return yield* scaled(grabcut(px,w,h,Tf,1,up,boost),.75,.95)}
 // Fondo uniforme: il colore tipico del bordo dell'inquadratura e quanto varia. Dai pixel del bordo simili a quel colore
 // lo sfondo si estende ai vicini con un colore vicino al loro e non troppo lontano da quello tipico (regge le sfumature
 // del telo); il soggetto è il resto, senza le briciole.
@@ -1891,6 +2057,14 @@ function uniformCut(px,w,h,inside,st){const d=px.data,n=w*h,bgm=new Uint8Array(n
  st.ring.forEach((p,i)=>{if(st.dev[i]<=st.tol&&!bgm[p]){bgm[p]=1;stack.push(p)}});
  while(stack.length){const p=stack.pop(),x=p%w,o=p*4;for(const q of [x>0?p-1:-1,x<w-1?p+1:-1,p-w,p+w]){if(q<0||q>=n||bgm[q]||!inside[q])continue;const o2=q*4;if(Math.max(Math.abs(d[o]-d[o2]),Math.abs(d[o+1]-d[o2+1]),Math.abs(d[o+2]-d[o2+2]))<=tl&&far(q)<=tg){bgm[q]=1;stack.push(q)}}}
  const lab=new Uint8Array(n);for(let p=0;p<n;p++)lab[p]=inside[p]&&!bgm[p]?1:0;return dropCrumbs(lab,w,h)}
+// Il fondo uniforme è credibile se ne esce un soggetto vero: una zona principale, rimasta dopo le briciole e non quasi
+// tutta la foto; altrimenti, in automatico, si passa a GrabCut.
+// Le zone che vanno da un lato all'altro (un orizzonte, una fila di alberi) sono sfondo e si tolgono.
+function uniformOk(lab,w,h){const n=w*h,seen=new Uint8Array(n),st=[],cells=[];let tot=0,big=0;
+ for(let p=0;p<n;p++){if(!lab[p]||seen[p])continue;cells.length=0;let l=false,r=false;seen[p]=1;st.push(p);
+  while(st.length){const q=st.pop(),x=q%w;cells.push(q);if(!x)l=true;if(x===w-1)r=true;for(const s of [x>0?q-1:-1,x<w-1?q+1:-1,q-w,q+w])if(s>=0&&s<n&&lab[s]&&!seen[s]){seen[s]=1;st.push(s)}}
+  if(l&&r){for(const q of cells)lab[q]=0;continue}tot+=cells.length;if(cells.length>big)big=cells.length}
+ return tot>n*.002&&tot<n*.9&&big>=tot*.5}
 // Chiusura: massimo e poi minimo su un quadrato di raggio r, in passate orizzontali e verticali. Chiude le fessure
 // sottili che il taglio lascia sui contorni forti (tra capelli e viso), così le parti del soggetto restano unite.
 function morph(lab,w,h,r,max){const t=new Uint8Array(lab.length),o=new Uint8Array(lab.length),hit=a=>max?a:!a;
@@ -1924,16 +2098,35 @@ function* cutCompute(c,from=null){const W=I.bmp.width,H=I.bmp.height,S=Math.max(
  const strokes=list=>{const m=new Uint8Array(n);if(!list.length)return m;ctx.clearRect(0,0,w,h);ctx.lineCap=ctx.lineJoin='round';ctx.strokeStyle='#fff';for(const s of list){ctx.lineWidth=Math.max(1,s.d*S*w/W);ctx.beginPath();s.p.forEach((p,i)=>ctx[i?'lineTo':'moveTo'](...toW(p)));if(s.p.length===1)ctx.lineTo(...toW(s.p[0]));ctx.stroke()}const a=ctx.getImageData(0,0,w,h).data;for(let p=0;p<n;p++)m[p]=a[p*4+3]>=128?1:0;return m};
  const keep=strokes(c.keep),drop=strokes(c.drop);yield .02;
  let method=c.method,st=null;if(method!=='grabcut'&&!c.box){st=borderStats(px,w,h,inside);if(method==='auto')method=st.uniform?'uniform':'grabcut'}else if(method==='auto')method='grabcut';
- let lab;if(method==='uniform'){lab=uniformCut(px,w,h,inside,st||borderStats(px,w,h,inside));yield .9}
- else{const T=new Uint8Array(n);for(let p=0;p<n;p++)T[p]=drop[p]?0:keep[p]?1:!inside[p]||(box?!box[p]:band[p])?0:2;const boost=new Uint8Array(n);for(let p=0;p<n;p++)boost[p]=keep[p]?1:drop[p]?2:0;const prev=from&&from.w===w&&from.h===h?from.data.map(v=>v>127?1:0):null;lab=yield* grabcut(px,w,h,T,prev?3:5,prev||guess,boost);lab=closeGaps(lab,w,h);lab=dropCrumbs(prev?lab:keepMain(lab,w,h),w,h);for(let p=0;p<n;p++)if(keep[p])lab[p]=1}
- const data=new Uint8Array(n);for(let p=0;p<n;p++)data[p]=lab[p]?255:0;return {w,h,data,method}}
+ const prev=from&&from.w===w&&from.h===h?from.data.map(v=>v>127?1:0):null,boost=new Uint8Array(n);for(let p=0;p<n;p++)boost[p]=keep[p]?1:drop[p]?2:0;let lab;
+ // Dopo un tratto si ricalcola solo intorno ai pixel dei tratti che il risultato di prima contraddice, più un margine:
+ // il resto resta com'era, così una correzione non sposta il contorno altrove. Vale per GrabCut e per il fondo uniforme.
+ if(prev){let x0=w,y0=h,x1=-1,y1=-1;for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++)if(keep[p]&&!prev[p]||drop[p]&&prev[p]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  if(x1<0)lab=prev;else{const R=Math.round(Math.max(w,h)*.08),T=new Uint8Array(n);x0-=R;x1+=R;y0-=R;y1+=R;
+   for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++)T[p]=drop[p]?0:keep[p]?1:!inside[p]||box&&!box[p]?0:x<x0||x>x1||y<y0||y>y1?prev[p]:2;lab=yield* grabcut(px,w,h,T,2,prev,boost);lab=dropCrumbs(closeGaps(lab,w,h),w,h)}}
+ else if(method==='uniform'){lab=uniformCut(px,w,h,inside,st||borderStats(px,w,h,inside));if(!uniformOk(lab,w,h)&&c.method==='auto'){method='grabcut';lab=null}else yield .9}
+ if(!lab){const T=new Uint8Array(n);for(let p=0;p<n;p++)T[p]=drop[p]?0:keep[p]?1:!inside[p]||(box?!box[p]:band[p])?0:2;lab=yield* cutLevels(px,w,h,T,guess,boost);lab=dropCrumbs(keepMain(closeGaps(lab,w,h),w,h),w,h)}
+ for(let p=0;p<n;p++)if(keep[p])lab[p]=1;const data=new Uint8Array(n);for(let p=0;p<n;p++)data[p]=lab[p]?255:0;return {w,h,data,method}}
 // La maschera dello scontorno: quella calcolata, il bordo rifinito sulla foto (più ampio quanto più la copia era piccola)
 // e i tratti, che valgono sempre.
 function cutOps(r,mc){const c=r.cut,R=c?.raster&&(mc?.ras||rasters).get(c.raster);if(!R)return [];const W=mc?mc.W:I.bmp.width,S=Math.max(W,mc?mc.H:I.bmp.height),k=W/R.w,e=c.edge??50;
- return [{t:'raster',id:c.raster},{t:'refine',r:U5(k*(1.2+e/30)/S),e:e<34?1e-4:e<67?1e-3:1e-2},...c.keep.map(s=>({...s,mode:'add'})),...c.drop.map(s=>({...s,mode:'sub'}))]}
+ return [{t:'raster',id:c.raster},{t:'refine',r:U5(k*(1.2+e/30)/S),e:e<34?1e-4:e<67?1e-3:1e-2,c:1},...c.keep.map(s=>({...s,mode:'add'})),...c.drop.map(s=>({...s,mode:'sub'}))]}
 const hexRgb=h=>{const v=parseInt(String(h).replace('#',''),16)||0;return [v>>16&255,v>>8&255,v&255]};
+// Colori del bordo ripuliti: nella fascia semitrasparente il pixel mescola il soggetto e lo sfondo di prima, C = αF + (1−α)B.
+// Con B stimato dai pixel di sfondo vicini, F = (C − (1−α)B)/α; dove α è piccola, quasi tutto sfondo, si va verso il
+// colore del soggetto vicino. Così sul fondo nuovo, trasparente o colorato, non resta l'alone di quello vecchio.
+function cutClean(img,m,w,h){const d=img.data,s=Math.max(2,Math.ceil(Math.sqrt(w*h/25e4))),gw=Math.ceil(w/s),gh=Math.ceil(h/s),N=gw*gh,A=[0,1,2,3,4,5,6,7].map(()=>new Float32Array(N)),S=A.map(()=>new Int32Array(gw)),[fr,fg,fb,fn,br,bg,bb,bn]=S,xi=new Int32Array(w),band=new Uint8Array(h);for(let x=0;x<w;x++)xi[x]=(x/s)|0;
+ // Righe con il bordo semitrasparente; le medie dei colori bastano su un pixel ogni quattro (righe e colonne alterne).
+ for(let y=0;y<h;y++)for(let x=0,r=y*w;x<w;x++){const v=m[r+x];if(v&&v!==255){band[y]=1;break}}if(!band.some(v=>v))return;
+ for(let gy=0;gy<gh;gy++){for(const a of S)a.fill(0);const y0=gy*s,y1=Math.min(h,y0+s);
+  for(let y=y0;y<y1;y+=2)for(let x=0,i=y*w,o=i*4;x<w;x+=2,i+=2,o+=8){const v=m[i];if(v===255){const j=xi[x];fr[j]+=d[o];fg[j]+=d[o+1];fb[j]+=d[o+2];fn[j]++}else if(!v){const j=xi[x];br[j]+=d[o];bg[j]+=d[o+1];bb[j]+=d[o+2];bn[j]++}}
+  for(let k=0;k<8;k++)A[k].set(S[k],gy*gw)}
+ const t=new Float32Array(N);for(const a of A)boxMean(a,gw,gh,Math.max(2,Math.round(Math.max(w,h)*.01/s)),t);const {x0,x1,fx}=gridCols(w,gw,s),R=A.map(()=>new Float32Array(gw)),[R0,R1,R2,R3,R4,R5,R6,R7]=R,F=[R0,R1,R2],B=[R4,R5,R6];
+ for(let y=0,i=0;y<h;y++,i+=w){if(!band[y])continue;A.forEach((a,k)=>gridRow(a,gw,gh,y,s,R[k]));
+  for(let x=0;x<w;x++){const v=m[i+x];if(!v||v===255)continue;const a=x0[x],b=x1[x],f=fx[x],wf=R3[a]+(R3[b]-R3[a])*f,wb=R7[a]+(R7[b]-R7[a])*f;if(wf<1e-3||wb<1e-3)continue;
+   const al=v/255,o=(i+x)*4,mix=al<.35?al/.35:1;for(let c=0;c<3;c++){const Fc=(F[c][a]+(F[c][b]-F[c][a])*f)/wf,Bc=(B[c][a]+(B[c][b]-B[c][a])*f)/wb,e=(d[o+c]-(1-al)*Bc)/al;d[o+c]=(e<0?0:e>255?255:e)*mix+Fc*(1-mix)}}}}
 // Applica lo scontorno ai pixel sviluppati: trasparenza, oppure un colore pieno o la stessa foto sfocata dietro al soggetto.
-function applyCut(img,r,mc){const c=r.cut;if(!c?.raster)return;if(!mc.ras.has(c.raster)){if(mc.ras===rasters)cutRestore();return}const m=maskOf(cutOps(r,mc),mc),d=img.data,n=m.length;
+function applyCut(img,r,mc){const c=r.cut;if(!c?.raster)return;if(!mc.ras.has(c.raster)){if(mc.ras===rasters)cutRestore();return}const m=maskOf(cutOps(r,mc),mc),d=img.data,n=m.length;cutClean(img,m,mc.w,mc.h);
  if(c.bg==='color'){const [R,G,B]=hexRgb(c.color);for(let i=0,j=0;i<n;i++,j+=4){const a=m[i];if(a===255)continue;const k=a/255,l=1-k;d[j]=d[j]*k+R*l;d[j+1]=d[j+1]*k+G*l;d[j+2]=d[j+2]*k+B*l;d[j+3]=255}return}
  if(c.bg==='blur'){blurBehind(img,m,mc.w,mc.h,Math.max(1,(c.blur??40)/100*.02*mc.k));return}
  for(let i=0,j=3;i<n;i++,j+=4)if(m[i]!==255)d[j]=d[j]*m[i]/255}
@@ -1954,15 +2147,18 @@ let cutBusy=false;
 function cutRestore(){if(cutBusy||!I.r.cut)return;cutBusy=true;const c=structuredClone(I.r.cut);setTimeout(async()=>{try{const res=await runChunks(cutCompute({...c,method:c.used||c.method}),'Scontorno');if(res&&I.r.cut?.raster===c.raster){rasters.set(c.raster,{w:res.w,h:res.h,data:res.data});requestRender()}}catch(e){console.warn('Scontorno non ricalcolato',e)}finally{cutBusy=false}},0)}
 async function cutRun(c,label,from=null){if(!I.bmp){toast('Apri prima una foto');return false}if(cutBusy){toast('Lo scontorno è già in corso');return false}cutBusy=true;const t0=performance.now();
  try{const res=await runChunks(cutCompute(c,from),'Scontorno');if(!res)return false;const id=uid();rasters.set(id,{w:res.w,h:res.h,data:res.data});
-  edit(label,r=>{r.cut={...c,raster:id,used:res.method}},{panel:true});renderPhoto(false);I.cutTime=Math.round(performance.now()-t0);announce(`${label}: ${cutSummary()}`);return true}
+  edit(label,r=>{r.cut={...c,raster:id,used:res.method}},{panel:true});renderPhoto(false);I.cutTime=Math.round(performance.now()-t0);
+  // Senza soggetto (succede quando il soggetto tocca i bordi o ha i colori dello sfondo) si dice che cosa fare.
+  let k=0;for(let i=0;i<res.data.length;i+=4)if(res.data[i])k++;if(!from&&!c.box&&k<res.data.length/4*.003)toast(`${label}: non ho trovato il soggetto. Traccia un riquadro intorno con Riquadro del soggetto, oppure segnalalo con Tieni.`);
+  else announce(`${label}: ${cutSummary()}`);return true}
  catch(e){console.error(e);toast('Scontorno non riuscito: '+(e.message||e));return false}finally{cutBusy=false}}
 function cutSummary(r=I.r){const c=r.cut;if(!c)return 'Lo sfondo c’è ancora.';const R=rasters.get(c.raster);if(!R||!lastMc)return 'Sfondo tolto.';const m=maskOf(cutOps(r,lastMc),lastMc);
  return `${describeMask(m,lastMc.w,lastMc.h,null,'Il soggetto',true)} Metodo: ${c.used==='uniform'?'fondo uniforme':'GrabCut'}${c.keep.length||c.drop.length?`, ${c.keep.length} tratti tieni e ${c.drop.length} togli`:''}. Sfondo: ${c.bg==='color'?'colore '+c.color:c.bg==='blur'?'foto sfocata':'trasparente'}.`}
 const cutAuto=()=>cutRun({...newCut(),method:prefs.cutMethod||'auto',bg:I.r.cut?.bg||'none',color:I.r.cut?.color||'#ffffff',blur:I.r.cut?.blur??40},'Togli lo sfondo');
 const needCut=()=>{if(!I.bmp){toast('Apri prima una foto');return false}if(!I.r.cut){toast('Lo sfondo c’è ancora: usa prima Togli lo sfondo');return false}return true};
-// I tratti con il fondo uniforme non cambiano il calcolo: si aggiungono subito. Con GrabCut il calcolo si ripete.
-function cutStroke(kind,p){const c=structuredClone(I.r.cut||newCut()),s={t:'brush',p:p.map(uvUnits),d:U5(T.size),h:.8};c[kind]=[...c[kind],s];const label=kind==='keep'?'Tratto tieni':'Tratto togli';
- if(I.r.cut&&I.r.cut.used==='uniform'){edit(label,r=>{r.cut=c},{panel:true});announce(label+'. '+cutSummary())}else cutRun({...c,method:I.r.cut?.used||c.method},label,rasters.get(I.r.cut?.raster))}
+// Un tratto ricalcola lo scontorno intorno a sé, partendo dal risultato di prima, con il fondo uniforme come con GrabCut.
+function cutStroke(kind,p){const c=structuredClone(I.r.cut||newCut()),s={t:'brush',p:p.map(uvUnits),d:U5(T.size),h:.8};c[kind]=[...c[kind],s];
+ cutRun({...c,method:I.r.cut?.used||c.method},kind==='keep'?'Tratto tieni':'Tratto togli',rasters.get(I.r.cut?.raster))}
 Object.assign(PHOTO_TOOLS,{
  cutBox:{label:'Riquadro del soggetto',kind:'two',keys:'Trascina un riquadro intorno al soggetto, con un po’ di sfondo intorno: quello che resta fuori è sfondo. Da tastiera: Invio su un angolo, poi su quello opposto.',two:(a,b)=>{const box=rectOp(a,b).p;endTool(false);cutRun({...(I.r.cut?structuredClone(I.r.cut):newCut()),box,method:'grabcut',keep:I.r.cut?.keep||[],drop:I.r.cut?.drop||[]},'Riquadro del soggetto')}},
  cutKeep:{label:'Tieni',kind:'paint',color:'#20c060',keys:'Dipingi sulle parti del soggetto che sono state tolte. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta.',opts:['size'],done:p=>cutStroke('keep',p)},
@@ -2180,7 +2376,7 @@ const FONTS=[['system-ui, sans-serif','Senza grazie del sistema'],["'Segoe UI', 
 const KIND_NAME={rect:'Rettangolo',ellipse:'Ellisse',line:'Linea',text:'Testo',image:'Immagine',path:'Tracciato',poly:'Poligono',arrow:'Freccia',bubble:'Fumetto'};
 const KIND_ICON={rect:'rect',ellipse:'ellipse',line:'lineI',text:'textI',image:'image',path:'pathI',poly:'polygon',arrow:'arrowR',bubble:'bubble'};
 // Quello che si aggiunge alla descrizione di un oggetto, secondo il tipo.
-const KIND_SAY={path:it=>(it.tool?`, tratto a mano libera di ${nodeList(it).length} nodi`:`, ${pathSummary(it)}`)+endsSay(it)};
+const KIND_SAY={path:it=>it.alt?`${altOf(it)===it.name?'':` «${altOf(it)}»`}, ${it.subs.length===1?'un contorno':it.subs.length+' contorni'}`:(it.tool?`, tratto a mano libera di ${nodeList(it).length} nodi`:`, ${pathSummary(it)}`)+endsSay(it)};
 const newDrawing=()=>({title:'Senza titolo',w:1080,h:1350,bg:'#ffffff',desc:'',items:[]});
 // Il disegno aperto, l'oggetto scelto, la cronologia e le immagini (file originali, indirizzi per l'anteprima);
 // ras sono le maschere calcolate delle immagini (lo scontorno), per id, come rasters in Immagini.
@@ -2216,13 +2412,22 @@ function addItem(kind,extra={}){const p=Dw.p,s=Math.min(p.w,p.h),it={id:uid(),ki
  if(kind==='text')measureText(it);it.x=Math.round((p.w-it.w)/2);it.y=Math.round((p.h-it.h)/2);
  Dw.sel=it.id;editD('Inserisci '+it.name,q=>{q.items.push(it)},{props:true});announce(`Inserito l’oggetto «${it.name}» al centro del foglio, sopra gli altri. Le proprietà sono nel riquadro a destra.`);return it}
 const describeItem=it=>{const b=box(it);return `${it.name}${it.name.startsWith(kindName(it))?'':', '+kindName(it).toLowerCase()}${it.kind==='text'?` «${it.text.replace(/\n/g,' ')}»`:''}${KIND_SAY[it.kind]?.(it)||''}${clipSay(it)}${styleSay(it)}, x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}${it.rot?`, ruotato di ${fmtNum(it.rot,0)} gradi`:''}${it.opacity<100?`, opacità ${it.opacity}%`:''}${it.hidden?', nascosto':''}${it.lock?', bloccato':''}`};
-// Immagini del disegno: il file originale resta com'è; per l'anteprima e per l'esportazione si usa un indirizzo locale.
+// Immagini del disegno: il file originale resta com'è (HEIC e RAW convertite); per l'anteprima e per l'esportazione si usa
+// un indirizzo locale.
 function registerImage(id,blob,name,w,h){const old=Dw.imgs.get(id);if(old)URL.revokeObjectURL(old.url);Dw.imgs.set(id,{blob,name,w,h,type:blob.type,url:URL.createObjectURL(blob),bmp:null})}
 const isSvgFile=f=>/svg/i.test(f.type)||/\.svg$/i.test(f.name);
 async function svgSize(file){const doc=new DOMParser().parseFromString(await file.text(),'image/svg+xml'),s=doc.documentElement,vb=(s.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number),w=parseFloat(s.getAttribute('width'))||vb[2]||300,h=parseFloat(s.getAttribute('height'))||vb[3]||150;return [Math.round(w),Math.round(h)]}
+// Le foto HEIC e i RAW entrano nel foglio convertite: il browser non sa disegnarle, e così anche l'SVG salvato si apre
+// altrove. In JPEG, o in PNG se una HEIC ha la trasparenza (un RAW non ce l'ha). bmp è la foto già decodificata e
+// raddrizzata; null se la conversione non riesce.
+const imgToConvert=f=>isHeic(f)||isRaw(f);
+// La trasparenza si cerca a strisce, per non leggere tutta la foto in una volta.
+function imgHasAlpha(x,w,h){for(let y=0;y<h;y+=256){const d=x.getImageData(0,y,w,Math.min(256,h-y)).data;for(let i=3;i<d.length;i+=4)if(d[i]<255)return true}return false}
+const imgConvert=(f,bmp)=>work(`Conversione di «${f.name}»`,async()=>{const heic=isHeic(f),cv=new OffscreenCanvas(bmp.width,bmp.height),x=cv.getContext('2d',{willReadFrequently:heic});x.drawImage(bmp,0,0);
+ const png=heic&&imgHasAlpha(x,cv.width,cv.height),type=png?'image/png':'image/jpeg';return new File([await cv.convertToBlob({type,quality:.92})],baseName(f.name)+(png?'.png':'.jpg'),{type})});
 // Le immagini entrano grandi al massimo l'80% del foglio, con le loro proporzioni.
-async function addImages(files){for(const f of files){let w,h;try{if(isSvgFile(f))[w,h]=await svgSize(f);else{const bmp=await decodePhoto(f);w=bmp.width;h=bmp.height;bmp.close()}}catch(e){toast(e.message);continue}
- const id=uid(),k=Math.min(1,Dw.p.w*.8/w,Dw.p.h*.8/h);registerImage(id,f,f.name,w,h);addItem('image',{img:id,w:Math.max(1,Math.round(w*k)),h:Math.max(1,Math.round(h*k)),name:safeFileName(baseName(f.name)).slice(0,40)||nextName('image')})}}
+async function addImages(files){for(let f of files){let w,h,raw;try{if(isSvgFile(f))[w,h]=await svgSize(f);else{const bmp=await decodePhoto(f);w=bmp.width;h=bmp.height;raw=bmp.rawInfo;if(imgToConvert(f))f=await imgConvert(f,bmp);bmp.close();if(!f)continue}}catch(e){toast(e.message);continue}
+ const id=uid(),k=Math.min(1,Dw.p.w*.8/w,Dw.p.h*.8/h);registerImage(id,f,f.name,w,h);addItem('image',{img:id,w:Math.max(1,Math.round(w*k)),h:Math.max(1,Math.round(h*k)),name:safeFileName(baseName(f.name)).slice(0,40)||nextName('image')});if(raw)toast(rawNote(raw))}}
 async function newDrawingCmd(){if(Dw.p.items.length&&!(await confirmAction('Il disegno attuale verrà chiuso. Se non l’hai salvato in SVG lo perdi: vuoi continuare?','Nuovo disegno')))return;Object.assign(Dw,{p:newDrawing(),sel:null,hist:[],redo:[],zoom:0});Dw.base=snapD();$('docTitle').value=Dw.p.title;updateTitle();drawingChanged({props:true});announce('Nuovo disegno vuoto, formato post 4:5. Inserisci forme, testi e immagini dalla scheda Inserisci.')}
 // Bozza: il disegno a ogni modifica, ogni immagine e ogni maschera calcolata una volta sola; quelle non più usate si tolgono.
 const imgSaved=new Set(),rasSaved=new Set();
@@ -2250,8 +2455,13 @@ function itemShape(it,{href='',hit=false,img=false,mask=''}={}){if(it.hidden||is
   case 'line':{const {xy,caps}=lineEnds(it);return `<g${id}${tr}${op}><line ${xy}${strokeAttrs(it,true)}/>${caps}${hit?`<line ${xy} stroke="transparent" stroke-width="${Math.max(it.sw,24)}"/>`:''}</g>`}
   case 'text':{const font=`font-family="${esc(it.font)}" font-size="${it.size}" font-weight="${it.bold?700:400}"${it.italic?' font-style="italic"':''}`;if(it.subs)return textPathSvg(it,{id,tr,op,hit,font});const lines=textLines(it),ax=n2(it.align==='center'?it.x+it.w/2:it.align==='right'?it.x+it.w:it.x),anchor=it.align==='center'?'middle':it.align==='right'?'end':'start';
    return `<g${id}${tr}${op}>${hit?`<rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" fill="transparent"/>`:''}<text x="${ax}" y="${it.y}" ${font} fill="${fillOf(it)}"${it.ls?` letter-spacing="${it.ls}"`:''} text-anchor="${anchor}" xml:space="preserve">${lines.map((l,i)=>`<tspan x="${ax}" dy="${n2(i?it.size*it.lineH:it.size*(it.lineH/2+.35))}">${esc(l)}</tspan>`).join('')}</text></g>`}
-  case 'path':{const E=pathEnds(it),d=`d="${E?.d||pathD(it)}"`;if(!E&&(!hit||it.fill!=='none'))return `<path${id} ${d} ${paint}${tr}${op}${pe}/>`;
-   return `<g${id}${tr}${op}><path ${d} ${paint}/>${E?.caps||''}${hit&&it.fill==='none'?`<path ${d} fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/>`:''}</g>`}
+  // Un testo diventato tracciato porta il suo testo come titolo, per chi legge l'SVG con uno screen reader.
+  case 'path':{const E=pathEnds(it),d=`d="${E?.d||pathD(it)}"`,t=it.alt?`<title>${esc(it.alt)}</title>`:'';
+   // Nel tracciato composto di forme e linee le parti aperte hanno il contorno ma non il riempimento: restano linee.
+   if(it.fill!=='none'&&it.subs.some(s=>s.closed)&&it.subs.some(s=>!s.closed)){const D=c=>pathD({x:it.x,y:it.y,subs:it.subs.filter(s=>s.closed===c)});
+    return `<g${id}${tr}${op}>${t}<path d="${D(true)}" ${paint}/><path d="${D(false)}" fill="none"${strokeAttrs(it,true)}/>${hit?`<path d="${D(false)}" fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/>`:''}</g>`}
+   if(!E&&(!hit||it.fill!=='none'))return `<path${id} ${d} ${paint}${tr}${op}${pe}${t?`>${t}</path>`:'/>'}`;
+   return `<g${id}${tr}${op}>${t}<path ${d} ${paint}/>${E?.caps||''}${hit&&it.fill==='none'?`<path ${d} fill="none" stroke="transparent" stroke-width="${Math.max(it.sw,24)}" pointer-events="stroke"/>`:''}</g>`}
   case 'poly':case 'arrow':case 'bubble':return `<path${id} d="${shapeD(it)}" ${paint}${tr}${op}${pe}/>`;
   // L'immagine ritagliata sta in un gruppo con il clipPath, così la sua rotazione non gira anche la forma. mask è il PNG
   // dello scontorno trasparente, nell'SVG salvato: la trasparenza resta fuori dalla foto, che può restare in JPEG.
@@ -2293,7 +2503,7 @@ function imgHref(it){const m=Dw.imgs.get(it.img);if(!m)return '';if(!hasImgEdits
  processImage(m,it,PREVIEW_FAST).then(blob=>{const e=procCache.get(key);if(!e)return;e.url=URL.createObjectURL(blob);if(procCache.size>40){const [k0,v0]=procCache.entries().next().value;if(v0.url)URL.revokeObjectURL(v0.url);procCache.delete(k0)}renderSheet()}).catch(e=>console.warn('Immagine non regolata',e));return prev||m.url}
 // Livelli: dal più in alto al più in basso, come si vedono sul foglio.
 function renderLayers(){const list=$('layList'),items=[...Dw.p.items].reverse(),sel=new Set(selIds());$('layCount').textContent=items.length?`${items.length}`:'';
- list.innerHTML=items.length?items.map(it=>{const tags=[clipShape(it)&&'ritagliata',isClipShape(it)&&'ritaglio',it.g&&'gruppo',it.lock&&'bloccato',it.hidden&&'nascosto'].filter(Boolean).join(', ');return `<div role="option" id="lay-${it.id}" class="lb-item layer-item${it.id===Dw.sel?' active':''}" data-id="${it.id}" aria-selected="${sel.has(it.id)}">${ICON(kindIcon(it))}<span class="n">${esc(it.name)}${it.kind==='text'?`<span class="sr-only">, testo «${esc(it.text.replace(/\n/g,' '))}»</span>`:''}</span>${tags?`<span class="t"><span class="sr-only">, </span>${tags}</span>`:''}</div>`}).join(''):'<div class="lb-empty" role="option" aria-disabled="true" aria-selected="false" id="lay-empty">Foglio vuoto: inserisci un oggetto dalla scheda Inserisci.</div>';
+ list.innerHTML=items.length?items.map(it=>{const tags=[clipShape(it)&&'ritagliata',isClipShape(it)&&'ritaglio',it.g&&'gruppo',it.lock&&'bloccato',it.hidden&&'nascosto'].filter(Boolean).join(', ');return `<div role="option" id="lay-${it.id}" class="lb-item layer-item${it.id===Dw.sel?' active':''}" data-id="${it.id}" aria-selected="${sel.has(it.id)}">${ICON(kindIcon(it))}<span class="n">${esc(it.name)}${it.kind==='text'?`<span class="sr-only">, testo «${esc(it.text.replace(/\n/g,' '))}»</span>`:it.alt?`<span class="sr-only">, testo in tracciati${altOf(it)===it.name?'':` «${esc(altOf(it))}»`}</span>`:''}</span>${tags?`<span class="t"><span class="sr-only">, </span>${tags}</span>`:''}</div>`}).join(''):'<div class="lb-empty" role="option" aria-disabled="true" aria-selected="false" id="lay-empty">Foglio vuoto: inserisci un oggetto dalla scheda Inserisci.</div>';
  list.setAttribute('aria-activedescendant',Dw.sel&&itemOf(Dw.sel)?'lay-'+Dw.sel:items.length?'lay-'+items[0].id:'lay-empty')}
 // Un oggetto solo (anche dentro un gruppo, come dai livelli); nessuno con null.
 function selectItem(id,{say=true}={}){Dw.sel=id&&itemOf(id)?id:null;Dw.multi={for:Dw.sel,ids:[]};selChanged({say})}
@@ -2326,7 +2536,7 @@ function syncProps(){const it=selItem(),a=document.activeElement;if(selIds().len
  for(const [k,v] of [['x',bx.x],['y',bx.y],['w',it.w],['h',it.h],['rot',n2(it.rot)],['size',it.size],['sw',it.sw],['radius',it.radius]]){const el=$('pr-'+k);if(el&&el!==a)el.value=v}
  const op=$('pr-opacity');if(op&&op!==a){op.value=it.opacity;op.setAttribute('aria-valuetext',it.opacity+'%');$('pr-opacity-o').textContent=it.opacity+'%'}if(curveOf(it))syncNodes(it)}
 // Valori scritti nei campi: si controllano e diventano una modifica.
-const PROP_NAME={mx:'Posizione',my:'Posizione',name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',text:'Testo',font:'Carattere',size:'Dimensione del testo',bold:'Grassetto',italic:'Corsivo',align:'Allineamento',fill:'Colore',fillNone:'Riempimento',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',hidden:'Nascosto',look:'Look',lookAmt:'Intensità del look',nx:'Posizione del nodo',ny:'Posizione del nodo',ntype:'Tipo di nodo',nclosed:'Tracciato chiuso',bsize:'Spessore del pennello',gtype:'Sfumatura',gangle:'Direzione della sfumatura',gstop:'Punto di colore',dash:'Tratteggio',cap:'Estremità',join:'Angoli',shadowOn:'Ombra',sx:'Ombra',sy:'Ombra',sblur:'Sfocatura dell’ombra',scolor:'Colore dell’ombra',sop:'Opacità dell’ombra',blur:'Sfocatura',blend:'Fusione',ls:'Spaziatura tra le lettere',wrap:'A capo nel riquadro',toff:'Inizio lungo la curva',start:'Inizio della linea',end:'Fine della linea',sides:'Lati',star:'Stella',inner:'Raggio interno',head:'Punta della freccia',shaft:'Corpo della freccia',double:'Due punte',tail:'Coda del fumetto',tip:'Punta della coda',tl:'Lunghezza della coda',tcolor:'Colore dello strumento',tsize:'Spessore dello strumento',nix:'Maniglia',niy:'Maniglia',nox:'Maniglia',noy:'Maniglia',sw_:'Larghezza del foglio',sh_:'Altezza del foglio',preset:'Formato del foglio',bg:'Sfondo',bgNone:'Sfondo',desc:'Descrizione'};
+const PROP_NAME={mx:'Posizione',my:'Posizione',name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',text:'Testo',font:'Carattere',size:'Dimensione del testo',bold:'Grassetto',italic:'Corsivo',align:'Allineamento',fill:'Colore',fillNone:'Riempimento',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',hidden:'Nascosto',look:'Look',lookAmt:'Intensità del look',nx:'Posizione del nodo',ny:'Posizione del nodo',ntype:'Tipo di nodo',nclosed:'Tracciato chiuso',bsize:'Spessore del pennello',gtype:'Sfumatura',gangle:'Direzione della sfumatura',gstop:'Punto di colore',dash:'Tratteggio',cap:'Estremità',join:'Angoli',shadowOn:'Ombra',sx:'Ombra',sy:'Ombra',sblur:'Sfocatura dell’ombra',scolor:'Colore dell’ombra',sop:'Opacità dell’ombra',blur:'Sfocatura',blend:'Fusione',ls:'Spaziatura tra le lettere',wrap:'A capo nel riquadro',toff:'Inizio lungo la curva',start:'Inizio della linea',end:'Fine della linea',sides:'Lati',star:'Stella',inner:'Raggio interno',head:'Punta della freccia',shaft:'Corpo della freccia',double:'Due punte',tail:'Coda del fumetto',tip:'Punta della coda',tl:'Lunghezza della coda',tcolor:'Colore dello strumento',alt:'Testo per chi non vede',tsize:'Spessore dello strumento',nix:'Maniglia',niy:'Maniglia',nox:'Maniglia',noy:'Maniglia',sw_:'Larghezza del foglio',sh_:'Altezza del foglio',preset:'Formato del foglio',bg:'Sfondo',bgNone:'Sfondo',desc:'Descrizione'};
 function applyProp(key,el){const p=Dw.p,it=selItem(),v=el.type==='checkbox'?el.checked:el.value,n=num(v);
  const need=(lo,hi)=>{if(!(n>=lo&&n<=hi))throw Error(`Scrivi un numero tra ${fmtInt(lo)} e ${fmtInt(hi)}`);return n};
  if(selIds().length>1){applyMulti(key,v,need);return}
@@ -2442,8 +2652,8 @@ const ALIGN={left:['al bordo sinistro del foglio',(it,b,p)=>[-b.x,0]],center:['a
 function alignItem(how){const many=needSel();if(!many.length)return;if(units(many).length>1){alignMulti(how,many);return}const ok=movable(many);if(!ok.length)return;const [say,fn]=ALIGN[how],[dx,dy]=fn(null,boxOf(ok),Dw.p),what=ok.length>1?'Il gruppo':`L’oggetto «${ok[0].name}»`;
  if(editD('Allinea',()=>{for(const it of ok){it.x=n2(it.x+dx);it.y=n2(it.y+dy)}}))announce(`${what} è allineato ${say}`);else toast(`${what} è già allineato ${say}`)}
 function itemMenu(x,y){const many=selItems(),it=selItem();
- const items=many.length>1?[mi('groupItems'),mi('ungroupItems'),mi('lockItems'),mi('hideItems'),'-',mi('boolUnion'),mi('boolSubtract'),mi('boolIntersect'),mi('boolExclude'),...(many.some(x=>x.kind==='image')?[mi('imgClip')]:[]),'-',mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('sendBack'),'-',mi('alignLeft'),mi('alignCenter'),mi('alignTop'),mi('alignMiddle'),mi('distH'),mi('distV'),'-',mi('deleteItem')]
-  :it?[mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('forward'),mi('backward'),mi('sendBack'),'-',mi('alignCenter'),mi('alignMiddle'),'-',...(SHAPE_SUBS[it.kind]?[mi('toPath')]:it.kind==='path'?[mi('toolNodes')]:[]),...(isPhotoImg(it)?[mi('imgMasks'),mi('imgCutout')]:[]),...(clipShape(it)||isClipShape(it)?[mi('imgUnclip')]:[]),mi('lockItems'),mi('hideItems'),...(it.g?[mi('ungroupItems')]:[]),'-',mi('deleteItem')]:[mi('addText'),mi('addRect'),mi('addImage'),mi('paste'),mi('selectAll'),'-',mi('sheetSize')];
+ const items=many.length>1?[mi('groupItems'),mi('ungroupItems'),mi('lockItems'),mi('hideItems'),'-',mi('boolUnion'),mi('boolSubtract'),mi('boolIntersect'),mi('boolExclude'),...(many.some(drawIsOpen)&&many.some(x=>hasArea(x)&&!drawIsOpen(x))?[mi('boolCut')]:[]),...(many.some(x=>x.kind==='image')?[mi('imgClip')]:[]),'-',mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('sendBack'),'-',mi('alignLeft'),mi('alignCenter'),mi('alignTop'),mi('alignMiddle'),mi('distH'),mi('distV'),'-',mi('deleteItem')]
+  :it?[mi('duplicateItem'),mi('copy'),mi('cut'),mi('paste'),'-',mi('bringFront'),mi('forward'),mi('backward'),mi('sendBack'),'-',mi('alignCenter'),mi('alignMiddle'),'-',...(SHAPE_SUBS[it.kind]||it.kind==='text'?[mi('toPath')]:it.kind==='path'?[mi('toolNodes'),mi('simplifyPath')]:[]),...(isPhotoImg(it)?[mi('imgMasks'),mi('imgCutout')]:[]),...(clipShape(it)||isClipShape(it)?[mi('imgUnclip')]:[]),mi('lockItems'),mi('hideItems'),...(it.g?[mi('ungroupItems')]:[]),'-',mi('deleteItem')]:[mi('addText'),mi('addRect'),mi('addImage'),mi('paste'),mi('selectAll'),'-',mi('sheetSize')];
  openMenu(items,x,y,many.length>1?`Menu di ${many.length} oggetti`:it?'Menu di '+it.name:'Menu del foglio')}
 // Zoom: 0 vuol dire che il foglio entra tutto nello spazio disponibile.
 function zoomDraw(f){const k=f?clamp(sheetScale()*f,.05,8):0;Dw.zoom=k;renderSheet();announce(k?`Zoom ${fmtInt(k*100)}%`:'Si vede tutto il foglio')}
@@ -2460,7 +2670,7 @@ async function drawingSvg({meta=true}={}){const p=Dw.p,parts=[],originals={},ras
   if(it.hidden)continue;if((it.g||null)!==g){if(g)parts.push('</g>');g=it.g||null;if(g)parts.push(`<g id="gruppo-${esc(g)}">`)}let href='',mask='';
   if(it.kind==='image'){if(!m)continue;if(edited){const o=await processImage(m,it,Infinity,m.type==='image/png'?'image/png':'image/jpeg',true);href=await blobToDataUrl(o.blob);if(o.cut)mask=await blobToDataUrl(await maskPng(o.cut,o.w,o.h))}else href=await blobToDataUrl(m.blob)}parts.push(itemSvg(it,{href,img:meta,mask}))}if(g)parts.push('</g>');
  const label=p.desc?' aria-labelledby="titolo descrizione"':' aria-labelledby="titolo"';
- return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}" role="img"${label}><title id="titolo">${esc(p.title)}</title>${p.desc?`<desc id="descrizione">${esc(p.desc)}</desc>`:''}${meta?`<metadata id="tassello-disegno">${esc(JSON.stringify({programma:'Tassello Grafica',versione:'1.1.0',p,originals,...(Object.keys(ras).length?{rasters:ras}:{})}))}</metadata>`:''}${p.bg==='none'?'':`<rect width="${p.w}" height="${p.h}" fill="${esc(p.bg)}"/>`}${parts.join('')}</svg>\n`}
+ return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}" role="img"${label}><title id="titolo">${esc(p.title)}</title>${p.desc?`<desc id="descrizione">${esc(p.desc)}</desc>`:''}${meta?`<metadata id="tassello-disegno">${esc(JSON.stringify({programma:'Tassello Grafica',versione:'1.2.0',p,originals,...(Object.keys(ras).length?{rasters:ras}:{})}))}</metadata>`:''}${p.bg==='none'?'':`<rect width="${p.w}" height="${p.h}" fill="${esc(p.bg)}"/>`}${parts.join('')}</svg>\n`}
 async function saveSvg(){if(!Dw.p.items.length&&!(await confirmAction('Il foglio è vuoto: vuoi salvarlo lo stesso?','Salva')))return;const svg=await work('Salvataggio del disegno',()=>drawingSvg());if(!svg)return;const blob=new Blob([svg],{type:'image/svg+xml'});download(blob,extName(Dw.p.title,'svg'),'image/svg+xml');toast(`Salvato in SVG, ${fmtBytes(blob.size)}: si riapre modificabile con Disegno${Dw.p.desc?'':'. Manca la descrizione per chi non vede il disegno'}`)}
 // Un SVG salvato da Disegno si riapre modificabile; gli altri SVG entrano nel foglio come immagini.
 async function openSvg(file){const doc=new DOMParser().parseFromString(await file.text(),'image/svg+xml'),meta=doc.getElementById('tassello-disegno');let data=null;try{data=meta&&JSON.parse(meta.textContent)}catch(e){}
@@ -2478,9 +2688,10 @@ async function exportDrawImage(){const p=Dw.p;const r=await modal('Esporta come 
  const blob=await work('Esportazione',async()=>{const url=URL.createObjectURL(new Blob([await drawingSvg({meta:false})],{type:'image/svg+xml'}));try{const img=new Image();img.src=url;await img.decode();const cv=new OffscreenCanvas(W,H),ctx=cv.getContext('2d');if(mime==='image/jpeg'){ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H)}ctx.drawImage(img,0,0,W,H);return await cv.convertToBlob({type:mime,quality:.92})}finally{URL.revokeObjectURL(url)}});
  if(!blob)return;download(blob,extName(r.name||p.title,r.format==='jpeg'?'jpg':'png'),mime);toast(`Esportato in ${r.format.toUpperCase()}, ${fmtInt(W)} × ${fmtInt(H)} pixel, ${fmtBytes(blob.size)}`)}
 // La foto di Immagini entra in Disegno con il file originale e la sua ricetta (regolazioni, maschere, scontorno, ritocchi,
-// inquadratura), che restano modificabili; le maschere calcolate passano a Disegno con lo stesso id.
-async function sendPhotoToDraw(){if(photoLink.id){linkBack();return}if(!I.bmp){toast('Apri prima una foto');return}const r=JSON.parse(snap()),W=I.bmp.width,H=I.bmp.height,[fw,fh]=outSize(r,W,H),id=uid(),k=Math.min(1,Dw.p.w*.8/fw,Dw.p.h*.8/fh),ph=photoFields(r),rid=r.cut?.raster;
- if(rid&&rasters.has(rid))Dw.ras.set(rid,rasters.get(rid));registerImage(id,I.file,I.name,W,H);setMode('disegno',{focus:false});
+// inquadratura), che restano modificabili; le maschere calcolate passano a Disegno con lo stesso id. HEIC e RAW entrano
+// convertite (imgConvert), con la stessa misura.
+async function sendPhotoToDraw(){if(photoLink.id){linkBack();return}if(!I.bmp){toast('Apri prima una foto');return}const file=imgToConvert(I.file)?await imgConvert(I.file,I.bmp):I.file;if(!file)return;const r=JSON.parse(snap()),W=I.bmp.width,H=I.bmp.height,[fw,fh]=outSize(r,W,H),id=uid(),k=Math.min(1,Dw.p.w*.8/fw,Dw.p.h*.8/fh),ph=photoFields(r),rid=r.cut?.raster;
+ if(rid&&rasters.has(rid))Dw.ras.set(rid,rasters.get(rid));registerImage(id,file,file===I.file?I.name:file.name,W,H);setMode('disegno',{focus:false});
  const it=addItem('image',{img:id,w:Math.max(1,Math.round(fw*k)),h:Math.max(1,Math.round(fh*k)),name:safeFileName(I.title.trim()||baseName(I.name)).slice(0,40)||nextName('image'),adj:Object.fromEntries(Object.entries(r.adj).filter(([,v])=>v)),look:r.look,lookAmt:r.lookAmt,...(Object.keys(ph).length?{photo:ph}:{})});
  sheetWrap.focus();const say=photoSay(it);if(say)announce(`Restano modificabili: ${say}. Maschere e Togli lo sfondo sono nella scheda Immagine.`,{join:true})}
 // Verifica dell'accessibilità: contrasto dei testi (WCAG), testi troppo piccoli, descrizione del disegno.
@@ -2490,13 +2701,17 @@ const covers=(a,b)=>a.x<=b.x&&a.y<=b.y&&a.x+a.w>=b.x+b.w&&a.y+a.h>=b.y+b.h,overl
 // Che cosa c'è sotto un testo: il colore di una forma piena che lo contiene, un'immagine, oppure lo sfondo del foglio.
 function behind(it){const items=Dw.p.items,b=box(it);for(let i=items.indexOf(it)-1;i>=0;i--){const o=items[i];if(o.hidden||isClipShape(o))continue;const ob=box(o);if(!overlaps(ob,b))continue;if(o.kind==='image')return {image:o};if(o.grad&&o.fill!=='none'&&covers(ob,b))return {grad:o};if(['rect','ellipse','poly','arrow','bubble'].includes(o.kind)&&o.fill!=='none'&&!o.rot&&o.opacity===100&&covers(ob,b))return {color:o.fill,by:o}}return Dw.p.bg==='none'?{none:true}:{color:Dw.p.bg}}
 function drawIssues(){const p=Dw.p,out=[];if(!p.desc.trim())out.push({msg:'Manca la descrizione del disegno: serve a chi non lo vede e diventa il testo alternativo quando lo pubblichi.',fix:'desc'});
- for(const it of p.items){if(it.kind!=='text'||it.hidden||!it.text.trim())continue;const big=it.size>=p.w/22||(it.bold&&it.size>=p.w/28),need=big?3:4.5,bg=behind(it);
+ // I testi diventati tracciati contano come testi: si leggono ancora, ma nel file non sono più testo.
+ const lost=p.items.filter(it=>!it.hidden&&it.alt&&altOf(it)&&!norm(p.desc).replace(/\s+/g,' ').includes(norm(altOf(it)))).map(it=>'«'+altOf(it)+'»');
+ if(lost.length)out.push({msg:`${lost.length===1?'Un testo è diventato tracciato':lost.length+' testi sono diventati tracciati'}: nel file salvato e nelle immagini esportate non ${lost.length===1?'è':'sono'} più testo. Scrivi ${lost.length>1?lost.slice(0,-1).join(', ')+' e '+lost.at(-1):lost[0]} nella descrizione del disegno, che diventa il testo alternativo.`,fix:'desc'});
+ for(const it of p.items){if(it.hidden)continue;if(it.alt!=null&&!altOf(it))out.push({it,msg:`«${it.name}» era un testo ed è diventato un tracciato senza il testo per chi non vede: scrivilo nelle sue proprietà.`});
+  const T=it.kind==='text'?it:it.alt?{...it,text:it.alt,size:it.tsize||0,bold:it.tbold}:null;if(!T||!T.text.trim())continue;const size=T.size,big=size>=p.w/22||(T.bold&&size>=p.w/28),need=big?3:4.5,bg=behind(it);
   if(bg.image)out.push({it,msg:`«${it.name}» è sopra l’immagine «${bg.image.name}»: controlla a occhio che si legga, o mettici sotto una forma piena.`});
   else if(bg.none)out.push({it,msg:`«${it.name}»: il foglio è trasparente, quindi il contrasto dipende da dove verrà messo il disegno.`});
   else if(bg.grad)out.push({it,msg:`«${it.name}» è sopra la sfumatura di «${bg.grad.name}»: controlla a occhio che si legga in ogni punto.`});
   else if(it.grad&&it.fill!=='none')out.push({it,msg:`«${it.name}» è colorato con una sfumatura: controlla a occhio il contrasto in ogni punto.`});
   else{const c=contrastRatio(it.fill,bg.color);if(c!=null&&c<need)out.push({it,msg:`«${it.name}»: contrasto ${fmtNum(c,1)}:1 con ${bg.by?'«'+bg.by.name+'»':'lo sfondo'}, ne serve almeno ${fmtNum(need,1)}:1${big?' per un testo grande':''}.`})}
-  if(it.size<Math.max(10,p.w/90))out.push({it,msg:`«${it.name}»: testo molto piccolo (${it.size} pixel su un foglio largo ${fmtInt(p.w)}), difficile da leggere sui telefoni.`});
+  if(size<Math.max(10,p.w/90))out.push({it,msg:`«${it.name}»: testo molto piccolo (${fmtInt(size)} pixel su un foglio largo ${fmtInt(p.w)}), difficile da leggere sui telefoni.`});
   if(it.opacity<100)out.push({it,msg:`«${it.name}»: il testo è trasparente al ${it.opacity}%, il contrasto reale è più basso.`});
   if(it.blur)out.push({it,msg:`«${it.name}»: il testo è sfocato, quindi si legge male.`})}
  return out}
@@ -2616,7 +2831,7 @@ function pathBounds(subs){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
 // la posizione si corregge perché i nodi restino dove si vedevano.
 function normPath(it,keepBrush){if(!keepBrush)delete it.brush;const o={x:it.x,y:it.y,w:it.w,h:it.h},b=pathBounds(it.subs);for(const s of it.subs)for(const n of s.nodes){n.x=n2(n.x-b.x0);n.y=n2(n.y-b.y0)}it.x=n2(it.x+b.x0);it.y=n2(it.y+b.y0);it.w=n2(b.x1-b.x0);it.h=n2(b.y1-b.y0);
  if(it.rot){const dx=it.x+it.w/2-o.x-o.w/2,dy=it.y+it.h/2-o.y-o.h/2,r=it.rot*Math.PI/180,c=Math.cos(r),s=Math.sin(r);it.x=n2(it.x-dx+c*dx-s*dy);it.y=n2(it.y-dy+s*dx+c*dy)}return it}
-function fitGeometry(it,o){if(!o.subs)return;const sx=o.w?it.w/o.w:1,sy=o.h?it.h/o.h:1;it.subs=o.subs.map(s=>({...s,nodes:s.nodes.map(n=>({...n,x:n2(n.x*sx),y:n2(n.y*sy),ix:n2(n.ix*sx),iy:n2(n.iy*sy),ox:n2(n.ox*sx),oy:n2(n.oy*sy)}))}));if(o.brush)it.brush={...o.brush,pts:o.brush.pts.map(([x,y,p])=>[n2(x*sx),n2(y*sy),p])}}
+function fitGeometry(it,o){if(!o.subs)return;const sx=o.w?it.w/o.w:1,sy=o.h?it.h/o.h:1;if(o.tsize)it.tsize=n2(o.tsize*sy);it.subs=o.subs.map(s=>({...s,nodes:s.nodes.map(n=>({...n,x:n2(n.x*sx),y:n2(n.y*sy),ix:n2(n.ix*sx),iy:n2(n.iy*sy),ox:n2(n.ox*sx),oy:n2(n.oy*sy)}))}));if(o.brush)it.brush={...o.brush,pts:o.brush.pts.map(([x,y,p])=>[n2(x*sx),n2(y*sy),p])}}
 // Punti del foglio e punti del tracciato non ruotato: le maniglie e i nodi si mostrano e si spostano dove si vedono.
 function rotPt(it,x,y,dir=1){if(!it.rot)return{x,y};const r=dir*it.rot*Math.PI/180,c=Math.cos(r),s=Math.sin(r),cx=it.x+it.w/2,cy=it.y+it.h/2,dx=x-cx,dy=y-cy;return{x:cx+c*dx-s*dy,y:cy+s*dx+c*dy}}
 const nodeVis=(it,n)=>rotPt(it,it.x+n.x,it.y+n.y),unrot=(it,pt)=>rotPt(it,pt.x,pt.y,-1);
@@ -2641,7 +2856,7 @@ function flatten(it,step=4){return it.subs.map(s=>{const f=s.nodes[0];if(!f)retu
 // Elenco e descrizione dei nodi, per lo screen reader e per l'elenco nelle proprietà.
 const DIRS=['a destra','in basso a destra','in basso','in basso a sinistra','a sinistra','in alto a sinistra','in alto','in alto a destra'];
 const dirWord=(dx,dy)=>DIRS[(Math.round(Math.atan2(dy,dx)/(Math.PI/4))+8)%8];
-function nodeLabel(it,j){const {s,n,i}=nodeList(it)[j],v=nodeVis(it,n);return `Nodo ${j+1}, ${n.s?'curvo':'d’angolo'}, x ${fmtInt(v.x)}, y ${fmtInt(v.y)}${!s.closed&&i===0?', inizio':!s.closed&&i===s.nodes.length-1?', fine':''}`}
+function nodeLabel(it,j,L=nodeList(it)){const {s,n,i}=L[j],v=nodeVis(it,n);return `Nodo ${j+1}, ${n.s?'curvo':'d’angolo'}, x ${fmtInt(v.x)}, y ${fmtInt(v.y)}${!s.closed&&i===0?', inizio':!s.closed&&i===s.nodes.length-1?', fine':''}`}
 function pathSummary(it){const L=nodeList(it),closed=it.subs.filter(s=>s.closed).length,curves=L.filter(x=>x.n.s).length;return `${it.subs.length>1?it.subs.length+' parti, ':''}${closed===it.subs.length?'chiuso':closed?'in parte chiuso':'aperto'}, ${L.length===1?'un nodo':L.length+' nodi'}: ${L.length-curves} d’angolo e ${curves===1?'uno curvo':curves+' curvi'}`}
 function describePath(it){const parts=it.subs.map((s,si)=>{if(!s.nodes.length)return '';const P=n=>nodeVis(it,n),f=P(s.nodes[0]);let t=`${it.subs.length>1?`Parte ${si+1}: parte`:'Parte'} da x ${fmtInt(f.x)}, y ${fmtInt(f.y)}`;const sg=segs(s);
   if(sg.length>24){const l=P(s.nodes.at(-1));return t+`, ${s.nodes.length} nodi${s.closed?', e torna al punto di partenza':`, finisce a x ${fmtInt(l.x)}, y ${fmtInt(l.y)}`}`}
@@ -2747,10 +2962,10 @@ TOOLS.nodes={sel:'box',
 sheetWrap.addEventListener('dblclick',e=>{const t=e.target.closest?.('[data-id]'),it=t&&itemOf(t.dataset.id);if(Dw.tool==='nodes'&&e.target.closest?.('[data-n]'))nodeToggle();else if(Dw.tool==='select'&&it?.kind==='path'&&!it.lock)setTool('nodes');else if(Dw.tool==='select'&&it?.kind==='text')$('pr-text')?.focus()});
 // Proprietà di un tracciato: l'elenco dei nodi (frecce per scegliere, Ctrl+frecce per spostare), i campi del nodo scelto
 // e la descrizione a parole.
-function pathProps(it){return (it.tool==='brush'?colorFld('fill','Colore',it.fill)+(it.brush?fld('bsize','Spessore del pennello (px)',it.brush.size):''):it.tool==='pencil'?colorFld('stroke','Colore',it.stroke)+fld('sw','Spessore (px)',it.sw):colorFld('fill','Riempimento',it.fill,'Nessun riempimento')+colorFld('stroke','Contorno',it.stroke)+fld('sw','Spessore del contorno (px)',it.sw))+SHAPE_PROPS.path(it)+nodeSection(it)}
+function pathProps(it){return (it.alt!=null?`<label for="pr-alt">Testo per chi non vede</label><textarea id="pr-alt" data-prop="alt" rows="2" aria-describedby="pr-alt-h">${esc(it.alt)}</textarea><small class="hint" id="pr-alt-h">Era un testo: resta la descrizione dell’oggetto e il titolo nel file SVG.</small>`:'')+(it.tool==='brush'?colorFld('fill','Colore',it.fill)+(it.brush?fld('bsize','Spessore del pennello (px)',it.brush.size):''):it.tool==='pencil'?colorFld('stroke','Colore',it.stroke)+fld('sw','Spessore (px)',it.sw):colorFld('fill','Riempimento',it.fill,'Nessun riempimento')+colorFld('stroke','Contorno',it.stroke)+fld('sw','Spessore del contorno (px)',it.sw))+SHAPE_PROPS.path(it)+nodeSection(it)}
 function nodeSection(it){const j=curNode(it),L=nodeList(it),{s,n}=L[j]||{},v=n&&nodeVis(it,n);
  let h=`<h3 id="pr-nodes-h">Nodi</h3><p class="hint" id="pr-pathsay">Tracciato ${esc(pathSummary(it))}.</p>`;
- h+=`<div class="lb node-list" id="pr-nodes" role="listbox" tabindex="0" aria-labelledby="pr-nodes-h" aria-describedby="pr-nodes-k" aria-activedescendant="pr-node-${j}">${L.map((x,i)=>`<div role="option" id="pr-node-${i}" class="lb-item${i===j?' active':''}" data-node="${i}" aria-selected="${i===j}">${esc(nodeLabel(it,i))}</div>`).join('')}</div><small class="hint" id="pr-nodes-k">Frecce su e giù per scegliere un nodo, Ctrl+frecce per spostarlo (con Maiusc di dieci pixel), Spazio per farlo d’angolo o curvo, Ins per aggiungerne uno dopo, Canc per toglierlo.</small>`;
+ h+=`<div class="lb node-list" id="pr-nodes" role="listbox" tabindex="0" aria-labelledby="pr-nodes-h" aria-describedby="pr-nodes-k" aria-activedescendant="pr-node-${j}">${L.map((x,i)=>`<div role="option" id="pr-node-${i}" class="lb-item${i===j?' active':''}" data-node="${i}" aria-selected="${i===j}">${esc(nodeLabel(it,i,L))}</div>`).join('')}</div><small class="hint" id="pr-nodes-k">Frecce su e giù per scegliere un nodo, Ctrl+frecce per spostarlo (con Maiusc di dieci pixel), Spazio per farlo d’angolo o curvo, Ins per aggiungerne uno dopo, Canc per toglierlo.</small>`;
  if(!n)return h;h+=`<div class="row2"><div>${fld('nx','X del nodo',n2(v.x))}</div><div>${fld('ny','Y del nodo',n2(v.y))}</div></div>`+selFld('ntype','Tipo di nodo',n.s?'1':'0',[['0','D’angolo'],['1','Curvo']]);
  if(n.s||n.ix||n.iy||n.ox||n.oy)h+=`<div class="row2"><div>${fld('nix','Maniglia d’entrata, x',n.ix)}</div><div>${fld('niy','Maniglia d’entrata, y',n.iy)}</div><div>${fld('nox','Maniglia d’uscita, x',n.ox)}</div><div>${fld('noy','Maniglia d’uscita, y',n.oy)}</div></div>`;
  return h+`<label class="check"><input type="checkbox" data-prop="nclosed"${s.closed?' checked':''}> Tracciato chiuso</label><div class="btns"><button type="button" class="btn sm" id="pm-readPath" data-action="readPath">${ICON('speak')}Descrivi il tracciato</button></div>`}
@@ -2773,14 +2988,15 @@ renderToolButtons();sheetWrap.dataset.tool='select';$('sheetHint').textContent=T
 // toglie i tratti che tocca. Da tastiera il cursore del foglio disegna: Spazio abbassa e alza la matita.
 $$('svg defs')[0].insertAdjacentHTML('beforeend',`<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></symbol>
 <symbol id="i-brush" viewBox="0 0 24 24"><path d="M20 4c-3 1-8 6-10 9l2 2c3-2 8-7 9-10z"/><path d="M9 14c-3 0-4 2-4 4s-1 2-2 2c3 1 8 0 8-4z"/></symbol>
-<symbol id="i-eraser" viewBox="0 0 24 24"><path d="M4 16l9-10 7 7-7 7H8z"/><path d="M9 11l6 6M8 20h12"/></symbol>`);
+<symbol id="i-eraser" viewBox="0 0 24 24"><path d="M4 16l9-10 7 7-7 7H8z"/><path d="M9 11l6 6M8 20h12"/></symbol>
+<symbol id="i-simplify" viewBox="0 0 24 24"><path d="M3 17l3-4 2 3 3-6 2 4 3-5 2 3 3-4" stroke-dasharray="2 2"/><path d="M3 20C8 9 15 9 21 13"/></symbol>`);
 // Colore e spessori degli strumenti: gli ultimi usati, oppure una misura adatta al foglio.
 const INK_DIV={pen:216,pencil:180,brush:45,eraser:36};
 const inkSize=t=>prefs.drawInk?.[t]||Math.max(1,Math.round(Math.min(Dw.p.w,Dw.p.h)/INK_DIV[t]));
 const inkColor=()=>prefs.drawInk?.color||'#1b1b1b';
 function setInk(k,v){(prefs.drawInk??={})[k]=v;savePrefs()}
-const kindName=it=>it.tool==='brush'?'Pennellata':it.tool==='pencil'?'Tratto di matita':it.kind==='poly'&&it.star?'Stella':KIND_NAME[it.kind];
-const kindIcon=it=>it.tool==='brush'?'brush':it.tool==='pencil'?'pencil':it.kind==='poly'&&it.star?'star':KIND_ICON[it.kind];
+const kindName=it=>it.tool==='brush'?'Pennellata':it.tool==='pencil'?'Tratto di matita':it.kind==='poly'&&it.star?'Stella':it.alt?'Testo in tracciati':KIND_NAME[it.kind];
+const kindIcon=it=>it.tool==='brush'?'brush':it.tool==='pencil'?'pencil':it.kind==='poly'&&it.star?'star':it.alt?'textI':KIND_ICON[it.kind];
 // Ramer-Douglas-Peucker: toglie i punti che si discostano dalla linea meno di tol. Con w conta anche il terzo valore
 // (la pressione), pesato w: dove la pressione cambia, il punto resta anche se la linea è dritta.
 function rdp(pts,tol,w=0){if(pts.length<3)return pts;const keep=new Uint8Array(pts.length),st=[[0,pts.length-1]];keep[0]=keep[pts.length-1]=1;
@@ -2790,23 +3006,51 @@ function rdp(pts,tol,w=0){if(pts.length<3)return pts;const keep=new Uint8Array(p
  return pts.filter((_,i)=>keep[i])}
 // Media mobile su tre punti: toglie il tremolio del puntatore senza spostare gli estremi.
 const soften=pts=>pts.map((p,i)=>i&&i<pts.length-1?p.map((v,k)=>k<2?(pts[i-1][k]+v*2+pts[i+1][k])/4:v):p);
-// Nodi levigati: curvi dove il tratto gira poco, d'angolo dove gira di colpo (più di 70 gradi).
-function strokeSub(pts,closed){const s={closed,nodes:pts.map(([x,y])=>({x:n2(x),y:n2(y),ix:0,iy:0,ox:0,oy:0,s:0}))},N=s.nodes;
- N.forEach((n,i)=>{const p=N[i-1]||(closed?N.at(-1):null),q=N[i+1]||(closed?N[0]:null);if(p&&q){let d=Math.abs(Math.atan2(q.y-n.y,q.x-n.x)-Math.atan2(n.y-p.y,n.x-p.x));if(d>Math.PI)d=2*Math.PI-d;if(d>1.22)return}smoothNode(s,i)});return s}
+// Adattamento a curve (Schneider): i punti fitti di un tratto diventano poche curve di Bézier che passano a meno di tol
+// pixel dai punti. Gli angoli restano angoli (dove la spezzata semplificata gira più di corner gradi), i tratti dritti
+// diventano rette, i nodi tra due curve sono curvi con le maniglie allineate.
+// I lati lunghi si riempiono di punti, così lo scarto si misura lungo tutta la curva e non solo nei punti dati.
+function drawFitSub(pts,closed,tol=.5,corner=70){const P=[],st=Math.max(1,tol*4);for(const p of [...pts,...(closed&&pts.length?[pts[0]]:[])]){const q=P.at(-1),d=q?Math.hypot(p[0]-q[0],p[1]-q[1]):1;if(d<=1e-6)continue;for(let k=1,n=q?Math.ceil(d/st):1;k<n;k++)P.push([q[0]+(p[0]-q[0])*k/n,q[1]+(p[1]-q[1])*k/n]);P.push([p[0],p[1]])}
+ if(closed&&P.length>2&&Math.hypot(P[0][0]-P.at(-1)[0],P[0][1]-P.at(-1)[1])<1e-6)P.pop();
+ const nd=(p,ix=0,iy=0,ox=0,oy=0,s=0)=>({x:n2(p[0]),y:n2(p[1]),ix:n2(ix),iy:n2(iy),ox:n2(ox),oy:n2(oy),s});if(P.length<3)return {closed:closed&&P.length>2,nodes:P.map(p=>nd(p))};
+ const D=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1]),U=(a,b)=>{const l=D(a,b)||1;return [(b[0]-a[0])/l,(b[1]-a[1])/l]},N=P.length;
+ // Angoli: sulla spezzata semplificata con la stessa tolleranza, i vertici dove la direzione cambia di più di corner gradi.
+ const R=rdp(closed?[...P,P[0]]:P,tol),at=new Map(P.map((p,i)=>[p,i])),cos=Math.cos(corner*Math.PI/180),C=[];
+ for(let k=closed?0:1;k<R.length-1;k++){const p=R[k],a=R[k?k-1:R.length-2],b=R[k+1],u=U(a,p),v=U(p,b);if(u[0]*v[0]+u[1]*v[1]<cos)C.push(at.get(p))}
+ const smooth=closed&&!C.length;if(smooth)C.push(0);const Q=closed?[...P.slice(C[0]),...P.slice(0,C[0]+1)]:P,cuts=closed?[...C.map(i=>(i-C[0]+N)%N),N]:[0,...C,N-1];
+ // La direzione all'estremo di un pezzo: verso il primo punto a più di 2 pixel, per non seguire il tremolio.
+ const tan=(i,d,lo,hi)=>{let j=i+d;while(j>lo&&j<hi&&D(Q[i],Q[j])<2)j+=d;return U(Q[i],Q[clamp(j,lo,hi)])};const bz=[];
+ const fit=(a,b,t1,t2,depth)=>{const p0=Q[a],p3=Q[b],L=D(p0,p3);let far=0;for(let i=a+1;i<b;i++){const q=Q[i];far=Math.max(far,Math.abs((q[0]-p0[0])*(p3[1]-p0[1])-(q[1]-p0[1])*(p3[0]-p0[0]))/(L||1))}
+  if(b-a<2||far<tol*.5&&L>0){bz.push([p0,p0,p3,p3]);return}
+  let u=[0];for(let i=a+1;i<=b;i++)u.push(u.at(-1)+D(Q[i-1],Q[i]));u=u.map(v=>v/u.at(-1));
+  const gen=()=>{let c00=0,c01=0,c11=0,x0=0,x1=0;u.forEach((t,i)=>{const s=1-t,b1=3*t*s*s,b2=3*t*t*s,h=s*s*s+b1,k=b2+t*t*t,A=[t1[0]*b1,t1[1]*b1],B=[t2[0]*b2,t2[1]*b2],d=[Q[a+i][0]-p0[0]*h-p3[0]*k,Q[a+i][1]-p0[1]*h-p3[1]*k];c00+=A[0]*A[0]+A[1]*A[1];c01+=A[0]*B[0]+A[1]*B[1];c11+=B[0]*B[0]+B[1]*B[1];x0+=A[0]*d[0]+A[1]*d[1];x1+=B[0]*d[0]+B[1]*d[1]});
+   const det=c00*c11-c01*c01;let l1=det?(x0*c11-x1*c01)/det:0,l2=det?(c00*x1-c01*x0)/det:0;if(!(l1>L*1e-3&&l2>L*1e-3&&l1<L*3&&l2<L*3))l1=l2=L/3;return [p0,[p0[0]+t1[0]*l1,p0[1]+t1[1]*l1],[p3[0]+t2[0]*l2,p3[1]+t2[1]*l2],p3]};
+  const pt=(c,t)=>[bez(t,c[0][0],c[1][0],c[2][0],c[3][0]),bez(t,c[0][1],c[1][1],c[2][1],c[3][1])],err=c=>{let m=0,k=a+1;u.forEach((t,i)=>{const q=pt(c,t),e=D(q,Q[a+i]);if(e>m&&i>0&&i<u.length-1){m=e;k=a+i}});return [m,k]};
+  let c=gen(),[e,k]=err(c);
+  // Newton-Raphson: ogni punto si riavvicina al punto più vicino della curva, poi si rifà la curva.
+  for(let it=0;e>=tol&&e<tol*4&&it<4;it++){u=u.map((t,i)=>{const q=pt(c,t),d1=[0,1].map(j=>3*((1-t)**2*(c[1][j]-c[0][j])+2*(1-t)*t*(c[2][j]-c[1][j])+t*t*(c[3][j]-c[2][j]))),d2=[0,1].map(j=>6*((1-t)*(c[2][j]-2*c[1][j]+c[0][j])+t*(c[3][j]-2*c[2][j]+c[1][j]))),f=[q[0]-Q[a+i][0],q[1]-Q[a+i][1]],den=d1[0]**2+d1[1]**2+f[0]*d2[0]+f[1]*d2[1];return den?clamp(t-(f[0]*d1[0]+f[1]*d1[1])/den,0,1):t});c=gen();[e,k]=err(c)}
+  if(e<tol||depth>14){bz.push(c);return}const tc=U(Q[k+1],Q[k-1]);fit(a,k,t1,tc,depth+1);fit(k,b,[-tc[0],-tc[1]],t2,depth+1)};
+ for(let j=0;j+1<cuts.length;j++){const a=cuts[j],b=cuts[j+1],n0=bz.length;if(b<=a)continue;
+  // In un contorno chiuso senza angoli il primo nodo è curvo: le direzioni ai due capi sono le stesse.
+  const ts=smooth?U(Q[N-1],Q[1]):null;fit(a,b,ts||tan(a,1,a,b),ts?[-ts[0],-ts[1]]:tan(b,-1,a,b),0);bz[n0].corner=true}
+ const nodes=[];bz.forEach((c,i)=>{const p=nodes.at(-1);if(!p)nodes.push(nd(c[0],0,0,c[1][0]-c[0][0],c[1][1]-c[0][1]));else{p.ox=n2(c[1][0]-c[0][0]);p.oy=n2(c[1][1]-c[0][1]);p.s=+(!c.corner&&!!(p.ix||p.iy)&&!!(p.ox||p.oy))}nodes.push(nd(c[3],c[2][0]-c[3][0],c[2][1]-c[3][1]))});
+ if(closed&&nodes.length>1){const l=nodes.pop(),f=nodes[0];f.ix=l.ix;f.iy=l.iy;f.s=+(smooth&&!!(f.ix||f.iy)&&!!(f.ox||f.oy))}return {closed,nodes}}
 // Contorno del pennello attorno alla linea centrale: lo spessore va da un quarto a tutto, secondo la pressione, con le
 // estremità tonde. Un punto solo fa un cerchio.
 function brushPoly(pts,size){const r=p=>Math.max(.3,size/2*(.25+.75*p)),arc=(x,y,w,a0,n=6)=>Array.from({length:n-1},(_,k)=>{const a=a0-(k+1)*Math.PI/n;return [x+Math.cos(a)*w,y+Math.sin(a)*w]});
  const len=pts.reduce((l,p,i)=>i?l+Math.hypot(p[0]-pts[i-1][0],p[1]-pts[i-1][1]):0,0);if(pts.length<2||len<.5){const [x,y,p]=pts[0],w=r(p);return Array.from({length:12},(_,k)=>[x+Math.cos(k*Math.PI/6)*w,y+Math.sin(k*Math.PI/6)*w])}
  const L=[],R=[],ang=[];pts.forEach(([x,y,p],i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],t=Math.atan2(b[1]-a[1],b[0]-a[0]),w=r(p);ang.push(t);L.push([x-Math.sin(t)*w,y+Math.cos(t)*w]);R.push([x+Math.sin(t)*w,y-Math.cos(t)*w])});
  const e=pts.at(-1),f=pts[0];return [...L,...arc(e[0],e[1],r(e[2]),ang.at(-1)+Math.PI/2),...R.reverse(),...arc(f[0],f[1],r(f[2]),ang[0]-Math.PI/2)]}
-// Rifà il contorno di una pennellata dalla sua linea centrale (relativa al riquadro, come i nodi).
-function brushOutline(it){const B=it.brush,poly=rdp(brushPoly(B.pts,B.size),.35);it.subs=[strokeSub(poly,true)];const b=pathBounds(it.subs);normPath(it,true);B.pts=B.pts.map(([x,y,p])=>[n2(x-b.x0),n2(y-b.y0),p])}
-// Un tratto finito diventa un oggetto: i punti sono in coordinate del foglio, con la pressione da 0 a 1. Il tratto fatto
-// da tastiera non trema e non si ammorbidisce: gli angoli restano angoli.
+// Rifà il contorno di una pennellata dalla sua linea centrale (relativa al riquadro, come i nodi), adattato a curve
+// con lo scarto fit: 0,4 pixel dello schermo quando si disegna, o quello scelto con Semplifica.
+function brushOutline(it){const B=it.brush;it.subs=[drawFitSub(brushPoly(B.pts,B.size),true,B.fit||.35)];const b=pathBounds(it.subs);normPath(it,true);B.pts=B.pts.map(([x,y,p])=>[n2(x-b.x0),n2(y-b.y0),p])}
+// Un tratto finito diventa un oggetto: i punti sono in coordinate del foglio, con la pressione da 0 a 1. La matita si
+// adatta a curve già mentre il tratto diventa oggetto, entro mezzo pixel dello schermo: meno nodi, stesso aspetto. Il
+// tratto fatto da tastiera non trema e non si ammorbidisce: gli angoli restano angoli.
 function addStroke(tool,raw,kb=false){const sm=kb?p=>p:soften;const k=sheetScale(),pts=[];for(const p of raw)if(!pts.length||Math.hypot(p[0]-pts.at(-1)[0],p[1]-pts.at(-1)[1])*k>=1)pts.push(p);if(!pts.length)return null;
  const it={id:uid(),kind:'path',tool,name:nextName('path',kindName({tool})),x:0,y:0,w:0,h:0,rot:0,opacity:100,radius:0,subs:[]};
- if(tool==='brush'){Object.assign(it,{fill:inkColor(),stroke:'#1b1b1b',sw:0,brush:{size:inkSize('brush'),pts:rdp(sm(pts),.4/k,inkSize('brush')/2).map(([x,y,p])=>[n2(x),n2(y),Math.round(p*100)/100])}});brushOutline(it)}
- else{const line=pts.length<2?[pts[0],[pts[0][0]+.01,pts[0][1]]]:rdp(sm(pts),kb?.5:1.2/k);Object.assign(it,{fill:'none',stroke:inkColor(),sw:inkSize('pencil'),subs:[strokeSub(line,false)]});normPath(it)}
+ if(tool==='brush'){Object.assign(it,{fill:inkColor(),stroke:'#1b1b1b',sw:0,brush:{size:inkSize('brush'),fit:n2(.4/k),pts:rdp(sm(pts),.4/k,inkSize('brush')/2).map(([x,y,p])=>[n2(x),n2(y),Math.round(p*100)/100])}});brushOutline(it)}
+ else{const line=pts.length<2?[pts[0],[pts[0][0]+.01,pts[0][1]]]:sm(pts);Object.assign(it,{fill:'none',stroke:inkColor(),sw:inkSize('pencil'),subs:[drawFitSub(line,false,kb?.5:.5/k,kb?20:70)]});normPath(it)}
  pick([it.id],it.id);editD(tool==='brush'?'Pennellata':'Tratto di matita',p=>{p.items.push(it)},{props:true});return it}
 const strokeSay=it=>{const L=nodeList(it),f=nodeVis(it,L[0].n),b=box(it);return `«${it.name}», ${it.brush?`larga ${fmtInt(it.brush.size)} pixel`:`spessa ${fmtInt(it.sw)} pixel`}, nel riquadro x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}, ${L.length} nodi`};
 // Il tratto in corso, con il puntatore o con la tastiera: anteprima sopra il foglio, poi un oggetto.
@@ -2853,6 +3097,21 @@ function toolProps(){const t=Dw.tool;if(!['pen','pencil','brush','eraser'].inclu
  +(t==='brush'?'<small class="hint">Con la penna di una tavoletta lo spessore segue la pressione; disegnando da tastiera i numeri da 1 a 9 la portano dal 10 al 90 per cento, Maiusc+0 al massimo.</small>':'')+'<h3>Foglio</h3>'}
 // Cambiando colore o spessore di un tratto, lo strumento li ricorda per il tratto successivo.
 function strokeProp(it,key,v,need){if(key==='bsize'){it.brush.size=need(1,2000);brushOutline(it);setInk('brush',it.brush.size)}else if(key==='fill'&&it.tool==='brush'||key==='stroke'&&it.tool!=='brush')setInk('color',v);else if(key==='sw'&&it.tool==='pencil')setInk('pencil',num(v))}
+// Semplifica il tracciato: ogni parte si ripercorre fitta e si riadatta a curve con lo scarto scelto (le pennellate
+// semplificano la linea centrale e rifanno il contorno). Il cursore Quantità mostra subito il risultato sul foglio e
+// quanti nodi restano; Annulla rimette tutto com'era, Semplifica è un passo solo da annullare. Una parte che non perde
+// nodi resta com'era.
+const simpTol=a=>.05*Math.pow(400,a/100),simpSay=a=>`${fmtInt(a)}%, scarto fino a ${fmtNum(simpTol(a),simpTol(a)<1?2:1)} pixel`;
+function simplifyItem(it,o,tol){Object.assign(it,structuredClone(o));if(it.brush){it.brush.pts=rdp(it.brush.pts,tol,it.brush.size/2);it.brush.fit=n2(Math.max(it.brush.fit||.35,tol));brushOutline(it);if(nodeList(it).length>=nodeList(o).length)Object.assign(it,structuredClone(o));return}
+ it.subs=it.subs.map(s=>{const p=flatten({x:0,y:0,subs:[s]},1)[0],f=p.length>2&&drawFitSub(p,s.closed,tol,it.tool?70:40);return f&&f.nodes.length<s.nodes.length?f:s});normPath(it)}
+async function simplifyPaths(){const items=needSel().filter(x=>x.kind==='path'&&!x.lock);if(!items.length){if(selItems().length)toast('Semplifica vale per i tracciati, i tratti e i testi diventati tracciati: le forme si convertono prima con Converti in tracciato');return}
+ const orig=items.map(x=>structuredClone(x)),count=()=>items.reduce((s,x)=>s+nodeList(x).length,0),before=count(),say=()=>`Nodi: ${fmtInt(before)} prima, ${fmtInt(count())} dopo.`,
+  apply=a=>{items.forEach((it,i)=>simplifyItem(it,orig[i],simpTol(a)));renderSheet();if($('dlgSimp'))$('dlgSimp').textContent=say()};let a=prefs.drawSimp??40;apply(a);
+ const r=await modal('Semplifica il tracciato',`<p>Toglie i nodi che non servono e riadatta le curve: più alta è la quantità, più il tracciato si allontana da quello di adesso. Il foglio mostra subito il risultato.</p><p id="dlgSimp" role="status">${esc(say())}</p>`,
+  [{id:'amt',label:'Quantità',type:'range',min:1,max:100,value:a,fmt:simpSay}],'Semplifica',{onOpen:pane=>{const el=pane.querySelector('#dlg_amt');el.addEventListener('input',()=>apply(Number(el.value)))}});
+ if(!r){items.forEach((it,i)=>Object.assign(it,structuredClone(orig[i])));renderSheet();announce('Semplifica annullato: i tracciati sono com’erano');return}
+ a=Number(r.amt);prefs.drawSimp=a;savePrefs();apply(a);const after=count();settleD(items.length>1?`Semplifica ${items.length} tracciati`:'Semplifica '+items[0].name,{props:true});
+ announce(`${items.length>1?items.length+' tracciati semplificati':`«${items[0].name}» semplificato`}: da ${fmtInt(before)} a ${fmtInt(after)} nodi${before?`, ${fmtInt((1-after/before)*100)}% in meno`:''}, con uno scarto fino a ${fmtNum(simpTol(a),simpTol(a)<1?2:1)} pixel.`)}
 STATIC_KEYS.d.push(['Matita e pennello',[['Muovi il cursore di dieci pixel (con Maiusc di uno)','← → ↑ ↓'],['Muovi il cursore in diagonale','Home / Fine / PgSu / PgGiù'],['Abbassa o alza la matita: inizia e finisce il tratto','Spazio'],['Annulla il tratto in corso','Esc'],['Pressione del pennello, dal 10 al 90 per cento (Maiusc+0 piena)','1 … 9 / Maiusc+0']]],['Gomma',[['Cancella i tratti sotto il cursore','Spazio']]]);
 // Forme: poligoni e stelle, frecce e fumetti, le estremità delle linee e dei tracciati aperti (freccia o punto) e
 // «Converti in tracciato». Ogni forma ha i suoi nodi (SHAPE_SUBS), relativi al riquadro che riempie per intero: così
@@ -2910,11 +3169,17 @@ const SHAPE_PROPS={poly:it=>fld('sides',it.star?'Punte':'Lati',it.sides)+`<label
 Object.assign(KIND_SAY,{poly:it=>`, ${it.sides} ${it.star?'punte':'lati'}`,arrow:it=>`, ${it.double?'a due punte, ':''}punta ${dirWord(Math.cos((it.rot||0)*Math.PI/180),Math.sin((it.rot||0)*Math.PI/180))}`,
  bubble:it=>`, con la coda in basso ${(it.tip??15)<34?'a sinistra':(it.tip??15)>66?'a destra':'al centro'}`,line:it=>endsSay(it)});
 const endsSay=it=>{const e=[hasEnd(it.start)&&`${it.start==='arrow'?'una freccia':'un punto'} all’inizio`,hasEnd(it.end)&&`${it.end==='arrow'?'una freccia':'un punto'} alla fine`].filter(Boolean);return e.length?', con '+e.join(' e '):''};
-// Converti in tracciato: le forme scelte diventano nodi modificabili, con lo stesso aspetto. I testi e le immagini restano.
-function toPath(){const many=needSel();if(!many.length)return;const ok=many.filter(x=>SHAPE_SUBS[x.kind]&&!x.lock),rest=many.length-ok.length;
- if(!ok.length){toast(many.every(x=>x.kind==='path')?'Sono già tracciati: modificali con lo strumento Nodi':'I testi e le immagini non diventano tracciati; gli oggetti bloccati restano com’erano');return}
- editD(ok.length>1?`Converti ${ok.length} oggetti in tracciati`:`Converti ${ok[0].name} in tracciato`,()=>{for(const it of ok){const subs=SHAPE_SUBS[it.kind](it),b=box(it);if(it.kind==='line')Object.assign(it,{fill:'none',x:b.x,y:b.y,w:b.w,h:b.h});for(const k of ['sides','star','inner','head','shaft','double','tail','tip','tl'])delete it[k];it.kind='path';it.subs=subs;normPath(it)}},{props:true});
- announce(`${ok.length>1?ok.length+' oggetti convertiti in tracciati':`«${ok[0].name}» è ora un tracciato di ${nodeList(ok[0]).length} nodi`}: lo strumento Nodi li modifica.${rest?` ${rest===1?'Un oggetto è rimasto':rest+' oggetti sono rimasti'} com’era: i testi, le immagini e gli oggetti bloccati non si convertono.`:''}`)}
+// Converti in tracciato: le forme scelte diventano nodi modificabili, con lo stesso aspetto; i testi diventano i contorni
+// delle loro lettere, presi dal file del carattere (07k). Le immagini restano. Tutto insieme è un passo solo da annullare.
+async function toPath(){const many=needSel();if(!many.length)return;const ok=many.filter(x=>SHAPE_SUBS[x.kind]&&!x.lock),texts=many.filter(x=>x.kind==='text'&&!x.lock&&String(x.text).trim());
+ if(!ok.length&&!texts.length){toast(many.every(x=>x.kind==='path')?'Sono già tracciati: modificali con lo strumento Nodi':'Le immagini non diventano tracciati; gli oggetti bloccati e i testi vuoti restano com’erano');return}
+ const fr=texts.length?await fontsFor(texts):{out:new Map(),fail:[]};if(!fr)return;const conv=[];
+ for(const t of texts){const F=fr.out.get(t.id);if(!F)continue;const o=drawTextSubs(t,F);if(o.subs.length)conv.push([t,o,F]);else fr.fail.push([t,`nessuna delle sue lettere è nel carattere ${F.label}`])}
+ const fails=fr.fail.map(([t,why])=>`«${t.name}» è rimasto un testo: ${why}.`).join(' ');if(!ok.length&&!conv.length){toast(fails);return}
+ const all=[...ok,...conv.map(c=>c[0])],rest=many.length-all.length-fr.fail.length;
+ editD(all.length>1?`Converti ${all.length} oggetti in tracciati`:`Converti ${all[0].name} in tracciato`,()=>{for(const it of ok){const subs=SHAPE_SUBS[it.kind](it),b=box(it);if(it.kind==='line')Object.assign(it,{fill:'none',x:b.x,y:b.y,w:b.w,h:b.h});for(const k of ['sides','star','inner','head','shaft','double','tail','tip','tl'])delete it[k];it.kind='path';it.subs=subs;normPath(it)}for(const [t,o] of conv)drawTextToPath(t,o)},{props:true});
+ const [t0,o0,F0]=conv[0]||[],notes=conv.flatMap(([t,o,F])=>[F.slant&&`il carattere ${F.label} non ha il corsivo: le lettere di «${t.name}» sono inclinate`,F.thin&&`il carattere ${F.label} non ha il grassetto: «${t.name}» ha il peso normale`,o.miss&&`${o.miss===1?'un carattere':o.miss+' caratteri'} di «${t.name}» non ${o.miss===1?'è':'sono'} nel file del carattere e ${o.miss===1?'manca':'mancano'}`,!o.miss&&o.dev>.01&&`il carattere ${F.label} non è proprio quello che si vedeva in «${t.name}»: la larghezza cambia del ${fmtInt(o.dev*100)}%`]).filter(Boolean);
+ announce(`${all.length>1?all.length+' oggetti convertiti in tracciati':t0?`«${t0.name}» è ora un tracciato di ${t0.subs.length===1?'un contorno':t0.subs.length+' contorni'}, con il carattere ${F0.label}; il testo resta come descrizione per chi non vede`:`«${ok[0].name}» è ora un tracciato di ${nodeList(ok[0]).length} nodi`}: lo strumento Nodi ${all.length>1?'li':'lo'} modifica.${notes.length?' Nota: '+notes.join('; ')+'.':''}${rest?` ${rest===1?'Un oggetto è rimasto':rest+' oggetti sono rimasti'} com’era: le immagini, gli oggetti bloccati e i testi vuoti non si convertono.`:''}`);if(fails)toast(fails)}
 // Stile: sfumature lineari e radiali con i punti di colore, tratteggio, estremità e angoli del contorno, ombra e
 // sfocatura (filtri SVG), fusione con gli oggetti sotto. Per i testi: spaziatura tra le lettere, testo a capo dentro il
 // riquadro e testo lungo una curva, presa da un tracciato o da una forma. Tutto è SVG 1.1 (più mix-blend-mode), così il
@@ -2990,39 +3255,109 @@ Object.assign(KIND_SAY,{text:it=>it.subs?', lungo una curva':it.wrap?`, a capo i
 // tagliano dove si incrociano e restano solo i pezzi che separano l'area del risultato da quella fuori, girati con
 // l'area a sinistra. I pezzi si ricuciono in contorni chiusi, che si levigano in nodi come i tratti di matita: le curve
 // tornano curve e gli incroci restano angoli. Il risultato è un tracciato nuovo; Ctrl+Z riporta le forme di prima.
+// Le linee (e i tracciati aperti) restano linee: intersecate con le forme tengono i tratti dentro, sottratte i tratti
+// fuori, unite o escluse entrano aperte nel tracciato composto. Taglia con una linea divide le forme lungo le linee.
 $$('svg defs')[0].insertAdjacentHTML('beforeend',`<symbol id="i-union" viewBox="0 0 24 24"><path d="M3 3h11v7h7v11H10v-7H3z" fill="currentColor" fill-opacity=".35"/></symbol>
 <symbol id="i-subtract" viewBox="0 0 24 24"><path d="M3 3h11v7h-4v4H3z" fill="currentColor" fill-opacity=".35"/><rect x="10" y="10" width="11" height="11" stroke-dasharray="2 2"/></symbol>
 <symbol id="i-intersect" viewBox="0 0 24 24"><rect x="3" y="3" width="11" height="11" stroke-dasharray="2 2"/><rect x="10" y="10" width="11" height="11" stroke-dasharray="2 2"/><rect x="10" y="10" width="4" height="4" fill="currentColor"/></symbol>
-<symbol id="i-exclude" viewBox="0 0 24 24"><path d="M3 3h11v7h-4v4H3zM14 10h7v11H10v-7h4z" fill="currentColor" fill-opacity=".35"/><rect x="10" y="10" width="4" height="4"/></symbol>`);
+<symbol id="i-exclude" viewBox="0 0 24 24"><path d="M3 3h11v7h-4v4H3zM14 10h7v11H10v-7h4z" fill="currentColor" fill-opacity=".35"/><rect x="10" y="10" width="4" height="4"/></symbol>
+<symbol id="i-cutLine" viewBox="0 0 24 24"><path d="M4 6h16v13H4z" fill="currentColor" fill-opacity=".35"/><path d="M15 2 8 22" stroke-dasharray="3 2"/></symbol>`);
 const BOOL={union:['Unione','unite',c=>c.some(Boolean)],subtract:['Sottrazione','sottratte',c=>c[0]&&!c.slice(1).some(Boolean)],intersect:['Intersezione','intersecate',c=>c.every(Boolean)],exclude:['Esclusione','escluse',c=>c.filter(Boolean).length%2===1]};
 const hasArea=it=>it.kind==='path'||!!SHAPE_SUBS[it.kind];
-// Spezzate chiuse di un oggetto, in coordinate del foglio; i tracciati aperti si chiudono come per il riempimento.
-function itemPolys(it){const b=box(it),src=it.kind==='path'?it:{x:b.x,y:b.y,subs:SHAPE_SUBS[it.kind](it)};return flatten(src,2).filter(p=>p.length>2).map(p=>p.map(([x,y])=>{const q=rotPt(it,x,y);return [q.x,q.y]}))}
+// Linee: le linee e i tracciati che hanno tutte le parti aperte, anche se riempiti.
+const drawIsOpen=it=>it.kind==='line'||it.kind==='path'&&it.subs.every(s=>!s.closed);
+// Le parti chiuse (open falso) o aperte di un oggetto, con i nodi in coordinate del foglio e la sua rotazione.
+function drawSheetSubs(it,open){const b=box(it),src=it.kind==='path'?it:{x:b.x,y:b.y,subs:SHAPE_SUBS[it.kind](it)},r=(it.rot||0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r),R=(x,y)=>[n2(c*x-s*y),n2(s*x+c*y)];
+ return src.subs.filter(sb=>!sb.closed===!!open&&sb.nodes.length>1).map(sb=>({closed:sb.closed,nodes:sb.nodes.map(n=>{const p=rotPt(it,src.x+n.x,src.y+n.y),[ix,iy]=R(n.ix,n.iy),[ox,oy]=R(n.ox,n.oy);return {...n,x:n2(p.x),y:n2(p.y),ix,iy,ox,oy}})}))}
+// Spezzate chiuse delle aree di un oggetto, in coordinate del foglio.
+const itemPolys=it=>drawSheetSubs(it,false).map(s=>flatten({x:0,y:0,subs:[s]},2)[0]).filter(p=>p.length>2);
 // Numero di avvolgimento: quante volte il contorno gira attorno al punto (pari e dispari per la regola evenodd).
 function winding(polys,x,y){let w=0;for(const p of polys)for(let i=0,n=p.length;i<n;i++){const [ax,ay]=p[i],[bx,by]=p[(i+1)%n],c=(bx-ax)*(y-ay)-(x-ax)*(by-ay);if(ay<=y){if(by>y&&c>0)w++}else if(by<=y&&c<0)w--}return w}
-function boolPolys(op,items){const ops=items.map(it=>({it,polys:itemPolys(it)})),inside=(o,x,y)=>{const w=winding(o.polys,x,y);return o.it.rule==='evenodd'?w%2!==0:w!==0},res=(x,y)=>BOOL[op][2](ops.map(o=>inside(o,x,y)));
- const E=[];ops.forEach((o,i)=>o.polys.forEach(p=>p.forEach((a,k)=>{const b=p[(k+1)%p.length];if(a[0]!==b[0]||a[1]!==b[1])E.push({a,b,i,cut:[]})})));
- // Incroci, anche dentro la stessa forma; i lati sovrapposti si tagliano dove finisce l'altro.
- E.forEach(e=>{e.x0=Math.min(e.a[0],e.b[0]);e.x1=Math.max(e.a[0],e.b[0]);e.y0=Math.min(e.a[1],e.b[1]);e.y1=Math.max(e.a[1],e.b[1])});const S=[...E].sort((p,q)=>p.x0-q.x0);
- for(let m=0;m<S.length;m++){const e=S[m],r=[e.b[0]-e.a[0],e.b[1]-e.a[1]],rr=r[0]*r[0]+r[1]*r[1];for(let q=m+1;q<S.length&&S[q].x0<=e.x1;q++){const f=S[q];if(f.y0>e.y1||f.y1<e.y0)continue;
+const boolInside=(it,polys)=>(x,y)=>{const w=winding(polys,x,y);return it.rule==='evenodd'?w%2!==0:w!==0};
+const boolEdges=(polys,extra)=>polys.flatMap(p=>p.map((a,k)=>({a,b:p[(k+1)%p.length],...extra})).filter(e=>e.a[0]!==e.b[0]||e.a[1]!==e.b[1]));
+// Incroci tra i lati (anche dentro la stessa forma): in e.cut i punti, con la loro posizione lungo il lato; i lati
+// sovrapposti si tagliano dove finisce l'altro. pair sceglie le coppie di lati da confrontare. Con snap un incrocio a
+// meno di un centesimo di pixel da un vertice cade sul vertice: un pezzetto più corto non saprebbe da che parte sta
+// l'area, e il contorno ricucito si spezzerebbe.
+function boolCuts(E,pair=()=>true,snap=true){E.forEach(e=>{e.cut=[];e.x0=Math.min(e.a[0],e.b[0]);e.x1=Math.max(e.a[0],e.b[0]);e.y0=Math.min(e.a[1],e.b[1]);e.y1=Math.max(e.a[1],e.b[1])});const S=[...E].sort((p,q)=>p.x0-q.x0);
+ for(let m=0;m<S.length;m++){const e=S[m],r=[e.b[0]-e.a[0],e.b[1]-e.a[1]],rr=r[0]*r[0]+r[1]*r[1];for(let q=m+1;q<S.length&&S[q].x0<=e.x1;q++){const f=S[q];if(f.y0>e.y1||f.y1<e.y0||!pair(e,f))continue;
   const s=[f.b[0]-f.a[0],f.b[1]-f.a[1]],den=r[0]*s[1]-r[1]*s[0],qp=[f.a[0]-e.a[0],f.a[1]-e.a[1]];
-  if(Math.abs(den)>1e-9){const t=(qp[0]*s[1]-qp[1]*s[0])/den,u=(qp[0]*r[1]-qp[1]*r[0])/den;if(t>1e-9&&t<1-1e-9||u>1e-9&&u<1-1e-9)if(t>=-1e-9&&t<=1+1e-9&&u>=-1e-9&&u<=1+1e-9){const P=[e.a[0]+t*r[0],e.a[1]+t*r[1]];e.cut.push([t,P]);f.cut.push([u,P])}}
+  if(Math.abs(den)>1e-9){const t=(qp[0]*s[1]-qp[1]*s[0])/den,u=(qp[0]*r[1]-qp[1]*r[0])/den;if(t>1e-9&&t<1-1e-9||u>1e-9&&u<1-1e-9)if(t>=-1e-9&&t<=1+1e-9&&u>=-1e-9&&u<=1+1e-9){
+   const lr=Math.sqrt(rr),ls=Math.hypot(s[0],s[1]),tol=snap?.01:0,te=t*lr>tol&&(1-t)*lr>tol,tf=u*ls>tol&&(1-u)*ls>tol,P=tf?te?[e.a[0]+t*r[0],e.a[1]+t*r[1]]:t<.5?e.a:e.b:u<.5?f.a:f.b;if(te)e.cut.push([t,P]);if(tf)f.cut.push([u,P])}}
   else if(Math.abs(qp[0]*r[1]-qp[1]*r[0])<1e-6*Math.sqrt(rr)){const ss=s[0]*s[0]+s[1]*s[1],on=(g,P,len2)=>{const t=((P[0]-g.a[0])*(g.b[0]-g.a[0])+(P[1]-g.a[1])*(g.b[1]-g.a[1]))/len2;if(t>1e-9&&t<1-1e-9)g.cut.push([t,P])};on(e,f.a,rr);on(e,f.b,rr);on(f,e.a,ss);on(f,e.b,ss)}}}
+ return E}
+// I pezzi di un lato tra i suoi incroci, con la loro direzione e l'area a sinistra e a destra secondo ins.
+function boolPieces(e,ins){const pts=[e.a,...e.cut.sort((p,q)=>p[0]-q[0]).map(c=>c[1]),e.b],out=[];for(let k=1;k<pts.length;k++){const a=pts[k-1],b=pts[k],dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy);if(l<1e-6)continue;
+ const eps=Math.min(.02,l/4),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,nx=-dy/l*eps,ny=dx/l*eps;out.push({a,b,L:ins(mx+nx,my+ny),R:ins(mx-nx,my-ny)})}return out}
+const boolKey=P=>Math.round(P[0]*1e3)+','+Math.round(P[1]*1e3);
+function boolPolys(op,items){const ops=items.map(it=>({it,polys:itemPolys(it)})),res=(x,y)=>BOOL[op][2](ops.map(o=>boolInside(o.it,o.polys)(x,y)));
+ const E=boolCuts(ops.flatMap((o,i)=>boolEdges(o.polys,{i})));
  // Pezzi di confine del risultato, con l'area a sinistra; i doppioni (lati sovrapposti) contano una volta.
- const K=P=>Math.round(P[0]*1e3)+','+Math.round(P[1]*1e3),kept=new Map(),eps=.02;
- for(const e of E){const pts=[e.a,...e.cut.sort((p,q)=>p[0]-q[0]).map(c=>c[1]),e.b];for(let k=1;k<pts.length;k++){const a=pts[k-1],b=pts[k],dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy);if(l<1e-6)continue;
-  const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,nx=-dy/l*eps,ny=dx/l*eps,L=res(mx+nx,my+ny),R=res(mx-nx,my-ny);if(L===R)continue;const [s,t]=L?[a,b]:[b,a],key=K(s)+'>'+K(t);if(!kept.has(key))kept.set(key,{a:s,b:t,ka:K(s),kb:K(t)})}}
+ const kept=new Map();for(const e of E)for(const {a,b,L,R} of boolPieces(e,res)){if(L===R)continue;const [s,t]=L?[a,b]:[b,a],key=boolKey(s)+'>'+boolKey(t);if(!kept.has(key))kept.set(key,{a:s,b:t,ka:boolKey(s),kb:boolKey(t)})}
  // Ricucitura: da ogni pezzo si passa a quello che parte dove finisce, fino a tornare all'inizio.
  const starts=new Map();for(const p of kept.values())starts.set(p.ka,[...(starts.get(p.ka)||[]),p]);const used=new Set(),loops=[];
  for(const p of kept.values()){if(used.has(p))continue;used.add(p);const loop=[p.a];let cur=p;for(let g=0;g<1e6&&cur.kb!==p.ka;g++){loop.push(cur.b);const nx=(starts.get(cur.kb)||[]).find(q=>!used.has(q));if(!nx)break;used.add(nx);cur=nx}if(loop.length>2)loops.push(loop)}
  return loops}
-function boolOp(op){const many=selItems(),ok=many.filter(x=>hasArea(x)&&!x.lock);if(ok.length<2){toast(`Scegli almeno due forme o tracciati: ${many.some(x=>!hasArea(x))?'i testi e le immagini non si combinano; ':''}Maiusc+clic sul foglio, Maiusc+frecce nei livelli o Ctrl+A`);return}
- const loops=boolPolys(op,ok),[name,done]=BOOL[op];if(!loops.length){toast(op==='intersect'?'Le forme scelte non hanno un’area in comune: non resta niente':'Il risultato è vuoto: le forme restano com’erano');return}
- // Lo stile viene dalla forma in fondo per la sottrazione, da quella più in alto per le altre operazioni.
- const src=op==='subtract'?ok[0]:ok.at(-1),it={id:uid(),kind:'path',name:nextName('path',name),x:0,y:0,w:0,h:0,rot:0,radius:0,rule:'evenodd',subs:loops.map(l=>strokeSub(rdp([...l,l[0]],.3).slice(0,-1),true))};
- for(const k of ['fill','stroke','sw','opacity','grad','dash','cap','join','shadow','blur','blend'])if(src[k]!==undefined)it[k]=structuredClone(src[k]);if(it.fill==='none')it.fill=src.stroke;normPath(it);
- const ids=new Set(ok.map(x=>x.id)),at=Dw.p.items.indexOf(src);pick([it.id],it.id);editD(`${name} di ${ok.length} forme`,p=>{const rest=p.items.filter((x,i)=>i<at&&!ids.has(x.id));p.items=[...rest,it,...p.items.filter((x,i)=>i>at&&!ids.has(x.id))]},{props:true});
- announce(`${ok.length} forme ${done}: «${it.name}», tracciato di ${it.subs.length===1?'una parte':it.subs.length+' parti'} e ${nodeList(it).length} nodi.${many.length>ok.length?' I testi, le immagini e gli oggetti bloccati sono rimasti com’erano.':''}`)}
+// Un contorno del risultato in nodi: le curve tornano curve, i lati dritti rette, gli angoli (anche dei poligoni) angoli.
+const boolLoopSub=l=>drawFitSub(l,true,.25,25);
+// Le parti aperte dove keep(x, y) è vero: ogni tratto si divide dove attraversa il contorno di un'area, con de Casteljau,
+// così le curve restano le stesse curve; i pezzi tenuti uno dopo l'altro restano una parte sola.
+function boolClipOpen(subs,polys,keep){const E=boolEdges(polys,{area:1}),out=[];
+ subs.forEach((s,si)=>segs(s).forEach(([a,b],i)=>{const n=isLine(a,b)?1:Math.max(4,Math.ceil((Math.hypot(b.x-a.x,b.y-a.y)+Math.hypot(a.ox,a.oy)+Math.hypot(b.ix,b.iy))/2));let p=[a.x,a.y];for(let k=1;k<=n;k++){const q=segPt(a,b,k/n);E.push({a:p,b:[q.x,q.y],key:si+':'+i,t0:(k-1)/n,t1:k/n});p=[q.x,q.y]}}));
+ boolCuts(E,(e,f)=>!e.area!==!f.area,false);const ts={};for(const e of E)if(e.key)for(const [u] of e.cut)(ts[e.key]??=[]).push(e.t0+u*(e.t1-e.t0));
+ subs.forEach((s,si)=>{const N=s.nodes.map(n=>({...n}));let cur=null;const stop=()=>{if(cur){Object.assign(cur.nodes.at(-1),{ox:0,oy:0,s:0});cur=null}};
+  for(let i=0;i+1<N.length;i++){const B=N[i+1],cuts=[...new Set(ts[si+':'+i]||[])].filter(t=>t>1e-6&&t<1-1e-6).sort((p,q)=>p-q),parts=[];let A=N[i],t0=0;
+   for(const t of cuts){const m=splitSeg(A,B,(t-t0)/(1-t0));parts.push([A,m]);A=m;t0=t}parts.push([A,B]);
+   for(const [P,Q] of parts){const m=segPt(P,Q,.5);if(!keep(m.x,m.y)){stop();continue}if(cur?.nodes.at(-1)===P)cur.nodes.push(Q);else{stop();Object.assign(P,{ix:0,iy:0,s:0});cur={closed:false,nodes:[P,Q]};out.push(cur)}}}stop()});
+ return out}
+// Il risultato prende lo stile dell'oggetto più in alto (per la sottrazione di quello in fondo); se tra gli oggetti ci sono
+// linee e forme, il riempimento viene dalla forma più in alto e il contorno dalla linea più in alto, così si vedono tutte.
+function boolStyle(it,src,area,line){for(const k of ['fill','stroke','sw','opacity','grad','dash','cap','join','shadow','blur','blend'])if(src[k]!==undefined)it[k]=structuredClone(src[k]);
+ if(area&&it.fill==='none'){const a=area.fill!=='none'?area:null;it.fill=a?a.fill:src.stroke;if(a?.grad)it.grad=structuredClone(a.grad)}
+ if(line&&!(it.sw>0&&it.stroke!=='none'))for(const k of ['stroke','sw','dash','cap','join'])if(line[k]!==undefined)it[k]=line[k]}
+function boolOp(op){const many=selItems(),ok=many.filter(x=>hasArea(x)&&!x.lock),lines=ok.filter(drawIsOpen),areas=ok.filter(x=>!drawIsOpen(x));if(ok.length<2){toast(`Scegli almeno due forme, linee o tracciati: ${many.some(x=>!hasArea(x))?'i testi e le immagini non si combinano; ':''}Maiusc+clic sul foglio, Maiusc+frecce nei livelli o Ctrl+A`);return}
+ if(lines.length&&(op==='intersect'||op==='subtract'&&drawIsOpen(ok[0]))){boolLines(op,ok,lines,areas);return}
+ // Con la forma in fondo, le linee davanti non tolgono area: restano com'erano.
+ const use=op==='subtract'?areas:ok,keepLines=op==='subtract'?lines:[];if(op==='subtract'&&areas.length<2){toast('Le linee non hanno un’area da togliere alla forma: sottrai un’altra forma, oppure usa Taglia con una linea');return}
+ const A=use.filter(x=>!drawIsOpen(x)),loops=A.length?boolPolys(op,A):[],open=op==='union'||op==='exclude'?use.flatMap(x=>drawSheetSubs(x,true)):[],[name,done]=BOOL[op];
+ if(!loops.length&&!open.length){toast(op==='intersect'?'Le forme scelte non hanno un’area in comune: non resta niente':'Il risultato è vuoto: le forme restano com’erano');return}
+ const src=op==='subtract'?A[0]:use.at(-1),it={id:uid(),kind:'path',name:nextName('path',name),x:0,y:0,w:0,h:0,rot:0,radius:0,rule:'evenodd',subs:[...loops.map(boolLoopSub),...open]};
+ boolStyle(it,src,loops.length&&A.at(-1),open.length&&use.filter(drawIsOpen).at(-1));normPath(it);
+ const ids=new Set(use.map(x=>x.id)),at=Dw.p.items.indexOf(src);pick([it.id],it.id);editD(`${name} di ${use.length} ${open.length?'oggetti':'forme'}`,p=>{const rest=p.items.filter((x,i)=>i<at&&!ids.has(x.id));p.items=[...rest,it,...p.items.filter((x,i)=>i>at&&!ids.has(x.id))]},{props:true});
+ const nl=use.filter(drawIsOpen).length,parts=it.subs.length;
+ announce(`${use.length} ${nl?'oggetti':'forme'} ${nl?done.replace(/e$/,'i'):done}:«${it.name}», tracciato di ${parts===1?'una parte':parts+' parti'} e ${nodeList(it).length} nodi.${open.length?` ${nl===1?'La linea resta aperta':'Le linee restano aperte'} nello stesso tracciato: ha${nl===1?'':'nno'} il contorno, non il riempimento.`:''}${keepLines.length?` ${keepLines.length===1?'La linea scelta è rimasta':'Le linee scelte sono rimaste'} com’era: per sottrarre da una linea, mettila in fondo.`:''}${many.length>ok.length?' I testi, le immagini e gli oggetti bloccati sono rimasti com’erano.':''}`)}
+// Linee e forme: intersecando restano i tratti delle linee dentro tutte le forme, sottraendo (con una linea in fondo) quelli
+// fuori da tutte le forme. Ogni linea resta un oggetto con il suo stile; le forme fanno da sagoma e spariscono.
+function boolLines(op,ok,lines,areas){if(!areas.length){toast(`Per ${op==='intersect'?'intersecare':'sottrarre da'} una linea serve almeno una forma chiusa: un rettangolo, un’ellisse o un tracciato chiuso`);return}
+ const A=areas.map(it=>boolInside(it,itemPolys(it))),polys=areas.flatMap(itemPolys),keep=op==='intersect'?(x,y)=>A.every(f=>f(x,y)):(x,y)=>!A.some(f=>f(x,y));
+ const res=lines.map(it=>[it,boolClipOpen(drawSheetSubs(it,true),polys,keep)]),kept=res.filter(r=>r[1].length),n=kept.reduce((s,r)=>s+r[1].length,0);
+ if(!kept.length){toast(op==='intersect'?'Nessuna delle linee scelte passa dentro le forme: non resta niente':'Le linee scelte sono tutte dentro le forme: non resta niente');return}
+ const gone=new Set([...areas,...res.filter(r=>!r[1].length).map(r=>r[0])].map(x=>x.id));pick(kept.map(r=>r[0].id),kept.at(-1)[0].id);
+ editD(`${BOOL[op][0]} di ${ok.length} oggetti`,p=>{for(const [it,subs] of kept){Object.assign(it,{kind:'path',x:0,y:0,w:0,h:0,rot:0,subs});normPath(it)}p.items=p.items.filter(x=>!gone.has(x.id))},{props:true});
+ announce(`${kept.length===1?`«${kept[0][0].name}»`:kept.length+' linee'}: ${n===1?'resta un tratto':`restano ${n} tratti`}, quell${n===1?'o':'i'} ${op==='intersect'?'dentro ':'fuori dal'}${areas.length>1?'le forme':'la forma'}. ${areas.length>1?'Le forme hanno fatto da sagoma e non ci sono più':'La forma ha fatto da sagoma e non c’è più'}${res.length>kept.length?`; ${res.length-kept.length===1?'una linea è sparita':res.length-kept.length+' linee sono sparite'} del tutto`:''}.`)}
+// Taglia con una linea: le linee scelte dividono le forme che attraversano da parte a parte. I pezzi sono le facce del
+// disegno fatto dai contorni e dai tratti delle linee dentro la forma: si percorrono con l'area a sinistra, girando a
+// ogni incrocio il più possibile verso l'area. I buchi stanno nel pezzo che li contiene.
+function boolFaces(it,L){const polys=itemPolys(it),ins=boolInside(it,polys),E=boolCuts([...boolEdges(polys,{area:1}),...L.flatMap(l=>l.slice(1).map((b,k)=>({a:l[k],b})).filter(e=>e.a[0]!==e.b[0]||e.a[1]!==e.b[1]))]),H=[],lineP=[];
+ for(const e of E)for(const {a,b,L:l,R:r} of boolPieces(e,ins)){if(e.area){if(l!==r)H.push(l?{a,b}:{a:b,b:a})}else if(l&&r)lineP.push({a,b})}
+ // I tratti che finiscono dentro la forma senza arrivare a un contorno o a un'altra linea non tagliano: si tolgono.
+ const deg=new Map(),inc=k=>deg.set(k,(deg.get(k)||0)+1);for(const h of [...H,...lineP]){inc(h.ka=boolKey(h.a));inc(h.kb=boolKey(h.b))}
+ for(let again=true;again;){again=false;for(let i=lineP.length-1;i>=0;i--){const p=lineP[i];if(deg.get(p.ka)<2||deg.get(p.kb)<2){deg.set(p.ka,deg.get(p.ka)-1);deg.set(p.kb,deg.get(p.kb)-1);lineP.splice(i,1);again=true}}}
+ if(!lineP.length)return [];for(const p of lineP)H.push(p,{a:p.b,b:p.a,ka:p.kb,kb:p.ka});
+ const from=new Map();for(const h of H)from.set(h.ka,[...(from.get(h.ka)||[]),h]);const used=new Set(),loops=[];
+ for(const h0 of H){if(used.has(h0))continue;const loop=[];let h=h0;for(let g=0;g<1e6;g++){used.add(h);loop.push(h.a);const dx=h.b[0]-h.a[0],dy=h.b[1]-h.a[1];let best=null,bt=-Infinity;
+   for(const c of from.get(h.kb)||[]){const ex=c.b[0]-c.a[0],ey=c.b[1]-c.a[1];if(c.kb===h.ka&&Math.abs(ex+dx)+Math.abs(ey+dy)<1e-9)continue;const t=Math.atan2(dx*ey-dy*ex,dx*ex+dy*ey);if(t>bt){bt=t;best=c}}
+   if(best===h0){if(loop.length>2)loops.push(loop);break}if(!best||used.has(best))break;h=best}}
+ const area=l=>l.reduce((s,p,i)=>{const q=l[(i+1)%l.length];return s+p[0]*q[1]-q[0]*p[1]},0)/2,outer=loops.filter(l=>area(l)>0).map(l=>({l,a:area(l),holes:[]}));
+ for(const l of loops)if(area(l)<=0){const o=outer.filter(o=>winding([o.l],...l[0])!==0).sort((p,q)=>p.a-q.a)[0];o?.holes.push(l)}
+ return outer.map(o=>[o.l,...o.holes])}
+function boolCut(){const many=selItems(),ok=many.filter(x=>hasArea(x)&&!x.lock),lines=ok.filter(drawIsOpen),areas=ok.filter(x=>!drawIsOpen(x));
+ if(!lines.length||!areas.length){toast('Scegli una forma e una linea che la attraversa da parte a parte (Maiusc+clic sul foglio o Maiusc+frecce nei livelli)');return}
+ const L=lines.flatMap(it=>flatten({x:0,y:0,subs:drawSheetSubs(it,true)},2)),res=areas.map(it=>[it,boolFaces(it,L)]).filter(r=>r[1].length>1);
+ if(!res.length){toast('Le linee non attraversano le forme da parte a parte: niente da tagliare');return}
+ const made=new Map(res.map(([it,faces])=>[it.id,faces.map((f,k)=>{const o={id:uid(),kind:'path',name:`${it.name} ${k+1}`,x:0,y:0,w:0,h:0,rot:0,radius:0,rule:'evenodd',subs:f.map(boolLoopSub)};boolStyle(o,it);if(it.g)o.g=it.g;return normPath(o)})])),gone=new Set(lines.map(x=>x.id)),all=[...made.values()].flat();
+ pick(all.map(x=>x.id),all.at(-1).id);editD(`Taglia ${res.length===1?res[0][0].name:res.length+' forme'} con ${lines.length===1?'una linea':lines.length+' linee'}`,p=>{p.items=p.items.flatMap(x=>made.get(x.id)||(gone.has(x.id)?[]:[x]))},{props:true});
+ announce(`Taglio ${res.length===1?`di «${res[0][0].name}»`:`di ${res.length} forme`}: ${all.length} pezzi, ${namesOf(all)}. ${lines.length===1?'La linea ha fatto da coltello e non c’è più':'Le linee hanno fatto da coltello e non ci sono più'}.${areas.length>res.length?` ${areas.length-res.length===1?'Una forma non è attraversata da parte a parte ed è rimasta':areas.length-res.length+' forme non sono attraversate da parte a parte e sono rimaste'} com’era.`:''}`)}
 // Immagini dentro Disegno. Un'immagine del foglio si apre con gli strumenti di Immagini (selezioni, maschere locali,
 // scontorno con Tieni e Togli, ritocco, curve, inquadratura) e torna nel foglio con la sua ricetta, che resta
 // modificabile: nell'oggetto restano adj, look e lookAmt come prima, e in photo le altre parti della ricetta diverse da
@@ -3103,6 +3438,168 @@ const zipBytes=async(u8,pack)=>new Uint8Array(await new Response(new Blob([u8]).
 const rasterPack=async R=>({w:R.w,h:R.h,z:b64(await zipBytes(R.data,true))});
 async function rasterUnpack(o){const data=await zipBytes(Uint8Array.from(atob(o.z),c=>c.charCodeAt(0)),false);if(data.length!==o.w*o.h)throw Error('Maschera calcolata non valida');return {w:o.w,h:o.h,data}}
 const DRAW_PHOTO_ACTIONS={imgEdit,imgMasks,imgCutout,imgPhotoReset,imgClip,imgUnclip};
+// Testo in tracciati: il contorno delle lettere viene dal file del carattere, letto con la Local Font Access API
+// (window.queryLocalFonts, in Chrome e in Edge) oppure scelto dall'utente. Il lettore OpenType è qui, senza dipendenze:
+// cmap (formati 4 e 12), head, hhea, hmtx, maxp, loca e glyf con i glifi composti, CFF con le curve cubiche, le raccolte
+// .ttc e la crenatura (le coppie di GPOS o la vecchia tabella kern). Le lettere si dispongono come sul foglio: righe,
+// allineamento, spaziatura, interlinea, a capo nel riquadro e lungo una curva.
+// Un carattere (anche dentro una raccolta): misura dell'em, glifi dai codici Unicode, avanzamenti, crenatura e contorni
+// in unità del carattere, con la y verso l'alto. Un contorno è un elenco di comandi M, L e C (le curve quadratiche di
+// glyf diventano cubiche). pick sceglie il carattere della raccolta dai suoi nomi; senza, vale il primo.
+function otfFont(buf,pick){const v=new DataView(buf),tag=o=>String.fromCharCode(v.getUint8(o),v.getUint8(o+1),v.getUint8(o+2),v.getUint8(o+3)),ttc=tag(0)==='ttcf';
+ const faces=(ttc?Array.from({length:v.getUint32(8)},(_,i)=>v.getUint32(12+i*4)):[0]).map(o=>{const T={};for(let i=0,n=v.getUint16(o+4);i<n;i++){const r=o+12+i*16;T[tag(r)]={o:v.getUint32(r+8),l:v.getUint32(r+12)}}return {T,names:otfNames(v,T.name)}});
+ const {T,names}=(pick&&faces.find(f=>pick(f.names)))||faces[0];
+ if(T.CFF2)throw Error('usa contorni CFF2, quelli dei caratteri variabili, che Tassello non sa ancora leggere');
+ if(!T.head||!T.hhea||!T.hmtx||!T.cmap||!(T.glyf&&T.loca||T['CFF ']))throw Error('non contiene i contorni delle lettere (forse è un carattere bitmap)');
+ const upm=v.getUint16(T.head.o+18),long=v.getInt16(T.head.o+50),nG=T.maxp?v.getUint16(T.maxp.o+4):65535,nH=v.getUint16(T.hhea.o+34);
+ const loca=T.loca&&(i=>long?v.getUint32(T.loca.o+i*4):v.getUint16(T.loca.o+i*2)*2),cff=!T.glyf&&otfCff(v,T['CFF '].o),memo=new Map();
+ return {upm,names,cff:!!cff,gid:otfCmap(v,T.cmap.o),kern:otfKern(v,T,tag),adv:g=>v.getUint16(T.hmtx.o+4*Math.min(g,nH-1)),
+  glyph:g=>{if(!memo.has(g))memo.set(g,g>=nG?[]:cff?cff(g):otfGlyf(v,T.glyf.o,loca,g,0));return memo.get(g)}}}
+// Nomi del carattere (1 famiglia, 2 stile, 4 nome completo, 6 PostScript, 16 e 17 famiglia e stile tipografici),
+// in inglese se ci sono più lingue.
+function otfNames(v,t){const o={};if(!t)return o;const b=t.o,so=b+v.getUint16(b+4);
+ for(let i=0,n=v.getUint16(b+2);i<n;i++){const r=b+6+i*12,pl=v.getUint16(r),id=v.getUint16(r+6),len=v.getUint16(r+8),at=so+v.getUint16(r+10);if(![1,2,4,6,16,17].includes(id)||o[id]&&!(pl===3&&v.getUint16(r+4)===0x409))continue;
+  let s='';if(pl===3||pl===0)for(let k=0;k+1<len;k+=2)s+=String.fromCharCode(v.getUint16(at+k));else if(pl===1&&!v.getUint16(r+2))for(let k=0;k<len;k++)s+=String.fromCharCode(v.getUint8(at+k));else continue;o[id]=s}return o}
+// cmap: prima la tabella completa (formato 12), poi quella del piano di base (formato 4). Restituisce glifo da codice.
+function otfCmap(v,c){let o=0,best=0;for(let i=0,n=v.getUint16(c+2);i<n;i++){const r=c+4+i*8,pl=v.getUint16(r),en=v.getUint16(r+2),at=c+v.getUint32(r+4),f=v.getUint16(at),s=f===12&&(pl===0||pl===3&&en===10)?2:f===4&&(pl===0||pl===3&&en===1)?1:0;if(s>best){best=s;o=at}}
+ if(!o)throw Error('non ha la tabella dei caratteri Unicode');
+ if(best===2){const n=v.getUint32(o+12);return cp=>{let lo=0,hi=n-1;while(lo<=hi){const m=lo+hi>>1,r=o+16+m*12;if(cp<v.getUint32(r))hi=m-1;else if(cp>v.getUint32(r+4))lo=m+1;else return v.getUint32(r+8)+cp-v.getUint32(r)}return 0}}
+ const n=v.getUint16(o+6)>>1,E=o+14,S=E+n*2+2,D=S+n*2,R=D+n*2;
+ return cp=>{if(cp>65535)return 0;let lo=0,hi=n-1;while(lo<hi){const m=lo+hi>>1;if(v.getUint16(E+m*2)<cp)lo=m+1;else hi=m}const s=v.getUint16(S+lo*2);if(cp<s||cp>v.getUint16(E+lo*2))return 0;
+  const ro=v.getUint16(R+lo*2),d=v.getUint16(D+lo*2);if(!ro)return cp+d&65535;const g=v.getUint16(R+lo*2+ro+(cp-s)*2);return g?g+d&65535:0}}
+// glyf: contorni di punti sulla curva e fuori (le maniglie delle quadratiche); i glifi composti mettono insieme altri
+// glifi spostati, scalati o trasformati. I componenti agganciati per punti (rari) restano senza spostamento.
+function otfGlyf(v,base,loca,g,d){const a=loca(g),b=loca(g+1);if(b<=a||d>8)return [];const o=base+a,nc=v.getInt16(o);
+ if(nc<0){const out=[];let p=o+10,f;do{f=v.getUint16(p);const c=v.getUint16(p+2),F2=q=>v.getInt16(q)/16384;p+=4;let dx,dy,m=[1,0,0,1];if(f&1){dx=v.getInt16(p);dy=v.getInt16(p+2);p+=4}else{dx=v.getInt8(p);dy=v.getInt8(p+1);p+=2}if(!(f&2))dx=dy=0;
+   if(f&8){m=[F2(p),0,0,F2(p)];p+=2}else if(f&64){m=[F2(p),0,0,F2(p+2)];p+=4}else if(f&128){m=[F2(p),F2(p+2),F2(p+4),F2(p+6)];p+=8}
+   for(const cs of otfGlyf(v,base,loca,c,d+1))out.push(cs.map(([t,...q])=>{const r=[t];for(let i=0;i<q.length;i+=2)r.push(m[0]*q[i]+m[2]*q[i+1]+dx,m[1]*q[i]+m[3]*q[i+1]+dy);return r}))}while(f&32);return out}
+ const ends=[];for(let i=0;i<nc;i++)ends.push(v.getUint16(o+10+i*2));const np=nc?ends[nc-1]+1:0,fl=new Uint8Array(np);let p=o+10+nc*2;p+=2+v.getUint16(p);
+ for(let i=0;i<np;){const f=v.getUint8(p++);fl[i++]=f;if(f&8)for(let r=v.getUint8(p++);r--&&i<np;)fl[i++]=f}
+ const co=(sh,same)=>{const a=new Array(np);let c=0;for(let i=0;i<np;i++){const f=fl[i];if(f&sh){const d=v.getUint8(p++);c+=f&same?d:-d}else if(!(f&same)){c+=v.getInt16(p);p+=2}a[i]=c}return a};
+ const X=co(2,16),Y=co(4,32);let s=0;return ends.map(e=>{const pts=[];for(let i=s;i<=e;i++)pts.push([X[i],Y[i],fl[i]&1]);s=e+1;return otfQuad(pts)}).filter(Boolean)}
+// Un contorno di glyf in comandi: tra due punti fuori dalla curva c'è un punto sulla curva a metà; ogni quadratica
+// diventa la cubica uguale (maniglie a due terzi).
+function otfQuad(P){if(P.length<2)return null;const k=P.findIndex(p=>p[2]),st=k<0?[(P[0][0]+P[1][0])/2,(P[0][1]+P[1][1])/2,1]:P[k],L=k<0?[...P.slice(1),P[0]]:[...P.slice(k+1),...P.slice(0,k)],out=[['M',st[0],st[1]]];let cur=st,c=null;
+ const q=e=>{out.push(['C',cur[0]+(c[0]-cur[0])*2/3,cur[1]+(c[1]-cur[1])*2/3,e[0]+(c[0]-e[0])*2/3,e[1]+(c[1]-e[1])*2/3,e[0],e[1]]);cur=e};
+ for(const p of [...L,st]){if(p[2]){if(c)q(p);else{out.push(['L',p[0],p[1]]);cur=p}c=null}else{if(c)q([(c[0]+p[0])/2,(c[1]+p[1])/2]);c=p}}return out}
+// CFF: le charstring di tipo 2, con le subroutine locali e globali, anche nei caratteri CID (FDArray e FDSelect).
+// I suggerimenti (stem e hintmask) si saltano: servono allo schermo, non al contorno.
+function otfCff(v,o){const idx=p=>{const n=v.getUint16(p);if(!n)return {n:0,end:p+2};const os=v.getUint8(p+2),rd=k=>{let x=0;for(let i=0;i<os;i++)x=x*256+v.getUint8(p+3+k*os+i);return x},b=p+2+(n+1)*os;return {n,end:b+rd(n),at:i=>[b+rd(i),b+rd(i+1)]}};
+ const dict=(a,b)=>{const d={},st=[];for(let p=a;p<b;){const c=v.getUint8(p);if(c<22){let k=c;p++;if(c===12)k=1200+v.getUint8(p++);d[k]=st.splice(0);continue}
+   if(c===28){st.push(v.getInt16(p+1));p+=3}else if(c===29){st.push(v.getInt32(p+1));p+=5}else if(c===30){let s='',end=false;p++;while(!end){const x=v.getUint8(p++);for(const h of [x>>4,x&15]){if(h===15){end=true;break}s+=h<10?h:['.','E','E-','','-'][h-10]}}st.push(parseFloat(s))}
+   else if(c>=32&&c<247){st.push(c-139);p++}else if(c>=247&&c<251){st.push((c-247)*256+v.getUint8(p+1)+108);p+=2}else if(c>=251&&c<255){st.push(-(c-251)*256-v.getUint8(p+1)-108);p+=2}else p++}return d};
+ const names=idx(o+v.getUint8(o+2)),tops=idx(names.end),strs=idx(tops.end),gs=idx(strs.end),top=dict(...tops.at(0)),cs=idx(o+top[17][0]);
+ if((top[1206]?.[0]??2)!==2)throw Error('usa charstring CFF di tipo 1, che Tassello non sa leggere');
+ const priv=pd=>{if(!pd)return {subrs:{n:0}};const [size,off]=pd,P=dict(o+off,o+off+size);return {subrs:P[19]?idx(o+off+P[19][0]):{n:0}}};
+ let fds=null,sel=()=>0;if(top[1236]){const fa=idx(o+top[1236][0]),s=o+top[1237][0],f=v.getUint8(s);fds=Array.from({length:fa.n},(_,i)=>priv(dict(...fa.at(i))[18]));
+  sel=g=>{if(f===0)return v.getUint8(s+1+g);for(let i=0,n=v.getUint16(s+1);i<n;i++)if(g<v.getUint16(s+3+(i+1)*3))return v.getUint8(s+5+i*3);return 0}}
+ const P0=priv(top[18]),bias=n=>n<1240?107:n<33900?1131:32768;
+ return g=>{if(g>=cs.n)return [];const pr=fds?fds[sel(g)]||fds[0]:P0,out=[],st=[];let x=0,y=0,stems=0,w=false,c=null;
+  const mv=(dx,dy)=>{x+=dx;y+=dy;c=[['M',x,y]];out.push(c)},ln=(dx,dy)=>{x+=dx;y+=dy;c?.push(['L',x,y])},cu=(a,b,e,f,h,k)=>{const x1=x+a,y1=y+b,x2=x1+e,y2=y1+f;x=x2+h;y=y2+k;c?.push(['C',x1,y1,x2,y2,x,y])};
+  // Il primo operatore che svuota la pila può avere in testa la larghezza del glifo: si scarta (vale hmtx).
+  const wd=n=>{if(!w&&st.length>n)st.shift();w=true};
+  const run=(a,b,d)=>{for(let p=a;p<b;){const b0=v.getUint8(p++);
+    if(b0>=32||b0===28){if(b0===28){st.push(v.getInt16(p));p+=2}else if(b0<247)st.push(b0-139);else if(b0<251)st.push((b0-247)*256+v.getUint8(p++)+108);else if(b0<255)st.push(-(b0-251)*256-v.getUint8(p++)-108);else{st.push(v.getInt32(p)/65536);p+=4}continue}
+    switch(b0){
+     case 1:case 3:case 18:case 23:case 19:case 20:if(!w&&st.length%2)st.shift();w=true;stems+=st.length>>1;st.length=0;if(b0===19||b0===20)p+=stems+7>>3;break;
+     case 21:wd(2);mv(st[0],st[1]);st.length=0;break;
+     case 22:wd(1);mv(st[0],0);st.length=0;break;
+     case 4:wd(1);mv(0,st[0]);st.length=0;break;
+     case 5:for(let i=0;i+1<st.length;i+=2)ln(st[i],st[i+1]);st.length=0;break;
+     case 6:case 7:{let h=b0===6;for(const n of st){h?ln(n,0):ln(0,n);h=!h}st.length=0;break}
+     case 8:for(let i=0;i+5<st.length;i+=6)cu(...st.slice(i,i+6));st.length=0;break;
+     case 24:{let i=0;for(;i+7<st.length;i+=6)cu(...st.slice(i,i+6));ln(st[i],st[i+1]);st.length=0;break}
+     case 25:{let i=0;for(;i+7<st.length;i+=2)ln(st[i],st[i+1]);cu(...st.slice(i,i+6));st.length=0;break}
+     case 26:{let i=st.length%2,e=i?st[0]:0;for(;i+3<st.length;i+=4){cu(e,st[i],st[i+1],st[i+2],0,st[i+3]);e=0}st.length=0;break}
+     case 27:{let i=st.length%2,e=i?st[0]:0;for(;i+3<st.length;i+=4){cu(st[i],e,st[i+1],st[i+2],st[i+3],0);e=0}st.length=0;break}
+     case 30:case 31:{let h=b0===31;for(let i=0;i+3<st.length;i+=4){const f=st.length-i===5?st[i+4]:0;h?cu(st[i],0,st[i+1],st[i+2],f,st[i+3]):cu(0,st[i],st[i+1],st[i+2],st[i+3],f);h=!h}st.length=0;break}
+     case 10:case 29:{const S=b0===10?pr.subrs:gs,i=st.pop()+bias(S.n);if(S.at&&i>=0&&i<S.n&&d<10&&run(...S.at(i),d+1))return true;break}
+     case 11:return false;
+     case 14:wd(st.length===4||st.length===5?4:0);return true;
+     case 12:{const e=v.getUint8(p++),s=st;if(e===35){cu(...s.slice(0,6));cu(...s.slice(6,12))}else if(e===34){cu(s[0],0,s[1],s[2],s[3],0);cu(s[4],0,s[5],-s[2],s[6],0)}else if(e===36){cu(...s.slice(0,5),0);cu(s[5],0,s[6],s[7],s[8],-(s[1]+s[3]+s[7]))}
+      else if(e===37){const dx=s[0]+s[2]+s[4]+s[6]+s[8],dy=s[1]+s[3]+s[5]+s[7]+s[9];cu(...s.slice(0,6));Math.abs(dx)>Math.abs(dy)?cu(s[6],s[7],s[8],s[9],s[10],-dy):cu(s[6],s[7],s[8],s[9],-dx,s[10])}st.length=0;break}
+     default:st.length=0}}return false};
+  run(...cs.at(g),0);return out}}
+// Crenatura: le coppie della funzione kern di GPOS (formati 1 e 2, anche dentro le estensioni) per la scrittura latina,
+// altrimenti la vecchia tabella kern (formato 0). Come nel browser, GPOS vale se c'è.
+function otfKern(v,T,tag){const memo=new Map(),sz=f=>{let n=0;for(let b=f&255;b;b>>=1)n+=b&1;return n*2},xa=(p,f)=>f&4?v.getInt16(p+((f&1)+(f>>1&1))*2):0;
+ // Ricerca binaria in un elenco ordinato di glifi (sz 2) o di intervalli (sz 6): restituisce la posizione del record.
+ const find=(c,g,sz)=>{let lo=0,hi=v.getUint16(c+2)-1;while(lo<=hi){const m=lo+hi>>1,r=c+4+m*sz,s=v.getUint16(r),e=sz===2?s:v.getUint16(r+2);if(g<s)hi=m-1;else if(g>e)lo=m+1;else return r}return 0};
+ const cov=(c,g)=>{if(v.getUint16(c)===1){const r=find(c,g,2);return r?(r-c-4)/2:-1}const r=find(c,g,6);return r?v.getUint16(r+4)+g-v.getUint16(r):-1};
+ const cls=(c,g)=>{if(v.getUint16(c)===1){const s=v.getUint16(c+2);return g>=s&&g<s+v.getUint16(c+4)?v.getUint16(c+6+(g-s)*2):0}const r=find(c,g,6);return r?v.getUint16(r+4):0};
+ const pair=(s,a,b)=>{const ci=cov(s+v.getUint16(s+2),a);if(ci<0)return null;const f1=v.getUint16(s+4),rs=sz(f1)+sz(v.getUint16(s+6));
+  if(v.getUint16(s)===1){const q=s+v.getUint16(s+10+ci*2),n=v.getUint16(q);let lo=0,hi=n-1;while(lo<=hi){const m=lo+hi>>1,r=q+2+m*(rs+2),g=v.getUint16(r);if(g===b)return xa(r+2,f1);if(g<b)lo=m+1;else hi=m-1}return null}
+  return xa(s+16+(cls(s+v.getUint16(s+8),a)*v.getUint16(s+14)+cls(s+v.getUint16(s+10),b))*rs,f1)};
+ let lk=[];if(T.GPOS){const g=T.GPOS.o,sl=g+v.getUint16(g+4),fl=g+v.getUint16(g+6),ll=g+v.getUint16(g+8),sr=Array.from({length:v.getUint16(sl)},(_,i)=>sl+2+i*6),sc=sr.find(r=>tag(r)==='latn')||sr.find(r=>tag(r)==='DFLT')||sr[0],ids=new Set();
+  const ls=sc&&v.getUint16(sl+v.getUint16(sc+4));if(ls){const L=sl+v.getUint16(sc+4)+ls;for(let j=0,n=v.getUint16(L+4);j<n;j++){const r=fl+2+v.getUint16(L+6+j*2)*6;if(tag(r)==='kern'){const f=fl+v.getUint16(r+4);for(let k=0,m=v.getUint16(f+2);k<m;k++)ids.add(v.getUint16(f+4+k*2))}}}
+  lk=[...ids].sort((a,b)=>a-b).map(i=>{const L=ll+v.getUint16(ll+2+i*2),t=v.getUint16(L);return Array.from({length:v.getUint16(L+4)},(_,j)=>{let s=L+v.getUint16(L+6+j*2),k=t;if(k===9){k=v.getUint16(s+2);s+=v.getUint32(s+4)}return k===2?s:0}).filter(Boolean)}).filter(l=>l.length)}
+ let old=null;if(!lk.length&&T.kern&&v.getUint16(T.kern.o)===0){old=new Map();for(let i=0,p=T.kern.o+4,n=v.getUint16(T.kern.o+2);i<n;i++){const c=v.getUint16(p+4),np=v.getUint16(p+6);if(c>>8===0&&(c&7)===1)for(let j=0;j<np;j++){const r=p+14+j*6;old.set(v.getUint16(r)*65536+v.getUint16(r+2),v.getInt16(r+4))}p+=c>>8===0?14+np*6:v.getUint16(p+2)}}
+ return (a,b)=>{const key=a*65536+b;if(old)return old.get(key)||0;if(!lk.length)return 0;if(memo.has(key))return memo.get(key);let k=0;for(const subs of lk)for(const s of subs){const r=pair(s,a,b);if(r!=null){k+=r;break}}memo.set(key,k);return k}}
+// Caratteri del computer. Le famiglie di un testo si provano nell'ordine del browser; quelle generiche diventano i
+// caratteri dei sistemi più diffusi (system-ui su Windows è Segoe UI).
+const FONT_GENERIC={'system-ui':['Segoe UI','SF Pro Text','SF Pro','Helvetica Neue','Cantarell','Ubuntu','Noto Sans','DejaVu Sans'],'sans-serif':['Arial','Helvetica','Liberation Sans','DejaVu Sans'],serif:['Times New Roman','Times','Liberation Serif','DejaVu Serif'],monospace:['Consolas','Courier New','Menlo','Liberation Mono','DejaVu Sans Mono']};
+const fontFamilies=css=>css.split(',').map(s=>s.trim().replace(/^['"]|['"]$/g,'')).flatMap(f=>FONT_GENERIC[f.toLowerCase()]||[f]);
+// Peso e corsivo dal nome dello stile («Bold Italic», «Semibold», «Light»…), per scegliere la variante più vicina al testo.
+function fontStyleOf(s){s=String(s||'').toLowerCase();return {w:/thin|hairline/.test(s)?100:/(extra|ultra) ?light/.test(s)?200:/(semi|demi) ?light/.test(s)?350:/light/.test(s)?300:/medium/.test(s)?500:/(semi|demi) ?bold/.test(s)?600:/(extra|ultra) ?bold/.test(s)?800:/black|heavy/.test(s)?900:/bold/.test(s)?700:400,i:/italic|oblique/.test(s)}}
+const fontScore=(st,it)=>Math.abs(st.w-(it.bold?700:400))+(st.i!==!!it.italic?1000:0);
+// I caratteri letti restano in memoria per la sessione, uno per famiglia, peso e corsivo dei testi; l'elenco di quelli
+// installati si chiede una volta sola. slant: manca il corsivo e le lettere si inclinano; thin: manca il grassetto.
+const fontFiles=new Map(),fontKey=it=>`${it.font}|${it.bold?700:400}|${!!it.italic}`;let fontList=null;
+const fontEntry=(font,label,st,it)=>({font,label,slant:!!it.italic&&!st.i,thin:!!it.bold&&st.w<600});
+// Prima di chiedere il permesso si spiega a che cosa serve; se il browser non legge i caratteri o il permesso è negato,
+// si può scegliere il file del carattere. Restituisce 'ok', 'file' o null (annullato).
+async function fontAccess(){if(fontList)return 'ok';const api=typeof window.queryLocalFonts==='function';let st='prompt',fin;if(api)try{st=(await navigator.permissions.query({name:'local-fonts'})).state}catch(e){}
+ if(api&&st==='granted'&&await fontQuery())return 'ok';const ask=api&&st!=='denied';
+ const why=!api?'<p>Questo browser non legge i caratteri installati sul computer: lo fanno Chrome ed Edge, dalla versione 103. Puoi scegliere tu il file del carattere (.ttf, .otf o .ttc); su Windows i caratteri stanno nella cartella C:\\Windows\\Fonts.</p>'
+  :st==='denied'?'<p>Il permesso di leggere i caratteri installati è stato negato. Puoi darlo dalle impostazioni del sito (l’icona a sinistra dell’indirizzo) e riprovare, oppure scegliere tu il file del carattere (.ttf, .otf o .ttc).</p>'
+  :'<p>Il browser ti chiederà il permesso di leggere i caratteri installati sul computer. Tassello Grafica legge solo i caratteri dei testi scelti, qui sul computer, e non manda niente in rete. Se preferisci, scegli tu il file del carattere (.ttf, .otf o .ttc).</p>';
+ const r=await modal('Testo in tracciati','<p>Per trasformare un testo in tracciati serve il disegno delle sue lettere, che sta nel file del carattere.</p>'+why,[],ask?'Chiedi il permesso':'Scegli il file del carattere…',{buttons:ask?[{label:'Scegli il file…',run:()=>fin('file')}]:[],onOpen:(p,f)=>{fin=f}});
+ if(!r)return null;if(r==='file'||!ask)return 'file';return await fontQuery()?'ok':null}
+async function fontQuery(){try{const l=await window.queryLocalFonts();if(l.length){fontList=l;return true}}catch(e){if(e.name!=='NotAllowedError'&&e.name!=='SecurityError'){toast('I caratteri installati non si leggono: '+e.message);return false}}
+ toast('Permesso negato: senza il file del carattere il testo resta un testo. Con «Converti in tracciato» puoi scegliere tu il file del carattere.');return false}
+function fontPickFile(){return new Promise(ok=>{const inp=Object.assign(document.createElement('input'),{type:'file',accept:'.ttf,.otf,.ttc,.otc,font/ttf,font/otf,font/collection'});inp.onchange=()=>ok(inp.files[0]||null);inp.oncancel=()=>ok(null);inp.click()})}
+// Il carattere di ogni testo: il primo della sua lista che è installato, nella variante più vicina per peso e corsivo.
+// Il file scelto dall'utente vale per tutti i testi che lo aspettano (in una raccolta, il carattere della variante più
+// vicina); si può scegliere anche per i testi il cui carattere non è tra quelli installati.
+// Restituisce {out: id del testo → carattere, fail: [testo, perché]}, o null se l'utente ha annullato.
+const fontLabel=it=>(FONTS.find(f=>f[0]===it.font)||[0,fontFamilies(it.font)[0]])[1];
+async function fontFromFile(list){const f=await fontPickFile();if(!f)return false;let font;try{font=otfFont(await f.arrayBuffer(),n=>!fontScore(fontStyleOf(n[17]||n[2]),list[0]))}catch(e){toast(`«${f.name}» non è un carattere che Tassello sa leggere: ${e.message||'il file è rovinato'}.`);return false}
+ for(const it of list)fontFiles.set(fontKey(it),fontEntry(font,font.names[4]||f.name,fontStyleOf(font.names[17]||font.names[2]),it));return true}
+async function fontsFor(texts){const fail=[],need=texts.filter(it=>!fontFiles.has(fontKey(it))),lost=[];
+ if(need.length){const how=await fontAccess();if(!how)return null;
+  if(how==='file'){if(!await fontFromFile(need))return null}
+  else for(const it of need){if(fontFiles.has(fontKey(it)))continue;const fams=fontFamilies(it.font);let fd=null;
+   for(const fam of fams){const faces=fontList.filter(f=>f.family.toLowerCase()===fam.toLowerCase());if(faces.length){fd=faces.sort((a,b)=>fontScore(fontStyleOf(a.style),it)-fontScore(fontStyleOf(b.style),it))[0];break}}
+   if(!fd){lost.push(it);continue}
+   try{const font=otfFont(await (await fd.blob()).arrayBuffer(),n=>n[6]===fd.postscriptName);fontFiles.set(fontKey(it),fontEntry(font,font.names[4]||fd.fullName,fontStyleOf(fd.style),it))}catch(e){fail.push([it,`il carattere ${fd.fullName} ${e.message||'non si legge'}`])}}}
+ if(lost.length){const names=[...new Set(lost.map(fontLabel))];if(!(await confirmAction(`${names.length>1?'I caratteri '+names.join(', ')+' non sono':'Il carattere '+names[0]+' non è'} tra quelli installati che il browser fa leggere. Vuoi scegliere tu il file del carattere (.ttf, .otf o .ttc)?`,'Scegli il file…')&&await fontFromFile(lost)))fail.push(...lost.map(it=>[it,`il carattere ${fontLabel(it)} non è tra quelli installati`]))}
+ return {out:new Map(texts.filter(it=>fontFiles.has(fontKey(it))).map(it=>[it.id,fontFiles.get(fontKey(it))])),fail}}
+// Le lettere come contorni, in pixel dall'angolo del riquadro del testo (di quello della curva, per il testo lungo un
+// tracciato): le stesse righe, la stessa linea di base e lo stesso allineamento del testo sul foglio. Ogni carattere
+// avanza della sua larghezza, più la crenatura con il successivo e la spaziatura; quelli che mancano nel carattere
+// tengono il loro posto e restano fuori (miss li conta). dev è lo scarto più grande tra la larghezza di una riga e quella
+// misurata dal browser: se supera l'1%, il carattere trovato non è proprio quello che si vede sul foglio.
+function drawTextSubs(it,F){const f=F.font,k=it.size/f.upm,ls=it.ls||0,sk=F.slant?.2:0,subs=[];let miss=0,dev=0;measureCtx.font=fontCss(it);
+ const run=s=>{const cs=[...s],gs=cs.map(c=>f.gid(c.codePointAt(0)));let x=0;const out=gs.map((g,i)=>{const at=x,a=g?f.adv(g)*k:measureCtx.measureText(cs[i]).width;if(!g&&cs[i].trim())miss++;x+=a+ls+(g&&gs[i+1]?f.kern(g,gs[i+1])*k:0);return [g,at,a]});
+  const bw=measureCtx.measureText(s).width+ls*cs.length;if(bw>it.size)dev=Math.max(dev,Math.abs(x-bw)/bw);return {out,w:x}};
+ // Un glifo con l'origine in (ox, oy), ruotato di r attorno al punto della linea di base a mid pixel dall'origine.
+ const put=(g,ox,oy,r=0,mid=0)=>{const c=Math.cos(r),s=Math.sin(r),P=(x,y)=>{const lx=(x+y*sk)*k-mid,ly=-y*k;return [ox+c*lx-s*ly,oy+s*lx+c*ly]};
+  for(const cmds of f.glyph(g)){const N=[];for(const [t,...q] of cmds){const [x,y]=P(q.at(-2),q.at(-1)),n={x:n2(x),y:n2(y),ix:0,iy:0,ox:0,oy:0,s:0};if(t==='C'){const [x1,y1]=P(q[0],q[1]),[x2,y2]=P(q[2],q[3]),a=N.at(-1);a.ox=n2(x1-a.x);a.oy=n2(y1-a.y);n.ix=n2(x2-x);n.iy=n2(y2-y)}N.push(n)}
+   const a=N[0],b=N.at(-1);if(N.length>1&&Math.abs(a.x-b.x)<.01&&Math.abs(a.y-b.y)<.01){a.ix=b.ix;a.iy=b.iy;N.pop()}if(N.length<2)continue;
+   for(const n of N){const li=Math.hypot(n.ix,n.iy),lo=Math.hypot(n.ox,n.oy);n.s=+(li>0&&lo>0&&n.ix*n.ox+n.iy*n.oy<0&&Math.abs(n.ix*n.oy-n.iy*n.ox)<.02*li*lo)}subs.push({closed:true,nodes:N})}};
+ if(!it.subs){textLines(it).forEach((l,i)=>{const {out,w}=run(l),y=it.size*(it.lineH/2+.35)+i*it.size*it.lineH,x0=it.align==='center'?(it.w-w)/2:it.align==='right'?it.w-w:0;for(const [g,x] of out)if(g)put(g,x0+x,y)});return {subs,miss,dev}}
+ // Lungo la curva ogni lettera sta con il centro della sua larghezza sul tracciato e gira con la tangente; quelle che
+ // cadono prima dell'inizio o dopo la fine non si vedono, come nell'SVG.
+ const seg=[];let L=0;for(const p of flatten({x:0,y:0,subs:it.subs},1))for(let i=1;i<p.length;i++){const [ax,ay]=p[i-1],[bx,by]=p[i],d=Math.hypot(bx-ax,by-ay);if(d>0){seg.push([L,ax,ay,bx,by,d]);L+=d}}
+ const {out,w}=run(String(it.text).replace(/\n/g,' ')),st=(it.toff??(it.align==='center'?50:it.align==='right'?100:0))/100*L-(it.align==='center'?w/2:it.align==='right'?w:0);
+ for(const [g,x,a] of out){const m=st+x+a/2;if(!g||m<0||m>L||!seg.length)continue;let lo=0,hi=seg.length-1;while(lo<hi){const q=lo+hi+1>>1;if(seg[q][0]<=m)lo=q;else hi=q-1}const [s0,ax,ay,bx,by,d]=seg[lo],u=(m-s0)/d;put(g,ax+(bx-ax)*u,ay+(by-ay)*u,Math.atan2(by-ay,bx-ax),a/2)}
+ return {subs,miss,dev}}
+// Il testo diventa un tracciato al suo posto, con riempimento, contorno, ombra, opacità, fusione e rotazione. Il testo
+// resta per chi non vede: alt è la descrizione dell'oggetto e il titolo nell'SVG, e se il nome era quello automatico
+// diventa il testo stesso; tsize e tbold servono alla verifica dell'accessibilità.
+function drawTextToPath(it,o){const one=String(it.text).replace(/\s+/g,' ').trim();Object.assign(it,{kind:'path',subs:o.subs,alt:String(it.text),tsize:it.size,tbold:!!it.bold});
+ if(/^Testo \d+$/.test(it.name))it.name=one.length>40?one.slice(0,39)+'…':one;for(const k of ['text','font','size','bold','italic','align','lineH','ls','wrap','toff','rule'])delete it[k];normPath(it)}
+const altOf=it=>String(it.alt).replace(/\s+/g,' ').trim();
 // Ogni comando del registro corrisponde a una funzione: prima quelle dell'app attiva, poi quelle comuni.
 const I_ACTIONS={open:()=>pickFile(),export:exportDialog,closePhoto,auto:applyAuto,compare:toggleCompare,resetAll,readStatus:readPhotoStatus,sendToDraw:sendPhotoToDraw,
  rotateLeft:()=>rotate(-90),rotateRight:()=>rotate(90),flipH,ratioMenu,straighten:()=>liveRange('Raddrizza','angle'),resetGeometry,
@@ -3118,8 +3615,8 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  readDraw:readDrawStatus,sheetSize:()=>focusSheetProp('pr-preset'),sheetDesc:()=>focusSheetProp('pr-desc'),a11yCheck:drawA11yCheck,
  zoomIn:()=>zoomDraw(1.25),zoomOut:()=>zoomDraw(.8),zoomFit:()=>zoomDraw(0),
  selectAll,groupItems,ungroupItems,lockItems,hideItems,distH:()=>distribute('h'),distV:()=>distribute('v'),smartGuides:()=>{prefs.drawSmart=!smartOn();savePrefs()},
- toolSelect:()=>setTool('select'),toolNodes:()=>setTool('nodes'),toolPen:()=>setTool('pen'),toolPencil:()=>setTool('pencil'),toolBrush:()=>setTool('brush'),toolEraser:()=>setTool('eraser'),nodeAdd,nodeDelete:deleteNode,nodeType:nodeToggle,pathClose,readPath,toPath,gradientItem:toggleGrad,shadowItem:toggleShadow,textOnPath,textOffPath,
- boolUnion:()=>boolOp('union'),boolSubtract:()=>boolOp('subtract'),boolIntersect:()=>boolOp('intersect'),boolExclude:()=>boolOp('exclude'),
+ toolSelect:()=>setTool('select'),toolNodes:()=>setTool('nodes'),toolPen:()=>setTool('pen'),toolPencil:()=>setTool('pencil'),toolBrush:()=>setTool('brush'),toolEraser:()=>setTool('eraser'),nodeAdd,nodeDelete:deleteNode,nodeType:nodeToggle,pathClose,readPath,toPath,simplifyPath:simplifyPaths,gradientItem:toggleGrad,shadowItem:toggleShadow,textOnPath,textOffPath,
+ boolUnion:()=>boolOp('union'),boolSubtract:()=>boolOp('subtract'),boolIntersect:()=>boolOp('intersect'),boolExclude:()=>boolOp('exclude'),boolCut,
  addPolygon:()=>addItem('poly'),addStar:()=>addItem('poly',{star:true,sides:5,inner:45,fill:'#e8a33d',name:nextName('poly','Stella')}),addArrow:()=>addItem('arrow'),addBubble:()=>addItem('bubble'),addArrowLine:()=>addItem('line',{end:'arrow',name:nextName('line','Linea con freccia')}),
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
 Object.assign(D_ACTIONS,DRAW_PHOTO_ACTIONS);

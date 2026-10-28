@@ -126,13 +126,13 @@ El maquetador, para publicaciones y carruseles, historias, folletos, carteles, t
 
 [impagina.elenco]
           <li>137 plantillas en 23 formatos, elegidas por formato y por uso, y tus propias plantillas guardadas</li>
-          <li>Márgenes, columnas, cuadrícula y páginas maestras con número de página y logotipo; kit de marca con colores, fuentes y logotipo</li>
+          <li>Márgenes, columnas, cuadrícula y páginas maestras con número de página y logotipo; varios kits de marca con colores, fuentes y logotipo</li>
           <li>Texto que fluye entre marcos y páginas y rodea los marcos, estilos de párrafo y de carácter, textos con efectos</li>
-          <li>Marcos girados, con sombras y degradados; fotos ajustadas dentro del marco; códigos QR creados sin internet, tablas y elementos gráficos</li>
+          <li>Marcos girados, con sombras y degradados; fotos ajustadas dentro del marco, con los ajustes copiados de uno a otro; códigos QR creados sin internet, tablas y elementos gráficos</li>
           <li>Datos de CSV, XLSX, JSON o de Calcolo para crear una página por fila; feeds RSS, texto de DOCX y una carpeta enlazada, también de Google Drive, OneDrive o Dropbox</li>
           <li>Temas de color, formas para las imágenes, cuadrículas de fotos, guías inteligentes y adaptación a otro formato</li>
           <li>Sangrado y marcas de corte, carteles y pancartas impresos en mosaico en hojas A4 o A3, presentación a pantalla completa; exporta PNG y PDF</li>
-          <li>Orden de lectura, texto alternativo y comprobación de accesibilidad para cada página</li>
+          <li>Orden de lectura, texto alternativo y comprobación de accesibilidad para cada página; tablas legibles también en el PDF</li>
 
 [ufficio.scarica]
 Descargar Tassello Ufficio
@@ -198,15 +198,15 @@ El editor de fotos, para fotos que compartir, retratos, paisajes, documentos y p
           <li>Quitar el fondo sin internet y sin inteligencia artificial; pincel corrector, tampón de clonar y ojos rojos</li>
           <li>Estilos listos y estilos importados de archivos LUT .cube, con su intensidad</li>
           <li>Histograma descrito con palabras, con un aviso cuando se queman las luces o se cierran las sombras</li>
-          <li>Abre JPEG, PNG, WebP, AVIF, GIF y BMP; exporta JPEG, PNG o WebP sin los datos de la cámara</li>
+          <li>Abre JPEG, PNG, WebP, AVIF, GIF, BMP, las fotos HEIC y la vista previa de los RAW; exporta JPEG, PNG o WebP sin los datos de la cámara</li>
 
 [disegno.per]
 El dibujo, para publicaciones, historias, banners, folletos e iconos.
 
 [disegno.elenco]
           <li>Lienzos en los formatos de hoy o del tamaño que quieras, con fondo liso o transparente</li>
-          <li>Pluma con edición de nodos, lápiz, pincel sensible a la presión y borrador; unir y restar formas</li>
-          <li>Formas, flechas, bocadillos y textos, también a lo largo de una curva, con degradados, discontinuos, sombras y fusión</li>
+          <li>Pluma con edición de nodos, lápiz, pincel sensible a la presión y borrador; unir y restar formas y líneas, cortar con una línea, simplificar trazados</li>
+          <li>Formas, flechas, bocadillos y textos, también a lo largo de una curva, convertibles en trazados, con degradados, discontinuos, sombras y fusión</li>
           <li>Imágenes con los ajustes, las máscaras y el recorte del fondo de Immagini, y el recorte dentro de una forma</li>
           <li>Selección múltiple, grupos, capas, alineación, distribución y guías inteligentes</li>
           <li>Guarda en SVG editable con título y descripción; exporta PNG o JPEG</li>
@@ -219,7 +219,7 @@ Descargar Tassello Grafica
 Probar Tassello Grafica en el navegador
 
 [grafica.limiti]
-Un archivo de unos 480 KB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico: Immagini trabaja con una foto cada vez y no abre archivos HEIC ni RAW; quitar el fondo usa algoritmos clásicos, así que el pelo fino o un fondo de los colores del sujeto hay que retocarlos a mano; en Disegno, los textos no se convierten en trazados. Conserva siempre una copia de los originales.
+Un archivo de unos 560 KB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico: Immagini trabaja con una foto cada vez, abre las fotos HEIC solo si el sistema sabe decodificar HEVC y de los RAW abre la vista previa de la cámara; quitar el fondo usa algoritmos clásicos, así que un sujeto que toca los bordes, el pelo fino o el vidrio necesitan un recuadro o algunos trazos; para convertir los textos en trazados hace falta permiso para leer las fuentes instaladas o el archivo de la fuente. Conserva siempre una copia de los originales.
 
 [accessibilita.titolo]
 Accesibilidad: la condición, no un extra
