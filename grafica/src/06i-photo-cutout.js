@@ -74,10 +74,22 @@ function* grabcut(px,w,h,T,iters=4,guess=null,boost=null){const n=w*h,d=px.data,
  for(let it=0;it<iters;it++){if(it){fgI=pick(1);bgI=pick(0);if(!fgI.length||!bgI.length)break;const cf=new Uint8Array(fgI.length),cb=new Uint8Array(bgI.length);
    for(let i=0;i<fgI.length;i++){const o=fgI[i]*4;cf[i]=gmmBest(fg,d[o],d[o+1],d[o+2])}for(let i=0;i<bgI.length;i++){const o=bgI[i]*4;cb[i]=gmmBest(bg,d[o],d[o+1],d[o+2])}fg=gmmFit(d,fgI,cf,K);bg=gmmFit(d,bgI,cb,K)}
   yield .05+.9*(it+.2)/iters;
-  const cap=new Float64Array(n*8),tr=new Float64Array(n);for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++){for(let k=0;k<4;k++){const X=x+NB_DX[k],Y=y+NB_DY[k];if(X<0||X>=w||Y>=h)continue;const q=Y*w+X,v=W[p*4+k];cap[p*8+k]=v;cap[q*8+(k^4)]=v}
-   const t=T[p];if(t===1)tr[p]=HARD;else if(t===0)tr[p]=-HARD;else{const o=p*4;tr[p]=gmmLog(fg,d[o],d[o+1],d[o+2])-gmmLog(bg,d[o],d[o+1],d[o+2])}}
-  yield .05+.9*(it+.4)/iters;yield* maxflow(w,h,cap,tr,tree);for(let p=0;p<n;p++)if(T[p]===2)lab[p]=tree[p]===1?1:0;yield .05+.9*(it+1)/iters}
+  // Capacità intere, in sedicesimi: niente residui decimali minuscoli che il flusso continuerebbe a spingere.
+  const cap=new Int32Array(n*8),tr=new Int32Array(n);for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++){for(let k=0;k<4;k++){const X=x+NB_DX[k],Y=y+NB_DY[k];if(X<0||X>=w||Y>=h)continue;const q=Y*w+X,v=Math.round(W[p*4+k]*16);cap[p*8+k]=v;cap[q*8+(k^4)]=v}
+   const t=T[p];if(t===1)tr[p]=HARD*16;else if(t===0)tr[p]=-HARD*16;else{const o=p*4,v=gmmLog(fg,d[o],d[o+1],d[o+2])-gmmLog(bg,d[o],d[o+1],d[o+2]);tr[p]=Math.round((v>HARD?HARD:v<-HARD?-HARD:v)*16)}}
+  // Ci si ferma quando le etichette non cambiano quasi più (meno di un pixel su mille).
+  yield .05+.9*(it+.4)/iters;yield* maxflow(w,h,cap,tr,tree);let ch=0;for(let p=0;p<n;p++)if(T[p]===2){const v=tree[p]===1?1:0;if(v!==lab[p]){lab[p]=v;ch++}}yield .05+.9*(it+1)/iters;if(it&&ch<n*.001)break}
  return lab}
+// GrabCut a due livelli (come le bande di Lombaert e altri): prima su una copia a metà lato, per la forma e i modelli di
+// colore; poi alla misura di lavoro si ricalcola solo una fascia di pochi pixel intorno al contorno trovato, con il resto
+// fermo. Il flusso massimo, che è la parte lenta, lavora così su molti meno pixel.
+function* cutLevels(px,w,h,T,guess,boost){const W=Math.ceil(w/2),H=Math.ceil(h/2),m=W*H,d=px.data,acc=new Float32Array(m*4),d2=new Uint8ClampedArray(m*4),T2=new Uint8Array(m).fill(2),g2=new Uint8Array(m),b2=new Uint8Array(m);
+ for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++){const q=(y>>1)*W+(x>>1),o=p*4;for(let c=0;c<3;c++)acc[q*4+c]+=d[o+c];acc[q*4+3]++;if(T[p]===1)T2[q]=1;else if(T[p]===0&&T2[q]!==1)T2[q]=0;if(guess[p])g2[q]=1;if(boost[p]>b2[q])b2[q]=boost[p]}
+ for(let q=0;q<m;q++){const k=acc[q*4+3];for(let c=0;c<3;c++)d2[q*4+c]=acc[q*4+c]/k}
+ const scaled=function*(g,a,b){let r;while(!(r=g.next()).done)yield typeof r.value==='number'?a+(b-a)*r.value:r.value;return r.value};
+ const lab2=yield* scaled(grabcut({data:d2},W,H,T2,5,g2,b2),0,.75),up=new Uint8Array(w*h),edge=new Uint8Array(w*h);for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++)up[p]=lab2[(y>>1)*W+(x>>1)];
+ for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++)if(x<w-1&&up[p]!==up[p+1]||y<h-1&&up[p]!==up[p+w])edge[p]=1;const band=morph(edge,w,h,4,true),Tf=new Uint8Array(w*h);
+ for(let p=0;p<w*h;p++)Tf[p]=T[p]!==2?T[p]:band[p]?2:up[p];return yield* scaled(grabcut(px,w,h,Tf,1,up,boost),.75,.95)}
 // Fondo uniforme: il colore tipico del bordo dell'inquadratura e quanto varia. Dai pixel del bordo simili a quel colore
 // lo sfondo si estende ai vicini con un colore vicino al loro e non troppo lontano da quello tipico (regge le sfumature
 // del telo); il soggetto è il resto, senza le briciole.
@@ -90,6 +102,14 @@ function uniformCut(px,w,h,inside,st){const d=px.data,n=w*h,bgm=new Uint8Array(n
  st.ring.forEach((p,i)=>{if(st.dev[i]<=st.tol&&!bgm[p]){bgm[p]=1;stack.push(p)}});
  while(stack.length){const p=stack.pop(),x=p%w,o=p*4;for(const q of [x>0?p-1:-1,x<w-1?p+1:-1,p-w,p+w]){if(q<0||q>=n||bgm[q]||!inside[q])continue;const o2=q*4;if(Math.max(Math.abs(d[o]-d[o2]),Math.abs(d[o+1]-d[o2+1]),Math.abs(d[o+2]-d[o2+2]))<=tl&&far(q)<=tg){bgm[q]=1;stack.push(q)}}}
  const lab=new Uint8Array(n);for(let p=0;p<n;p++)lab[p]=inside[p]&&!bgm[p]?1:0;return dropCrumbs(lab,w,h)}
+// Il fondo uniforme è credibile se ne esce un soggetto vero: una zona principale, rimasta dopo le briciole e non quasi
+// tutta la foto; altrimenti, in automatico, si passa a GrabCut.
+// Le zone che vanno da un lato all'altro (un orizzonte, una fila di alberi) sono sfondo e si tolgono.
+function uniformOk(lab,w,h){const n=w*h,seen=new Uint8Array(n),st=[],cells=[];let tot=0,big=0;
+ for(let p=0;p<n;p++){if(!lab[p]||seen[p])continue;cells.length=0;let l=false,r=false;seen[p]=1;st.push(p);
+  while(st.length){const q=st.pop(),x=q%w;cells.push(q);if(!x)l=true;if(x===w-1)r=true;for(const s of [x>0?q-1:-1,x<w-1?q+1:-1,q-w,q+w])if(s>=0&&s<n&&lab[s]&&!seen[s]){seen[s]=1;st.push(s)}}
+  if(l&&r){for(const q of cells)lab[q]=0;continue}tot+=cells.length;if(cells.length>big)big=cells.length}
+ return tot>n*.002&&tot<n*.9&&big>=tot*.5}
 // Chiusura: massimo e poi minimo su un quadrato di raggio r, in passate orizzontali e verticali. Chiude le fessure
 // sottili che il taglio lascia sui contorni forti (tra capelli e viso), così le parti del soggetto restano unite.
 function morph(lab,w,h,r,max){const t=new Uint8Array(lab.length),o=new Uint8Array(lab.length),hit=a=>max?a:!a;
@@ -123,16 +143,31 @@ function* cutCompute(c,from=null){const W=I.bmp.width,H=I.bmp.height,S=Math.max(
  const strokes=list=>{const m=new Uint8Array(n);if(!list.length)return m;ctx.clearRect(0,0,w,h);ctx.lineCap=ctx.lineJoin='round';ctx.strokeStyle='#fff';for(const s of list){ctx.lineWidth=Math.max(1,s.d*S*w/W);ctx.beginPath();s.p.forEach((p,i)=>ctx[i?'lineTo':'moveTo'](...toW(p)));if(s.p.length===1)ctx.lineTo(...toW(s.p[0]));ctx.stroke()}const a=ctx.getImageData(0,0,w,h).data;for(let p=0;p<n;p++)m[p]=a[p*4+3]>=128?1:0;return m};
  const keep=strokes(c.keep),drop=strokes(c.drop);yield .02;
  let method=c.method,st=null;if(method!=='grabcut'&&!c.box){st=borderStats(px,w,h,inside);if(method==='auto')method=st.uniform?'uniform':'grabcut'}else if(method==='auto')method='grabcut';
- let lab;if(method==='uniform'){lab=uniformCut(px,w,h,inside,st||borderStats(px,w,h,inside));yield .9}
- else{const T=new Uint8Array(n);for(let p=0;p<n;p++)T[p]=drop[p]?0:keep[p]?1:!inside[p]||(box?!box[p]:band[p])?0:2;const boost=new Uint8Array(n);for(let p=0;p<n;p++)boost[p]=keep[p]?1:drop[p]?2:0;const prev=from&&from.w===w&&from.h===h?from.data.map(v=>v>127?1:0):null;lab=yield* grabcut(px,w,h,T,prev?3:5,prev||guess,boost);lab=closeGaps(lab,w,h);lab=dropCrumbs(prev?lab:keepMain(lab,w,h),w,h);for(let p=0;p<n;p++)if(keep[p])lab[p]=1}
- const data=new Uint8Array(n);for(let p=0;p<n;p++)data[p]=lab[p]?255:0;return {w,h,data,method}}
+ const prev=from&&from.w===w&&from.h===h?from.data.map(v=>v>127?1:0):null,boost=new Uint8Array(n);for(let p=0;p<n;p++)boost[p]=keep[p]?1:drop[p]?2:0;let lab;
+ // Dopo un tratto si ricalcola solo intorno ai pixel dei tratti che il risultato di prima contraddice, più un margine:
+ // il resto resta com'era, così una correzione non sposta il contorno altrove. Vale per GrabCut e per il fondo uniforme.
+ if(prev){let x0=w,y0=h,x1=-1,y1=-1;for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++)if(keep[p]&&!prev[p]||drop[p]&&prev[p]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  if(x1<0)lab=prev;else{const R=Math.round(Math.max(w,h)*.08),T=new Uint8Array(n);x0-=R;x1+=R;y0-=R;y1+=R;
+   for(let y=0,p=0;y<h;y++)for(let x=0;x<w;x++,p++)T[p]=drop[p]?0:keep[p]?1:!inside[p]||box&&!box[p]?0:x<x0||x>x1||y<y0||y>y1?prev[p]:2;lab=yield* grabcut(px,w,h,T,2,prev,boost);lab=dropCrumbs(closeGaps(lab,w,h),w,h)}}
+ else if(method==='uniform'){lab=uniformCut(px,w,h,inside,st||borderStats(px,w,h,inside));if(!uniformOk(lab,w,h)&&c.method==='auto'){method='grabcut';lab=null}else yield .9}
+ if(!lab){const T=new Uint8Array(n);for(let p=0;p<n;p++)T[p]=drop[p]?0:keep[p]?1:!inside[p]||(box?!box[p]:band[p])?0:2;lab=yield* cutLevels(px,w,h,T,guess,boost);lab=dropCrumbs(keepMain(closeGaps(lab,w,h),w,h),w,h)}
+ for(let p=0;p<n;p++)if(keep[p])lab[p]=1;const data=new Uint8Array(n);for(let p=0;p<n;p++)data[p]=lab[p]?255:0;return {w,h,data,method}}
 // La maschera dello scontorno: quella calcolata, il bordo rifinito sulla foto (più ampio quanto più la copia era piccola)
 // e i tratti, che valgono sempre.
 function cutOps(r,mc){const c=r.cut,R=c?.raster&&(mc?.ras||rasters).get(c.raster);if(!R)return [];const W=mc?mc.W:I.bmp.width,S=Math.max(W,mc?mc.H:I.bmp.height),k=W/R.w,e=c.edge??50;
- return [{t:'raster',id:c.raster},{t:'refine',r:U5(k*(1.2+e/30)/S),e:e<34?1e-4:e<67?1e-3:1e-2},...c.keep.map(s=>({...s,mode:'add'})),...c.drop.map(s=>({...s,mode:'sub'}))]}
+ return [{t:'raster',id:c.raster},{t:'refine',r:U5(k*(1.2+e/30)/S),e:e<34?1e-4:e<67?1e-3:1e-2,c:1},...c.keep.map(s=>({...s,mode:'add'})),...c.drop.map(s=>({...s,mode:'sub'}))]}
 const hexRgb=h=>{const v=parseInt(String(h).replace('#',''),16)||0;return [v>>16&255,v>>8&255,v&255]};
+// Colori del bordo ripuliti: nella fascia semitrasparente il pixel mescola il soggetto e lo sfondo di prima, C = αF + (1−α)B.
+// Con B stimato dai pixel di sfondo vicini, F = (C − (1−α)B)/α; dove α è piccola, quasi tutto sfondo, si va verso il
+// colore del soggetto vicino. Così sul fondo nuovo, trasparente o colorato, non resta l'alone di quello vecchio.
+function cutClean(img,m,w,h){const d=img.data,s=Math.max(2,Math.ceil(Math.sqrt(w*h/25e4))),gw=Math.ceil(w/s),gh=Math.ceil(h/s),N=gw*gh,A=[0,1,2,3,4,5,6,7].map(()=>new Float32Array(N)),xi=new Int32Array(w),band=new Uint8Array(h);for(let x=0;x<w;x++)xi[x]=(x/s)|0;
+ for(let y=0;y<h;y++){const row=((y/s)|0)*gw;for(let x=0,i=y*w,o=i*4;x<w;x++,i++,o+=4){const v=m[i],q=row+xi[x];if(v>=242){if(v<255)band[y]=1;A[0][q]+=d[o];A[1][q]+=d[o+1];A[2][q]+=d[o+2];A[3][q]++}else if(v<=13){if(v)band[y]=1;A[4][q]+=d[o];A[5][q]+=d[o+1];A[6][q]+=d[o+2];A[7][q]++}else band[y]=1}}
+ if(!band.some(v=>v))return;const t=new Float32Array(N);for(const a of A)boxMean(a,gw,gh,Math.max(2,Math.round(Math.max(w,h)*.01/s)),t);const {x0,x1,fx}=gridCols(w,gw,s),R=A.map(()=>new Float32Array(gw));
+ for(let y=0,i=0;y<h;y++,i+=w){if(!band[y])continue;A.forEach((a,k)=>gridRow(a,gw,gh,y,s,R[k]));
+  for(let x=0;x<w;x++){const v=m[i+x];if(!v||v===255)continue;const a=x0[x],b=x1[x],f=fx[x],L=k=>R[k][a]+(R[k][b]-R[k][a])*f,wf=L(3),wb=L(7);if(wf<1e-3||wb<1e-3)continue;
+   const al=v/255,o=(i+x)*4,mix=al<.35?al/.35:1;for(let c=0;c<3;c++){const Fc=L(c)/wf,Bc=L(c+4)/wb,e=(d[o+c]-(1-al)*Bc)/al;d[o+c]=(e<0?0:e>255?255:e)*mix+Fc*(1-mix)}}}}
 // Applica lo scontorno ai pixel sviluppati: trasparenza, oppure un colore pieno o la stessa foto sfocata dietro al soggetto.
-function applyCut(img,r,mc){const c=r.cut;if(!c?.raster)return;if(!mc.ras.has(c.raster)){if(mc.ras===rasters)cutRestore();return}const m=maskOf(cutOps(r,mc),mc),d=img.data,n=m.length;
+function applyCut(img,r,mc){const c=r.cut;if(!c?.raster)return;if(!mc.ras.has(c.raster)){if(mc.ras===rasters)cutRestore();return}const m=maskOf(cutOps(r,mc),mc),d=img.data,n=m.length;cutClean(img,m,mc.w,mc.h);
  if(c.bg==='color'){const [R,G,B]=hexRgb(c.color);for(let i=0,j=0;i<n;i++,j+=4){const a=m[i];if(a===255)continue;const k=a/255,l=1-k;d[j]=d[j]*k+R*l;d[j+1]=d[j+1]*k+G*l;d[j+2]=d[j+2]*k+B*l;d[j+3]=255}return}
  if(c.bg==='blur'){blurBehind(img,m,mc.w,mc.h,Math.max(1,(c.blur??40)/100*.02*mc.k));return}
  for(let i=0,j=3;i<n;i++,j+=4)if(m[i]!==255)d[j]=d[j]*m[i]/255}
@@ -153,15 +188,18 @@ let cutBusy=false;
 function cutRestore(){if(cutBusy||!I.r.cut)return;cutBusy=true;const c=structuredClone(I.r.cut);setTimeout(async()=>{try{const res=await runChunks(cutCompute({...c,method:c.used||c.method}),'Scontorno');if(res&&I.r.cut?.raster===c.raster){rasters.set(c.raster,{w:res.w,h:res.h,data:res.data});requestRender()}}catch(e){console.warn('Scontorno non ricalcolato',e)}finally{cutBusy=false}},0)}
 async function cutRun(c,label,from=null){if(!I.bmp){toast('Apri prima una foto');return false}if(cutBusy){toast('Lo scontorno è già in corso');return false}cutBusy=true;const t0=performance.now();
  try{const res=await runChunks(cutCompute(c,from),'Scontorno');if(!res)return false;const id=uid();rasters.set(id,{w:res.w,h:res.h,data:res.data});
-  edit(label,r=>{r.cut={...c,raster:id,used:res.method}},{panel:true});renderPhoto(false);I.cutTime=Math.round(performance.now()-t0);announce(`${label}: ${cutSummary()}`);return true}
+  edit(label,r=>{r.cut={...c,raster:id,used:res.method}},{panel:true});renderPhoto(false);I.cutTime=Math.round(performance.now()-t0);
+  // Senza soggetto (succede quando il soggetto tocca i bordi o ha i colori dello sfondo) si dice che cosa fare.
+  let k=0;for(let i=0;i<res.data.length;i+=4)if(res.data[i])k++;if(!from&&!c.box&&k<res.data.length/4*.003)toast(`${label}: non ho trovato il soggetto. Traccia un riquadro intorno con Riquadro del soggetto, oppure segnalalo con Tieni.`);
+  else announce(`${label}: ${cutSummary()}`);return true}
  catch(e){console.error(e);toast('Scontorno non riuscito: '+(e.message||e));return false}finally{cutBusy=false}}
 function cutSummary(r=I.r){const c=r.cut;if(!c)return 'Lo sfondo c’è ancora.';const R=rasters.get(c.raster);if(!R||!lastMc)return 'Sfondo tolto.';const m=maskOf(cutOps(r,lastMc),lastMc);
  return `${describeMask(m,lastMc.w,lastMc.h,null,'Il soggetto',true)} Metodo: ${c.used==='uniform'?'fondo uniforme':'GrabCut'}${c.keep.length||c.drop.length?`, ${c.keep.length} tratti tieni e ${c.drop.length} togli`:''}. Sfondo: ${c.bg==='color'?'colore '+c.color:c.bg==='blur'?'foto sfocata':'trasparente'}.`}
 const cutAuto=()=>cutRun({...newCut(),method:prefs.cutMethod||'auto',bg:I.r.cut?.bg||'none',color:I.r.cut?.color||'#ffffff',blur:I.r.cut?.blur??40},'Togli lo sfondo');
 const needCut=()=>{if(!I.bmp){toast('Apri prima una foto');return false}if(!I.r.cut){toast('Lo sfondo c’è ancora: usa prima Togli lo sfondo');return false}return true};
-// I tratti con il fondo uniforme non cambiano il calcolo: si aggiungono subito. Con GrabCut il calcolo si ripete.
-function cutStroke(kind,p){const c=structuredClone(I.r.cut||newCut()),s={t:'brush',p:p.map(uvUnits),d:U5(T.size),h:.8};c[kind]=[...c[kind],s];const label=kind==='keep'?'Tratto tieni':'Tratto togli';
- if(I.r.cut&&I.r.cut.used==='uniform'){edit(label,r=>{r.cut=c},{panel:true});announce(label+'. '+cutSummary())}else cutRun({...c,method:I.r.cut?.used||c.method},label,rasters.get(I.r.cut?.raster))}
+// Un tratto ricalcola lo scontorno intorno a sé, partendo dal risultato di prima, con il fondo uniforme come con GrabCut.
+function cutStroke(kind,p){const c=structuredClone(I.r.cut||newCut()),s={t:'brush',p:p.map(uvUnits),d:U5(T.size),h:.8};c[kind]=[...c[kind],s];
+ cutRun({...c,method:I.r.cut?.used||c.method},kind==='keep'?'Tratto tieni':'Tratto togli',rasters.get(I.r.cut?.raster))}
 Object.assign(PHOTO_TOOLS,{
  cutBox:{label:'Riquadro del soggetto',kind:'two',keys:'Trascina un riquadro intorno al soggetto, con un po’ di sfondo intorno: quello che resta fuori è sfondo. Da tastiera: Invio su un angolo, poi su quello opposto.',two:(a,b)=>{const box=rectOp(a,b).p;endTool(false);cutRun({...(I.r.cut?structuredClone(I.r.cut):newCut()),box,method:'grabcut',keep:I.r.cut?.keep||[],drop:I.r.cut?.drop||[]},'Riquadro del soggetto')}},
  cutKeep:{label:'Tieni',kind:'paint',color:'#20c060',keys:'Dipingi sulle parti del soggetto che sono state tolte. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta.',opts:['size'],done:p=>cutStroke('keep',p)},
