@@ -252,7 +252,7 @@ Listening
 In Audio the waveform plays back the point where you are, and you can jump from one pause in the speech to the next; in Video the checker reviews captions, contrast and flashing; in Immagini, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd> describes the photo, its light and the adjustments you changed, and selections, masks and cut-outs can be described in words; in Disegno, path nodes are a list and a cursor draws from the keyboard.
 
 [accessibilita.segnalazioni]
-Do you use NVDA, JAWS or Narrator? Your <a href="https://github.com/svitaTLCO/tassello/issues">reports</a> are very welcome: an accessibility problem is a bug to fix, not an improvement to consider.
+Do you use NVDA, JAWS or Narrator? Your <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">reports</a> are very welcome: an accessibility problem is a bug to fix, not an improvement to consider.
 
 [privacy.titolo]
 Privacy
@@ -295,7 +295,7 @@ Install it as an app
 In Chrome or Edge, open <a href="{{BASE}}tassello-ufficio.html">Tassello Ufficio</a>, <a href="{{BASE}}tassello-media.html">Tassello Media</a> or <a href="{{BASE}}tassello-grafica.html">Tassello Grafica</a> in the browser and choose <b>Install</b> in the address bar or in the menu. The app always comes from this website, works offline and updates itself.
 
 [sicurezza.segnala]
-Found a suspicious copy? <a href="https://github.com/svitaTLCO/tassello/issues">Report it on GitHub</a>.
+Found a suspicious copy? <a href="https://github.com/svitaTLCO/tassello/issues/new?template=copia-sospetta.yml">Report it on GitHub</a>.
 
 [famiglia.titolo]
 The Tassello family

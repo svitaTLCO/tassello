@@ -1,0 +1,104 @@
+name: Problema di accessibilità
+description: Qualcosa non si usa con lo screen reader, con la sola tastiera o con le altre tecnologie assistive. · Accessibility problem.
+title: "[Accessibilità] "
+labels: ["accessibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie. Per Tassello un problema di accessibilità è un difetto da correggere, non un miglioramento da valutare, e queste segnalazioni hanno la precedenza.
+        Puoi scrivere in italiano o in inglese. La segnalazione è pubblica: non allegare documenti personali e togli dai testi nomi, indirizzi e altri dati tuoi o di altri.
+
+        *Thank you. Accessibility problems are bugs and come first. You can write in Italian or English. This report is public: do not attach personal documents.*
+  - type: dropdown
+    id: app
+    attributes:
+      label: Dove succede
+      description: Il tassello e l'app in cui hai trovato il problema.
+      options:
+        - Testo (Tassello Ufficio)
+        - Calcolo (Tassello Ufficio)
+        - Impagina (Tassello Ufficio)
+        - Audio (Tassello Media)
+        - Video (Tassello Media)
+        - Immagini (Tassello Grafica)
+        - Disegno (Tassello Grafica)
+        - Il sito o la pagina Verifica
+        - Non lo so
+    validations:
+      required: true
+  - type: input
+    id: versione
+    attributes:
+      label: Versione
+      description: "Premi Alt+Q, cerca «Informazioni» e premi Invio: il numero è nella prima riga, per esempio 1.9.0. Se l'hai installata come app, indicalo."
+      placeholder: "1.9.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: tecnologie
+    attributes:
+      label: Come usi Tassello
+      description: Puoi sceglierne più di una.
+      multiple: true
+      options:
+        - NVDA
+        - JAWS
+        - Assistente vocale di Windows
+        - VoiceOver
+        - Orca
+        - Solo tastiera
+        - Ingrandimento dello schermo
+        - Contrasto elevato o tema scuro
+        - Comandi vocali
+        - Altro (scrivilo sotto)
+    validations:
+      required: true
+  - type: input
+    id: ambiente
+    attributes:
+      label: Browser, sistema e versione dello screen reader
+      placeholder: "Edge 156, Windows 11, NVDA 2026.3"
+    validations:
+      required: true
+  - type: textarea
+    id: passi
+    attributes:
+      label: Che cosa stavi facendo
+      description: I passi per arrivare al problema, con i tasti che hai premuto.
+      placeholder: |
+        1. Ho aperto Impagina e scelto un modello con Ctrl+Alt+N
+        2. Con Tab sono arrivato all'elenco dei modelli
+        3. Ho premuto la freccia giù
+    validations:
+      required: true
+  - type: textarea
+    id: risultato
+    attributes:
+      label: Che cosa ti aspettavi e che cosa è successo
+      description: Se puoi, scrivi parola per parola quello che lo screen reader ha letto, oppure che cosa non ha letto.
+    validations:
+      required: true
+  - type: dropdown
+    id: gravita
+    attributes:
+      label: Quanto ti blocca
+      options:
+        - Non riesco a finire il lavoro
+        - Ci riesco, ma con fatica o con un trucco
+        - È un fastidio
+    validations:
+      required: true
+  - type: textarea
+    id: parlato
+    attributes:
+      label: Registro del parlato (facoltativo)
+      description: "In NVDA: menu Strumenti, Visualizzatore del parlato. Copia qui le righe del momento del problema."
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Prima di inviare
+      options:
+        - label: Ho tolto dalla segnalazione i dati personali miei e di altri.
+          required: true

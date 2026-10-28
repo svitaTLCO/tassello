@@ -1,0 +1,78 @@
+name: Copia sospetta
+description: Hai trovato un file o un sito che sembra Tassello ma non viene dai canali ufficiali. · Suspicious copy.
+title: "[Copia sospetta] "
+labels: ["copia sospetta"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie: una segnalazione aiuta a proteggere anche gli altri. Prima leggi [SECURITY.md](https://github.com/svitaTLCO/tassello/blob/main/SECURITY.md).
+
+        - **Non aprire la copia e non allegarla.** Basta la sua impronta SHA-256, che la pagina [Verifica una copia](https://svitatlco.github.io/tassello/verifica.html) calcola senza che il file lasci il tuo computer.
+        - **Non incollare link cliccabili.** Scrivi gli indirizzi con `hxxp` al posto di `http`, per esempio `hxxps://esempio[.]com`.
+        - **Questa segnalazione è pubblica.** Se la copia contiene dati personali, o se hai inserito password o dati di pagamento, usa invece la [segnalazione privata](https://github.com/svitaTLCO/tassello/security/advisories/new).
+
+        *Do not open or attach the copy; give its SHA-256 instead and write addresses as `hxxps://example[.]com`. This report is public: if personal data is involved, use private reporting.*
+  - type: dropdown
+    id: origine
+    attributes:
+      label: Da dove arriva
+      options:
+        - Email
+        - Chat o social
+        - Chiavetta o cartella condivisa
+        - Un altro sito
+        - Un negozio di app o di estensioni
+        - Una pubblicità
+        - Altro
+    validations:
+      required: true
+  - type: textarea
+    id: dove
+    attributes:
+      label: Dove l'hai trovata
+      description: L'indirizzo del sito, scritto con hxxp e [.], o il dominio di chi l'ha mandata. Niente indirizzi email completi di altre persone.
+      placeholder: "hxxps://tassello-download[.]example/tassello-ufficio.html"
+    validations:
+      required: true
+  - type: input
+    id: impronta
+    attributes:
+      label: Impronta SHA-256 del file
+      description: "Dalla pagina Verifica, oppure in Windows: certutil -hashfile nome-del-file SHA256"
+      placeholder: "64 caratteri, da 0 a 9 e da a a f"
+  - type: dropdown
+    id: verifica
+    attributes:
+      label: Che cosa dice la pagina Verifica
+      options:
+        - Non corrisponde a nessuna versione ufficiale
+        - Non l'ho verificata
+        - Corrisponde, ma la copia si comporta in modo strano
+    validations:
+      required: true
+  - type: checkboxes
+    id: comportamento
+    attributes:
+      label: Che cosa fa la copia
+      description: Segna quello che hai notato. La copia ufficiale non fa nessuna di queste cose.
+      options:
+        - label: Chiede password, un account o di accedere
+        - label: Chiede pagamenti o dati di una carta
+        - label: Propone di scaricare aggiornamenti o altri programmi
+        - label: Si collega a internet o carica contenuti da altri siti
+        - label: Ha un aspetto o un nome diverso da quello ufficiale
+  - type: textarea
+    id: dettagli
+    attributes:
+      label: Altri dettagli
+      description: Che cosa è successo, quando, e se hai già avvisato chi te l'ha mandata.
+  - type: checkboxes
+    id: sicurezza
+    attributes:
+      label: Prima di inviare
+      options:
+        - label: Non ho allegato il file e non ho incollato link cliccabili.
+          required: true
+        - label: Nella segnalazione non ci sono dati personali miei o di altri.
+          required: true

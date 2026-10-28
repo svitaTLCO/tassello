@@ -256,7 +256,7 @@ Ascolto
 In Audio la forma d’onda fa ascoltare il punto in cui ti trovi e si salta da una pausa all’altra del parlato; in Video la verifica controlla sottotitoli, contrasto e lampeggiamenti; in Immagini <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>I</kbd> descrive la foto, la sua luce e le regolazioni cambiate, e selezioni, maschere e scontorno si fanno descrivere a parole; in Disegno i nodi dei tracciati sono un elenco e un cursore disegna da tastiera.
 
 [accessibilita.segnalazioni]
-Usi NVDA, JAWS o Assistente vocale? Le tue <a href="https://github.com/svitaTLCO/tassello/issues">segnalazioni</a> sono molto benvenute: un problema di accessibilità è un difetto da correggere, non un miglioramento da valutare.
+Usi NVDA, JAWS o Assistente vocale? Le tue <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">segnalazioni</a> sono molto benvenute: un problema di accessibilità è un difetto da correggere, non un miglioramento da valutare.
 
 [privacy.titolo]
 Privacy
@@ -299,7 +299,7 @@ Installala come app
 In Chrome o in Edge apri <a href="{{BASE}}tassello-ufficio.html">Tassello Ufficio</a>, <a href="{{BASE}}tassello-media.html">Tassello Media</a> o <a href="{{BASE}}tassello-grafica.html">Tassello Grafica</a> nel browser e scegli <b>Installa</b> nella barra degli indirizzi o nel menu. L’app arriva sempre da questo sito, funziona senza rete e si aggiorna da sola.
 
 [sicurezza.segnala]
-Hai trovato una copia sospetta? <a href="https://github.com/svitaTLCO/tassello/issues">Segnalala su GitHub</a>.
+Hai trovato una copia sospetta? <a href="https://github.com/svitaTLCO/tassello/issues/new?template=copia-sospetta.yml">Segnalala su GitHub</a>.
 
 [famiglia.titolo]
 La famiglia Tassello

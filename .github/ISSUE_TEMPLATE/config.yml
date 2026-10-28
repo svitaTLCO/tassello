@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Verifica una copia
+    url: https://svitatlco.github.io/tassello/verifica.html
+    about: Controlla se un file di Tassello è identico a una versione ufficiale. Il file non lascia il tuo computer.
+  - name: Segnalazione privata di un problema di sicurezza
+    url: https://github.com/svitaTLCO/tassello/security/advisories/new
+    about: Per un difetto di sicurezza nella copia ufficiale, o per una copia falsa che coinvolge dati personali. La segnalazione resta privata.

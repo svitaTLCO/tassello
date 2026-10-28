@@ -253,7 +253,7 @@ Mode lecture, contraste élevé, thème sombre, lecture à voix haute et vérifi
 Dans Audio, la forme d’onde fait entendre l’endroit où vous êtes et vous sautez d’une pause à l’autre de la parole&nbsp;; dans Video, la vérification contrôle les sous-titres, le contraste et les clignotements&nbsp;; dans Immagini, <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>I</kbd> décrit la photo, sa lumière et les réglages modifiés, et les sélections, masques et détourages se font décrire en mots&nbsp;; dans Disegno, les nœuds des tracés forment une liste et un curseur dessine au clavier.
 
 [accessibilita.segnalazioni]
-Vous utilisez NVDA, JAWS ou le Narrateur&nbsp;? Vos <a href="https://github.com/svitaTLCO/tassello/issues">signalements</a> sont les bienvenus&nbsp;: un problème d’accessibilité est un défaut à corriger, pas une amélioration à envisager.
+Vous utilisez NVDA, JAWS ou le Narrateur&nbsp;? Vos <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">signalements</a> sont les bienvenus&nbsp;: un problème d’accessibilité est un défaut à corriger, pas une amélioration à envisager.
 
 [privacy.titolo]
 Confidentialité
@@ -296,7 +296,7 @@ L’installer comme application
 Dans Chrome ou Edge, ouvrez <a href="{{BASE}}tassello-ufficio.html">Tassello Ufficio</a>, <a href="{{BASE}}tassello-media.html">Tassello Media</a> ou <a href="{{BASE}}tassello-grafica.html">Tassello Grafica</a> dans le navigateur et choisissez <b>Installer</b> dans la barre d’adresse ou dans le menu. L’application vient toujours de ce site, fonctionne hors ligne et se met à jour toute seule.
 
 [sicurezza.segnala]
-Vous avez trouvé une copie suspecte&nbsp;? <a href="https://github.com/svitaTLCO/tassello/issues">Signalez-la sur GitHub</a>.
+Vous avez trouvé une copie suspecte&nbsp;? <a href="https://github.com/svitaTLCO/tassello/issues/new?template=copia-sospetta.yml">Signalez-la sur GitHub</a>.
 
 [famiglia.titolo]
 La famille Tassello
