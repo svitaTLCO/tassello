@@ -29,7 +29,7 @@ function settle(label,opts){const now=snap();if(now===I.base)return false;I.hist
 function edit(label,fn,opts){if(!I.bmp){toast('Apri prima una foto');return false}fn(I.r);return settle(label,opts)}
 function photoUndo(redo){const from=redo?I.redo:I.hist,to=redo?I.hist:I.redo,e=from.pop();if(!e){toast(redo?'Niente da ripetere':'Niente da annullare');return}to.push({label:e.label,r:snap()});I.r=JSON.parse(e.r);I.base=e.r;recipeChanged({panel:true});announce((redo?'Ripetuto: ':'Annullato: ')+e.label)}
 // Dopo ogni modifica: anteprima, pannello, pulsanti attivi e bozza.
-function recipeChanged({panel=false}={}){requestRender();if(panel)renderPanel();else syncPanel();refreshToggles();schedulePersist('immagini')}
+function recipeChanged({panel=false}={}){requestRender();if(panel)renderPanel();else syncPanel();refreshToggles();if(photoLink.id)linkSync();else schedulePersist('immagini')}
 const changedAdj=r=>ADJ.filter(a=>r.adj[a[0]]);
 const hasEdits=()=>JSON.stringify({...I.r,sel:null})!==JSON.stringify(newRecipe());
 // Apertura: la foto nuova riparte da una ricetta vuota e dal primo passo del piano scelto.
@@ -37,12 +37,12 @@ async function openPhoto(file){const bmp=await work('Apertura della foto',()=>de
  I.bmp?.close();photoChanged();Object.assign(I,{file,name:file.name,title:baseName(file.name),bmp,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false});I.base=snap();
  $('docTitle').value=I.title;updateTitle();showPhoto();renderPanel();renderPlans();refreshToggles();schedulePersist('immagini');
  const intro=enterStep();announce(`Aperta «${file.name}», ${fmtInt(bmp.width)} per ${fmtInt(bmp.height)} pixel.${intro?' '+intro:''}`);$('photo').focus();return true}
-async function closePhoto(){if(!I.bmp)return;if(hasEdits()&&!(await confirmAction('Le modifiche non esportate andranno perse. L’originale resta com’è sul tuo computer. Vuoi chiudere la foto?','Chiudi la foto')))return;
+async function closePhoto(){if(photoLink.id){linkBack();return}if(!I.bmp)return;if(hasEdits()&&!(await confirmAction('Le modifiche non esportate andranno perse. L’originale resta com’è sul tuo computer. Vuoi chiudere la foto?','Chiudi la foto')))return;
  I.bmp.close();photoChanged();Object.assign(I,{file:null,name:'',title:'Foto',bmp:null,r:newRecipe(),hist:[],redo:[],step:0,seen:new Set(),compare:false,stats:null});I.base=snap();
  $('docTitle').value=I.title;updateTitle();showPhoto();renderPanel();refreshToggles();schedulePersist('immagini');announce('Foto chiusa');$('photoEmpty').querySelector('button')?.focus()}
 // Bozza: il file originale si salva una volta sola, la ricetta a ogni modifica.
 let fileSaved=null;
-async function persistPhoto(){if(!I.file){await dbDel('photo');await dbDel('photoFile');fileSaved=null;return}
+async function persistPhoto(){if(photoLink.id)return;if(!I.file){await dbDel('photo');await dbDel('photoFile');fileSaved=null;return}
  if(fileSaved!==I.file){await dbPut('photoFile',I.file);fileSaved=I.file}
  await dbPut('photo',{name:I.name,title:I.title,r:I.r,luts:I.luts,plan:I.plan,step:I.step,seen:[...I.seen]});
  // La maschera dello scontorno è calcolata: si salva a parte, solo quella in uso.

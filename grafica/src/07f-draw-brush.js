@@ -53,10 +53,11 @@ const drawTool=tool=>({sel:'box',
  down(e,pt){curFromPointer(pt);ink.kb=false;ink.pts=[[pt.x,pt.y,pressureOf(e)]];renderOverlay();return true},
  move(e,pt){if(!ink.pts||ink.kb)return;for(const c of coalesced(e)){const q=toSheet(c);ink.pts.push([q.x,q.y,pressureOf(c)])}renderOverlay()},
  up(){if(ink.pts&&!ink.kb)inkEnd()},
- key(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();if(ink.kb){inkEnd();return true}if(e.key==='Enter')return true;if(!Dw.cur.on){toast('Muovi prima il cursore con le frecce: parte dal centro del foglio');return true}
+ key(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();if(ink.kb){inkEnd();return true}if(e.key==='Enter')return true;curShow();
    ink.kb=true;ink.pts=[[Dw.cur.x,Dw.cur.y,ink.kp]];renderOverlay();announce(`${tool==='brush'?'Pennello':'Matita'} giù a ${curSay(Dw.cur)}: muovi il cursore per disegnare, Spazio per finire il tratto`);return true}
   if(e.key==='Escape'){e.preventDefault();if(ink.kb){ink.pts=null;ink.kb=false;renderOverlay();announce('Tratto annullato')}else setTool('select');return true}
-  if(tool==='brush'&&/^[0-9]$/.test(e.key)&&!e.ctrlKey&&!e.altKey){e.preventDefault();ink.kp=e.key==='0'?1:Number(e.key)/10;announce(`Pressione ${fmtInt(ink.kp*100)}%`);return true}
+  // Pressione: 1…9 dal 10 al 90 per cento, Maiusc+0 piena (lo zero da solo resta «tutto il foglio»).
+  if(tool==='brush'&&!e.ctrlKey&&!e.altKey&&(/^[1-9]$/.test(e.key)||e.shiftKey&&e.code==='Digit0')){e.preventDefault();ink.kp=e.code==='Digit0'?1:Number(e.key)/10;announce(`Pressione ${fmtInt(ink.kp*100)}%`);return true}
   const c=cursorKey(e);if(!c)return false;if(ink.kb)ink.pts.push([c.x,c.y,ink.kp]);announce(curSay(c));renderOverlay();return true},
  overlay(k){return liveSvg(k)+cursorSvg(k)}});
 TOOLS.pencil=drawTool('pencil');TOOLS.brush=drawTool('brush');
@@ -73,14 +74,14 @@ TOOLS.eraser={sel:'none',
  down(e,pt){curFromPointer(pt);er.drag={gone:[]};eraseAt(pt);return true},
  move(e,pt){er.hover=pt;if(er.drag)for(const c of coalesced(e))eraseAt(toSheet(c));renderOverlay()},
  up(){const d=er.drag;er.drag=null;if(d)eraseEnd(d.gone)},
- key(e){if(e.key===' '){e.preventDefault();if(!Dw.cur.on){toast('Muovi prima il cursore con le frecce');return true}er.drag={gone:[]};eraseAt(Dw.cur);const g=er.drag.gone;er.drag=null;if(g.length)eraseEnd(g);else announce('Nessun tratto sotto il cursore');return true}
+ key(e){if(e.key===' '){e.preventDefault();curShow();er.drag={gone:[]};eraseAt(Dw.cur);const g=er.drag.gone;er.drag=null;if(g.length)eraseEnd(g);else announce('Nessun tratto sotto il cursore');return true}
   if(e.key==='Escape'){e.preventDefault();setTool('select');return true}
   const c=cursorKey(e);if(!c)return false;const under=strokesAt(c,inkSize('eraser')/2);announce(curSay(c)+(under.length?`: sopra ${namesOf(under)}, Spazio per cancellare`:''));renderOverlay();return true},
  overlay(k){const h=Dw.cur.on?Dw.cur:er.hover;return h?`<circle class="k-cur" cx="${n2(h.x)}" cy="${n2(h.y)}" r="${n2(inkSize('eraser')/2)}" stroke-width="${n2(1.5/k)}"/>`:''}};
 sheetWrap.addEventListener('pointerleave',()=>{if(Dw.tool==='eraser'&&!er.drag){er.hover=null;renderOverlay()}});
 // Colore e spessore dello strumento nelle proprietà, quando non c'è niente di scelto.
 function toolProps(){const t=Dw.tool;if(!['pen','pencil','brush','eraser'].includes(t))return '';return `<h3>${esc(TOOL_INFO[t][0])}</h3>`+(t==='eraser'?fld('tsize','Dimensione della gomma (px)',inkSize('eraser')):colorFld('tcolor','Colore',inkColor())+fld('tsize',t==='brush'?'Spessore del pennello (px)':'Spessore (px)',inkSize(t)))
- +(t==='brush'?'<small class="hint">Con la penna di una tavoletta lo spessore segue la pressione; disegnando da tastiera i numeri da 1 a 9 la portano dal 10 al 90 per cento, lo zero al massimo.</small>':'')+'<h3>Foglio</h3>'}
+ +(t==='brush'?'<small class="hint">Con la penna di una tavoletta lo spessore segue la pressione; disegnando da tastiera i numeri da 1 a 9 la portano dal 10 al 90 per cento, Maiusc+0 al massimo.</small>':'')+'<h3>Foglio</h3>'}
 // Cambiando colore o spessore di un tratto, lo strumento li ricorda per il tratto successivo.
 function strokeProp(it,key,v,need){if(key==='bsize'){it.brush.size=need(1,2000);brushOutline(it);setInk('brush',it.brush.size)}else if(key==='fill'&&it.tool==='brush'||key==='stroke'&&it.tool!=='brush')setInk('color',v);else if(key==='sw'&&it.tool==='pencil')setInk('pencil',num(v))}
-STATIC_KEYS.d.push(['Matita e pennello',[['Muovi il cursore di dieci pixel (con Maiusc di uno)','← → ↑ ↓'],['Muovi il cursore in diagonale','Home / Fine / PgSu / PgGiù'],['Abbassa o alza la matita: inizia e finisce il tratto','Spazio'],['Annulla il tratto in corso','Esc'],['Pressione del pennello, dal 10 al 90 per cento (0 il massimo)','1 … 9 / 0']]],['Gomma',[['Cancella i tratti sotto il cursore','Spazio']]]);
+STATIC_KEYS.d.push(['Matita e pennello',[['Muovi il cursore di dieci pixel (con Maiusc di uno)','← → ↑ ↓'],['Muovi il cursore in diagonale','Home / Fine / PgSu / PgGiù'],['Abbassa o alza la matita: inizia e finisce il tratto','Spazio'],['Annulla il tratto in corso','Esc'],['Pressione del pennello, dal 10 al 90 per cento (Maiusc+0 piena)','1 … 9 / Maiusc+0']]],['Gomma',[['Cancella i tratti sotto il cursore','Spazio']]]);

@@ -21,15 +21,47 @@ function fxTables(fx){if(!fx)return null;const cv=fx.curves,T=Object.fromEntries
  const DH=new Float32Array(360),DS=new Float32Array(360),DL=new Float32Array(360),MX=new Float32Array(360),mixOf=(a,i,j,t)=>a[i]*(1-t)+a[j]*t;
  for(let g=0;g<360;g++){const [i,j,t]=hueSpan(g);DH[g]=mixOf(fx.hue,i,j,t)*.3;DS[g]=1+mixOf(fx.sat,i,j,t)/100;DL[g]=mixOf(fx.lum,i,j,t)/100;MX[g]=mixOf(fx.mix,i,j,t)/100}
  return {C,hsl,bw:fx.bw,DH,DS,DL,MX}}
+// Media su una finestra quadrata di raggio r per due campi insieme (come boxMean): tf e tg sono aree di lavoro, cf e cg
+// le somme per colonna, ix i reciproci dei conteggi ai bordi. Nel mezzo della riga e del campo i cicli non hanno salti.
+function boxPair(f,g,w,h,r,tf,tg,cf,cg,ix){const e=Math.min(r,w-1),k0=1/(2*r+1);
+ for(let o=0;o<w*h;o+=w){let p=0,q=0,x=0;for(let k=0;k<=e;k++){p+=f[o+k];q+=g[o+k]}
+  for(;x<r&&x<w;x++){tf[o+x]=p*ix[x];tg[o+x]=q*ix[x];if(x+r+1<w){p+=f[o+x+r+1];q+=g[o+x+r+1]}}
+  for(const end=w-r-1;x<end;x++){tf[o+x]=p*k0;tg[o+x]=q*k0;p+=f[o+x+r+1]-f[o+x-r];q+=g[o+x+r+1]-g[o+x-r]}
+  for(;x<w;x++){tf[o+x]=p*ix[x];tg[o+x]=q*ix[x];if(x>=r){p-=f[o+x-r];q-=g[o+x-r]}}}
+ cf.fill(0);cg.fill(0);for(let y=0;y<=Math.min(r,h-1);y++)for(let x=0,o=y*w;x<w;x++){cf[x]+=tf[o+x];cg[x]+=tg[o+x]}
+ for(let y=0;y<h;y++){const o=y*w,k=1/(Math.min(y+r,h-1)-Math.max(y-r,0)+1),A=(y+r+1)*w,S=(y-r)*w,add=y+r+1<h,sub=y>=r;
+  if(add&&sub)for(let x=0;x<w;x++){f[o+x]=cf[x]*k;g[o+x]=cg[x]*k;cf[x]+=tf[A+x]-tf[S+x];cg[x]+=tg[A+x]-tg[S+x]}
+  else for(let x=0;x<w;x++){f[o+x]=cf[x]*k;g[o+x]=cg[x]*k;if(add){cf[x]+=tf[A+x];cg[x]+=tg[A+x]}if(sub){cf[x]-=tf[S+x];cg[x]-=tg[S+x]}}}}
+// Una riga di pixel (da o in P) nelle medie della griglia dalla posizione j: luminosità, il suo quadrato e le due
+// differenze di colore. A passo 2 ogni blocco somma due pixel per riga, a passo 1 la riga si copia.
+function dnIn(P,o,w,j,Ia,Ib,Ua,Va,s2){const k=1/255;
+ if(s2)for(let x=0;x<w;x++,o+=4){const R=P[o]*k,B=P[o+2]*k,Y=.299*R+.587*P[o+1]*k+.114*B,q=j+(x>>1);Ia[q]+=Y;Ib[q]+=Y*Y;Ua[q]+=B-Y;Va[q]+=R-Y}
+ else for(let x=0,q=j;x<w;x++,o+=4,q++){const R=P[o]*k,B=P[o+2]*k,Y=.299*R+.587*P[o+1]*k+.114*B;Ia[q]=Y;Ib[q]=Y*Y;Ua[q]=B-Y;Va[q]=R-Y}}
+// Una riga pulita: luminosità con i coefficienti a e b del filtro guidato, colore mescolato con quello sfocato. Con X0
+// (passo 2) i valori della griglia si interpolano tra le due colonne vicine, senza si leggono così come sono.
+function dnOut(d,o,w,lum,col,RA,RB,RU,RV,X0,X1,FX){const k=1/255;
+ for(let x=0;x<w;x++,o+=4){let a,b,u,v;if(X0){const i=X0[x],j=X1[x],t=FX[x];a=RA[i]+(RA[j]-RA[i])*t;b=RB[i]+(RB[j]-RB[i])*t;u=RU[i]+(RU[j]-RU[i])*t;v=RV[i]+(RV[j]-RV[i])*t}else{a=RA[x];b=RB[x];u=RU[x];v=RV[x]}
+  const R=d[o]*k,B=d[o+2]*k,Y=.299*R+.587*d[o+1]*k+.114*B,U=B-Y,V=R-Y,yy=lum?a*Y+b:Y,R2=yy+V+(v-V)*col,B2=yy+U+(u-U)*col;d[o]=R2*255+.5;d[o+2]=B2*255+.5;d[o+1]=(yy-.299*R2-.114*B2)/.587*255+.5}}
 // Riduzione del rumore a strisce di righe con un margine sopra e sotto, così anche a 24 megapixel bastano array piccoli.
 // Luminosità: filtro guidato con la foto come guida (leviga dove è piatto, tiene i contorni); colore: le differenze di
-// colore sfocate, perché il rumore colorato è a macchie larghe.
-function denoise(img,lum,col,z){const w=img.width,h=img.height,d=img.data,r=Math.max(1,Math.round(1.6*z)),eps=.0035*lum*lum+1e-6,cb=Math.max(1,Math.round(3*z)),halo=2*Math.max(r,cb)+1,STRIP=128;
- for(let y0=0;y0<h;y0+=STRIP){const y1=Math.min(h,y0+STRIP),a0=Math.max(0,y0-halo),a1=Math.min(h,y1+halo),rows=a1-a0,n=rows*w,Y=new Float32Array(n),U=new Float32Array(n),V=new Float32Array(n);
-  for(let i=0,o=a0*w*4;i<n;i++,o+=4){const y=(.299*d[o]+.587*d[o+1]+.114*d[o+2])/255;Y[i]=y;U[i]=d[o+2]/255-y;V[i]=d[o]/255-y}
-  let A=null,B=null;const tmp=new Float32Array(n);if(lum){const mI=boxMean(Y.slice(),w,rows,r,tmp),II=new Float32Array(n);for(let i=0;i<n;i++)II[i]=Y[i]*Y[i];boxMean(II,w,rows,r,tmp);A=II;B=mI;for(let i=0;i<n;i++){const m=mI[i],v=Math.max(0,II[i]-m*m),a=v/(v+eps);A[i]=a;B[i]=m-a*m}boxMean(A,w,rows,r,tmp);boxMean(B,w,rows,r,tmp)}
-  const Uf=col?boxMean(boxMean(U.slice(),w,rows,cb,tmp),w,rows,cb,tmp):U,Vf=col?boxMean(boxMean(V.slice(),w,rows,cb,tmp),w,rows,cb,tmp):V;
-  for(let y=y0;y<y1;y++)for(let x=0,i=(y-a0)*w,o=y*w*4;x<w;x++,i++,o+=4){const yy=A?A[i]*Y[i]+B[i]:Y[i],u=U[i]+(Uf[i]-U[i])*col,v=V[i]+(Vf[i]-V[i])*col,R=yy+v,Bl=yy+u;d[o]=R*255+.5;d[o+2]=Bl*255+.5;d[o+1]=(yy-.299*R-.114*Bl)/.587*255+.5}}}
+// colore sfocate, perché il rumore colorato è a macchie larghe. Quando il raggio a piena misura arriva a due pixel
+// (le esportazioni grandi) medie e sfocature si fanno su una griglia di passo 2, come nel filtro guidato veloce di He e
+// Sun, e i coefficienti tornano alla misura piena interpolati: quasi lo stesso risultato in meno della metà del tempo.
+// Il margine sopra una striscia si legge dalla copia delle righe originali (keep), non da quelle già pulite.
+function denoise(img,lum,col,z){const w=img.width,h=img.height,d=img.data,s=1.6*z>=1.5?2:1,r=Math.max(1,Math.round(1.6*z/s)),cb=Math.max(1,Math.round(3*z/s)),eps=.0035*lum*lum+1e-6,
+ gw=Math.ceil(w/s),gh=Math.ceil(h/s),H=2*Math.max(r,cb)+2,GS=128,N=Math.min(gh,GS+2*H)*gw,F=()=>new Float32Array(N),Ia=F(),Ib=F(),Ua=F(),Va=F(),t1=F(),t2=F(),cf=new Float64Array(gw),cg=new Float64Array(gw),
+ keep=new Uint8ClampedArray(H*s*w*4),ix=c=>Float32Array.from({length:gw},(_,x)=>1/(Math.min(x+c,gw-1)-Math.max(x-c,0)+1)),ixr=ix(r),ixc=ix(cb),{x0,x1,fx}=gridCols(w,gw,s),rows4=[0,1,2,3].map(()=>new Float32Array(gw));
+ for(let G0=0;G0<gh;G0+=GS){const G1=Math.min(gh,G0+GS),A0=Math.max(0,G0-H),A1=Math.min(gh,G1+H),rows=A1-A0,n=rows*gw;
+  for(let gy=A0,j=0;gy<A1;gy++,j+=gw){const ya=gy*s,yb=Math.min(h,ya+s);if(s>1)for(const a of [Ia,Ib,Ua,Va])a.fill(0,j,j+gw);
+   for(let y=ya;y<yb;y++)dnIn(y<G0*s?keep:d,(y<G0*s?y-A0*s:y)*w*4,w,j,Ia,Ib,Ua,Va,s>1);
+   if(s>1){const ry=1/(yb-ya);for(let gx=0,q=j;gx<gw;gx++,q++){const c=ry/Math.min(2,w-gx*2);Ia[q]*=c;Ib[q]*=c;Ua[q]*=c;Va[q]*=c}}}
+  if(lum){boxPair(Ia,Ib,gw,rows,r,t1,t2,cf,cg,ixr);for(let j=0;j<n;j++){const m=Ia[j],v=Math.max(0,Ib[j]-m*m),a=v/(v+eps);Ia[j]=a;Ib[j]=m-a*m}boxPair(Ia,Ib,gw,rows,r,t1,t2,cf,cg,ixr)}
+  if(col){boxPair(Ua,Va,gw,rows,cb,t1,t2,cf,cg,ixc);boxPair(Ua,Va,gw,rows,cb,t1,t2,cf,cg,ixc)}
+  if(G1<gh){const k0=Math.max(0,G1-H)*s;keep.set(d.subarray(k0*w*4,G1*s*w*4))}
+  // Ritorno alla misura piena: a passo 2 per ogni riga si mescolano le due righe vicine della griglia.
+  for(let y=G0*s,ye=Math.min(h,G1*s);y<ye;y++){if(s>1){let v=(y+.5)/s-.5;v=v<0?0:v>gh-1?gh-1:v;const g0=v|0,o0=(g0-A0)*gw,o1=(Math.min(gh-1,g0+1)-A0)*gw,f=v-g0;
+    [Ia,Ib,Ua,Va].forEach((a,i)=>{const R=rows4[i];for(let j=0;j<gw;j++)R[j]=a[o0+j]+(a[o1+j]-a[o0+j])*f});dnOut(d,y*w*4,w,lum,col,...rows4,x0,x1,fx)}
+   else{const o0=(y-A0)*gw;dnOut(d,y*w*4,w,lum,col,...[Ia,Ib,Ua,Va].map(a=>a.subarray(o0,o0+gw)),null,null,null)}}}}
 // Foschia con il «canale scuro» (He, Sun e Tang), su una copia ridotta: dove anche il canale più scuro è chiaro c'è un
 // velo del colore della luce. Toglierla allontana i colori da quella luce in proporzione al velo; aggiungerla li avvicina.
 function dehaze(img,a){const w=img.width,h=img.height,d=img.data,f=Math.max(1,Math.ceil(Math.max(w,h)/320)),gw=Math.ceil(w/f),gh=Math.ceil(h/f),N=gw*gh,dark=new Float32Array(N),col=new Float32Array(N*3),mn=new Uint8Array(gw),S=[0,1,2].map(()=>new Float64Array(gw)),xi=new Int32Array(w);for(let x=0;x<w;x++)xi[x]=(x/f)|0;

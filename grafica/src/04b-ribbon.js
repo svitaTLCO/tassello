@@ -15,6 +15,7 @@ const RIBBON={
   Disegna:[['Strumenti','toolSelect toolNodes toolPen toolPencil toolBrush toolEraser'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath toPath'],['Combina','boolUnion boolSubtract boolIntersect boolExclude']],
   Disponi:[['Scelta','selectAll groupItems ungroupItems lockItems hideItems'],['Ordine','bringFront sendBack forward backward'],['Allinea','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Distribuisci','distH distV smartGuides'],['Oggetto','duplicateItem deleteItem readDraw']],
   Stile:[['Riempimento ed effetti','gradientItem shadowItem'],['Testo','textOnPath textOffPath']],
+  Immagine:[['Immagine','imgEdit imgMasks imgCutout imgPhotoReset'],['Ritaglio','imgClip imgUnclip']],
   Foglio:[['Foglio','sheetSize sheetDesc newDraw'],['Accessibilità','a11yCheck']],
   Vista:[['Zoom','zoomIn zoomOut zoomFit'],['Tasselli','showLayers showProps layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]}};
 const TABS={i:Object.keys(RIBBON.i),d:Object.keys(RIBBON.d)};

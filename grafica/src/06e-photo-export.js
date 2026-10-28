@@ -15,6 +15,17 @@ async function exportDialog(){if(!I.bmp){toast('Apri prima una foto');return}con
  const blob=await work('Esportazione',()=>renderFull(w,h,f.mime,Number(r.quality)/100));if(!blob)return;
  if(blob.type!==f.mime){toast(`Il browser non sa scrivere ${f.label}: niente è stato salvato`);return}
  download(blob,extName(r.name||I.name,f.ext),f.mime);toast(`Esportata in ${f.label}, ${fmtInt(w)} × ${fmtInt(h)} pixel, ${fmtBytes(blob.size)}`)}
+// PNG scritto qui, per le maschere dell'SVG (grigio con trasparenza, che il canvas non sa scrivere): filtro Sub su ogni
+// riga e la compressione deflate del browser (CompressionStream), a pezzi così la pagina resta viva. type: 0 grigio,
+// 2 RGB, 4 grigio con trasparenza, 6 RGBA; data ha i canali uno dopo l'altro, riga per riga.
+const CRC_TAB=Int32Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;return c});
+function crc32(a,c=-1){for(let i=0;i<a.length;i++)c=CRC_TAB[(c^a[i])&255]^(c>>>8);return c}
+async function pngEncode(w,h,data,type){const ch={0:1,2:3,4:2,6:4}[type],row=w*ch,raw=new Uint8Array((row+1)*h);
+ for(let y=0,o=0,s=0;y<h;y++,s+=row){raw[o++]=1;for(let x=s;x<s+ch;x++)raw[o++]=data[x];for(let x=s+ch,e=s+row;x<e;x++)raw[o++]=data[x]-data[x-ch]}
+ const cs=new CompressionStream('deflate'),out=new Response(cs.readable).arrayBuffer(),wr=cs.writable.getWriter();for(let i=0;i<raw.length;i+=1<<22)await wr.write(raw.subarray(i,i+(1<<22)));wr.close();const z=new Uint8Array(await out);
+ const chunk=(t,d)=>{const head=new Uint8Array(8),tail=new Uint8Array(4),v=new DataView(head.buffer);v.setUint32(0,d.length);for(let i=0;i<4;i++)head[4+i]=t.charCodeAt(i);new DataView(tail.buffer).setUint32(0,~crc32(d,crc32(head.subarray(4)))>>>0);return [head,d,tail]};
+ const ih=new Uint8Array(13),v=new DataView(ih.buffer);v.setUint32(0,w);v.setUint32(4,h);ih[8]=8;ih[9]=type;
+ return new Blob([new Uint8Array([137,80,78,71,13,10,26,10]),...chunk('IHDR',ih),...chunk('IDAT',z),...chunk('IEND',new Uint8Array(0))],{type:'image/png'})}
 async function renderFull(w,h,mime,quality){const cv=new OffscreenCanvas(w,h),ctx=cv.getContext('2d',{willReadFrequently:true});drawGeometry(ctx,I.bmp,I.r,w,h);const src=ctx.getImageData(0,0,w,h),mc=prepareMasks(I.r,maskCtx(I.r,w,h,src));ctx.putImageData(develop(src,src,I.r,lutOf(I.r.look),mc),0,0);
  // Il JPEG non ha trasparenza: le parti trasparenti (anche quelle dello scontorno) diventano bianche invece che nere.
  if(mime==='image/jpeg'){ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h)}
