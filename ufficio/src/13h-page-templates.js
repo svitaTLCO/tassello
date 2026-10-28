@@ -26,7 +26,8 @@ const PG_V='post quadrato storia a4 letter a5 a3 a2 a1 a0';
 // di un telefono: i testi crescono fino a questa misura),
 // m cornici del mastro, p pagine. Una pagina è un elenco di cornici, oppure {r:3,p:[…]} da ripetere ({p} è il numero
 // della ripetizione), {d:1,p:[…]} da ripetere per ogni riga dei dati, {x:1,p:[…]} senza mastro.
-// Cornici: ['q',bordi…,'contenuto',{…}] codice QR (meglio con q, quadrato), ['t',bordi…,'paragrafi',{…}] testo, ['i',bordi…,{…}] immagine, ['s',bordi…,'scritta',{…}] insegna,
+// Cornici: ['b',bordi…,'A;B|1;2',{…}] tabella (righe separate da |, celle da ;, la prima è l'intestazione; st stile, sz corpo
+// in volte il corpo del testo), ['q',bordi…,'contenuto',{…}] codice QR (meglio con q, quadrato), ['t',bordi…,'paragrafi',{…}] testo, ['i',bordi…,{…}] immagine, ['s',bordi…,'scritta',{…}] insegna,
 // ['r'|'e'|'v',bordi…,'colore',{…}] rettangolo, ellisse e triangolo, ['l',bordi…,'colore'] linea, ['g',bordi…,'griglia',{…}]
 // griglia di foto (PG_GRIDS). I paragrafi sono «lettera:testo» separati da |; con + davanti valgono solo nei formati da
 // stampa, con - solo in quelli per lo schermo. Opzioni: n nome, f sfondo, r angoli (frazione del lato corto), v allineamento
@@ -197,6 +198,9 @@ const PG_TEMPLATES=[
   p:[[['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['s',0,0,1,.4,'Nome Cognome',{c1:'light'}],['t',0,.42,1,.6,'O:Il tuo ruolo'],['t',0,.62,1,1,'N:Telefono · e-mail|N:sito',{v:'b'}]],
    [['r',-1,-1,2,2,'accent',{n:'Sfondo'}],['s',.2,.1,.8,.9,'NC',{q:1,c1:'light',n:'Iniziali'}]]]},
  // Cartoline: davanti la foto, dietro lo spazio per il messaggio, l'indirizzo e il francobollo.
+ {id:'listino',n:'Listino con tabella',d:'Il titolo, una frase e una tabella a strisce con i servizi, la durata e i prezzi, da scrivere o da riempire con i dati di un file.',u:'menu offerta',f:'a4 letter a5 a3',th:'classico',sp:.024,
+  p:[[['t',0,0,1,.17,'o:Listino 2026|t:I nostri prezzi'],['t',0,.19,1,.3,'c:Scrivi qui in una frase che cosa contiene il listino.|+c:La tabella si scrive nelle proprietà, oppure si riempie con i dati di un file CSV o XLSX: Riempi dai dati.'],
+   ['b',0,.33,1,.88,'Servizio;Durata;Prezzo|Prima voce;30 minuti;25 €|Seconda voce;1 ora;40 €|Terza voce;1 ora e mezza;55 €|Quarta voce;2 ore;70 €',{st:'zebra'}],['t',0,.92,1,1,'n:Indirizzo · telefono · sito']]]},
  {id:'bv-qr',n:'Con codice QR',d:'Davanti il nome, il ruolo e i contatti; dietro un codice QR che porta al tuo sito, con una riga che lo spiega.',u:'contatti',f:'biglietto',th:'mare',
   p:[[['r',-1,-1,-.6,2,'accent',{n:'Barra'}],['t',0,.08,1,.6,'h:Nome Cognome|d:Il tuo ruolo',{v:'m'}],['l',0,.68,.35,.68,'accent',{w:.15}],['t',0,.72,1,1,'n:Telefono · e-mail|n:Indirizzo, città',{v:'b'}]],
    [['q',0,0,.5,1,'https://www.esempio.it',{q:1,n:'Codice QR del sito'}],['t',.56,0,1,1,'h:Inquadra il codice|n:Porta al sito: scrivi qui anche l’indirizzo, per chi non può inquadrarlo.',{v:'m'}]]]},
@@ -259,6 +263,7 @@ function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_
    if(o.k&&chains[o.k])return pgPutLinked(p,h,chains[o.k],x);const it=pgPutText(p,h,x,paras(a,n,pi));if(o.k)chains[o.k]=it;return it}
   if(k==='i')return pgPut(h,pgMk(p,'image',{name:nm('Foto'),...B,fill:o.f?tok(o.f):'none',radius:rad,...ef,...(o.ad?{adj:{...o.ad}}:{}),...(o.lk?{look:o.lk}:{}),deco:!!o.d,...(o.m?{mask:o.m}:{})}));
   if(k==='s'){const st=o.st||'classica',c={};for(const z of ['c1','c2','oc','oc2','shc','gc'])if(o[z])c[z]=tok(o[z]);return pgPut(h,pgMk(p,'sign',{...pgSignStyle(st),style:st,name:nm('Scritta'),text:fill(a,n,pi),...B,c1:T.head,...c,...ef,...o.x}))}
+  if(k==='b')return pgPut(h,pgMk(p,'table',{name:nm('Tabella'),...B,cells:a.split('|').map(r=>r.split(';').map(c=>fill(c,n,pi))),head:1,tstyle:o.st||'righe',size:r1(b*(o.sz||1)),ink:T.ink,hc:T.dark,hink:T.light,line:T.accent,zc:T.soft,...ef}));
   if(k==='q')return pgPut(h,pgMk(p,'qr',{name:nm('Codice QR'),...B,text:fill(a,n,pi),...ef,...o.x}));
   if(k==='l')return pgPut(h,pgMk(p,'line',{name:nm('Linea'),x:B.x,y:B.y,w:B.w,h:B.h,stroke:tok(a||'accent'),...(o.w?{sw:b*o.w}:{}),...ef}));
   if(k==='g'){const cells=PG_GRIDS.find(x=>x[0]===a)[2],g=p.gut*.6,gid=uid(),e6=1e-6;return cells.map(([u,v,cw,ch])=>{const l=u>e6?g/2:0,r=u+cw<1-e6?g/2:0,tp=v>e6?g/2:0,bt=v+ch<1-e6?g/2:0;return pgPut(h,pgMk(p,'image',{name:nm(o.n||'Foto'),...B,x:B.x+u*B.w+l,y:B.y+v*B.h+tp,w:cw*B.w-l-r,h:ch*B.h-tp-bt,fill:o.f?tok(o.f):'none',g:gid,...(o.m?{mask:o.m}:{})}))})}

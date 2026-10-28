@@ -31,10 +31,10 @@ const PG_PRESETS=[
  ['a0','Poster A0 (841 × 1189 mm)',841*MM,1189*MM,'mm',[40,40,40,40].map(v=>v*MM),1,14*MM,1,56],
  ['striscione','Striscione 300 × 50 cm',3000*MM,500*MM,'mm',[40,60,40,60].map(v=>v*MM),1,20*MM,1,110],
  ['slide','Presentazione 16:9 (1920 × 1080 px)',1920,1080,'px',[96,120,120,120],1,48,3,40]];
-const PG_KIND={text:'Testo',image:'Immagine',sign:'Insegna',rect:'Rettangolo',ellipse:'Ellisse',tri:'Triangolo',line:'Linea',qr:'Codice QR'};
-const PG_ICON={text:'textbox',image:'image',sign:'sign',rect:'rect',ellipse:'ellipse',tri:'triangle',line:'lineI',qr:'qr'};
+const PG_KIND={text:'Testo',image:'Immagine',sign:'Insegna',rect:'Rettangolo',ellipse:'Ellisse',tri:'Triangolo',line:'Linea',qr:'Codice QR',table:'Tabella'};
+const PG_ICON={text:'textbox',image:'image',sign:'sign',rect:'rect',ellipse:'ellipse',tri:'triangle',line:'lineI',qr:'qr',table:'table'};
 // Le cornici che portano un contenuto da leggere: le altre nascono decorative.
-const PG_CONTENT=new Set(['text','image','sign','qr']),pgKindSay=k=>PG_KIND[k][0].toLowerCase()+PG_KIND[k].slice(1);
+const PG_CONTENT=new Set(['text','image','sign','qr','table']),pgKindSay=k=>PG_KIND[k][0].toLowerCase()+PG_KIND[k].slice(1);
 // Caratteri: quelli del sistema, con la famiglia generica di riserva.
 const fontStack=f=>`'${String(f).replace(/['"]/g,'')}', ${/^(Georgia|Cambria|Times New Roman)$/.test(f)?'serif':f==='Consolas'?'monospace':'sans-serif'}`;
 const r1=v=>Math.round(v*10)/10,pr2=v=>Math.round(v*100)/100,clampV=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -59,7 +59,7 @@ const pgBlankPage=p=>({id:uid(),master:p.masters[0]?.id||'',items:[],read:[],dat
 // Nomi delle cornici: «Testo 1», «Immagine 2»… unici in tutto il documento.
 function pgNextName(p,kind){const base=PG_KIND[kind],used=new Set(pgAllItems(p).map(x=>x.name));let n=1;while(used.has(base+' '+n))n++;return base+' '+n}
 const pgAllItems=p=>[...p.masters,...p.pages].flatMap(h=>h.items);
-const PG_DEF={text:p=>({story:'',cols:1,gut:p.gut,pad:0,valign:'top'}),image:()=>({img:'',fit:'fill',fx:50,fy:50,field:'',file:''}),sign:()=>({...pgSignStyle('classica'),style:'classica',text:'Scrivi qui',fit:true,size:48,img:''}),rect:()=>({fill:'#f6e8da'}),ellipse:()=>({fill:'#f6e8da'}),tri:()=>({fill:'#f6e8da'}),line:p=>({h:0,sw:Math.max(1,Math.round(p.w/400))}),qr:()=>({text:'https://www.esempio.it',ec:'M',dark:'#000000',light:'#ffffff',quiet:4,field:''})};
+const PG_DEF={text:p=>({story:'',cols:1,gut:p.gut,pad:0,valign:'top'}),image:()=>({img:'',fit:'fill',fx:50,fy:50,field:'',file:''}),sign:()=>({...pgSignStyle('classica'),style:'classica',text:'Scrivi qui',fit:true,size:48,img:''}),rect:()=>({fill:'#f6e8da'}),ellipse:()=>({fill:'#f6e8da'}),tri:()=>({fill:'#f6e8da'}),line:p=>({h:0,sw:Math.max(1,Math.round(p.w/400))}),qr:()=>({text:'https://www.esempio.it',ec:'M',dark:'#000000',light:'#ffffff',quiet:4,field:''}),table:p=>pgTableDef(p)};
 function pgMk(p,kind,o={}){return {id:uid(),kind,name:o.name||pgNextName(p,kind),x:0,y:0,w:100,h:100,fill:'none',stroke:'#1b1b1b',sw:0,radius:0,opacity:100,alt:'',deco:!PG_CONTENT.has(kind),...PG_DEF[kind](p),...o}}
 function pgPut(holder,it){holder.items.push(it);holder.read.push(it.id);return it}
 function pgNewStory(p,paras){const id=uid();p.stories[id]={paras:paras.length?paras:[P('corpo','')],chain:[],src:''};return id}
@@ -214,6 +214,7 @@ function pgItemShape(it,L,ctx,href,fv,edge){const op=it.opacity<100?` opacity="$
   case 'tri':return `<polygon points="${pr2(it.x)},${pr2(it.y)} ${pr2(it.x+it.w)},${pr2(it.y)} ${pr2(it.x+it.w/2)},${pr2(it.y+it.h)}" ${paint} stroke-linejoin="round"${op}/>`;
   case 'sign':return pgSignSvg(it,ctx,href);
   case 'qr':return pgQrSvg(it,ctx);
+  case 'table':return pgTableSvg(it,ctx);
   case 'image':{const m=pgPhotoFor(it,ctx),d=pgMaskPath(it),pic=()=>{const [ox,oy,dw,dh]=pgFitBox(it,m);return `<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg>`};
    // Il contorno va sopra la foto, che altrimenti ne coprirebbe metà.
    if(!d){const back=it.fill!=='none'?`<rect ${box}${rx} fill="${fv}"/>`:'',line=edge?`<rect ${box}${rx} fill="none"${stroke}/>`:'';if(!m)return back||line?`<g${op}>${back}${line}</g>`:'';return `<g${op}>${back}${pic()}${line}</g>`}
