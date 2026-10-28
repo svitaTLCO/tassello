@@ -20,6 +20,10 @@ const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden]')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body){if(t.id==='wordEditor')restoreWordFocus();else t.focus({preventScroll:true})}}
 function trapTab(e,root){if(e.key!=='Tab')return;const f=focusables(root);if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&i<=0){e.preventDefault();f.at(-1).focus()}else if(!e.shiftKey&&(i===f.length-1||i<0)){e.preventDefault();f[0].focus()}}
+// Finestra di dialogo modale con campi etichettati. opts.validate(valori) può rifiutare i valori con un messaggio (una stringa,
+// o {msg,field} per indicare il campo): la finestra resta aperta con quello che si è scritto, il messaggio compare sotto il
+// campo ed è annunciato, il campo prende aria-invalid ed è collegato al messaggio, e il fuoco torna lì. Il messaggio sparisce
+// quando si corregge il campo.
 function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new Promise(resolve=>{const pane=$('modal'),bg=$('modalbg'),prev=document.activeElement;
  const field=x=>{const id='dlg_'+x.id,hint=x.hint?`<small class="hint" id="${id}_h">${esc(x.hint)}</small>`:'',desc=x.hint?` aria-describedby="${id}_h"`:'';
   if(x.type==='checkbox')return `<label class="check"><input type="checkbox" id="${id}"${x.value?' checked':''}${desc}> ${esc(x.label)}</label>${hint}`;
@@ -28,16 +32,23 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
   if(x.type==='textarea')return lab+`<textarea id="${id}" rows="${x.rows||3}"${desc}>${esc(x.value||'')}</textarea>`+hint;
   return lab+`<input id="${id}" type="${x.type||'text'}" value="${esc(x.value??'')}"${x.min!==undefined?` min="${x.min}"`:''}${x.max!==undefined?` max="${x.max}"`:''} autocomplete="off"${desc}>`+hint};
  pane.className='modal'+(opts.wide?' wide':'');pane.setAttribute('aria-describedby','dlgBody');
- pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<div class="modal-actions">${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
+ pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="dlg-err" id="dlgErr" role="alert" hidden></p><div class="modal-actions">${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
  bg.hidden=false;
  const finish=v=>{bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
- $('dialogForm').onsubmit=e=>{e.preventDefault();const obj={};for(const x of fields){const el=$('dlg_'+x.id);obj[x.id]=x.type==='checkbox'?el.checked:el.value}finish(obj)};
+ const values=()=>{const obj={};for(const x of fields){const el=$('dlg_'+x.id);obj[x.id]=x.type==='checkbox'?el.checked:el.value}return obj};
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){dlgError(typeof bad==='string'?{msg:bad,field:fields.length===1?fields[0].id:''}:bad);return}finish(v)};
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);
  setTimeout(()=>{const f=fields[0]?$('dlg_'+fields[0].id):(pane.querySelector('[data-autofocus]')||$('okDlg'));f?.focus({preventScroll:!fields[0]});pane.scrollTop=0;if(f?.select&&f.type!=='checkbox')f.select()},0);
 });}
+// Mostra l'errore della finestra aperta: sotto il campo indicato (o sopra i pulsanti), riscritto perché venga riletto anche se uguale.
+function dlgError({msg,field}){const box=$('dlgErr'),el=field?$('dlg_'+field):null;if(!box)return;for(const x of $$('[aria-invalid=true]',$('modal')))dlgClearInvalid(x);
+ const after=el?(el.type==='checkbox'?el.closest('label'):el).nextElementSibling?.classList.contains('hint')?(el.type==='checkbox'?el.closest('label'):el).nextElementSibling:(el.type==='checkbox'?el.closest('label'):el):null;
+ if(after)after.after(box);else $('dialogForm').querySelector('.modal-actions').before(box);box.hidden=false;box.textContent='';setTimeout(()=>{box.textContent=msg},40);
+ if(el){el.setAttribute('aria-invalid','true');el.dataset.desc=el.getAttribute('aria-describedby')||'';el.setAttribute('aria-describedby',(el.dataset.desc+' dlgErr').trim());el.addEventListener('input',()=>{dlgClearInvalid(el);box.hidden=true;box.textContent=''},{once:true});el.focus();if(el.select&&/^(text|search|url|email|number|)$/.test(el.type))el.select()}}
+function dlgClearInvalid(el){el.removeAttribute('aria-invalid');if(el.dataset.desc!==undefined){if(el.dataset.desc)el.setAttribute('aria-describedby',el.dataset.desc);else el.removeAttribute('aria-describedby');delete el.dataset.desc}}
 const overlayOpen=()=>!$('modalbg').hidden||!$('palettebg').hidden||!$('filepanel').hidden||!$('menu').hidden;
 const tip=$('tip');let tipTimer;
 function showTip(el){const t=el.dataset.tip;if(!t||!el.isConnected)return;tip.textContent=t;tip.hidden=false;const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;let x=Math.min(innerWidth-w-6,Math.max(6,r.left+r.width/2-w/2)),y=r.bottom+6;if(y+h>innerHeight-4)y=r.top-h-6;tip.style.left=x+'px';tip.style.top=y+'px'}

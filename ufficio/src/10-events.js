@@ -57,7 +57,7 @@ addEventListener('resize',()=>renderGrid());
 // Mouse sulla griglia: cella (Maiusc estende la selezione, trascinando si allarga), intestazione di colonna o di riga, angolo per tutto il foglio.
 const cellOf=td=>({r:Number(td.dataset.r),c:Number(td.dataset.c)});
 $('grid').addEventListener('mousedown',e=>{if(e.button!==0)return;const td=e.target.closest('td[data-r]');
- if(td){e.preventDefault();finishCell(false,false);const {r,c}=cellOf(td);e.shiftKey?setSelection(state.sel.r,state.sel.c,r,c):setSelection(r,c);sheetDrag=true;gs.focus({preventScroll:true});return}
+ if(td){e.preventDefault();finishCell(false,false);const {r,c}=cellOf(td);e.shiftKey||extendSel?setSelection(state.sel.r,state.sel.c,r,c):setSelection(r,c);sheetDrag=true;gs.focus({preventScroll:true});return}
  const colHead=e.target.closest('th[data-col]'),rowHead=e.target.closest('th[data-rhead]'),corner=e.target.closest('th[data-corner]');if(!colHead&&!rowHead&&!corner)return;
  e.preventDefault();finishCell(false,false);
  if(corner)setSelection(0,0,ROWS-1,COLS-1);
@@ -68,7 +68,7 @@ $('grid').addEventListener('mouseover',e=>{const td=sheetDrag&&e.target.closest(
 addEventListener('mouseup',()=>{sheetDrag=false});
 $('grid').addEventListener('dblclick',({target})=>{const td=target.closest('td[data-r]');if(!td)return;const {r,c}=cellOf(td);editCell(r,c)});
 $('grid').addEventListener('contextmenu',e=>{const td=e.target.closest('td[data-r]');if(!td)return;e.preventDefault();const r=+td.dataset.r,c=+td.dataset.c,b=selectedBounds();if(r<b.r1||r>b.r2||c<b.c1||c>b.c2)setSelection(r,c);gs.focus({preventScroll:true});cellMenu(e.clientX,e.clientY)});
-gs.addEventListener('keydown',e=>{if(!isCalc()||e.target!==gs||e.defaultPrevented)return;const k=e.key,shift=e.shiftKey,ctrl=e.ctrlKey||e.metaKey,altgr=e.getModifierState?.('AltGraph')||(e.ctrlKey&&e.altKey),{r,c}=state.sel;
+gs.addEventListener('keydown',e=>{if(!isCalc()||e.target!==gs||e.defaultPrevented)return;if(extendSel&&e.key==='Escape'){e.preventDefault();extendSelToggle(false);return}const k=e.key,shift=e.shiftKey||extendSel,ctrl=e.ctrlKey||e.metaKey,altgr=e.getModifierState?.('AltGraph')||(e.ctrlKey&&e.altKey),{r,c}=state.sel;
  if(k==='Tab'&&tabExitArmed){tabExitArmed=false;return}if(k!=='Escape'&&k!=='Shift')tabExitArmed=false;
  const nav={ArrowDown:[1,0],ArrowUp:[-1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[k];
  if(nav&&!e.altKey){e.preventDefault();ctrl?jump(nav[0],nav[1],shift):moveCell(nav[0],nav[1],shift);return}

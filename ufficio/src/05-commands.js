@@ -261,6 +261,7 @@ def('x','Selezione e navigazione',[
  ['selectRow','Seleziona la riga','','Maiusc+Spazio',{ctx:'grid'}],
  ['selectCol','Seleziona la colonna','','Ctrl+Spazio',{ctx:'grid'}],
  ['goto','Vai alla cella o all’intervallo','goto','Ctrl+G',{g:1,short:'Vai a'}],
+ ['extendSel','Estendi la selezione','resize','F8',{ctx:'grid',short:'Estendi selezione',toggle:()=>extendSel}],
  ['toggleGrid','Mostra griglia','grid','',{short:'Griglia',toggle:()=>!hideGrid}]]);
 def('x','Strumenti del foglio',[
  ['freezeMenu','Blocca riquadri','freeze','',{menu:1,short:'Blocca riquadri'}],

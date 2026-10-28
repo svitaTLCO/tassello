@@ -9,7 +9,7 @@ async function pgPersist(){clearTimeout(pgSaveTimer);pgSaveTimer=0;if(!Pg.p)retu
    for(const id of used){const m=Pg.imgs.get(id);if(m&&!pgImgSaved.has(id)){await storeCall(db,'readwrite',st=>st.put({blob:m.blob,name:m.name},'pimg:'+id));pgImgSaved.add(id)}}
    const old=(await storeCall(db,'readonly',st=>st.getAllKeys())).filter(k=>String(k).startsWith('pimg:')&&!used.has(String(k).slice(5)));if(old.length){await storeCall(db,'readwrite',st=>{for(const k of old)st.delete(k)});for(const k of old)pgImgSaved.delete(String(k).slice(5))}}
   else localStorage.setItem(PG_KEY,JSON.stringify(data));label.textContent='Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
- catch(e){label.textContent='Bozza non salvata';status('Bozza di Impagina non salvata: salva il progetto per non perdere il lavoro')}}
+ catch(e){draftFailed('Bozza di Impagina non salvata: salva il progetto per non perdere il lavoro')}}
 async function pageRestore(){let d=null;try{d=db?await storeCall(db,'readonly',st=>st.get('impagina')):JSON.parse(localStorage.getItem(PG_KEY)||'null')}catch(e){}
  if(d?.p)try{const p=pgClean(d.p);for(const id of new Set(pgAllItems(p).filter(x=>(x.kind==='image'||x.kind==='sign')&&x.img).map(x=>x.img))){const m=db?await storeCall(db,'readonly',st=>st.get('pimg:'+id)).catch(()=>null):null;if(m?.blob)try{await pgRegister(id,m.blob,m.name);pgImgSaved.add(id)}catch(e){}}
   Object.assign(Pg,{p,pi:clampV(d.pi|0,0,p.pages.length-1),mid:p.masters.some(m=>m.id===d.mid)?d.mid:'',row:Math.max(0,d.row|0),guides:d.guides!==false,grid:!!d.grid,hist:[],redo:[]});Pg.base=pgSnap()}catch(e){console.warn('Bozza di Impagina non recuperabile',e)}
