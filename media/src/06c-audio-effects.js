@@ -86,7 +86,7 @@ const EFFECTS={
 // Parte su cui agisce un effetto: la selezione, oppure (per le dissolvenze senza selezione) dall'inizio al cursore
 // o dal cursore alla fine, oppure tutto l'audio.
 function effectRange(id){if(hasSel())return[A.selA,A.selB];if(id==='fadeIn'&&A.cursor>0)return[0,A.cursor];if(id==='fadeOut'&&A.cursor<alen())return[A.cursor,alen()];return[0,alen()]}
-const rangeWords=([a,b])=>a===0&&b===alen()?`tutto l’audio (${sayTime(sec(b-a))})`:`il tratto da ${fmtTime(sec(a),1)} a ${fmtTime(sec(b),1)} (${sayTime(sec(b-a))})`;
+const rangeWords=([a,b])=>a===0&&b===alen()?`tutto l’audio (${sayTime(sec(b-a))})`:`il tratto da ${sayTime(sec(a))} a ${sayTime(sec(b))} (${sayTime(sec(b-a))})`;
 const lastParams={};
 async function applyEffect(id,params={}){const fx=EFFECTS[id];if(!A.buf){toast('Nessun audio aperto');return}const [a,b]=effectRange(id);if(b<=a){toast('Il tratto è vuoto');return}const ctx={};
  const out=await work(fx.label,async()=>fx.run(sliceCh(A.buf,a,b),A.rate,params,ctx));if(!out)return;

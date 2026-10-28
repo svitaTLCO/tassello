@@ -110,12 +110,13 @@ async function insertAudioFile(file){const res=await work('Lettura di «'+file.n
 // Appunti dell'audio: copia, taglia, incolla e incolla mescolando.
 function needSel(){if(!A.buf){toast('Nessun audio aperto');return false}if(!hasSel()){toast('Prima seleziona una parte: Maiusc con le frecce, oppure I e O');return false}return true}
 function audioCopy(){if(!needSel())return;aclip=copyRange(A.buf,A.selA,A.selB);announce('Copiati '+sayTime(aclip.duration))}
-function audioCut(){if(!needSel())return;aclip=copyRange(A.buf,A.selA,A.selB);const d=aclip.duration;audioEdit('Taglia',A.selA,A.selB,null);announce('Tagliati '+sayTime(d))}
+function audioCut(){if(!needSel())return;aclip=copyRange(A.buf,A.selA,A.selB);const d=aclip.duration;audioEdit('Taglia',A.selA,A.selB,null);if(A.buf)announce('Tagliati '+sayTime(d))}
 async function audioPaste(){if(!aclip){toast('Gli appunti dell’audio sono vuoti: copia o taglia prima una parte');return}const ins=await conformAudio(aclip),a=hasSel()?A.selA:A.cursor,b=hasSel()?A.selB:A.cursor;audioEdit('Incolla',a,b,ins);announce('Incollati '+sayTime(aclip.duration)+(b>a?' al posto della selezione':' al cursore'))}
 async function audioPasteMix(){if(!aclip){toast('Gli appunti dell’audio sono vuoti: copia o taglia prima una parte');return}if(!A.buf){audioPaste();return}const ins=await conformAudio(aclip),a=A.cursor,n=ins[0].length,b=Math.min(alen(),a+n),out=[];
  for(let c=0;c<A.nch;c++){const cur=A.buf.getChannelData(c).subarray(a,b),m=new Float32Array(n);m.set(cur);for(let i=0;i<n;i++)m[i]+=ins[c][i];out.push(m)}
  audioEdit('Incolla mescolando',a,b,out);const peak=Math.max(...out.map(d=>d.reduce((p,x)=>Math.max(p,Math.abs(x)),0)));announce('Mescolati '+sayTime(n/A.rate)+(peak>1?'. Attenzione: il livello supera il fondo scala, normalizza o attenua la parte selezionata':''))}
-function deleteSelection(){if(!needSel())return;const d=sec(A.selB-A.selA);audioEdit('Elimina',A.selA,A.selB,null);announce('Eliminati '+sayTime(d)+', cursore a '+sayTime(sec(A.cursor)))}
+// Se si toglie tutto l'audio della regione, parla regionFromEditor: la regione è stata tolta dalla traccia.
+function deleteSelection(){if(!needSel())return;const d=sec(A.selB-A.selA);audioEdit('Elimina',A.selA,A.selB,null);if(A.buf)announce('Eliminati '+sayTime(d)+', cursore a '+sayTime(sec(A.cursor)))}
 function trimToSelection(){if(!needSel())return;const a=A.selA,b=A.selB;stopPlayback(false);const old=A.buf,before=snapA(),nb=copyRange(old,a,b);A.buf=nb;A.markers=A.markers.filter(m=>m.pos>=a&&m.pos<=b).map(m=>({...m,pos:m.pos-a}));A.cursor=0;A.selA=0;A.selB=0;const after=snapA();
  pushHist({label:'Ritaglia',bytes:(old.length+nb.length)*A.nch*4,undo:()=>{A.buf=old;restoreA(before)},redo:()=>{A.buf=nb;restoreA(after)}});audioChanged();zoomFitAudio();announce('Tenuta solo la selezione: ora l’audio dura '+sayTime(adur()))}
 function silenceSel(){if(!needSel())return;audioEdit('Silenzia',A.selA,A.selB,Array.from({length:A.nch},()=>new Float32Array(A.selB-A.selA)),{sel:[A.selA,A.selB]});announce('Selezione silenziata')}

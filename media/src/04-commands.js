@@ -38,9 +38,9 @@ def('a','Tracce',[
  ['cycle','Ciclo: ripeti il tratto tra inizio e fine del ciclo','loop','',{short:'Ciclo',toggle:()=>P.cycle.on}],
  ['cycleRegion','Ciclo sulla regione scelta','loop','',{short:'Ciclo sulla regione'}],
  ['metronome','Metronomo','metronome','',{short:'Metronomo',toggle:()=>P.metro}],
- ['countInToggle','Battuta di conteggio prima di registrare','metronome','',{short:'Conteggio',toggle:()=>P.countIn}],
+ ['countInToggle','Battuta di conteggio prima di registrare','metronome','',{short:'Conteggio',toggle:()=>P.countIn,said:['Battuta di conteggio attivata: prima di registrare suona una battuta','Battuta di conteggio disattivata']}],
  ['tempoSettings','Tempo, battuta, griglia e latenza…','metronome','',{short:'Tempo'}],
- ['toggleEditor','Editor della regione','wave','Ctrl+E',{short:'Editor',toggle:()=>!$('editorArea').classList.contains('closed')}],
+ ['toggleEditor','Editor della regione','wave','Ctrl+E',{short:'Editor',toggle:()=>!$('editorArea').classList.contains('closed'),said:['Editor della regione aperto','Editor della regione chiuso']}],
  ['playRegion','Ascolta la regione nell’editor','play','',{short:'Ascolta la regione'}],
  ['focusTracks','Vai alle tracce','tracks','Ctrl+Alt+L',{g:1}]]);
 def('v','File',[
@@ -71,8 +71,8 @@ def('av','Generale',[
  ['zoomIn','Aumenta lo zoom','zoomIn','',{short:'Zoom avanti'}],
  ['zoomOut','Riduci lo zoom','zoomOut','',{short:'Zoom indietro'}],
  ['zoomFit','Mostra tutto','zoomFit','',{short:'Tutto'}],
- ['follow','Segui la riproduzione','follow','',{short:'Segui',toggle:()=>prefs.follow}],
- ['snap','Aggancio ai bordi durante il trascinamento (Alt lo sospende)','magnet','',{short:'Aggancio',toggle:()=>prefs.snap}],
+ ['follow','Segui la riproduzione','follow','',{short:'Segui',toggle:()=>prefs.follow,said:['La vista segue la riproduzione','La vista non segue più la riproduzione']}],
+ ['snap','Aggancio ai bordi durante il trascinamento (Alt lo sospende)','magnet','',{short:'Aggancio',toggle:()=>prefs.snap,said:['Aggancio ai bordi attivato','Aggancio ai bordi disattivato']}],
  ['themeDark','Tema scuro','moon','',{short:'Tema scuro',toggle:()=>prefs.theme==='dark'}],
  ['contrast','Contrasto elevato','contrast','',{short:'Contrasto elevato',toggle:()=>prefs.contrast}]]);
 def('a','Selezione',[
@@ -92,10 +92,10 @@ def('a','Modifica',[
  ['insertSilence','Inserisci silenzio al cursore…','insertSilence','',{short:'Inserisci silenzio'}]]);
 def('a','Riproduzione',[
  ['playSel','Riproduci la selezione','playSel','',{short:'Selezione'}],
- ['loop','Ripetizione ciclica della selezione','loop','',{short:'Ciclo',toggle:()=>aplay.loop}],
+ ['loop','Ripetizione ciclica della selezione','loop','',{short:'Ciclo',toggle:()=>aplay.loop,said:['Ciclo sulla selezione attivato','Ciclo sulla selezione disattivato']}],
  ['playBefore','Ascolta i 2 secondi prima del cursore','frameBack','',{short:'Prima'}],
  ['playAfter','Ascolta i 2 secondi dopo il cursore','frameFwd','',{short:'Dopo'}],
- ['scrub','Ascolta mentre sposti il cursore','speak','',{short:'Ascolto al passaggio',toggle:()=>prefs.scrub}],
+ ['scrub','Ascolta mentre sposti il cursore','speak','',{short:'Ascolto al passaggio',toggle:()=>prefs.scrub,said:['Ascolto al passaggio attivato','Ascolto al passaggio disattivato']}],
  ['recordAudio','Registra sulla traccia scelta, dall’indicatore','mic','Ctrl+Alt+R',{g:1,short:'Registra'}]]);
 def('a','Effetti',[
  ['amplify','Amplifica o attenua…','amplify','',{short:'Amplifica'}],
@@ -126,7 +126,7 @@ def('a','Inserisci',[
  ['markerDelete','Elimina il marcatore più vicino','trash','',{short:'Elimina'}],
  ['markersClear','Elimina tutti i marcatori','trash','',{short:'Elimina tutti'}],
  ['markersFromPauses','Aggiungi marcatori all’inizio di ogni parte dopo una pausa','pauses','',{short:'Sulle pause'}],
- ['markPane','Riquadro dei marcatori','markers','',{short:'Riquadro',toggle:()=>!$('markPane').hidden}]]);
+ ['markPane','Riquadro dei marcatori','markers','',{short:'Riquadro',toggle:()=>!$('markPane').hidden,said:['Riquadro dei marcatori aperto','Riquadro dei marcatori chiuso']}]]);
 def('a','Analisi',[
  ['stats','Statistiche: durata, picco, volume medio e distorsioni','stats','',{short:'Statistiche'}],
  ['readLevel','Leggi il livello intorno al cursore','speak','',{short:'Livello'}],
@@ -154,18 +154,18 @@ def('v','Clip',[
  ['adjust','Luce e colore della clip…','light','',{short:'Luce e colore'}],
  ['clipSpeed','Velocità della clip…','speed','',{short:'Velocità'}],
  ['clipVolume','Volume dell’elemento…','volume','',{short:'Volume'}],
- ['clipMute','Audio della clip disattivato','mute','',{short:'Muto',toggle:()=>!!selected()?.mute}],
+ ['clipMute','Muto della clip','mute','',{short:'Muto',toggle:()=>!!selected()?.mute}],
  ['fadeInV','Dissolvenza in entrata dell’elemento','fadeIn','',{short:'Entrata'}],
  ['fadeOutV','Dissolvenza in uscita dell’elemento','fadeOut','',{short:'Uscita'}],
  ['rotate','Ruota la clip di 90 gradi','rotate','',{short:'Ruota'}],
- ['flip','Clip riflessa orizzontalmente','flip','',{short:'Rifletti',toggle:()=>!!selected()?.flip}],
+ ['flip','Riflessione orizzontale della clip','flip','',{short:'Rifletti',toggle:()=>!!selected()?.flip}],
  ['fitMode','Riempi l’inquadratura ritagliando i bordi','fit','',{short:'Riempi',toggle:()=>selected()?.fit==='cover'}]]);
 def('v','Testo',[
  ['addSub','Aggiungi un sottotitolo all’indicatore','subs','Ctrl+Alt+S',{g:1,short:'Sottotitolo'}],
  ['subImport','Importa sottotitoli (SRT o VTT)','import','',{short:'Importa'}],
  ['subExport','Esporta i sottotitoli (SRT o VTT)','export','',{short:'Esporta'}],
- ['subShow','Mostra i sottotitoli nell’anteprima','subs','',{short:'Mostra',toggle:()=>prefs.showSubs}],
- ['subBurn','Imprimi i sottotitoli nel video esportato','subs','',{short:'Imprimi nel video',toggle:()=>!!V.p.burnSubs}]]);
+ ['subShow','Mostra i sottotitoli nell’anteprima','subs','',{short:'Mostra',toggle:()=>prefs.showSubs,said:['Sottotitoli visibili nell’anteprima','Sottotitoli nascosti nell’anteprima']}],
+ ['subBurn','Imprimi i sottotitoli nel video esportato','subs','',{short:'Imprimi nel video',toggle:()=>!!V.p.burnSubs,said:['I sottotitoli saranno impressi nel video esportato','I sottotitoli non saranno impressi nel video esportato']}]]);
 def('v','Riproduzione',[
  ['frameBack','Fotogramma precedente','frameBack','',{}],
  ['frameFwd','Fotogramma successivo','frameFwd','',{}],
@@ -193,9 +193,11 @@ const available=c=>c.modes.includes(state.mode[0]);
 function focusContext(){const a=document.activeElement;if(!a||a===document.body)return 'other';if(a.id==='wave')return 'wave';if(a.classList.contains('ar-lane'))return 'lane';if(a.id==='arPlayhead')return 'arph';if(a.id==='playhead'||a.id==='viewCanvas'||a.classList.contains('track'))return 'timeline';if(a.classList.contains('lb'))return 'list';if(a.matches('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select'))return 'input';return 'other'}
 function findShortcut(e,ctx){let fallback=null;for(const c of Object.values(C)){const spec=keysOf(c);if(!spec||!available(c))continue;if(c.ctx&&c.ctx!==ctx)continue;if(ctx==='input'&&!c.g)continue;if(parsedKeys(spec).some(k=>keyMatch(e,k))){if(c.ctx===ctx)return c;fallback??=c}}return fallback}
 const safe=fn=>{try{return fn()}catch(e){return false}};
-async function runCommand(id){const c=C[id];if(!c)return;if(!available(c)){toast('«'+c.label+'» non è disponibile in '+(isAudio()?'Audio':'Video'));return}hideTip();
+// Dopo un interruttore si dice il nuovo stato (said: le frasi per acceso e spento), ma solo se l'azione non ha già
+// parlato: il suo messaggio, per esempio con il nome della traccia o un avviso, è più utile.
+async function runCommand(id){const c=C[id];if(!c)return;if(!available(c)){toast('«'+c.label+'» non è disponibile in '+(isAudio()?'Audio':'Video'));return}hideTip();const said=saidCount;
  try{await handleAction(id)}catch(e){console.error(e);toast(e.message||String(e));return}
- if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}
+ refreshToggles();if(c.toggle&&!c.quiet&&saidCount===said){const on=!!safe(c.toggle);announce(c.said?c.said[on?0:1]:c.label+(on?' attivato':' disattivato'))}}
 let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#tools [aria-pressed][data-action],#drawer [aria-pressed][data-action],.transport [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}},40)}
 // Ricerca comandi (Alt+Q): combobox con elenco filtrato, navigabile con le frecce.
 let palItems=[],palIdx=0,palPrev=null;

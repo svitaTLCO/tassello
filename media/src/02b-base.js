@@ -24,7 +24,7 @@ const pad2=n=>String(n).padStart(2,'0');
 function fmtTime(sec,dec=3){if(!Number.isFinite(sec))return '—';const neg=sec<0,k=10**dec,total=Math.round(Math.abs(sec)*k),whole=Math.floor(total/k),frac=total%k,h=Math.floor(whole/3600),m=Math.floor(whole%3600/60),s=whole%60;
  return (neg?'−':'')+(h?h+':'+pad2(m):m)+':'+pad2(s)+(dec?','+String(frac).padStart(dec,'0'):'')}
 function sayTime(sec,dec=1){if(!Number.isFinite(sec))return 'tempo non valido';const k=10**dec,total=Math.round(Math.abs(sec)*k)/k,h=Math.floor(total/3600),m=Math.floor(total%3600/60),s=Math.round((total-h*3600-m*60)*k)/k,parts=[];
- if(h)parts.push(h===1?'1 ora':h+' ore');if(m)parts.push(m===1?'1 minuto':m+' minuti');if(s||!parts.length)parts.push(s===1?'1 secondo':fmtNum(s,s%1?dec:0)+' secondi');
+ if(h)parts.push(h===1?'1 ora':h+' ore');if(m)parts.push(m===1?'1 minuto':m+' minuti');if(s||!parts.length)parts.push(s===1?'1 secondo':fmtNum(s,s%1?dec:0).replace(/(,\d*?)0+$/,'$1').replace(/,$/,'')+' secondi');
  return (sec<0?'meno ':'')+(parts.length>1?parts.slice(0,-1).join(', ')+' e '+parts.at(-1):parts[0])}
 // Timecode del video: ore:minuti:secondi:fotogrammi.
 function fmtTC(sec,fps){const f=Math.round(Math.max(0,sec)*fps),fr=f%fps,t=Math.floor(f/fps);return pad2(Math.floor(t/3600))+':'+pad2(Math.floor(t%3600/60))+':'+pad2(t%60)+':'+pad2(fr)}
@@ -43,10 +43,21 @@ const fmtDb=d=>Number.isFinite(d)?fmtNum(d,1).replace('-','−')+' dB':'meno inf
 const fmtBytes=n=>n>=1e9?fmtNum(n/1e9,2)+' GB':n>=1e6?fmtNum(n/1e6,1)+' MB':fmtInt(n/1e3)+' kB';
 // Annunci per screen reader, finestre di dialogo accessibili, tooltip e preferenze di visualizzazione.
 const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
-let toastTimer;
-// Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
-function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),4200)}
-let liveTimer;function announce(msg){const el=$('srLive');el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
+// Messaggi per gli screen reader. Arrivano poco dopo nelle regioni vive (#srLive per gli annunci, #toast per i messaggi
+// che si vedono anche sullo schermo). I messaggi chiesti nello stesso momento, cioè dallo stesso tasto o dallo stesso
+// comando, si uniscono in una sola frase invece di cancellarsi; quello di un momento successivo prende il posto di
+// quello non ancora letto, così tenendo premuta una freccia si sente l'ultimo punto e non una fila di punti.
+// saidCount conta i messaggi: runCommand lo guarda per non aggiungere «… attivato» dopo il messaggio dell'azione.
+let saidCount=0,turnId=0,turnOpen=false;
+function sayTurn(){if(!turnOpen){turnOpen=true;turnId++;setTimeout(()=>{turnOpen=false},0)}return turnId}
+// Il messaggio in attesa dello stesso momento si allunga; altrimenti si ricomincia.
+function joinSaid(pending,msg){const t=sayTurn(),a=pending.turn===t?pending.msg:'';return{turn:t,msg:!a||a===msg?msg:a+(/[.!?]$/.test(a)?' ':'. ')+msg}}
+let toastTimer,toastShow,toastPending={};
+// Messaggio temporaneo: si svuota e si riscrive perché venga annunciato anche se uguale; resta visibile in proporzione alla lunghezza.
+function toast(message){const box=$('toast');saidCount++;toastPending=joinSaid(toastPending,String(message));const text=toastPending.msg;clearTimeout(toastTimer);clearTimeout(toastShow);box.textContent='';
+ toastShow=setTimeout(()=>{toastPending={};box.textContent=text;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,text.length*60))}
+let liveTimer,livePending={};
+function announce(msg){const el=$('srLive');saidCount++;livePending=joinSaid(livePending,String(msg));const text=livePending.msg;el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{livePending={};el.textContent=text},70)}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden],.hidden')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body)t.focus({preventScroll:true})}

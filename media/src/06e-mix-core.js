@@ -34,7 +34,7 @@ function openRegion(r,{focus=true,quiet=false}={}){const src=SOURCES.get(r.src);
  showEditor(true);updateEditorBar();if(focus)$('wave').focus();if(!quiet)announce(`Editor: regione «${r.name}» della traccia «${trackOf(r.track)?.name||''}», ${sayTime(r.dur)}`);return true}
 function closeRegionEditor(){A.region=null;A.own=null;A.bound=null;setAudioDoc(null,{title:'',markers:[]});updateEditorBar()}
 function regionFromEditor(){const r=regionOf(A.region);if(!r)return;
- if(!A.buf){P.regions=P.regions.filter(x=>x!==r);A.region=null;A.bound=null;projectChanged();updateEditorBar();announce('La regione è rimasta vuota ed è stata tolta dalla traccia');return}
+ if(!A.buf){P.regions=P.regions.filter(x=>x!==r);A.region=null;A.bound=null;projectChanged();updateEditorBar();announce('Eliminato tutto l’audio: la regione è rimasta vuota ed è stata tolta dalla traccia');return}
  A.own??=uid();SOURCES.set(A.own,A.buf);dirtySources.add(A.own);Object.assign(r,{src:A.own,off:0,dur:A.buf.duration,markers:A.markers.map(m=>({...m}))});A.bound={src:r.src,off:0,dur:r.dur};projectChanged();updateEditorBar()}
 function regionMarkersFromEditor(){const r=A.region&&regionOf(A.region);if(r)r.markers=A.markers.map(m=>({...m}))}
 // Se la regione nell'editor cambia altrove (annulla, taglio, divisione), l'editor la riapre; se sparisce, si svuota.
