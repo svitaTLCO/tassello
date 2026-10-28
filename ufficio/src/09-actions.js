@@ -61,7 +61,7 @@ const swapPaper=size=>setPaper(state.paper.endsWith('landscape')?size+'-landscap
 // Comandi comuni alle due app, o che scelgono da sé che cosa fare: ricevono word (true in Testo).
 // I comandi propri di una sola app stanno in WORD_ACTIONS e SHEET_ACTIONS.
 const COMMON_ACTIONS={
- save:()=>fileSave(),open:()=>$('fileInput').click(),new:()=>newDocument(),backup:()=>projectBackup(),print:()=>window.print(),filePanel:()=>openFilePanel(),
+ save:()=>fileSave(),open:()=>$('fileInput').click(),new:()=>newDocument(),backup:()=>projectBackup(),print:word=>{if(word)toast(printCheckSay());window.print()},filePanel:()=>openFilePanel(),
  exportHtml:()=>{htmlExport();toast('Pagina HTML scaricata')},exportCSV:()=>exportCSV(),importCSV:()=>$('fileInput').click(),
  palette:()=>openPalette(),shortcuts:()=>showShortcuts(),help:()=>help(),formulaHelp:()=>formulaHelp(),
  nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),switchWord:()=>setMode('word'),switchExcel:()=>setMode('excel'),switchPage:()=>setMode('impagina'),layoutMenu:()=>layoutMenu(),layoutReset:()=>layoutReset(),showPgSide:()=>paneToggle('pgSidePane'),showPgProps:()=>paneToggle('pgPropsPane'),
