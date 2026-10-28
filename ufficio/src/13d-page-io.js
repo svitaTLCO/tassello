@@ -4,7 +4,7 @@ const PG_KEY='tassello-ufficio.impagina',pgImgSaved=new Set();let pgSaveTimer=0;
 const pgUsedImgs=()=>new Set(Pg.p?pgAllItems(Pg.p).filter(x=>(x.kind==='image'||x.kind==='sign')&&x.img).map(x=>x.img):[]);
 function pgPersistSoon(){if(!Pg.p)return;clearTimeout(pgSaveTimer);$('saveState').textContent='Salvataggio bozza…';pgSaveTimer=setTimeout(pgPersist,800)}
 // La bozza: il documento a ogni modifica, ogni immagine una volta sola; quelle non più usate si tolgono.
-async function pgPersist(){clearTimeout(pgSaveTimer);if(!Pg.p)return;const label=$('saveState'),data={p:Pg.p,pi:Pg.pi,mid:Pg.mid,row:Pg.row,guides:Pg.guides,grid:Pg.grid};
+async function pgPersist(){clearTimeout(pgSaveTimer);pgSaveTimer=0;if(!Pg.p)return;const label=$('saveState'),data={p:Pg.p,pi:Pg.pi,mid:Pg.mid,row:Pg.row,guides:Pg.guides,grid:Pg.grid};
  try{if(db){await storeCall(db,'readwrite',st=>st.put(data,'impagina'));const used=pgUsedImgs();
    for(const id of used){const m=Pg.imgs.get(id);if(m&&!pgImgSaved.has(id)){await storeCall(db,'readwrite',st=>st.put({blob:m.blob,name:m.name},'pimg:'+id));pgImgSaved.add(id)}}
    const old=(await storeCall(db,'readonly',st=>st.getAllKeys())).filter(k=>String(k).startsWith('pimg:')&&!used.has(String(k).slice(5)));if(old.length){await storeCall(db,'readwrite',st=>{for(const k of old)st.delete(k)});for(const k of old)pgImgSaved.delete(String(k).slice(5))}}
@@ -89,11 +89,13 @@ function pagePrintCss(){const p=Pg.p;if(p?.tiles?.on)return pgTilePrintCss();if(
 let pgPrinting=false;
 function pgBuildPrint(){const p=Pg.p,box=$('pgPrint');if(!p){box.replaceChildren();return}Pg.hq=true;try{pgPrintMarkup(p,box)}finally{Pg.hq=false}}
 function pgPrintMarkup(p,box){const insts=pgInstances(p),lay=pgLayout(p,insts);
- // Dopo ogni pagina, una copia non visibile delle sue tabelle: lo screen reader le legge come tabelle vere anche nel PDF.
- // Nella stampa a tessere le copie vanno dopo tutti i fogli.
- const sr=I=>{const m=pgMasterOf(I.pg),ctx={n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()};return [...(m?.items||[]),...I.pg.items].filter(it=>it.kind==='table'&&!it.hidden).map(it=>pgTableHtml(it,ctx,'sr-only')).join('')};
- if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay)+insts.map(sr).join('');return}
- box.innerHTML=insts.map((I,ii)=>(pgBleedOn(p)?pgSheetSvg(p,I,ii,lay,m=>m.url):`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" style="width:${pr2(p.w/MM)}mm;height:${pr2(p.h/MM)}mm" role="img" aria-label="Pagina ${I.n}${I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:insts.length,row:I.row,title:p.title,date:pgToday()})):''}">${pgPageSvg(p,I,ii,lay)}</svg>`)+sr(I)).join('')}
+ // Dentro ogni pagina, una copia delle sue tabelle con il testo trasparente: lo screen reader le legge come tabelle vere
+ // anche nel PDF. Il browser mette nei tag del PDF solo quello che disegna, e un testo nascosto o tagliato non ci arriva;
+ // dentro il riquadro della pagina la copia non aggiunge una pagina bianca. Nella stampa a tessere va nell'ultimo foglio.
+ const sr=I=>{const m=pgMasterOf(I.pg),ctx={n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()};return [...(m?.items||[]),...I.pg.items].filter(it=>it.kind==='table'&&!it.hidden)
+  .map(it=>pgTableHtml(it,ctx,'pg-sr')).join('')};
+ if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay);for(const s of [...box.children]){const d=document.createElement('div');d.className='pg-pp';s.replaceWith(d);d.append(s)}box.lastElementChild?.insertAdjacentHTML('beforeend',insts.map(sr).join(''));return}
+ box.innerHTML=insts.map((I,ii)=>'<div class="pg-pp">'+(pgBleedOn(p)?pgSheetSvg(p,I,ii,lay,m=>m.url):`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" style="width:${pr2(p.w/MM)}mm;height:${pr2(p.h/MM)}mm" role="img" aria-label="Pagina ${I.n}${I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:insts.length,row:I.row,title:p.title,date:pgToday()})):''}">${pgPageSvg(p,I,ii,lay)}</svg>`)+sr(I)+'</div>').join('')}
 window.addEventListener('beforeprint',()=>{if(isPage()&&!pgPrinting)pgBuildPrint()});window.addEventListener('afterprint',()=>{pgPrinting=false;$('pgPrint').replaceChildren()});
 async function pgPrint(){const p=Pg.p;pgStorySync();await pgPreloadFieldImages(pgInstances(p));await pgWork('Preparazione delle foto regolate',()=>pgDevPreload(pgInstances(p)));pgBuildPrint();pgPrinting=true;
  await Promise.all([...new Set($$('#pgPrint image').map(i=>i.getAttribute('href')))].map(u=>{const im=new Image();im.src=u;return im.decode().catch(()=>{})}));await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));printStyle();window.print()}
@@ -245,14 +247,14 @@ const PAGE_ACTIONS={new:pageNewDialog,pgTemplates:pageNewDialog,open:()=>$('pgFi
  zoomUp:()=>pgZoom(1.25),zoomDown:()=>pgZoom(.8),zoomReset:()=>{Pg.zoom=1;pgRenderStage();announce('Zoom 100%')},pgZoomFit:()=>pgZoom(0),
  pgSave:pageSave,pgSaveTpl,pgExportPng,pgDescribe,pgCheck,
  pgAddPage,pgDupPage,pgDelPage,pgPrevPage:()=>pgStepPage(-1),pgNextPage:()=>pgStepPage(1),pgDataRepeat,pgRowPrev:()=>pgStepRow(-1),pgRowNext:()=>pgStepRow(1),
- pgElements:pgElemDialog,pgPresent,pgBrand:()=>pgBrandDialog(),pgBrandApply,pgBrandLogo,pgAddQr,pgAddTable,pgTblData,pgTblRowAdd:()=>pgTblRowAdd(),pgTblColAdd:()=>pgTblColAdd(),pgTblRowDel:()=>pgTblRowDel(),pgTblColDel:()=>pgTblColDel(),pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
+ pgElements:pgElemDialog,pgPresent,pgBrand:()=>pgBrandDialog(),pgBrandApply:()=>pgBrandApply(),pgBrandLogo,pgAddQr,pgAddTable,pgTblData,pgTblRowAdd:()=>pgTblRowAdd(),pgTblColAdd:()=>pgTblColAdd(),pgTblRowDel:()=>pgTblRowDel(),pgTblColDel:()=>pgTblColDel(),pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
  pgPageNum:()=>pgMasterAdd('num'),pgHeader:()=>pgMasterAdd('head'),pgLogo:()=>pgMasterAdd('logo'),pgField:pgFieldMenu,
  pgEditText:()=>{if(pgNeed('text'))pgOpenItem(pgSel())},pgDup,pgDelete,pgCut:()=>pgCopy(true),pgCopy:()=>pgCopy(false),pgPaste,
  pgFront:()=>pgOrder('front'),pgBack:()=>pgOrder('back'),pgForward:()=>pgOrder('forward'),pgBackward:()=>pgOrder('backward'),
  pgAlignL:()=>pgAlign('L'),pgAlignC:()=>pgAlign('C'),pgAlignR:()=>pgAlign('R'),pgAlignT:()=>pgAlign('T'),pgAlignM:()=>pgAlign('M'),pgAlignB:()=>pgAlign('B'),
  pgRotR:()=>pgRotate(15),pgRotL:()=>pgRotate(-15),pgRotR1:()=>pgRotate(1),pgRotL1:()=>pgRotate(-1),pgRot0:()=>pgRotate(0,true),
  pgReadUp:()=>pgReadMove(-1),pgReadDown:()=>pgReadMove(1),pgReadAuto,pgLink,pgLinkTo:pgLinkToMenu,pgUnlink,pgOverflow,
- pgChooseImage:()=>$('pgImgInput').click(),pgPhotoAdj,pgPhotoAuto,pgPhotoReset,pgWrap:pgWrapMenu,pgFit:()=>{const it=pgNeed('image');if(it&&pgEdit('Adatta l’immagine',()=>{it.fit='fit'},{props:true}))announce('L’immagine si vede tutta dentro la cornice')},pgFill:()=>{const it=pgNeed('image');if(it&&pgEdit('Riempi la cornice',()=>{it.fit='fill'},{props:true}))announce('L’immagine riempie la cornice; il punto focale sceglie che cosa resta al centro')},
+ pgChooseImage:()=>$('pgImgInput').click(),pgPhotoAdj,pgPhotoAuto,pgPhotoReset,pgPhotoCopy,pgPhotoPaste:()=>pgPhotoPaste(),pgPhotoPasteSome,pgWrap:pgWrapMenu,pgFit:()=>{const it=pgNeed('image');if(it&&pgEdit('Adatta l’immagine',()=>{it.fit='fit'},{props:true}))announce('L’immagine si vede tutta dentro la cornice')},pgFill:()=>{const it=pgNeed('image');if(it&&pgEdit('Riempi la cornice',()=>{it.fit='fill'},{props:true}))announce('L’immagine riempie la cornice; il punto focale sceglie che cosa resta al centro')},
  pgFormat:()=>pgFocusProp('pp-preset'),pgBleed:()=>pgFocusProp('pp-bleed'),pgCropMarks:()=>{pgEdit('Segni di taglio',p=>{if(p.marks)delete p.marks;else p.marks=true},{props:true});announce(Pg.p.marks?`Segni di taglio attivi: la pagina si stampa su un foglio più grande, ${pgFmt(pgSheet(Pg.p).w/MM)} per ${pgFmt(pgSheet(Pg.p).h/MM)} mm${Pg.p.tiles?.on?'. Con la stampa a tessere valgono i segni delle tessere':''}`:'Segni di taglio tolti')},pgMargins:()=>pgFocusProp('pp-mt'),pgGuides:()=>{Pg.guides=!Pg.guides;pgRenderOverlay();pgPersistSoon()},pgGrid:()=>{Pg.grid=!Pg.grid;pgRenderOverlay();pgPersistSoon()},pgSnap:()=>pgEdit('Aggancia alla griglia',p=>{p.snap=!p.snap}),
  pgMasterApply:pgMasterMenu,pgMasterEdit,pgMasterNew,pgStyles:pgStylesMenu,
  pgSelectAll,pgGroup,pgUngroup,pgLock,pgDistH:()=>pgDistribute('h'),pgDistV:()=>pgDistribute('v'),pgSmart:()=>{Pg.smart=Pg.smart===false;announce(Pg.smart?'Guide intelligenti attive: trascinando, le cornici si agganciano a bordi e centri':'Guide intelligenti spente')},

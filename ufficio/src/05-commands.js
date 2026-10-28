@@ -385,6 +385,9 @@ def('p','Cornice',[
  ['pgPhotoAdj','Regolazioni della foto: luce, colore e look','sliders','',{short:'Regola la foto'}],
  ['pgPhotoAuto','Regolazione automatica della foto','wand','',{short:'Automatica'}],
  ['pgPhotoReset','Togli le regolazioni della foto','history','',{short:'Foto originale'}],
+ ['pgPhotoCopy','Copia le regolazioni della foto: luce, colore, effetti e look','copy','Alt+Maiusc+C',{short:'Copia regolazioni'}],
+ ['pgPhotoPaste','Incolla le regolazioni della foto nelle cornici per immagine scelte','paste','Alt+Maiusc+V',{short:'Incolla regolazioni'}],
+ ['pgPhotoPasteSome','Incolla solo alcune regolazioni della foto: luce, colore, effetti o look','paste','',{short:'Incolla alcune'}],
  ['pgFit','Adatta l’immagine alla cornice','fit','',{short:'Adatta',toggle:()=>pgSel()?.fit==='fit'}],
  ['pgFill','Riempi la cornice con l’immagine','fill','',{short:'Riempi',toggle:()=>pgSel()?.fit==='fill'}]]);
 def('p','Pagina e griglia',[

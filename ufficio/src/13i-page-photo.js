@@ -95,10 +95,25 @@ function pgAdjR(id,label,min,max,step,v,fmt,hint){return `<div class="adj"><labe
 function pgPhotoProps(it){if(!it.img&&!it.field)return '';let s='<h3>Regolazioni della foto</h3><p class="hint">Il file della foto non cambia: le regolazioni valgono solo in questa cornice. Le frecce cambiano il cursore, Inizio e Fine lo portano agli estremi.</p>',g='';
  for(const [id,label,group,min,max,step,fmt,hint] of PG_ADJ){if(group!==g){g=group;s+=`<h4>${esc(group)}</h4>`}s+=pgAdjR('a_'+id,label,min,max,step,it.adj?.[id]||0,fmt,hint)}
  s+=ppS('look','Look',it.look||'none',PG_LOOKS.map(l=>[l.id,l.name]))+(it.look&&it.look!=='none'?ppR('lookAmt','Intensità del look',0,100,it.lookAmt??100,v=>v+'%'):'');
- return s+`<div class="pg-btns">${ppBtn('pgPhotoAuto','Regolazione automatica')}${pgPhotoOn(it)?ppBtn('pgPhotoReset','Togli le regolazioni'):''}</div>`}
+ return s+`<div class="pg-btns">${ppBtn('pgPhotoAuto','Regolazione automatica')}${pgPhotoOn(it)?ppBtn('pgPhotoReset','Togli le regolazioni'):''}${ppBtn('pgPhotoCopy','Copia le regolazioni')}${Pg.photoClip?ppBtn('pgPhotoPaste','Incolla le regolazioni'):''}</div>`}
 // Comandi: regolazione automatica, via le regolazioni, e il primo cursore nelle proprietà.
 async function pgPhotoAuto(){const it=pgNeed('image');if(!it)return;const m=pgImgFor(it,{row:pgCur().I.row});if(!m){toast('Scegli prima la foto della cornice');return}let v;try{v=pgAutoAdj((await pgDecode(m,512)).img)}catch(e){toast('La foto non si legge: '+e.message);return}
  const a={};for(const [k,x] of Object.entries(v))if(x)a[k]=x;if(!pgEdit('Regolazione automatica di '+it.name,()=>{if(Object.keys(a).length)it.adj=a;else delete it.adj},{props:true})){toast('La foto è già regolata così');return}
  announce(`«${it.name}»: ${Object.keys(a).length?pgPhotoSay(it):'la foto non ha bisogno di regolazioni'}. Ctrl+Z torna a prima.`)}
 function pgPhotoReset(){const it=pgNeed('image');if(!it)return;if(!pgEdit('Togli le regolazioni di '+it.name,()=>{delete it.adj;delete it.look;delete it.lookAmt},{props:true})){toast('La foto non ha regolazioni');return}announce(`«${it.name}»: la foto è di nuovo com’è nel file`)}
 function pgPhotoAdj(){const it=pgNeed('image');if(!it)return;if(!it.img&&!it.field){toast('Scegli prima la foto della cornice: Invio sulla cornice vuota');return}pgShowProps();$('pp-a_exposure')?.focus();announce('Regolazioni della foto: Esposizione. Tab passa al cursore successivo')}
+// Copia e incolla delle regolazioni tra cornici per immagine, come in Grafica e con gli stessi tasti: si copia la ricetta
+// della cornice scelta (luce, colore, effetti e look) e si incolla in tutte le cornici per immagine scelte, anche in quelle
+// ancora vuote, dove vale quando arriva la foto. Incolla alcune regolazioni chiede quali gruppi incollare.
+const PG_PHOTO_PARTS=[...['Luce','Colore','Effetti'].map(g=>[g,`${g}: ${PG_ADJ.filter(a=>a[2]===g).map(a=>a[1].toLowerCase()).join(', ')}`]),['Look','Look e la sua intensità']];
+function pgPhotoCopy(){const it=pgNeed('image');if(!it)return;Pg.photoClip={...structuredClone(pgPh(it)),from:it.name};
+ announce(`Copiate le regolazioni di «${it.name}»: ${pgPhotoSay(it)||'nessuna, la foto è com’è nel file, e incollandole si tolgono quelle delle altre cornici'}. Alt+Maiusc+V le incolla nelle cornici per immagine scelte.`)}
+function pgPhotoTargets(){if(!Pg.photoClip){toast('Non ci sono regolazioni copiate: Alt+Maiusc+C sulla cornice della foto da cui prenderle');return null}const to=pgSelItems().filter(x=>x.kind==='image');if(!to.length){toast('Scegli prima una o più cornici per immagine');return null}return to}
+function pgPhotoPaste(parts=PG_PHOTO_PARTS.map(x=>x[0])){const c=Pg.photoClip,to=pgPhotoTargets();if(!to)return;const keys=PG_ADJ.filter(a=>parts.includes(a[2])).map(a=>a[0]),look=parts.includes('Look');
+ const ok=pgEdit('Incolla le regolazioni',()=>{for(const it of to){const a={...it.adj};for(const k of keys)if(c.adj[k])a[k]=c.adj[k];else delete a[k];if(Object.keys(a).length)it.adj=a;else delete it.adj;
+  if(look){if(c.look!=='none'){it.look=c.look;if(c.lookAmt!==100)it.lookAmt=c.lookAmt;else delete it.lookAmt}else{delete it.look;delete it.lookAmt}}}},{props:true});
+ const n=to.length,names=n===1?`«${to[0].name}»`:`${n} cornici: ${to.map(x=>x.name).join(', ')}`;if(!ok){toast(n===1?`«${to[0].name}» ha già queste regolazioni`:'Le cornici scelte hanno già queste regolazioni');return}
+ announce(`Regolazioni di «${c.from}» incollate${parts.length<PG_PHOTO_PARTS.length?`, solo ${parts.map(x=>x.toLowerCase()).join(', ')},`:''} in ${names}.${to.some(x=>!x.img&&!x.field)?' Nelle cornici vuote valgono quando scegli la foto.':''} Ctrl+Z torna a prima.`)}
+async function pgPhotoPasteSome(){if(!pgPhotoTargets())return;const c=Pg.photoClip;
+ const v=await modal('Incolla alcune regolazioni',`<p>Regolazioni copiate da «${esc(c.from)}»: ${esc(pgPhotoSay({kind:'image',...c})||'nessuna')}. Scegli quali incollare nelle cornici per immagine scelte; le altre restano come sono.</p>`,PG_PHOTO_PARTS.map(([id,label])=>({id,label,type:'checkbox',value:true})),'Incolla');if(!v)return;
+ const parts=PG_PHOTO_PARTS.map(x=>x[0]).filter(id=>v[id]);if(!parts.length){toast('Non hai scelto niente da incollare');return}pgPhotoPaste(parts)}

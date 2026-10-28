@@ -7,3 +7,8 @@ window.addEventListener('beforeprint',()=>{if(state.mode==='excel')$('excelPrint
 window.addEventListener('afterprint',()=>$('excelPrint').replaceChildren());
 // Senza IndexedDB la bozza va in localStorage anche alla chiusura della pagina.
 window.addEventListener('beforeunload',()=>{if(db)return;try{localStorage.setItem(DRAFT_KEY,JSON.stringify(snapshot()))}catch(e){}});
+// Con IndexedDB, chiudendo o ricaricando la pagina si scrivono subito le bozze che aspettavano il loro ritardo: così
+// non si perde quello che è cambiato nell'ultimo secondo (il testo scritto, l'app in cui si era). La transazione si
+// chiude subito con commit, perché la pagina sta per sparire; le immagini nuove di Impagina restano al salvataggio solito.
+window.addEventListener('pagehide',()=>{if(!db||!draftTimer&&!(pgSaveTimer&&Pg.p))return;try{const tx=db.transaction('docs','readwrite'),st=tx.objectStore('docs');
+ if(draftTimer){clearTimeout(draftTimer);draftTimer=0;st.put(snapshot(),'current')}if(pgSaveTimer&&Pg.p){clearTimeout(pgSaveTimer);pgSaveTimer=0;st.put({p:Pg.p,pi:Pg.pi,mid:Pg.mid,row:Pg.row,guides:Pg.guides,grid:Pg.grid},'impagina')}tx.commit?.()}catch(e){}});

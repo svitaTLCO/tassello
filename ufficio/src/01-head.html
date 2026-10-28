@@ -617,9 +617,11 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 .pg-tpl-view{display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start;max-height:min(54vh,520px);overflow:auto;padding:10px;background:var(--canvas);border-radius:8px}
 .pg-tpl-page{display:block;flex:1 1 40%;min-width:120px}.pg-tpl-page:first-child{flex-basis:100%}.pg-tpl-page svg{display:block;margin:auto;width:auto;height:auto;max-width:100%;max-height:min(46vh,440px);background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .pg-tpl-page:not(:first-child) svg{max-height:160px}.pg-tpl-more{align-self:center;color:var(--text-2);font-size:12.5px}
+.pg-brand-list{max-height:min(46vh,420px)}.pg-brand-sw svg,.pg-brand-prev svg{display:block;border-radius:4px;box-shadow:0 0 0 1px var(--line);forced-color-adjust:none}.pg-brand-sw svg{width:84px;height:42px}.pg-brand-prev svg{width:min(100%,240px);height:auto;margin:6px 0}
 @media (max-width:760px){.pg-tpl{grid-template-columns:1fr}.pg-tpl-view{display:none}}
 .pg-print{display:none}
 @media (forced-colors:active){#pgOver .sel-box{stroke:Highlight}#pgOver .handle{fill:Canvas;stroke:Highlight}.lb-item[aria-selected=true]{outline:2px solid Highlight}}
 @media (max-width:900px){.pg-work{flex-direction:column;gap:var(--gap);overflow:auto}.pg-view{min-height:300px;flex:none;order:0!important}}
-@media print{html[data-mode=impagina] #app,html[data-mode=impagina] .msg,html[data-mode=impagina] .tip{display:none!important}html[data-mode=impagina] .pg-print{display:block!important}.pg-print>svg{display:block;break-after:page}.pg-print>svg:last-of-type{break-after:auto}}
+@media print{html[data-mode=impagina] #app,html[data-mode=impagina] .msg,html[data-mode=impagina] .tip{display:none!important}html[data-mode=impagina] .pg-print{display:block!important}.pg-pp{position:relative;overflow:hidden;break-after:page}.pg-pp:last-child{break-after:auto}.pg-pp>svg{display:block}
+ .pg-sr{position:absolute;left:0;top:0;width:100%;font-size:2px;line-height:1;border-collapse:collapse}.pg-sr,.pg-sr *{color:transparent!important;background:none!important;border:0!important;padding:0!important}}
 </style></head>
