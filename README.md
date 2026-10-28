@@ -105,6 +105,8 @@ Per Tassello l'accessibilità non è una funzione in più da attivare: è il req
 
 Le prove fatte finora sono nel browser; le segnalazioni di chi usa NVDA, JAWS o Assistente vocale sono molto benvenute, con il modulo [Problema di accessibilità](https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml). Un problema di accessibilità è un difetto da correggere, non un miglioramento da valutare.
 
+Per chi vuole provare Tassello con uno screen reader c'è una [guida alla prova](PROVA-ACCESSIBILITA.md): come scaricarlo e aprirlo, i compiti da provare app per app, che cosa annotare e come segnalare.
+
 ## Privacy
 
 I documenti restano sul tuo dispositivo. L'unica funzione che usa un servizio esterno è la dettatura vocale di Tassello Ufficio: in Chrome l'audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Impagina legge la cartella che colleghi solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed, e crea i codici QR senza internet. Tassello Media usa il microfono solo quando lo chiedi tu e le registrazioni restano sul dispositivo. Tassello Grafica non modifica mai le foto originali, e il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto; anche lo scontorno avviene tutto sul dispositivo, senza servizi esterni.
