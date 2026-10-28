@@ -102,3 +102,8 @@ function pgIssuesSay(layout=false){let list=[];try{list=pgIssues().filter(x=>!la
  if(!list.length)return '';return ` La verifica trova ${list.length===1?'un punto':list.length+' punti'} da controllare${layout?' nella disposizione':''}: ${list.slice(0,2).map(x=>x.msg.replace(/\.$/,'')).join('; ')}${list.length>2?'; e altri':''}. Alt+Q, Verifica dell’accessibilità, li elenca tutti.`}
 // I testi di esempio con cui nasce un documento da modello: la verifica li riconosce se restano uguali.
 function pgTplMark(p,e){if(!e||e.mine||e.id==='vuoto')return;p.tpl={n:e.n,d:e.d||'',texts:[...new Set(Object.values(p.stories||{}).map(s=>storyText(s).trim()).filter(Boolean))]}}
+// Nell'editor del testo lo stile del paragrafo si dice quando cambia, passando da un paragrafo all'altro (U-I10); entrando
+// nell'editor no, perché lo dice già il campo Stile del paragrafo.
+let pgLastPs=null;
+document.addEventListener('selectionchange',()=>{const ed=$('pgStory');if(!ed||document.activeElement!==ed||!Pg.p)return;const a=getSelection().anchorNode,el=a?.nodeType===3?a.parentElement:a,ps=el?.closest?.('p[data-ps]')?.dataset.ps||null;if(ps===pgLastPs)return;const first=pgLastPs===null;pgLastPs=ps;if(!first&&ps&&Pg.p.ps[ps])announce('Paragrafo '+Pg.p.ps[ps].name)});
+document.addEventListener('focusout',e=>{if(e.target.id==='pgStory')pgLastPs=null});
