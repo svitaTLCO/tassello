@@ -63,8 +63,11 @@ async function recordVoice(){vStop();await recordDialog({title:'Registra una voc
 // Contrasto WCAG tra due colori esadecimali.
 function contrastRatio(a,b){const lum=h=>{const n=parseInt(h.slice(1),16);return 0.2126*linear(n>>16&255)+0.7152*linear(n>>8&255)+0.0722*linear(n&255)},x=lum(a),y=lum(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05)}
 // Verifica dell'accessibilità del montaggio.
+// Una clip ha dell'audio solo se il suo file ha una traccia audio: lo dice il contenitore, letto una volta e ricordato
+// nella raccolta. Se il contenitore non si sa leggere si suppone di sì, come prima.
+async function mediaHasAudio(m){if(!m||m.type==='image')return false;if(m.type==='audio')return true;if(typeof m.audio==='boolean')return m.audio;const dm=await mediaDemux(m.id);if(!dm)return true;m.audio=dm.tracks.some(t=>t.type==='audio');schedulePersist('video');return m.audio}
 async function a11yCheck(){const issues=[],T=totalDur();if(T<=0){toast('La linea temporale è vuota');return}
- const speech=V.p.main.some(c=>c.kind==='media'&&!c.mute&&mediaMeta(c.media)?.type!=='image')||V.p.audio.length;
+ let speech=V.p.audio.length>0;for(const c of V.p.main)if(!speech&&c.kind==='media'&&!c.mute)speech=await mediaHasAudio(mediaMeta(c.media));
  if(speech&&!V.p.subs.length)issues.push({msg:'Il video ha dell’audio ma nessun sottotitolo: chi non sente non può seguirlo. Aggiungili con Ctrl+Alt+S o importali da un file SRT.'});
  const subs=[...V.p.subs].sort((a,b)=>a.start-b.start);subs.forEach((s,i)=>{const d=s.end-s.start,chars=s.text.replace(/\s+/g,' ').length,lines=s.text.split('\n');
   if(chars/d>20)issues.push({msg:`Sottotitolo ${i+1} troppo veloce da leggere: ${fmtNum(chars/d,0)} caratteri al secondo (meglio non più di 17).`,go:['subs',s.id]});

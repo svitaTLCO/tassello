@@ -103,7 +103,7 @@ async function fastExport(plan,{fmt,bps,burn,srt,name}){vStop();const f=plan.for
  catch(e){console.error('Esportazione fotogramma per fotogramma non riuscita',e);fastBroken=true;toast('Esportazione non riuscita ('+(e.message||e)+'). Riprova: si userà l’esportazione in tempo reale.')}
  finally{try{if(enc&&enc.state!=='closed')enc.close()}catch(e){}ui.end()}}
 // Analisi dei lampeggiamenti senza esportare, un fotogramma alla volta.
-async function fastFlashes(){vStop();const ui=progressDialog('Analisi dei lampeggiamenti','Si misura la luminosità di ogni fotogramma, senza far scorrere il montaggio.','Annulla','Avanzamento dell’analisi');ui.exp.burn=V.p.burnSubs;
+async function fastFlashes(){vStop();const ui=progressDialog('Analisi dei lampeggiamenti','Si misura la luminosità di ogni fotogramma, senza far scorrere il montaggio.','Annulla','Avanzamento dell’analisi');ui.exp.burn=V.p.burnSubs;ui.exp.word='Analisi';
  try{const ok=await renderFrames({burn:V.p.burnSubs,stop:ui.cancelled,onFrame:(k,t,xc)=>expFrame(t,xc)});if(!ok){toast('Analisi annullata');return null}
   await lumDone(ui.exp);const warn=flashWarnings(ui.exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
  catch(e){console.error('Analisi fotogramma per fotogramma non riuscita',e);fastBroken=true;toast('Analisi non riuscita: riprova, si userà l’analisi in tempo reale');return null}
