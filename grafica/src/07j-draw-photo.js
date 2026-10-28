@@ -25,7 +25,7 @@ async function linkStart(it,then){if(photoLink.id===it.id){setMode('immagini');t
  const r=structuredClone(imgRecipe(it)),rid=r.cut?.raster;if(rid&&Dw.ras.has(rid))rasters.set(rid,Dw.ras.get(rid));
  Object.assign(I,{file,name:m.name||it.name,title:it.name,bmp,r,hist:[],redo:[],step:0,seen:new Set(),compare:false,plan:'libera',maskSel:null});I.base=snap();photoLink.id=it.id;
  $('linkText').textContent=`Stai modificando «${it.name}», un’immagine del disegno: le modifiche restano nell’immagine e si possono cambiare ancora.`;$('linkBar').hidden=false;
- setMode('immagini',{focus:false});renderPlans();renderPhoto(false);photoCv.focus();
+ setMode('immagini',{focus:false});renderPlans();renderPhoto(false);renderPanel();photoCv.focus();
  if(then)then();else announce(`«${it.name}» del disegno aperta con gli strumenti di Immagini: selezioni nella scheda Seleziona, maschere nella scheda Maschere, scontorno nella scheda Sfondo. Ctrl+Alt+D o «Torna a Disegno» riportano le modifiche nel foglio.`)}
 // A ogni modifica la ricetta torna nell'oggetto, senza entrare nella cronologia di Disegno: al ritorno diventa un passo
 // solo. Se l'inquadratura cambia le proporzioni, l'immagine le segue con la stessa area e lo stesso centro.
