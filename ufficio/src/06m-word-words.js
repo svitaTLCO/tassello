@@ -14,7 +14,12 @@ function whereAmISay(){if(!inEditor())return 'Il cursore non è nel documento: p
 // L'intestazione e il piè di pagina della pagina in cui si è, con i campi già riempiti e le pagine pari (U-T10).
 function hfSayAt(i,sec){const L=state.layout,n=pageNums[i]??i+1,total=pageNums.at(-1)??pageCount(),hf=sec?.hf||{},even=L.evenDiff&&n%2===0,get=k=>even&&L['e'+k]?L['e'+k]:hf[k]||'',one=ks=>ks.map(get).filter(Boolean).map(t=>hfText(t,n,total)).join(' · ');
  const h=one(['hl','hc','hr']),f=one(['fl','fc','fr']);return [h&&`intestazione «${h}»`,f&&`piè di pagina «${f}»`].filter(Boolean).join('; ')}
-function whereAmI(){const el=inEditor()&&anchorEl(),hf=el?hfSayAt(pageIndexAt(el),sectionList()[sectionIndexAt(el)]):'';announce(whereAmISay().replace(/\.$/,'')+(hf?'; '+hf:'')+'.')}
+// L'oggetto accanto al cursore (U-T8): un'immagine con il suo testo alternativo e la didascalia, o un'equazione in forma lineare.
+function objectAtCaretSay(){const s=getSelection();if(!s.rangeCount)return '';const n=s.anchorNode,o=s.anchorOffset,near=[n?.nodeType===1?n.childNodes[o]:null,n?.nodeType===1?n.childNodes[o-1]:o===0?n?.previousSibling:null,n?.nodeType===3&&o===n.length?n.nextSibling:null,anchorEl()];
+ for(const x of near){const el=x?.nodeType===1?x:null;if(!el)continue;const img=el.matches('img')?el:el.closest?.('figure')?.querySelector('img'),eq=el.closest?.('span.eq')||(el.matches('span.eq')?el:null);
+  if(img){const cap=img.closest('figure')?.querySelector('figcaption')?.textContent.trim();return `immagine ${img.alt?`«${img.alt.slice(0,100)}»`:'senza testo alternativo'}${cap?`, didascalia «${cap.slice(0,80)}»`:''}`}
+  if(eq)return `equazione ${eq.title||eq.textContent.trim()}`}return ''}
+function whereAmI(){const el=inEditor()&&anchorEl(),hf=el?hfSayAt(pageIndexAt(el),sectionList()[sectionIndexAt(el)]):'';const ob=el?objectAtCaretSay():'';announce(whereAmISay().replace(/\.$/,'')+(ob?'; accanto al cursore: '+ob:'')+(hf?'; '+hf:'')+'.')}
 // Mentre ci si muove nel documento, il cambio di pagina si annuncia, con l'interruzione che lo ha fatto. Si spegne con il
 // comando «Annuncia i cambi di pagina».
 let lastCaretPage=-1;
