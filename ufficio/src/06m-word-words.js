@@ -10,13 +10,25 @@ function caretLineOnPage(){const s=getSelection();if(!s.rangeCount)return 0;cons
 function whereAmISay(){if(!inEditor())return 'Il cursore non è nel documento: premi Esc per tornarci.';const el=anchorEl(),i=pageIndexAt(el),n=pageCount(),secs=sectionList(),si=sectionIndexAt(el),sec=secs[si]||secs[0],cols=+sec.cols||1;
  let head=null;for(const h of $$('h1,h2,h3,h4,h5,h6',$('wordEditor'))){if(h.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING||h.contains(el))head=h;else break}
  const cell=el?.closest('td,th'),li=el?.closest('li');
- return `Pagina ${i+1} di ${n}${pageNumSay(i)}; riga ${caretLineOnPage()} circa${secs.length>1?`; sezione ${si+1} di ${secs.length}, ${SECT_ORIENT[sec.orient]||'verticale'}, ${cols===1?'una colonna':cols===2?'due colonne':cols+' colonne'}`:cols>1?`; ${cols===2?'due colonne':cols+' colonne'}`:''}${head?`; ${head.contains(el)?'nel titolo':'sotto il titolo'} «${head.textContent.trim().slice(0,80)}»`:''}${cell?'; in tabella, '+cellInfo(cell).split(':')[0]:''}${li?`; elenco, livello ${listDepth(li.parentElement)}`:''}.`}
+ return `Pagina ${i+1} di ${n}${pageNumSay(i)}; riga ${caretLineOnPage()} circa${secs.length>1?`; sezione ${si+1} di ${secs.length}, ${SECT_ORIENT[sec.orient]||'verticale'}, ${cols===1?'una colonna':cols===2?'due colonne':cols+' colonne'}`:cols>1?`; ${cols===2?'due colonne':cols+' colonne'}`:''}${head?`; ${head.contains(el)?'nel titolo':'sotto il titolo'} «${head.textContent.trim().slice(0,80)}»`:''}${cell?'; in tabella, '+cellInfo(cell).split(':')[0]:''}${li?`; elenco, livello ${listDepth(li.parentElement)+1}`:''}.`}
 function whereAmI(){announce(whereAmISay())}
 // Mentre ci si muove nel documento, il cambio di pagina si annuncia, con l'interruzione che lo ha fatto. Si spegne con il
 // comando «Annuncia i cambi di pagina».
 let lastCaretPage=-1;
 function pageChangeSay(){if(prefs.sayPages===false||!isWord()||!inEditor()||document.activeElement!==$('wordEditor'))return;const i=pageIndexAt(anchorEl());if(lastCaretPage<0||i===lastCaretPage){lastCaretPage=i;return}
  const m=pageMarks[Math.max(i,lastCaretPage)-1];lastCaretPage=i;announce(`Pagina ${i+1}${pageNumSay(i)}${m?.forced?(m.sect?', dopo un’interruzione di sezione':', dopo un’interruzione di pagina'):''}`)}
+// Il richiamo di una nota sotto il cursore: «Nota 3: …», come per i commenti (U-T9).
+let lastNoteSeen=null;
+function noteAtCaretSay(){if(!isWord()||!inEditor()||document.activeElement!==$('wordEditor'))return;const s=getSelection(),n=s.anchorNode,o=s.anchorOffset;let sup=anchorEl()?.closest('sup.fn');if(!sup){const prev=n?.nodeType===3?(o===0?n.previousSibling:null):n?.childNodes?.[o-1];if(prev?.matches?.('sup.fn'))sup=prev}
+ if(sup===lastNoteSeen)return;lastNoteSeen=sup;const p=sup&&$('fn-'+sup.id.slice(4));if(p)announce(`Nota ${sup.textContent}: ${noteText(p).slice(0,160)}`)}
+// Trova dice dove e che cosa ha trovato (U-T7): «pagina 2, in Titolo 2: «…contesto…»». Va nella parte per gli screen reader
+// del conteggio, che resta corto alla vista.
+function blockStyleSay(b){if(!b)return 'Normale';if(b.closest('td,th'))return 'tabella';if(b.closest('li'))return 'elenco';const t=b.tagName;if(/^H[1-6]$/.test(t))return 'Titolo '+t[1];if(t==='BLOCKQUOTE'||b.closest('blockquote'))return 'Citazione';if(b.classList.contains('title'))return 'Titolo';if(b.classList.contains('subtitle'))return 'Sottotitolo';const sc=[...b.classList].find(c=>/^st-/.test(c));return sc&&customStyle(sc.slice(3))?.name||'Normale'}
+function findWhereSay(range){const el=range.startContainer.nodeType===3?range.startContainer.parentElement:range.startContainer,b=el.closest('p,h1,h2,h3,h4,h5,h6,li,td,th,blockquote,figcaption,caption')||el,t=b.textContent,pre=document.createRange();pre.selectNodeContents(b);pre.setEnd(range.startContainer,range.startOffset);const at=pre.toString().length,len=range.toString().length;
+ const ctx=(at>30?'…':'')+t.slice(Math.max(0,at-30),at+len+30).trim()+(at+len+30<t.length?'…':'');return `, pagina ${pageIndexAt(el)+1}, in ${blockStyleSay(b)}: «${ctx}»`}
+// Dopo Tab o Maiusc+Tab in un elenco: il livello e il tipo di elenco (U-T9).
+const LIST_KIND={decimal:'numerato 1, 2, 3','lower-alpha':'numerato a, b, c','upper-alpha':'numerato A, B, C','lower-roman':'numerato i, ii, iii','upper-roman':'numerato I, II, III',disc:'puntato',circle:'puntato con i cerchi',square:'puntato con i quadrati',dash:'con i trattini',legal:'numerato 1.1, 1.2'};
+function listLevelSay(){const li=anchorEl()?.closest('li');return li?`Livello ${listDepth(li.parentElement)+1}, elenco ${LIST_KIND[listStyleOf(li.parentElement)]||(li.parentElement.tagName==='OL'?'numerato':'puntato')}`:'Fuori dall’elenco'}
 function pageSayToggle(){prefs.sayPages=prefs.sayPages===false;savePrefs();announce(prefs.sayPages?'Cambi di pagina annunciati mentre ti muovi nel documento':'Cambi di pagina non più annunciati: Alt+Maiusc+P dice dove sei')}
 // Alt+Maiusc+F: la formattazione in una frase, con le differenze dallo stile del paragrafo e i colori con il nome. Premuto
 // due volte di seguito apre Mostra formattazione.

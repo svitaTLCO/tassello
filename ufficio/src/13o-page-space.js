@@ -42,7 +42,7 @@ function pgAlignSay(R,p=Pg.p){const B=R.me.B,tol=pgTol(),i=pgInner(p),E=b=>[b.x,
  return [...groups.values()].map(g=>{const list=[...g.who.slice(0,4),...(g.who.length>4?[`altre ${g.who.length-4}`]:[]),...(g.m?[g.ks.length>1?'i margini':`il margine ${sideName[g.ks[0]]}`]:[]),...(g.c?['il centro della pagina']:[])];return `allineata ${pgList(g.ks.map(k=>names[k]))} con ${pgList(list)}`}).join('; ')}
 const pgCap=s=>s?s[0].toUpperCase()+s.slice(1):s;
 // Alt+Maiusc+R: dove sta la cornice scelta rispetto alla pagina, ai margini e alle altre cornici.
-function pgPlaceSay(it,{short=false}={}){const p=Pg.p,B=pgBoxOf(it),i=pgInner(p),out=pgOutSay(it),size=`${pgMeasureSay(B.w,i.w,p.w,'larga')}, ${pgMeasureSay(B.h,i.h,p.h,'alta')}`;
+function pgPlaceSay(it,{short=false}={}){const p=Pg.p,B=pgBoxOf(it),i=pgInner(p),out=pgOutSay(it),line=it.kind==='line',size=line?`lunga ${pgU(Math.hypot(it.w,it.h))}`:`${pgMeasureSay(B.w,i.w,p.w,'larga')}, ${pgMeasureSay(B.h,i.h,p.h,'alta')}`;
  if(short)return [out==='fuori dalla pagina'?out:pgZoneSay(B,p),size,out!=='fuori dalla pagina'&&out].filter(Boolean).join(', ');
  const R=pgRelations(it),h=pgHolder(),z=h.items.indexOf(it);
  return [`${it.name}: ${out==='fuori dalla pagina'?out:pgZoneSay(B,p)}, ${size}${out&&out!=='fuori dalla pagina'?', '+out:''}.`,R&&pgNearSay(R),R&&pgOverSay(R),R&&pgAlignSay(R),h.items.length>1?`livello ${z+1} di ${h.items.length} dal fondo`:''].filter(Boolean).map(s=>pgCap(s.replace(/\.$/,''))+'.').join(' ')}
