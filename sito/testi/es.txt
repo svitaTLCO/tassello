@@ -122,15 +122,16 @@ La hoja de cálculo, para cuentas, listas y análisis.
           <li>Abre y guarda XLSX y CSV</li>
 
 [impagina.per]
-El maquetador, para publicaciones y carruseles, historias, folletos, carteles, trípticos, boletines y presentaciones.
+El maquetador, para publicaciones y carruseles, historias, folletos, carteles, trípticos, boletines, presentaciones, tarjetas de visita, invitaciones y diplomas.
 
 [impagina.elenco]
-          <li>Formatos listos, márgenes, columnas, cuadrícula y páginas maestras con número de página y logotipo</li>
-          <li>Texto que fluye entre marcos y páginas, estilos de párrafo y de carácter, textos con efectos</li>
-          <li>Datos de CSV, XLSX, JSON o de una hoja de Calcolo para crear una página por fila; feeds RSS y texto de DOCX</li>
-          <li>Una carpeta del ordenador enlazada, también la de Google Drive, OneDrive o Dropbox, que se vuelve a leer con un comando</li>
+          <li>137 plantillas en 23 formatos, elegidas por formato y por uso, y tus propias plantillas guardadas</li>
+          <li>Márgenes, columnas, cuadrícula y páginas maestras con número de página y logotipo; kit de marca con colores, fuentes y logotipo</li>
+          <li>Texto que fluye entre marcos y páginas y rodea los marcos, estilos de párrafo y de carácter, textos con efectos</li>
+          <li>Marcos girados, con sombras y degradados; fotos ajustadas dentro del marco; códigos QR creados sin internet, tablas y elementos gráficos</li>
+          <li>Datos de CSV, XLSX, JSON o de Calcolo para crear una página por fila; feeds RSS, texto de DOCX y una carpeta enlazada, también de Google Drive, OneDrive o Dropbox</li>
           <li>Temas de color, formas para las imágenes, cuadrículas de fotos, guías inteligentes y adaptación a otro formato</li>
-          <li>Carteles y pancartas impresos en mosaico en hojas A4 o A3; exporta PNG y PDF</li>
+          <li>Sangrado y marcas de corte, carteles y pancartas impresos en mosaico en hojas A4 o A3, presentación a pantalla completa; exporta PNG y PDF</li>
           <li>Orden de lectura, texto alternativo y comprobación de accesibilidad para cada página</li>
 
 [ufficio.scarica]
@@ -143,7 +144,7 @@ Probar Tassello Ufficio en el navegador
 Instalar como aplicación
 
 [ufficio.limiti]
-Un archivo de alrededor de 1 MB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico, no todo: no admite macros, control de cambios, segmentaciones de tablas dinámicas ni gráficos combinados, e Impagina no sustituye a un programa de maquetación profesional. Conserva siempre una copia de los originales.
+Un archivo de alrededor de 1,3 MB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico, no todo: no admite macros, control de cambios, segmentaciones de tablas dinámicas ni gráficos combinados, e Impagina no sustituye a un programa de maquetación profesional. Conserva siempre una copia de los originales.
 
 [media.titolo]
 Tassello Media: Audio y Video
@@ -192,7 +193,9 @@ El editor de fotos, para fotos que compartir, retratos, paisajes, documentos y p
 
 [immagini.elenco]
           <li>Planes guiados según el objetivo: redes sociales, retrato, paisaje, documento o tique, producto sobre fondo claro</li>
-          <li>Encuadre con rotación, enderezado y formatos listos; luz, color y viñeteado</li>
+          <li>Encuadre con rotación, enderezado y formatos listos; luz, color, curvas, ocho tonos, detalle y viñeteado</li>
+          <li>Selecciones (lazo, pincel, varita mágica, gama de colores) y máscaras con ajustes locales</li>
+          <li>Quitar el fondo sin internet y sin inteligencia artificial; pincel corrector, tampón de clonar y ojos rojos</li>
           <li>Estilos listos y estilos importados de archivos LUT .cube, con su intensidad</li>
           <li>Histograma descrito con palabras, con un aviso cuando se queman las luces o se cierran las sombras</li>
           <li>Abre JPEG, PNG, WebP, AVIF, GIF y BMP; exporta JPEG, PNG o WebP sin los datos de la cámara</li>
@@ -202,8 +205,10 @@ El dibujo, para publicaciones, historias, banners, folletos e iconos.
 
 [disegno.elenco]
           <li>Lienzos en los formatos de hoy o del tamaño que quieras, con fondo liso o transparente</li>
-          <li>Rectángulos, elipses, líneas, textos de varias líneas e imágenes, con los ajustes de Immagini</li>
-          <li>Capas, alineación con el lienzo, duplicar, copiar y pegar</li>
+          <li>Pluma con edición de nodos, lápiz, pincel sensible a la presión y borrador; unir y restar formas</li>
+          <li>Formas, flechas, bocadillos y textos, también a lo largo de una curva, con degradados, discontinuos, sombras y fusión</li>
+          <li>Imágenes con los ajustes, las máscaras y el recorte del fondo de Immagini, y el recorte dentro de una forma</li>
+          <li>Selección múltiple, grupos, capas, alineación, distribución y guías inteligentes</li>
           <li>Guarda en SVG editable con título y descripción; exporta PNG o JPEG</li>
           <li>Comprobación de accesibilidad: contraste de los textos y descripción del dibujo</li>
 
@@ -214,7 +219,7 @@ Descargar Tassello Grafica
 Probar Tassello Grafica en el navegador
 
 [grafica.limiti]
-Un archivo de unos 210 KB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico: Immagini trabaja con una foto cada vez, no abre archivos HEIC ni RAW y todavía no tiene pinceles, retoques locales, nitidez ni reducción de ruido; Disegno todavía no tiene pluma para curvas, grupos ni selección múltiple. Conserva siempre una copia de los originales.
+Un archivo de unos 480 KB para Chrome y Edge recientes, incluso sin conexión. Cubre el trabajo básico: Immagini trabaja con una foto cada vez y no abre archivos HEIC ni RAW; quitar el fondo usa algoritmos clásicos, así que el pelo fino o un fondo de los colores del sujeto hay que retocarlos a mano; en Disegno, los textos no se convierten en trazados. Conserva siempre una copia de los originales.
 
 [accessibilita.titolo]
 Accesibilidad: la condición, no un extra
@@ -244,7 +249,7 @@ Modo lectura, alto contraste, tema oscuro, lectura en voz alta y comprobación d
 Escucha
 
 [accessibilita.ascolto]
-En Audio, la forma de onda reproduce el punto en el que estás y se salta de una pausa a otra del habla; en Video, la comprobación revisa subtítulos, contraste y destellos; en Immagini, <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>I</kbd> describe la foto, su luz y los ajustes cambiados.
+En Audio, la forma de onda reproduce el punto en el que estás y se salta de una pausa a otra del habla; en Video, la comprobación revisa subtítulos, contraste y destellos; en Immagini, <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>I</kbd> describe la foto, su luz y los ajustes cambiados, y las selecciones, máscaras y recortes se describen con palabras; en Disegno, los nodos de los trazados son una lista y un cursor dibuja con el teclado.
 
 [accessibilita.segnalazioni]
 ¿Usas NVDA, JAWS o Narrador? Tus <a href="https://github.com/svitaTLCO/tassello/issues">avisos</a> son muy bienvenidos: un problema de accesibilidad es un fallo que corregir, no una mejora que valorar.
@@ -254,9 +259,9 @@ Privacidad
 
 [privacy.testo]
       <p>Tus documentos se quedan en tu navegador y en tu ordenador. La única función que usa un servicio externo es el dictado por voz de Tassello Ufficio: en Chrome el audio se envía a los servidores de Google, en Edge a los de Microsoft. Si no lo usas, nada sale de tu dispositivo.</p>
-      <p>Impagina lee la carpeta que enlazas solo cuando se lo pides y nunca la modifica; no descarga nada, ni siquiera las imágenes indicadas en un feed.</p>
+      <p>Impagina lee la carpeta que enlazas solo cuando se lo pides y nunca la modifica; no descarga nada, ni siquiera las imágenes indicadas en un feed, y crea los códigos QR sin internet.</p>
       <p>Tassello Media usa el micrófono solo cuando tú lo pides, y las grabaciones, los archivos y los vídeos exportados se quedan en tu ordenador.</p>
-      <p>Tassello Grafica nunca modifica tus fotos originales, y los archivos exportados no contienen los datos de la cámara ni el lugar donde se hizo la foto.</p>
+      <p>Tassello Grafica nunca modifica tus fotos originales, y los archivos exportados no contienen los datos de la cámara ni el lugar donde se hizo la foto. Quitar el fondo también ocurre por completo en tu ordenador, sin servicios externos.</p>
       <p>Esto vale para la copia oficial. Una copia modificada por otros puede comportarse de otra manera: un motivo más para <a href="#sicurezza">descargar Tassello solo desde aquí</a>.</p>
 
 [sicurezza.titolo]

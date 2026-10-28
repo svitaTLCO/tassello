@@ -126,15 +126,16 @@ Per conti, elenchi e analisi.
           <li>Apre e salva XLSX e CSV</li>
 
 [impagina.per]
-Per post e caroselli, storie, volantini, poster, brochure, newsletter e presentazioni.
+Per post e caroselli, storie, volantini, poster, brochure, newsletter, presentazioni, biglietti da visita, inviti e attestati.
 
 [impagina.elenco]
-          <li>Formati pronti, margini, colonne, griglia e pagine mastro con numero di pagina e logo</li>
-          <li>Testo che scorre tra le cornici e le pagine, stili di paragrafo e di carattere, insegne d’effetto</li>
-          <li>Dati da CSV, XLSX, JSON o da un foglio di Calcolo per una pagina per riga; feed RSS e testo da DOCX</li>
-          <li>Una cartella del computer collegata, anche quella di Google Drive, OneDrive o Dropbox, che si rilegge con un comando</li>
+          <li>137 modelli in 23 formati, scelti per formato e per uso, e i tuoi modelli salvati</li>
+          <li>Margini, colonne, griglia e pagine mastro con numero di pagina e logo; kit del marchio con colori, caratteri e logo</li>
+          <li>Testo che scorre tra le cornici e le pagine e gira attorno alle cornici, stili di paragrafo e di carattere, insegne d’effetto</li>
+          <li>Cornici ruotate, con ombre e sfumature; foto regolate nella cornice; codici QR fatti senza internet, tabelle ed elementi</li>
+          <li>Dati da CSV, XLSX, JSON o da Calcolo per una pagina per riga; feed RSS, testo da DOCX e una cartella collegata, anche di Google Drive, OneDrive o Dropbox</li>
           <li>Temi di colore, sagome per le immagini, griglie di foto, guide intelligenti e adattamento a un altro formato</li>
-          <li>Poster e striscioni stampati a tessere su fogli A4 o A3; esporta PNG e PDF</li>
+          <li>Abbondanza e segni di taglio, poster e striscioni stampati a tessere su fogli A4 o A3, presentazione a schermo intero; esporta PNG e PDF</li>
           <li>Ordine di lettura, testi alternativi e verifica dell’accessibilità per ogni pagina</li>
 
 [ufficio.scarica]
@@ -147,7 +148,7 @@ Prova Tassello Ufficio nel browser
 Installa come app
 
 [ufficio.limiti]
-Un file da circa 1 MB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base, non tutto: macro, revisioni tracciate, slicer delle tabelle pivot e grafici combinati non sono supportati, e Impagina non sostituisce un programma di impaginazione professionale. Conserva sempre una copia degli originali.
+Un file da circa 1,3 MB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base, non tutto: macro, revisioni tracciate, slicer delle tabelle pivot e grafici combinati non sono supportati, e Impagina non sostituisce un programma di impaginazione professionale. Conserva sempre una copia degli originali.
 
 [media.titolo]
 Tassello Media: Audio e Video
@@ -196,7 +197,9 @@ Per foto da pubblicare, ritratti, paesaggi, documenti e prodotti.
 
 [immagini.elenco]
           <li>Piani guidati per obiettivo: social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro</li>
-          <li>Inquadratura con rotazione, raddrizzamento e formati pronti; luce, colore e vignettatura</li>
+          <li>Inquadratura con rotazione, raddrizzamento e formati pronti; luce, colore, curve, otto colori, dettaglio e vignettatura</li>
+          <li>Selezioni (lazo, pennello, bacchetta magica, intervallo di colore) e maschere con regolazioni locali</li>
+          <li>Togli lo sfondo senza internet e senza intelligenza artificiale; correttivo, timbro clone e occhi rossi</li>
           <li>Look pronti e look importati da file LUT .cube, con la loro intensità</li>
           <li>Istogramma descritto a parole, con un avviso se le luci si bruciano o le ombre si chiudono</li>
           <li>Apre JPEG, PNG, WebP, AVIF, GIF e BMP; esporta JPEG, PNG o WebP senza i dati della fotocamera</li>
@@ -206,8 +209,10 @@ Per post, storie, banner, volantini e icone.
 
 [disegno.elenco]
           <li>Fogli nei formati di oggi o della misura che vuoi, con sfondo pieno o trasparente</li>
-          <li>Rettangoli, ellissi, linee, testi su più righe e immagini, con le regolazioni di Immagini</li>
-          <li>Livelli, allineamento al foglio, duplica, copia e incolla</li>
+          <li>Penna con i nodi, matita, pennello che segue la pressione e gomma; unisci e sottrai tra le forme</li>
+          <li>Forme, frecce, fumetti e testi anche lungo una curva, con sfumature, tratteggi, ombre e fusione</li>
+          <li>Immagini con le regolazioni, le maschere e lo scontorno di Immagini, e il ritaglio dentro una forma</li>
+          <li>Scelta di più oggetti, gruppi, livelli, allineamento, distribuzione e guide intelligenti</li>
           <li>Salva in SVG modificabile con titolo e descrizione; esporta PNG o JPEG</li>
           <li>Verifica dell’accessibilità: contrasto dei testi e descrizione del disegno</li>
 
@@ -218,7 +223,7 @@ Scarica Tassello Grafica
 Prova Tassello Grafica nel browser
 
 [grafica.limiti]
-Un file da circa 210 KB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base: Immagini lavora su una foto alla volta, non apre i file HEIC e RAW e non ha ancora pennelli, ritocchi locali, nitidezza e riduzione del rumore; Disegno non ha ancora la penna per le curve, i gruppi né la scelta di più oggetti insieme. Conserva sempre una copia degli originali.
+Un file da circa 480 KB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base: Immagini lavora su una foto alla volta e non apre i file HEIC e RAW; lo scontorno usa algoritmi classici e con capelli sottili o sfondi dei colori del soggetto va corretto a mano; in Disegno i testi non si convertono in tracciati. Conserva sempre una copia degli originali.
 
 [accessibilita.titolo]
 Accessibilità: la condizione, non un extra
@@ -248,7 +253,7 @@ Modalità lettura, contrasto elevato, tema scuro, lettura ad alta voce e verific
 Ascolto
 
 [accessibilita.ascolto]
-In Audio la forma d’onda fa ascoltare il punto in cui ti trovi e si salta da una pausa all’altra del parlato; in Video la verifica controlla sottotitoli, contrasto e lampeggiamenti; in Immagini <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>I</kbd> descrive la foto, la sua luce e le regolazioni cambiate.
+In Audio la forma d’onda fa ascoltare il punto in cui ti trovi e si salta da una pausa all’altra del parlato; in Video la verifica controlla sottotitoli, contrasto e lampeggiamenti; in Immagini <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>I</kbd> descrive la foto, la sua luce e le regolazioni cambiate, e selezioni, maschere e scontorno si fanno descrivere a parole; in Disegno i nodi dei tracciati sono un elenco e un cursore disegna da tastiera.
 
 [accessibilita.segnalazioni]
 Usi NVDA, JAWS o Assistente vocale? Le tue <a href="https://github.com/svitaTLCO/tassello/issues">segnalazioni</a> sono molto benvenute: un problema di accessibilità è un difetto da correggere, non un miglioramento da valutare.
@@ -258,9 +263,9 @@ Privacy
 
 [privacy.testo]
       <p>I documenti restano nel tuo browser e sul tuo computer. L’unica funzione che usa un servizio esterno è la dettatura vocale di Tassello Ufficio: in Chrome l’audio viene inviato ai server di Google, in Edge a quelli di Microsoft. Se non la usi, nulla esce dal tuo dispositivo.</p>
-      <p>Impagina legge la cartella che colleghi solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed.</p>
+      <p>Impagina legge la cartella che colleghi solo quando glielo chiedi e non la modifica; non scarica nulla, nemmeno le immagini indicate in un feed, e crea i codici QR senza internet.</p>
       <p>Tassello Media usa il microfono solo quando lo chiedi tu, e le registrazioni, i file e i video esportati restano sul tuo computer.</p>
-      <p>Tassello Grafica non modifica mai le foto originali, e il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto.</p>
+      <p>Tassello Grafica non modifica mai le foto originali, e il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto. Anche lo scontorno avviene tutto sul tuo computer, senza servizi esterni.</p>
       <p>Questo vale per la copia ufficiale. Una copia modificata da altri può comportarsi in modo diverso: anche per questo conviene <a href="#sicurezza">scaricare Tassello solo da qui</a>.</p>
 
 [sicurezza.titolo]
