@@ -12,7 +12,7 @@ const RIBBON={
   Vista:[['Confronto','compare'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  d:{Inizio:[['Disegno','openDraw saveSvg exportDraw'],['Appunti','paste cut copy duplicateItem'],['Inserisci','addText addImage addRect addEllipse'],['Cronologia','undo redo']],
   Inserisci:[['Forme','addRect addEllipse addPolygon addStar addArrow addBubble'],['Linee','addLine addArrowLine'],['Testo','addText'],['Immagini','addImage']],
-  Disegna:[['Strumenti','toolSelect toolNodes toolPen toolPencil toolBrush toolEraser'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath toPath'],['Combina','boolUnion boolSubtract boolIntersect boolExclude']],
+  Disegna:[['Strumenti','toolSelect toolNodes toolPen toolPencil toolBrush toolEraser'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath toPath simplifyPath'],['Combina','boolUnion boolSubtract boolIntersect boolExclude boolCut']],
   Disponi:[['Scelta','selectAll groupItems ungroupItems lockItems hideItems'],['Ordine','bringFront sendBack forward backward'],['Allinea','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Distribuisci','distH distV smartGuides'],['Oggetto','duplicateItem deleteItem readDraw']],
   Stile:[['Riempimento ed effetti','gradientItem shadowItem'],['Testo','textOnPath textOffPath']],
   Immagine:[['Immagine','imgEdit imgMasks imgCutout imgPhotoReset'],['Ritaglio','imgClip imgUnclip']],
