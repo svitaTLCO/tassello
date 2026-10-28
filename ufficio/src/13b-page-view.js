@@ -50,7 +50,7 @@ function pgItemInfo(it){const p=Pg.p;if(it.kind==='text'){const s=p.stories[it.s
  if(it.kind==='shape')return (PG_ELEM_BY[it.shape]?.[1].toLowerCase()||'elemento')+(it.deco?', decorativo':it.alt?`, testo alternativo «${it.alt.slice(0,80)}»`:'');
  if(it.kind==='qr')return pgQrSay(it,{row:pgCur().I.row}).replace(/^codice QR /,'');
  return it.deco?'decorativa':it.alt?`testo alternativo «${it.alt.slice(0,80)}»`:''}
-function pgDescribeItem(it){const info=pgItemInfo(it),fx=pgFxSay(it);return `${it.name}, ${pgKindSay(it.kind)}${info?', '+info:''}${pgRot(it)?', '+pgRotSay(it):''}${fx?', '+fx:''}${it.mask&&it.mask!=='rect'?', sagoma '+PG_MASKS.find(x=>x[0]===it.mask)?.[1].toLowerCase():''}${it.g?', in un gruppo':''}${it.lock?', bloccata':''}, x ${pgU(it.x)}, y ${pgU(it.y)}, ${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`}
+function pgDescribeItem(it){const info=pgItemInfo(it),fx=pgFxSay(it);return `${it.name}, ${pgKindSay(it.kind)}${info?', '+info:''}${pgRot(it)?', '+pgRotSay(it):''}${fx?', '+fx:''}${it.mask&&it.mask!=='rect'?', sagoma '+PG_MASKS.find(x=>x[0]===it.mask)?.[1].toLowerCase():''}${it.g?', in un gruppo':''}${it.lock?', bloccata':''}, ${pgPlaceSay(it,{short:true})}; x ${pgU(it.x)}, y ${pgU(it.y)}, ${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`}
 function pgStageLabel(){const h=pgHolder(),sel=pgSel(),many=pgSelItems();return `${Pg.mid?'Mastro '+h.name:`Pagina ${Pg.pi+1} di ${Pg.p.pages.length}`}, ${h.items.length===1?'una cornice':h.items.length+' cornici'}. ${many.length>1?`${many.length} cornici scelte: ${many.map(x=>x.name).join(', ')}.`:sel?'Scelta: '+pgDescribeItem(sel):'Nessuna cornice scelta.'}`}
 // Il focus in Impagina: la pagina, oppure il primo formato da scegliere se non c'è ancora un documento.
 const pageFocus=()=>Pg.p?pgStage.focus():$('pgPresets').querySelector('button')?.focus();
@@ -81,7 +81,7 @@ const row2=(a,b)=>`<div class="row2"><div>${a}</div><div>${b}</div></div>`;
 const ppBtn=(action,label)=>`<button type="button" class="btn sm" id="pp-b-${action}" data-action="${action}">${esc(label)}</button>`;
 function pgRenderProps({story=false}={}){const b=$('pgProps'),p=Pg.p,it=pgSel(),h=pgHolder(),u=unitName(),focusId=document.activeElement?.closest?.('#pgProps')?document.activeElement.id:null;
  if(!story&&focusId==='pgStory'&&it?.kind==='text')return pgSyncProps();
- const many=pgSelItems();if(many.length>1){$('pgPropTitle').textContent=`${many.length} cornici scelte`;b.innerHTML=pgMultiProps(many);if(focusId&&$(focusId))$(focusId).focus();return}
+ const many=pgSelItems();if(many.length>1){$('pgPropTitle').textContent=`${many.length} cornici scelte`;b.innerHTML=pgMultiProps(many);colorHints(b);if(focusId&&$(focusId))$(focusId).focus();return}
  $('pgPropTitle').textContent=it?'Proprietà di '+it.name:Pg.mid?'Proprietà del mastro':'Pagina e documento';let s='';
  if(!it){if(Pg.mid)s+=ppF('mname','Nome del mastro',h.name,'text')+`<p class="hint">Le cornici del mastro compaiono su tutte le pagine che lo usano: mettici il numero di pagina, l’intestazione, il logo.</p>`;
   else{const pg=h,rows=p.data?.rows.length||0;s+=`<h3>Pagina ${Pg.pi+1}</h3>`+ppS('master','Mastro',pg.master,[['','Nessuno'],...p.masters.map(m=>[m.id,m.name])])+ppK('data','Ripeti per ogni riga dei dati',pg.data,p.data?`${plural(rows,'riga','righe')} da «${p.data.name}»: nel PDF e nei PNG questa pagina diventa ${rows===1?'una pagina':rows+' pagine'}.`:'Prima scegli i dati dalla scheda Fonti.')+ppT('alt','Descrizione della pagina',pg.alt||'','Per chi non vede: è il testo alternativo da usare quando pubblichi il PNG della pagina.')}
@@ -110,7 +110,7 @@ function pgRenderProps({story=false}={}){const b=$('pgProps'),p=Pg.p,it=pgSel(),
   if(it.kind!=='sign')s+=`<h3>Effetti</h3>`+ppS('shadow','Ombra',it.shadow||'none',PG_SIGN_SHADOWS,'L’ombra cade in basso a destra, anche se la cornice è ruotata.')+(it.shadow&&it.shadow!=='none'?ppC('shc','Colore dell’ombra',it.shc||'#1b1b1b'):'');
   s+=ppR('opacity','Opacità',0,100,it.opacity,v=>v+'%');
   if(!['text','sign','qr','table'].includes(it.kind))s+=`<h3>Per chi non vede</h3>`+ppK('deco','Decorativa: non serve descriverla',it.deco)+(it.deco?'':ppT('alt','Testo alternativo',it.alt,it.kind==='image'?'Che cosa mostra l’immagine, in una o due frasi. Puoi usare i campi dei dati, per esempio «Nome».':'Che cosa comunica la forma.'))}
- if(it)s+=ppK('lock','Bloccata: non si sposta e non si elimina per sbaglio',it.lock);b.innerHTML=s;pgStoryCss();if(focusId&&$(focusId))$(focusId).focus()}
+ if(it)s+=ppK('lock','Bloccata: non si sposta e non si elimina per sbaglio',it.lock);b.innerHTML=s;colorHints(b);pgStoryCss();if(focusId&&$(focusId))$(focusId).focus()}
 // Riempimento con la sfumatura e contorno con il suo tratto, per tutte le cornici che non sono insegne.
 function pgFillProps(it,label,none){return ppC('fill',label,it.fill,none)+(it.fill==='none'?'':ppS('grad','Sfumatura',it.grad||'',[['','Nessuna, colore pieno'],['lin','Lineare'],['rad','Radiale, dal centro']])+(it.grad?ppC('fill2','Secondo colore della sfumatura',it.fill2||'#ffffff')+(it.grad==='lin'?ppR('gangle','Direzione della sfumatura',0,360,it.gangle??90,v=>v+'°','°',15):''):''))}
 function pgEdgeProps(it,label){const u=unitName();return ppC('stroke',label,it.stroke)+ppF('sw',`Spessore del contorno (${u})`,fmtU(it.sw),'decimal',it.sw>0?'':'Con lo spessore a zero il contorno non c’è.')+(it.sw>0?ppS('dash','Tratto del contorno',it.dash||'',PG_DASHES):'')}
@@ -237,8 +237,9 @@ pgStage.addEventListener('keydown',e=>{if(!Pg.p)return;const it=pgSel(),arrows={
   const n=e.shiftKey?10:1,unit=step/n,onGrid=Pg.p.snap?', sulla griglia':'';
   if(!(e.ctrlKey||e.metaKey)&&many.length>1){const ok=pgMovable(many),B0=pgBox(ok),dx=pgGridGo(B0.x,ax,n,unit)-B0.x,dy=pgGridGo(B0.y,ay,n,unit)-B0.y;if(ok.length&&pgEdit('Sposta',()=>{for(const x of ok){x.x+=dx;x.y+=dy}},{merge:true})){const B=pgBox(ok);announce(`${ok.length} cornici, x ${pgU(B.x)}, y ${pgU(B.y)}${onGrid}`)}return}
   if(it.lock){toast(`«${it.name}» è bloccata: sbloccala per spostarla`);return}
-  if(e.ctrlKey||e.metaKey){pgEdit('Ridimensiona',()=>{if(it.kind==='line'){it.w+=ax*step;it.h+=ay*step}else pgSizeTo(it,Math.max(2,pgGridGo(it.x+it.w,ax,n,unit)-it.x),Math.max(2,pgGridGo(it.y+it.h,ay,n,unit)-it.y))},{merge:true});announce(`${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`)}
-  else{pgEdit('Sposta',()=>{it.x=pgGridGo(it.x,ax,n,unit);it.y=pgGridGo(it.y,ay,n,unit)},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}${onGrid}`)}return}
+  const st0=pgRelState(it),then=()=>{const d=pgRelDiff(st0,pgRelState(it));return d?'; '+d:''};
+  if(e.ctrlKey||e.metaKey){pgEdit('Ridimensiona',()=>{if(it.kind==='line'){it.w+=ax*step;it.h+=ay*step}else pgSizeTo(it,Math.max(2,pgGridGo(it.x+it.w,ax,n,unit)-it.x),Math.max(2,pgGridGo(it.y+it.h,ay,n,unit)-it.y))},{merge:true});announce(`${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}${then()}`)}
+  else{pgEdit('Sposta',()=>{it.x=pgGridGo(it.x,ax,n,unit);it.y=pgGridGo(it.y,ay,n,unit)},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}${onGrid}${then()}`)}return}
  if(e.key==='PageUp'||e.key==='PageDown'){if(e.altKey||e.ctrlKey)return;e.preventDefault();pgSelectStep(e.key==='PageDown'?1:-1,e.shiftKey);return}
  if(e.key==='Escape'&&Pg.sel){e.preventDefault();pgSelect(null);return}
  if(e.key==='Enter'){e.preventDefault();if(it)pgOpenItem(it);else{pgShowProps();focusables($('pgProps'))[0]?.focus()}return}

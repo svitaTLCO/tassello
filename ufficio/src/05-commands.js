@@ -432,7 +432,9 @@ def('p','Fonti',[
  ['pgDocx','Importa il testo da un DOCX o da un file di testo','import','',{short:'Testo da DOCX'}]]);
 def('p','Verifica',[
  ['pgCheck','Verifica dell’accessibilità','a11y','',{short:'Verifica accessibilità'}],
- ['pgDescribe','Descrivi la pagina e la cornice scelta','speak','Alt+Maiusc+I',{g:1,short:'Descrivi pagina'}]]);
+ ['pgDescribe','Descrivi la pagina e la cornice scelta','speak','Alt+Maiusc+I',{g:1,short:'Descrivi pagina'}],
+ ['pgPlace','Dove sta la cornice scelta: posizione, vicini e allineamenti','speak','Alt+Maiusc+R',{g:1,short:'Posizione a parole'}],
+ ['pgOverview','Panoramica della pagina: fasce, sfondi, sovrapposizioni e nove zone','speak','Alt+Maiusc+D',{g:1,short:'Panoramica'}]]);
 def('wp','Tasselli',[
  ['layoutMenu','Tasselli: mostra, riduci o togli i riquadri','mosaic','',{short:'Tasselli'}],
  ['layoutReset','Rimetti i tasselli come all’inizio','history','',{short:'Come all’inizio'}]]);
