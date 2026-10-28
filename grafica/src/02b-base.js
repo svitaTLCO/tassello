@@ -22,11 +22,22 @@ const fmtPct=(f,d=0)=>fmtNum(f*100,d)+'%';
 const fmtBytes=n=>n>=1e9?fmtNum(n/1e9,2)+' GB':n>=1e6?fmtNum(n/1e6,1)+' MB':fmtInt(n/1e3)+' kB';
 // Annunci per screen reader, finestre di dialogo accessibili, tooltip e preferenze di visualizzazione.
 const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
-let toastTimer;
-// Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
-function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,String(message).length*55))}
-// Con join il messaggio si aggiunge a quello appena annunciato invece di sostituirlo (per esempio un avviso dopo Annulla).
-let liveTimer,lastSaid={t:0,msg:''};function announce(msg,{join=false}={}){const el=$('srLive');if(join&&Date.now()-lastSaid.t<800)msg=lastSaid.msg+' '+msg;lastSaid={t:Date.now(),msg};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
+// I messaggi per lo screen reader si scrivono con un piccolo ritardo, dopo aver svuotato la regione, perché vengano letti
+// anche se uguali. Quelli che arrivano mentre uno aspetta si accodano: un messaggio dettagliato non viene coperto da uno
+// generico arrivato subito dopo. Solo lo stesso tasto premuto di nuovo (le frecce tenute premute) sostituisce il suo
+// messaggio di prima, che non è ancora stato letto. spoken conta i messaggi: runCommand sa se l'azione ha già parlato.
+let spoken=0,keyAct={seq:0,sig:''};
+addEventListener('keydown',e=>{keyAct={seq:keyAct.seq+1,sig:[e.ctrlKey||e.metaKey,e.altKey,e.shiftKey,e.key].join()}},true);
+addEventListener('pointerdown',()=>{keyAct={seq:keyAct.seq+1,sig:'puntatore'}},true);
+const queueSay=(list,msg)=>{const {seq,sig}=keyAct;list=list.filter(p=>p.seq===seq||p.sig!==sig);if(list.at(-1)?.msg!==msg)list.push({msg,seq,sig});return list};
+let toastTimer,toastWait=null,toastList=[];
+// Messaggio temporaneo, letto dagli screen reader: resta a schermo in proporzione alla lunghezza.
+function toast(message){message=String(message??'').trim();if(!message)return;spoken++;const box=$('toast');clearTimeout(toastTimer);clearTimeout(toastWait);toastList=queueSay(toastList,message);const text=toastList.map(p=>p.msg).join(' ');box.textContent='';
+ toastWait=setTimeout(()=>{toastList=[];box.textContent=text;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,text.length*55))}
+// Con join il messaggio si aggiunge anche a quello appena letto, entro 800 ms (per esempio un avviso dopo Annulla).
+let liveTimer,liveList=[],lastSaid={t:0,msg:''};
+function announce(msg,{join=false}={}){msg=String(msg??'').trim();if(!msg)return;spoken++;const el=$('srLive');if(!liveList.length&&join&&Date.now()-lastSaid.t<800)liveList=[{msg:lastSaid.msg,seq:-1,sig:''}];
+ liveList=queueSay(liveList,msg);const text=liveList.map(p=>p.msg).join(' ');lastSaid={t:Date.now(),msg:text};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{liveList=[];el.textContent=text},70)}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden],.hidden')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body)t.focus({preventScroll:true})}
@@ -53,7 +64,7 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
  (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
- $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad;$('dlgErr').textContent=err.msg;if(err.field)$('dlg_'+err.field)?.focus();return}finish(v)};
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad,box=$('dlgErr');box.textContent='';setTimeout(()=>{box.textContent=err.msg},60);if(err.field)$('dlg_'+err.field)?.focus();return}finish(v)};
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);
