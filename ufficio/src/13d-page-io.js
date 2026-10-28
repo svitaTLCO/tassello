@@ -88,14 +88,73 @@ async function pgExportPng(){const p=Pg.p;pgStorySync();const mm=pgMM(),all=pgIn
 function pagePrintCss(){const p=Pg.p;if(p?.tiles?.on)return pgTilePrintCss();if(p&&pgBleedOn(p)){const S=pgSheet(p);return `@page{size:${pr2(S.w/MM)}mm ${pr2(S.h/MM)}mm;margin:0}`}return p?`@page{size:${pr2(p.w/MM)}mm ${pr2(p.h/MM)}mm;margin:0}`:'@page{size:A4 portrait;margin:18mm}'}
 let pgPrinting=false;
 function pgBuildPrint(){const p=Pg.p,box=$('pgPrint');if(!p){box.replaceChildren();return}Pg.hq=true;try{pgPrintMarkup(p,box)}finally{Pg.hq=false}}
-function pgPrintMarkup(p,box){const insts=pgInstances(p),lay=pgLayout(p,insts);
+// PDF con i tag. Chrome ed Edge mettono nei tag del PDF quello che disegnano, con i ruoli ARIA anche dentro l'SVG: la pagina
+// stampata è lo stesso disegno di sempre, con i ruoli sui gruppi. Titoli, paragrafi e voci degli elenchi sono gruppi di
+// righe; immagini, insegne, codici QR e forme con il testo alternativo sono figure; il resto (sfondi, cornici decorative,
+// mastri con i numeri di pagina e le intestazioni, segni di taglio) è aria-hidden e resta fuori dai tag. Chrome non scrive
+// artefatti (/Artifact): quello che non è nei tag resta senza marcatura, e gli screen reader lo saltano.
+// L'ordine di lettura è l'aria-owns del contenitore della pagina, nell'ordine delle cornici (pgReadOrder), mentre il disegno
+// resta nell'ordine dei livelli. Un paragrafo che continua in un'altra cornice, anche nella pagina dopo, prende il seguito con
+// aria-owns e resta un paragrafo solo; un elenco fa lo stesso con le voci che continuano, che là stanno in un gruppo con il
+// ruolo di elenco (fuori da un elenco una voce perde il suo ruolo, e l'elenco rimasto vuoto Chrome lo toglie).
+// Titoli: titolo, sottotitolo e titoletto, anche su fondo scuro, sono H1, H2 e H3, ma nell'ordine di lettura nessun livello
+// si salta: un titolo scende al più di uno sotto quello prima, e i titoli con lo stesso stile restano allo stesso livello
+// (in un documento con titolo e titoletti i titoletti sono H2, con soli titoletti H1). L'occhiello sta sopra il titolo ma
+// non è un titolo: resta un paragrafo, come gli altri stili. Gli stili con il punto elenco fanno le voci degli elenchi.
+const PG_HEADS=['titolo','sottotitolo','titoletto'];
+// Numeri di pagina: i paragrafi con lo stile del numero di pagina, o con «Pagina» e «Pagine» e al più le parole «pagina» e
+// «di» («Pagina «Pagina» di «Pagine»»), restano fuori dai tag anche quando non sono nel mastro.
+const pgTagFolio=s=>s.paras.some(pa=>pa.runs.some(r=>r.t.trim()))&&s.paras.every(pa=>{const t=pa.runs.map(r=>r.t).join('');return pa.ps==='numero'||!t.trim()||/«\s*pagin[ae]\s*»/i.test(t)&&!/[\p{L}\p{N}]/u.test(t.replace(/«\s*pagin[ae]\s*»|\b(pagina|pag|di)\b/gi,''))});
+// Il testo alternativo di una figura; vuoto se la cornice non porta niente da leggere (un'immagine senza descrizione resta
+// fuori, e la verifica dell'accessibilità lo segnala). Un'insegna senza descrizione si legge con la sua scritta.
+function pgTagAlt(it,ctx){const alt=fillFields((it.alt||'').trim(),ctx);
+ if(it.kind==='image')return pgImgFor(it,ctx)?alt:'';if(it.kind==='sign')return alt||pgSignMetrics(it,ctx).lines.join(' ').replace(/\s+/g,' ').trim();
+ if(it.kind==='qr'){if(!pgQrText(it,ctx))return '';const s=pgQrSay(it,ctx);return s[0].toUpperCase()+s.slice(1)}return alt}
+// Il piano della struttura per le copie di pagina insts: lines (per ogni riga il gruppo in cui va, l'elenco che la contiene
+// e se ha bisogno di uno spazio in fondo), items (le cornici con i ruoli: le figure con gli attributi, i testi), tables (gli
+// id delle copie delle tabelle) e pages (per ogni pagina gli id nell'ordine di lettura; null per una pagina che resta una
+// figura con la sua descrizione: senza testi, tabelle e testi alternativi scritti nelle cornici, come le lettere del festone).
+function pgTagPlan(p,insts,lay){const T={lines:new Map(),items:new Map(),tables:new Map(),pages:[],n:0},nid=()=>'pgtag-'+(++T.n),groups=new Map(),tops=new Map(),heads=new Map();
+ // Le storie come in pgLayout: quelle delle pagine normali scorrono da una pagina all'altra, quelle delle pagine dai dati no.
+ insts.forEach((I,ii)=>{for(const it of I.pg.items){const s=p.stories[it.story];if(it.kind!=='text'||it.hidden||it.deco||!s||pgTagFolio(s))continue;const k=(I.row?'d'+ii:'n')+'|'+it.story;let g=groups.get(k);if(!g)groups.set(k,g={s,frames:[]});g.frames.push([it,ii])}});
+ for(const {s,frames} of groups.values()){frames.sort((a,b)=>s.chain.indexOf(a[0].id)-s.chain.indexOf(b[0].id));
+  const kind=s.paras.map(pa=>{if((p.ps[pa.ps]||p.ps.corpo)?.bullet)return 'li';const h=PG_HEADS.indexOf(String(pa.ps).replace(/Inverso$/,''));return h<0?'p':h}),seq=[];
+  for(const [it,ii] of frames){const L=lay.get(ii+'|'+it.id);if(!L)continue;tops.set(L,[]);T.items.set(ii+'|'+it.id,{L});for(const ln of L.lines)if(ln.pieces.length)seq.push([L,ln])}
+  let para=null,list=null;
+  seq.forEach(([L,ln],k)=>{let seg,wrap=null;
+   if(para?.pa!==ln.pa){const tag=kind[ln.pa];if(tag!=='li'||kind[ln.pa-1]!=='li')list=null;seg={id:nid(),tag,own:[]};para={pa:ln.pa,head:seg,L,seg};if(typeof tag==='number')heads.set(seg.id,seg);
+    if(tag!=='li')tops.get(L).push(seg.id);
+    else{if(!list){list={id:nid(),tag:'list',own:[],L,ctx:new Map()};tops.get(L).push(list.id)}if(list.L===L)wrap=list;else{list.own.push(seg.id);wrap=list.ctx.get(L)||list.ctx.set(L,{tag:'ctx'}).get(L)}}}
+   else if(para.L!==L){seg={id:nid(),tag:'',own:[]};para.head.own.push(seg.id);para.L=L;para.seg=seg}
+   else{seg=para.seg;wrap=T.lines.get(seq[k-1][1]).wrap}
+   T.lines.set(ln,{seg,wrap,sp:seq[k+1]?.[1].pa===ln.pa})})}
+ insts.forEach((I,ii)=>{const ctx={n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()},out=[];let text=false,alts=false;
+  for(const it of pgReadOrder(I.pg)){if(it.hidden||it.deco)continue;const key=ii+'|'+it.id;
+   if(it.kind==='text'){const t=T.items.get(key);if(t){out.push(...tops.get(t.L));text||=t.L.lines.some(l=>l.pieces.length)}continue}
+   if(it.kind==='table'){const id=nid();T.tables.set(key,id);out.push(id);text=true;continue}
+   const label=pgTagAlt(it,ctx);if(!label)continue;alts||=!!it.alt.trim();const id=nid();T.items.set(key,{a:` id="${id}" role="img" aria-label="${esc(label)}"`});out.push(id)}
+  T.pages.push(text||alts||!(I.pg.alt||'').trim()?out:null)});
+ const st=[];for(const pg of T.pages)for(const id of pg||[]){const h=heads.get(id);if(!h)continue;while(st.length&&st.at(-1).tag>=h.tag)st.pop();h.lv=(st.at(-1)?.lv||0)+1;st.push(h)}
+ return T}
+const pgTagAttr=o=>o.tag==='ctx'?' role="list"':(o.id?` id="${o.id}"`:'')+(o.tag==='list'?' role="list"':o.tag==='li'?' role="listitem"':o.tag==='p'?' role="paragraph"':typeof o.tag==='number'?` role="heading" aria-level="${o.lv||1}"`:'')+(o.own.length?` aria-owns="${o.own.join(' ')}"`:'');
+// Le righe di una cornice di testo con i gruppi del piano. Il punto elenco resta fuori dai tag; gli spazi che l'impaginazione
+// toglie (quelli del giustificato e quello a fine riga) tornano come spazi invisibili, così il testo letto non attacca le parole.
+function pgTagText(L){const T=pgTags;let out='',seg=null,wrap=null;
+ for(const l of L?.lines||[]){const t=T.lines.get(l);if(!l.pieces.length||!t)continue;
+  if(t.seg!==seg){if(seg)out+='</g>';if(t.wrap!==wrap){if(wrap)out+='</g>';if(t.wrap)out+=`<g${pgTagAttr(t.wrap)}>`;wrap=t.wrap}out+=`<g${pgTagAttr(t.seg)}>`;seg=t.seg}
+  out+='<text xml:space="preserve">'+l.pieces.map((pc,k)=>{const sp=pc.sp||t.sp&&k===l.pieces.length-1;return pgTspan(pc,l.base,pc.dot?' aria-hidden="true"':'',sp&&!pc.st.under?pc.t+' ':pc.t)+(sp&&pc.st.under?`<tspan ${pgRunAttrs(pc.st)}> </tspan>`:'')}).join('')+'</text>'}
+ return out+(seg?'</g>':'')+(wrap?'</g>':'')}
+function pgPrintMarkup(p,box){const insts=pgInstances(p),lay=pgLayout(p,insts),T=pgTagPlan(p,insts,lay),own=ii=>T.pages[ii]?.length?` aria-owns="${T.pages[ii].join(' ')}"`:'';
  // Dentro ogni pagina, una copia delle sue tabelle con il testo trasparente: lo screen reader le legge come tabelle vere
  // anche nel PDF. Il browser mette nei tag del PDF solo quello che disegna, e un testo nascosto o tagliato non ci arriva;
- // dentro il riquadro della pagina la copia non aggiunge una pagina bianca. Nella stampa a tessere va nell'ultimo foglio.
- const sr=I=>{const m=pgMasterOf(I.pg),ctx={n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()};return [...(m?.items||[]),...I.pg.items].filter(it=>it.kind==='table'&&!it.hidden)
-  .map(it=>pgTableHtml(it,ctx,'pg-sr')).join('')};
- if(p.tiles?.on){box.innerHTML=pgTilesMarkup(insts,lay);for(const s of [...box.children]){const d=document.createElement('div');d.className='pg-pp';s.replaceWith(d);d.append(s)}box.lastElementChild?.insertAdjacentHTML('beforeend',insts.map(sr).join(''));return}
- box.innerHTML=insts.map((I,ii)=>'<div class="pg-pp">'+(pgBleedOn(p)?pgSheetSvg(p,I,ii,lay,m=>m.url):`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" style="width:${pr2(p.w/MM)}mm;height:${pr2(p.h/MM)}mm" role="img" aria-label="Pagina ${I.n}${I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:insts.length,row:I.row,title:p.title,date:pgToday()})):''}">${pgPageSvg(p,I,ii,lay)}</svg>`)+sr(I)+'</div>').join('')}
+ // dentro il riquadro della pagina la copia non aggiunge una pagina bianca. Il disegno della tabella resta fuori dai tag.
+ const sr=ii=>{const I=insts[ii],ctx={n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()};return I.pg.items.filter(it=>T.tables.has(ii+'|'+it.id))
+  .map(it=>pgTableHtml(it,ctx,'pg-sr').replace('<table',`<table id="${T.tables.get(ii+'|'+it.id)}"`)).join('')};
+ pgTags=T;try{
+  // Stampa a tessere: le tabelle vanno nel foglio che ha la pagina nei tag, altrimenti nell'ultimo.
+  if(p.tiles?.on){const sheets=pgTilesMarkup(insts,lay),done=new Set(sheets.map(s=>s.ii));box.innerHTML=sheets.map((s,k)=>`<div class="pg-pp"${s.ii>=0?own(s.ii):''}>${s.svg}${s.ii>=0?sr(s.ii):''}${k===sheets.length-1?insts.map((I,ii)=>done.has(ii)?'':sr(ii)).join(''):''}</div>`).join('');return}
+  box.innerHTML=insts.map((I,ii)=>{const svg=()=>pgBleedOn(p)?pgSheetSvg(p,I,ii,lay,m=>m.url):`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" style="width:${pr2(p.w/MM)}mm;height:${pr2(p.h/MM)}mm"${pgTags?'':` role="img" aria-label="Pagina ${I.n}${I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:insts.length,row:I.row,title:p.title,date:pgToday()})):''}"`}>${pgPageSvg(p,I,ii,lay)}</svg>`;
+   return `<div class="pg-pp"${own(ii)}>${T.pages[ii]?svg():pgUntagged(svg)}${sr(ii)}</div>`}).join('')}finally{pgTags=null}}
 window.addEventListener('beforeprint',()=>{if(isPage()&&!pgPrinting)pgBuildPrint()});window.addEventListener('afterprint',()=>{pgPrinting=false;$('pgPrint').replaceChildren()});
 async function pgPrint(){const p=Pg.p;pgStorySync();await pgPreloadFieldImages(pgInstances(p));await pgWork('Preparazione delle foto regolate',()=>pgDevPreload(pgInstances(p)));pgBuildPrint();pgPrinting=true;
  await Promise.all([...new Set($$('#pgPrint image').map(i=>i.getAttribute('href')))].map(u=>{const im=new Image();im.src=u;return im.decode().catch(()=>{})}));await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));printStyle();window.print()}

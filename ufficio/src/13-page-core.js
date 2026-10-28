@@ -49,6 +49,10 @@ function pgStyles(b){const s=(name,o)=>({name,font:'Segoe UI',size:r1(b),lh:1.35
 // Lo stato di Impagina: il documento, la vista (pagina o mastro), la cornice scelta, la riga dei dati in anteprima,
 // la cronologia e le immagini (file originali con l'indirizzo locale per vederle).
 const Pg={p:null,pi:0,mid:'',sel:null,row:0,zoom:0,guides:true,grid:false,clip:null,hist:[],redo:[],base:'',last:{label:'',t:0},imgs:new Map(),folder:null,ver:0};
+// La struttura del PDF mentre si prepara la stampa (pgTagPlan, in 13d), altrimenti null: le pagine si disegnano uguali, con
+// in più i ruoli per i tag. cur è quello che porta la cornice che si sta disegnando.
+let pgTags=null;
+const pgUntagged=fn=>{const t=pgTags;pgTags=null;try{return fn()}finally{pgTags=t}};
 const pgSnap=()=>JSON.stringify(Pg.p);
 const P=(ps,t)=>({ps,runs:[{t,cs:''}]});
 const pgInner=p=>({x:p.m.l,y:p.m.t,w:p.w-p.m.l-p.m.r,h:p.h-p.m.t-p.m.b});
@@ -123,11 +127,12 @@ function runSt(p,ps,cs){const c=cs&&p.cs[cs],st={font:ps.font,size:ps.size,bold:
 // Colonne di una cornice di testo, al netto del margine interno.
 function frameRegions(it){const pad=Math.max(0,it.pad||0),x=it.x+pad,y=it.y+pad,w=Math.max(1,it.w-2*pad),h=Math.max(1,it.h-2*pad),n=Math.max(1,Math.min(12,it.cols|0||1)),g=n>1?Math.max(0,it.gut||0):0,cw=Math.max(1,(w-(n-1)*g)/n);return Array.from({length:n},(_,k)=>({x:x+k*(cw+g),y,w:cw,h}))}
 // Scorrimento del testo: i paragrafi vanno a capo parola per parola nelle regioni (le colonne delle cornici della
-// catena, in ordine). Ritorna le righe, con la regione e la linea di base, e quanti caratteri restano fuori.
+// catena, in ordine). Ritorna le righe, con la regione, la linea di base e il paragrafo (pa), e quanti caratteri restano
+// fuori. Per i tag del PDF il punto elenco è segnato (dot), e un pezzo seguito da uno spazio tolto dal giustificato ha sp.
 function flowStory(p,s,regions,ctx){const lines=[],fallback=p.ps.corpo||Object.values(p.ps)[0];let ri=0,R=regions[0],y=R?R.y:0,top=true,over=0;
  // Una storia ridotta per entrare (fit, da 0,3 a 1) usa gli stili in scala, con gli spazi prima e dopo.
  const k=s.fit>0&&s.fit<1?s.fit:1;
- for(const para of s.paras){const ps0=p.ps[para.ps]||fallback,ps=k===1?ps0:{...ps0,size:ps0.size*k,before:ps0.before*k,after:ps0.after*k},atoms=[];
+ for(const [pn,para] of s.paras.entries()){const ps0=p.ps[para.ps]||fallback,ps=k===1?ps0:{...ps0,size:ps0.size*k,before:ps0.before*k,after:ps0.after*k},atoms=[];
   for(const run of para.runs){const st=runSt(p,ps,run.cs);let t=fillFields(run.t,ctx);if(st.caps)t=t.toLocaleUpperCase('it');for(const m of t.matchAll(/\s+|\S+/g)){const sp=/^\s/.test(m[0]),tx=sp?' ':m[0];atoms.push({t:tx,st,sp,w:textWidth(st.css,tx)})}}
   if(!R){over+=atoms.reduce((n,a)=>n+a.t.length,0)+1;continue}
   if(!top)y+=ps.before;
@@ -146,9 +151,9 @@ function flowStory(p,s,regions,ctx){const lines=[],fallback=p.ps.corpo||Object.v
    if(y+lh>R.y+R.h+.5){ri++;R=regions[ri];if(R){y=R.y;top=true}continue}
    const ext=avail-w,last=j>=atoms.length;let x=sx+bw,gap=0;
    if(ps.align==='center')x+=ext/2;else if(ps.align==='right')x+=ext;else if(ps.align==='justify'&&!last){const n=atoms.slice(i,end).filter(a=>a.sp).length;if(n)gap=ext/n}
-   const pieces=firstLine&&ps.bullet?[{x:sx,t:'•',st:pst}]:[];let cur=null;
-   for(let k=i;k<end;k++){const a=atoms[k];if(gap&&a.sp){x+=a.w+gap;cur=null;continue}if(cur&&cur.st===a.st)cur.t+=a.t;else pieces.push(cur={x,t:a.t,st:a.st});x+=a.w}
-   lines.push({r:ri,top:y,lh,base:y+(lh-size)/2+size*.8,pieces});y+=lh;top=false;firstLine=false;i=j}
+   const pieces=firstLine&&ps.bullet?[{x:sx,t:'•',st:pst,dot:true}]:[];let cur=null;
+   for(let k=i;k<end;k++){const a=atoms[k];if(gap&&a.sp){if(cur)cur.sp=true;x+=a.w+gap;cur=null;continue}if(cur&&cur.st===a.st)cur.t+=a.t;else pieces.push(cur={x,t:a.t,st:a.st});x+=a.w}
+   lines.push({r:ri,top:y,lh,base:y+(lh-size)/2+size*.8,pieces,pa:pn});y+=lh;top=false;firstLine=false;i=j}
   if(R)y+=ps.after}
  return{lines,over}}
 // Impaginazione di un gruppo di copie di pagina: per ogni storia le cornici della catena nell'ordine giusto.
@@ -195,35 +200,41 @@ function pgImgFor(it,ctx){if(it.field&&ctx?.row&&Pg.p.data){const i=Pg.p.data.fi
 function pgFitBox(it,m){const k=it.fit==='fit'?Math.min(it.w/m.w,it.h/m.h):Math.max(it.w/m.w,it.h/m.h),dw=m.w*k,dh=m.h*k,fx=(it.fx??50)/100,fy=(it.fy??50)/100;
  return it.fit==='fit'?[(it.w-dw)*fx,(it.h-dh)*fy,dw,dh]:[clampV(it.w/2-dw*fx,it.w-dw,0),clampV(it.h/2-dh*fy,it.h-dh,0),dw,dh]}
 // Disegno in SVG: una pagina è lo sfondo, le cornici del mastro e quelle della pagina, una sopra l'altra.
-function pgTextSvg(lines){return lines.filter(l=>l.pieces.length).map(l=>`<text xml:space="preserve">${l.pieces.map(pc=>{const st=pc.st;return `<tspan x="${pr2(pc.x)}" y="${pr2(l.base)}" font-family="${esc(fontStack(st.font))}" font-size="${pr2(st.size)}"${st.bold?' font-weight="700"':''}${st.italic?' font-style="italic"':''} fill="${esc(st.color)}"${st.under?' text-decoration="underline"':''}>${esc(pc.t)}</tspan>`}).join('')}</text>`).join('')}
+const pgRunAttrs=st=>`font-family="${esc(fontStack(st.font))}" font-size="${pr2(st.size)}"${st.bold?' font-weight="700"':''}${st.italic?' font-style="italic"':''} fill="${esc(st.color)}"`;
+const pgTspan=(pc,y,a='',t=pc.t)=>`<tspan x="${pr2(pc.x)}" y="${pr2(y)}" ${pgRunAttrs(pc.st)}${pc.st.under?' text-decoration="underline"':''}${a}>${esc(t)}</tspan>`;
+function pgTextSvg(lines){return lines.filter(l=>l.pieces.length).map(l=>`<text xml:space="preserve">${l.pieces.map(pc=>pgTspan(pc,l.base)).join('')}</text>`).join('')}
 // Rotazione: in gradi in senso orario, da -180 a 180, attorno al centro della cornice. Le linee non la usano: girano
 // spostando i due capi attorno al punto di mezzo.
 const pgRot=it=>it.kind==='line'?0:+it.rot||0,pgRotNorm=a=>{a=((a%360)+540)%360-180;return a===-180?180:Math.round(a*10)/10||0};
 const pgRotT=it=>{const r=pgRot(it);return r?` transform="rotate(${pr2(r)} ${pr2(it.x+it.w/2)} ${pr2(it.y+it.h/2)})"`:''};
 // Un punto della cornice com'è disegnato sulla pagina (back: dalla pagina alla cornice diritta).
 function pgTurn(it,x,y,back=false){const r=pgRot(it)*Math.PI/180*(back?-1:1);if(!r)return{x,y};const cx=it.x+it.w/2,cy=it.y+it.h/2,c=Math.cos(r),s=Math.sin(r),dx=x-cx,dy=y-cy;return{x:cx+dx*c-dy*s,y:cy+dx*s+dy*c}}
-// L'ombra sta fuori dalla rotazione, così cade sempre dalla stessa parte.
-function pgItemSvg(it,L,ctx,href){let s=pgItemBody(it,L,ctx,href);if(!s)return s;const t=pgRotT(it);if(t)s=`<g${t}>${s}</g>`;const f=it.kind!=='sign'&&it.shadow&&it.shadow!=='none'&&pgFrameShadow(it,L);return f?`<defs>${f.def}</defs><g filter="url(#${f.id})">${s}</g>`:s}
+// L'ombra sta fuori dalla rotazione, così cade sempre dalla stessa parte. Nella stampa con i tag una cornice da leggere
+// ha l'ombra da una copia senza tag, sotto: nel PDF un filtro fa del contenuto un'immagine, senza testo e fuori dai tag.
+function pgItemSvg(it,L,ctx,href){let s=pgItemBody(it,L,ctx,href);if(!s)return s;const t=pgRotT(it),rot=s=>t?`<g${t}>${s}</g>`:s;s=rot(s);const T=pgTags?.cur,f=it.kind!=='sign'&&it.shadow&&it.shadow!=='none'&&pgFrameShadow(it,L,!!T);if(!f)return s;
+ if(T)return `<defs>${f.def}</defs><g filter="url(#${f.id})" aria-hidden="true">${rot(pgUntagged(()=>pgItemBody(it,L,ctx,href)))}</g>${s}`;return `<defs>${f.def}</defs><g filter="url(#${f.id})">${s}</g>`}
 // Riempimento: un colore o una sfumatura (lineare, con la sua direzione, o radiale); contorno pieno o tratteggiato.
 const PG_DASHES=[['','Continuo'],['dash','Tratteggiato'],['long','A tratti lunghi'],['dot','Punteggiato'],['dashdot','Tratto e punto']];
 const pgDashAttr=(it,w,cap=true)=>{const k={dash:[2,3],long:[5,3.5],dot:[0,2],dashdot:[3,2.5,0,2.5]}[it.dash];return k?` stroke-dasharray="${k.map(v=>pr2(v*w)).join(' ')}"${cap?' stroke-linecap="round"':''}`:''};
 function pgGrad(id,type,c1,c2,angle){const stops=`<stop offset="0" stop-color="${esc(c1)}"/><stop offset="1" stop-color="${esc(c2)}"/>`;if(type==='rad')return `<radialGradient id="${id}" cx="50%" cy="50%" r="70%">${stops}</radialGradient>`;const a=(angle||0)*Math.PI/180,cx=Math.cos(a)*50,cy=Math.sin(a)*50;return `<linearGradient id="${id}" x1="${pr2(50-cx)}%" y1="${pr2(50-cy)}%" x2="${pr2(50+cx)}%" y2="${pr2(50+cy)}%">${stops}</linearGradient>`}
 // Misura dell'ombra: il corpo più grande del testo su fondo trasparente, altrimenti il lato corto della cornice, entro un quarto della pagina.
-function pgFrameShadow(it,L){let s=0;if(it.kind==='text'&&it.fill==='none')for(const l of L?.lines||[])for(const pc of l.pieces)s=Math.max(s,pc.st.size);if(!s)s=clampV(Math.min(Math.abs(it.w),Math.abs(it.h))*.8,Math.max(it.sw||0,1)*8,Math.min(Pg.p.w,Pg.p.h)*.25);
- const fx=pgShadowFx(it.shadow,it.shc||'#1b1b1b',s);if(!fx)return null;const id='fx'+(++pgDefSeq);return{id,def:`<filter id="${id}" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">${fx[0]}<feMerge><feMergeNode in="${fx[1]}"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`}}
+function pgFrameShadow(it,L,alone=false){let s=0;if(it.kind==='text'&&it.fill==='none')for(const l of L?.lines||[])for(const pc of l.pieces)s=Math.max(s,pc.st.size);if(!s)s=clampV(Math.min(Math.abs(it.w),Math.abs(it.h))*.8,Math.max(it.sw||0,1)*8,Math.min(Pg.p.w,Pg.p.h)*.25);
+ const fx=pgShadowFx(it.shadow,it.shc||'#1b1b1b',s);if(!fx)return null;const id='fx'+(++pgDefSeq);return{id,def:`<filter id="${id}" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">${fx[0]}<feMerge><feMergeNode in="${fx[1]}"/>${alone?'':'<feMergeNode in="SourceGraphic"/>'}</feMerge></filter>`}}
 function pgItemBody(it,L,ctx,href){if(it.hidden)return '';const gid=it.grad&&it.fill!=='none'&&it.fill2?'gr'+(++pgDefSeq):'',fv=gid?`url(#${gid})`:it.fill==='none'?'none':esc(it.fill),body=pgItemShape(it,L,ctx,href,fv,it.sw>0&&it.stroke!=='none');return gid&&body?`<defs>${pgGrad(gid,it.grad,it.fill,it.fill2,it.gangle??90)}</defs>${body}`:body}
-function pgItemShape(it,L,ctx,href,fv,edge){const op=it.opacity<100?` opacity="${it.opacity/100}"`:'',stroke=edge?` stroke="${esc(it.stroke)}" stroke-width="${pr2(it.sw)}"${pgDashAttr(it,it.sw)}`:'',paint=`fill="${fv}"${stroke}`,box=`x="${pr2(it.x)}" y="${pr2(it.y)}" width="${pr2(Math.max(0,it.w))}" height="${pr2(Math.max(0,it.h))}"`,rx=it.radius?` rx="${pr2(it.radius)}"`:'',bg=it.fill!=='none'||it.sw>0?`<rect ${box}${rx} ${paint}/>`:'';
+// A: i ruoli per i tag del PDF di una figura (un'immagine, un'insegna, una forma con il testo alternativo), sull'elemento
+// che disegna: un gruppo che contiene solo immagini o forme Chrome lo lascia fuori dai tag.
+function pgItemShape(it,L,ctx,href,fv,edge){const A=pgTags?.cur?.a||'',op=it.opacity<100?` opacity="${it.opacity/100}"`:'',stroke=edge?` stroke="${esc(it.stroke)}" stroke-width="${pr2(it.sw)}"${pgDashAttr(it,it.sw)}`:'',paint=`fill="${fv}"${stroke}`,box=`x="${pr2(it.x)}" y="${pr2(it.y)}" width="${pr2(Math.max(0,it.w))}" height="${pr2(Math.max(0,it.h))}"`,rx=it.radius?` rx="${pr2(it.radius)}"`:'',bg=it.fill!=='none'||it.sw>0?`<rect ${box}${rx} ${paint}/>`:'';
  switch(it.kind){
-  case 'rect':return `<rect ${box}${it.radius?` rx="${pr2(it.radius)}"`:''} ${paint}${op}/>`;
-  case 'ellipse':return `<ellipse cx="${pr2(it.x+it.w/2)}" cy="${pr2(it.y+it.h/2)}" rx="${pr2(Math.abs(it.w/2))}" ry="${pr2(Math.abs(it.h/2))}" ${paint}${op}/>`;
-  case 'line':return `<line x1="${pr2(it.x)}" y1="${pr2(it.y)}" x2="${pr2(it.x+it.w)}" y2="${pr2(it.y+it.h)}" stroke="${esc(it.stroke)}" stroke-width="${pr2(Math.max(it.sw,.5))}" stroke-linecap="round"${pgDashAttr(it,Math.max(it.sw,.5),false)}${op}/>`;
-  case 'text':return `<g${op}>${bg}${pgTextSvg(L?.lines||[])}</g>`;
-  case 'tri':return `<polygon points="${pr2(it.x)},${pr2(it.y)} ${pr2(it.x+it.w)},${pr2(it.y)} ${pr2(it.x+it.w/2)},${pr2(it.y+it.h)}" ${paint} stroke-linejoin="round"${op}/>`;
-  case 'sign':return pgSignSvg(it,ctx,href);
-  case 'qr':return pgQrSvg(it,ctx);
+  case 'rect':return `<rect ${box}${it.radius?` rx="${pr2(it.radius)}"`:''} ${paint}${op}${A}/>`;
+  case 'ellipse':return `<ellipse cx="${pr2(it.x+it.w/2)}" cy="${pr2(it.y+it.h/2)}" rx="${pr2(Math.abs(it.w/2))}" ry="${pr2(Math.abs(it.h/2))}" ${paint}${op}${A}/>`;
+  case 'line':return `<line x1="${pr2(it.x)}" y1="${pr2(it.y)}" x2="${pr2(it.x+it.w)}" y2="${pr2(it.y+it.h)}" stroke="${esc(it.stroke)}" stroke-width="${pr2(Math.max(it.sw,.5))}" stroke-linecap="round"${pgDashAttr(it,Math.max(it.sw,.5),false)}${op}${A}/>`;
+  case 'text':return `<g${op}>${bg}${pgTags?.cur?pgTagText(L):pgTextSvg(L?.lines||[])}</g>`;
+  case 'tri':return `<polygon points="${pr2(it.x)},${pr2(it.y)} ${pr2(it.x+it.w)},${pr2(it.y)} ${pr2(it.x+it.w/2)},${pr2(it.y+it.h)}" ${paint} stroke-linejoin="round"${op}${A}/>`;
+  case 'sign':{const s=pgSignSvg(it,ctx,href);return A&&s?`<g${A}>${s}</g>`:s}
+  case 'qr':return pgQrSvg(it,ctx).replace('<path ',`<path${A} `);
   case 'table':return pgTableSvg(it,ctx);
-  case 'shape':return pgElemSvg(it,paint,op);
-  case 'image':{const m=pgPhotoFor(it,ctx),d=pgMaskPath(it),pic=()=>{const [ox,oy,dw,dh]=pgFitBox(it,m);return `<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg>`};
+  case 'shape':return pgElemSvg(it,paint,op+A);
+  case 'image':{const m=pgPhotoFor(it,ctx),d=pgMaskPath(it),pic=()=>{const [ox,oy,dw,dh]=pgFitBox(it,m);return `<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image${A} href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg>`};
    // Il contorno va sopra la foto, che altrimenti ne coprirebbe metà.
    if(!d){const back=it.fill!=='none'?`<rect ${box}${rx} fill="${fv}"/>`:'',line=edge?`<rect ${box}${rx} fill="none"${stroke}/>`:'';if(!m)return back||line?`<g${op}>${back}${line}</g>`:'';return `<g${op}>${back}${pic()}${line}</g>`}
    // Con una sagoma, la foto, lo sfondo e il contorno seguono la forma.
@@ -231,7 +242,9 @@ function pgItemShape(it,L,ctx,href,fv,edge){const op=it.opacity<100?` opacity="$
    return `<g${op}>${back}${m?`<defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs><g clip-path="url(#${id})">${pic()}</g>`:''}${line}</g>`}}
  return ''}
 // Con bleed (l'abbondanza per il taglio) lo sfondo e le cornici a filo della pagina continuano oltre il bordo.
-function pgPageSvg(p,I,ii,lay,href=m=>m.url,bleed=0){const m=pgMasterOf(I.pg),ctx={row:I.row,n:I.n,total:I.total,title:p.title,date:pgToday()},b=bleed;return (p.bg&&p.bg!=='none'?`<rect${b?` x="${pr2(-b)}" y="${pr2(-b)}"`:''} width="${pr2(p.w+2*b)}" height="${pr2(p.h+2*b)}" fill="${esc(p.bg)}"/>`:'')+[...(m?m.items:[]),...I.pg.items].map(it=>pgItemSvg(b?pgBleedItem(it,p,b):it,lay.get(ii+'|'+it.id),ctx,href)).join('')}
+// Nella stampa con i tag le cornici che pgTagPlan non mette nella struttura (sfondi, decorazioni, mastri) sono aria-hidden.
+function pgPageSvg(p,I,ii,lay,href=m=>m.url,bleed=0){const m=pgMasterOf(I.pg),ctx={row:I.row,n:I.n,total:I.total,title:p.title,date:pgToday()},b=bleed,T=pgTags;return (p.bg&&p.bg!=='none'?`<rect${b?` x="${pr2(-b)}" y="${pr2(-b)}"`:''} width="${pr2(p.w+2*b)}" height="${pr2(p.h+2*b)}" fill="${esc(p.bg)}"/>`:'')+[...(m?m.items:[]),...I.pg.items].map(it=>{const one=()=>pgItemSvg(b?pgBleedItem(it,p,b):it,lay.get(ii+'|'+it.id),ctx,href);if(!T)return one();
+  T.cur=T.items.get(ii+'|'+it.id)||null;try{const s=one();return s&&!T.cur?`<g aria-hidden="true">${s}</g>`:s}finally{T.cur=null}}).join('')}
 // Misure per l'interfaccia: millimetri e punti nei documenti da stampa, pixel in quelli per lo schermo.
 const pgMM=()=>Pg.p?.unit==='mm';
 const toU=v=>pgMM()?v/MM:v,fromU=v=>pgMM()?v*MM:v,pgToPt=v=>pgMM()?v*.75:v,pgFromPt=v=>pgMM()?v/.75:v;
