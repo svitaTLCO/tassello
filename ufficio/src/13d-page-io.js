@@ -13,7 +13,8 @@ async function pgPersist(){clearTimeout(pgSaveTimer);if(!Pg.p)return;const label
 async function pageRestore(){let d=null;try{d=db?await storeCall(db,'readonly',st=>st.get('impagina')):JSON.parse(localStorage.getItem(PG_KEY)||'null')}catch(e){}
  if(d?.p)try{const p=pgClean(d.p);for(const id of new Set(pgAllItems(p).filter(x=>(x.kind==='image'||x.kind==='sign')&&x.img).map(x=>x.img))){const m=db?await storeCall(db,'readonly',st=>st.get('pimg:'+id)).catch(()=>null):null;if(m?.blob)try{await pgRegister(id,m.blob,m.name);pgImgSaved.add(id)}catch(e){}}
   Object.assign(Pg,{p,pi:clampV(d.pi|0,0,p.pages.length-1),mid:p.masters.some(m=>m.id===d.mid)?d.mid:'',row:Math.max(0,d.row|0),guides:d.guides!==false,grid:!!d.grid,hist:[],redo:[]});Pg.base=pgSnap()}catch(e){console.warn('Bozza di Impagina non recuperabile',e)}
- if(db)try{const h=await storeCall(db,'readonly',st=>st.get('pfolder'));if(h?.kind==='directory')Pg.folder={handle:h,name:h.name,files:null}}catch(e){}}
+ if(db)try{const h=await storeCall(db,'readonly',st=>st.get('pfolder'));if(h?.kind==='directory')Pg.folder={handle:h,name:h.name,files:null}}catch(e){}
+ await pgBrandLoad()}
 // Lettura prudente di bozze e progetti: ogni valore viene controllato prima di entrare nel documento.
 function pgClean(o){if(!o||typeof o!=='object'||!Array.isArray(o.pages)||!o.pages.length)throw Error('Il file non contiene un progetto di Impagina');
  const base=newPub(PG_PRESETS.some(x=>x[0]===o.preset)?o.preset:'post'),num=(v,d,lo=-1e5,hi=1e5)=>Number.isFinite(+v)&&v!==null&&v!==''?clampV(+v,lo,hi):d,str=(v,n=200)=>String(v??'').slice(0,n),col=v=>/^#[0-9a-f]{6}$/i.test(v)?v:v==='none'?'none':null,key=k=>/^[\w-]{1,40}$/.test(k);
@@ -241,7 +242,7 @@ const PAGE_ACTIONS={new:pageNewDialog,pgTemplates:pageNewDialog,open:()=>$('pgFi
  zoomUp:()=>pgZoom(1.25),zoomDown:()=>pgZoom(.8),zoomReset:()=>{Pg.zoom=1;pgRenderStage();announce('Zoom 100%')},pgZoomFit:()=>pgZoom(0),
  pgSave:pageSave,pgSaveTpl,pgExportPng,pgDescribe,pgCheck,
  pgAddPage,pgDupPage,pgDelPage,pgPrevPage:()=>pgStepPage(-1),pgNextPage:()=>pgStepPage(1),pgDataRepeat,pgRowPrev:()=>pgStepRow(-1),pgRowNext:()=>pgStepRow(1),
- pgAddQr,pgAddTable,pgTblData,pgTblRowAdd:()=>pgTblRowAdd(),pgTblColAdd:()=>pgTblColAdd(),pgTblRowDel:()=>pgTblRowDel(),pgTblColDel:()=>pgTblColDel(),pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
+ pgPresent,pgBrand:()=>pgBrandDialog(),pgBrandApply,pgBrandLogo,pgAddQr,pgAddTable,pgTblData,pgTblRowAdd:()=>pgTblRowAdd(),pgTblColAdd:()=>pgTblColAdd(),pgTblRowDel:()=>pgTblRowDel(),pgTblColDel:()=>pgTblColDel(),pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
  pgPageNum:()=>pgMasterAdd('num'),pgHeader:()=>pgMasterAdd('head'),pgLogo:()=>pgMasterAdd('logo'),pgField:pgFieldMenu,
  pgEditText:()=>{if(pgNeed('text'))pgOpenItem(pgSel())},pgDup,pgDelete,pgCut:()=>pgCopy(true),pgCopy:()=>pgCopy(false),pgPaste,
  pgFront:()=>pgOrder('front'),pgBack:()=>pgOrder('back'),pgForward:()=>pgOrder('forward'),pgBackward:()=>pgOrder('backward'),

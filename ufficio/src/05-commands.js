@@ -324,6 +324,7 @@ def('p','Pagine',[
  ['pgPrevPage','Pagina precedente','up','Alt+PgSu',{short:'Pagina precedente'}],
  ['pgNextPage','Pagina successiva','down','Alt+PgGiù',{short:'Pagina successiva'}],
  ['pgDataRepeat','Ripeti la pagina per ogni riga dei dati','sheet','',{short:'Una pagina per riga',toggle:()=>!!pgCurPage()?.data}],
+ ['pgPresent','Presenta a schermo intero, una pagina alla volta','present','F5',{g:1,short:'Presenta'}],
  ['pgRowPrev','Anteprima della riga dei dati precedente','left','',{short:'Riga precedente'}],
  ['pgRowNext','Anteprima della riga dei dati successiva','right','',{short:'Riga successiva'}]]);
 def('p','Inserisci',[
@@ -334,6 +335,7 @@ def('p','Inserisci',[
  ['pgAddLine','Inserisci una linea','lineI','',{short:'Linea'}],
  ['pgAddTri','Inserisci un triangolo','triangle','',{short:'Triangolo'}],
  ['pgAddTable','Inserisci una tabella','table','',{short:'Tabella'}],
+ ['pgBrandLogo','Inserisci il logo del kit del marchio','brand','',{short:'Logo del marchio'}],
  ['pgAddQr','Inserisci un codice QR, fatto senza internet','qr','',{short:'Codice QR'}],
  ['pgAddSign','Inserisci un’insegna, una scritta d’effetto','sign','',{short:'Insegna'}],
  ['pgSignStyles','Stili delle insegne','down','',{menu:1,short:'Stili delle insegne'}],
@@ -400,6 +402,8 @@ def('p','Pagina e griglia',[
  ['pgFestone','Festone di lettere, una per foglio','festone','',{short:'Festone'}],
  ['pgAdapt','Adatta a un altro formato','resize','',{short:'Adatta formato'}],
  ['pgTheme','Temi di colore','palette','',{menu:1,short:'Temi di colore'}],
+ ['pgBrand','Kit del marchio: colori, caratteri e logo','brand','',{short:'Kit del marchio'}],
+ ['pgBrandApply','Applica il kit del marchio al documento','brand','',{short:'Il mio marchio'}],
  ['pgSmart','Guide intelligenti','magnet','',{short:'Guide intelligenti',toggle:()=>Pg.smart!==false}]]);
 def('p','Più cornici',[
  ['pgSelectAll','Scegli tutte le cornici della pagina','','Ctrl+A',{ctx:'page',short:'Scegli tutte'}],
