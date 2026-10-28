@@ -43,7 +43,7 @@ def('wx','Generale',[
  ['find','Trova','search','Ctrl+F',{g:1,short:'Trova'}],
  ['replace','Sostituisci','replace','Ctrl+H',{g:1,short:'Sostituisci'}],
  ['findNext','Trova successivo','down','F3',{g:1}],
- ['findPrev','Trova precedente','up','Maiusc+F3',{g:1}]]);
+ ['findPrev','Trova precedente','up','Maiusc+F3',{g:1,kx:''}]]);
 def('wx','Formato carattere',[
  ['bold','Grassetto','t:<b>G</b>','Ctrl+B',{toggle:()=>isWord()?qs('bold'):isCalc()&&cs('bold')}],
  ['italic','Corsivo','t:<i>C</i>','Ctrl+I',{toggle:()=>isWord()?qs('italic'):isCalc()&&cs('italic')}],
@@ -115,7 +115,7 @@ def('w','Formattazione',[
  ['formatCopy','Copia il formato del testo','brush','Alt+Maiusc+C',{}],
  ['formatPaste','Applica il formato copiato','brush','Alt+Maiusc+V',{}],
  ['caseMenu','Maiuscole e minuscole','t:Aa','',{menu:1,short:'Maiuscole'}],
- ['changeCase','Cambia maiuscole e minuscole','t:Aa','Maiusc+F3',{ctx:'editor'}],
+ ['changeCase','Cambia maiuscole e minuscole','t:Aa','Alt+Maiusc+F3',{ctx:'editor'}],
  ['pasteSpecial','Incolla speciale','paste','Ctrl+Alt+V',{short:'Incolla speciale'}],
  ['revealFormat','Mostra formattazione','info','Maiusc+F1',{short:'Mostra formattazione'}],
  ['showMarks','Mostra segni di formattazione','t:¶','Ctrl+Maiusc+8',{short:'Segni ¶',toggle:()=>marksOn}],

@@ -4,10 +4,14 @@ const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>
 const joinSay=(a,b)=>!a||a===b?b:a+(/[.!?:;…]$/.test(a)?' ':'. ')+b;
 // saidN conta gli annunci: runCommand lo confronta per non aggiungere «… attivato» dopo il messaggio dell'azione.
 let toastTimer,toastShow,toastNext='',saidN=0;
+// Un messaggio in attesa si accoda al successivo, tranne quando a produrli è lo stesso tasto premuto di nuovo (una freccia
+// tenuta giù): lì vale solo l'ultimo, cioè la posizione in cui ci si ferma.
+let keySig='',keySeq=0;addEventListener('keydown',e=>{keySeq++;keySig=[e.ctrlKey,e.altKey,e.shiftKey,e.metaKey,e.key].join()},true);
+const sayFrom=()=>({sig:keySig,seq:keySeq}),queueSay=(prev,from,msg)=>from&&from.seq!==keySeq&&from.sig===keySig?msg:joinSay(prev,msg);
 // Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale. Un
 // messaggio che arriva prima che il precedente sia scritto gli si accoda, e il riquadro resta in proporzione alla lunghezza.
-function toast(message){const box=$('toast');saidN++;toastNext=joinSay(toastNext,String(message??''));clearTimeout(toastTimer);clearTimeout(toastShow);box.textContent='';toastShow=setTimeout(()=>{box.textContent=toastNext;box.classList.add('show');toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,toastNext.length*60));toastNext=''},40)}
-let liveTimer,liveNext='';function announce(msg){msg=String(msg??'').trim();if(!msg)return;saidN++;const el=$('srLive');liveNext=joinSay(liveNext,msg);el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=liveNext;liveNext=''},70)}
+let toastFrom=null;function toast(message){const box=$('toast');saidN++;toastNext=queueSay(toastNext,toastFrom,String(message??''));toastFrom=sayFrom();clearTimeout(toastTimer);clearTimeout(toastShow);box.textContent='';toastShow=setTimeout(()=>{box.textContent=toastNext;box.classList.add('show');toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,toastNext.length*60));toastNext=''},40)}
+let liveTimer,liveNext='',liveFrom=null;function announce(msg){msg=String(msg??'').trim();if(!msg)return;saidN++;const el=$('srLive');liveNext=queueSay(liveNext,liveFrom,msg);liveFrom=sayFrom();el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=liveNext;liveNext=''},70)}
 // Le descrizioni lunghe (più di due frasi) vanno in una finestra, che resta finché non si chiude e che lo screen reader
 // legge all'apertura, una frase per paragrafo; quelle brevi restano un messaggio.
 function sayLong(title,text){text=String(text??'').trim();const parts=text.split(/(?<=[.!?])\s+(?=[A-ZÀ-ÖØ-Þ«"0-9])/);if(parts.length<=2&&text.length<=200)return toast(text);saidN++;

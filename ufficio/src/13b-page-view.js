@@ -196,6 +196,9 @@ document.addEventListener('focusout',e=>{if(e.target.id==='pgStory')pgStorySync(
 const pgPt=e=>{const r=pgSvg.getBoundingClientRect(),k=pgScale();return{x:(e.clientX-r.left)/k,y:(e.clientY-r.top)/k}};
 function pgHit(pt){const items=pgHolder().items,tol=6/pgScale();for(let i=items.length-1;i>=0;i--){const it=items[i];if(it.hidden)continue;if(it.kind==='line'){const dx=it.w,dy=it.h,L=Math.hypot(dx,dy)||1,t=clampV(((pt.x-it.x)*dx+(pt.y-it.y)*dy)/(L*L),0,1);if(Math.hypot(it.x+t*dx-pt.x,it.y+t*dy-pt.y)<=Math.max(tol,it.sw))return it;continue}const q=pgTurn(it,pt.x,pt.y,true);if(q.x>=it.x&&q.x<=it.x+it.w&&q.y>=it.y&&q.y<=it.y+it.h)return it}return null}
 const pgSnapV=v=>Pg.p.snap?Math.round(v/Pg.p.step)*Pg.p.step:v;
+// Con «Aggancia alla griglia» le frecce portano il bordo alla riga successiva della griglia nel verso dato (n righe con Maiusc),
+// anche se la cornice partiva fuori griglia; senza, è la posizione più il passo.
+const pgGridGo=(v,dir,n,step)=>{if(!dir)return v;if(!Pg.p.snap)return v+dir*n*step;const g=Pg.p.step,k=v/g;return (dir>0?Math.floor(k+1e-6)+n:Math.ceil(k-1e-6)-n)*g};
 let pgDrag=null;
 pgStage.addEventListener('pointerdown',e=>{if(e.button!==0||!Pg.p)return;pgStage.focus({preventScroll:true});const pt=pgPt(e),hd=e.target.closest?.('[data-h]');
  if(hd&&pgSel()&&!pgSel().lock)pgDrag={mode:hd.dataset.h==='rot'?'rot':'resize',h:hd.dataset.h,o:{...pgSel()},pt,L:pgSnapLines(new Set([Pg.sel]))};
@@ -226,10 +229,11 @@ function pgOpenItem(it){if(it.kind==='text'){pgShowProps();$('pgStory')?.focus()
 pgStage.addEventListener('keydown',e=>{if(!Pg.p)return;const it=pgSel(),arrows={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
  if(arrows[e.key]&&e.altKey&&e.shiftKey){e.preventDefault();const [ax,ay]=arrows[e.key];pgSnapStep(ax,ay);return}
  if(arrows[e.key]&&!e.altKey){e.preventDefault();if(!it){toast('Scegli prima una cornice: PgGiù e PgSu, oppure l’elenco delle cornici');return}const [ax,ay]=arrows[e.key],step=(Pg.p.snap?Pg.p.step:pgMM()?MM:1)*(e.shiftKey?10:1),many=pgSelItems();
-  if(!(e.ctrlKey||e.metaKey)&&many.length>1){const ok=pgMovable(many);if(ok.length&&pgEdit('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true})){const B=pgBox(ok);announce(`${ok.length} cornici, x ${pgU(B.x)}, y ${pgU(B.y)}`)}return}
+  const n=e.shiftKey?10:1,unit=step/n,onGrid=Pg.p.snap?', sulla griglia':'';
+  if(!(e.ctrlKey||e.metaKey)&&many.length>1){const ok=pgMovable(many),B0=pgBox(ok),dx=pgGridGo(B0.x,ax,n,unit)-B0.x,dy=pgGridGo(B0.y,ay,n,unit)-B0.y;if(ok.length&&pgEdit('Sposta',()=>{for(const x of ok){x.x+=dx;x.y+=dy}},{merge:true})){const B=pgBox(ok);announce(`${ok.length} cornici, x ${pgU(B.x)}, y ${pgU(B.y)}${onGrid}`)}return}
   if(it.lock){toast(`«${it.name}» è bloccata: sbloccala per spostarla`);return}
-  if(e.ctrlKey||e.metaKey){pgEdit('Ridimensiona',()=>{if(it.kind==='line'){it.w+=ax*step;it.h+=ay*step}else pgSizeTo(it,Math.max(2,it.w+ax*step),Math.max(2,it.h+ay*step))},{merge:true});announce(`${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`)}
-  else{pgEdit('Sposta',()=>{it.x+=ax*step;it.y+=ay*step},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}`)}return}
+  if(e.ctrlKey||e.metaKey){pgEdit('Ridimensiona',()=>{if(it.kind==='line'){it.w+=ax*step;it.h+=ay*step}else pgSizeTo(it,Math.max(2,pgGridGo(it.x+it.w,ax,n,unit)-it.x),Math.max(2,pgGridGo(it.y+it.h,ay,n,unit)-it.y))},{merge:true});announce(`${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`)}
+  else{pgEdit('Sposta',()=>{it.x=pgGridGo(it.x,ax,n,unit);it.y=pgGridGo(it.y,ay,n,unit)},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}${onGrid}`)}return}
  if(e.key==='PageUp'||e.key==='PageDown'){if(e.altKey||e.ctrlKey)return;e.preventDefault();pgSelectStep(e.key==='PageDown'?1:-1,e.shiftKey);return}
  if(e.key==='Escape'&&Pg.sel){e.preventDefault();pgSelect(null);return}
  if(e.key==='Enter'){e.preventDefault();if(it)pgOpenItem(it);else{pgShowProps();focusables($('pgProps'))[0]?.focus()}return}

@@ -13,11 +13,14 @@ function pgShowSay(I){const p=Pg.p,ctx={n:I.n,total:I.total,row:I.row,title:p.ti
  for(const it of [...pgReadOrder(I.pg),...(m?pgReadOrder(m):[])]){if(it.deco||it.hidden)continue;let t='';if(it.kind==='text'){const L=pgShowSt.lay.get(pgShowSt.insts.indexOf(I)+'|'+it.id);t=(L?.lines||[]).map(l=>l.pieces.map(pc=>pc.t).join('')).join(' ')}
   else if(it.kind==='sign')t=pgSignMetrics(it,ctx).lines.join(' ');else if(it.kind==='image')t=it.alt?'Immagine: '+fillFields(it.alt,ctx):'';else if(it.kind==='qr')t=pgQrSay(it,ctx);else if(it.kind==='table')t=pgTableSay(it);else t=it.alt||'';
   if(t.trim())out.push(t.replace(/\s+/g,' ').trim())}return out.join('. ')||'Pagina senza testo.'}
-function pgShowGo(i,first=false){const S=pgShowSt;if(!S)return;if(!first&&(i<0||i>=S.insts.length)){toast(i<0?'Sei sulla prima pagina':'Fine della presentazione: Esc per uscire');return}S.i=clampV(i,0,S.insts.length-1);
+function pgShowGo(i,first=false){const S=pgShowSt;if(!S)return;if(!first&&(i<0||i>=S.insts.length)){pgShowMsg(i<0?'Sei sulla prima pagina':'Fine della presentazione: Esc per uscire');return}S.i=clampV(i,0,S.insts.length-1);
  const p=Pg.p,I=S.insts[S.i],el=$('pgShow'),label=`Pagina ${S.i+1} di ${S.insts.length}`;el.firstChild.innerHTML=`<svg viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" aria-hidden="true" focusable="false">${pgPageSvg(p,I,S.i,S.lay)}</svg>`;el.children[1].textContent=`${S.i+1} / ${S.insts.length} · frecce per cambiare pagina, Esc per uscire`;
  el.setAttribute('aria-label',`Presentazione di «${p.title}», ${label}`);
  // L'annuncio sta dentro la finestra della presentazione, così si sente anche mentre il resto del programma è nascosto.
  const live=el.children[2];live.textContent='';setTimeout(()=>{live.textContent=`${first?'Presentazione a schermo intero: frecce o Spazio per andare avanti, Esc per uscire. ':''}${label}. ${pgShowSay(I)}`},70)}
+// Gli avvisi agli estremi stanno dentro la presentazione, nella sua regione viva e nella barra: a schermo intero un messaggio
+// fuori dalla finestra non si vede, e uno screen reader può non leggerlo.
+function pgShowMsg(t){const el=$('pgShow'),live=el.children[2];live.textContent='';setTimeout(()=>{live.textContent=t},70);el.children[1].textContent=t}
 function pgShowEnd(){const S=pgShowSt;if(!S)return;pgShowSt=null;const el=$('pgShow');el.hidden=true;el.firstChild.replaceChildren();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});(S.prev&&document.contains(S.prev)?S.prev:pgStage).focus();announce('Presentazione finita')}
 document.addEventListener('fullscreenchange',()=>{if(pgShowSt&&!document.fullscreenElement)pgShowEnd()});
 // Durante la presentazione i tasti valgono solo per lei (questo ascoltatore viene prima di quello dei comandi).
