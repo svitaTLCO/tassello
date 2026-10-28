@@ -170,6 +170,8 @@ python grafica/build.py
 python sito/build.py
 ```
 
+Per provare una modifica senza toccare `docs/` né gli elenchi delle versioni, `python grafica/build.py --prova <cartella>` (o `ufficio`, `media`) scrive una copia di prova in quella cartella. Ogni build, anche di prova, si ferma se due sorgenti dichiarano lo stesso nome, se un comando è registrato due volte o, quando c'è Node.js, se lo script non si legge: tutto il codice di un tassello finisce in un unico script e un nome ripetuto lo bloccherebbe all'avvio.
+
 Le pagine del sito non si modificano direttamente in `docs/`: si cambiano il modello in `sito/pagine/` o i testi in `sito/testi/` e si ricostruisce. Ogni lingua deve avere le stesse voci dell'italiano; se ne manca una, o ne avanza una, `sito/build.py` si ferma e dice quale.
 
 L'ordine dei file è indicato in ogni `build.py`. Tutto il codice gira dentro un'unica funzione: non ci sono librerie esterne né richieste di rete, e la regola di sicurezza in `src/01-head.html` le vieta.
