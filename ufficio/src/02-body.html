@@ -139,6 +139,18 @@
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
 <symbol id="i-distH" viewBox="0 0 24 24"><path d="M3 3v18M21 3v18"/><rect x="8" y="7" width="8" height="10" rx="1"/></symbol>
 <symbol id="i-distV" viewBox="0 0 24 24"><path d="M3 3h18M3 21h18"/><rect x="7" y="8" width="10" height="8" rx="1"/></symbol>
+<symbol id="i-elements" viewBox="0 0 24 24"><path d="M3 13l4-4 4 4-4 4z"/><circle cx="17" cy="7" r="4"/><path d="M13 21l4-7 4 7z"/></symbol>
+<symbol id="i-shrinkText" viewBox="0 0 24 24"><path d="M4 18 8.5 6h1L14 18M5.7 14h6.6"/><path d="M18 5v9M15.5 11.5 18 14l2.5-2.5"/></symbol>
+<symbol id="i-brand" viewBox="0 0 24 24"><path d="M12 3.5l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/></symbol>
+<symbol id="i-present" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M10 7.5v5l4-2.5z"/><path d="M12 16v4M8 20h8"/></symbol>
+<symbol id="i-wrapText" viewBox="0 0 24 24"><path d="M3 4h18M3 8h7M3 12h7M3 16h7M3 20h18"/><rect x="13" y="7.5" width="8" height="9" rx="1"/></symbol>
+<symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v4H2M18 2v4h4M6 22v-4H2M18 22v-4h4"/><rect x="8" y="8" width="8" height="8"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 20.5h2M20.5 14v2"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+<symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 11-11"/><path d="M15 3.5V6M20.5 9H18M18.8 5.2 17 7M11.6 5.4 13 7"/></symbol>
+<symbol id="i-rotR" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 3.5v4.2h-4.2"/></symbol>
+<symbol id="i-rotL" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v4.2h4.2"/></symbol>
+<symbol id="i-rot0" viewBox="0 0 24 24"><rect x="5" y="6" width="14" height="10" rx="1"/><path d="M3 20h18"/><path d="M12 2.5v2"/></symbol>
 <symbol id="i-mask" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9.5A4 4 0 0 1 12 8a4 4 0 0 1 7 2.5C19 15.6 12 20 12 20z"/></symbol>
 <symbol id="i-festone" viewBox="0 0 24 24"><path d="M2 5c6 3 14 3 20 0"/><path d="M5 6.3 7 12l2-5.1M11 7.4 12 13l1-5.6M15 6.9l2 5.1 2-5.7"/></symbol>
 <symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></symbol>
@@ -220,7 +232,7 @@
 <div class="zoom chip" role="group" aria-label="Zoom"><button type="button" class="st-btn icon" id="zoomMinus" aria-label="Riduci zoom"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button><input type="range" id="zoomSlider" value="100" min="60" max="160" step="10" aria-label="Livello di zoom" aria-valuetext="100%"><button type="button" class="st-btn icon" id="zoomPlus" aria-label="Aumenta zoom"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button><output id="zoomText" for="zoomSlider" aria-hidden="true">100%</output></div>
 </footer>
 </div>
-<p id="pgStageHint" class="sr-only">PgGiù e PgSu scelgono la cornice successiva o precedente nell’ordine di lettura. Frecce per spostarla, con Maiusc dieci volte tanto; Ctrl più frecce per cambiarne le dimensioni. Maiusc+PgGiù aggiunge la cornice successiva alla scelta, Alt+Maiusc più frecce porta la scelta alla guida successiva. Invio apre il testo o le proprietà, Esc toglie la scelta, Canc elimina, Maiusc+F10 apre il menu. Più e meno cambiano lo zoom, zero mostra tutta la pagina. Alt+PgGiù e Alt+PgSu cambiano pagina, Alt+Maiusc+I descrive la pagina.</p>
+<p id="pgStageHint" class="sr-only">PgGiù e PgSu scelgono la cornice successiva o precedente nell’ordine di lettura. Frecce per spostarla, con Maiusc dieci volte tanto; Ctrl più frecce per cambiarne le dimensioni. Alt più frecce a sinistra e a destra la ruotano di 15 gradi, con Ctrl di un grado. Maiusc+PgGiù aggiunge la cornice successiva alla scelta, Alt+Maiusc più frecce porta la scelta alla guida successiva. Invio apre il testo o le proprietà, Esc toglie la scelta, Canc elimina, Maiusc+F10 apre il menu. Più e meno cambiano lo zoom, zero mostra tutta la pagina. Alt+PgGiù e Alt+PgSu cambiano pagina, Alt+Maiusc+I descrive la pagina, F5 la presenta a schermo intero.</p>
 <p id="pgPagesKeys" class="sr-only">Frecce su e giù per scegliere una pagina o un mastro, Alt+Maiusc più frecce per spostare la pagina, Invio per andare sulla pagina, Canc per eliminarla, Maiusc+F10 per il menu.</p>
 <p id="pgFramesKeys" class="sr-only">Le cornici nell’ordine in cui si leggono. Frecce su e giù per scegliere, Maiusc più frecce o Spazio per sceglierne più di una, Alt+Maiusc più frecce per cambiare l’ordine di lettura, Invio per lavorarci, F2 per rinominare, Canc per eliminare, Maiusc+F10 per il menu.</p>
 <p id="pgStoryHint" class="sr-only">Un paragrafo per riga. Lo stile del paragrafo e quello del carattere si scelgono negli elenchi qui sopra; Ctrl+B e Ctrl+I applicano Forte ed Enfasi. Esc torna alla pagina.</p>

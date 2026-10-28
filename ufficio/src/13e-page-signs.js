@@ -30,22 +30,25 @@ function pgSignMetrics(it,ctx={}){let t=fillFields(String(it.text||''),ctx);if(i
  const w100=Math.max(1,...lines.map(l=>textWidth(css,l)+Math.max(0,[...l].length-1)*ls*100)),geo=curved?pgSignPath(it):null;
  const size=it.fit===false?Math.max(1,it.size||40):Math.max(1,curved?Math.min(geo.len*.95/w100*100,geo.maxH):Math.min(it.w*.97/w100*100,it.h/(lines.length*1.12)));return{lines,size,ls:ls*size,geo,curved}}
 // Filtro degli effetti: restituisce solo gli effetti (ombra, contorno esterno, alone), che vanno sotto il testo.
-function pgSignFilter(id,it,size){const parts=[],res=[],col=(inp,c,op,r)=>`<feFlood flood-color="${esc(c)}" flood-opacity="${op}"/><feComposite in2="${inp}" operator="in" result="${r}"/>`;
- if(it.shadow==='soft'){parts.push(`<feGaussianBlur in="SourceAlpha" stdDeviation="${pr2(size*.045)}"/><feOffset dx="${pr2(size*.04)}" dy="${pr2(size*.06)}" result="sb"/>`+col('sb',it.shc,.55,'sh'));res.push('sh')}
- if(it.shadow==='long'||it.shadow==='3d'){const n=it.shadow==='long'?16:7,st=size*(it.shadow==='long'?.022:.014);let s='',m='';for(let i=1;i<=n;i++){s+=`<feOffset in="SourceAlpha" dx="${pr2(st*i)}" dy="${pr2(st*i)}" result="o${i}"/>`;m+=`<feMergeNode in="o${i}"/>`}parts.push(s+`<feMerge result="om">${m}</feMerge>`+col('om',it.shc,1,'ex'));res.push('ex')}
+// Le ombre valgono anche per le altre cornici: size è il corpo della scritta, o la misura della cornice. Restituiscono
+// i passi del filtro e il nome del risultato.
+const pgFlood=(inp,c,op,r)=>`<feFlood flood-color="${esc(c)}" flood-opacity="${op}"/><feComposite in2="${inp}" operator="in" result="${r}"/>`;
+function pgShadowFx(kind,c,size){if(kind==='soft')return [`<feGaussianBlur in="SourceAlpha" stdDeviation="${pr2(size*.045)}"/><feOffset dx="${pr2(size*.04)}" dy="${pr2(size*.06)}" result="sb"/>`+pgFlood('sb',c,.55,'sh'),'sh'];
+ if(kind==='long'||kind==='3d'){const n=kind==='long'?16:7,st=size*(kind==='long'?.022:.014);let s='',m='';for(let i=1;i<=n;i++){s+=`<feOffset in="SourceAlpha" dx="${pr2(st*i)}" dy="${pr2(st*i)}" result="o${i}"/>`;m+=`<feMergeNode in="o${i}"/>`}return [s+`<feMerge result="om">${m}</feMerge>`+pgFlood('om',c,1,'ex'),'ex']}return null}
+function pgSignFilter(id,it,size){const parts=[],res=[],col=pgFlood,sh=pgShadowFx(it.shadow,it.shc,size);if(sh){parts.push(sh[0]);res.push(sh[1])}
  if(it.glow>0){parts.push(`<feGaussianBlur in="SourceAlpha" stdDeviation="${pr2(size*it.glow/700)}" result="g0"/>`+col('g0',it.gc,1,'g1')+`<feGaussianBlur in="SourceAlpha" stdDeviation="${pr2(size*it.glow/250)}" result="g2"/>`+col('g2',it.gc,.85,'g3'));res.push('g3','g1')}
  if(it.ow2>0){parts.push(`<feMorphology in="SourceAlpha" operator="dilate" radius="${pr2(size*(it.ow+it.ow2)/100)}" result="d"/>`+col('d',it.oc2,1,'ol'));res.push('ol')}
  return res.length?`<filter id="${id}" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">${parts.join('')}<feMerge>${res.map(r=>`<feMergeNode in="${r}"/>`).join('')}</feMerge></filter>`:''}
 // La scritta in SVG. Gli id delle definizioni sono nuovi a ogni disegno, così pagina, miniature e stampa non si scontrano.
 let pgDefSeq=0;
 function pgSignSvg(it,ctx,href){const M=pgSignMetrics(it,ctx);if(!M.lines.some(l=>l.trim()))return '';const id='sg'+(++pgDefSeq),size=M.size,op=it.opacity<100?` opacity="${it.opacity/100}"`:'';let defs='',paint;
- if(it.fillType==='grad'){const a=(it.angle||0)*Math.PI/180,cx=Math.cos(a)*50,cy=Math.sin(a)*50;defs+=`<linearGradient id="${id}g" x1="${pr2(50-cx)}%" y1="${pr2(50-cy)}%" x2="${pr2(50+cx)}%" y2="${pr2(50+cy)}%"><stop offset="0" stop-color="${esc(it.c1)}"/><stop offset="1" stop-color="${esc(it.c2)}"/></linearGradient>`;paint=`url(#${id}g)`}
+ if(it.fillType==='grad'){defs+=pgGrad(id+'g','lin',it.c1,it.c2,it.angle);paint=`url(#${id}g)`}
  else if(it.fillType==='image'){const m=it.img&&Pg.imgs.get(it.img);if(m){defs+=`<pattern id="${id}p" patternUnits="userSpaceOnUse" x="${pr2(it.x)}" y="${pr2(it.y)}" width="${pr2(it.w)}" height="${pr2(it.h)}"><image href="${esc(href(m))}" width="${pr2(it.w)}" height="${pr2(it.h)}" preserveAspectRatio="xMidYMid slice"/></pattern>`;paint=`url(#${id}p)`}else paint=esc(it.c1)}
  else paint=it.fillType==='none'?'none':esc(it.c1);
  const filter=pgSignFilter(id+'f',it,size);defs+=filter;if(M.curved)defs+=`<path id="${id}t" d="${M.geo.d}"/>`;
  const anchor=M.curved?'middle':it.align==='left'?'start':it.align==='right'?'end':'middle',ax=it.align==='left'?it.x:it.align==='right'?it.x+it.w:it.x+it.w/2,lh=size*1.12,y0=it.y+(it.h-M.lines.length*lh)/2+size*.86;
  const body=M.curved?`<textPath href="#${id}t" startOffset="${M.geo.off}">${esc(M.lines[0])}</textPath>`:M.lines.map((l,i)=>`<tspan x="${pr2(ax)}" y="${pr2(y0+i*lh)}">${esc(l)}</tspan>`).join('');
- const font=`font-family="${esc(fontStack(it.font))}" font-size="${pr2(size)}"${it.bold?' font-weight="700"':''}${it.italic?' font-style="italic"':''}${M.ls?` letter-spacing="${pr2(M.ls)}"`:''} text-anchor="${anchor}" xml:space="preserve"`,stroke=it.ow>0?` stroke="${esc(it.oc)}" stroke-width="${pr2(size*it.ow/50)}" stroke-linejoin="round" paint-order="stroke"`:'';
+ const font=`font-family="${esc(fontStack(it.font))}" font-size="${pr2(size)}"${it.bold?' font-weight="700"':''}${it.italic?' font-style="italic"':''}${M.ls?` letter-spacing="${pr2(M.ls)}"`:''} text-anchor="${anchor}" xml:space="preserve"`,stroke=it.ow>0?` stroke="${esc(it.oc)}" stroke-width="${pr2(size*it.ow/50)}" stroke-linejoin="round" paint-order="stroke"${pgDashAttr(it,size*it.ow/50)}`:'';
  return `<g${op}>${defs?`<defs>${defs}</defs>`:''}${filter?`<text ${font} fill="${paint==='none'?'#000':paint}"${stroke} filter="url(#${id}f)" aria-hidden="true">${body}</text>`:''}<text ${font} fill="${paint}"${stroke}>${body}</text></g>`}
 // Inserimento e stili: senza un'insegna scelta lo stile ne crea una nuova, altrimenti cambia quella scelta.
 function pgSignStylesMenu(){const it=pgSel(),a=document.querySelector('#ribbon [data-action="pgSignStyles"]')||document.querySelector('#ribbon [data-action="pgAddSign"]'),r=(a||pgStage).getBoundingClientRect();

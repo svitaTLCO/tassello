@@ -25,6 +25,25 @@ function pgTileMapSvg(p,I,ii,lay,g,href){const sf=Math.max(p.tiles.safe,8*MM),W=
  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pr2(g.sw)} ${pr2(g.sh)}" style="width:${pr2(g.sw/MM)}mm;height:${pr2(g.sh/MM)}mm" role="img" aria-label="${esc(lines.join(' '))}">${lines.map((l,i)=>`<text x="${pr2(sf)}" y="${pr2(sf+fs*(1.1+i*1.5))}" font-family="'Segoe UI', sans-serif" font-size="${pr2(fs)}"${i?'':' font-weight="700"'} fill="#1b1b1b">${esc(l)}</text>`).join('')}<svg x="${pr2(bx)}" y="${pr2(by)}" width="${pr2(bw)}" height="${pr2(bh)}" viewBox="${pr2(-g.ox)} ${pr2(-g.oy)} ${pr2(tw)} ${pr2(th)}"><rect x="${pr2(-g.ox)}" y="${pr2(-g.oy)}" width="${pr2(tw)}" height="${pr2(th)}" fill="#f3f3f3"/>${pgPageSvg(p,I,ii,lay,href)}${grid}</svg></svg>`}
 function pgTilesMarkup(insts,lay,href=m=>m.url){const p=Pg.p,g=pgTileGrid(p);let out=p.tiles.map&&g.n>1?pgTileMapSvg(p,insts[0],0,lay,g,href):'';insts.forEach((I,ii)=>{for(let r=0;r<g.rows;r++)for(let c=0;c<g.cols;c++)out+=pgTileSvg(p,I,ii,lay,g,c,r,href)});return out}
 const pgTilePrintCss=()=>{const g=pgTileGrid(Pg.p);return `@page{size:${pr2(g.sw/MM)}mm ${pr2(g.sh/MM)}mm;margin:0}`};
+// Abbondanza e segni di taglio, per la stampa in tipografia di qualunque documento: il foglio è più grande della pagina,
+// lo sfondo e le cornici a filo continuano nell'abbondanza, nei margini del foglio ci sono i segni d'angolo per tagliare e
+// una riga con il titolo e il numero di pagina. Con la stampa a tessere valgono i segni delle tessere.
+const PG_SLUG=6*MM,pgBleedOn=p=>!p.tiles?.on&&(p.bleed>0||!!p.marks);
+const pgSheet=p=>{const b=p.bleed||0,s=p.marks?PG_SLUG:0;return {b,s,o:b+s,w:p.w+2*(b+s),h:p.h+2*(b+s)}};
+// Si allungano i rettangoli e le immagini (senza sagoma) diritti che toccano un bordo della pagina: i testi no, perché
+// andrebbero a capo in un altro modo, e nemmeno le forme che cambierebbero aspetto.
+function pgBleedItem(it,p,b){if(pgRot(it)||!(it.kind==='rect'||it.kind==='image'&&(!it.mask||it.mask==='rect')))return it;const e=.5,x0=it.x<=e?-b:it.x,y0=it.y<=e?-b:it.y,x1=it.x+it.w>=p.w-e?p.w+b:it.x+it.w,y1=it.y+it.h>=p.h-e?p.h+b:it.y+it.h;
+ return x0===it.x&&y0===it.y&&x1===it.x+it.w&&y1===it.y+it.h?it:{...it,x:x0,y:y0,w:x1-x0,h:y1-y0}}
+// Il foglio di una copia di pagina: dims in pixel per il PNG, altrimenti la misura in millimetri per la stampa.
+function pgSheetSvg(p,I,ii,lay,href,dims){const S=pgSheet(p),{b,s}=S,line=(x1,y1,x2,y2)=>`<line x1="${pr2(x1)}" y1="${pr2(y1)}" x2="${pr2(x2)}" y2="${pr2(y2)}"/>`;let m='';
+ if(s){for(const x of [0,p.w])for(const y of [0,p.h]){const dx=x?1:-1,dy=y?1:-1;m+=line(x+dx*(b+.5*MM),y,x+dx*(b+s-.5*MM),y)+line(x,y+dy*(b+.5*MM),x,y+dy*(b+s-.5*MM))}
+  m=`<g stroke="#000" stroke-width="${pr2(.25*MM)}">${m}</g><text x="0" y="${pr2(p.h+b+s*.66)}" font-family="'Segoe UI', sans-serif" font-size="${pr2(2.2*MM)}" fill="#000">${esc(`${p.title} · pagina ${I.n} di ${I.total}${b?` · abbondanza ${pgFmt(b/MM)} mm`:''}`)}</text>`}
+ const alt=I.pg.alt?': '+esc(fillFields(I.pg.alt,{n:I.n,total:I.total,row:I.row,title:p.title,date:pgToday()})):'';
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${pr2(-S.o)} ${pr2(-S.o)} ${pr2(S.w)} ${pr2(S.h)}" ${dims?`width="${dims[0]}" height="${dims[1]}"`:`style="width:${pr2(S.w/MM)}mm;height:${pr2(S.h/MM)}mm" role="img" aria-label="Pagina ${I.n}${alt}"`}>${dims?`<rect x="${pr2(-S.o)}" y="${pr2(-S.o)}" width="${pr2(S.w)}" height="${pr2(S.h)}" fill="#ffffff"/>`:''}<svg x="${pr2(-b)}" y="${pr2(-b)}" width="${pr2(p.w+2*b)}" height="${pr2(p.h+2*b)}" viewBox="${pr2(-b)} ${pr2(-b)} ${pr2(p.w+2*b)} ${pr2(p.h+2*b)}" overflow="hidden">${pgPageSvg(p,I,ii,lay,href,b)}</svg>${m}</svg>`}
+// Verifica per la tipografia: le cornici con un contenuto troppo vicine al taglio, i fondi che non arrivano al bordo.
+function pgBleedIssues(p,h,at,where,out){const near=3*MM,gap=2*MM;for(const it of h.items){if(it.hidden)continue;const B=pgBoxOf(it),nm=`«${it.name}» (${where})`,A={...at,id:it.id},d=[B.x,B.y,p.w-B.x-B.w,p.h-B.y-B.h];
+ if(PG_CONTENT.has(it.kind)&&it.kind!=='image'&&d.some(v=>v>-1&&v<near))out.push({...A,msg:`${nm} è a meno di 3 mm dal taglio: la tipografia potrebbe tagliarla. Spostala verso l’interno.`});
+ else if(p.bleed>0&&(it.kind==='rect'||it.kind==='image')&&d.some(v=>v>.5&&v<gap))out.push({...A,msg:`${nm} arriva quasi al bordo della pagina ma non lo tocca: dopo il taglio resterebbe un filo bianco. Portala fino al bordo, così continua nell’abbondanza.`})}}
 // Sulla pagina, con le guide: il bordo di ogni tessera e la sua etichetta.
 function pgTileOverlay(k){const p=Pg.p,g=pgTileGrid(p),sw=pr2(1.2/k);let s='';for(let r=0;r<g.rows;r++)for(let c=0;c<g.cols;c++){const b=pgTileBox(g,c,r);s+=`<rect class="g-tile" x="${pr2(b.x)}" y="${pr2(b.y)}" width="${pr2(b.w)}" height="${pr2(b.h)}" fill="none" stroke-width="${sw}" stroke-dasharray="${pr2(8/k)} ${pr2(4/k)}"/><text class="g-tile-l" x="${pr2(b.x+6/k)}" y="${pr2(b.y+16/k)}" font-size="${pr2(12/k)}">${r+1}·${c+1}</text>`}return s}
 // Festone: una lettera grande per foglio, su una bandierina o sul foglio intero, con i segni dei fori per il filo.

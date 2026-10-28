@@ -26,13 +26,17 @@ const PG_V='post quadrato storia a4 letter a5 a3 a2 a1 a0';
 // di un telefono: i testi crescono fino a questa misura),
 // m cornici del mastro, p pagine. Una pagina è un elenco di cornici, oppure {r:3,p:[…]} da ripetere ({p} è il numero
 // della ripetizione), {d:1,p:[…]} da ripetere per ogni riga dei dati, {x:1,p:[…]} senza mastro.
-// Cornici: ['t',bordi…,'paragrafi',{…}] testo, ['i',bordi…,{…}] immagine, ['s',bordi…,'scritta',{…}] insegna,
+// Cornici: ['o',bordi…,'elemento',{…}] elemento della raccolta (PG_ELEMS, f colore, a testo alternativo), ['b',bordi…,'A;B|1;2',{…}] tabella (righe separate da |, celle da ;, la prima è l'intestazione; st stile, sz corpo
+// in volte il corpo del testo), ['q',bordi…,'contenuto',{…}] codice QR (meglio con q, quadrato), ['t',bordi…,'paragrafi',{…}] testo, ['i',bordi…,{…}] immagine, ['s',bordi…,'scritta',{…}] insegna,
 // ['r'|'e'|'v',bordi…,'colore',{…}] rettangolo, ellisse e triangolo, ['l',bordi…,'colore'] linea, ['g',bordi…,'griglia',{…}]
 // griglia di foto (PG_GRIDS). I paragrafi sono «lettera:testo» separati da |; con + davanti valgono solo nei formati da
 // stampa, con - solo in quelli per lo schermo. Opzioni: n nome, f sfondo, r angoli (frazione del lato corto), v allineamento
 // verticale m/b, c colonne, pad margine interno (in corpi del testo), k catena (le cornici con la stessa k si passano il
 // testo), q quadrata al centro, i rientro (frazione del lato corto), m sagoma, d decorativa, a testo alternativo, s colore
-// del contorno delle forme, w spessore della linea o del contorno (in corpi del testo); nelle insegne st stile e c1, c2, oc, oc2, shc, gc colori, x altre proprietà.
+// del contorno delle forme, w spessore della linea o del contorno (in corpi del testo), rot rotazione in gradi (le linee la ignorano),
+// sh ombra (soft, long, 3d) con shc il suo colore, nelle immagini ad regolazioni della foto ({exposure:.3,…}) e lk look, f2 secondo colore della sfumatura (ga direzione in gradi, gr:1 radiale), da tratto del contorno,
+// wr scontorno del testo (box o shape) con wg la distanza in corpi del testo;
+// nelle insegne st stile e c1, c2, oc, oc2, shc, gc colori, x altre proprietà.
 // Un gruppo {rep:[volte,dx,dy],g:[cornici…]} si ripete spostato di dx e dy: nei testi {n} è il numero della copia.
 const PG_NUM=['t',.5,1.25,1,1.8,'k:«Pagina» / «Pagine»',{n:'Numero di pagina'}];
 const PG_TEMPLATES=[
@@ -194,6 +198,12 @@ const PG_TEMPLATES=[
   p:[[['r',-1,-1,2,2,'dark',{n:'Sfondo'}],['s',0,0,1,.4,'Nome Cognome',{c1:'light'}],['t',0,.42,1,.6,'O:Il tuo ruolo'],['t',0,.62,1,1,'N:Telefono · e-mail|N:sito',{v:'b'}]],
    [['r',-1,-1,2,2,'accent',{n:'Sfondo'}],['s',.2,.1,.8,.9,'NC',{q:1,c1:'light',n:'Iniziali'}]]]},
  // Cartoline: davanti la foto, dietro lo spazio per il messaggio, l'indirizzo e il francobollo.
+ {id:'listino',n:'Listino con tabella',d:'Il titolo, una frase e una tabella a strisce con i servizi, la durata e i prezzi, da scrivere o da riempire con i dati di un file.',u:'menu offerta',f:'a4 letter a5 a3',th:'classico',sp:.024,
+  p:[[['t',0,0,1,.17,'o:Listino 2026|t:I nostri prezzi'],['t',0,.19,1,.3,'c:Scrivi qui in una frase che cosa contiene il listino.|+c:La tabella si scrive nelle proprietà, oppure si riempie con i dati di un file CSV o XLSX: Riempi dai dati.'],
+   ['b',0,.33,1,.88,'Servizio;Durata;Prezzo|Prima voce;30 minuti;25 €|Seconda voce;1 ora;40 €|Terza voce;1 ora e mezza;55 €|Quarta voce;2 ore;70 €',{st:'zebra'}],['t',0,.92,1,1,'n:Indirizzo · telefono · sito']]]},
+ {id:'bv-qr',n:'Con codice QR',d:'Davanti il nome, il ruolo e i contatti; dietro un codice QR che porta al tuo sito, con una riga che lo spiega.',u:'contatti',f:'biglietto',th:'mare',
+  p:[[['r',-1,-1,-.6,2,'accent',{n:'Barra'}],['t',0,.08,1,.6,'h:Nome Cognome|d:Il tuo ruolo',{v:'m'}],['l',0,.68,.35,.68,'accent',{w:.15}],['t',0,.72,1,1,'n:Telefono · e-mail|n:Indirizzo, città',{v:'b'}]],
+   [['q',0,0,.5,1,'https://www.esempio.it',{q:1,n:'Codice QR del sito'}],['t',.56,0,1,1,'h:Inquadra il codice|n:Porta al sito: scrivi qui anche l’indirizzo, per chi non può inquadrarlo.',{v:'m'}]]]},
  {id:'cart-saluti',n:'Saluti da…',d:'Davanti una foto al vivo con una fascia scura e il nome del luogo; dietro il messaggio, l’indirizzo e il francobollo.',u:'auguri',f:'cartolina',th:'mare',
   p:[[['i',-1,-1,2,2,{n:'Foto del luogo'}],['r',-1,.72,2,2,'dark',{n:'Fascia'}],['s',0,.76,1,1,'Saluti da Bologna',{c1:'light'}]],
    [['t',0,0,.47,1,'c:Scrivi qui il tuo messaggio: due righe bastano per dire che pensi a qualcuno.|n:Un saluto, e la firma'],['l',.5,0,.5,1,'ink',{n:'Divisorio'}],['r',.78,0,1,.32,'none',{s:'ink',w:.08,n:'Francobollo'}],{rep:[4,0,.14],g:[['l',.55,.52,1,.52,'ink',{n:'Riga dell’indirizzo {n}'}]]}]]},
@@ -248,14 +258,17 @@ function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_
  const name=s=>{let v=s,k=2;while(used.has(v))v=s+' '+k++;used.add(v);return v};
  const ax=(v,a,n,len)=>v<0?a*(v+1):v>1?a+n+(len-a-n)*(v-1):a+v*n;
  const box=(e,o)=>{let x=ax(e[1],I.x,I.w,p.w),y=ax(e[2],I.y,I.h,p.h),w=ax(e[3],I.x,I.w,p.w)-x,h=ax(e[4],I.y,I.h,p.h)-y;if(o.q){const s=Math.min(w,h);x+=(w-s)/2;y+=(h-s)/2;w=h=s}if(o.i){const d=Math.min(w,h)*o.i;x+=d;y+=d;w-=2*d;h-=2*d}return{x,y,w,h}};
- const put=(h,e,n,pi)=>{const k=e[0],a=e[5],o=[e[5],e[6]].find(v=>v&&typeof v==='object')||{},B=box(e,o),nm=d=>name(o.n?fill(o.n,n,pi):d),rad=o.r?Math.min(B.w,B.h)*o.r:0;
-  if(k==='t'){const x={name:nm(PG_TPL_NAME[(a.replace(/^[+-]/,'')[0]||'c').toLowerCase()]||'Testo'),...B,valign:{m:'middle',b:'bottom'}[o.v]||'top',cols:o.c||1,gut:p.gut,pad:(o.pad||0)*b,fill:o.f?tok(o.f):'none',radius:rad};
+ const put=(h,e,n,pi)=>{const k=e[0],a=e[5],o=[e[5],e[6]].find(v=>v&&typeof v==='object')||{},B={...box(e,o),...(o.rot?{rot:pgRotNorm(o.rot)}:{})},nm=d=>name(o.n?fill(o.n,n,pi):d),rad=o.r?Math.min(B.w,B.h)*o.r:0,ef={...(o.sh?{shadow:o.sh,shc:tok(o.shc||'dark')}:{}),...(o.f2?{grad:o.gr?'rad':'lin',fill2:tok(o.f2),gangle:o.ga??90}:{}),...(o.da?{dash:o.da}:{}),...(o.wr?{wrap:o.wr,wrapGap:b*(o.wg??.75)}:{})};
+  if(k==='t'){const x={name:nm(PG_TPL_NAME[(a.replace(/^[+-]/,'')[0]||'c').toLowerCase()]||'Testo'),...B,valign:{m:'middle',b:'bottom'}[o.v]||'top',cols:o.c||1,gut:p.gut,pad:(o.pad||0)*b,fill:o.f?tok(o.f):'none',radius:rad,...ef};
    if(o.k&&chains[o.k])return pgPutLinked(p,h,chains[o.k],x);const it=pgPutText(p,h,x,paras(a,n,pi));if(o.k)chains[o.k]=it;return it}
-  if(k==='i')return pgPut(h,pgMk(p,'image',{name:nm('Foto'),...B,fill:o.f?tok(o.f):'none',radius:rad,deco:!!o.d,...(o.m?{mask:o.m}:{})}));
-  if(k==='s'){const st=o.st||'classica',c={};for(const z of ['c1','c2','oc','oc2','shc','gc'])if(o[z])c[z]=tok(o[z]);return pgPut(h,pgMk(p,'sign',{...pgSignStyle(st),style:st,name:nm('Scritta'),text:fill(a,n,pi),...B,c1:T.head,...c,...o.x}))}
-  if(k==='l')return pgPut(h,pgMk(p,'line',{name:nm('Linea'),...B,stroke:tok(a||'accent'),...(o.w?{sw:b*o.w}:{})}));
-  if(k==='g'){const cells=PG_GRIDS.find(x=>x[0]===a)[2],g=p.gut*.6,gid=uid(),e6=1e-6;return cells.map(([u,v,cw,ch])=>{const l=u>e6?g/2:0,r=u+cw<1-e6?g/2:0,tp=v>e6?g/2:0,bt=v+ch<1-e6?g/2:0;return pgPut(h,pgMk(p,'image',{name:nm(o.n||'Foto'),x:B.x+u*B.w+l,y:B.y+v*B.h+tp,w:cw*B.w-l-r,h:ch*B.h-tp-bt,fill:o.f?tok(o.f):'none',g:gid,...(o.m?{mask:o.m}:{})}))})}
-  const kind={r:'rect',e:'ellipse',v:'tri'}[k];return pgPut(h,pgMk(p,kind,{name:nm(PG_KIND[kind]),...B,fill:tok(a||'soft'),radius:rad,opacity:o.op||100,...(o.s?{stroke:tok(o.s),sw:b*(o.w||.1)}:{}),...(o.a?{alt:o.a,deco:false}:{})}))};
+  if(k==='i')return pgPut(h,pgMk(p,'image',{name:nm('Foto'),...B,fill:o.f?tok(o.f):'none',radius:rad,...ef,...(o.ad?{adj:{...o.ad}}:{}),...(o.lk?{look:o.lk}:{}),deco:!!o.d,...(o.m?{mask:o.m}:{})}));
+  if(k==='s'){const st=o.st||'classica',c={};for(const z of ['c1','c2','oc','oc2','shc','gc'])if(o[z])c[z]=tok(o[z]);return pgPut(h,pgMk(p,'sign',{...pgSignStyle(st),style:st,name:nm('Scritta'),text:fill(a,n,pi),...B,c1:T.head,...c,...ef,...o.x}))}
+  if(k==='o')return pgPut(h,pgMk(p,'shape',{name:nm(PG_ELEM_BY[a]?.[1]||'Elemento'),...B,shape:a,fill:tok(o.f||'accent'),...ef,...(o.a?{alt:o.a,deco:false}:{})}));
+  if(k==='b')return pgPut(h,pgMk(p,'table',{name:nm('Tabella'),...B,cells:a.split('|').map(r=>r.split(';').map(c=>fill(c,n,pi))),head:1,tstyle:o.st||'righe',size:r1(b*(o.sz||1)),ink:T.ink,hc:T.dark,hink:T.light,line:T.accent,zc:T.soft,...ef}));
+  if(k==='q')return pgPut(h,pgMk(p,'qr',{name:nm('Codice QR'),...B,text:fill(a,n,pi),...ef,...o.x}));
+  if(k==='l')return pgPut(h,pgMk(p,'line',{name:nm('Linea'),x:B.x,y:B.y,w:B.w,h:B.h,stroke:tok(a||'accent'),...(o.w?{sw:b*o.w}:{}),...ef}));
+  if(k==='g'){const cells=PG_GRIDS.find(x=>x[0]===a)[2],g=p.gut*.6,gid=uid(),e6=1e-6;return cells.map(([u,v,cw,ch])=>{const l=u>e6?g/2:0,r=u+cw<1-e6?g/2:0,tp=v>e6?g/2:0,bt=v+ch<1-e6?g/2:0;return pgPut(h,pgMk(p,'image',{name:nm(o.n||'Foto'),...B,x:B.x+u*B.w+l,y:B.y+v*B.h+tp,w:cw*B.w-l-r,h:ch*B.h-tp-bt,fill:o.f?tok(o.f):'none',g:gid,...(o.m?{mask:o.m}:{})}))})}
+  const kind={r:'rect',e:'ellipse',v:'tri'}[k];return pgPut(h,pgMk(p,kind,{name:nm(PG_KIND[kind]),...B,fill:tok(a||'soft'),radius:rad,opacity:o.op||100,...ef,...(o.s?{stroke:tok(o.s),sw:b*(o.w||.1)}:{}),...(o.a?{alt:o.a,deco:false}:{})}))};
  // Un gruppo {rep:[volte,dx,dy],g:[…]} ripete le sue cornici spostandole: così l'ordine di lettura va copia per copia.
  const fillHolder=(h,list,pi)=>{for(const e of list){if(Array.isArray(e)){put(h,e,1,pi);continue}const [cnt,dx,dy]=e.rep;for(let j=0;j<cnt;j++)for(const x of e.g)put(h,[x[0],x[1]+j*dx,x[2]+j*dy,x[3]+j*dx,x[4]+j*dy,...x.slice(5)],j+1,pi)}};
  const pages=[];for(const pg of t.p){if(Array.isArray(pg))pages.push({list:pg,pi:pages.length+1});else for(let j=0;j<(pg.r||1);j++)pages.push({list:pg.p,pi:j+1,data:!!pg.d,free:!!pg.x})}
@@ -269,34 +282,34 @@ function pgTplEntries(fmt,mine){const own=mine.filter(m=>m.preset===fmt).map(m=>
 // Anteprime: le pagine del modello disegnate come la pagina vera, con il documento del modello al posto di quello aperto.
 // Le cornici per le foto ancora vuote si vedono come un riquadro grigio con un paesaggio stilizzato.
 const pgTplCache=new Map();
-function pgTplPhoto(it){const s=Math.min(Math.abs(it.w),Math.abs(it.h))*.32,cx=it.x+it.w/2,cy=it.y+it.h/2,X=u=>pr2(cx+u*s),Y=v=>pr2(cy+v*s);return `<path d="M${X(-.5)} ${Y(.32)}L${X(-.16)} ${Y(-.1)}L${X(.06)} ${Y(.14)}L${X(.2)} ${Y(0)}L${X(.5)} ${Y(.32)}Z" fill="#a9b1bb"/><circle cx="${X(.26)}" cy="${Y(-.24)}" r="${pr2(s*.1)}" fill="#a9b1bb"/>`}
-function pgTplPreview(e,fmt){const key=fmt+'|'+e.id;let v=pgTplCache.get(key);if(v)return v;const p=e.make(),old=Pg.p,empty=pgAllItems(p).filter(x=>x.kind==='image'&&!x.img&&!x.hidden);for(const it of empty)if(it.fill==='none')it.fill='#dde1e6';Pg.p=p;
+function pgTplPhoto(it){const s=Math.min(Math.abs(it.w),Math.abs(it.h))*.32,cx=it.x+it.w/2,cy=it.y+it.h/2,X=u=>pr2(cx+u*s),Y=v=>pr2(cy+v*s);return `<g${pgRotT(it)}><path d="M${X(-.5)} ${Y(.32)}L${X(-.16)} ${Y(-.1)}L${X(.06)} ${Y(.14)}L${X(.2)} ${Y(0)}L${X(.5)} ${Y(.32)}Z" fill="#a9b1bb"/><circle cx="${X(.26)}" cy="${Y(-.24)}" r="${pr2(s*.1)}" fill="#a9b1bb"/></g>`}
+function pgTplPreview(e,fmt){const key=fmt+'|'+e.id+(e.brand?'|b':'');let v=pgTplCache.get(key);if(v)return v;const p=e.make(),old=Pg.p,empty=pgAllItems(p).filter(x=>x.kind==='image'&&!x.img&&!x.hidden);for(const it of empty)if(it.fill==='none')it.fill='#dde1e6';Pg.p=p;
  try{const all=pgInstances(p),insts=Object.assign(all.slice(0,6),{total:all.length}),lay=pgLayout(p,insts);v={n:p.pages.length,svg:insts.map((I,ii)=>`<svg viewBox="0 0 ${pr2(p.w)} ${pr2(p.h)}" width="${Math.round(p.w)}" height="${Math.round(p.h)}" aria-hidden="true" focusable="false">${pgPageSvg(p,I,ii,lay)}${[...(pgMasterOf(I.pg)?.items||[]),...I.pg.items].filter(x=>empty.includes(x)).map(pgTplPhoto).join('')}</svg>`)}}finally{Pg.p=old}
  pgTplCache.set(key,v);return v}
 // La galleria: formato e uso filtrano l'elenco; le frecce scelgono il modello, Invio lo crea.
-async function pgGallery({fmt,use='',pick='',say=''}={}){const mine=await pgMineList();await pgMineImgs(mine);
+async function pgGallery({fmt,use='',pick='',say='',brand=false}={}){const mine=await pgMineList();await pgMineImgs(mine);await pgBrandLoad();
  const fmts=[...PG_PRESETS.map(([v,l])=>[v,l]),['festone','Festone di lettere'],...(mine.some(m=>m.preset!=='festone'&&!PG_PRESETS.some(x=>x[0]===m.preset))?[['','Formato personalizzato, i tuoi modelli']]:[])];
  fmt??=PG_PRESETS.some(x=>x[0]===Pg.p?.preset)?Pg.p.preset:'post';if(!fmts.some(x=>x[0]===fmt))fmt='post';
  let list=[],cur=0,act=null;const opt=(v,l,s)=>`<option value="${esc(v)}"${v===s?' selected':''}>${esc(l)}</option>`;
  const body=`<p id="tplIntro">Scegli il formato e l’uso, poi il modello: frecce per scorrere l’elenco, Invio per creare il documento.${mine.length?' I tuoi modelli si rinominano con F2 e si eliminano con Canc.':''}</p><div class="pg-tpl-bar"><div><label for="tplFmt">Formato</label><select id="tplFmt">${[['Per lo schermo',v=>PG_PRESETS.find(x=>x[0]===v)?.[4]==='px'],['Da stampare',v=>PG_PRESETS.find(x=>x[0]===v)?.[4]==='mm'&&!PG_TILED.has(v)],['Grande formato',v=>PG_TILED.has(v)||v==='festone'],['I tuoi formati',v=>!v]].map(([g,f])=>{const l=fmts.filter(x=>f(x[0]));return l.length?`<optgroup label="${g}">${l.map(([v,l])=>opt(v,l,fmt)).join('')}</optgroup>`:''}).join('')}</select></div>
-  <div><label for="tplUse">Uso</label><select id="tplUse">${opt('','Tutti gli usi',use)}${PG_USES.map(([v,l])=>opt(v,l,use)).join('')}</select></div></div>
+  <div><label for="tplUse">Uso</label><select id="tplUse">${opt('','Tutti gli usi',use)}${PG_USES.map(([v,l])=>opt(v,l,use)).join('')}</select></div>${Pg.brand?`<div><label class="check"><input type="checkbox" id="tplBrand"${brand?' checked':''}> Con il mio marchio, «${esc(Pg.brand.name)}»</label></div>`:''}</div>
   <p class="pg-tpl-count" id="tplCount"></p><div class="pg-tpl"><div class="lb pg-tpl-list" id="tplList" role="listbox" tabindex="0" aria-labelledby="tplCount" data-autofocus></div><div class="pg-tpl-view" id="tplView" aria-hidden="true"></div></div>
   <p class="pg-btns" id="tplMine" hidden><button type="button" class="btn sm" data-tpl="rename">Rinomina il modello</button><button type="button" class="btn sm" data-tpl="delete">Elimina il modello</button></p>`;
- const fmtName=()=>fmts.find(x=>x[0]===$('tplFmt').value)?.[1]||'',countSay=()=>{const k=list.filter(e=>e.id!=='vuoto').length;return `${k===1?'Un modello':k?k+' modelli':'Nessun modello'}${k<list.length?' e il documento vuoto':''} per ${fmtName()}${$('tplUse').value?', uso '+PG_USES.find(x=>x[0]===$('tplUse').value)[1].toLowerCase():''}`};
+ const fmtName=()=>fmts.find(x=>x[0]===$('tplFmt').value)?.[1]||'',countSay=()=>{const k=list.filter(e=>e.id!=='vuoto').length;return `${k===1?'Un modello':k?k+' modelli':'Nessun modello'}${k<list.length?' e il documento vuoto':''} per ${fmtName()}${$('tplUse').value?', uso '+PG_USES.find(x=>x[0]===$('tplUse').value)[1].toLowerCase():''}${$('tplBrand')?.checked?', con il tuo marchio':''}`};
  const show=()=>{const L=$('tplList'),e=list[cur];L.querySelectorAll('[role=option]').forEach((o,i)=>{o.setAttribute('aria-selected',i===cur);o.classList.toggle('active',i===cur)});L.setAttribute('aria-activedescendant',e?'tpo-'+cur:'tpo-none');$(e?'tpo-'+cur:'tpo-none')?.scrollIntoView({block:'nearest'});
   const v=e?.make?pgTplPreview(e,$('tplFmt').value):null;$('tplView').innerHTML=v?v.svg.map(s=>`<span class="pg-tpl-page">${s}</span>`).join('')+(v.n>v.svg.length?`<span class="pg-tpl-more">e altre ${v.n-v.svg.length} pagine</span>`:''):'';$('tplMine').hidden=!e?.mine};
- const render=()=>{const f=$('tplFmt').value,u=$('tplUse').value,keep=list[cur]?.id||pick;list=pgTplEntries(f,mine).filter(e=>!u||e.u.split(' ').includes(u));pick='';cur=Math.max(0,list.findIndex(e=>e.id===keep));if(!keep||cur===0&&list[0]?.id!==keep)cur=list.findIndex(e=>e.id!=='vuoto')<0?0:list.findIndex(e=>e.id!=='vuoto');
+ const render=()=>{const f=$('tplFmt').value,u=$('tplUse').value,keep=list[cur]?.id||pick;list=pgTplEntries(f,mine).filter(e=>!u||e.u.split(' ').includes(u)).map(e=>$('tplBrand')?.checked&&e.make&&!e.mine?{...e,brand:true,make:()=>{const p=e.make();pgBrandDoc(p);return p}}:e);pick='';cur=Math.max(0,list.findIndex(e=>e.id===keep));if(!keep||cur===0&&list[0]?.id!==keep)cur=list.findIndex(e=>e.id!=='vuoto')<0?0:list.findIndex(e=>e.id!=='vuoto');
   $('tplCount').textContent=countSay();$('tplList').innerHTML=list.length?list.map((e,i)=>{const v=e.make?pgTplPreview(e,f):null;return `<div role="option" id="tpo-${i}" class="lb-item pg-tpl-item" aria-selected="false"><span class="pg-tpl-thumb">${v?.svg[0]||ICON('festone')}</span><span class="n"><b>${esc(e.n)}</b><span class="sr-only">. </span><span class="d">${esc(e.d)}${v&&v.n>1?` ${v.n} pagine.`:''}</span></span></div>`}).join(''):'<div role="option" id="tpo-none" class="lb-item" aria-disabled="true">Nessun modello per quest’uso in questo formato: scegli un altro uso.</div>';show()};
  const v=await modal('Nuovo da modello',body,[],'Crea',{wide:true,onOpen:(pane,finish)=>{pane.classList.add('pg-tpl-dlg');pane.setAttribute('aria-describedby','tplIntro');render();const L=$('tplList');
   const go=j=>{if(!list.length)return;cur=clampV(j,0,list.length-1);show()},mineAct=k=>{if(list[cur]?.mine){act={k,m:list[cur].mine,i:cur};finish(null)}};
-  for(const id of ['tplFmt','tplUse'])$(id).onchange=()=>{render();announce(countSay())};
+  for(const id of ['tplFmt','tplUse','tplBrand'])if($(id))$(id).onchange=()=>{render();announce(countSay())};
   L.onkeydown=e=>{const k=e.key;if(k==='ArrowDown'||k==='ArrowRight')go(cur+1);else if(k==='ArrowUp'||k==='ArrowLeft')go(cur-1);else if(k==='Home')go(0);else if(k==='End')go(list.length-1);else if(k==='PageDown')go(cur+5);else if(k==='PageUp')go(cur-5);
    else if(k==='Enter'){if(list[cur])finish({})}else if(k==='F2')mineAct('rename');else if(k==='Delete')mineAct('delete');
    else if(k.length===1&&/\S/.test(k)&&!e.ctrlKey&&!e.altKey){const q=k.toLowerCase(),j=[...list.keys()].map(x=>(cur+1+x)%list.length).find(x=>list[x].n.toLowerCase().startsWith(q));if(j!=null)go(j)}else return;e.preventDefault()};
   L.onclick=e=>{const o=e.target.closest('[role=option][id^=tpo-]');if(o&&o.id!=='tpo-none'){cur=+o.id.slice(4);show()}};L.ondblclick=e=>{if(e.target.closest('[role=option]')&&list[cur])finish({})};
   pane.querySelector('#tplMine').onclick=e=>{const b=e.target.closest('[data-tpl]');if(b)mineAct(b.dataset.tpl)};
   setTimeout(()=>announce(say+countSay()+'. Frecce per scegliere, Invio per creare.'),400)}});
- $('modal').setAttribute('aria-describedby','dlgBody');const state={fmt:$('tplFmt')?.value??fmt,use:$('tplUse')?.value??use};
+ $('modal').setAttribute('aria-describedby','dlgBody');const state={fmt:$('tplFmt')?.value??fmt,use:$('tplUse')?.value??use,brand:!!$('tplBrand')?.checked};
  if(act){const nb=list[act.i+1]||list[act.i-1];if(act.k==='rename'){const ok=await pgMineRename(act.m);pgGallery({...state,pick:'m:'+act.m.id,say:ok?`Modello rinominato: «${act.m.n}». `:''})}
   else if(await confirmAction(`Eliminare il modello «${act.m.n}»? Non si può annullare.`)){await pgMineDel(act.m.id);pgGallery({...state,pick:nb?.id||'',say:`Modello «${act.m.n}» eliminato. `})}else pgGallery({...state,pick:'m:'+act.m.id});return}
  const e=v&&list[cur];if(!e)return;if(e.id==='festone'){pgFestoneDialog();return}const p=e.make();if(e.id!=='vuoto')p.title=e.n.slice(0,120);pgTplOpen(p,e.id==='vuoto'?'':e.n,!!e.mine)}
