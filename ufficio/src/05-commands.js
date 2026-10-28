@@ -372,6 +372,8 @@ def('p','Cornice',[
  ['pgLinkTo','Fai continuare il testo in una cornice esistente','chain','',{menu:1,short:'Collega a…'}],
  ['pgUnlink','Togli la cornice dalla catena del testo','unchain','',{short:'Scollega'}],
  ['pgOverflow','Vai al testo che non entra nelle cornici','overflow','',{short:'Testo in eccesso'}],
+ ['pgShrink','Riduci il testo finché entra (la cornice scelta, o tutto il documento)','shrinkText','',{short:'Riduci finché entra'}],
+ ['pgShrinkReset','Riporta il testo ridotto alla misura degli stili','history','',{short:'Misura degli stili'}],
  ['pgChooseImage','Scegli l’immagine della cornice','image','',{short:'Scegli immagine'}],
  ['pgTblRowAdd','Aggiungi una riga alla tabella','rowBelow','',{short:'Aggiungi riga'}],
  ['pgTblColAdd','Aggiungi una colonna alla tabella','colRight','',{short:'Aggiungi colonna'}],

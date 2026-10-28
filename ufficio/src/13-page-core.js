@@ -125,7 +125,9 @@ function frameRegions(it){const pad=Math.max(0,it.pad||0),x=it.x+pad,y=it.y+pad,
 // Scorrimento del testo: i paragrafi vanno a capo parola per parola nelle regioni (le colonne delle cornici della
 // catena, in ordine). Ritorna le righe, con la regione e la linea di base, e quanti caratteri restano fuori.
 function flowStory(p,s,regions,ctx){const lines=[],fallback=p.ps.corpo||Object.values(p.ps)[0];let ri=0,R=regions[0],y=R?R.y:0,top=true,over=0;
- for(const para of s.paras){const ps=p.ps[para.ps]||fallback,atoms=[];
+ // Una storia ridotta per entrare (fit, da 0,3 a 1) usa gli stili in scala, con gli spazi prima e dopo.
+ const k=s.fit>0&&s.fit<1?s.fit:1;
+ for(const para of s.paras){const ps0=p.ps[para.ps]||fallback,ps=k===1?ps0:{...ps0,size:ps0.size*k,before:ps0.before*k,after:ps0.after*k},atoms=[];
   for(const run of para.runs){const st=runSt(p,ps,run.cs);let t=fillFields(run.t,ctx);if(st.caps)t=t.toLocaleUpperCase('it');for(const m of t.matchAll(/\s+|\S+/g)){const sp=/^\s/.test(m[0]),tx=sp?' ':m[0];atoms.push({t:tx,st,sp,w:textWidth(st.css,tx)})}}
   if(!R){over+=atoms.reduce((n,a)=>n+a.t.length,0)+1;continue}
   if(!top)y+=ps.before;
