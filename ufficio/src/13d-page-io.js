@@ -245,7 +245,7 @@ const PAGE_ACTIONS={new:pageNewDialog,pgTemplates:pageNewDialog,open:()=>$('pgFi
  zoomUp:()=>pgZoom(1.25),zoomDown:()=>pgZoom(.8),zoomReset:()=>{Pg.zoom=1;pgRenderStage();announce('Zoom 100%')},pgZoomFit:()=>pgZoom(0),
  pgSave:pageSave,pgSaveTpl,pgExportPng,pgDescribe,pgCheck,
  pgAddPage,pgDupPage,pgDelPage,pgPrevPage:()=>pgStepPage(-1),pgNextPage:()=>pgStepPage(1),pgDataRepeat,pgRowPrev:()=>pgStepRow(-1),pgRowNext:()=>pgStepRow(1),
- pgElements:pgElemDialog,pgPresent,pgBrand:()=>pgBrandDialog(),pgBrandApply,pgBrandLogo,pgAddQr,pgAddTable,pgTblData,pgTblRowAdd:()=>pgTblRowAdd(),pgTblColAdd:()=>pgTblColAdd(),pgTblRowDel:()=>pgTblRowDel(),pgTblColDel:()=>pgTblColDel(),pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
+ pgElements:pgElemDialog,pgPresent,pgBrand:()=>pgBrandDialog(),pgBrandApply:()=>pgBrandApply(),pgBrandLogo,pgAddQr,pgAddTable,pgTblData,pgTblRowAdd:()=>pgTblRowAdd(),pgTblColAdd:()=>pgTblColAdd(),pgTblRowDel:()=>pgTblRowDel(),pgTblColDel:()=>pgTblColDel(),pgAddText:()=>pgAddCmd('text'),pgAddImage:()=>pgAddCmd('image'),pgAddRect:()=>pgAddCmd('rect'),pgAddEllipse:()=>pgAddCmd('ellipse'),pgAddLine:()=>pgAddCmd('line'),
  pgPageNum:()=>pgMasterAdd('num'),pgHeader:()=>pgMasterAdd('head'),pgLogo:()=>pgMasterAdd('logo'),pgField:pgFieldMenu,
  pgEditText:()=>{if(pgNeed('text'))pgOpenItem(pgSel())},pgDup,pgDelete,pgCut:()=>pgCopy(true),pgCopy:()=>pgCopy(false),pgPaste,
  pgFront:()=>pgOrder('front'),pgBack:()=>pgOrder('back'),pgForward:()=>pgOrder('forward'),pgBackward:()=>pgOrder('backward'),
