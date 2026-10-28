@@ -96,5 +96,9 @@ function pgOverview(){const p=Pg.p,h=pgHolder(),items=pgSpaceItems(h),pg=pgCurPa
   `<h3>Spazio libero</h3><p>${gap.h>pgTol()*4?`Il più grande è una fascia alta ${esc(pgU(gap.h))}, da ${esc(pgU(gap.y))} dall’alto, larga quanto i margini.`:'Tra i margini non resta una fascia libera.'}</p>`+
   `<table><caption>La pagina in nove zone</caption><thead><tr><td></td><th scope="col">A sinistra</th><th scope="col">Al centro</th><th scope="col">A destra</th></tr></thead><tbody>${['In alto','Al centro','In basso'].map((n,r)=>`<tr><th scope="row">${n}</th>${[0,1,2].map(c=>`<td>${esc(zone(r,c))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
  saidN++;return modal('Panoramica della pagina',body,[],'Chiudi',{noCancel:true,wide:true})}
+// Il conto dei punti della verifica, da dire dopo «Adatta a un altro formato» (solo la disposizione) e prima di stampare o
+// esportare (tutti): «La verifica trova 3 punti da controllare: …». '' se non trova nulla.
+function pgIssuesSay(layout=false){let list=[];try{list=pgIssues().filter(x=>!layout||x.fix==='lay'||/esce dalla pagina|fuori dalla pagina/.test(x.msg))}catch(e){return ''}
+ if(!list.length)return '';return ` La verifica trova ${list.length===1?'un punto':list.length+' punti'} da controllare${layout?' nella disposizione':''}: ${list.slice(0,2).map(x=>x.msg.replace(/\.$/,'')).join('; ')}${list.length>2?'; e altri':''}. Alt+Q, Verifica dell’accessibilità, li elenca tutti.`}
 // I testi di esempio con cui nasce un documento da modello: la verifica li riconosce se restano uguali.
 function pgTplMark(p,e){if(!e||e.mine||e.id==='vuoto')return;p.tpl={n:e.n,d:e.d||'',texts:[...new Set(Object.values(p.stories||{}).map(s=>storyText(s).trim()).filter(Boolean))]}}

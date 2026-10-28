@@ -75,7 +75,7 @@ function pgAdaptTo(id,shrink=true){const src=Pg.p,pr=PG_PRESETS.find(x=>x[0]===i
   for(const k of ['sw','radius','pad','wrapGap'])if(it[k])it[k]=it[k]*s;if(it.gut)it.gut=it.gut*Ti.w/Si.w;if(it.kind==='sign'&&it.fit===false)it.size=it.size*f;if(it.kind==='table')it.size=Math.max(r1(it.size*f),least)}
  // Le storie che non entrano più si riducono, se richiesto, finché entrano.
  const fit=shrink?pgShrinkAll(p):{done:[]};pgUseNew(p,'Adatta al formato');const over=[...pgLayout(p,pgInstances(p)).values()].filter(v=>v.over).map(v=>v.it.name);
- announce(`Documento adattato a ${pr[1]}: ${p.pages.length===1?'una pagina':p.pages.length+' pagine'}.${fit.done.length?` Testo ridotto per entrare in ${fit.done.map(x=>x.name).join(', ')}.`:''}${over.length?` Il testo non entra in ${[...new Set(over)].join(', ')}: ingrandisci le cornici o accorcia il testo.`:' Tutto il testo entra nelle cornici.'} Ctrl+Z torna al formato di prima.`)}
+ announce(`Documento adattato a ${pr[1]}: ${p.pages.length===1?'una pagina':p.pages.length+' pagine'}.${fit.done.length?` Testo ridotto per entrare in ${fit.done.map(x=>x.name).join(', ')}.`:''}${over.length?` Il testo non entra in ${[...new Set(over)].join(', ')}: ingrandisci le cornici o accorcia il testo.`:' Tutto il testo entra nelle cornici.'}${pgIssuesSay(true)} Ctrl+Z torna al formato di prima.`)}
 // Temi di colore: fondo, testi, titoli, accenti, superfici chiare e scure. Si applicano a tutto il documento e poi
 // il contrasto si controlla cornice per cornice: dove non basta cambia lo sfondo dietro il testo, o il colore della scritta.
 const PG_THEMES={classico:['Classico','Bianco, nero e blu',{bg:'#ffffff',ink:'#1b1b1b',head:'#1b3a6b',accent:'#2457c5',accent2:'#e8a33d',soft:'#e7edfa',dark:'#14213d',light:'#ffffff'}],
