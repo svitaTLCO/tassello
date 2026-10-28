@@ -57,6 +57,12 @@ const rasters=new Map();
 function rasterCanvas(R){if(R.cv)return R.cv;const cv=new OffscreenCanvas(R.w,R.h),c=cv.getContext('2d'),img=c.createImageData(R.w,R.h),d=img.data;for(let i=0,j=0;i<R.data.length;i++,j+=4){d[j]=d[j+1]=d[j+2]=255;d[j+3]=R.data[i]}c.putImageData(img,0,0);return R.cv=cv}
 function rasterLayer(op,mc){const R=mc.ras.get(op.id);if(!R)return new Uint8Array(mc.w*mc.h);const W=mc.W,H=mc.H;
  return canvasLayer(mc,c=>{c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.setTransform(mc.U.scale(W/mc.S/R.w,H/mc.S/R.h));c.drawImage(rasterCanvas(R),0,0)})}
+// Maschera calcolata seguita dalla rifinitura (lo scontorno): il filtro guidato vuole della maschera solo le medie nei
+// blocchi della sua griglia, e quelle si ottengono disegnando la maschera piccola direttamente alla misura della griglia.
+// Così all'esportazione non serve la maschera intermedia a piena misura, che su una foto grande era la parte più lenta.
+function rasterRefine(op,ref,mc){const R=mc.ras.get(op.id),m=new Uint8Array(mc.w*mc.h);if(!R)return m;const Rp=Math.max(1,ref.r*mc.k),{s,gw,gh}=guidedGrid(mc.w,mc.h,Rp),cv=new OffscreenCanvas(gw,gh),c=cv.getContext('2d',{willReadFrequently:true});
+ c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.setTransform(new DOMMatrix().scale(1/s).multiply(mc.U.scale(mc.W/mc.S/R.w,mc.H/mc.S/R.h)));c.drawImage(rasterCanvas(R),0,0);
+ const a=c.getImageData(0,0,gw,gh).data,P=new Float32Array(gw*gh);for(let q=0;q<P.length;q++)P[q]=a[q*4+3]/255;return guidedRefine(m,mc.px,mc.w,mc.h,Rp,ref.e??1e-3,!!ref.c,P)}
 const LAYERS={rect:shapeLayer,poly:shapeLayer,ellipse:shapeLayer,brush:brushLayer,linear:linearLayer,radial:radialLayer,wand:wandLayer,range:rangeLayer,raster:rasterLayer};
 // Unione con il massimo, sottrazione e intersezione con il minimo: con i bordi morbidi danno passaggi puliti.
 function combine(m,L,mode){if(!m||mode==='new')return mode==='sub'||mode==='int'?new Uint8Array(L.length):L;const n=L.length;
@@ -103,12 +109,16 @@ function boxMean(f,w,h,r,t=new Float32Array(f.length)){const cs=new Float64Array
 // (proiezione sul segmento da B a F). Vale tanto più quanto F e B sono diversi e quanto il filtro guidato è incerto: i
 // capelli scuri su un cielo chiaro escono ciocca per ciocca, mentre una foglia dello sfondo lontana dal bordo resta fuori;
 // dove i colori si somigliano resta il filtro guidato.
-function guidedRefine(m,px,w,h,R,eps=1e-3,col=false){const s=Math.max(1,Math.floor(R/4),Math.ceil(Math.sqrt(w*h/6e5))),gw=Math.ceil(w/s),gh=Math.ceil(h/s),n=gw*gh,r=Math.max(1,Math.round(R/s)),d=px.data;
+// La griglia del filtro: passo s (almeno un quarto del raggio, e al massimo circa 600.000 celle), righe e colonne.
+function guidedGrid(w,h,R){const s=Math.max(1,Math.floor(R/4),Math.ceil(Math.sqrt(w*h/6e5)));return {s,gw:Math.ceil(w/s),gh:Math.ceil(h/s)}}
+// P0, se c'è, sono già le medie della maschera nei blocchi della griglia (vedi rasterRefine): m allora serve solo da uscita.
+function guidedRefine(m,px,w,h,R,eps=1e-3,col=false,P0=null){const {s,gw,gh}=guidedGrid(w,h,R),n=gw*gh,r=Math.max(1,Math.round(R/s)),d=px.data;
  const F=()=>new Float32Array(n),Ir=F(),Ig=F(),Ib=F(),P=F(),xi=new Int32Array(w),aR=new Int32Array(gw),aG=new Int32Array(gw),aB=new Int32Array(gw),aP=new Int32Array(gw);for(let x=0;x<w;x++)xi[x]=(x/s)|0;
  // Medie dei blocchi s×s, sommate per righe in interi: molto più veloce che accumulare direttamente nella griglia.
  for(let gy=0;gy<gh;gy++){aR.fill(0);aG.fill(0);aB.fill(0);aP.fill(0);const y0=gy*s,y1=Math.min(h,y0+s);
   for(let y=y0;y<y1;y++)for(let x=0,i=y*w,o=i*4;x<w;x++,i++,o+=4){const j=xi[x];aR[j]+=d[o];aG[j]+=d[o+1];aB[j]+=d[o+2];aP[j]+=m[i]}
   for(let j=0,q=gy*gw;j<gw;j++,q++){const c=255*(y1-y0)*Math.min(s,w-j*s);Ir[q]=aR[j]/c;Ig[q]=aG[j]/c;Ib[q]=aB[j]/c;P[q]=aP[j]/c}}
+ if(P0)P.set(P0);
  const prod=(a,b)=>{const o=F();for(let j=0;j<n;j++)o[j]=a[j]*b[j];return boxMean(o,gw,gh,r)},rp=prod(Ir,P),gp=prod(Ig,P),bp=prod(Ib,P),rr=prod(Ir,Ir),rg=prod(Ir,Ig),rb=prod(Ir,Ib),gg=prod(Ig,Ig),gb=prod(Ig,Ib),bb=prod(Ib,Ib);
  // Colori del soggetto e dello sfondo vicini: medie dei blocchi pieni e vuoti in una finestra due volte più larga.
  const FB=col?[F(),F(),F(),F(),F(),F(),F(),F()]:null;if(col){const [fr,fg,fb,wf,br,bgr,bbl,wb]=FB;for(let j=0;j<n;j++){const a=P[j]>=.98?1:0,b=P[j]<=.02?1:0;fr[j]=Ir[j]*a;fg[j]=Ig[j]*a;fb[j]=Ib[j]*a;wf[j]=a;br[j]=Ir[j]*b;bgr[j]=Ig[j]*b;bbl[j]=Ib[j]*b;wb[j]=b}
@@ -123,10 +133,14 @@ function guidedRefine(m,px,w,h,R,eps=1e-3,col=false){const s=Math.max(1,Math.flo
   ar=(cr*i0+cg*i1+cb*i2)/det,ag=(cr*i1+cg*i4+cb*i5)/det,ab=(cr*i2+cg*i5+cb*i8)/det;Ar[j]=ar;Ag[j]=ag;Ab[j]=ab;Bq[j]=mp-ar*mr-ag*mg-ab*mb}
  for(const a of [Ar,Ag,Ab,Bq])boxMean(a,gw,gh,r);
  // Ritorno alla misura piena: coefficienti interpolati e applicati ai colori di ogni pixel. Dove nella finestra la
- // maschera era tutta piena o tutta vuota il risultato è già noto e non si calcola.
- const {x0,x1,fx}=gridCols(w,gw,s),G=()=>new Float32Array(gw),RA=G(),RG=G(),RB=G(),RQ=G(),RP=G(),RC=col?FB.map(G):null,k=1/255,L=(R,a,b,t)=>R[a]+(R[b]-R[a])*t;
- for(let y=0,i=0;y<h;y++){gridRow(Ar,gw,gh,y,s,RA);gridRow(Ag,gw,gh,y,s,RG);gridRow(Ab,gw,gh,y,s,RB);gridRow(Bq,gw,gh,y,s,RQ);gridRow(P,gw,gh,y,s,RP);if(col)FB.forEach((a,c)=>gridRow(a,gw,gh,y,s,RC[c]));
-  for(let x=0;x<w;x++,i++){const a=x0[x],b=x1[x],t=fx[x],pm=RP[a]+(RP[b]-RP[a])*t;if(pm<=.002){m[i]=0;continue}if(pm>=.998){m[i]=255;continue}
+ // maschera era tutta piena o tutta vuota il risultato è già noto: i pixel tra due celle della griglia così si riempiono
+ // in un colpo, e le righe senza bordo non leggono nemmeno i coefficienti.
+ const {x0,x1,fx}=gridCols(w,gw,s),G=()=>new Float32Array(gw),RA=G(),RG=G(),RB=G(),RQ=G(),RP=G(),RC=col?FB.map(G):null,k=1/255,L=(R,a,b,t)=>R[a]+(R[b]-R[a])*t,js=new Int32Array(gw+1),mix=new Uint8Array(gw);
+ for(let j=0,x=0;j<=gw;j++){while(x<w&&x0[x]<j)x++;js[j]=x}
+ for(let y=0;y<h;y++){const row=y*w;gridRow(P,gw,gh,y,s,RP);let any=false;
+  for(let j=0;j<gw;j++){const a=RP[j],b=RP[j+1<gw?j+1:j],lo=a<b?a:b,hi=a<b?b:a;mix[j]=0;if(hi<=.002)m.fill(0,row+js[j],row+js[j+1]);else if(lo>=.998)m.fill(255,row+js[j],row+js[j+1]);else{mix[j]=1;any=true}}
+  if(!any)continue;gridRow(Ar,gw,gh,y,s,RA);gridRow(Ag,gw,gh,y,s,RG);gridRow(Ab,gw,gh,y,s,RB);gridRow(Bq,gw,gh,y,s,RQ);if(col)FB.forEach((a,c)=>gridRow(a,gw,gh,y,s,RC[c]));
+  for(let j=0;j<gw;j++)if(mix[j])for(let x=js[j],i=row+x;x<js[j+1];x++,i++){const a=x0[x],b=x1[x],t=fx[x],pm=RP[a]+(RP[b]-RP[a])*t;if(pm<=.002){m[i]=0;continue}if(pm>=.998){m[i]=255;continue}
    const o=i*4,cr=d[o]*k,cg=d[o+1]*k,cb=d[o+2]*k;let q=L(RA,a,b,t)*cr+L(RG,a,b,t)*cg+L(RB,a,b,t)*cb+L(RQ,a,b,t);
    if(col){const cf=L(RC[3],a,b,t);if(cf>0){const Fr=L(RC[0],a,b,t),Fg=L(RC[1],a,b,t),Fb=L(RC[2],a,b,t),Br=L(RC[4],a,b,t),Bg=L(RC[5],a,b,t),Bb=L(RC[6],a,b,t),er=Fr-Br,eg=Fg-Bg,eb=Fb-Bb;
      const u=q<0?0:q>1?1:q,v=6.4*u*(1-u);q+=cf*(v<1?v:1)*(((cr-Br)*er+(cg-Bg)*eg+(cb-Bb)*eb)/(er*er+eg*eg+eb*eb)-q)}}
@@ -138,6 +152,7 @@ function rasterOps(ops,mc,from=null,start=0){let m=from;for(let i=start;i<ops.le
  else if(t==='feather'){if(m)feather(m,mc.w,mc.h,op.r*mc.k)}
  else if(t==='grow'){if(m)grow(m,mc.w,mc.h,op.r*mc.k)}
  else if(t==='refine'){if(m&&mc.px)guidedRefine(m,mc.px,mc.w,mc.h,Math.max(1,op.r*mc.k),op.e??1e-3,!!op.c)}
+ else if(t==='raster'&&!m&&ops[i+1]?.t==='refine'&&mc.px)m=rasterRefine(op,ops[++i],mc);
  else if(LAYERS[t])m=combine(m,LAYERS[t](op,mc),op.mode||'add')}
  return m||new Uint8Array(mc.w*mc.h)}
 // Maschere dell'anteprima ricordate per chiave: aggiungere un tratto ricalcola solo l'ultima operazione.

@@ -160,12 +160,16 @@ const hexRgb=h=>{const v=parseInt(String(h).replace('#',''),16)||0;return [v>>16
 // Colori del bordo ripuliti: nella fascia semitrasparente il pixel mescola il soggetto e lo sfondo di prima, C = αF + (1−α)B.
 // Con B stimato dai pixel di sfondo vicini, F = (C − (1−α)B)/α; dove α è piccola, quasi tutto sfondo, si va verso il
 // colore del soggetto vicino. Così sul fondo nuovo, trasparente o colorato, non resta l'alone di quello vecchio.
-function cutClean(img,m,w,h){const d=img.data,s=Math.max(2,Math.ceil(Math.sqrt(w*h/25e4))),gw=Math.ceil(w/s),gh=Math.ceil(h/s),N=gw*gh,A=[0,1,2,3,4,5,6,7].map(()=>new Float32Array(N)),xi=new Int32Array(w),band=new Uint8Array(h);for(let x=0;x<w;x++)xi[x]=(x/s)|0;
- for(let y=0;y<h;y++){const row=((y/s)|0)*gw;for(let x=0,i=y*w,o=i*4;x<w;x++,i++,o+=4){const v=m[i],q=row+xi[x];if(v>=242){if(v<255)band[y]=1;A[0][q]+=d[o];A[1][q]+=d[o+1];A[2][q]+=d[o+2];A[3][q]++}else if(v<=13){if(v)band[y]=1;A[4][q]+=d[o];A[5][q]+=d[o+1];A[6][q]+=d[o+2];A[7][q]++}else band[y]=1}}
- if(!band.some(v=>v))return;const t=new Float32Array(N);for(const a of A)boxMean(a,gw,gh,Math.max(2,Math.round(Math.max(w,h)*.01/s)),t);const {x0,x1,fx}=gridCols(w,gw,s),R=A.map(()=>new Float32Array(gw));
+function cutClean(img,m,w,h){const d=img.data,s=Math.max(2,Math.ceil(Math.sqrt(w*h/25e4))),gw=Math.ceil(w/s),gh=Math.ceil(h/s),N=gw*gh,A=[0,1,2,3,4,5,6,7].map(()=>new Float32Array(N)),S=A.map(()=>new Int32Array(gw)),[fr,fg,fb,fn,br,bg,bb,bn]=S,xi=new Int32Array(w),band=new Uint8Array(h);for(let x=0;x<w;x++)xi[x]=(x/s)|0;
+ // Righe con il bordo semitrasparente; le medie dei colori bastano su un pixel ogni quattro (righe e colonne alterne).
+ for(let y=0;y<h;y++)for(let x=0,r=y*w;x<w;x++){const v=m[r+x];if(v&&v!==255){band[y]=1;break}}if(!band.some(v=>v))return;
+ for(let gy=0;gy<gh;gy++){for(const a of S)a.fill(0);const y0=gy*s,y1=Math.min(h,y0+s);
+  for(let y=y0;y<y1;y+=2)for(let x=0,i=y*w,o=i*4;x<w;x+=2,i+=2,o+=8){const v=m[i];if(v===255){const j=xi[x];fr[j]+=d[o];fg[j]+=d[o+1];fb[j]+=d[o+2];fn[j]++}else if(!v){const j=xi[x];br[j]+=d[o];bg[j]+=d[o+1];bb[j]+=d[o+2];bn[j]++}}
+  for(let k=0;k<8;k++)A[k].set(S[k],gy*gw)}
+ const t=new Float32Array(N);for(const a of A)boxMean(a,gw,gh,Math.max(2,Math.round(Math.max(w,h)*.01/s)),t);const {x0,x1,fx}=gridCols(w,gw,s),R=A.map(()=>new Float32Array(gw)),[R0,R1,R2,R3,R4,R5,R6,R7]=R,F=[R0,R1,R2],B=[R4,R5,R6];
  for(let y=0,i=0;y<h;y++,i+=w){if(!band[y])continue;A.forEach((a,k)=>gridRow(a,gw,gh,y,s,R[k]));
-  for(let x=0;x<w;x++){const v=m[i+x];if(!v||v===255)continue;const a=x0[x],b=x1[x],f=fx[x],L=k=>R[k][a]+(R[k][b]-R[k][a])*f,wf=L(3),wb=L(7);if(wf<1e-3||wb<1e-3)continue;
-   const al=v/255,o=(i+x)*4,mix=al<.35?al/.35:1;for(let c=0;c<3;c++){const Fc=L(c)/wf,Bc=L(c+4)/wb,e=(d[o+c]-(1-al)*Bc)/al;d[o+c]=(e<0?0:e>255?255:e)*mix+Fc*(1-mix)}}}}
+  for(let x=0;x<w;x++){const v=m[i+x];if(!v||v===255)continue;const a=x0[x],b=x1[x],f=fx[x],wf=R3[a]+(R3[b]-R3[a])*f,wb=R7[a]+(R7[b]-R7[a])*f;if(wf<1e-3||wb<1e-3)continue;
+   const al=v/255,o=(i+x)*4,mix=al<.35?al/.35:1;for(let c=0;c<3;c++){const Fc=(F[c][a]+(F[c][b]-F[c][a])*f)/wf,Bc=(B[c][a]+(B[c][b]-B[c][a])*f)/wb,e=(d[o+c]-(1-al)*Bc)/al;d[o+c]=(e<0?0:e>255?255:e)*mix+Fc*(1-mix)}}}}
 // Applica lo scontorno ai pixel sviluppati: trasparenza, oppure un colore pieno o la stessa foto sfocata dietro al soggetto.
 function applyCut(img,r,mc){const c=r.cut;if(!c?.raster)return;if(!mc.ras.has(c.raster)){if(mc.ras===rasters)cutRestore();return}const m=maskOf(cutOps(r,mc),mc),d=img.data,n=m.length;cutClean(img,m,mc.w,mc.h);
  if(c.bg==='color'){const [R,G,B]=hexRgb(c.color);for(let i=0,j=0;i<n;i++,j+=4){const a=m[i];if(a===255)continue;const k=a/255,l=1-k;d[j]=d[j]*k+R*l;d[j+1]=d[j+1]*k+G*l;d[j+2]=d[j+2]*k+B*l;d[j+3]=255}return}
