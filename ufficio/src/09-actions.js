@@ -102,7 +102,7 @@ const COMMON_ACTIONS={
  filter:()=>sheet().filter?.text&&focusContext()==='grid'?applyFilter(0,''):filterSheet(),clearFilter:()=>applyFilter(0,''),
  selectAll:()=>setSelection(0,0,ROWS-1,COLS-1),
  selectRow:()=>{const b=selectedBounds();setSelection(b.r1,0,b.r2,COLS-1)},selectCol:()=>{const b=selectedBounds();setSelection(0,b.c1,ROWS-1,b.c2)},
- extendSel:()=>extendSelToggle(),
+ extendSel:()=>extendSelToggle(),sheetDescribe:()=>sheetDescribe(),sheetCheck:()=>sheetCheck(),
  goto:async word=>{if(!word&&focusContext()!=='input'){const box=$('nameBox');box.focus();box.select();announce('Casella nome: digita una cella o un intervallo, poi Invio');return}
   const v=await modal('Vai a','Digita una cella o un intervallo, ad esempio AB300, B2:D10 o Foglio2!A1.',[{id:'ref',label:'Riferimento',value:toRef(state.sel.r,state.sel.c)}],'Vai',{validate:v=>gotoProblem(v.ref)});if(v)gotoRef(v.ref)},
  toggleGrid:()=>{hideGrid=!hideGrid;renderGrid()},

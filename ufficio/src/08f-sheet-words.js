@@ -1,0 +1,53 @@
+// Calcolo a parole: l'aspetto della cella con i colori e il contrasto, le intestazioni della tabella in cui sta la cella, il
+// riassunto dei dati (tendenza, valori anomali, salto più grande), la descrizione del foglio (Alt+Maiusc+D) e la verifica
+// dell'accessibilità del foglio.
+const CELL_ALIGN_SAY={left:'allineato a sinistra',center:'centrato',right:'allineato a destra'};
+// «Riempimento giallo chiaro, testo rosso scuro, Arial 14, centrato; contrasto basso, 2,1:1»; '' con l'aspetto normale.
+function cellLookSay(r,c,s=sheet()){const st=cell(r,c,s)?.s||{},fill=HEX6.test(st.fill||'')?st.fill:'',color=HEX6.test(st.color||'')?st.color:'',parts=[];
+ if(fill)parts.push('riempimento '+ufColorName(fill));if(color)parts.push('testo '+ufColorName(color));if(st.font||st.size)parts.push([st.font,st.size&&String(st.size).replace('.',',')].filter(Boolean).join(' '));if(CELL_ALIGN_SAY[st.align])parts.push(CELL_ALIGN_SAY[st.align]);
+ let t=parts.join(', ');const con=fill||color?pgContrast(color||'#000000',fill||'#ffffff'):null;if(con!=null&&con<4.5)t+=`; contrasto basso, ${pgFmt(con)}:1`;return t}
+// Le intestazioni della cella: dalla riga e dalla colonna bloccate, se ci sono, altrimenti dalla tabella in cui sta (la prima
+// riga se è di testo sopra i numeri, la prima colonna se è di testo). Vuote per le intestazioni stesse.
+function cellHeads(r,c,s=sheet()){const f=s.freeze||{},txt=v=>typeof v==='string'&&v.trim()?v.trim().slice(0,60):'';let col=+f.r>0&&r>=+f.r?txt(computed(+f.r-1,c,s)):'',row=+f.c>0&&c>=+f.c?txt(computed(r,+f.c-1,s)):'';
+ if((!col||!row)&&s===sheet()&&filledAt(r,c)){const b=currentRegion(r,c);if(b.r2>b.r1){if(!col&&r>b.r1&&isHeaderRow(b))col=txt(computed(b.r1,c,s));if(!row&&c>b.c1&&typeof computed(r,b.c1,s)==='string')row=txt(computed(r,b.c1,s))}}return{col,row}}
+const cellHeadSay=(r,c,s)=>{const h=cellHeads(r,c,s);return [h.col&&`colonna «${h.col}»`,h.row&&`riga «${h.row}»`].filter(Boolean).join(', ')};
+// Riassunto di una serie di numeri: tendenza dalla retta di regressione, valori anomali con la regola di Tukey (oltre 1,5
+// volte lo scarto interquartile), salto più grande tra due valori vicini. name(i) dà il nome del punto, fmt il valore.
+function dataSummary(vals,name,fmt){const pts=vals.map((v,i)=>[v,i]).filter(q=>typeof q[0]==='number'&&Number.isFinite(q[0]));if(pts.length<3)return{text:'',out:[]};
+ const n=pts.length,mx=pts.reduce((a,q)=>a+q[1],0)/n,my=pts.reduce((a,q)=>a+q[0],0)/n,sxy=pts.reduce((a,q)=>a+(q[1]-mx)*(q[0]-my),0),sxx=pts.reduce((a,q)=>a+(q[1]-mx)**2,0),syy=pts.reduce((a,q)=>a+(q[0]-my)**2,0),slope=sxx?sxy/sxx:0,r2=sxx&&syy?sxy*sxy/(sxx*syy):0,rel=my?slope*(pts.at(-1)[1]-pts[0][1])/Math.abs(my):0;
+ const trend=r2<.3||Math.abs(rel)<.05?'nessuna tendenza chiara':`${slope>0?'in crescita':'in calo'}${r2>.8?' costante':''}, di circa ${fmt(Math.abs(slope))} a ogni passo`;
+ const sorted=pts.map(q=>q[0]).sort((a,b)=>a-b),qa=k=>{const x=(n-1)*k,i=Math.floor(x);return sorted[i]+(sorted[Math.min(n-1,i+1)]-sorted[i])*(x-i)},q1=qa(.25),q3=qa(.75),iqr=q3-q1,out=iqr>0?pts.filter(q=>q[0]<q1-1.5*iqr||q[0]>q3+1.5*iqr).map(q=>q[1]):[];
+ let jump=null;for(let k=1;k<n;k++){const d=pts[k][0]-pts[k-1][0];if(!jump||Math.abs(d)>Math.abs(jump.d))jump={d,a:pts[k-1][1],b:pts[k][1]}}
+ const outSay=out.length?`${out.length===1?'un valore anomalo':out.length+' valori anomali'}: ${out.slice(0,5).map(i=>`${name(i)}, ${fmt(vals[i])}, ${vals[i]>q3?'molto sopra gli altri':'molto sotto gli altri'}`).join('; ')}`:'nessun valore anomalo';
+ return{text:`${trend}; ${outSay}; il salto più grande è tra ${name(jump.a)} e ${name(jump.b)}, ${jump.d>0?'+':'−'}${fmt(Math.abs(jump.d))}`,out}}
+// Sulla selezione di una sola riga o colonna di numeri, per Alt+Maiusc+I.
+function selSummary(){const b=selectedBounds();if(isSingle(b))return '';const col=b.c1===b.c2,row=b.r1===b.r2;if(!col&&!row)return '';const vals=[],names=[];
+ const nm=(r,c)=>{const h=cellHeads(r,c);return col&&h.row?`${h.row} (${toRef(r,c)})`:row&&h.col?`${h.col} (${toRef(r,c)})`:toRef(r,c)};
+ if(col)for(let r=b.r1;r<=b.r2;r++){vals.push(computed(r,b.c1));names.push(nm(r,b.c1))}else for(let c=b.c1;c<=b.c2;c++){vals.push(computed(b.r1,c));names.push(nm(b.r1,c))}
+ const s=dataSummary(vals,i=>names[i],v=>itNum(v,2));return s.text?' Riassunto: '+s.text+'.':''}
+// Le zone di dati del foglio: blocchi di celle piene, ciascuno con la sua area e, se c'è, la riga di intestazione.
+function sheetRegions(s=sheet()){const seen=new Set(),out=[];for(const ref of Object.keys(s.cells)){const p=parseRef(ref);if(!p||cellRaw(p.r,p.c)===''||seen.has(ref))continue;const b=currentRegion(p.r,p.c);for(let r=b.r1;r<=b.r2;r++)for(let c=b.c1;c<=b.c2;c++)seen.add(toRef(r,c));out.push(b);if(out.length>=20)break}
+ return out.sort((a,b)=>a.r1-b.r1||a.c1-b.c1).map(b=>({...b,head:b.r2>b.r1&&isHeaderRow(b)?[...Array(b.c2-b.c1+1).keys()].map(k=>String(computed(b.r1,b.c1+k)??'').trim()).filter(Boolean):null}))}
+const regionRef=b=>areaRef({r1:b.r1,c1:b.c1,r2:b.r2,c2:b.c2});
+// Alt+Maiusc+D: com'è fatto il foglio, in una finestra con titoli ed elenchi.
+function sheetDescribe(){const s=sheet(),u=usedBounds(),regions=sheetRegions(s),cells=Object.entries(s.cells),notes=cells.filter(([,o])=>o.n),errs=cells.filter(([ref])=>{const p=parseRef(ref);const v=p&&computed(p.r,p.c);return typeof v==='string'&&ERR_SAY[v]}),f=s.freeze||{},merges=mergeList(s);
+ const li=a=>a.length?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p>Nessuno.</p>';
+ const body=`<p>Foglio «${esc(s.name)}», ${state.sheet+1} di ${state.sheets.length}. ${cells.length?`Dati da A1 a ${toRef(u.r,u.c)}.`:'Il foglio è vuoto.'}${+f.r||+f.c?` Bloccate ${[+f.r&&(+f.r===1?'la prima riga':`le prime ${f.r} righe`),+f.c&&(+f.c===1?'la prima colonna':`le prime ${f.c} colonne`)].filter(Boolean).join(' e ')}.`:''}${s.filter?.text?` Filtro attivo sulla colonna ${colName(s.filter.col)}.`:''}</p>`+
+  `<h3>Tabelle e blocchi di dati</h3>${li(regions.map(b=>`${regionRef(b)}: ${b.r2-b.r1+1} righe per ${b.c2-b.c1+1} colonne, ${b.head?'intestazioni '+b.head.slice(0,8).join(', ')+(b.head.length>8?'…':''):'senza riga di intestazione'}`))}`+
+  `<h3>Grafici</h3>${li(chartsOf(s).map(ch=>`${CHART_NAME[ch.type]||'Grafico'}${ch.title?` «${ch.title}»`:' senza titolo'}, in ${toRef(ch.r,ch.c)}, dati ${ch.range}`))}`+
+  `<h3>Tabelle pivot</h3>${li((s.pivots||[]).map(p=>`${p.name}${p.at?', in '+toRef(p.at.r,p.at.c):''}, dai dati ${p.src?.sheet?p.src.sheet+'!':''}${p.src?.ref||''}`))}`+
+  `<h3>Regole e note</h3>${li([...(s.cf||[]).map(x=>`Formattazione condizionale su ${x.range}`),...(s.dv||[]).map(x=>`Convalida su ${x.range}: ${dvRuleText(x,s)}`),...(notes.length?[`${notes.length===1?'Una nota':notes.length+' note'}: ${notes.slice(0,10).map(([r])=>r).join(', ')}`]:[]),...(merges.length?[`${merges.length===1?'Un gruppo':merges.length+' gruppi'} di celle unite: ${merges.slice(0,8).map(m=>areaRef(m)).join(', ')}`]:[]),...(errs.length?[`${errs.length===1?'Una formula':errs.length+' formule'} con errore: ${errs.slice(0,8).map(([r])=>r).join(', ')}`]:[])])}`;
+ saidN++;return modal('Descrizione del foglio',body,[],'Chiudi',{noCancel:true,wide:true})}
+// Verifica dell'accessibilità del foglio: grafici senza titolo o sopra i dati, colore come solo significato, celle unite nei
+// dati, tabelle senza intestazione, formule con errore. «Vai» porta alla cella o al grafico.
+function sheetIssues(s=sheet()){const out=[],regions=sheetRegions(s),cells=Object.entries(s.cells),inData=(r,c)=>regions.some(b=>r>=b.r1&&r<=b.r2&&c>=b.c1&&c<=b.c2);
+ for(const ch of chartsOf(s)){if(!ch.title&&!String(ch.desc||'').trim())out.push({msg:`Il ${(CHART_NAME[ch.type]||'grafico').toLowerCase()} in ${toRef(ch.r,ch.c)} non ha un titolo: aggiungilo in Formato grafico, così si capisce di che cosa parla.`,chart:ch.id});
+  let rows=0,y=0;while(y<ch.h&&rows<200){y+=ROWHEIGHT;rows++}let cols=0,x=0;while(x<ch.w&&cols<60){x+=colW(ch.c+cols);cols++}const hit=regions.find(b=>b.r1<=ch.r+rows-1&&b.r2>=ch.r&&b.c1<=ch.c+cols-1&&b.c2>=ch.c);if(hit)out.push({msg:`Il grafico${ch.title?` «${ch.title}»`:''} in ${toRef(ch.r,ch.c)} copre una parte dei dati di ${regionRef(hit)}: spostalo con Ctrl+frecce o in Formato grafico.`,chart:ch.id})}
+ const colored=cells.filter(([ref,o])=>{const p=parseRef(ref);return p&&(HEX6.test(o.s?.fill||'')||HEX6.test(o.s?.color||''))&&inData(p.r,p.c)&&!regions.some(b=>b.head&&p.r===b.r1)});
+ if(colored.length)out.push({msg:`${colored.length===1?'Una cella ha':colored.length+' celle hanno'} un colore di riempimento o del testo (${colored.slice(0,5).map(([r])=>r).join(', ')}${colored.length>5?'…':''}): se il colore vuol dire qualcosa, per esempio «da controllare», scrivilo anche in una colonna o in una nota. Alt+Maiusc+I dice il colore di ogni cella.`,ref:colored[0][0]});
+ for(const m of mergeList(s))if(regions.some(b=>m.r1>b.r1&&m.r1<=b.r2&&m.c1>=b.c1&&m.c1<=b.c2))out.push({msg:`Celle unite in ${areaRef(m)}, dentro una tabella di dati: gli screen reader e l’ordinamento le gestiscono male. Separale e ripeti il valore.`,ref:toRef(m.r1,m.c1)});
+ for(const b of regions)if(!b.head&&b.r2-b.r1>=2&&b.c2>b.c1)out.push({msg:`La tabella ${regionRef(b)} non ha una riga di intestazione: scrivi in cima il nome di ogni colonna, così gli screen reader lo leggono con le celle.`,ref:toRef(b.r1,b.c1)});
+ const errs=cells.filter(([ref])=>{const p=parseRef(ref),v=p&&computed(p.r,p.c);return typeof v==='string'&&ERR_SAY[v]});for(const [ref] of errs.slice(0,10)){const p=parseRef(ref),v=computed(p.r,p.c);out.push({msg:`${ref}: ${v}, ${ERR_SAY[v]}.`,ref})}
+ if(errs.length>10)out.push({msg:`E altre ${errs.length-10} formule con errore.`});return out}
+async function sheetCheck(){const issues=sheetIssues();await modal('Verifica dell’accessibilità del foglio',issues.length?`<p>${issues.length===1?'Un punto da controllare':issues.length+' punti da controllare'} nel foglio «${esc(sheet().name)}». Scegli «Vai» per raggiungerlo.</p><ul class="issue-list">${issues.map((x,i)=>`<li><span>${esc(x.msg)}</span>${x.ref||x.chart?`<button type="button" class="btn" data-issue="${i}">Vai<span class="sr-only"> a: ${esc(x.msg)}</span></button>`:''}</li>`).join('')}</ul>`:'<p class="ok-msg">Nessun problema trovato: grafici con il titolo, tabelle con le intestazioni, nessuna cella unita nei dati, nessun colore da solo e nessuna formula con errore.</p>',[],'Chiudi',{noCancel:true,wide:true,
+ onOpen:(pane,finish)=>pane.addEventListener('click',e=>{const b=e.target.closest('[data-issue]');if(!b)return;const x=issues[+b.dataset.issue];finish(null);setTimeout(()=>{if(x.chart){focusChart(x.chart);return}const p=parseRef(x.ref);if(p){setSelection(p.r,p.c,p.r,p.c,true);$('gridScroll').focus()}},0)})})}

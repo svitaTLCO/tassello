@@ -262,6 +262,8 @@ def('x','Selezione e navigazione',[
  ['selectCol','Seleziona la colonna','','Ctrl+Spazio',{ctx:'grid'}],
  ['goto','Vai alla cella o all’intervallo','goto','Ctrl+G',{g:1,short:'Vai a'}],
  ['extendSel','Estendi la selezione','resize','F8',{ctx:'grid',short:'Estendi selezione',toggle:()=>extendSel}],
+ ['sheetDescribe','Descrivi il foglio: tabelle, grafici, regole e note','speak','Alt+Maiusc+D',{g:1,short:'Descrivi foglio'}],
+ ['sheetCheck','Verifica accessibilità del foglio','a11y','',{short:'Verifica accessibilità'}],
  ['toggleGrid','Mostra griglia','grid','',{short:'Griglia',toggle:()=>!hideGrid}]]);
 def('x','Strumenti del foglio',[
  ['freezeMenu','Blocca riquadri','freeze','',{menu:1,short:'Blocca riquadri'}],
