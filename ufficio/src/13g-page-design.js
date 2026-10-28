@@ -67,7 +67,7 @@ function pgAdaptTo(id,shrink=true){const src=Pg.p,pr=PG_PRESETS.find(x=>x[0]===i
  const f=base.ps.corpo.size/(src.ps.corpo?.size||base.ps.corpo.size),least=base.unit==='mm'?12:Math.ceil(base.w/60);for(const s of Object.values(p.ps)){s.size=Math.max(r1(s.size*f),least);s.before=r1(s.before*f);s.after=r1(s.after*f)}
  const Si=pgInner(src),Ti=pgInner(p),seg=(v,a,b,len,A,B,LEN)=>v<=a?v*(A/Math.max(a,1e-6)):v<=b?A+(v-a)*(B-A)/Math.max(b-a,1e-6):B+(v-b)*(LEN-B)/Math.max(len-b,1e-6),mx=v=>seg(v,Si.x,Si.x+Si.w,src.w,Ti.x,Ti.x+Ti.w,p.w),my=v=>seg(v,Si.y,Si.y+Si.h,src.h,Ti.y,Ti.y+Ti.h,p.h),s=Math.min(Ti.w/Si.w,Ti.h/Si.h);
  for(const it of pgAllItems(p)){const full=it.x<=1&&it.y<=1&&it.x+it.w>=src.w-1&&it.y+it.h>=src.h-1;if(full){Object.assign(it,{x:0,y:0,w:p.w,h:p.h});continue}
-  const x0=mx(it.x),y0=my(it.y),x1=mx(it.x+it.w),y1=my(it.y+it.h),keep=(it.kind==='ellipse'||it.kind==='tri'||it.kind==='qr'||(it.kind==='image'&&it.fit==='fit'))&&it.w&&it.h;let nw=x1-x0,nh=y1-y0;
+  const x0=mx(it.x),y0=my(it.y),x1=mx(it.x+it.w),y1=my(it.y+it.h),keep=(it.kind==='ellipse'||it.kind==='tri'||it.kind==='qr'||it.kind==='shape'&&(PG_ELEM_BY[it.shape]?.[4]?.k||PG_ELEM_BY[it.shape]?.[4]?.g)||(it.kind==='image'&&it.fit==='fit'))&&it.w&&it.h;let nw=x1-x0,nh=y1-y0;
   // Una cornice ruotata mantiene le proporzioni: il riquadro che occupa sulla pagina passa al nuovo formato e lei ci entra.
   if(pgRot(it)){const b=pgBoxOf(it),k=Math.min((mx(b.x+b.w)-mx(b.x))/b.w,(my(b.y+b.h)-my(b.y))/b.h),cx=(mx(b.x)+mx(b.x+b.w))/2,cy=(my(b.y)+my(b.y+b.h))/2;nw=it.w*k;nh=it.h*k;Object.assign(it,{x:cx-nw/2,y:cy-nh/2,w:nw,h:nh})}
   // Forme tonde, triangoli e immagini adattate mantengono le proporzioni, al centro del nuovo riquadro.

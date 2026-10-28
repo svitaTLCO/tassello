@@ -26,7 +26,7 @@ const PG_V='post quadrato storia a4 letter a5 a3 a2 a1 a0';
 // di un telefono: i testi crescono fino a questa misura),
 // m cornici del mastro, p pagine. Una pagina è un elenco di cornici, oppure {r:3,p:[…]} da ripetere ({p} è il numero
 // della ripetizione), {d:1,p:[…]} da ripetere per ogni riga dei dati, {x:1,p:[…]} senza mastro.
-// Cornici: ['b',bordi…,'A;B|1;2',{…}] tabella (righe separate da |, celle da ;, la prima è l'intestazione; st stile, sz corpo
+// Cornici: ['o',bordi…,'elemento',{…}] elemento della raccolta (PG_ELEMS, f colore, a testo alternativo), ['b',bordi…,'A;B|1;2',{…}] tabella (righe separate da |, celle da ;, la prima è l'intestazione; st stile, sz corpo
 // in volte il corpo del testo), ['q',bordi…,'contenuto',{…}] codice QR (meglio con q, quadrato), ['t',bordi…,'paragrafi',{…}] testo, ['i',bordi…,{…}] immagine, ['s',bordi…,'scritta',{…}] insegna,
 // ['r'|'e'|'v',bordi…,'colore',{…}] rettangolo, ellisse e triangolo, ['l',bordi…,'colore'] linea, ['g',bordi…,'griglia',{…}]
 // griglia di foto (PG_GRIDS). I paragrafi sono «lettera:testo» separati da |; con + davanti valgono solo nei formati da
@@ -263,6 +263,7 @@ function pgTplBuild(t,preset){const p=newPub(preset),T=PG_THEMES[t.th]?.[2]||PG_
    if(o.k&&chains[o.k])return pgPutLinked(p,h,chains[o.k],x);const it=pgPutText(p,h,x,paras(a,n,pi));if(o.k)chains[o.k]=it;return it}
   if(k==='i')return pgPut(h,pgMk(p,'image',{name:nm('Foto'),...B,fill:o.f?tok(o.f):'none',radius:rad,...ef,...(o.ad?{adj:{...o.ad}}:{}),...(o.lk?{look:o.lk}:{}),deco:!!o.d,...(o.m?{mask:o.m}:{})}));
   if(k==='s'){const st=o.st||'classica',c={};for(const z of ['c1','c2','oc','oc2','shc','gc'])if(o[z])c[z]=tok(o[z]);return pgPut(h,pgMk(p,'sign',{...pgSignStyle(st),style:st,name:nm('Scritta'),text:fill(a,n,pi),...B,c1:T.head,...c,...ef,...o.x}))}
+  if(k==='o')return pgPut(h,pgMk(p,'shape',{name:nm(PG_ELEM_BY[a]?.[1]||'Elemento'),...B,shape:a,fill:tok(o.f||'accent'),...ef,...(o.a?{alt:o.a,deco:false}:{})}));
   if(k==='b')return pgPut(h,pgMk(p,'table',{name:nm('Tabella'),...B,cells:a.split('|').map(r=>r.split(';').map(c=>fill(c,n,pi))),head:1,tstyle:o.st||'righe',size:r1(b*(o.sz||1)),ink:T.ink,hc:T.dark,hink:T.light,line:T.accent,zc:T.soft,...ef}));
   if(k==='q')return pgPut(h,pgMk(p,'qr',{name:nm('Codice QR'),...B,text:fill(a,n,pi),...ef,...o.x}));
   if(k==='l')return pgPut(h,pgMk(p,'line',{name:nm('Linea'),x:B.x,y:B.y,w:B.w,h:B.h,stroke:tok(a||'accent'),...(o.w?{sw:b*o.w}:{}),...ef}));

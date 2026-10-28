@@ -335,6 +335,7 @@ def('p','Inserisci',[
  ['pgAddLine','Inserisci una linea','lineI','',{short:'Linea'}],
  ['pgAddTri','Inserisci un triangolo','triangle','',{short:'Triangolo'}],
  ['pgAddTable','Inserisci una tabella','table','',{short:'Tabella'}],
+ ['pgElements','Elementi: frecce, forme, cornici decorative e icone','elements','',{short:'Elementi'}],
  ['pgBrandLogo','Inserisci il logo del kit del marchio','brand','',{short:'Logo del marchio'}],
  ['pgAddQr','Inserisci un codice QR, fatto senza internet','qr','',{short:'Codice QR'}],
  ['pgAddSign','Inserisci un’insegna, una scritta d’effetto','sign','',{short:'Insegna'}],

@@ -31,8 +31,8 @@ const PG_PRESETS=[
  ['a0','Poster A0 (841 × 1189 mm)',841*MM,1189*MM,'mm',[40,40,40,40].map(v=>v*MM),1,14*MM,1,56],
  ['striscione','Striscione 300 × 50 cm',3000*MM,500*MM,'mm',[40,60,40,60].map(v=>v*MM),1,20*MM,1,110],
  ['slide','Presentazione 16:9 (1920 × 1080 px)',1920,1080,'px',[96,120,120,120],1,48,3,40]];
-const PG_KIND={text:'Testo',image:'Immagine',sign:'Insegna',rect:'Rettangolo',ellipse:'Ellisse',tri:'Triangolo',line:'Linea',qr:'Codice QR',table:'Tabella'};
-const PG_ICON={text:'textbox',image:'image',sign:'sign',rect:'rect',ellipse:'ellipse',tri:'triangle',line:'lineI',qr:'qr',table:'table'};
+const PG_KIND={text:'Testo',image:'Immagine',sign:'Insegna',rect:'Rettangolo',ellipse:'Ellisse',tri:'Triangolo',line:'Linea',qr:'Codice QR',table:'Tabella',shape:'Elemento'};
+const PG_ICON={text:'textbox',image:'image',sign:'sign',rect:'rect',ellipse:'ellipse',tri:'triangle',line:'lineI',qr:'qr',table:'table',shape:'elements'};
 // Le cornici che portano un contenuto da leggere: le altre nascono decorative.
 const PG_CONTENT=new Set(['text','image','sign','qr','table']),pgKindSay=k=>PG_KIND[k][0].toLowerCase()+PG_KIND[k].slice(1);
 // Caratteri: quelli del sistema, con la famiglia generica di riserva.
@@ -59,7 +59,7 @@ const pgBlankPage=p=>({id:uid(),master:p.masters[0]?.id||'',items:[],read:[],dat
 // Nomi delle cornici: «Testo 1», «Immagine 2»… unici in tutto il documento.
 function pgNextName(p,kind){const base=PG_KIND[kind],used=new Set(pgAllItems(p).map(x=>x.name));let n=1;while(used.has(base+' '+n))n++;return base+' '+n}
 const pgAllItems=p=>[...p.masters,...p.pages].flatMap(h=>h.items);
-const PG_DEF={text:p=>({story:'',cols:1,gut:p.gut,pad:0,valign:'top'}),image:()=>({img:'',fit:'fill',fx:50,fy:50,field:'',file:''}),sign:()=>({...pgSignStyle('classica'),style:'classica',text:'Scrivi qui',fit:true,size:48,img:''}),rect:()=>({fill:'#f6e8da'}),ellipse:()=>({fill:'#f6e8da'}),tri:()=>({fill:'#f6e8da'}),line:p=>({h:0,sw:Math.max(1,Math.round(p.w/400))}),qr:()=>({text:'https://www.esempio.it',ec:'M',dark:'#000000',light:'#ffffff',quiet:4,field:''}),table:p=>pgTableDef(p)};
+const PG_DEF={text:p=>({story:'',cols:1,gut:p.gut,pad:0,valign:'top'}),image:()=>({img:'',fit:'fill',fx:50,fy:50,field:'',file:''}),sign:()=>({...pgSignStyle('classica'),style:'classica',text:'Scrivi qui',fit:true,size:48,img:''}),rect:()=>({fill:'#f6e8da'}),ellipse:()=>({fill:'#f6e8da'}),tri:()=>({fill:'#f6e8da'}),line:p=>({h:0,sw:Math.max(1,Math.round(p.w/400))}),qr:()=>({text:'https://www.esempio.it',ec:'M',dark:'#000000',light:'#ffffff',quiet:4,field:''}),table:p=>pgTableDef(p),shape:()=>({shape:'frecciaD',fill:'#b35500'})};
 function pgMk(p,kind,o={}){return {id:uid(),kind,name:o.name||pgNextName(p,kind),x:0,y:0,w:100,h:100,fill:'none',stroke:'#1b1b1b',sw:0,radius:0,opacity:100,alt:'',deco:!PG_CONTENT.has(kind),...PG_DEF[kind](p),...o}}
 function pgPut(holder,it){holder.items.push(it);holder.read.push(it.id);return it}
 function pgNewStory(p,paras){const id=uid();p.stories[id]={paras:paras.length?paras:[P('corpo','')],chain:[],src:''};return id}
@@ -181,7 +181,7 @@ function pgWrapExt(o,y0,y1){const {B,g}=o;if(y1<=B.y-g||y0>=B.y+B.h+g)return nul
 const pgWrapCache=new Map();
 function pgWrapProfile(it,B){const key=JSON.stringify([it.kind,it.x,it.y,it.w,it.h,it.rot||0,it.mask||'']);let P=pgWrapCache.get(key);if(P)return P;const k=Math.min(1,160/Math.max(B.w,B.h,1)),W=Math.max(1,Math.ceil(B.w*k)),H=Math.max(1,Math.ceil(B.h*k)),c=new OffscreenCanvas(W,H).getContext('2d');
  c.setTransform(k,0,0,k,-B.x*k,-B.y*k);const r=pgRot(it)*Math.PI/180,{x,y,w,h}=pgRectOf(it);if(r){c.translate(x+w/2,y+h/2);c.rotate(r);c.translate(-x-w/2,-y-h/2)}
- c.fill(new Path2D(it.kind==='ellipse'?`M${x} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x+w} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x} ${y+h/2}Z`:it.kind==='tri'?`M${x} ${y}L${x+w} ${y}L${x+w/2} ${y+h}Z`:it.kind==='image'&&it.mask&&it.mask!=='rect'?pgMaskPath(it):`M${x} ${y}h${w}v${h}h${-w}Z`));
+ if(it.kind==='shape'){const E=pgElemPath(it),path=new Path2D();path.addPath(new Path2D(E.d),new DOMMatrix(E.m));c.fill(path,E.rule?'evenodd':'nonzero')}else c.fill(new Path2D(it.kind==='ellipse'?`M${x} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x+w} ${y+h/2}A${w/2} ${h/2} 0 1 0 ${x} ${y+h/2}Z`:it.kind==='tri'?`M${x} ${y}L${x+w} ${y}L${x+w/2} ${y+h}Z`:it.kind==='image'&&it.mask&&it.mask!=='rect'?pgMaskPath(it):`M${x} ${y}h${w}v${h}h${-w}Z`));
  const d=c.getImageData(0,0,W,H).data,min=new Float32Array(H).fill(Infinity),max=new Float32Array(H).fill(-Infinity);for(let yy=0;yy<H;yy++)for(let xx=0;xx<W;xx++)if(d[(yy*W+xx)*4+3]>40){if(xx<min[yy])min[yy]=xx;max[yy]=xx}
  P={k,rows:H,min,max};if(pgWrapCache.size>300)pgWrapCache.clear();pgWrapCache.set(key,P);return P}
 // Immagine di una cornice: quella scelta, oppure quella che ha per nome il valore del campo dei dati.
@@ -217,6 +217,7 @@ function pgItemShape(it,L,ctx,href,fv,edge){const op=it.opacity<100?` opacity="$
   case 'sign':return pgSignSvg(it,ctx,href);
   case 'qr':return pgQrSvg(it,ctx);
   case 'table':return pgTableSvg(it,ctx);
+  case 'shape':return pgElemSvg(it,paint,op);
   case 'image':{const m=pgPhotoFor(it,ctx),d=pgMaskPath(it),pic=()=>{const [ox,oy,dw,dh]=pgFitBox(it,m);return `<svg ${box} viewBox="0 0 ${pr2(Math.max(1,it.w))} ${pr2(Math.max(1,it.h))}" overflow="hidden" preserveAspectRatio="none"><image href="${esc(href(m))}" x="${pr2(ox)}" y="${pr2(oy)}" width="${pr2(dw)}" height="${pr2(dh)}" preserveAspectRatio="none"/></svg>`};
    // Il contorno va sopra la foto, che altrimenti ne coprirebbe metà.
    if(!d){const back=it.fill!=='none'?`<rect ${box}${rx} fill="${fv}"/>`:'',line=edge?`<rect ${box}${rx} fill="none"${stroke}/>`:'';if(!m)return back||line?`<g${op}>${back}${line}</g>`:'';return `<g${op}>${back}${pic()}${line}</g>`}
