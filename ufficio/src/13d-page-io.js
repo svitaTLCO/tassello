@@ -4,7 +4,7 @@ const PG_KEY='tassello-ufficio.impagina',pgImgSaved=new Set();let pgSaveTimer=0;
 const pgUsedImgs=()=>new Set(Pg.p?pgAllItems(Pg.p).filter(x=>(x.kind==='image'||x.kind==='sign')&&x.img).map(x=>x.img):[]);
 function pgPersistSoon(){if(!Pg.p)return;clearTimeout(pgSaveTimer);$('saveState').textContent='Salvataggio bozza…';pgSaveTimer=setTimeout(pgPersist,800)}
 // La bozza: il documento a ogni modifica, ogni immagine una volta sola; quelle non più usate si tolgono.
-async function pgPersist(){clearTimeout(pgSaveTimer);if(!Pg.p)return;const label=$('saveState'),data={p:Pg.p,pi:Pg.pi,mid:Pg.mid,row:Pg.row,guides:Pg.guides,grid:Pg.grid};
+async function pgPersist(){clearTimeout(pgSaveTimer);pgSaveTimer=0;if(!Pg.p)return;const label=$('saveState'),data={p:Pg.p,pi:Pg.pi,mid:Pg.mid,row:Pg.row,guides:Pg.guides,grid:Pg.grid};
  try{if(db){await storeCall(db,'readwrite',st=>st.put(data,'impagina'));const used=pgUsedImgs();
    for(const id of used){const m=Pg.imgs.get(id);if(m&&!pgImgSaved.has(id)){await storeCall(db,'readwrite',st=>st.put({blob:m.blob,name:m.name},'pimg:'+id));pgImgSaved.add(id)}}
    const old=(await storeCall(db,'readonly',st=>st.getAllKeys())).filter(k=>String(k).startsWith('pimg:')&&!used.has(String(k).slice(5)));if(old.length){await storeCall(db,'readwrite',st=>{for(const k of old)st.delete(k)});for(const k of old)pgImgSaved.delete(String(k).slice(5))}}
