@@ -1,7 +1,7 @@
 // Barra: gli strumenti di tutti i giorni restano in vista, le categorie sono cassetti che si aprono sopra il lavoro
 // e si richiudono dopo il comando. Ogni cassetto elenca per gruppi i comandi del registro.
 const RIBBON={
- a:{Tracce:[['Tracce','newTrack importTrack recordAudio'],['Traccia scelta','trackSettings trackMute trackSolo trackRename trackDuplicate trackDelete'],['Regione scelta','regionEdit regionSplit regionDuplicate regionLoop regionDelete regionProps'],['Tempo','tempoSettings metronome countInToggle cycle'],['Riproduzione','playPause stop cycleRegion'],['Cronologia','undo redo']],
+ a:{Tracce:[['Tracce','newTrack importTrack recordAudio'],['Traccia scelta','trackSettings trackMute trackSolo trackRename trackDuplicate trackDelete'],['Regione scelta','regionEdit regionSplit regionTrimStart regionTrimEnd regionDuplicate regionLoop regionDelete regionProps'],['Tempo','tempoSettings metronome countInToggle cycle'],['Riproduzione','playPause stop cycleRegion'],['Cronologia','undo redo']],
   Editor:[['Appunti','paste cut copy pasteMix'],['Modifica','deleteSel trim silence duplicate insertSilence'],['Selezione','selectAll selectRange selectNone selMarkers'],['Ascolto','playRegion playSel loop scrub'],['Cronologia','undo redo']],
   Effetti:[['Volume','amplify normalize fadeIn fadeOut'],['Tempo','speed tempo reverse truncate'],['Pulizia','noiseGate captureNoise eq compressor removeDC echo'],['Canali','toMono toStereo swapChannels'],['Formato','resample'],['Ripeti','repeatEffect']],
   Inserisci:[['Suoni','insertFile generate recordAudio'],['Marcatori','markerAdd markerPrev markerNext markerRename markerDelete markersClear'],['Automatici','markersFromPauses']],

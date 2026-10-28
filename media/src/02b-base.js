@@ -64,7 +64,9 @@ function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==doc
 function trapTab(e,root){if(e.key!=='Tab')return;const f=focusables(root);if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&i<=0){e.preventDefault();f.at(-1).focus()}else if(!e.shiftKey&&(i===f.length-1||i<0)){e.preventDefault();f[0].focus()}}
 // Finestra di dialogo modale con campi etichettati. Campi: text, number, time, select, textarea, checkbox, range, color.
 // opts.buttons aggiunge pulsanti (per esempio Anteprima) che ricevono i valori correnti; opts.validate può rifiutare
-// i valori con un messaggio, che resta nella finestra ed è annunciato.
+// i valori con un messaggio, che resta nella finestra ed è annunciato. I campi number con min e max si controllano da
+// soli: un valore fuori dai limiti non viene corretto in silenzio ma segnalato. Il campo sbagliato prende il fuoco,
+// aria-invalid e il messaggio come descrizione; scrivendo di nuovo nel campo il messaggio sparisce.
 function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new Promise(resolve=>{const pane=$('modal'),bg=$('modalbg'),prev=document.activeElement;
  const field=x=>{const id='dlg_'+x.id,hint=x.hint?`<small class="hint" id="${id}_h">${esc(x.hint)}</small>`:'',desc=x.hint?` aria-describedby="${id}_h"`:'';
   if(x.type==='checkbox')return `<label class="check"><input type="checkbox" id="${id}"${x.value?' checked':''}${desc}> ${esc(x.label)}</label>${hint}`;
@@ -75,6 +77,12 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
   // Numeri e tempi sono campi di testo: si possono scrivere con la virgola, come si usa in italiano.
   const decimal=x.type==='time'||x.type==='number',type=decimal?'text':x.type||'text',value=x.type==='number'&&typeof x.value==='number'?fmtNum(x.value,x.value%1?Math.min(3,String(x.value).split('.')[1]?.length||1):0).replace(/\./g,''):x.value;
   return lab+`<input id="${id}" type="${type}" value="${esc(value??'')}" autocomplete="off" spellcheck="false"${decimal?' inputmode="decimal"':''}${desc}>`+hint};
+ const limits=v=>{for(const x of fields){if(x.type!=='number'||(x.min===undefined&&x.max===undefined))continue;const n=num(v[x.id]),lo=x.min??-Infinity,hi=x.max??Infinity;
+  if(!Number.isFinite(n)||n<lo||n>hi)return{msg:`${x.label}: scrivi un numero ${x.min!==undefined&&x.max!==undefined?`da ${fmtNum(lo,lo%1?2:0)} a ${fmtNum(hi,hi%1?2:0)}`:x.min!==undefined?`da ${fmtNum(lo,lo%1?2:0)} in su`:`fino a ${fmtNum(hi,hi%1?2:0)}`}.`,field:x.id}}return null};
+ const described=(el,on)=>{const ids=(el.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!=='dlgErr');if(on)ids.push('dlgErr');if(ids.length)el.setAttribute('aria-describedby',ids.join(' '));else el.removeAttribute('aria-describedby')};
+ const clearErr=()=>{for(const el of $$('[aria-invalid]',pane)){el.removeAttribute('aria-invalid');described(el,false)}const box=$('dlgErr');if(box)box.textContent=''};
+ // Il messaggio si svuota e si riscrive: role=alert lo rilegge anche se è lo stesso di prima.
+ const showErr=err=>{clearErr();const el=err.field&&$('dlg_'+err.field);if(el){el.setAttribute('aria-invalid','true');described(el,true);el.focus()}setTimeout(()=>{const box=$('dlgErr');if(box)box.textContent=err.msg},50)};
  pane.className='modal'+(opts.wide?' wide':'');
  const extra=(opts.buttons||[]).map((b,i)=>`<button type="button" class="btn${i?'':' left'}" id="dlgBtn${i}">${esc(b.label)}</button>`).join('');
  pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="hint" id="dlgErr" role="alert"></p><div class="modal-actions">${extra}${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
@@ -84,7 +92,8 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
  (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
- $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad;$('dlgErr').textContent=err.msg;if(err.field)$('dlg_'+err.field)?.focus();return}finish(v)};
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=limits(v)||opts.validate?.(v);if(bad){showErr(typeof bad==='string'?{msg:bad}:bad);return}finish(v)};
+ $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute?.('aria-invalid'))clearErr()});
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);
@@ -105,6 +114,13 @@ function applyPrefs(){document.documentElement.dataset.theme=prefs.theme==='dark
 let palette={};
 function themeChanged(){const probe=document.createElement('span');document.body.append(probe);const read=v=>{probe.style.color=`var(${v})`;return getComputedStyle(probe).color};palette=Object.fromEntries(['--wave-bg','--wave','--wave-rms','--wave-mid','--wave-sel','--playhead','--marker','--ruler','--accent','--text-3','--line'].map(v=>[v.slice(2),read(v)]));probe.remove();redrawAll?.()}
 let redrawAll=null;
+// Indicatore durante l'ascolto (WCAG 4.1.2): il valore si aggiorna una volta al secondo, ma non mentre l'indicatore ha il
+// fuoco, perché lo screen reader lo leggerebbe di continuo; quando lo riceve si aggiorna subito. Alt+Maiusc+I lo dice sempre.
+function playingValue(el,t,text,force=false){if(!force&&(document.activeElement===el||Math.abs(t-(el._said??-9))<1))return;el._said=t;el.setAttribute('aria-valuenow',Math.round(t));el.setAttribute('aria-valuetext',text(t))}
 // Lavori lunghi: messaggio nella barra di stato e cursore di attesa; gli errori diventano un messaggio leggibile.
-async function work(label,fn){status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{document.body.style.cursor='';status()}}
-function status(text){$('statusText').textContent=text||'Pronto'}
+// Lo stato si sente anche (WCAG 4.1.3): all'inizio del lavoro e poi al più ogni 4 secondi, con l'avanzamento.
+let statusSaid=0,busy=0;
+async function work(label,fn){busy++;status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{busy--;document.body.style.cursor='';status()}}
+function status(text,{say=true}={}){$('statusText').textContent=text||'Pronto';if(!text){statusSaid=0;return}if(say&&Date.now()-statusSaid>=4000){statusSaid=Date.now();announce(text)}}
+// Lavoro in corso, per Alt+Maiusc+I: il testo della barra di stato mentre work() lavora.
+const jobNow=()=>busy?`In corso: ${$('statusText').textContent.replace(/…$/,'')}. `:''

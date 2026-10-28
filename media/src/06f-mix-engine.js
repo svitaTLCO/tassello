@@ -74,7 +74,7 @@ function mixPump(){if(!MIX.playing)return;const ctx=actx,now=ctx.currentTime,hor
  if(P.metro){const bd=beatDur();for(const p of MIX.passes){if(p.w+(p.b-p.a)<=MIX.metroUntil)continue;for(let k=Math.ceil((p.a+Math.max(0,MIX.metroUntil-p.w))/bd-1e-6);;k++){const tb=k*bd,ct=p.w+(tb-p.a);if(tb>=p.b-1e-6||ct>horizon)break;if(ct>MIX.metroUntil+1e-6)MIX.srcs.push(clickAt(ctx,mixOut(),ct,k%P.sig===0))}}}
  MIX.metroUntil=horizon;MIX.srcs=MIX.srcs.filter(x=>x.until>now-0.1);MIX.passes=MIX.passes.filter((p,i,l)=>i===l.length-1||l[i+1].w>now-1);
  if(!MIX.recording&&!P.metro&&!cycleOn()&&mixPos()>=projDur()+0.05){const o=MIX.origin;mixKill();P.t=o;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI();announce('Fine del brano')}}
-function mixTick(){if(!MIX.playing)return;const pos=mixPos();placeArPlayhead(pos);$('aClock').textContent=fmtTime(pos);if(prefs.follow)followAr(pos);
+function mixTick(){if(!MIX.playing)return;const pos=mixPos();placeArPlayhead(pos);$('aClock').textContent=fmtTime(pos);if(prefs.follow)followAr(pos);playingValue(arPlayheadEl,pos,arPlayheadText);
  if(MIX.analyser){MIX.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}
  MIX.raf=requestAnimationFrame(mixTick)}
 function playUIProject(on){const b=$('aPlay');b.setAttribute('aria-label',on?'Pausa del brano':'Riproduci il brano');b.innerHTML=ICON(on?'pause':'play')}

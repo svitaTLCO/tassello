@@ -15,9 +15,12 @@ const dbPut=(key,value)=>storeCall('readwrite',st=>st.put(value,key));
 const dbDel=key=>storeCall('readwrite',st=>st.delete(key));
 const dbKeys=()=>storeCall('readonly',st=>st.getAllKeys());
 // Le modifiche ravvicinate producono un solo salvataggio. Le funzioni di salvataggio di ogni app stanno nel suo modulo.
+// Quando la bozza non si salva (o il progetto è troppo grande) lo si dice con un messaggio, una volta per ogni cambio.
 function schedulePersist(app=state.mode){if(suppressAutosave)return;dirtyApps.add(app);clearTimeout(draftTimer);$('saveState').textContent='Salvataggio bozza…';draftTimer=setTimeout(persistNow,SAVE_DELAY)}
+let draftWarned='';
+function draftWarn(msg){if(msg&&msg!==draftWarned)toast(msg);draftWarned=msg}
 async function persistNow(){clearTimeout(draftTimer);const label=$('saveState'),apps=[...dirtyApps];dirtyApps.clear();let note='';
  try{for(const app of apps)note=(await (app==='audio'?persistAudio():persistVideo()))||note;await dbPut('ui',{mode:state.mode});
-  label.textContent=note||'Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(note)status(note)}
- catch(e){console.warn('Bozza non salvata',e);label.textContent='Bozza non salvata';status('Bozza non salvata: esporta il lavoro per non perderlo')}}
+  label.textContent=note||'Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(note)status(note,{say:false});draftWarn(note)}
+ catch(e){console.warn('Bozza non salvata',e);label.textContent='Bozza non salvata';const msg='Bozza non salvata: esporta il lavoro per non perderlo';status(msg,{say:false});draftWarn(msg)}}
 addEventListener('pagehide',()=>{if(dirtyApps.size)persistNow()});

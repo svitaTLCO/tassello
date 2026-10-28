@@ -122,7 +122,7 @@
 <button type="button" class="tb drw" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
 <div id="drawers"></div>
 </div>
-<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
+<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi, Alt Q" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
 <button type="button" class="tile primary-tile" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta il brano (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
 </header>
 <div class="drawer" id="drawer" role="group" hidden></div>
@@ -187,7 +187,7 @@
 </aside>
 <section class="viewer tile" id="viewer" aria-labelledby="viewTitle">
 <h2 id="viewTitle" class="sr-only">Anteprima</h2>
-<div class="stage" id="stage"><canvas id="viewCanvas" width="1280" height="720" tabindex="0" role="img" aria-roledescription="anteprima video" aria-label="Anteprima del video" aria-describedby="viewHint"></canvas></div>
+<div class="stage" id="stage"><canvas id="viewCanvas" width="1280" height="720" tabindex="0" role="application" aria-roledescription="anteprima video" aria-label="Anteprima del video" aria-describedby="viewHint"></canvas></div>
 <div class="transport" id="vTransport" role="toolbar" aria-label="Riproduzione video">
 <div class="tp-group">
 <button type="button" class="tp-btn" data-action="toStart" aria-label="Vai all’inizio" data-tip="Vai all’inizio (Home)"><svg class="ico" aria-hidden="true"><use href="#i-toStart"/></svg></button>
@@ -235,12 +235,12 @@
 </footer>
 </div>
 <p id="waveHint" class="sr-only">Editor della regione. Frecce sinistra e destra spostano il cursore del passo scelto, Pagina su e giù di cinque secondi, Ctrl più frecce alla pausa precedente o successiva, Home e Fine all’inizio e alla fine; con Maiusc si seleziona. Spazio ascolta o mette in pausa, Maiusc+Spazio ascolta la selezione, P e D ascoltano due secondi prima o dopo il cursore. I e O fissano inizio e fine della selezione, anche durante l’ascolto. Esc toglie la selezione. Maiusc+F10 apre il menu, Alt+Maiusc+I legge posizione e livello.</p>
-<p id="laneHint" class="sr-only">Frecce sinistra e destra per scegliere una regione, su e giù per cambiare traccia. Ctrl più frecce sposta la regione nel tempo, Ctrl più frecce su e giù la porta su un’altra traccia. Invio la apre nell’editor, Alt+Invio ne mostra le proprietà, Ctrl+K la divide all’indicatore, Canc la elimina. M e S attivano muto e solo della traccia, R registra su questa traccia, Spazio avvia o ferma il brano.</p>
-<p id="arPlayheadHint" class="sr-only">Frecce sinistra e destra di un passo della griglia, Maiusc più frecce di un passo piccolo, Pagina su e giù di una battuta o di cinque secondi, frecce su e giù al bordo di regione precedente o successivo, Home e Fine. Spazio avvia o ferma il brano, I e O fissano inizio e fine del ciclo, C attiva il ciclo, R registra sulla traccia scelta.</p>
+<p id="laneHint" class="sr-only">Frecce sinistra e destra per scegliere una regione, su e giù per cambiare traccia. Ctrl più frecce sposta la regione nel tempo, Ctrl più frecce su e giù la porta su un’altra traccia. Invio la apre nell’editor, Alt+Invio ne mostra le proprietà, Ctrl+K la divide all’indicatore, Q e W ne accorciano l’inizio o la fine fino all’indicatore, Canc la elimina. M e S attivano muto e solo della traccia, R registra su questa traccia, Spazio avvia o ferma il brano.</p>
+<p id="arPlayheadHint" class="sr-only">Frecce sinistra e destra di un passo della griglia, Maiusc più frecce di un passo piccolo, Pagina su e giù di una battuta o di cinque secondi, frecce su e giù al bordo di regione precedente o successivo, Home e Fine. Spazio avvia o ferma il brano, I e O fissano inizio e fine del ciclo, C attiva il ciclo, Q e W accorciano l’inizio o la fine della regione all’indicatore, R registra sulla traccia scelta.</p>
 <p id="timeHint" class="sr-only">Scrivi un tempo come 83,5 oppure 1:23,5 oppure 0:01:23,500 e premi Invio.</p>
 <p id="trackHint" class="sr-only">Frecce sinistra e destra per scegliere un elemento, Ctrl più frecce per spostarlo di un secondo e Ctrl+Maiusc più frecce di un fotogramma: le clip attaccate in quella direzione si spostano insieme. Alt+Maiusc più frecce scambia una clip con la vicina, Invio per modificarne le proprietà, Canc per eliminarlo, Maiusc+F10 per il menu. Spazio avvia o ferma l’anteprima.</p>
 <p id="playheadHint" class="sr-only">Frecce sinistra e destra di un fotogramma, Maiusc più frecce di un secondo, Pagina su e giù di cinque secondi, frecce su e giù al taglio precedente o successivo, Home e Fine. Spazio avvia o ferma l’anteprima, J K L come un registratore, S divide la clip, Alt+Maiusc+I descrive l’istante.</p>
-<p id="viewHint" class="sr-only">Anteprima del montaggio. Alt+Maiusc+I descrive la clip, il titolo e il sottotitolo visibili in questo istante.</p>
+<p id="viewHint" class="sr-only">Anteprima del montaggio. Spazio o clic avvia e ferma, frecce sinistra e destra di un fotogramma, J K L come un registratore, S divide la clip. Alt+Maiusc+I descrive la clip, il titolo e il sottotitolo visibili in questo istante.</p>
 <div class="msg" id="toast" role="status" aria-atomic="true" aria-live="polite"></div>
 <div id="srLive" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 <div id="filepanel" class="filepanel" role="dialog" aria-modal="true" aria-labelledby="fileTitle" hidden>

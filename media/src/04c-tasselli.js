@@ -16,10 +16,13 @@ for(const [id,d] of Object.entries(PANES)){const el=$(id);
 $('timeline').insertAdjacentHTML('beforebegin','<div class="sep h" id="tlSep" role="separator" tabindex="0" aria-orientation="horizontal" aria-controls="timeline" aria-label="Altezza della linea temporale" aria-valuemin="140"></div>');
 // Disposizione: a sinistra dell'area centrale gli ordini 0, 2, 4…, a destra 102, 104…; la fuga sta tra riquadro e centro.
 function applyLayout(redraw=true){for(const m of ['a','v']){const ids=panesOf(m);ids.filter(id=>paneState(id).side==='left').forEach((id,i)=>placePane(id,2*i));ids.filter(id=>paneState(id).side==='right').forEach((id,i)=>placePane(id,102+2*i))}
- const h=layoutOf().tlH;$('timeline').style.setProperty('--tl-h',h?h+'px':'');$('tlSep').setAttribute('aria-valuenow',h||$('timeline').offsetHeight||0);paneBadges();if(redraw)relayout()}
+ const h=layoutOf().tlH;$('timeline').style.setProperty('--tl-h',h?h+'px':'');sepTl(h||$('timeline').offsetHeight||0);paneBadges();if(redraw)relayout()}
+// Valori delle fughe: il massimo dipende dalla finestra (45% della larghezza, 60% dell'altezza).
+const paneMax=d=>Math.round(Math.max(d.min,Math.min(d.max,innerWidth*.45)));
+function sepTl(v){const sep=$('tlSep');sep.setAttribute('aria-valuemax',Math.max(140,Math.round(innerHeight*.6)));sep.setAttribute('aria-valuenow',v);sep.setAttribute('aria-valuetext',v+' pixel')}
 function placePane(id,order){const s=paneState(id),d=PANES[id],el=$(id),sep=$(id+'Sep'),tes=$(id+'Tes'),left=s.side==='left';s.w=clamp(s.w,d.min,d.max);
  el.style.order=tes.style.order=order;sep.style.order=left?order+1:order-1;tes.dataset.side=s.side;el.style.setProperty('--w',s.w+'px');
- el.hidden=s.st!=='open';sep.hidden=s.st!=='open';tes.hidden=s.st!=='tessera';sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');
+ el.hidden=s.st!=='open';sep.hidden=s.st!=='open';tes.hidden=s.st!=='tessera';sep.setAttribute('aria-valuemax',paneMax(d));sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');
  el.querySelector('[data-pane-act=collapse]').innerHTML=ICON(left?'left':'right')}
 function paneBadges(){for(const [id,d] of Object.entries(PANES)){const n=d.count&&safe(d.count)||0,tes=$(id+'Tes');tes.querySelector('.badge').textContent=n?String(n):'';tes.setAttribute('aria-label',`${d.title}, riquadro ridotto${n?`: ${n} ${d.unit[n===1?0:1]}`:''}. Espandi`)}}
 for(const id of ['libList','markList'])new MutationObserver(paneBadges).observe($(id),{childList:true});
@@ -34,17 +37,20 @@ function paneSet(id,st,{focus=false,say=true}={}){const s=paneState(id),d=PANES[
  if(say)announce(d.title+': '+PANE_SAY[st]);refreshToggles()}
 function paneToggle(id){const off=paneState(id).st==='off';paneSet(id,off?'open':'off',{focus:off})}
 function paneMove(id){const s=paneState(id);s.side=s.side==='left'?'right':'left';savePrefs();applyLayout();announce(`${PANES[id].title} spostato a ${s.side==='left'?'sinistra':'destra'}`)}
-function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,Math.max(d.min,Math.min(d.max,innerWidth*.45))));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final){savePrefs();relayout()}else relayoutSoon()}
-function setTlH(h,final=true){const max=Math.round(innerHeight*.6),v=Math.round(clamp(h,140,Math.max(140,max))),sep=$('tlSep');layoutOf().tlH=v;$('timeline').style.setProperty('--tl-h',v+'px');sep.setAttribute('aria-valuemax',max);sep.setAttribute('aria-valuenow',v);sep.setAttribute('aria-valuetext',v+' pixel');if(final){savePrefs();relayout()}else relayoutSoon()}
+function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,paneMax(d)));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuemax',paneMax(d));sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final){savePrefs();relayout()}else relayoutSoon()}
+function setTlH(h,final=true){const max=Math.round(innerHeight*.6),v=Math.round(clamp(h,140,Math.max(140,max)));layoutOf().tlH=v;$('timeline').style.setProperty('--tl-h',v+'px');sepTl(v);if(final){savePrefs();relayout()}else relayoutSoon()}
 function paneMenu(id,btn){const s=paneState(id),d=PANES[id],left=s.side==='left',r=btn.getBoundingClientRect();
- openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Larghezza iniziale',icon:'fit',run:()=>setW(id,d.w)},'-',
+ openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},'-',{label:'Più largo',icon:'plus',run:()=>paneWidth(id,16)},{label:'Più stretto',icon:'minus',run:()=>paneWidth(id,-16)},{label:'Larghezza iniziale',icon:'fit',run:()=>paneWidth(id,0)},'-',
   {label:'Togli dal piano',desc:'Torna dal menu Tasselli, in basso a sinistra',icon:'close',run:()=>paneSet(id,'off',{focus:true})}],r.right-240,r.bottom+4,'Opzioni del riquadro '+d.title,btn)}
+// Misure senza trascinare (WCAG 2.5.7): 16 pixel alla volta dal menu, con l'annuncio della misura ottenuta.
+function paneWidth(id,d){const s=paneState(id);setW(id,d?s.w+d:PANES[id].w);announce(`${PANES[id].title}: largo ${paneState(id).w} pixel`)}
+function tlHeight(d){setTlH($('timeline').offsetHeight+d);announce(`Linea temporale: alta ${layoutOf().tlH} pixel`)}
 // Menu Tasselli nella barra di stato: quali riquadri sono sul piano e alcune disposizioni pronte.
 function layoutMenu(){const m=state.mode[0],btn=$('layoutBtn'),r=btn.getBoundingClientRect(),ed=!$('editorArea').classList.contains('closed');
  const where=id=>{const s=paneState(id);return s.st==='open'?(s.side==='left'?'A sinistra':'A destra'):s.st==='tessera'?'Ridotto a tessera':'Tolto dal piano'};
  const items=panesOf(m).map(id=>({label:PANES[id].title,desc:where(id),box:true,checked:paneState(id).st!=='off',run:()=>paneToggle(id)}));
  if(m==='a')items.unshift({label:'Editor della regione',desc:ed?'Aperto':'Chiuso',box:true,checked:ed,run:()=>runCommand('toggleEditor')});
- items.push('-');if(m==='v')items.push({label:'Montaggio',desc:'Raccolta e proprietà aperte',icon:'tiles',run:()=>layoutPreset('open')},{label:'Anteprima grande',desc:'Raccolta e proprietà ridotte a tessera',icon:'fit',run:()=>layoutPreset('tessera')});
+ items.push('-');if(m==='v')items.push({label:'Linea temporale più alta',icon:'up',run:()=>tlHeight(32)},{label:'Linea temporale più bassa',icon:'down',run:()=>tlHeight(-32)},'-',{label:'Montaggio',desc:'Raccolta e proprietà aperte',icon:'tiles',run:()=>layoutPreset('open')},{label:'Anteprima grande',desc:'Raccolta e proprietà ridotte a tessera',icon:'fit',run:()=>layoutPreset('tessera')});
  items.push({label:'Come all’inizio',desc:'Rimette ogni tassello al suo posto',icon:'history',run:layoutReset});
  openMenu(items,r.left,r.top-6,'Tasselli',btn,true)}
 function layoutPreset(st){for(const id of panesOf('v'))paneState(id).st=st;savePrefs();applyLayout();announce(st==='open'?'Disposizione per il montaggio':'Anteprima grande')}
