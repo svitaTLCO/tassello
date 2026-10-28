@@ -11,7 +11,10 @@ function whereAmISay(){if(!inEditor())return 'Il cursore non è nel documento: p
  let head=null;for(const h of $$('h1,h2,h3,h4,h5,h6',$('wordEditor'))){if(h.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING||h.contains(el))head=h;else break}
  const cell=el?.closest('td,th'),li=el?.closest('li');
  return `Pagina ${i+1} di ${n}${pageNumSay(i)}; riga ${caretLineOnPage()} circa${secs.length>1?`; sezione ${si+1} di ${secs.length}, ${SECT_ORIENT[sec.orient]||'verticale'}, ${cols===1?'una colonna':cols===2?'due colonne':cols+' colonne'}`:cols>1?`; ${cols===2?'due colonne':cols+' colonne'}`:''}${head?`; ${head.contains(el)?'nel titolo':'sotto il titolo'} «${head.textContent.trim().slice(0,80)}»`:''}${cell?'; in tabella, '+cellInfo(cell).split(':')[0]:''}${li?`; elenco, livello ${listDepth(li.parentElement)+1}`:''}.`}
-function whereAmI(){announce(whereAmISay())}
+// L'intestazione e il piè di pagina della pagina in cui si è, con i campi già riempiti e le pagine pari (U-T10).
+function hfSayAt(i,sec){const L=state.layout,n=pageNums[i]??i+1,total=pageNums.at(-1)??pageCount(),hf=sec?.hf||{},even=L.evenDiff&&n%2===0,get=k=>even&&L['e'+k]?L['e'+k]:hf[k]||'',one=ks=>ks.map(get).filter(Boolean).map(t=>hfText(t,n,total)).join(' · ');
+ const h=one(['hl','hc','hr']),f=one(['fl','fc','fr']);return [h&&`intestazione «${h}»`,f&&`piè di pagina «${f}»`].filter(Boolean).join('; ')}
+function whereAmI(){const el=inEditor()&&anchorEl(),hf=el?hfSayAt(pageIndexAt(el),sectionList()[sectionIndexAt(el)]):'';announce(whereAmISay().replace(/\.$/,'')+(hf?'; '+hf:'')+'.')}
 // Mentre ci si muove nel documento, il cambio di pagina si annuncia, con l'interruzione che lo ha fatto. Si spegne con il
 // comando «Annuncia i cambi di pagina».
 let lastCaretPage=-1;
