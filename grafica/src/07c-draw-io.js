@@ -60,8 +60,8 @@ async function exportDrawImage(){const p=Dw.p;const r=await modal('Esporta come 
  if(!blob)return;download(blob,extName(r.name||p.title,r.format==='jpeg'?'jpg':'png'),mime);toast(`Esportato in ${r.format.toUpperCase()}, ${fmtInt(W)} × ${fmtInt(H)} pixel, ${fmtBytes(blob.size)}`)}
 // La foto di Immagini entra in Disegno con il file originale e la sua ricetta (regolazioni, maschere, scontorno, ritocchi,
 // inquadratura), che restano modificabili; le maschere calcolate passano a Disegno con lo stesso id. HEIC e RAW entrano
-// in JPEG, con la stessa misura.
-async function sendPhotoToDraw(){if(photoLink.id){linkBack();return}if(!I.bmp){toast('Apri prima una foto');return}const file=needsJpeg(I.file)?await photoAsJpeg(I.file,I.bmp):I.file;if(!file)return;const r=JSON.parse(snap()),W=I.bmp.width,H=I.bmp.height,[fw,fh]=outSize(r,W,H),id=uid(),k=Math.min(1,Dw.p.w*.8/fw,Dw.p.h*.8/fh),ph=photoFields(r),rid=r.cut?.raster;
+// convertite (imgConvert), con la stessa misura.
+async function sendPhotoToDraw(){if(photoLink.id){linkBack();return}if(!I.bmp){toast('Apri prima una foto');return}const file=imgToConvert(I.file)?await imgConvert(I.file,I.bmp):I.file;if(!file)return;const r=JSON.parse(snap()),W=I.bmp.width,H=I.bmp.height,[fw,fh]=outSize(r,W,H),id=uid(),k=Math.min(1,Dw.p.w*.8/fw,Dw.p.h*.8/fh),ph=photoFields(r),rid=r.cut?.raster;
  if(rid&&rasters.has(rid))Dw.ras.set(rid,rasters.get(rid));registerImage(id,file,file===I.file?I.name:file.name,W,H);setMode('disegno',{focus:false});
  const it=addItem('image',{img:id,w:Math.max(1,Math.round(fw*k)),h:Math.max(1,Math.round(fh*k)),name:safeFileName(I.title.trim()||baseName(I.name)).slice(0,40)||nextName('image'),adj:Object.fromEntries(Object.entries(r.adj).filter(([,v])=>v)),look:r.look,lookAmt:r.lookAmt,...(Object.keys(ph).length?{photo:ph}:{})});
  sheetWrap.focus();const say=photoSay(it);if(say)announce(`Restano modificabili: ${say}. Maschere e Togli lo sfondo sono nella scheda Immagine.`,{join:true})}

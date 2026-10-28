@@ -43,17 +43,21 @@ function addItem(kind,extra={}){const p=Dw.p,s=Math.min(p.w,p.h),it={id:uid(),ki
  if(kind==='text')measureText(it);it.x=Math.round((p.w-it.w)/2);it.y=Math.round((p.h-it.h)/2);
  Dw.sel=it.id;editD('Inserisci '+it.name,q=>{q.items.push(it)},{props:true});announce(`Inserito l’oggetto «${it.name}» al centro del foglio, sopra gli altri. Le proprietà sono nel riquadro a destra.`);return it}
 const describeItem=it=>{const b=box(it);return `${it.name}${it.name.startsWith(kindName(it))?'':', '+kindName(it).toLowerCase()}${it.kind==='text'?` «${it.text.replace(/\n/g,' ')}»`:''}${KIND_SAY[it.kind]?.(it)||''}${clipSay(it)}${styleSay(it)}, x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}${it.rot?`, ruotato di ${fmtNum(it.rot,0)} gradi`:''}${it.opacity<100?`, opacità ${it.opacity}%`:''}${it.hidden?', nascosto':''}${it.lock?', bloccato':''}`};
-// Immagini del disegno: il file originale resta com'è (HEIC e RAW in JPEG); per l'anteprima e per l'esportazione si usa
+// Immagini del disegno: il file originale resta com'è (HEIC e RAW convertite); per l'anteprima e per l'esportazione si usa
 // un indirizzo locale.
 function registerImage(id,blob,name,w,h){const old=Dw.imgs.get(id);if(old)URL.revokeObjectURL(old.url);Dw.imgs.set(id,{blob,name,w,h,type:blob.type,url:URL.createObjectURL(blob),bmp:null})}
 const isSvgFile=f=>/svg/i.test(f.type)||/\.svg$/i.test(f.name);
 async function svgSize(file){const doc=new DOMParser().parseFromString(await file.text(),'image/svg+xml'),s=doc.documentElement,vb=(s.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number),w=parseFloat(s.getAttribute('width'))||vb[2]||300,h=parseFloat(s.getAttribute('height'))||vb[3]||150;return [Math.round(w),Math.round(h)]}
-// Le foto HEIC e i RAW entrano nel foglio convertite in JPEG: il browser non sa disegnarle, e così anche l'SVG salvato
-// si apre altrove. bmp è la foto già decodificata e raddrizzata; null se la conversione non riesce.
-const needsJpeg=f=>isHeic(f)||isRaw(f);
-const photoAsJpeg=(f,bmp)=>work(`Conversione di «${f.name}» in JPEG`,async()=>{const cv=new OffscreenCanvas(bmp.width,bmp.height);cv.getContext('2d').drawImage(bmp,0,0);return new File([await cv.convertToBlob({type:'image/jpeg',quality:.92})],baseName(f.name)+'.jpg',{type:'image/jpeg'})});
+// Le foto HEIC e i RAW entrano nel foglio convertite: il browser non sa disegnarle, e così anche l'SVG salvato si apre
+// altrove. In JPEG, o in PNG se una HEIC ha la trasparenza (un RAW non ce l'ha). bmp è la foto già decodificata e
+// raddrizzata; null se la conversione non riesce.
+const imgToConvert=f=>isHeic(f)||isRaw(f);
+// La trasparenza si cerca a strisce, per non leggere tutta la foto in una volta.
+function imgHasAlpha(x,w,h){for(let y=0;y<h;y+=256){const d=x.getImageData(0,y,w,Math.min(256,h-y)).data;for(let i=3;i<d.length;i+=4)if(d[i]<255)return true}return false}
+const imgConvert=(f,bmp)=>work(`Conversione di «${f.name}»`,async()=>{const heic=isHeic(f),cv=new OffscreenCanvas(bmp.width,bmp.height),x=cv.getContext('2d',{willReadFrequently:heic});x.drawImage(bmp,0,0);
+ const png=heic&&imgHasAlpha(x,cv.width,cv.height),type=png?'image/png':'image/jpeg';return new File([await cv.convertToBlob({type,quality:.92})],baseName(f.name)+(png?'.png':'.jpg'),{type})});
 // Le immagini entrano grandi al massimo l'80% del foglio, con le loro proporzioni.
-async function addImages(files){for(let f of files){let w,h,raw;try{if(isSvgFile(f))[w,h]=await svgSize(f);else{const bmp=await decodePhoto(f);w=bmp.width;h=bmp.height;raw=bmp.rawInfo;if(needsJpeg(f))f=await photoAsJpeg(f,bmp);bmp.close();if(!f)continue}}catch(e){toast(e.message);continue}
+async function addImages(files){for(let f of files){let w,h,raw;try{if(isSvgFile(f))[w,h]=await svgSize(f);else{const bmp=await decodePhoto(f);w=bmp.width;h=bmp.height;raw=bmp.rawInfo;if(imgToConvert(f))f=await imgConvert(f,bmp);bmp.close();if(!f)continue}}catch(e){toast(e.message);continue}
  const id=uid(),k=Math.min(1,Dw.p.w*.8/w,Dw.p.h*.8/h);registerImage(id,f,f.name,w,h);addItem('image',{img:id,w:Math.max(1,Math.round(w*k)),h:Math.max(1,Math.round(h*k)),name:safeFileName(baseName(f.name)).slice(0,40)||nextName('image')});if(raw)toast(rawNote(raw))}}
 async function newDrawingCmd(){if(Dw.p.items.length&&!(await confirmAction('Il disegno attuale verrà chiuso. Se non l’hai salvato in SVG lo perdi: vuoi continuare?','Nuovo disegno')))return;Object.assign(Dw,{p:newDrawing(),sel:null,hist:[],redo:[],zoom:0});Dw.base=snapD();$('docTitle').value=Dw.p.title;updateTitle();drawingChanged({props:true});announce('Nuovo disegno vuoto, formato post 4:5. Inserisci forme, testi e immagini dalla scheda Inserisci.')}
 // Bozza: il disegno a ogni modifica, ogni immagine e ogni maschera calcolata una volta sola; quelle non più usate si tolgono.
