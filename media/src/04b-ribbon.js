@@ -5,13 +5,14 @@ const RIBBON={
   Editor:[['Appunti','paste cut copy pasteMix'],['Modifica','deleteSel trim silence duplicate insertSilence'],['Selezione','selectAll selectRange selectNone selMarkers'],['Ascolto','playRegion playSel loop scrub'],['Cronologia','undo redo']],
   Effetti:[['Volume','amplify normalize fadeIn fadeOut'],['Tempo','speed tempo reverse truncate'],['Pulizia','noiseGate captureNoise eq compressor removeDC echo'],['Canali','toMono toStereo swapChannels'],['Formato','resample'],['Ripeti','repeatEffect']],
   Inserisci:[['Suoni','insertFile generate recordAudio'],['Marcatori','markerAdd markerPrev markerNext markerRename markerDelete markersClear'],['Automatici','markersFromPauses']],
-  Analisi:[['Misura','stats readLevel'],['Pause','prevPause nextPause pauseSettings'],['Distorsioni','findClip']],
+  Analisi:[['Descrivi','describeSong readLevels compareFx'],['Misura','stats readLevel'],['Pause','prevPause nextPause pauseSettings'],['Distorsioni','findClip']],
   Esporta:[['Brano','saveAudio exportStems saveAudioProject'],['Regione','exportParts'],['Marcatori','exportLabels importLabels']],
   Vista:[['Zoom','zoomIn zoomOut zoomFit zoomSel'],['Tasselli','toggleEditor markPane layoutMenu layoutReset'],['Mostra','follow snap'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
- v:{Inizio:[['Appunti','paste cut copy'],['File','importMedia addToTimeline'],['Montaggio','split trimStart trimEnd duplicateItem deleteItem'],['Posizione','moveEarlier swapPrev moveLater swapNext snap'],['Riproduzione','playPause stop prevEdit nextEdit'],['Cronologia','undo redo']],
+ v:{Inizio:[['Appunti','paste cut copy'],['File','importMedia addToTimeline'],['Montaggio','split trimStart trimEnd duplicateItem deleteItem'],['Posizione','moveEarlier swapPrev moveLater swapNext snap'],['Riproduzione','playPause stop vPlayItem vPlayBefore vPlayAfter prevEdit nextEdit'],['Cronologia','undo redo']],
   Inserisci:[['Testo','addTitle addSub addCard'],['Audio','recordVoice'],['File','importMedia']],
   Clip:[['Transizione','transitionMenu'],['Aspetto','filterMenu adjust rotate flip fitMode'],['Tempo e suono','clipSpeed clipVolume clipMute fadeInV fadeOutV']],
-  Sottotitoli:[['Sottotitoli','addSub subImport subExport'],['Visualizzazione','subShow subBurn']],
+  Sottotitoli:[['Sottotitoli','addSub subImport subExport'],['Parlato','subSnap subsFromSpeech vPrevPause vNextPause'],['Visualizzazione','subShow subBurn']],
+  Analisi:[['Descrivi','describeFrame describeClip'],['Scene','analyzeImages scenePrev sceneNext'],['Pause del parlato','vPrevPause vNextPause'],['Accessibilità','a11yCheck']],
   Esporta:[['Video','exportVideo exportMix exportFrame'],['Progetto','saveProject projectSettings'],['Accessibilità','a11yCheck']],
   Vista:[['Zoom','zoomIn zoomOut zoomFit'],['Tasselli','showLibrary showInspector bigPreview layoutMenu layoutReset'],['Mostra','follow subShow snap'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]}};
 const TABS={a:Object.keys(RIBBON.a),v:Object.keys(RIBBON.v)};

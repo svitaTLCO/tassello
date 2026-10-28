@@ -43,16 +43,16 @@ function drawClip(g,s,t){const c=s.c,W=V.p.w,H=V.p.h,{a,wipe}=clipLook(s,t);if(a
  const rot=(((c.rotate||0)+frot)%360+360)%360,side=rot===90||rot===270,rw=side?sh:sw,rh=side?sw:sh,k=c.fit==='cover'?Math.max(W/rw,H/rh):Math.min(W/rw,H/rh);
  g.filter=filterOf(c);g.translate(W/2,H/2);if(rot)g.rotate(rot*Math.PI/180);if(c.flip)g.scale(-1,1);g.drawImage(src,-sw*k/2,-sh*k/2,sw*k,sh*k);g.restore()}
 function titleAlpha(x,t){let a=1;if(x.fadeIn>0)a*=clamp((t-x.start)/x.fadeIn,0,1);if(x.fadeOut>0)a*=clamp((x.start+x.dur-t)/x.fadeOut,0,1);return a}
-function drawFrame(g,t,{subs=prefs.showSubs}={}){const W=V.p.w,H=V.p.h;g.save();g.globalAlpha=1;g.filter='none';g.fillStyle=V.p.bg;g.fillRect(0,0,W,H);g.restore();
+function drawFrame(g,t,{subs=prefs.showSubs,titles=true}={}){const W=V.p.w,H=V.p.h;g.save();g.globalAlpha=1;g.filter='none';g.fillStyle=V.p.bg;g.fillRect(0,0,W,H);g.restore();
  for(const s of layout())if(t>=s.start&&t<s.end)drawClip(g,s,t);
- for(const x of V.p.titles)if(t>=x.start&&t<x.start+x.dur)drawText(g,x.text,{...x,alpha:titleAlpha(x,t)});
+ if(titles)for(const x of V.p.titles)if(t>=x.start&&t<x.start+x.dur)drawText(g,x.text,{...x,alpha:titleAlpha(x,t)});
  if(subs)for(const x of V.p.subs)if(t>=x.start&&t<x.end)drawText(g,x.text,{color:'#ffffff',size:5,pos:'bottom',box:'dark',bold:false})}
 // Riproduzione. L'orologio si ferma se un file non è ancora pronto, così audio e video restano allineati.
 const nowT=()=>VE.playing&&!VE.stalled&&!VE.suspended?VE.t0+(performance.now()-VE.c0)/1000*VE.rate:V.t;
 function vPlay(){if(VE.playing)return;const T=totalDur();if(T<=0){toast('La linea temporale è vuota: importa dei file e aggiungili');return}if(V.t>=T-frameDur())V.t=0;actxGet();vMaster();Object.assign(VE,{playing:true,t0:V.t,c0:performance.now(),stalled:false,origin:V.t});vPlayUI(true);cancelAnimationFrame(VE.raf);VE.raf=requestAnimationFrame(vTick)}
-function vStop(){if(!VE.playing)return;V.t=clamp(nowT(),0,totalDur());VE.playing=false;VE.rate=1;cancelAnimationFrame(VE.raf);for(const s of SLOTS){s.el.pause();s.gain.gain.value=0}vPlayUI(false);drawMeter($('vMeter'),-Infinity);updateVideoUI();requestFrame()}
+function vStop(){if(!VE.playing)return;V.t=clamp(nowT(),0,totalDur());VE.playing=false;VE.rate=1;VE.stopAt=null;cancelAnimationFrame(VE.raf);for(const s of SLOTS){s.el.pause();s.gain.gain.value=0}vPlayUI(false);drawMeter($('vMeter'),-Infinity);updateVideoUI();requestFrame()}
 function vPlayPause(){if(VE.playing){vStop();announce('Pausa a '+sayTime(V.t,1))}else vPlay()}
-function vTick(){if(!VE.playing)return;let t=nowT();const T=totalDur();if(t>=T){V.t=T;if(VE.exp){drawFrame(vg,T-1e-3,{subs:VE.exp.burn});VE.exp.finish?.('end')}vStop();if(!VE.exp)announce('Fine del montaggio');return}
+function vTick(){if(!VE.playing)return;let t=nowT();const T=totalDur();if(VE.stopAt!=null&&t>=VE.stopAt){const back=VE.back,said=VE.endSay;vStop();if(back!=null)seekTo(back);announce(said);return}if(t>=T){V.t=T;if(VE.exp){drawFrame(vg,T-1e-3,{subs:VE.exp.burn});VE.exp.finish?.('end')}vStop();if(!VE.exp)announce('Fine del montaggio');return}
  const want=syncMedia(t,true),ctx=actxGet();let stalled=false;
  for(const w of want){if(!w.slot)continue;const el=w.slot.el;if(w.active){const rate=w.rate*VE.rate;if(Math.abs(el.playbackRate-rate)>1e-3)el.playbackRate=rate;const dur=el.duration||Infinity,drift=el.currentTime-w.expected;
    if(el.readyState<3||el.seeking){stalled=true;if(Math.abs(drift)>0.3&&!el.seeking)el.currentTime=w.expected}
@@ -64,6 +64,11 @@ function vTick(){if(!VE.playing)return;let t=nowT();const T=totalDur();if(t>=T){
  if(!VE.stalled){drawFrame(vg,t,VE.exp?{subs:VE.exp.burn}:undefined);if(VE.exp)expFrame(t);V.t=t;tickTimelineUI(t)}
  if(vAnalyser){vAnalyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('vMeter'),toDb(pk))}
  VE.raf=requestAnimationFrame(vTick)}
+// Riproduzione di un tratto: Maiusc+Spazio l'elemento scelto, P e D i due secondi prima o dopo l'indicatore. Alla fine
+// l'indicatore torna dove si era, come in Audio, così si può riascoltare.
+function vPlayRange(a,b,back,said){vStop();a=clamp(a,0,totalDur());b=clamp(b,0,totalDur());if(b-a<0.05){toast('Il tratto è troppo corto da ascoltare');return}V.t=a;vPlay();VE.stopAt=b;VE.back=back;VE.endSay=said}
+function vPlayItem(){const x=selected(),kind=V.sel?.kind;if(!x){toast('Scegli prima un elemento sulla linea temporale');return}const it=itemsOf(kind).find(i=>i.x.id===x.id);vPlayRange(it.start,it.end,it.start,`Fine di ${itemName(kind,x)}`)}
+function vPlayAround(before){const t=V.t;vPlayRange(before?t-2:t,before?t:t+2,t,'Fine dell’ascolto')}
 function vPlayUI(on){const b=$('vPlay');b.setAttribute('aria-label',on?'Pausa':'Riproduci');b.innerHTML=ICON(on?'pause':'play')}
 // Con la scheda nascosta il browser rallenta il disegno: riproduzione ed esportazione si sospendono e riprendono da sole.
 document.addEventListener('visibilitychange',()=>{if(!VE.playing)return;if(document.hidden){VE.t0=nowT();VE.suspended=true;for(const s of SLOTS)s.el.pause();if(VE.exp?.rec.state==='recording')VE.exp.rec.pause()}else{VE.suspended=false;VE.c0=performance.now();if(VE.exp&&!VE.stalled&&VE.exp.rec.state==='paused')VE.exp.rec.resume();if(VE.exp)announce('Esportazione ripresa')}});

@@ -64,7 +64,8 @@ function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==doc
 function trapTab(e,root){if(e.key!=='Tab')return;const f=focusables(root);if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&i<=0){e.preventDefault();f.at(-1).focus()}else if(!e.shiftKey&&(i===f.length-1||i<0)){e.preventDefault();f[0].focus()}}
 // Finestra di dialogo modale con campi etichettati. Campi: text, number, time, select, textarea, checkbox, range, color.
 // opts.buttons aggiunge pulsanti (per esempio Anteprima) che ricevono i valori correnti; opts.validate può rifiutare
-// i valori con un messaggio, che resta nella finestra ed è annunciato. I campi number con min e max si controllano da
+// i valori con un messaggio, che resta nella finestra ed è annunciato; opts.describedBy sceglie che cosa si legge
+// all'apertura (di solito tutto il testo, per le descrizioni lunghe solo il riassunto). I campi number con min e max si controllano da
 // soli: un valore fuori dai limiti non viene corretto in silenzio ma segnalato. Il campo sbagliato prende il fuoco,
 // aria-invalid e il messaggio come descrizione; scrivendo di nuovo nel campo il messaggio sparisce.
 function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new Promise(resolve=>{const pane=$('modal'),bg=$('modalbg'),prev=document.activeElement;
@@ -83,7 +84,7 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const clearErr=()=>{for(const el of $$('[aria-invalid]',pane)){el.removeAttribute('aria-invalid');described(el,false)}const box=$('dlgErr');if(box)box.textContent=''};
  // Il messaggio si svuota e si riscrive: role=alert lo rilegge anche se è lo stesso di prima.
  const showErr=err=>{clearErr();const el=err.field&&$('dlg_'+err.field);if(el){el.setAttribute('aria-invalid','true');described(el,true);el.focus()}setTimeout(()=>{const box=$('dlgErr');if(box)box.textContent=err.msg},50)};
- pane.className='modal'+(opts.wide?' wide':'');
+ pane.className='modal'+(opts.wide?' wide':'');pane.setAttribute('aria-describedby',opts.describedBy||'dlgBody');
  const extra=(opts.buttons||[]).map((b,i)=>`<button type="button" class="btn${i?'':' left'}" id="dlgBtn${i}">${esc(b.label)}</button>`).join('');
  pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="hint" id="dlgErr" role="alert"></p><div class="modal-actions">${extra}${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
  bg.hidden=false;

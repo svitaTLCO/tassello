@@ -85,7 +85,7 @@ waveEl.addEventListener('keydown',e=>{if(e.defaultPrevented)return;const k=e.key
  else if(plain&&/^z$/i.test(k))zoomToSel();
  else if(plain&&(k==='+'||e.code==='NumpadAdd'))zoomAudio(0.5);else if(plain&&(k==='-'||e.code==='NumpadSubtract'))zoomAudio(2);else if(plain&&k==='0'){zoomFitAudio();announce('Si vede tutto il file')}
  else if(k==='Delete'||k==='Backspace'){if(!ctrl)runCommand('deleteSel')}
- else if(k==='Escape'){if(aplay.playing)audioStop();else if(hasSel()){A.selA=A.selB=0;audioMetaChanged();announce('Selezione tolta')}else handled=false}
+ else if(k==='Escape'){if(cmpSrc){stopCompare();announce('Confronto fermato')}else if(aplay.playing)audioStop();else if(hasSel()){A.selA=A.selB=0;audioMetaChanged();announce('Selezione tolta')}else handled=false}
  else if((k==='F10'&&shift)||k==='ContextMenu')waveMenu();
  else handled=false;
  if(handled){e.preventDefault();e.stopPropagation()}});

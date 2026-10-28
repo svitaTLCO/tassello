@@ -82,8 +82,8 @@ function songPlayPause(){if(MIX.playing){mixStop(true);announce('Pausa a '+sayTi
 function songStop(){const o=MIX.playing?MIX.origin:0;mixStop(false);P.t=o;updateArrangeUI();announce('Fermo, indicatore a '+sayTime(o))}
 // Mixaggio fuori linea: tutto il brano, oppure una sola traccia (only) con la sua sola catena, per esportarla da sola.
 // Si mixano 6 o 12 ms in più e si tolgono all'inizio: è il ritardo di limitatore e compressori.
-async function renderMix({only=null,from=0,to=null,rate=48000}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');const tracks=only?P.tracks.filter(t=>t.id===only):P.tracks,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate);
- const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
+async function renderMix({only=null,from=0,to=null,rate=48000,limit=true}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');const tracks=only?P.tracks.filter(t=>t.id===only):P.tracks,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate);
+ const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});if(!limit){gr.lim.threshold.value=0;gr.lim.ratio.value=1}scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
  for(let c=0;c<2;c++)res.copyToChannel(out.getChannelData(c).subarray(skip,skip+n),c);return res}
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.
 function songMarkers(rate){const out=[];for(const r of P.regions){const sr=SOURCES.get(r.src)?.sampleRate||rate;for(const m of r.markers||[]){const x=m.pos/sr;if(x<0||x>r.dur)continue;out.push({id:m.id,pos:Math.round((r.start+x)*rate),label:m.label})}}return out.sort((a,b)=>a.pos-b.pos)}
