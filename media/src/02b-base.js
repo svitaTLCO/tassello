@@ -24,7 +24,7 @@ const pad2=n=>String(n).padStart(2,'0');
 function fmtTime(sec,dec=3){if(!Number.isFinite(sec))return '—';const neg=sec<0,k=10**dec,total=Math.round(Math.abs(sec)*k),whole=Math.floor(total/k),frac=total%k,h=Math.floor(whole/3600),m=Math.floor(whole%3600/60),s=whole%60;
  return (neg?'−':'')+(h?h+':'+pad2(m):m)+':'+pad2(s)+(dec?','+String(frac).padStart(dec,'0'):'')}
 function sayTime(sec,dec=1){if(!Number.isFinite(sec))return 'tempo non valido';const k=10**dec,total=Math.round(Math.abs(sec)*k)/k,h=Math.floor(total/3600),m=Math.floor(total%3600/60),s=Math.round((total-h*3600-m*60)*k)/k,parts=[];
- if(h)parts.push(h===1?'1 ora':h+' ore');if(m)parts.push(m===1?'1 minuto':m+' minuti');if(s||!parts.length)parts.push(s===1?'1 secondo':fmtNum(s,s%1?dec:0)+' secondi');
+ if(h)parts.push(h===1?'1 ora':h+' ore');if(m)parts.push(m===1?'1 minuto':m+' minuti');if(s||!parts.length)parts.push(s===1?'1 secondo':fmtNum(s,s%1?dec:0).replace(/(,\d*?)0+$/,'$1').replace(/,$/,'')+' secondi');
  return (sec<0?'meno ':'')+(parts.length>1?parts.slice(0,-1).join(', ')+' e '+parts.at(-1):parts[0])}
 // Timecode del video: ore:minuti:secondi:fotogrammi.
 function fmtTC(sec,fps){const f=Math.round(Math.max(0,sec)*fps),fr=f%fps,t=Math.floor(f/fps);return pad2(Math.floor(t/3600))+':'+pad2(Math.floor(t%3600/60))+':'+pad2(t%60)+':'+pad2(fr)}
@@ -43,17 +43,31 @@ const fmtDb=d=>Number.isFinite(d)?fmtNum(d,1).replace('-','−')+' dB':'meno inf
 const fmtBytes=n=>n>=1e9?fmtNum(n/1e9,2)+' GB':n>=1e6?fmtNum(n/1e6,1)+' MB':fmtInt(n/1e3)+' kB';
 // Annunci per screen reader, finestre di dialogo accessibili, tooltip e preferenze di visualizzazione.
 const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
-let toastTimer;
-// Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
-function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),4200)}
-let liveTimer;function announce(msg){const el=$('srLive');el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
+// Messaggi per gli screen reader. Arrivano poco dopo nelle regioni vive (#srLive per gli annunci, #toast per i messaggi
+// che si vedono anche sullo schermo). I messaggi chiesti nello stesso momento, cioè dallo stesso tasto o dallo stesso
+// comando, si uniscono in una sola frase invece di cancellarsi; quello di un momento successivo prende il posto di
+// quello non ancora letto, così tenendo premuta una freccia si sente l'ultimo punto e non una fila di punti.
+// saidCount conta i messaggi: runCommand lo guarda per non aggiungere «… attivato» dopo il messaggio dell'azione.
+let saidCount=0,turnId=0,turnOpen=false;
+function sayTurn(){if(!turnOpen){turnOpen=true;turnId++;setTimeout(()=>{turnOpen=false},0)}return turnId}
+// Il messaggio in attesa dello stesso momento si allunga; altrimenti si ricomincia.
+function joinSaid(pending,msg){const t=sayTurn(),a=pending.turn===t?pending.msg:'';return{turn:t,msg:!a||a===msg?msg:a+(/[.!?]$/.test(a)?' ':'. ')+msg}}
+let toastTimer,toastShow,toastPending={};
+// Messaggio temporaneo: si svuota e si riscrive perché venga annunciato anche se uguale; resta visibile in proporzione alla lunghezza.
+function toast(message){const box=$('toast');saidCount++;toastPending=joinSaid(toastPending,String(message));const text=toastPending.msg;clearTimeout(toastTimer);clearTimeout(toastShow);box.textContent='';
+ toastShow=setTimeout(()=>{toastPending={};box.textContent=text;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,text.length*60))}
+let liveTimer,livePending={};
+function announce(msg){const el=$('srLive');saidCount++;livePending=joinSaid(livePending,String(msg));const text=livePending.msg;el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{livePending={};el.textContent=text},70)}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden],.hidden')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body)t.focus({preventScroll:true})}
 function trapTab(e,root){if(e.key!=='Tab')return;const f=focusables(root);if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&i<=0){e.preventDefault();f.at(-1).focus()}else if(!e.shiftKey&&(i===f.length-1||i<0)){e.preventDefault();f[0].focus()}}
 // Finestra di dialogo modale con campi etichettati. Campi: text, number, time, select, textarea, checkbox, range, color.
 // opts.buttons aggiunge pulsanti (per esempio Anteprima) che ricevono i valori correnti; opts.validate può rifiutare
-// i valori con un messaggio, che resta nella finestra ed è annunciato.
+// i valori con un messaggio, che resta nella finestra ed è annunciato; opts.describedBy sceglie che cosa si legge
+// all'apertura (di solito tutto il testo, per le descrizioni lunghe solo il riassunto). I campi number con min e max si controllano da
+// soli: un valore fuori dai limiti non viene corretto in silenzio ma segnalato. Il campo sbagliato prende il fuoco,
+// aria-invalid e il messaggio come descrizione; scrivendo di nuovo nel campo il messaggio sparisce.
 function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new Promise(resolve=>{const pane=$('modal'),bg=$('modalbg'),prev=document.activeElement;
  const field=x=>{const id='dlg_'+x.id,hint=x.hint?`<small class="hint" id="${id}_h">${esc(x.hint)}</small>`:'',desc=x.hint?` aria-describedby="${id}_h"`:'';
   if(x.type==='checkbox')return `<label class="check"><input type="checkbox" id="${id}"${x.value?' checked':''}${desc}> ${esc(x.label)}</label>${hint}`;
@@ -64,7 +78,13 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
   // Numeri e tempi sono campi di testo: si possono scrivere con la virgola, come si usa in italiano.
   const decimal=x.type==='time'||x.type==='number',type=decimal?'text':x.type||'text',value=x.type==='number'&&typeof x.value==='number'?fmtNum(x.value,x.value%1?Math.min(3,String(x.value).split('.')[1]?.length||1):0).replace(/\./g,''):x.value;
   return lab+`<input id="${id}" type="${type}" value="${esc(value??'')}" autocomplete="off" spellcheck="false"${decimal?' inputmode="decimal"':''}${desc}>`+hint};
- pane.className='modal'+(opts.wide?' wide':'');
+ const limits=v=>{for(const x of fields){if(x.type!=='number'||(x.min===undefined&&x.max===undefined))continue;const n=num(v[x.id]),lo=x.min??-Infinity,hi=x.max??Infinity;
+  if(!Number.isFinite(n)||n<lo||n>hi)return{msg:`${x.label}: scrivi un numero ${x.min!==undefined&&x.max!==undefined?`da ${fmtNum(lo,lo%1?2:0)} a ${fmtNum(hi,hi%1?2:0)}`:x.min!==undefined?`da ${fmtNum(lo,lo%1?2:0)} in su`:`fino a ${fmtNum(hi,hi%1?2:0)}`}.`,field:x.id}}return null};
+ const described=(el,on)=>{const ids=(el.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!=='dlgErr');if(on)ids.push('dlgErr');if(ids.length)el.setAttribute('aria-describedby',ids.join(' '));else el.removeAttribute('aria-describedby')};
+ const clearErr=()=>{for(const el of $$('[aria-invalid]',pane)){el.removeAttribute('aria-invalid');described(el,false)}const box=$('dlgErr');if(box)box.textContent=''};
+ // Il messaggio si svuota e si riscrive: role=alert lo rilegge anche se è lo stesso di prima.
+ const showErr=err=>{clearErr();const el=err.field&&$('dlg_'+err.field);if(el){el.setAttribute('aria-invalid','true');described(el,true);el.focus()}setTimeout(()=>{const box=$('dlgErr');if(box)box.textContent=err.msg},50)};
+ pane.className='modal'+(opts.wide?' wide':'');pane.setAttribute('aria-describedby',opts.describedBy||'dlgBody');
  const extra=(opts.buttons||[]).map((b,i)=>`<button type="button" class="btn${i?'':' left'}" id="dlgBtn${i}">${esc(b.label)}</button>`).join('');
  pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="hint" id="dlgErr" role="alert"></p><div class="modal-actions">${extra}${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
  bg.hidden=false;
@@ -73,7 +93,8 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
  (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
- $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad;$('dlgErr').textContent=err.msg;if(err.field)$('dlg_'+err.field)?.focus();return}finish(v)};
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=limits(v)||opts.validate?.(v);if(bad){showErr(typeof bad==='string'?{msg:bad}:bad);return}finish(v)};
+ $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute?.('aria-invalid'))clearErr()});
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);
@@ -94,6 +115,13 @@ function applyPrefs(){document.documentElement.dataset.theme=prefs.theme==='dark
 let palette={};
 function themeChanged(){const probe=document.createElement('span');document.body.append(probe);const read=v=>{probe.style.color=`var(${v})`;return getComputedStyle(probe).color};palette=Object.fromEntries(['--wave-bg','--wave','--wave-rms','--wave-mid','--wave-sel','--playhead','--marker','--ruler','--accent','--text-3','--line'].map(v=>[v.slice(2),read(v)]));probe.remove();redrawAll?.()}
 let redrawAll=null;
+// Indicatore durante l'ascolto (WCAG 4.1.2): il valore si aggiorna una volta al secondo, ma non mentre l'indicatore ha il
+// fuoco, perché lo screen reader lo leggerebbe di continuo; quando lo riceve si aggiorna subito. Alt+Maiusc+I lo dice sempre.
+function playingValue(el,t,text,force=false){if(!force&&(document.activeElement===el||Math.abs(t-(el._said??-9))<1))return;el._said=t;el.setAttribute('aria-valuenow',Math.round(t));el.setAttribute('aria-valuetext',text(t))}
 // Lavori lunghi: messaggio nella barra di stato e cursore di attesa; gli errori diventano un messaggio leggibile.
-async function work(label,fn){status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{document.body.style.cursor='';status()}}
-function status(text){$('statusText').textContent=text||'Pronto'}
+// Lo stato si sente anche (WCAG 4.1.3): all'inizio del lavoro e poi al più ogni 4 secondi, con l'avanzamento.
+let statusSaid=0,busy=0;
+async function work(label,fn){busy++;status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{busy--;document.body.style.cursor='';status()}}
+function status(text,{say=true}={}){$('statusText').textContent=text||'Pronto';if(!text){statusSaid=0;return}if(say&&Date.now()-statusSaid>=4000){statusSaid=Date.now();announce(text)}}
+// Lavoro in corso, per Alt+Maiusc+I: il testo della barra di stato mentre work() lavora.
+const jobNow=()=>busy?`In corso: ${$('statusText').textContent.replace(/…$/,'')}. `:''

@@ -4,7 +4,7 @@ async function start(){applyPrefs();$('stepSel').value=String(prefs.step);if(!$(
  suppressAutosave=true;try{db=await openStore();await restoreAudio().catch(e=>console.warn('Bozza audio non recuperabile',e));await restoreVideo().catch(e=>console.warn('Progetto video non recuperabile',e));await gcMedia();await gcSources();const ui=await dbGet('ui').catch(()=>null);if(ui?.mode==='video')setMode('video',{focus:false})}
  catch(e){console.error('Avvio non riuscito',e);toast('Avvio non riuscito: '+e.message)}finally{suppressAutosave=false}
  $('docTitle').value=isAudio()?P.title:V.p.title;updateTitle();renderBar();applyLayout(false);resizeCanvas();showEditor(!!A.buf);zoomFitAudio();updateAudioUI();renderArrange();updateEditorBar();renderLibrary();renderInspector();drawTimeline();updateVideoUI();
- status(db?'Pronto · i file restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze: esporta il lavoro prima di chiudere')}
+ status(db?'Pronto · i file restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze: esporta il lavoro prima di chiudere',{say:false});if(!db)toast('Il browser non permette di salvare le bozze: esporta il lavoro prima di chiudere')}
 // Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si può installare come app
 // che funziona anche senza rete e si aggiorna dal sito.
 function enableInstall(){if(location.protocol==='file:'||!('serviceWorker' in navigator))return;

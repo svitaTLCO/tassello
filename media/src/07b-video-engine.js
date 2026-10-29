@@ -43,16 +43,16 @@ function drawClip(g,s,t){const c=s.c,W=V.p.w,H=V.p.h,{a,wipe}=clipLook(s,t);if(a
  const rot=(((c.rotate||0)+frot)%360+360)%360,side=rot===90||rot===270,rw=side?sh:sw,rh=side?sw:sh,k=c.fit==='cover'?Math.max(W/rw,H/rh):Math.min(W/rw,H/rh);
  g.filter=filterOf(c);g.translate(W/2,H/2);if(rot)g.rotate(rot*Math.PI/180);if(c.flip)g.scale(-1,1);g.drawImage(src,-sw*k/2,-sh*k/2,sw*k,sh*k);g.restore()}
 function titleAlpha(x,t){let a=1;if(x.fadeIn>0)a*=clamp((t-x.start)/x.fadeIn,0,1);if(x.fadeOut>0)a*=clamp((x.start+x.dur-t)/x.fadeOut,0,1);return a}
-function drawFrame(g,t,{subs=prefs.showSubs}={}){const W=V.p.w,H=V.p.h;g.save();g.globalAlpha=1;g.filter='none';g.fillStyle=V.p.bg;g.fillRect(0,0,W,H);g.restore();
+function drawFrame(g,t,{subs=prefs.showSubs,titles=true}={}){const W=V.p.w,H=V.p.h;g.save();g.globalAlpha=1;g.filter='none';g.fillStyle=V.p.bg;g.fillRect(0,0,W,H);g.restore();
  for(const s of layout())if(t>=s.start&&t<s.end)drawClip(g,s,t);
- for(const x of V.p.titles)if(t>=x.start&&t<x.start+x.dur)drawText(g,x.text,{...x,alpha:titleAlpha(x,t)});
+ if(titles)for(const x of V.p.titles)if(t>=x.start&&t<x.start+x.dur)drawText(g,x.text,{...x,alpha:titleAlpha(x,t)});
  if(subs)for(const x of V.p.subs)if(t>=x.start&&t<x.end)drawText(g,x.text,{color:'#ffffff',size:5,pos:'bottom',box:'dark',bold:false})}
 // Riproduzione. L'orologio si ferma se un file non è ancora pronto, così audio e video restano allineati.
 const nowT=()=>VE.playing&&!VE.stalled&&!VE.suspended?VE.t0+(performance.now()-VE.c0)/1000*VE.rate:V.t;
 function vPlay(){if(VE.playing)return;const T=totalDur();if(T<=0){toast('La linea temporale è vuota: importa dei file e aggiungili');return}if(V.t>=T-frameDur())V.t=0;actxGet();vMaster();Object.assign(VE,{playing:true,t0:V.t,c0:performance.now(),stalled:false,origin:V.t});vPlayUI(true);cancelAnimationFrame(VE.raf);VE.raf=requestAnimationFrame(vTick)}
-function vStop(){if(!VE.playing)return;V.t=clamp(nowT(),0,totalDur());VE.playing=false;VE.rate=1;cancelAnimationFrame(VE.raf);for(const s of SLOTS){s.el.pause();s.gain.gain.value=0}vPlayUI(false);drawMeter($('vMeter'),-Infinity);updateVideoUI();requestFrame()}
+function vStop(){if(!VE.playing)return;V.t=clamp(nowT(),0,totalDur());VE.playing=false;VE.rate=1;VE.stopAt=null;cancelAnimationFrame(VE.raf);for(const s of SLOTS){s.el.pause();s.gain.gain.value=0}vPlayUI(false);drawMeter($('vMeter'),-Infinity);updateVideoUI();requestFrame()}
 function vPlayPause(){if(VE.playing){vStop();announce('Pausa a '+sayTime(V.t,1))}else vPlay()}
-function vTick(){if(!VE.playing)return;let t=nowT();const T=totalDur();if(t>=T){V.t=T;if(VE.exp){drawFrame(vg,T-1e-3,{subs:VE.exp.burn});VE.exp.finish?.('end')}vStop();if(!VE.exp)announce('Fine del montaggio');return}
+function vTick(){if(!VE.playing)return;let t=nowT();const T=totalDur();if(VE.stopAt!=null&&t>=VE.stopAt){const back=VE.back,said=VE.endSay;vStop();if(back!=null)seekTo(back);announce(said);return}if(t>=T){V.t=T;if(VE.exp){drawFrame(vg,T-1e-3,{subs:VE.exp.burn});VE.exp.finish?.('end')}vStop();if(!VE.exp)announce('Fine del montaggio');return}
  const want=syncMedia(t,true),ctx=actxGet();let stalled=false;
  for(const w of want){if(!w.slot)continue;const el=w.slot.el;if(w.active){const rate=w.rate*VE.rate;if(Math.abs(el.playbackRate-rate)>1e-3)el.playbackRate=rate;const dur=el.duration||Infinity,drift=el.currentTime-w.expected;
    if(el.readyState<3||el.seeking){stalled=true;if(Math.abs(drift)>0.3&&!el.seeking)el.currentTime=w.expected}
@@ -64,6 +64,11 @@ function vTick(){if(!VE.playing)return;let t=nowT();const T=totalDur();if(t>=T){
  if(!VE.stalled){drawFrame(vg,t,VE.exp?{subs:VE.exp.burn}:undefined);if(VE.exp)expFrame(t);V.t=t;tickTimelineUI(t)}
  if(vAnalyser){vAnalyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('vMeter'),toDb(pk))}
  VE.raf=requestAnimationFrame(vTick)}
+// Riproduzione di un tratto: Maiusc+Spazio l'elemento scelto, P e D i due secondi prima o dopo l'indicatore. Alla fine
+// l'indicatore torna dove si era, come in Audio, così si può riascoltare.
+function vPlayRange(a,b,back,said){vStop();a=clamp(a,0,totalDur());b=clamp(b,0,totalDur());if(b-a<0.05){toast('Il tratto è troppo corto da ascoltare');return}V.t=a;vPlay();VE.stopAt=b;VE.back=back;VE.endSay=said}
+function vPlayItem(){const x=selected(),kind=V.sel?.kind;if(!x){toast('Scegli prima un elemento sulla linea temporale');return}const it=itemsOf(kind).find(i=>i.x.id===x.id);vPlayRange(it.start,it.end,it.start,`Fine di ${itemName(kind,x)}`)}
+function vPlayAround(before){const t=V.t;vPlayRange(before?t-2:t,before?t:t+2,t,'Fine dell’ascolto')}
 function vPlayUI(on){const b=$('vPlay');b.setAttribute('aria-label',on?'Pausa':'Riproduci');b.innerHTML=ICON(on?'pause':'play')}
 // Con la scheda nascosta il browser rallenta il disegno: riproduzione ed esportazione si sospendono e riprendono da sole.
 document.addEventListener('visibilitychange',()=>{if(!VE.playing)return;if(document.hidden){VE.t0=nowT();VE.suspended=true;for(const s of SLOTS)s.el.pause();if(VE.exp?.rec.state==='recording')VE.exp.rec.pause()}else{VE.suspended=false;VE.c0=performance.now();if(VE.exp&&!VE.stalled&&VE.exp.rec.state==='paused')VE.exp.rec.resume();if(VE.exp)announce('Esportazione ripresa')}});
@@ -104,7 +109,7 @@ function frameLuminance(src){lumG.drawImage(src,0,0,32,18);const d=lumG.getImage
 // per circa 14 ms in 1080p e all'esportazione si perderebbero fotogrammi. Le misure arrivano poco dopo, in ordine di tempo.
 function measureFrame(e,t,src=view){e.inflight=(e.inflight||0)+1;createImageBitmap(src,{resizeWidth:32,resizeHeight:18,resizeQuality:'medium'}).then(b=>{e.lum.push([t,frameLuminance(b)]);b.close()}).catch(()=>{}).finally(()=>{if(--e.inflight===0)e.idle?.()})}
 const lumDone=e=>e.inflight?new Promise(r=>{e.idle=r}):Promise.resolve();
-function expFrame(t,src=view){const e=VE.exp;measureFrame(e,t,src);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`Esportazione al ${step*10}%`)}}}
+function expFrame(t,src=view){const e=VE.exp;measureFrame(e,t,src);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`${e.word||'Esportazione'} al ${step*10}%`)}}}
 // Impronta di ciò che si vede: se cambia, l'analisi dei lampeggiamenti va rifatta.
 function visualKey(){const s=JSON.stringify([V.p.main,V.p.titles,V.p.w,V.p.h,V.p.fps,V.p.bg,V.p.burnSubs&&V.p.subs]);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36)}
 // Lampeggiamenti (WCAG 2.3.1): coppie di variazioni opposte di luminosità di almeno il 10%, più di tre in un secondo.
@@ -112,7 +117,7 @@ function flashWarnings(series){const ev=[];if(series.length<2)return[];let ext=s
  const out=[];for(let i=0,j=0;i<ev.length;i++){while(ev[i]-ev[j]>1)j++;if(i-j+1>6&&(!out.length||ev[i]-out.at(-1)>2))out.push(ev[j])}return out}
 // Analisi dei lampeggiamenti senza esportare: il montaggio scorre senza audio e si misura ogni fotogramma.
 async function analyzeFlashes(){const T=totalDur();if(T<=0){toast('La linea temporale è vuota');return null}if((await fastPlan()).decodable)return fastFlashes();vStop();vMaster().gain.value=0;let finish;const done=new Promise(r=>{finish=r});
- VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:V.p.burnSubs,T,lum:[],finish,lastPct:-1,step:-1,completed:false,close:null};
+ VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:V.p.burnSubs,T,lum:[],finish,lastPct:-1,step:-1,completed:false,close:null,word:'Analisi'};
  modal('Analisi dei lampeggiamenti',`<p>Il montaggio scorre senza audio e viene misurata la luminosità di ogni fotogramma. Dura circa ${esc(sayTime(T))}.</p><div class="progress" id="expBar" role="progressbar" aria-label="Avanzamento dell’analisi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div><p id="expText">Preparazione…</p>`,[],'Annulla',{noCancel:true,restore:false,onOpen:(p,close)=>{VE.exp.close=close}}).then(()=>{if(VE.exp&&!VE.exp.completed)VE.exp.finish('cancel')});
  V.t=0;await showFrame(0);vPlay();const outcome=await done,exp=VE.exp;exp.completed=true;vStop();exp.close?.(null);VE.exp=null;vMaster().gain.value=1;if(outcome==='cancel'){toast('Analisi annullata');return null}
  await lumDone(exp);const warn=flashWarnings(exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
