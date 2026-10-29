@@ -13,8 +13,9 @@ const baseName=name=>String(name||'').replace(IMG_EXT,'');
 const extName=(name,ext)=>`${safeFileName(baseName(name))}.${ext}`;
 function download(content,fileName,mime){const payload=content instanceof Blob?content:new Blob([content],{type:mime||'application/octet-stream'}),url=URL.createObjectURL(payload),link=Object.assign(document.createElement('a'),{href:url,download:fileName});link.style.display='none';document.body.append(link);link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);link.remove()}
 // Numeri all'italiana: quelli scritti dall'utente con la virgola o il punto, quelli mostrati con la virgola,
-// il segno meno tipografico e, per le regolazioni, il segno più.
-const num=v=>{const s=String(v??'').trim().replace(/\s/g,'').replace(/−/g,'-').replace(',','.');return s===''?NaN:Number(s)};
+// il segno meno tipografico e, per le regolazioni, il segno più. Il punto tra gruppi di tre cifre separa le migliaia
+// («1.200» è milleduecento), come lo mostra fmtInt; altrimenti è la virgola dei decimali («1.5» è uno e mezzo).
+const num=v=>{let s=String(v??'').trim().replace(/\s/g,'').replace(/−/g,'-');if(/^-?[1-9]\d{0,2}(\.\d{3})+(,\d*)?$/.test(s))s=s.replace(/\./g,'');s=s.replace(',','.');return s===''?NaN:Number(s)};
 const fmtNum=(n,d=1)=>Number(n).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).replace(/^-/,'−');
 const fmtInt=n=>Math.round(n).toLocaleString('it-IT');
 const fmtSigned=(n,d=0)=>(n>0?'+':'')+fmtNum(n,d);
@@ -22,11 +23,24 @@ const fmtPct=(f,d=0)=>fmtNum(f*100,d)+'%';
 const fmtBytes=n=>n>=1e9?fmtNum(n/1e9,2)+' GB':n>=1e6?fmtNum(n/1e6,1)+' MB':fmtInt(n/1e3)+' kB';
 // Annunci per screen reader, finestre di dialogo accessibili, tooltip e preferenze di visualizzazione.
 const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
-let toastTimer;
-// Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
-function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,String(message).length*55))}
-// Con join il messaggio si aggiunge a quello appena annunciato invece di sostituirlo (per esempio un avviso dopo Annulla).
-let liveTimer,lastSaid={t:0,msg:''};function announce(msg,{join=false}={}){const el=$('srLive');if(join&&Date.now()-lastSaid.t<800)msg=lastSaid.msg+' '+msg;lastSaid={t:Date.now(),msg};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
+// I messaggi per lo screen reader si scrivono con un piccolo ritardo, dopo aver svuotato la regione, perché vengano letti
+// anche se uguali. Quelli che arrivano mentre uno aspetta si accodano: un messaggio dettagliato non viene coperto da uno
+// generico arrivato subito dopo. Solo lo stesso tasto premuto di nuovo (le frecce tenute premute) sostituisce il suo
+// messaggio di prima, che non è ancora stato letto. spoken conta i messaggi: runCommand sa se l'azione ha già parlato.
+let spoken=0,keyAct={seq:0,sig:''};
+addEventListener('keydown',e=>{keyAct={seq:keyAct.seq+1,sig:[e.ctrlKey||e.metaKey,e.altKey,e.shiftKey,e.key].join()}},true);
+addEventListener('pointerdown',()=>{keyAct={seq:keyAct.seq+1,sig:'puntatore'}},true);
+const queueSay=(list,msg)=>{const {seq,sig}=keyAct;list=list.filter(p=>p.seq===seq||p.sig!==sig);if(list.at(-1)?.msg!==msg)list.push({msg,seq,sig});return list};
+// I messaggi accodati diventano una frase dopo l'altra: si mette il punto a quelli che non ce l'hanno.
+const sayJoin=list=>list.map(p=>p.msg).reduce((a,m)=>a?a+(/[.!?…:;]$/.test(a)?' ':'. ')+m:m,'');
+let toastTimer,toastWait=null,toastList=[];
+// Messaggio temporaneo, letto dagli screen reader: resta a schermo in proporzione alla lunghezza.
+function toast(message){message=String(message??'').trim();if(!message)return;spoken++;const box=$('toast');clearTimeout(toastTimer);clearTimeout(toastWait);toastList=queueSay(toastList,message);const text=sayJoin(toastList);box.textContent='';
+ toastWait=setTimeout(()=>{toastList=[];box.textContent=text;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,text.length*55))}
+// Con join il messaggio si aggiunge anche a quello appena letto, entro 800 ms (per esempio un avviso dopo Annulla).
+let liveTimer,liveList=[],lastSaid={t:0,msg:''};
+function announce(msg,{join=false}={}){msg=String(msg??'').trim();if(!msg)return;spoken++;const el=$('srLive');if(!liveList.length&&join&&Date.now()-lastSaid.t<800)liveList=[{msg:lastSaid.msg,seq:-1,sig:''}];
+ liveList=queueSay(liveList,msg);const text=sayJoin(liveList);lastSaid={t:Date.now(),msg:text};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{liveList=[];el.textContent=text},70)}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden],.hidden')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body)t.focus({preventScroll:true})}
@@ -53,7 +67,10 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
  (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
- $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad;$('dlgErr').textContent=err.msg;if(err.field)$('dlg_'+err.field)?.focus();return}finish(v)};
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad,box=$('dlgErr'),f=err.field&&$('dlg_'+err.field);box.textContent='';setTimeout(()=>{box.textContent=err.msg},60);
+  for(const el of $$('[aria-invalid]',pane))el.removeAttribute('aria-invalid');if(f){f.setAttribute('aria-invalid','true');f.setAttribute('aria-describedby',[...new Set([...(f.getAttribute('aria-describedby')||'').split(' ').filter(Boolean),'dlgErr'])].join(' '));f.focus()}return}finish(v)};
+ // Correggendo il campo il messaggio d'errore sparisce.
+ $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute('aria-invalid')){e.target.removeAttribute('aria-invalid');$('dlgErr').textContent=''}});
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);
@@ -74,6 +91,19 @@ function applyPrefs(){document.documentElement.dataset.theme=prefs.theme==='dark
 let palette={};
 function themeChanged(){const probe=document.createElement('span');document.body.append(probe);const read=v=>{probe.style.color=`var(${v})`;return getComputedStyle(probe).color};palette=Object.fromEntries(['--hist-bg','--hist-l','--hist-r','--hist-g','--hist-b','--hist-clip','--accent','--text-3','--line'].map(v=>[v.slice(2),read(v)]));probe.remove();redrawAll?.()}
 let redrawAll=null;
+// Suoni senza file, con Web Audio, sull'idea dei grafici di Ufficio: note da sinistra a destra nello spazio stereo. Ogni
+// parte ha i valori da 0 a 1 (l'altezza, da 220 a 880 Hz; null è una pausa), se vuole le posizioni nello stereo (pans, da
+// −1 a 1), la forma d'onda, un nome detto quando comincia e le note con un colpo breve in più (marks). toneHalt ferma.
+let toneStop=null;
+function toneHalt(){if(!toneStop)return false;toneStop();toneStop=null;return true}
+function toneSeq(parts,{dur=.08,gap=.015,pause=.45,say='',end='Fine dell’ascolto'}={}){toneHalt();const AC=window.AudioContext||window.webkitAudioContext;if(!AC){toast('Il browser non può suonare: manca Web Audio');return false}
+ const ctx=new AC(),timers=[];let t=ctx.currentTime+.5;
+ const note=(f,at,len,pan,wave,vol)=>{const o=ctx.createOscillator(),g=ctx.createGain(),p=ctx.createStereoPanner?ctx.createStereoPanner():null;o.type=wave;o.frequency.value=f;g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(vol,at+.012);g.gain.linearRampToValueAtTime(0,at+len);o.connect(g);if(p){p.pan.value=clamp(pan,-1,1);g.connect(p);p.connect(ctx.destination)}else g.connect(ctx.destination);o.start(at);o.stop(at+len+.03)};
+ for(const part of parts){const n=part.vals.length;if(part.label){const at=t;timers.push(setTimeout(()=>announce(part.label),Math.max(0,(at-ctx.currentTime-.4)*1000)))}
+  part.vals.forEach((v,i)=>{const pan=part.pans?.[i]??(n>1?-.8+1.6*i/(n-1):0);if(v!=null)note(220*4**clamp(v,0,1),t,dur,pan,part.wave||'sine',.2);if(part.marks?.has(i))note(1760,t,.03,pan,'square',.05);t+=dur+gap});t+=pause}
+ if(say)announce(say);const stop=setTimeout(()=>{toneStop=null;ctx.close();announce(end)},(t-ctx.currentTime)*1000+200);toneStop=()=>{clearTimeout(stop);timers.forEach(clearTimeout);ctx.close()};return true}
 // Lavori lunghi: messaggio nella barra di stato e cursore di attesa; gli errori diventano un messaggio leggibile.
 async function work(label,fn){status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{document.body.style.cursor='';status()}}
-function status(text){$('statusText').textContent=text||'Pronto'}
+// Il testo della barra di stato si annuncia anche (passa da announce, che accoda), salvo quiet: per esempio le
+// percentuali di un lavoro lungo, che ha già i suoi annunci ogni tanto. Senza testo si legge «Pronto».
+function status(text,{quiet=false}={}){$('statusText').textContent=text||$('statusText').dataset.idle||'Pronto';if(text&&!quiet)announce(text)}

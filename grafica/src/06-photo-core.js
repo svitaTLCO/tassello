@@ -27,7 +27,7 @@ const snap=()=>JSON.stringify(I.r);
 I.base=snap();
 function settle(label,opts){const now=snap();if(now===I.base)return false;I.hist.push({label,r:I.base});if(I.hist.length>200)I.hist.shift();I.redo=[];I.base=now;recipeChanged(opts);return true}
 function edit(label,fn,opts){if(!I.bmp){toast('Apri prima una foto');return false}fn(I.r);return settle(label,opts)}
-function photoUndo(redo){const from=redo?I.redo:I.hist,to=redo?I.hist:I.redo,e=from.pop();if(!e){toast(redo?'Niente da ripetere':'Niente da annullare');return}to.push({label:e.label,r:snap()});I.r=JSON.parse(e.r);I.base=e.r;recipeChanged({panel:true});announce((redo?'Ripetuto: ':'Annullato: ')+e.label)}
+function photoUndo(redo){const from=redo?I.redo:I.hist,to=redo?I.hist:I.redo,e=from.pop();if(!e){toast(redo?'Niente da ripetere':'Niente da annullare');return}const was=I.r;to.push({label:e.label,r:snap()});I.r=JSON.parse(e.r);I.base=e.r;recipeChanged({panel:true});const back=describeChanges(was,I.r);announce(`${redo?'Ripetuto':'Annullato'}: ${e.label}${back?`; ora ${back}`:''}.`)}
 // Dopo ogni modifica: anteprima, pannello, pulsanti attivi e bozza.
 function recipeChanged({panel=false}={}){requestRender();if(panel)renderPanel();else syncPanel();refreshToggles();if(photoLink.id)linkSync();else schedulePersist('immagini')}
 const changedAdj=r=>ADJ.filter(a=>r.adj[a[0]]);

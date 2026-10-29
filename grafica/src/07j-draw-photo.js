@@ -14,7 +14,10 @@ function needPhotoImg(){const it=needItem();if(!it)return null;if(it.kind!=='ima
 function photoSay(it){const ph=it.photo||{},out=[],ml=ph.masks||[];if(ml.length)out.push(`${ml.length===1?'una maschera':ml.length+' maschere'} (${ml.map(m=>m.name).join(', ')})`);
  if(ph.cut)out.push('sfondo tolto, '+(ph.cut.bg==='color'?'colore pieno '+ph.cut.color:ph.cut.bg==='blur'?'foto sfocata dietro':'trasparente'));if(ph.heal?.length)out.push(ph.heal.length===1?'un ritocco':ph.heal.length+' ritocchi');
  if(GEO_KEYS.some(k=>k in ph))out.push('inquadratura cambiata');if(ph.fx)out.push('curve, colori o dettaglio');return out.join(', ')}
-KIND_SAY.image=it=>{const s=photoSay(it);return s?', '+s:''};
+// Un'immagine con proporzioni diverse da quelle della foto (inquadratura compresa) è deformata: si dice di quanto.
+function imgDeform(it){const m=photoOf(it);if(!m?.w||!m?.h||!it.w||!it.h)return '';const [fw,fh]=outSize(imgRecipe(it),m.w,m.h),q=(it.w/it.h)/(fw/fh);
+ return Math.abs(q-1)<.02?'':`, deformata: ${fmtPct(q>1?q-1:1/q-1)} più ${q>1?'larga':'alta'} dell’originale`}
+KIND_SAY.image=it=>{const s=photoSay(it);return (s?', '+s:'')+imgDeform(it)};
 // La modifica in Immagini. stash tiene la foto di Immagini messa da parte, con le sue maschere calcolate.
 const photoLink={id:null,stash:null};
 const STASH_KEYS=['file','name','title','bmp','r','base','hist','redo','step','seen','compare','plan','maskSel'];

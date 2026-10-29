@@ -51,8 +51,15 @@ const SHAPE_PROPS={poly:it=>fld('sides',it.star?'Punte':'Lati',it.sides)+`<label
  arrow:it=>rangeFld('head','Lunghezza della punta',10,300,5,it.head??100,pct)+rangeFld('shaft','Spessore del corpo',5,100,1,it.shaft??50,pct)+`<label class="check"><input type="checkbox" data-prop="double"${it.double?' checked':''}> Due punte</label>`,
  bubble:it=>rangeFld('tail','Posizione della coda',0,100,1,it.tail??30,pct)+rangeFld('tip','Punta della coda',0,100,1,it.tip??15,pct)+rangeFld('tl','Lunghezza della coda',5,60,1,it.tl??22,pct)+fld('radius','Angoli arrotondati (px)',it.radius),
  line:endsFld,path:it=>it.subs[0]&&!it.subs[0].closed?endsFld(it):''};
-Object.assign(KIND_SAY,{poly:it=>`, ${it.sides} ${it.star?'punte':'lati'}`,arrow:it=>`, ${it.double?'a due punte, ':''}punta ${dirWord(Math.cos((it.rot||0)*Math.PI/180),Math.sin((it.rot||0)*Math.PI/180))}`,
- bubble:it=>`, con la coda in basso ${(it.tip??15)<34?'a sinistra':(it.tip??15)>66?'a destra':'al centro'}`,line:it=>endsSay(it)});
+// Le forme si dicono per quello che sono: cerchio, quadrato, triangolo con la punta in alto, esagono; una linea dice se
+// sale o scende, quanto è lunga e inclinata, e dove punta la freccia.
+const POLY_NAME={3:'triangolo',4:'rombo',5:'pentagono',6:'esagono',7:'ettagono',8:'ottagono'};
+const rotDir=(it,dx,dy)=>{const r=(it.rot||0)*Math.PI/180;return dirWord(dx*Math.cos(r)-dy*Math.sin(r),dx*Math.sin(r)+dy*Math.cos(r))};
+function lineSay(it){const a=rotPt(it,it.x,it.y),b=rotPt(it,it.x+it.w,it.y+it.h);let dx=b.x-a.x,dy=b.y-a.y;const len=Math.hypot(dx,dy);if(len<.5)return ', lunga meno di un pixel';if(dx<0){dx=-dx;dy=-dy}const deg=Math.atan2(-dy,dx)*180/Math.PI,ad=Math.abs(deg);
+ return `, ${ad<1?'orizzontale':ad>89?'verticale':`${deg>0?'sale':'scende'} verso destra, inclinata di ${fmtInt(ad)} gradi`}, lunga ${fmtInt(len)} pixel${it.end==='arrow'?`, la freccia punta ${dirWord(b.x-a.x,b.y-a.y)}`:''}${it.start==='arrow'?`, ${it.end==='arrow'?'l’altra':'la freccia'} punta ${dirWord(a.x-b.x,a.y-b.y)}`:''}`}
+Object.assign(KIND_SAY,{poly:it=>it.star?`, stella di ${it.sides} punte`:`, ${POLY_NAME[it.sides]||'poligono di '+it.sides+' lati'}${it.sides===3?` con la punta ${rotDir(it,0,-1)}`:''}`,
+ rect:it=>`${Math.abs(it.w-it.h)<1?', quadrato':''}${it.radius?`, con gli angoli arrotondati di ${pxSay(it.radius)} pixel`:''}`,ellipse:it=>Math.abs(it.w-it.h)<1?`, cerchio di diametro ${fmtInt(it.w)}`:'',arrow:it=>`, ${it.double?'a due punte, ':''}punta ${dirWord(Math.cos((it.rot||0)*Math.PI/180),Math.sin((it.rot||0)*Math.PI/180))}`,
+ bubble:it=>`, con la coda in basso ${(it.tip??15)<34?'a sinistra':(it.tip??15)>66?'a destra':'al centro'}`,line:it=>lineSay(it)+endsSay(it)});
 const endsSay=it=>{const e=[hasEnd(it.start)&&`${it.start==='arrow'?'una freccia':'un punto'} all’inizio`,hasEnd(it.end)&&`${it.end==='arrow'?'una freccia':'un punto'} alla fine`].filter(Boolean);return e.length?', con '+e.join(' e '):''};
 // Converti in tracciato: le forme scelte diventano nodi modificabili, con lo stesso aspetto; i testi diventano i contorni
 // delle loro lettere, presi dal file del carattere (07k). Le immagini restano. Tutto insieme è un passo solo da annullare.

@@ -34,13 +34,13 @@ function selDescribe(){const m=selMask();toast(m?describeMask(m,lastMc.w,lastMc.
 function colorAt([u,v],orig=false){const px=orig?lastMc.px:shownPx(),w=px.width,h=px.height,X=Math.min(w-1,Math.floor(u*w)),Y=Math.min(h-1,Math.floor(v*h)),d=px.data;let r=0,g=0,b=0,n=0;
  for(let y=Math.max(0,Y-1);y<=Math.min(h-1,Y+1);y++)for(let x=Math.max(0,X-1);x<=Math.min(w-1,X+1);x++){const o=(y*w+x)*4;r+=d[o];g+=d[o+1];b+=d[o+2];n++}return [r/n,g/n,b/n]}
 const posSay=([u,v])=>`${fmtPct(u)} da sinistra, ${fmtPct(v)} dall’alto`;
-function sayCursor(){const p=[T.u,T.v],m=selMask(),i=m?Math.min(lastMc.h-1,Math.floor(p[1]*lastMc.h))*lastMc.w+Math.min(lastMc.w-1,Math.floor(p[0]*lastMc.w)):-1;
- announce(`${posSay(p)}: ${colorName(...colorAt(p))}${m?m[i]>=128?', nella selezione':', fuori dalla selezione':''}${T.down?', pennello giù':''}`)}
+function sayCursor(){const p=[T.u,T.v];announce(`${posSay(p)}: ${cursorAt(p).text}${T.down?', pennello giù':''}`)}
 // Scelta dello strumento: la foto diventa un'area interattiva (le frecce muovono il cursore) finché lo strumento è attivo.
 function setPhotoTool(id){if(!I.bmp){toast('Apri prima una foto');return}if(T.tool===id){endTool();return}const t=PHOTO_TOOLS[id];T.tool=id;T.pts=[];if(t.sel)T.mode=T.selMode||'new';else if(t.modes&&!t.modes.some(([v])=>v===T.mode))T.mode=t.modes[0][0];T.drag=T.down=false;toolChanged();photoCv.focus();announce(`${PHOTO_TOOLS[id].label}. ${PHOTO_TOOLS[id].keys} Esc chiude lo strumento.`)}
-function endTool(say=true){if(!T.tool)return;const t=PHOTO_TOOLS[T.tool];T.tool=null;T.pts=[];T.drag=T.down=false;toolChanged();if(say)announce(t.label+': chiuso')}
-function toolChanged(){const t=T.tool&&PHOTO_TOOLS[T.tool];photoCv.setAttribute('role',t?'application':'img');if(t)photoCv.setAttribute('aria-roledescription','foto');else photoCv.removeAttribute('aria-roledescription');
- $('toolHint').textContent=t?`${t.label}. ${t.keys} Le frecce muovono il cursore (con Maiusc di più, con Ctrl di un pixel) e dicono il colore sotto il cursore. Esc annulla il punto in corso o chiude lo strumento.`:'';
+function endTool(say=true){if(!T.tool)return;const t=PHOTO_TOOLS[T.tool];T.tool=null;T.pts=[];T.drag=T.down=T.wait=false;toolChanged();if(say)announce(t.label+': chiuso')}
+// La foto è sempre un'area interattiva (role application): ha i suoi tasti anche senza strumento.
+function toolChanged(){const t=T.tool&&PHOTO_TOOLS[T.tool];
+ $('toolHint').textContent=t?`${t.label}. ${t.keys}${t.kind==='two'?' Con il mouse basta anche un clic sul primo punto e uno sul secondo.':''} Le frecce muovono il cursore (con Maiusc di più, con Ctrl di un pixel) e dicono il colore sotto il cursore. Esc annulla il punto in corso o chiude lo strumento.`:'';
  photoCv.setAttribute('aria-describedby',t?'toolHint':'photoHint');photoCv.classList.toggle('tooling',!!t);renderToolOpts();refreshToggles();drawOver()}
 // Opzioni dello strumento sotto la foto: modo della selezione, dimensione e durezza del pennello, tolleranze.
 const sizeToV=s=>Math.round(Math.log(s/.001)/Math.log(250)*100),vToSize=v=>.001*250**(v/100);
@@ -61,7 +61,7 @@ $('toolOpts').addEventListener('input',e=>{const el=e.target,o=el.dataset.toolOp
 // Cambia dimensione o durezza del pennello da tastiera, sulla foto.
 function brushKey(bigger,hard){if(hard)T.hard=clamp(Math.round(T.hard*10+(bigger?1:-1))/10,0,1);else T.size=clamp(T.size*(bigger?1.25:.8),.001,.25);saveTool();renderToolOpts();drawOver();announce(hard?'Durezza '+TOOL_OPTS.hard.fmt():'Dimensione '+TOOL_OPTS.size.fmt())}
 // Fine di un'operazione con i punti raccolti.
-function finishTwo(a,b,mode){const t=PHOTO_TOOLS[T.tool];T.pts=[];drawOver();const [fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
+function finishTwo(a,b,mode){const t=PHOTO_TOOLS[T.tool];T.pts=[];T.wait=false;drawOver();const [fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
  if(Math.abs(b[0]-a[0])*fw<2&&Math.abs(b[1]-a[1])*fh<2&&!t.point){if(t.sel&&mode==='new'&&I.r.sel){selNone();return}announce('Troppo piccolo: sposta il cursore prima del secondo punto');return}t.two(a,b,mode)}
 function finishPoly(mode){const t=PHOTO_TOOLS[T.tool],p=T.pts;T.pts=[];drawOver();if(p.length<3){announce('Servono almeno tre punti');return}t.done(p,mode)}
 function finishPaint(mode){const t=PHOTO_TOOLS[T.tool],p=T.pts;T.pts=[];T.down=false;drawOver();if(p.length)t.done(p,mode)}
@@ -77,17 +77,21 @@ photoCv.addEventListener('keydown',e=>{const t=T.tool&&PHOTO_TOOLS[T.tool];if(!t
  if(k==='Enter'&&!e.ctrlKey){e.preventDefault();keyEnter(e.shiftKey);return}
  if(k===' '){e.preventDefault();if(t.kind==='paint')penToggle();else keyEnter(false);return}
  if(k==='Backspace'&&T.pts.length&&(t.kind==='poly'||t.kind==='lasso')){e.preventDefault();T.pts.pop();drawOver();announce(T.pts.length?`Tolto l’ultimo punto, ne restano ${T.pts.length}`:'Nessun punto');return}
- if(k==='Escape'){e.preventDefault();if(T.pts.length||T.down){T.pts=[];T.down=false;drawOver();announce('Annullato')}else endTool();return}
+ if(k==='Escape'){e.preventDefault();if(T.pts.length||T.down){T.pts=[];T.down=T.wait=false;drawOver();announce('Annullato')}else endTool();return}
  if((k==='['||k===']'||k==='{'||k==='}')&&toolOptsOf(T.tool).includes('size')){e.preventDefault();brushKey(k===']'||k==='}',e.shiftKey)}});
-// Mouse e penna: Maiusc aggiunge, Alt sottrae, tutti e due intersecano.
+// Mouse e penna: Maiusc aggiunge, Alt sottrae, tutti e due intersecano. Gli strumenti a due punti si usano trascinando
+// oppure con due clic: un clic senza movimento fissa il primo punto (T.wait) e il clic seguente chiude.
 const eventUV=e=>{const r=photoCv.getBoundingClientRect();return [clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1)]};
 const dispDist=(a,b)=>{const r=photoCv.getBoundingClientRect();return Math.hypot((a[0]-b[0])*r.width,(a[1]-b[1])*r.height)};
 photoCv.addEventListener('pointerdown',e=>{const t=T.tool&&PHOTO_TOOLS[T.tool];if(!t||e.button!==0)return;e.preventDefault();photoCv.focus({preventScroll:true});const p=eventUV(e),mode=e.shiftKey&&e.altKey?'int':e.shiftKey?'add':e.altKey?'sub':T.mode;[T.u,T.v]=p;T.kbd=false;T.pmode=mode;
  if(t.kind==='click'){t.at(p,mode);return}
+ if(t.kind==='two'&&T.wait&&T.pts.length===1){finishTwo(T.pts[0],p,T.pmode);return}
  if(t.kind==='poly'){if(T.pts.length>=3&&dispDist(p,T.pts[0])<8)finishPoly(mode);else{T.pts.push(p);drawOver()}return}
  photoCv.setPointerCapture(e.pointerId);T.pts=[p];T.drag=true;drawOver()});
-photoCv.addEventListener('pointermove',e=>{if(!T.tool||!I.bmp)return;const p=eventUV(e);[T.u,T.v]=p;T.kbd=false;if(T.drag){const t=PHOTO_TOOLS[T.tool];if(t.kind==='two')T.pts[1]=p;else if(dispDist(p,T.pts.at(-1))>=Math.max(2,t.kind==='paint'?brushDisp()*.2:0))T.pts.push(p)}drawOver()});
-photoCv.addEventListener('pointerup',()=>{if(!T.drag)return;T.drag=false;const t=PHOTO_TOOLS[T.tool];if(!t)return;if(t.kind==='two')finishTwo(T.pts[0],T.pts[1]||T.pts[0],T.pmode);else if(t.kind==='lasso')finishPoly(T.pmode);else if(t.kind==='paint'){T.pts.push([T.u,T.v]);finishPaint(T.pmode)}});
+photoCv.addEventListener('pointermove',e=>{if(!T.tool||!I.bmp)return;const p=eventUV(e);[T.u,T.v]=p;T.kbd=false;if(T.wait&&PHOTO_TOOLS[T.tool].kind==='two')T.pts[1]=p;else if(T.drag){const t=PHOTO_TOOLS[T.tool];if(t.kind==='two')T.pts[1]=p;else if(dispDist(p,T.pts.at(-1))>=Math.max(2,t.kind==='paint'?brushDisp()*.2:0))T.pts.push(p)}drawOver()});
+photoCv.addEventListener('pointerup',()=>{if(!T.drag)return;T.drag=false;const t=PHOTO_TOOLS[T.tool];if(!t)return;
+ if(t.kind==='two'){const a=T.pts[0],b=T.pts[1]||a;if(!t.point&&dispDist(a,b)<4){T.wait=true;T.pts=[a];drawOver();announce(`${t.first||'Primo punto'}: ${posSay(a)}. Clic ${t.second||'sul secondo punto'}; Esc annulla.`);return}finishTwo(a,b,T.pmode)}
+ else if(t.kind==='lasso')finishPoly(T.pmode);else if(t.kind==='paint'){T.pts.push([T.u,T.v]);finishPaint(T.pmode)}});
 photoCv.addEventListener('dblclick',()=>{if(T.tool&&PHOTO_TOOLS[T.tool].kind==='poly'&&T.pts.length>=3)finishPoly(T.pmode)});
 photoCv.addEventListener('pointerleave',()=>{if(T.tool&&!T.drag)drawOver(false)});
 // Il contorno della selezione e i segni degli strumenti stanno su due canvas sopra la foto, della stessa misura.

@@ -1,7 +1,7 @@
 // Barra: gli strumenti di tutti i giorni restano in vista, le categorie sono cassetti che si aprono sopra il lavoro
 // e si richiudono dopo il comando. Ogni cassetto elenca per gruppi i comandi del registro.
 const RIBBON={
- i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll readStatus'],['Piano','planMenu stepPrev stepNext planFree'],['Appunti','adjCopy adjPaste'],['Cronologia','undo redo']],
+ i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll'],['Descrivi','readStatus readZones readLight readCompare toolExplore'],['Piano','planMenu stepPrev stepNext planFree'],['Appunti','adjCopy adjPaste'],['Cronologia','undo redo']],
   Inquadra:[['Ruota','rotateLeft rotateRight flipH'],['Formato','ratioMenu straighten resetGeometry']],
   Look:[['Look','lookMenu lutImport lookAmount lookOff']],
   Dettaglio:[['Curve','curveS curveAdd curveDel curveReset'],['Dettaglio','fxClarity fxDehaze fxSharpen fxNoise'],['Colore','bwToggle']],
@@ -9,11 +9,11 @@ const RIBBON={
   Maschere:[['Nuova','maskFromSel maskBrush maskLinear maskRadial'],['Maschera','maskPaint maskRedraw maskAddSel maskSubSel maskInvert'],['Gestisci','maskPrev maskNext maskHide maskOverlay maskRename maskDelete maskDescribe']],
   Ritocca:[['Ritocco','toolSpot toolClone toolRedEye'],['Ritocchi','retouchLast retouchClear']],
   Sfondo:[['Scontorno','cutAuto cutBox cutKeep cutDrop cutRecalc cutRemove'],['Sfondo','cutBgNone cutBgColor cutBgBlur cutColor'],['Vista','cutMatte cutDescribe']],
-  Vista:[['Confronto','compare'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
+  Vista:[['Confronto','compare readCompare effectSay'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  d:{Inizio:[['Disegno','openDraw saveSvg exportDraw'],['Appunti','paste cut copy duplicateItem'],['Inserisci','addText addImage addRect addEllipse'],['Cronologia','undo redo']],
   Inserisci:[['Forme','addRect addEllipse addPolygon addStar addArrow addBubble'],['Linee','addLine addArrowLine'],['Testo','addText'],['Immagini','addImage']],
   Disegna:[['Strumenti','toolSelect toolNodes toolPen toolPencil toolBrush toolEraser'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath toPath simplifyPath'],['Combina','boolUnion boolSubtract boolIntersect boolExclude boolCut']],
-  Disponi:[['Scelta','selectAll groupItems ungroupItems lockItems hideItems'],['Ordine','bringFront sendBack forward backward'],['Allinea','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Distribuisci','distH distV smartGuides'],['Oggetto','duplicateItem deleteItem readDraw']],
+  Disponi:[['Scelta','selectAll groupItems ungroupItems lockItems hideItems'],['Ordine','bringFront sendBack forward backward'],['Allinea','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Distribuisci','distH distV smartGuides'],['Oggetto','duplicateItem deleteItem'],['Descrivi','readDraw readAround readCompo listenShape']],
   Stile:[['Riempimento ed effetti','gradientItem shadowItem'],['Testo','textOnPath textOffPath']],
   Immagine:[['Immagine','imgEdit imgMasks imgCutout imgPhotoReset'],['Ritaglio','imgClip imgUnclip']],
   Foglio:[['Foglio','sheetSize sheetDesc newDraw'],['Accessibilità','a11yCheck']],

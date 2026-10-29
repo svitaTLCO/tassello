@@ -12,7 +12,7 @@ function geometryPixels(fast=false){const [w,h]=previewSize(fast),r=I.r,key=JSON
 function requestRender(fast=false){renderFast=(renderQueued?renderFast:true)&&fast;if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderPhoto(renderFast)})}
 function renderPhoto(fast){if(!I.bmp){I.stats=null;drawHist();drawAnts();return}const src=geometryPixels(fast);if(!outPx||outPx.width!==src.width||outPx.height!==src.height)outPx=new ImageData(src.width,src.height);
  lastMc=maskCtx(I.r,src.width,src.height,src,srcCache[fast?'fast':'full'].key);const img=I.compare?src:develop(src,outPx,I.r,lutOf(I.r.look),lastMc);if(photoCv.width!==img.width||photoCv.height!==img.height){photoCv.width=img.width;photoCv.height=img.height}photoCtx.putImageData(img,0,0);fitStage();
- const prev=I.stats;I.stats=measure(img);photoCv.classList.toggle('alpha',I.stats.alpha);drawHist();warnClipping(prev,I.stats);photoCv.setAttribute('aria-label',photoLabel());$('photoInfo').textContent=photoInfo();drawAnts()}
+ const prev=I.stats;I.stats=measure(img);photoCv.classList.toggle('alpha',I.stats.alpha);drawHist();warnClipping(prev,I.stats);photoEffect(fast);photoCv.setAttribute('aria-label',photoLabel());$('photoInfo').textContent=photoInfo();drawAnts()}
 // La foto occupa lo spazio disponibile senza deformarsi e senza superare la sua misura reale.
 function fitStage(){if(!I.bmp)return;const st=$('stage'),pad=24,[w,h]=outSize(I.r,I.bmp.width,I.bmp.height),k=Math.min((st.clientWidth-pad)/w,(st.clientHeight-pad)/h,1);photoCv.style.width=Math.max(1,Math.floor(w*k))+'px';photoCv.style.height=Math.max(1,Math.floor(h*k))+'px';placeOverlays()}
 function showPhoto(){const has=!!I.bmp;photoCv.hidden=!has;if(!has){antsCv.hidden=overCv.hidden=true;endTool(false)}$('photoEmpty').hidden=has;$('compareBadge').hidden=!(has&&I.compare);if(!has){for(const slot of Object.values(srcCache))Object.assign(slot,{key:'',px:null});$('photoInfo').textContent='';$('docInfo').textContent=''}requestRender()}
@@ -26,13 +26,26 @@ function drawHist(){const dpr=devicePixelRatio||1,W=Math.max(1,Math.round(histCv
  ctx.beginPath();ctx.moveTo(0,H);for(let i=0;i<256;i++)ctx.lineTo(x(i),scale(st.H[0][i]));ctx.lineTo(W,H);ctx.closePath();ctx.globalAlpha=.45;ctx.fillStyle=palette['hist-l'];ctx.fill();ctx.globalAlpha=1;
  if(!matchMedia('(forced-colors: active)').matches)[['hist-r',1],['hist-g',2],['hist-b',3]].forEach(([c,k])=>{ctx.beginPath();for(let i=0;i<256;i++)ctx[i?'lineTo':'moveTo'](x(i),scale(st.H[k][i]));ctx.strokeStyle=palette[c];ctx.lineWidth=dpr;ctx.globalAlpha=.8;ctx.stroke();ctx.globalAlpha=1});
  const mark=(left)=>{const s=7*dpr;ctx.beginPath();if(left){ctx.moveTo(2,2);ctx.lineTo(2+s,2);ctx.lineTo(2,2+s)}else{ctx.moveTo(W-2,2);ctx.lineTo(W-2-s,2);ctx.lineTo(W-2,2+s)}ctx.closePath();ctx.fillStyle=palette['hist-clip'];ctx.fill()};
- if(st.low>=CLIP_WARN)mark(true);if(st.high>=CLIP_WARN)mark(false);
+ if(st.low>=CLIP_WARN)mark(true);if(st.high>=CLIP_WARN)mark(false);histCursor(ctx,W,H);
  txt.textContent=histSentence(st);txt.classList.toggle('warn',st.low>=CLIP_WARN||st.high>=CLIP_WARN)}
-// Oltre l'1% di pixel completamente bianchi o neri la foto perde dettagli: si scrive e, al primo passaggio, si annuncia.
-const CLIP_WARN=.01;
-function histSentence(st){const parts=[`Luminosità media ${fmtPct(st.mean)}.`];if(st.high>=CLIP_WARN)parts.push(`Luci bruciate: ${fmtPct(st.high,1)} della foto, prova ad abbassare Esposizione, Alte luci o Bianchi.`);if(st.low>=CLIP_WARN)parts.push(`Ombre chiuse: ${fmtPct(st.low,1)} della foto, prova ad alzare Ombre o Neri.`);if(st.high<CLIP_WARN&&st.low<CLIP_WARN)parts.push('Nessuna parte bruciata o chiusa.');return parts.join(' ')}
-let clipSaid=0;
-function warnClipping(prev,st){if(!prev||I.compare||Date.now()-clipSaid<1500)return;const msg=[];if(st.high>=CLIP_WARN&&prev.high<CLIP_WARN)msg.push(`luci bruciate, ${fmtPct(st.high,1)}`);if(st.low>=CLIP_WARN&&prev.low<CLIP_WARN)msg.push(`ombre chiuse, ${fmtPct(st.low,1)}`);if(msg.length){clipSaid=Date.now();announce('Attenzione: '+msg.join(' e '),{join:true})}}
+// Oltre l'1% di pixel bruciati (anche in un canale solo) o neri la foto perde dettagli: si scrive e, quando si passa la
+// soglia, si annuncia.
+const CLIP_WARN=.01,CH_NAME=['rosso','verde','blu'];
+function clipDetail(st){const out=[];if(st.white>=.001&&st.white<st.high-.0005)out.push(`bianco pieno ${fmtPct(st.white,1)}`);const ch=st.ch.map((v,k)=>v>=.001?`nel ${CH_NAME[k]} ${fmtPct(v,1)}`:'').filter(Boolean);if(ch.length)out.push(`colori al massimo ${ch.length>1?ch.slice(0,-1).join(', ')+' e '+ch.at(-1):ch[0]}`);return out.join('; ')}
+// La frase dice anche com'è la luce a parole e la gamma dei toni (dal 2° al 98° percentile): poco più di metà vuol dire
+// foto piatta. Con lo sfondo trasparente si misura solo il soggetto.
+function histSentence(st){const p2=pctl(st,.02),p98=pctl(st,.98),parts=[`Luminosità media ${fmtPct(st.mean)}, foto ${lightWord(st.mean)}; toni da ${fmtInt(p2*100)} a ${fmtPct(p98)}${p98-p2<.5?': poco contrasto':''}.`];if(st.alpha)parts.push('Misurata sul soggetto: lo sfondo è trasparente.');
+ if(st.high>=CLIP_WARN){const d=clipDetail(st),col=st.high-st.white>=CLIP_WARN/2;parts.push(`Luci bruciate: ${fmtPct(st.high,1)} della foto${d?` (${d})`:''}, prova ad abbassare Esposizione, Alte luci o Bianchi${col?', o Saturazione per i colori più accesi':''}.`)}
+ if(st.low>=CLIP_WARN)parts.push(`Ombre chiuse: ${fmtPct(st.low,1)} della foto, prova ad alzare Ombre o Neri.`);if(st.high<CLIP_WARN&&st.low<CLIP_WARN)parts.push('Nessuna parte bruciata o chiusa.');return parts.join(' ')}
+// L'avviso parte quando ci si ferma, 600 ms dopo l'ultimo disegno, con la quota di quel momento; si sente anche quando si
+// torna sotto la soglia. clipSeen ricorda lo stato già detto (o quello all'apertura della foto, che non si annuncia).
+let clipSeen=null,clipTimer;
+const clipNow=st=>({bmp:I.bmp,high:st.high>=CLIP_WARN,low:st.low>=CLIP_WARN,hv:st.high,lv:st.low});
+function clipChange(prev,st){const up=[],down=[];if(st.high!==prev.high)(st.high?up:down).push(st.high?`luci bruciate, ${fmtPct(st.hv,1)}`:`luci bruciate da ${fmtPct(prev.hv,1)} a ${fmtPct(st.hv,1)}: recuperate`);if(st.low!==prev.low)(st.low?up:down).push(st.low?`ombre chiuse, ${fmtPct(st.lv,1)}`:`ombre chiuse da ${fmtPct(prev.lv,1)} a ${fmtPct(st.lv,1)}: riaperte`);
+ const d=down.join(' e ');return (up.length?'Attenzione: '+up.join(' e ')+'.':'')+(d?(up.length?' ':'')+d[0].toUpperCase()+d.slice(1)+'.':'')}
+// Con l'effetto delle modifiche acceso l'avviso è dentro l'effetto, che si dice poco dopo: qui si tiene solo il conto.
+function warnClipping(prev,st){if(I.compare)return;const now=clipNow(st);if(!prev||clipSeen?.bmp!==I.bmp||effectOn()){clipSeen=now;clearTimeout(clipTimer);return}clearTimeout(clipTimer);if(now.high===clipSeen.high&&now.low===clipSeen.low)return;
+ clipTimer=setTimeout(()=>{if(!I.stats||I.compare||clipSeen?.bmp!==I.bmp)return;const n=clipNow(I.stats),t=clipChange(clipSeen,n);clipSeen=n;if(t)announce(t)},600)}
 // Piani nel riquadro di sinistra: elenco con la scelta attiva, Invio per iniziare.
 let planCursor=0;
 function renderPlans(){const list=$('planList');planCursor=clamp(planCursor,0,PLANS.length-1);list.innerHTML=PLANS.map((p,i)=>`<div role="option" id="plan-${p.id}" class="lb-item plan-item${i===planCursor?' active':''}" data-plan="${p.id}" aria-selected="${p.id===I.plan}"><span class="n">${esc(p.name)}</span><span class="d">${esc(p.desc)}</span></div>`).join('');list.setAttribute('aria-activedescendant','plan-'+PLANS[planCursor].id)}
@@ -61,6 +74,8 @@ function renderPanel(){const plan=planOf(),body=$('adjBody'),head=$('stepHead'),
   head.innerHTML=`<p class="step-count">${esc(plan.name)} · passo ${i+1} di ${steps.length}</p><h3 id="stepTitle">${esc(s.title)}</h3><p id="stepText">${esc(s.text)}</p><div class="step-nav"><button type="button" class="btn sm" data-action="stepPrev"${i?'':' disabled'}>${ICON('left')}Indietro</button>${s.auto?`<button type="button" class="btn sm" data-action="stepAuto"${I.bmp?'':' disabled'}>${ICON('wand')}Proposta</button>`:''}<span class="grow"></span>${last?`<button type="button" class="btn sm primary" data-action="export"${I.bmp?'':' disabled'}>${ICON('save')}Esporta…</button>`:`<button type="button" class="btn sm primary" data-action="stepNext">Avanti${ICON('right')}</button>`}</div>`;
   body.innerHTML=(s.controls||[]).map(id=>controlHtml(id,true)).join('')+(s.export?`<dl><dt>Formato</dt><dd>${esc(exportLabel(s.export))}</dd><dt>Dati della foto</dt><dd>Fotocamera e posizione non vengono copiate</dd></dl>`:'')}
  else{head.hidden=true;head.innerHTML='';body.innerHTML=GROUPS.map(([g,ids])=>`<h3>${esc(g)}</h3>`+ids.map(id=>controlHtml(id,false)).join('')).join('')}
+ // Senza foto il corpo non ha comandi da raggiungere: si raggiunge lui, con un nome, così si scorre anche da tastiera.
+ if(I.bmp)for(const a of ['tabindex','role','aria-label'])body.removeAttribute(a);else{body.tabIndex=0;body.setAttribute('role','region');body.setAttribute('aria-label','Regolazioni: si usano dopo aver aperto una foto')}
  afterPanel();
  if(focusId){const el=$(focusId)||body.querySelector(`[data-action="${focusId}"]`)||head.querySelector(`[data-action="${focusId}"]`);if(el&&!el.disabled)el.focus();else (focusables(head)[0]||focusables(body)[0])?.focus()}}
 // Aggiorna valori e stati senza ricostruire il pannello, così il cursore che si sta usando non perde il focus.

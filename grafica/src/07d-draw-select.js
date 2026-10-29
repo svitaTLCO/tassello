@@ -10,9 +10,9 @@ $$('svg defs')[0].insertAdjacentHTML('beforeend',`<symbol id="i-selectAll" viewB
 <symbol id="i-distV" viewBox="0 0 24 24"><path d="M3 3h18M3 21h18"/><rect x="7" y="8" width="10" height="8" rx="1"/></symbol>
 <symbol id="i-magnet" viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3h-4v8a2 2 0 0 1-4 0V3z"/><path d="M6 7h4M14 7h4"/></symbol>`);
 $('layList').setAttribute('aria-multiselectable','true');
-$('layKeys').textContent='Frecce su e giù per scegliere un oggetto, Maiusc più frecce per aggiungere alla scelta quello sopra o sotto, Maiusc+clic per aggiungerlo o toglierlo, Alt+Maiusc più frecce per portarlo sopra o sotto gli altri, Invio per le proprietà, F2 per rinominarlo, Canc per eliminarlo, Maiusc+F10 per il menu.';
+$('layKeys').textContent='Frecce su e giù per scegliere un oggetto, Maiusc più frecce per aggiungere alla scelta quello sopra o sotto, Ctrl più frecce per muovere il cursore senza cambiare la scelta e Ctrl+Spazio per aggiungere o togliere l’oggetto del cursore, Maiusc+clic per aggiungerlo o toglierlo, Alt+Maiusc più frecce per portarlo sopra o sotto gli altri, Invio per le proprietà, F2 per rinominarlo, Canc per eliminarlo, Maiusc+F10 per il menu.';
 STATIC_KEYS.d[0][1].splice(3,0,['Aggiungi alla scelta l’oggetto sopra o sotto','Maiusc+PgSu / Maiusc+PgGiù'],['Aggancia la scelta alla guida successiva','Alt+Maiusc+← → ↑ ↓']);
-STATIC_KEYS.d[1][1].splice(1,0,['Aggiungi alla scelta l’oggetto sopra o sotto','Maiusc+↑ / Maiusc+↓']);
+STATIC_KEYS.d[1][1].splice(1,0,['Aggiungi alla scelta l’oggetto sopra o sotto','Maiusc+↑ / Maiusc+↓'],['Muovi il cursore senza cambiare la scelta','Ctrl+↑ / Ctrl+↓'],['Aggiungi o togli dalla scelta l’oggetto del cursore','Ctrl+Spazio']);
 STATIC_KEYS.d.push(['Con il puntatore',[['Aggiungi o togli un oggetto dalla scelta','Maiusc+clic'],['Scegli un oggetto solo dentro un gruppo','Alt+clic'],['Scegli gli oggetti dentro un riquadro','Trascina sul vuoto'],['Sposta senza agganciarti alle guide','Alt mentre trascini'],['Ridimensiona mantenendo le proporzioni','Maiusc sulle maniglie']]]);
 const namesOf=items=>{const n=items.map(x=>'«'+x.name+'»');return n.length>6?n.slice(0,5).join(', ')+` e altri ${n.length-5}`:n.length>1?n.slice(0,-1).join(', ')+' e '+n.at(-1):n.join('')};
 function boxOf(items){const b=items.map(box),x=Math.min(...b.map(v=>v.x)),y=Math.min(...b.map(v=>v.y));return{x,y,w:Math.max(...b.map(v=>v.x+v.w))-x,h:Math.max(...b.map(v=>v.y+v.h))-y}}
@@ -23,7 +23,7 @@ const hasFill=it=>it.kind!=='line'&&it.kind!=='image',hasStroke=it=>it.kind!=='t
 function describeSel(){const many=selItems();if(many.length<2)return many[0]?describeItem(many[0]):'Nessun oggetto scelto';const B=boxOf(many);return `${many.length} oggetti scelti: ${namesOf(many)}; insieme x ${fmtInt(B.x)}, y ${fmtInt(B.y)}, ${fmtInt(B.w)} per ${fmtInt(B.h)}`}
 // pick cambia la scelta senza ridisegnare (prima di una modifica, che ridisegna già); setSel ridisegna e annuncia.
 function pick(ids,primary){Dw.sel=primary??null;Dw.multi={for:Dw.sel,ids}}
-function selChanged({say=true}={}){Dw.last={label:'',t:0};Dw.lastAlign='';renderLayers();renderOverlay();renderProps();refreshToggles();sheetWrap.setAttribute('aria-label',sheetLabel());$('lay-'+Dw.sel)?.scrollIntoView({block:'nearest'});if(say)announce(Dw.sel?describeSel():'Nessun oggetto scelto: le proprietà sono quelle del foglio')}
+function selChanged({say=true}={}){Dw.last={label:'',t:0};Dw.lastAlign='';Dw.relBurst=null;renderLayers();renderOverlay();renderProps();refreshToggles();sheetWrap.setAttribute('aria-label',sheetLabel());$('lay-'+Dw.sel)?.scrollIntoView({block:'nearest'});if(say)announce(Dw.sel?describeSel():'Nessun oggetto scelto: le proprietà sono quelle del foglio')}
 function setSel(ids,primary,opts){ids=[...new Set(ids)].filter(itemOf);pick(ids,primary&&ids.includes(primary)?primary:ids.at(-1));selChanged(opts)}
 // Aggiunge o toglie un oggetto, con il suo gruppo, dalla scelta.
 function toggleSel(id){const it=itemOf(id);if(!it)return;const cur=new Set(selIds()),grp=groupIds(it),had=cur.has(id);for(const g of grp)had?cur.delete(g):cur.add(g);const rest=[...cur];setSel(rest,had?rest.at(-1):id,{say:false});
@@ -33,7 +33,7 @@ function selectAll(){const items=Dw.p.items.filter(x=>!x.hidden);if(!items.lengt
 function marqueeSelect(m,add){const hit=Dw.p.items.filter(x=>!x.hidden&&!x.lock&&covers(m,box(x)));if(!hit.length&&!add.length){renderOverlay();announce('Nessun oggetto dentro il riquadro');return}setSel([...add,...hit.flatMap(groupIds)],hit.at(-1)?.id||Dw.sel)}
 // Gli oggetti bloccati restano fermi: non si spostano, non si ridimensionano e non si eliminano.
 function movable(items,what='spostarlo'){const ok=items.filter(x=>!x.lock),n=items.length-ok.length;if(n)toast(items.length===1?`«${items[0].name}» è bloccato: sbloccalo per ${what}`:`${n===1?'Un oggetto scelto è bloccato':n+' oggetti scelti sono bloccati'}${ok.length?' e resta'+(n>1?'no':'')+' com’è':': sbloccali con Ctrl+Maiusc+L'}`);return ok}
-function needMany(n){const items=selItems();if(units(items).length<n){toast(`Scegli almeno ${n===2?'due':'tre'} oggetti: Maiusc+clic sul foglio, Maiusc+frecce nei livelli o Ctrl+A`);return null}return items}
+function needMany(n){const items=selItems();if(units(items).length<n){toast(`Scegli almeno ${n===2?'due':'tre'} oggetti: Maiusc+clic sul foglio, nei livelli Maiusc+frecce o Ctrl+frecce e Ctrl+Spazio, oppure Ctrl+A`);return null}return items}
 // Raggruppa: gli oggetti vanno uno sopra l'altro nei livelli, all'altezza del più alto, nell'ordine che avevano.
 function groupItems(){const items=needMany(2);if(!items)return;const g=uid(),ids=new Set(items.map(x=>x.id));
  editD('Raggruppa',p=>{const top=Math.max(...items.map(x=>p.items.indexOf(x))),rest=p.items.filter(x=>!ids.has(x.id));for(const it of items)it.g=g;rest.splice(p.items.slice(0,top+1).filter(x=>!ids.has(x.id)).length,0,...items);p.items=rest},{props:true});
@@ -65,9 +65,10 @@ function snapStep(ax,ay){const many=selItems();if(!many.length){needItem();retur
  for(const [v,lab] of ax?L.X:L.Y)for(const [e,elab] of edges){const d=v-e;if(d*dir>.5&&(!best||Math.abs(d)<Math.abs(best.d)))best={d,lab,elab}}
  if(!best){toast('Nessuna guida in quella direzione');return}editD('Aggancia alla guida',()=>{for(const it of items){if(ax)it.x=n2(it.x+best.d);else it.y=n2(it.y+best.d)}});Dw.lastAlign=alignSay(items);
  announce(`${items.length>1?'Gli oggetti scelti':'«'+items[0].name+'»'}: ${best.elab} è allineato al ${best.lab}`)}
-// Frecce sul foglio: la scelta si sposta; se finisce allineata a qualcosa lo si sente, una volta sola.
-function moveKeys(many,ax,ay,step){const ok=movable(many);if(!ok.length||!editD('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true}))return;const B=boxOf(ok),a=alignSay(ok);
- announce(`${ok.length>1?ok.length+' oggetti, ':''}x ${fmtInt(B.x)}, y ${fmtInt(B.y)}${a&&a!==Dw.lastAlign?'. '+a:''}`);Dw.lastAlign=a}
+// Frecce sul foglio: la scelta si sposta; se finisce allineata a qualcosa lo si sente, una volta sola, e così quando
+// comincia o smette di coprire, di toccare o di stare sotto un altro oggetto, o esce dal foglio (relChange, 07l).
+function moveKeys(many,ax,ay,step){const ok=movable(many);if(!ok.length)return;const t=Date.now();if(!Dw.relBurst||t-Dw.relBurst.t>500)Dw.relBurst={base:relKeys(ok)};Dw.relBurst.t=t;const before=Dw.relBurst.base;if(!editD('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true}))return;const B=boxOf(ok),a=alignSay(ok),r=relChange(ok,before);
+ announce(`${ok.length>1?ok.length+' oggetti, ':''}x ${fmtInt(B.x)}, y ${fmtInt(B.y)}${a&&a!==Dw.lastAlign?'. '+a[0].toUpperCase()+a.slice(1):''}${r?'. '+r[0].toUpperCase()+r.slice(1):''}`);Dw.lastAlign=a}
 // Più oggetti si ridimensionano insieme sul riquadro che li contiene: posizioni e misure in proporzione, i testi
 // cambiano dimensione. B è il riquadro di prima, N quello nuovo.
 function scaleItem(it,o,B,N){const sx=B.w?N.w/B.w:1,sy=B.h?N.h/B.h:1,b=box(o),nx=N.x+(b.x-B.x)*sx,ny=N.y+(b.y-B.y)*sy;
@@ -75,16 +76,19 @@ function scaleItem(it,o,B,N){const sx=B.w?N.w/B.w:1,sy=B.h?N.h/B.h:1,b=box(o),nx
  const nb=box(it);it.x=n2(it.x+nx-nb.x);it.y=n2(it.y+ny-nb.y)}
 function scaleDrag(d,dx,dy,shift){const B=d.B,H=d.h;let x=B.x,y=B.y,w=B.w,h=B.h;if(H.includes('e'))w=B.w+dx;if(H.includes('s'))h=B.h+dy;if(H.includes('w')){w=B.w-dx;x=B.x+dx}if(H.includes('n')){h=B.h-dy;y=B.y+dy}w=Math.max(1,w);h=Math.max(1,h);
  if(shift&&B.w&&B.h){const k=Math.max(w/B.w,h/B.h);w=B.w*k;h=B.h*k;if(H.includes('w'))x=B.x+B.w-w;if(H.includes('n'))y=B.y+B.h-h}for(const [it,o] of d.os)scaleItem(it,o,B,{x,y,w,h})}
-function scaleKeys(many,ax,ay,step){const ok=movable(many,'ridimensionarlo');if(!ok.length)return;const B=boxOf(ok),N={x:B.x,y:B.y,w:Math.max(1,B.w+ax*step),h:Math.max(1,B.h+ay*step)},os=ok.map(x=>[x,structuredClone(x)]);
- if(editD('Ridimensiona',()=>{for(const [it,o] of os)scaleItem(it,o,B,N)},{merge:true}))announce(`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}`)}
+// Se tra gli oggetti c'è chi mantiene le proporzioni (un'immagine, di solito), il riquadro comune cresce in proporzione.
+function scaleKeys(many,ax,ay,step){const ok=movable(many,'ridimensionarlo');if(!ok.length)return;const B=boxOf(ok),keep=ok.some(keepsRatio),k=ax?Math.max(1,B.w+ax*step)/B.w:Math.max(1,B.h+ay*step)/B.h,N=keep?{x:B.x,y:B.y,w:B.w*k,h:B.h*k}:{x:B.x,y:B.y,w:Math.max(1,B.w+ax*step),h:Math.max(1,B.h+ay*step)},os=ok.map(x=>[x,structuredClone(x)]);
+ if(editD('Ridimensiona',()=>{for(const [it,o] of os)scaleItem(it,o,B,N)},{merge:true}))announce(`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}${keep?', proporzioni mantenute':''}`)}
 // Proprietà di più oggetti: posizione del riquadro comune, colori, contorno e opacità per tutti, e i comandi per disporli.
 function multiProps(many){const B=boxOf(many),f=many.find(x=>hasFill(x)&&x.fill!=='none'),s=many.find(hasStroke),btn=id=>{const c=C[id];return `<button type="button" class="btn sm" id="pm-${id}" data-action="${id}"${c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:''} aria-label="${esc(c.label)}" data-tip="${esc(c.label)}">${ICON(c.icon)}</button>`};
- return `<p class="hint">${esc(describeSel())}. Qui le modifiche valgono per tutti; per un oggetto solo sceglilo nei livelli.</p><div class="row2"><div>${fld('mx','X',n2(B.x))}</div><div>${fld('my','Y',n2(B.y))}</div></div>`
+ return `<p class="hint">${esc(describeSel())}. Qui le modifiche valgono per tutti; per un oggetto solo sceglilo nei livelli.</p><div class="row2"><div>${fld('mx','X',n2(B.x))}</div><div>${fld('my','Y',n2(B.y))}</div></div><div class="row2"><div>${fld('mw','Larghezza',n2(B.w))}</div><div>${fld('mh','Altezza',n2(B.h))}</div></div>`
   +(f?colorFld('fill','Riempimento',f.fill):'')+(s?colorFld('stroke','Contorno',s.stroke)+fld('sw','Spessore del contorno (px)',s.sw):'')+rangeFld('opacity','Opacità',0,100,1,selItem().opacity,v=>fmtInt(v)+'%')
   +`<h3>Disponi</h3><div class="btns">${['groupItems','ungroupItems','lockItems','hideItems'].map(btn).join('')}</div><div class="btns">${['alignLeft','alignCenter','alignRight','alignTop','alignMiddle','alignBottom','distH','distV'].map(btn).join('')}</div>`}
-function syncMulti(){if(!$('pr-mx')){renderProps();return}const a=document.activeElement,B=boxOf(selItems());for(const [k,v] of [['mx',n2(B.x)],['my',n2(B.y)]]){const el=$('pr-'+k);if(el!==a)el.value=v}}
+function syncMulti(){if(!$('pr-mx')){renderProps();return}const a=document.activeElement,B=boxOf(selItems());for(const [k,v] of [['mx',n2(B.x)],['my',n2(B.y)],['mw',n2(B.w)],['mh',n2(B.h)]]){const el=$('pr-'+k);if(el&&el!==a)el.value=v}}
 function applyMulti(key,v,need){const many=selItems(),ok=many.filter(x=>!x.lock);
  if(key==='mx'||key==='my'){if(!ok.length)throw Error('Gli oggetti scelti sono bloccati');const k=key==='mx'?'x':'y',d=need(-1e5,1e5)-boxOf(ok)[k];for(const it of ok)it[k]=n2(it[k]+d)}
+ // Larghezza e altezza del riquadro comune: come con Ctrl+frecce, in proporzione se qualcuno la mantiene.
+ else if(key==='mw'||key==='mh'){if(!ok.length)throw Error('Gli oggetti scelti sono bloccati');const B=boxOf(ok),n=need(1,1e5),keep=ok.some(keepsRatio),k=key==='mw'?n/B.w:n/B.h,N=keep?{...B,w:B.w*k,h:B.h*k}:{...B,[key==='mw'?'w':'h']:n},os=ok.map(x=>[x,structuredClone(x)]);for(const [it,o] of os)scaleItem(it,o,B,N);propSay=`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}${keep?', proporzioni mantenute':''}`}
  else if(key==='opacity')for(const it of many)it.opacity=Number(v);
  else if(key==='fill'||key==='stroke'){for(const it of many)if(key==='fill'?hasFill(it):hasStroke(it))it[key]=v}
  else if(key==='sw'){const n=need(0,1000);for(const it of many)if(hasStroke(it))it.sw=n}}
