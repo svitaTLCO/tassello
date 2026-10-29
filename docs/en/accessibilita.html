@@ -1,0 +1,119 @@
+<!doctype html>
+<!-- Pagina generata da sito/build.py: modifica sito/pagine/accessibilita.html o i testi in sito/testi/, poi ricostruisci. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Accessibility statement · Tassello</title>
+<meta name="description" content="What we have checked about the accessibility of Tassello, where we stand and what does not work well yet.">
+<meta name="color-scheme" content="light dark">
+<link rel="alternate" hreflang="it" href="https://svitatlco.github.io/tassello/accessibilita.html">
+<link rel="alternate" hreflang="en" href="https://svitatlco.github.io/tassello/en/accessibilita.html">
+<link rel="alternate" hreflang="fr" href="https://svitatlco.github.io/tassello/fr/accessibilita.html">
+<link rel="alternate" hreflang="es" href="https://svitatlco.github.io/tassello/es/accessibilita.html">
+<link rel="alternate" hreflang="x-default" href="https://svitatlco.github.io/tassello/accessibilita.html">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../stile.css">
+</head>
+<body>
+<a class="skip" href="#contenuto">Skip to content</a>
+<div class="wrap">
+<header class="top">
+  <a class="logo" href="./" aria-label="Tassello, home page">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"/><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/><rect y="54" width="46" height="46" rx="10" fill="#B35500"/><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/></svg>
+    tassello
+  </a>
+  <details class="lingua">
+    <summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span class="sr-only">Language: </span>English</summary>
+    <ul>
+      <li><a href="../accessibilita.html" hreflang="it" lang="it">Italiano</a></li>
+      <li><a href="../en/accessibilita.html" hreflang="en" lang="en" aria-current="page">English</a></li>
+      <li><a href="../fr/accessibilita.html" hreflang="fr" lang="fr">Français</a></li>
+      <li><a href="../es/accessibilita.html" hreflang="es" lang="es">Español</a></li>
+    </ul>
+  </details>
+  <nav aria-label="Site">
+    <ul>
+      <li><a href="./">Home page</a></li>
+      <li><a href="./#accessibilita">Accessibility</a></li>
+      <li><a href="https://github.com/svitaTLCO/tassello">Source code</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="contenuto">
+  <div class="page-head">
+    <h1>Accessibility statement</h1>
+    <p class="lead">For Tassello, accessibility is the condition for releasing a tool. Here is what we have checked, where we stand and what does not work well yet, so you know what to expect.</p>
+  </div>
+
+  <section aria-labelledby="ambito">
+    <h2 id="ambito">What it covers</h2>
+    <ul>
+      <li>Tassello Ufficio 1.10.0: Testo, Calcolo and Impagina</li>
+      <li>Tassello Media 1.4.0: Audio and Video</li>
+      <li>Tassello Grafica 1.3.0: Immagini and Disegno</li>
+      <li>this website and the verification page</li>
+    </ul>
+    <p>It applies to recent Chrome or Edge on a computer; testing was done on Windows. Tablets, phones, the Mac with VoiceOver and other browsers are not supported yet. The app interface is in Italian.</p>
+  </section>
+
+  <section aria-labelledby="stato">
+    <h2 id="stato">Conformance status</h2>
+    <p>Tassello is <b>partially conformant</b> with WCAG 2.2 level AA. Our checks find no remaining failures against level A and AA criteria, apart from the known limitations below; conformance is not yet confirmed with real screen readers, so we state it as partial until the testing group has finished.</p>
+  </section>
+
+  <section aria-labelledby="metodo">
+    <h2 id="metodo">How we evaluated it</h2>
+    <ul>
+      <li>A WCAG 2.2 AA evaluation in Edge on Windows, with axe-core and custom checks: about 1,000 states of the seven apps and the website, in four themes and with forced colours, repeated after the fixes.</li>
+      <li>Automated real-browser tests for each tool, which also read the exact screen reader announcements.</li>
+      <li>A task-by-task analysis, app by app, of the work usually done by looking.</li>
+      <li>Testing with blind people, in progress, using the <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">testing guide</a> (in Italian).</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="offre">
+    <h2 id="offre">What Tassello offers</h2>
+    <ul>
+      <li>Everything works from the keyboard. Descriptions use the same key in every app: Alt+Shift+I what is in front of you, D the whole, R where the selected item is, L light or levels, O the comparison with the original.</li>
+      <li>Visual results in words and sounds: position and overlaps of frames and objects, light and colours of a photo, scenes and speech in a video, audio levels, charts and histograms you can listen to, colours by name.</li>
+      <li>Accessibility checks for what you make, Impagina PDFs with headings, paragraphs and alternative text, captions in Video.</li>
+      <li>Dark theme, high contrast, forced colours, reduced motion, reflow down to 320 px wide.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="limiti">
+    <h2 id="limiti">Known limitations</h2>
+    <ul>
+      <li>Behaviour with NVDA, JAWS and Narrator is still to be confirmed, especially for announcements joined into one sentence and for interactive areas: the photo, the histogram, the video preview, the Calcolo grid.</li>
+      <li>Some Tassello Ufficio dialogs correct an out-of-range value without saying which limit was used.</li>
+      <li>Some visual tasks are still hard without sight: placing frames on the grid in Impagina, following the cut-out edge in Immagini, exploring a drawing with a cursor, hearing light and colour before and after in Video. The flash check does not yet detect flashes on part of the screen or red flashes.</li>
+      <li>Descriptions measure pixels and sound without artificial intelligence: they do not recognise people or objects.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="segnala">
+    <h2 id="segnala">Feedback</h2>
+    <p>If something does not work with the technology you use, report it with the <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Accessibility problem form</a>: we treat it as a bug and it comes first. The full statement is in the <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">repository</a>.</p>
+  </section>
+
+  <p class="meta">Statement written on 29 October 2026; we update it with every release.</p>
+</main>
+<footer>
+  <p>Official channels: svitatlco.github.io/tassello and the <a href="https://github.com/svitaTLCO/tassello/releases">GitHub releases</a>. Copies received in other ways, or modified by others, are not official: <a href="verifica.html">verify a copy</a>.</p>
+  <p>© 2026 svitaTLCO and contributors. Tassello is free software, released under the <a href="https://github.com/svitaTLCO/tassello/blob/main/LICENSE">EUPL 1.2</a> licence. <a href="https://github.com/svitaTLCO/tassello">Source code and issue reports</a>.</p>
+  <p>Found a suspicious copy? <a href="https://github.com/svitaTLCO/tassello/issues/new?template=copia-sospetta.yml">Report it on GitHub</a>.</p>
+</footer>
+</div>
+<script>
+// Selettore della lingua: si chiude con Esc, con un clic fuori o quando il fuoco esce dall'elenco.
+(()=>{
+const menu=document.querySelector('.lingua'),summary=menu.querySelector('summary');
+addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open){menu.open=false;summary.focus()}});
+addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
+menu.addEventListener('focusout',e=>{if(e.relatedTarget&&!menu.contains(e.relatedTarget))menu.open=false});
+})();
+</script>
+</body>
+</html>

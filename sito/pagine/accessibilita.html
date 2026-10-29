@@ -1,0 +1,86 @@
+<!doctype html>
+<!-- Pagina generata da sito/build.py: modifica sito/pagine/accessibilita.html o i testi in sito/testi/, poi ricostruisci. -->
+<html lang="{{LINGUA}}">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{dichiarazione.pagina_titolo}}</title>
+<meta name="description" content="{{dichiarazione.descrizione}}">
+<meta name="color-scheme" content="light dark">
+{{ALTERNATIVE}}
+<link rel="icon" href="{{BASE}}icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="{{BASE}}stile.css">
+</head>
+<body>
+<a class="skip" href="#contenuto">{{comune.salta}}</a>
+<div class="wrap">
+<header class="top">
+  <a class="logo" href="./" aria-label="{{comune.logo}}">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"/><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/><rect y="54" width="46" height="46" rx="10" fill="#B35500"/><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/></svg>
+    tassello
+  </a>
+  {{LINGUE}}
+  <nav aria-label="{{verifica.nav}}">
+    <ul>
+      <li><a href="./">{{verifica.home}}</a></li>
+      <li><a href="./#accessibilita">{{nav.accessibilita}}</a></li>
+      <li><a href="https://github.com/svitaTLCO/tassello">{{comune.codice}}</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="contenuto">
+  <div class="page-head">
+    <h1>{{dichiarazione.titolo}}</h1>
+    <p class="lead">{{dichiarazione.testo}}</p>
+  </div>
+
+  <section aria-labelledby="ambito">
+    <h2 id="ambito">{{dichiarazione.ambito_titolo}}</h2>
+{{dichiarazione.ambito}}
+  </section>
+
+  <section aria-labelledby="stato">
+    <h2 id="stato">{{dichiarazione.stato_titolo}}</h2>
+{{dichiarazione.stato}}
+  </section>
+
+  <section aria-labelledby="metodo">
+    <h2 id="metodo">{{dichiarazione.metodo_titolo}}</h2>
+{{dichiarazione.metodo}}
+  </section>
+
+  <section aria-labelledby="offre">
+    <h2 id="offre">{{dichiarazione.offre_titolo}}</h2>
+{{dichiarazione.offre}}
+  </section>
+
+  <section aria-labelledby="limiti">
+    <h2 id="limiti">{{dichiarazione.limiti_titolo}}</h2>
+{{dichiarazione.limiti}}
+  </section>
+
+  <section aria-labelledby="segnala">
+    <h2 id="segnala">{{dichiarazione.segnala_titolo}}</h2>
+{{dichiarazione.segnala}}
+  </section>
+
+  <p class="meta">{{dichiarazione.data}}</p>
+</main>
+<footer>
+  <p>{{piede.canali}}</p>
+  <p>{{piede.licenza}}</p>
+  <p>{{sicurezza.segnala}}</p>
+</footer>
+</div>
+<script>
+// Selettore della lingua: si chiude con Esc, con un clic fuori o quando il fuoco esce dall'elenco.
+(()=>{
+const menu=document.querySelector('.lingua'),summary=menu.querySelector('summary');
+addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open){menu.open=false;summary.focus()}});
+addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
+menu.addEventListener('focusout',e=>{if(e.relatedTarget&&!menu.contains(e.relatedTarget))menu.open=false});
+})();
+</script>
+</body>
+</html>

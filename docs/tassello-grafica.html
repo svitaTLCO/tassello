@@ -13,12 +13,12 @@
 /* Mosaico: la finestra è fatta di tasselli (--surface) appoggiati su una fuga (--grout) che prende il colore dell'app. */
 :root{--accent:#b0306a;--accent-strong:#8c2453;--accent-text:#8c2453;--accent-soft:#fbeaf2;--sel-tint:rgba(176,48,106,.18);
 --grout:#eddde5;--grout-deep:#e0cad5;--gap:8px;--r:10px;--fold:var(--accent);--scrim:rgba(16,22,34,.16);
---bg:var(--grout);--chrome:#fff;--surface:#fff;--surface-2:#f1f3f7;--hover:#e9edf3;--pressed:#dde2ea;--line:#e1e5ec;--line-strong:#a9b0bc;--text:#161b26;--text-2:#3e4757;--text-3:#596374;--canvas:#e4e5e7;--focus:#161b26;--danger:#b10e1c;
+--bg:var(--grout);--chrome:#fff;--surface:#fff;--surface-2:#f1f3f7;--hover:#e9edf3;--pressed:#dde2ea;--line:#e1e5ec;--line-strong:#7c8493;--text:#161b26;--text-2:#3e4757;--text-3:#596374;--canvas:#e4e5e7;--focus:#161b26;--danger:#b10e1c;
 --hist-bg:#ffffff;--hist-l:#6b6b6b;--hist-r:#d13438;--hist-g:#2e8b3d;--hist-b:#2f6fd6;--hist-clip:#c50f1f;
 --shadow:0 12px 32px rgba(20,24,34,.18),0 2px 8px rgba(20,24,34,.08);--lift:0 18px 40px rgba(20,24,34,.26),0 2px 6px rgba(20,24,34,.1);color-scheme:light;
 --mono:'Cascadia Mono',Consolas,ui-monospace,'Courier New',monospace;
 font-family:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--text)}
-html[data-theme=dark]{color-scheme:dark;--grout:#170e13;--grout-deep:#0d070a;--scrim:rgba(0,0,0,.45);--chrome:#1e2026;--surface:#1e2026;--surface-2:#272a31;--hover:#2f333c;--pressed:#3a3f49;--line:#363a44;--line-strong:#6b7280;--text:#eef1f6;--text-2:#c9d0db;--text-3:#a3acbb;--canvas:#141518;--focus:#fff;--accent-text:#f59ac2;--accent-soft:#3f1a2c;
+html[data-theme=dark]{color-scheme:dark;--danger:#ff8a8a;--grout:#170e13;--grout-deep:#0d070a;--scrim:rgba(0,0,0,.45);--chrome:#1e2026;--surface:#1e2026;--surface-2:#272a31;--hover:#2f333c;--pressed:#3a3f49;--line:#363a44;--line-strong:#6b7280;--text:#eef1f6;--text-2:#c9d0db;--text-3:#a3acbb;--canvas:#141518;--focus:#fff;--accent-text:#f59ac2;--accent-soft:#3f1a2c;
 --hist-bg:#1a1c21;--hist-l:#bdbdbd;--hist-r:#ff7b7f;--hist-g:#6fd37f;--hist-b:#7fa8ff;--hist-clip:#ff6b6b;--shadow:0 12px 32px rgba(0,0,0,.55);--lift:0 18px 40px rgba(0,0,0,.6)}
 html[data-contrast=high]{--grout:#fff;--grout-deep:#fff;--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#5e1638;--hist-l:#000;--hist-clip:#b10e1c}
 html[data-contrast=high][data-theme=dark]{--grout:#000;--grout-deep:#000;--line:#fff;--line-strong:#fff;--text-2:#fff;--text-3:#fff;--hover:#4a4a4a;--accent-text:#ffc2dc;--hist-l:#fff;--hist-clip:#ff8080}
@@ -41,6 +41,7 @@ button,select,input,textarea{color:inherit;font:inherit}
 button{cursor:pointer}button:disabled,[aria-disabled=true]{opacity:.45;cursor:not-allowed}
 :focus{outline:none}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media (forced-colors:active){:focus-visible{outline-color:Highlight}}
 kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding:3px 6px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:4px;background:var(--surface);color:var(--text-2);white-space:nowrap}
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .skip{position:fixed;left:10px;top:-80px;z-index:1000;background:var(--surface);color:var(--text);padding:10px 16px;border-radius:8px;box-shadow:var(--shadow);font-weight:600;text-decoration:none}
@@ -78,7 +79,7 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .tb{flex-shrink:0;height:36px;min-width:36px;border:0;border-radius:8px;background:transparent;color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;white-space:nowrap}
 .tb.icon{width:36px;padding:0}
 .tb:hover{background:var(--hover)}.tb:active{background:var(--pressed)}
-.tb[aria-pressed=true],.tb[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text)}
+.tb[aria-pressed=true],.tb[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 -3px 0 var(--accent-text)}
 .tb.drw{font-weight:600}
 .tb .chev{width:12px;height:12px;stroke-width:2.2}
 .tb:focus-visible{outline-offset:-2px}
@@ -118,7 +119,7 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;padding:var(--gap) var(--gap) 0}
 .main:focus-visible{outline-offset:-3px}
 .editor-pane{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
-.btn[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.btn[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent-text);color:var(--accent-text)}
 /* Riquadri laterali: si riducono a tessera, si spostano a destra o a sinistra, si allargano trascinando la fuga. */
 .pane{width:var(--w,270px);flex-shrink:0;display:flex;flex-direction:column;min-height:0;min-width:0}
 .pane-head{display:flex;align-items:center;gap:4px;padding:8px 6px 4px 14px;min-height:40px}.pane-head h2{font-size:14px;margin:0;flex:1}
@@ -135,6 +136,7 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .sep::before{content:'';width:4px;height:40px;max-height:60%;border-radius:2px;background:var(--accent);opacity:0;transition:opacity .12s}
 .sep:hover::before,.sep:focus-visible::before,.sep.dragging::before{opacity:1}
 .sep:focus-visible{outline-offset:0}
+.sep{position:relative}.sep::after{content:'';position:absolute;inset:0 -16px 0 0}.sep[data-side=right]::after{inset:0 0 0 -16px}
 .sep.h{cursor:row-resize}.sep.h::before{width:40px;height:4px;max-width:60%}
 @media (forced-colors:active){.sep::before{background:Highlight}}
 .pane-count{font-size:12px;color:var(--text-3)}
@@ -144,7 +146,7 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .lb:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
 .lb-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:13px;line-height:1.3;cursor:pointer;border:1px solid transparent}
 .lb-item:hover{background:var(--hover)}
-.lb-item[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent)}
+.lb-item[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent-text)}
 .lb:focus-visible .lb-item.active,.lb-item.active{box-shadow:inset 3px 0 0 var(--accent)}
 .lb-item .t{font:12px 'Cascadia Mono',Consolas,monospace;color:var(--text-3);flex-shrink:0}
 .lb-item[aria-selected=true] .t{color:inherit}
@@ -159,6 +161,7 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .insp-body input[type=color]{width:52px;height:30px;padding:2px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface)}
 .insp-body .row2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 .insp-body .hint{display:block;color:var(--text-3);font-size:11.5px;margin-top:3px}
+.insp-body .hint.err{color:var(--danger);font-weight:600}.insp-body [aria-invalid=true],.modal [aria-invalid=true]{border-color:var(--danger);border-width:2px}
 .insp-body dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:8px 0 0}
 .insp-body dt{color:var(--text-3)}.insp-body dd{margin:0;font-weight:600}
 .insp-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
@@ -198,9 +201,9 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .adjust{display:flex;flex-direction:column;min-height:0;min-width:0}
 .hist-box{padding:0 14px 8px}
 .hist{width:100%;height:92px;display:block;border-radius:6px;background:var(--hist-bg);border:1px solid var(--line);forced-color-adjust:none}
+.hist-nav{border-radius:6px}.hist-nav:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .hist-text{margin:6px 0 0;font-size:12px;color:var(--text-2);line-height:1.35}
 .hist-text.warn{color:var(--danger)}
-html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 .step-head{padding:6px 14px 8px;border-bottom:1px solid var(--line)}
 .step-head h3{margin:0;font-size:14px}
 .step-head p{margin:4px 0 0;font-size:12px;color:var(--text-2);line-height:1.4}
@@ -235,10 +238,11 @@ html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 #overlay .node{pointer-events:all;fill:#fff;stroke:var(--accent);cursor:move}#overlay .node.cur{fill:var(--accent)}#overlay .n-h{pointer-events:all;fill:var(--accent);cursor:move}
 #overlay .k-cur{fill:none;stroke:var(--accent)}
 .node-list{max-height:180px;overflow:auto;border:1px solid var(--line-strong);border-radius:6px;padding:2px;margin-top:4px}
-#drawbar .tool-btn.btn[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent)}
+#drawbar .tool-btn.btn[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent-text)}
 @media (forced-colors:active){#overlay .n-path,#overlay .n-arm,#overlay .node,#overlay .k-cur{stroke:Highlight}#overlay .node.cur,#overlay .n-h{fill:Highlight}#drawbar .tool-btn[aria-pressed=true]{outline:2px solid Highlight}}
 .layer-item .ico{width:16px;height:16px;color:var(--text-3)}
 .layer-item[aria-selected=true] .ico{color:inherit}
+.layer-item.cursor{outline:2px dashed var(--accent-text);outline-offset:-3px}
 @media (forced-colors:active){#overlay .sel-box{stroke:Highlight}#overlay .handle{fill:Canvas;stroke:Highlight}}
 /* Nelle finestre strette i tasselli si mettono in colonna e le tessere diventano orizzontali. */
 @media (max-width:860px){#photoPane,#drawPane{flex-direction:column;gap:var(--gap);overflow:auto}.viewer{min-height:260px;flex:none;order:0!important}.pane{width:auto;max-height:280px;order:1!important}.sep{display:none}.tessera{width:auto;height:44px;flex-direction:row;padding:0 14px;margin:0!important;order:1!important}.tessera .vt{writing-mode:horizontal-tb;transform:none}}
@@ -299,7 +303,7 @@ html[data-theme=dark] .hist-text.warn{color:#ff8a8a}
 .pal-group-h span+span{font:500 11px/1.4 var(--mono);letter-spacing:0}
 .pal-opt{display:flex;align-items:center;gap:12px;min-height:38px;padding:0 10px;border-radius:8px;cursor:pointer}
 .pal-opt .ico,.pal-opt .ti-text{color:var(--text-2)}
-.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text)}
+.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 4px 0 0 var(--accent-text)}
 .pal-opt[aria-selected=true] .ico,.pal-opt[aria-selected=true] .pal-cat{color:inherit}
 .pal-opt kbd{border:0;background:var(--surface-2);font:500 11px/1 var(--mono);padding:4px 6px;border-radius:5px}
 .pal-opt[aria-selected=true] kbd{background:var(--surface)}
@@ -326,8 +330,13 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 /* Nelle finestre strette i testi dei pulsanti spariscono alla vista ma restano agli screen reader: sono il loro nome. */
 @media (max-width:1500px){.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.app-switch button{padding:0 6px}}
 @media (max-width:1200px){.status .st-btn:not(.lead) span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
-@media (forced-colors:active){.tb[aria-pressed=true],.tb[aria-expanded=true],.ditem[aria-pressed=true],.pal-opt[aria-selected=true],.lb-item[aria-selected=true]{outline:2px solid Highlight}}
+@media (forced-colors:active){.tb[aria-pressed=true],.tb[aria-expanded=true],.ditem[aria-pressed=true],.pal-opt[aria-selected=true],.lb-item[aria-selected=true],.app-switch button[aria-pressed=true]{outline:2px solid Highlight}}
 @media (max-width:720px){.bar{gap:6px;padding:6px 6px 0}.brand{display:none}.save-state,.search-tile kbd{display:none}.bar>.doc-tile{flex-basis:140px;min-width:90px}.primary-tile span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.primary-tile{padding:0 16px}.file-side{width:180px}.file-info{padding:22px}.drawer-grid{grid-template-columns:1fr!important}.status{overflow-x:auto;scrollbar-width:none}#docInfo{display:none}}
+/* Finestre basse (sotto 500 pixel, come 1280 × 1024 al 400%): la pagina scorre in verticale, la barra e la barra di stato
+   scorrono via con lei e l'area di lavoro tiene un'altezza utile; i riquadri hanno il loro scorrimento. */
+@media (max-height:500px){html{height:auto;overflow:auto}body{height:auto;overflow:visible}#app{height:auto;min-height:100dvh}.main{flex:none}#photoPane,#drawPane{flex:none;align-items:flex-start;overflow:visible}.viewer{min-height:max(180px,70vh);align-self:stretch}.pane{max-height:85vh}}
+/* Finestre strette (sotto 480 pixel): strumenti e cassetti vanno a capo invece di scorrere di lato, e così la barra di stato. */
+@media (max-width:480px){.bar>.tools{height:auto;min-height:48px;flex-wrap:wrap;overflow:visible;padding:4px 6px}.tools>div{flex-wrap:wrap;flex-shrink:1;min-width:0;max-width:100%}.tools .tsep{display:none}.status{flex-wrap:wrap;overflow:visible}}
 /* Immagini: strumenti sulla foto. Il contorno della selezione è bianco e nero e resta così anche con i colori forzati. */
 .stage canvas.overlay{position:absolute;pointer-events:none;box-shadow:none;forced-color-adjust:none}
 .stage canvas.tooling{cursor:crosshair;touch-action:none}
@@ -339,10 +348,10 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;flex-shrink:0}
 .seg button{border:0;border-right:1px solid var(--line);background:var(--surface);height:26px;padding:0 9px;font-size:12px}
 .seg button:last-child{border-right:0}.seg button:hover{background:var(--hover)}
-.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-text);font-weight:600;box-shadow:inset 0 -3px 0 var(--accent-text)}
 .seg button:focus-visible{outline-offset:-3px}
 .tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:4px;margin-top:8px}
-.tool-grid .btn{justify-content:flex-start;overflow:hidden;text-overflow:ellipsis}
+.tool-grid .btn{justify-content:flex-start;white-space:normal;height:auto;min-height:26px;padding-top:3px;padding-bottom:3px;text-align:left;line-height:1.25}
 .sel-desc{font-size:12px;color:var(--text-2);margin:8px 0 0;line-height:1.4}
 .stage canvas.alpha[data-matte=white]{background:#fff}.stage canvas.alpha[data-matte=black]{background:#000}.stage canvas.alpha[data-matte=gray]{background:#808080}
 .curve-cv{display:block;width:100%;aspect-ratio:1;max-width:280px;margin:8px 0 4px;border:1px solid var(--line);border-radius:6px;touch-action:none;cursor:crosshair;forced-color-adjust:none}
@@ -350,7 +359,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 .mask-list{display:flex;flex-direction:column;gap:3px;margin-top:10px}
 .mask-item{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--text);text-align:left}
 .mask-item:hover{background:var(--hover)}.mask-item .n{font-weight:600}.mask-item .d{font-size:11.5px;color:var(--text-3)}
-.mask-item[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-text)}.mask-item[aria-pressed=true] .d{color:inherit}
+.mask-item[aria-pressed=true]{border-color:var(--accent-text);background:var(--accent-soft);color:var(--accent-text)}.mask-item[aria-pressed=true] .d{color:inherit}
 .insp-body h4.mask-head{margin:14px 0 0;font-size:12.5px}
 @media (forced-colors:active){.mask-item[aria-pressed=true]{outline:2px solid Highlight}}
 @media (forced-colors:active){.seg button[aria-pressed=true]{outline:2px solid Highlight;outline-offset:-2px}}
@@ -473,7 +482,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <button type="button" class="tb drw" id="fileBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="filepanel">File</button>
 <div id="drawers"></div>
 </div>
-<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
+<button type="button" class="tile search-tile" id="paletteBtn" aria-label="Cerca comandi, Alt Q" aria-haspopup="dialog" aria-keyshortcuts="Alt+Q" data-tip="Cerca comandi (Alt+Q)"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">Alt Q</kbd></button>
 <button type="button" class="tile primary-tile" id="saveTop" aria-keyshortcuts="Control+S" data-tip="Esporta la foto (Ctrl+S)"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg><span id="saveTopLabel">Esporta</span></button>
 </header>
 <div class="drawer" id="drawer" role="group" hidden></div>
@@ -487,7 +496,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <section class="viewer tile" id="photoViewer" aria-labelledby="viewTitle">
 <h2 class="sr-only" id="viewTitle">Foto</h2>
 <div class="stage" id="stage">
-<canvas id="photo" tabindex="0" role="img" aria-label="Foto" aria-describedby="photoHint" hidden></canvas>
+<canvas id="photo" tabindex="0" role="application" aria-roledescription="foto" aria-label="Foto" aria-describedby="photoHint" hidden></canvas>
 <canvas id="photoAnts" class="overlay" aria-hidden="true" hidden></canvas><canvas id="photoOver" class="overlay" aria-hidden="true" hidden></canvas>
 <span class="stage-badge" id="compareBadge" hidden>Originale</span>
 <div class="photo-empty" id="photoEmpty"><div><b>Apri una foto per iniziare</b>JPEG, PNG, WebP, AVIF o GIF: puoi anche trascinarla qui. La foto resta sul tuo dispositivo e l’originale non viene mai modificato.<div class="row"><button type="button" class="btn primary" data-action="open">Apri una foto…</button></div></div></div>
@@ -501,7 +510,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </section>
 <aside class="adjust pane tile" id="adjPane" aria-labelledby="adjTitle">
 <div class="pane-head"><h2 id="adjTitle">Regolazioni</h2><button type="button" class="btn sm" data-action="resetAll">Ripristina</button></div>
-<div class="hist-box"><canvas class="hist" id="hist" aria-hidden="true"></canvas><p class="hist-text" id="histText">Nessuna foto aperta.</p></div>
+<div class="hist-box"><div class="hist-nav" id="histNav" tabindex="0" role="application" aria-roledescription="istogramma" aria-label="Istogramma della foto" aria-describedby="histText histKeys"><canvas class="hist" id="hist" aria-hidden="true"></canvas></div><p class="hist-text" id="histText">Nessuna foto aperta.</p></div>
 <div class="step-head" id="stepHead" hidden></div>
 <div class="insp-body" id="adjBody"></div>
 </aside>
@@ -510,7 +519,7 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <aside class="plans pane tile" id="layPane" aria-labelledby="layTitle">
 <div class="pane-head"><h2 id="layTitle">Livelli</h2><span class="pane-count" id="layCount"></span></div>
 <p class="pane-hint" id="layHint">Dall’oggetto più in alto a quello più in basso. Alt+Maiusc+frecce lo porta sopra o sotto gli altri.</p>
-<div class="lb" id="layList" role="listbox" aria-labelledby="layTitle" aria-describedby="layKeys" tabindex="0"></div>
+<div class="lb" id="layList" role="listbox" aria-multiselectable="true" aria-labelledby="layTitle" aria-describedby="layKeys" tabindex="0"></div>
 </aside>
 <section class="viewer tile" id="drawViewer" aria-labelledby="sheetTitle">
 <h2 class="sr-only" id="sheetTitle">Foglio</h2>
@@ -535,9 +544,10 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 <button type="button" class="st-btn" id="helpBtn" aria-haspopup="dialog"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Informazioni</span></button>
 </footer>
 </div>
-<p id="photoHint" class="sr-only">Foto con le regolazioni applicate. Alt+Maiusc+I descrive la foto e la sua luce, la barra rovesciata mostra l’originale, Maiusc+F10 apre il menu.</p>
+<p id="photoHint" class="sr-only">Foto con le regolazioni applicate. Alt+Maiusc+I descrive la foto, Alt+Maiusc+D le zone, i colori e la dominante, Alt+Maiusc+L la luce, Alt+Maiusc+O il confronto con l’originale; X esplora la foto con le frecce; la barra rovesciata mostra l’originale, Maiusc+F10 apre il menu.</p>
 <p id="toolHint" class="sr-only"></p>
-<p id="sheetHint" class="sr-only">Frecce per spostare l’oggetto scelto di un pixel, con Maiusc di dieci; Ctrl più frecce per cambiarne le dimensioni. PgSu e PgGiù scelgono l’oggetto sopra o sotto, Invio porta alle proprietà, Esc toglie la scelta, Canc elimina l’oggetto, Maiusc+F10 apre il menu. Più e meno cambiano lo zoom, zero mostra tutto il foglio. Alt+Maiusc+I descrive il foglio.</p>
+<p id="histKeys" class="sr-only">Frecce a destra e a sinistra per le 16 fasce di tono, Su e Giù per luminosità, rosso, verde e blu, Home e Fine per il nero e il bianco pieni, T per la tabella, D per la descrizione, S per ascoltarlo e Maiusc+S per i tre colori, Esc per fermare l’ascolto o tornare alla foto.</p>
+<p id="sheetHint" class="sr-only">Frecce per spostare l’oggetto scelto di un pixel, con Maiusc di dieci; Ctrl più frecce per cambiarne le dimensioni. PgSu e PgGiù scelgono l’oggetto sopra o sotto, Invio porta alle proprietà, Esc toglie la scelta, Canc elimina l’oggetto, Maiusc+F10 apre il menu. Più e meno cambiano lo zoom, zero mostra tutto il foglio. Alt+Maiusc+I descrive il foglio e l’oggetto scelto, Alt+Maiusc+R i suoi dintorni, Alt+Maiusc+D la composizione.</p>
 <p id="layKeys" class="sr-only">Frecce su e giù per scegliere un oggetto, Alt+Maiusc più frecce per portarlo sopra o sotto gli altri, Invio per le proprietà, F2 per rinominarlo, Canc per eliminarlo, Maiusc+F10 per il menu.</p>
 <p id="planKeys" class="sr-only">Frecce su e giù per scegliere un piano, Invio per iniziarlo dal primo passo.</p>
 <div class="msg" id="toast" role="status" aria-atomic="true" aria-live="polite"></div>
@@ -577,8 +587,9 @@ const baseName=name=>String(name||'').replace(IMG_EXT,'');
 const extName=(name,ext)=>`${safeFileName(baseName(name))}.${ext}`;
 function download(content,fileName,mime){const payload=content instanceof Blob?content:new Blob([content],{type:mime||'application/octet-stream'}),url=URL.createObjectURL(payload),link=Object.assign(document.createElement('a'),{href:url,download:fileName});link.style.display='none';document.body.append(link);link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);link.remove()}
 // Numeri all'italiana: quelli scritti dall'utente con la virgola o il punto, quelli mostrati con la virgola,
-// il segno meno tipografico e, per le regolazioni, il segno più.
-const num=v=>{const s=String(v??'').trim().replace(/\s/g,'').replace(/−/g,'-').replace(',','.');return s===''?NaN:Number(s)};
+// il segno meno tipografico e, per le regolazioni, il segno più. Il punto tra gruppi di tre cifre separa le migliaia
+// («1.200» è milleduecento), come lo mostra fmtInt; altrimenti è la virgola dei decimali («1.5» è uno e mezzo).
+const num=v=>{let s=String(v??'').trim().replace(/\s/g,'').replace(/−/g,'-');if(/^-?[1-9]\d{0,2}(\.\d{3})+(,\d*)?$/.test(s))s=s.replace(/\./g,'');s=s.replace(',','.');return s===''?NaN:Number(s)};
 const fmtNum=(n,d=1)=>Number(n).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).replace(/^-/,'−');
 const fmtInt=n=>Math.round(n).toLocaleString('it-IT');
 const fmtSigned=(n,d=0)=>(n>0?'+':'')+fmtNum(n,d);
@@ -586,11 +597,24 @@ const fmtPct=(f,d=0)=>fmtNum(f*100,d)+'%';
 const fmtBytes=n=>n>=1e9?fmtNum(n/1e9,2)+' GB':n>=1e6?fmtNum(n/1e6,1)+' MB':fmtInt(n/1e3)+' kB';
 // Annunci per screen reader, finestre di dialogo accessibili, tooltip e preferenze di visualizzazione.
 const ICON=(name,cls='ico')=>!name?'<span class="ico" aria-hidden="true"></span>':name.startsWith('t:')?`<span class="ti-text" aria-hidden="true">${name.slice(2)}</span>`:`<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
-let toastTimer;
-// Messaggio temporaneo, letto dagli screen reader: si svuota e si riscrive perché venga annunciato anche se uguale.
-function toast(message){const box=$('toast');clearTimeout(toastTimer);box.textContent='';setTimeout(()=>{box.textContent=message;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,String(message).length*55))}
-// Con join il messaggio si aggiunge a quello appena annunciato invece di sostituirlo (per esempio un avviso dopo Annulla).
-let liveTimer,lastSaid={t:0,msg:''};function announce(msg,{join=false}={}){const el=$('srLive');if(join&&Date.now()-lastSaid.t<800)msg=lastSaid.msg+' '+msg;lastSaid={t:Date.now(),msg};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{el.textContent=msg},70)}
+// I messaggi per lo screen reader si scrivono con un piccolo ritardo, dopo aver svuotato la regione, perché vengano letti
+// anche se uguali. Quelli che arrivano mentre uno aspetta si accodano: un messaggio dettagliato non viene coperto da uno
+// generico arrivato subito dopo. Solo lo stesso tasto premuto di nuovo (le frecce tenute premute) sostituisce il suo
+// messaggio di prima, che non è ancora stato letto. spoken conta i messaggi: runCommand sa se l'azione ha già parlato.
+let spoken=0,keyAct={seq:0,sig:''};
+addEventListener('keydown',e=>{keyAct={seq:keyAct.seq+1,sig:[e.ctrlKey||e.metaKey,e.altKey,e.shiftKey,e.key].join()}},true);
+addEventListener('pointerdown',()=>{keyAct={seq:keyAct.seq+1,sig:'puntatore'}},true);
+const queueSay=(list,msg)=>{const {seq,sig}=keyAct;list=list.filter(p=>p.seq===seq||p.sig!==sig);if(list.at(-1)?.msg!==msg)list.push({msg,seq,sig});return list};
+// I messaggi accodati diventano una frase dopo l'altra: si mette il punto a quelli che non ce l'hanno.
+const sayJoin=list=>list.map(p=>p.msg).reduce((a,m)=>a?a+(/[.!?…:;]$/.test(a)?' ':'. ')+m:m,'');
+let toastTimer,toastWait=null,toastList=[];
+// Messaggio temporaneo, letto dagli screen reader: resta a schermo in proporzione alla lunghezza.
+function toast(message){message=String(message??'').trim();if(!message)return;spoken++;const box=$('toast');clearTimeout(toastTimer);clearTimeout(toastWait);toastList=queueSay(toastList,message);const text=sayJoin(toastList);box.textContent='';
+ toastWait=setTimeout(()=>{toastList=[];box.textContent=text;box.classList.add('show')},40);toastTimer=setTimeout(()=>box.classList.remove('show'),Math.max(4200,text.length*55))}
+// Con join il messaggio si aggiunge anche a quello appena letto, entro 800 ms (per esempio un avviso dopo Annulla).
+let liveTimer,liveList=[],lastSaid={t:0,msg:''};
+function announce(msg,{join=false}={}){msg=String(msg??'').trim();if(!msg)return;spoken++;const el=$('srLive');if(!liveList.length&&join&&Date.now()-lastSaid.t<800)liveList=[{msg:lastSaid.msg,seq:-1,sig:''}];
+ liveList=queueSay(liveList,msg);const text=sayJoin(liveList);lastSaid={t:Date.now(),msg:text};el.textContent='';clearTimeout(liveTimer);liveTimer=setTimeout(()=>{liveList=[];el.textContent=text},70)}
 const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden],.hidden')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body)t.focus({preventScroll:true})}
@@ -617,7 +641,10 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
  (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
- $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad;$('dlgErr').textContent=err.msg;if(err.field)$('dlg_'+err.field)?.focus();return}finish(v)};
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){const err=typeof bad==='string'?{msg:bad}:bad,box=$('dlgErr'),f=err.field&&$('dlg_'+err.field);box.textContent='';setTimeout(()=>{box.textContent=err.msg},60);
+  for(const el of $$('[aria-invalid]',pane))el.removeAttribute('aria-invalid');if(f){f.setAttribute('aria-invalid','true');f.setAttribute('aria-describedby',[...new Set([...(f.getAttribute('aria-describedby')||'').split(' ').filter(Boolean),'dlgErr'])].join(' '));f.focus()}return}finish(v)};
+ // Correggendo il campo il messaggio d'errore sparisce.
+ $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute('aria-invalid')){e.target.removeAttribute('aria-invalid');$('dlgErr').textContent=''}});
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);
@@ -638,9 +665,22 @@ function applyPrefs(){document.documentElement.dataset.theme=prefs.theme==='dark
 let palette={};
 function themeChanged(){const probe=document.createElement('span');document.body.append(probe);const read=v=>{probe.style.color=`var(${v})`;return getComputedStyle(probe).color};palette=Object.fromEntries(['--hist-bg','--hist-l','--hist-r','--hist-g','--hist-b','--hist-clip','--accent','--text-3','--line'].map(v=>[v.slice(2),read(v)]));probe.remove();redrawAll?.()}
 let redrawAll=null;
+// Suoni senza file, con Web Audio, sull'idea dei grafici di Ufficio: note da sinistra a destra nello spazio stereo. Ogni
+// parte ha i valori da 0 a 1 (l'altezza, da 220 a 880 Hz; null è una pausa), se vuole le posizioni nello stereo (pans, da
+// −1 a 1), la forma d'onda, un nome detto quando comincia e le note con un colpo breve in più (marks). toneHalt ferma.
+let toneStop=null;
+function toneHalt(){if(!toneStop)return false;toneStop();toneStop=null;return true}
+function toneSeq(parts,{dur=.08,gap=.015,pause=.45,say='',end='Fine dell’ascolto'}={}){toneHalt();const AC=window.AudioContext||window.webkitAudioContext;if(!AC){toast('Il browser non può suonare: manca Web Audio');return false}
+ const ctx=new AC(),timers=[];let t=ctx.currentTime+.5;
+ const note=(f,at,len,pan,wave,vol)=>{const o=ctx.createOscillator(),g=ctx.createGain(),p=ctx.createStereoPanner?ctx.createStereoPanner():null;o.type=wave;o.frequency.value=f;g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(vol,at+.012);g.gain.linearRampToValueAtTime(0,at+len);o.connect(g);if(p){p.pan.value=clamp(pan,-1,1);g.connect(p);p.connect(ctx.destination)}else g.connect(ctx.destination);o.start(at);o.stop(at+len+.03)};
+ for(const part of parts){const n=part.vals.length;if(part.label){const at=t;timers.push(setTimeout(()=>announce(part.label),Math.max(0,(at-ctx.currentTime-.4)*1000)))}
+  part.vals.forEach((v,i)=>{const pan=part.pans?.[i]??(n>1?-.8+1.6*i/(n-1):0);if(v!=null)note(220*4**clamp(v,0,1),t,dur,pan,part.wave||'sine',.2);if(part.marks?.has(i))note(1760,t,.03,pan,'square',.05);t+=dur+gap});t+=pause}
+ if(say)announce(say);const stop=setTimeout(()=>{toneStop=null;ctx.close();announce(end)},(t-ctx.currentTime)*1000+200);toneStop=()=>{clearTimeout(stop);timers.forEach(clearTimeout);ctx.close()};return true}
 // Lavori lunghi: messaggio nella barra di stato e cursore di attesa; gli errori diventano un messaggio leggibile.
 async function work(label,fn){status(label+'…');document.body.style.cursor='progress';await new Promise(r=>setTimeout(r,30));try{return await fn()}catch(e){console.error(e);toast(e.message||String(e));return null}finally{document.body.style.cursor='';status()}}
-function status(text){$('statusText').textContent=text||'Pronto'}
+// Il testo della barra di stato si annuncia anche (passa da announce, che accoda), salvo quiet: per esempio le
+// percentuali di un lavoro lungo, che ha già i suoi annunci ogni tanto. Senza testo si legge «Pronto».
+function status(text,{quiet=false}={}){$('statusText').textContent=text||$('statusText').dataset.idle||'Pronto';if(text&&!quiet)announce(text)}
 // Bozze nel browser con IndexedDB: la foto aperta con le sue regolazioni e il piano in corso, il disegno con le sue
 // immagini restano sul dispositivo
 // e tornano alla prossima apertura. Ogni app salva solo quando è cambiata, SAVE_DELAY dopo l'ultima modifica.
@@ -663,8 +703,10 @@ const dbKeys=()=>storeCall('readonly',st=>st.getAllKeys());
 function schedulePersist(app=state.mode){if(suppressAutosave)return;dirtyApps.add(app);clearTimeout(draftTimer);$('saveState').textContent='Salvataggio bozza…';draftTimer=setTimeout(persistNow,SAVE_DELAY)}
 async function persistNow(){clearTimeout(draftTimer);const label=$('saveState'),apps=[...dirtyApps];dirtyApps.clear();let note='';
  try{for(const app of apps)note=(await (app==='immagini'?persistPhoto():persistDrawing()))||note;await dbPut('ui',{mode:state.mode});
-  label.textContent=note||'Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(note)status(note)}
- catch(e){console.warn('Bozza non salvata',e);label.textContent='Bozza non salvata';status('Bozza non salvata: esporta la foto per non perdere il lavoro')}}
+  label.textContent=note||'Bozza salvata alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(note)status(note);draftFailed=false}
+ // Una bozza che non si salva si annuncia una volta, finché non torna a salvarsi.
+ catch(e){console.warn('Bozza non salvata',e);label.textContent='Bozza non salvata';const msg=apps.includes('immagini')?'Bozza non salvata: esporta la foto per non perdere il lavoro':'Bozza non salvata: salva il disegno in SVG per non perdere il lavoro';status(msg,{quiet:draftFailed});draftFailed=true}}
+let draftFailed=false;
 // Chiudendo o ricaricando la pagina si salva subito quello che aspettava SAVE_DELAY. Una scrittura alla volta, ognuna
 // in attesa della fine della precedente, non fa in tempo: la pagina sparisce prima. Così tutte le scritture entrano in
 // una transazione sola, aperta qui; i passi di persistNow si risolvono subito e commit la chiude prima che la pagina sparisca.
@@ -685,6 +727,11 @@ def('i','Foto',[
  ['compare','Mostra l’originale','compare','\\',{short:'Originale',toggle:()=>I.compare}],
  ['resetAll','Ripristina la foto com’era','history','Ctrl+Maiusc+R',{g:1,short:'Ripristina tutto'}],
  ['readStatus','Descrivi la foto e la sua luce','speak','Alt+Maiusc+I',{g:1,short:'Descrivi'}],
+ ['readZones','Descrivi zone, colori e dominante (due volte: la tabella)','speak','Alt+Maiusc+D',{g:1,short:'Zone e colori'}],
+ ['readLight','Descrivi la luce (due volte: l’istogramma da percorrere)','stats','Alt+Maiusc+L',{g:1,short:'Luce'}],
+ ['readCompare','Confronta con l’originale a parole','compare','Alt+Maiusc+O',{g:1,short:'Confronta'}],
+ ['toolExplore','Esplora la foto: un cursore che dice che cosa c’è sotto','explore','X',{ctx:'photo',short:'Esplora',quiet:1,toggle:()=>T.tool==='explore'}],
+ ['effectSay','Annuncia l’effetto delle modifiche','speak','',{short:'Annuncia l’effetto',toggle:()=>prefs.effectSay!==false}],
  ['sendToDraw','Usa la foto in Disegno','draw','',{short:'Usa in Disegno'}],
  ['photoBack','Torna a Disegno con le modifiche all’immagine','draw','',{short:'Torna a Disegno'}]]);
 def('i','Inquadratura',[
@@ -798,7 +845,10 @@ def('d','Oggetto',[
  ['alignTop','Allinea in alto, al foglio o tra gli oggetti scelti','alignT','',{short:'In alto'}],
  ['alignMiddle','Centra in verticale, nel foglio o tra gli oggetti scelti','alignM','',{short:'Al centro'}],
  ['alignBottom','Allinea in basso, al foglio o tra gli oggetti scelti','alignB','',{short:'In basso'}],
- ['readDraw','Descrivi il foglio e l’oggetto scelto','speak','Alt+Maiusc+I',{g:1,short:'Descrivi'}]]);
+ ['readDraw','Descrivi il foglio e l’oggetto scelto','speak','Alt+Maiusc+I',{g:1,short:'Descrivi'}],
+ ['readAround','Descrivi i dintorni dell’oggetto scelto: posizione, vicini, sovrapposizioni','speak','Alt+Maiusc+R',{g:1,short:'Dintorni'}],
+ ['readCompo','Descrivi la composizione del foglio (due volte: la descrizione completa)','sheet','Alt+Maiusc+D',{g:1,short:'Composizione'}],
+ ['listenShape','Ascolta la forma dell’oggetto scelto','speak','',{short:'Ascolta la forma'}]]);
 def('d','Foglio',[
  ['sheetSize','Formato del foglio','sheet','',{short:'Formato'}],
  ['sheetDesc','Descrizione per chi non vede il disegno','a11y','',{short:'Descrizione'}],
@@ -890,9 +940,10 @@ const available=c=>c.modes.includes(state.mode[0]);
 function focusContext(){const a=document.activeElement;if(!a||a===document.body)return 'other';if(a.id==='photo')return 'photo';if(a.id==='sheetWrap')return 'sheet';if(a.classList.contains('lb'))return 'list';if(a.matches('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select'))return 'input';return 'other'}
 function findShortcut(e,ctx){let fallback=null;for(const c of Object.values(C)){const spec=keysOf(c);if(!spec||!available(c))continue;if(c.ctx&&c.ctx!==ctx)continue;if(ctx==='input'&&!c.g)continue;if(parsedKeys(spec).some(k=>keyMatch(e,k))){if(c.ctx===ctx)return c;fallback??=c}}return fallback}
 const safe=fn=>{try{return fn()}catch(e){return false}};
-async function runCommand(id){const c=C[id];if(!c)return;if(!available(c)){toast('«'+c.label+'» non è disponibile in '+appName());return}hideTip();
+// Dopo un comando a interruttore si dice se è attivo, a meno che l'azione non abbia già parlato con un messaggio suo.
+async function runCommand(id){const c=C[id];if(!c)return;if(!available(c)){toast('«'+c.label+'» non è disponibile in '+appName());return}hideTip();const said=spoken;
  try{await handleAction(id)}catch(e){console.error(e);toast(e.message||String(e));return}
- if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}
+ refreshToggles();if(spoken!==said)return;if(c.toggle&&!c.quiet)announce(c.label+(safe(c.toggle)?' attivato':' disattivato'));else if(c.say)announce(c.say)}
 let toggleTimer;function refreshToggles(){clearTimeout(toggleTimer);toggleTimer=setTimeout(()=>{for(const b of $$('#tools [aria-pressed][data-action],#drawer [aria-pressed][data-action],#viewbar [aria-pressed][data-action],#adjBody [aria-pressed][data-action]')){const c=C[b.dataset.action];if(c?.toggle)b.setAttribute('aria-pressed',!!safe(c.toggle))}},40)}
 // Ricerca comandi (Alt+Q): combobox con elenco filtrato, navigabile con le frecce.
 let palItems=[],palIdx=0,palPrev=null;
@@ -918,10 +969,10 @@ function menuAnchor(action){const el=document.querySelector(`#drawer [data-actio
 // Scorciatoie che dipendono dall'area con il focus: non passano dal registro, ma la guida le elenca.
 const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Strumenti e cassetti della barra','← → poi Invio o ↓'],['Chiudi il cassetto','Esc'],['Larghezza di un riquadro, sulla fuga','← → (con Maiusc di più)'],['Riduci il riquadro a tessera, sulla fuga','Invio'],['Chiudi finestre e menu','Esc']]]],
  i:[['Sulla foto',[['Descrivi la foto e la sua luce','Alt+Maiusc+I'],['Mostra l’originale finché non premi di nuovo','\\'],['Menu della foto','Maiusc+F10']]],['Nei piani',[['Scegli un piano','↑ ↓'],['Primo o ultimo piano','Home / Fine'],['Inizia il piano dal primo passo','Invio']]],['Nei cursori delle regolazioni',[['Cambia il valore di un passo','← → o ↑ ↓'],['Cambia il valore di un passo ampio','PgSu / PgGiù'],['Valore minimo o massimo','Home / Fine'],['Riporta a zero','Canc']]]],
- d:[['Sul foglio',[['Sposta l’oggetto scelto di un pixel (con Maiusc di dieci)','← → ↑ ↓'],['Cambia larghezza e altezza (per un testo la dimensione)','Ctrl+← → ↑ ↓'],['Scegli l’oggetto sopra o sotto','PgSu / PgGiù'],['Vai alle proprietà dell’oggetto','Invio'],['Togli la scelta: proprietà del foglio','Esc'],['Elimina l’oggetto','Canc'],['Zoom avanti, indietro, tutto il foglio','+ / − / 0'],['Menu dell’oggetto','Maiusc+F10']]],['Nei livelli',[['Scegli l’oggetto sopra o sotto','↑ ↓'],['Primo o ultimo','Home / Fine'],['Porta l’oggetto sopra o sotto gli altri','Alt+Maiusc+↑ / Alt+Maiusc+↓'],['Vai alle proprietà','Invio'],['Rinomina','F2'],['Elimina','Canc']]],['Nelle proprietà',[['Conferma un valore scritto','Invio o Tab'],['Torna ai livelli','Esc']]]]};
+ d:[['Sul foglio',[['Sposta l’oggetto scelto di un pixel (con Maiusc di dieci)','← → ↑ ↓'],['Cambia larghezza e altezza (le immagini mantengono le proporzioni; per un testo la dimensione)','Ctrl+← → ↑ ↓'],['Scegli l’oggetto sopra o sotto','PgSu / PgGiù'],['Vai alle proprietà dell’oggetto','Invio'],['Togli la scelta: proprietà del foglio','Esc'],['Elimina l’oggetto','Canc'],['Zoom avanti, indietro, tutto il foglio','+ / − / 0'],['Menu dell’oggetto','Maiusc+F10']]],['Nei livelli',[['Scegli l’oggetto sopra o sotto','↑ ↓'],['Primo o ultimo','Home / Fine'],['Porta l’oggetto sopra o sotto gli altri','Alt+Maiusc+↑ / Alt+Maiusc+↓'],['Vai alle proprietà','Invio'],['Rinomina','F2'],['Elimina','Canc']]],['Nelle proprietà',[['Conferma un valore scritto','Invio o Tab'],['Torna ai livelli','Esc']]]]};
 function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${appName()}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
-async function help(){await modal('Tassello Grafica',`<p><b>Tassello Grafica 1.2.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Immagini</b>, per migliorare le foto passo per passo, e <b>Disegno</b>, per comporre forme, testi e immagini e salvarli in SVG. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica e installare Tassello Grafica come app, che si aggiorna da sola. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Grafica non sostituisce i programmi di fotoritocco professionali e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (una foto per i social, un ritratto, un documento da rendere leggibile, un volantino, un’immagine per un post) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie. Alt+Maiusc+I descrive la foto: dimensioni, inquadratura, luminosità media, quanta parte è bruciata nelle luci o chiusa nelle ombre, e le regolazioni cambiate. Ogni regolazione è un cursore con il suo nome e il suo valore; Canc la riporta a zero. Gli strumenti sulla foto si usano anche da tastiera: le frecce muovono un cursore che dice il colore sotto il punto, Invio usa il punto, Spazio abbassa il pennello; ogni selezione, maschera e scontorno si può far descrivere (Alt+Maiusc+S, M, B) e il contorno della selezione è bianco e nero, più spesso con il contrasto elevato. Una selezione si può anche scrivere con le misure. L’istogramma è descritto a parole sotto il grafico, e se una modifica brucia le luci o chiude le ombre lo senti subito. In Disegno i livelli sono un elenco che si scorre con le frecce, sul foglio le frecce spostano l’oggetto scelto e Ctrl+frecce ne cambia le dimensioni, ogni proprietà ha un campo con il suo nome, Alt+Maiusc+I descrive il foglio e l’oggetto scelto, e spostando la scelta con le frecce si sente a che cosa si è allineata. I nodi dei tracciati sono un elenco nelle proprietà, Alt+Maiusc+P descrive il tracciato a parole, e un cursore sul foglio disegna da tastiera con la Penna, la Matita e il Pennello. La verifica dell’accessibilità controlla il contrasto dei testi (anche di quelli diventati tracciati) e la descrizione del disegno, dove ricorda di scrivere i testi diventati tracciati.</p><p><b>Immagini:</b> i <b>piani</b> ti guidano secondo quello che vuoi ottenere (foto per i social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro): un passo alla volta, solo i controlli che servono, con una proposta automatica da accettare o ritoccare. Con <b>Tutti i controlli</b> lavori senza piano. Inquadratura: rotazione, riflessione, raddrizzamento e formati pronti (quadrato, 4:5, 9:16, 3:2, 16:9, A4). Luce: esposizione, contrasto, alte luci, ombre, bianchi e neri. Colore: temperatura, tinta, vividezza e saturazione; curve per canale; tinta, saturazione e luminosità di otto colori; bianco e nero con il miscelatore. Dettaglio: chiarezza, foschia, nitidezza e riduzione del rumore. Vignettatura. Look pronti (bianco e nero, seppia, caldo, freddo, pellicola, vivace, tenue) e look importati da file LUT .cube, con la loro intensità. <b>Selezioni</b>: rettangolo, ellisse, lazo, lazo poligonale, pennello, bacchetta magica e intervallo di colore, da sfumare, espandere o rifinire sui contorni veri. <b>Maschere</b> con regolazioni loro: dalla selezione, a pennello, sfumature lineari e radiali. <b>Togli lo sfondo</b> sceglie il soggetto senza rete e senza intelligenza artificiale (fondo uniforme o GrabCut), con un riquadro intorno al soggetto e i tratti Tieni e Togli, che ricalcolano solo la zona intorno; il bordo segue i colori di capelli e pelo e si ripulisce dal colore del vecchio sfondo; dietro resta la trasparenza, un colore pieno o la foto sfocata. <b>Ritocco</b>: correttivo puntuale, timbro clone, occhi rossi. Le regolazioni si copiano da una foto e si incollano su un’altra. Apre JPEG, PNG, WebP, AVIF, GIF e BMP, le foto HEIC degli iPhone e, dei file RAW delle fotocamere, l’anteprima JPEG che vi ha messo la fotocamera; esporta JPEG, PNG o WebP alla dimensione che scegli; <b>Usa in Disegno</b> porta la foto nel foglio.</p><p><b>Disegno:</b> un foglio con i formati di oggi (post, quadrato, storia, 16:9, banner, A4, icona) o della misura che vuoi, con sfondo pieno o trasparente. Rettangoli, ellissi, poligoni, stelle, frecce, fumetti, linee con le estremità a freccia o a punto, testi su più righe, a capo nel riquadro o lungo una curva, e immagini (foto e SVG; le foto HEIC e l’anteprima dei RAW entrano nel foglio in JPEG, o in PNG se hanno la trasparenza); sulle foto le regolazioni e i look di Immagini e, aprendole con i suoi strumenti, selezioni, maschere locali, scontorno con Tieni e Togli e ritocco, che restano modificabili; un’immagine si può ritagliare dentro una forma o un tracciato. Tracciati con la Penna e lo strumento Nodi. <b>Converti in tracciato</b> vale per le forme e per i testi: le lettere diventano contorni presi dal file del carattere (tra quelli installati, con il permesso del browser, o scelto da te: .ttf, .otf o .ttc), con righe, allineamento, spaziatura, crenatura e curva com’erano, e il testo resta come descrizione per chi non vede. Unisci, sottrai, interseca ed escludi tra le forme; le linee restano linee: intersecate con una forma tengono i tratti dentro, sottratte (con la linea in fondo) quelli fuori, unite o escluse entrano aperte nel tracciato, con il contorno e senza riempimento. <b>Taglia con una linea</b> divide una forma lungo le linee che la attraversano da parte a parte. Matita a mano libera e Pennello che segue la pressione della penna, con pochi nodi già mentre disegni; <b>Semplifica il tracciato</b> ne toglie altri con la quantità che scegli, guardando il risultato; Gomma per i tratti. Sfumature, contorno tratteggiato, ombra, sfocatura e fusione. Scelta di più oggetti, gruppi, blocco, allineamento al foglio o tra gli oggetti, distribuzione e guide intelligenti; duplica, copia e incolla. Salva in SVG, che si apre in ogni browser e programma di grafica e che Disegno riapre modificabile, con titolo e descrizione per chi non vede; esporta PNG o JPEG.</p><p><b>Privacy:</b> foto e disegni restano nel browser e sul tuo computer; gli originali non vengono mai modificati. Il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Immagini lavora su una foto alla volta. Le foto HEIC si aprono solo se il sistema ha il decodificatore HEVC (su Windows l’estensione «Estensioni video HEVC»; altrimenti esportale in JPEG dal telefono o da Foto), e le HEIF fatte di più immagini sovrapposte non si ricompongono. Di un file RAW si apre l’anteprima JPEG che la fotocamera ha già sviluppato, con la sua misura, a volte più piccola della foto: non è uno sviluppo del RAW. Lo scontorno usa algoritmi classici: con soggetti che toccano i bordi, capelli sottili, vetro o sfondi dei colori del soggetto servono un riquadro o qualche tratto Tieni e Togli. L’anteprima è ridotta alla dimensione dello schermo e la foto intera viene calcolata all’esportazione. Il file esportato è in sRGB, a 8 bit per canale. In Disegno i testi usano i caratteri installati sul computer, quindi un SVG aperto altrove può mostrare un carattere diverso: per fissarli, convertili in tracciati. Per convertirli serve il permesso di leggere i caratteri installati (Chrome ed Edge) o il file del carattere; i caratteri variabili con contorni CFF2 non si leggono, e legature e varianti delle lettere non si applicano. Gli SVG di altri programmi entrano come immagini. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Grafica',`<p><b>Tassello Grafica 1.3.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Immagini</b>, per migliorare le foto passo per passo, e <b>Disegno</b>, per comporre forme, testi e immagini e salvarli in SVG. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica e installare Tassello Grafica come app, che si aggiorna da sola. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Grafica non sostituisce i programmi di fotoritocco professionali e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (una foto per i social, un ritratto, un documento da rendere leggibile, un volantino, un’immagine per un post) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie. Gli annunci non si coprono: un messaggio che arriva mentre un altro aspetta si accoda, e la barra di stato si sente. Le lettere hanno lo stesso significato in tutta la famiglia Tassello: Alt+Maiusc+I descrive ciò che hai davanti, Alt+Maiusc+D l’insieme, Alt+Maiusc+R le relazioni, Alt+Maiusc+L la luce, Alt+Maiusc+O il confronto con l’originale, e X apre lo strumento Esplora.</p><p><b>Immagini senza vederle:</b> Alt+Maiusc+I descrive la foto: dimensioni, inquadratura, luce e regolazioni. Quando ti fermi su un cursore, un look, una proposta o Annulla senti l’effetto, con i valori di prima e di dopo («Luminosità media da 42% a 51%», «Luci bruciate da 2,1% a 0,3%: recuperate»); se una modifica brucia le luci, anche in un colore solo, o chiude le ombre, l’effetto comincia con l’avviso. Si spegne con «Annuncia l’effetto delle modifiche». Alt+Maiusc+L dice la luce a parole e, premuto di nuovo, porta all’istogramma, che si percorre con le frecce in 16 fasce per luminosità, rosso, verde e blu, si apre in tabella con T e si ascolta come toni con S. Alt+Maiusc+D descrive le zone della foto per terzi, i colori prevalenti e la dominante, con il valore di Temperatura o di Tinta che la toglierebbe; premuto di nuovo apre la tabella delle zone. Alt+Maiusc+O confronta la foto con l’originale, e la barra rovesciata dice la luce di prima e di dopo. Lo strumento Esplora (X sulla foto) muove un cursore che non cambia niente e dice colore, luce, parti bruciate o chiuse, soggetto e maschere; Alt+Maiusc+frecce lo portano al bordo successivo. Ogni regolazione è un cursore con il suo nome e il suo valore; Canc la riporta a zero. Gli strumenti sulla foto si usano anche da tastiera: Invio usa il punto, Spazio abbassa il pennello; ogni selezione, maschera e scontorno si può far descrivere (Alt+Maiusc+S, M, B) e il contorno della selezione è bianco e nero, più spesso con il contrasto elevato. Una selezione si può anche scrivere con le misure, e quelle a due punti si fanno anche con due clic, senza trascinare.</p><p><b>Disegno senza vederlo:</b> i livelli sono un elenco che si scorre con le frecce, e Ctrl+frecce con Ctrl+Spazio scelgono più oggetti anche non vicini; sul foglio le frecce spostano l’oggetto scelto e Ctrl+frecce ne cambia le dimensioni (le immagini mantengono le proporzioni, e una deformata lo dice). Ogni proprietà ha un campo con il suo nome, e un valore sbagliato resta nel campo con il messaggio sotto. Gli oggetti si descrivono per quello che sono (cerchio, quadrato, triangolo con la punta in alto, una linea che sale verso destra e dove punta la sua freccia) e con i colori per nome, e i campi colore dicono il nome del colore e, per un testo, il contrasto con quello che ha sotto. Alt+Maiusc+I descrive il foglio e l’oggetto scelto; Alt+Maiusc+R i suoi dintorni: dove sta nel foglio, i vicini con le distanze, che cosa copre o lo copre, gli allineamenti. Spostandolo con le frecce si sente quando si allinea, quando comincia o smette di coprire un altro oggetto e quando esce dal foglio. Alt+Maiusc+D descrive la composizione (zone, margini, equilibrio, allineamenti, sovrapposizioni, ordine di lettura dei testi) e, premuto di nuovo, la apre in una finestra. «Ascolta la forma» suona il contorno dell’oggetto scelto. I nodi dei tracciati sono un elenco nelle proprietà, Alt+Maiusc+P descrive il tracciato a parole, e un cursore sul foglio disegna da tastiera con la Penna, la Matita e il Pennello. La verifica dell’accessibilità controlla il contrasto dei testi (anche di quelli diventati tracciati), la descrizione del disegno, dove ricorda di scrivere i testi diventati tracciati, e gli oggetti fuori dal foglio o coperti del tutto. In Immagini, Annulla dice anche il valore a cui si torna.</p><p><b>Immagini:</b> i <b>piani</b> ti guidano secondo quello che vuoi ottenere (foto per i social, ritratto, paesaggio, documento o scontrino, prodotto su fondo chiaro): un passo alla volta, solo i controlli che servono, con una proposta automatica da accettare o ritoccare. Con <b>Tutti i controlli</b> lavori senza piano. Inquadratura: rotazione, riflessione, raddrizzamento e formati pronti (quadrato, 4:5, 9:16, 3:2, 16:9, A4). Luce: esposizione, contrasto, alte luci, ombre, bianchi e neri. Colore: temperatura, tinta, vividezza e saturazione; curve per canale; tinta, saturazione e luminosità di otto colori; bianco e nero con il miscelatore. Dettaglio: chiarezza, foschia, nitidezza e riduzione del rumore. Vignettatura. Look pronti (bianco e nero, seppia, caldo, freddo, pellicola, vivace, tenue) e look importati da file LUT .cube, con la loro intensità. <b>Selezioni</b>: rettangolo, ellisse, lazo, lazo poligonale, pennello, bacchetta magica e intervallo di colore, da sfumare, espandere o rifinire sui contorni veri. <b>Maschere</b> con regolazioni loro: dalla selezione, a pennello, sfumature lineari e radiali. <b>Togli lo sfondo</b> sceglie il soggetto senza rete e senza intelligenza artificiale (fondo uniforme o GrabCut), con un riquadro intorno al soggetto e i tratti Tieni e Togli, che ricalcolano solo la zona intorno; il bordo segue i colori di capelli e pelo e si ripulisce dal colore del vecchio sfondo; dietro resta la trasparenza, un colore pieno o la foto sfocata. <b>Ritocco</b>: correttivo puntuale, timbro clone, occhi rossi. Le regolazioni si copiano da una foto e si incollano su un’altra. Apre JPEG, PNG, WebP, AVIF, GIF e BMP, le foto HEIC degli iPhone e, dei file RAW delle fotocamere, l’anteprima JPEG che vi ha messo la fotocamera; esporta JPEG, PNG o WebP alla dimensione che scegli; <b>Usa in Disegno</b> porta la foto nel foglio.</p><p><b>Disegno:</b> un foglio con i formati di oggi (post, quadrato, storia, 16:9, banner, A4, icona) o della misura che vuoi, con sfondo pieno o trasparente. Rettangoli, ellissi, poligoni, stelle, frecce, fumetti, linee con le estremità a freccia o a punto, testi su più righe, a capo nel riquadro o lungo una curva, e immagini (foto e SVG; le foto HEIC e l’anteprima dei RAW entrano nel foglio in JPEG, o in PNG se hanno la trasparenza); sulle foto le regolazioni e i look di Immagini e, aprendole con i suoi strumenti, selezioni, maschere locali, scontorno con Tieni e Togli e ritocco, che restano modificabili; un’immagine si può ritagliare dentro una forma o un tracciato. Tracciati con la Penna e lo strumento Nodi. <b>Converti in tracciato</b> vale per le forme e per i testi: le lettere diventano contorni presi dal file del carattere (tra quelli installati, con il permesso del browser, o scelto da te: .ttf, .otf o .ttc), con righe, allineamento, spaziatura, crenatura e curva com’erano, e il testo resta come descrizione per chi non vede. Unisci, sottrai, interseca ed escludi tra le forme; le linee restano linee: intersecate con una forma tengono i tratti dentro, sottratte (con la linea in fondo) quelli fuori, unite o escluse entrano aperte nel tracciato, con il contorno e senza riempimento. <b>Taglia con una linea</b> divide una forma lungo le linee che la attraversano da parte a parte. Matita a mano libera e Pennello che segue la pressione della penna, con pochi nodi già mentre disegni; <b>Semplifica il tracciato</b> ne toglie altri con la quantità che scegli, guardando il risultato; Gomma per i tratti. Sfumature, contorno tratteggiato, ombra, sfocatura e fusione. Scelta di più oggetti, gruppi, blocco, allineamento al foglio o tra gli oggetti, distribuzione e guide intelligenti; duplica, copia e incolla. Salva in SVG, che si apre in ogni browser e programma di grafica e che Disegno riapre modificabile, con titolo e descrizione per chi non vede; esporta PNG o JPEG.</p><p><b>Privacy:</b> foto e disegni restano nel browser e sul tuo computer; gli originali non vengono mai modificati. Il file esportato non contiene i dati della fotocamera né la posizione in cui è stata scattata la foto. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Immagini lavora su una foto alla volta. Le foto HEIC si aprono solo se il sistema ha il decodificatore HEVC (su Windows l’estensione «Estensioni video HEVC»; altrimenti esportale in JPEG dal telefono o da Foto), e le HEIF fatte di più immagini sovrapposte non si ricompongono. Di un file RAW si apre l’anteprima JPEG che la fotocamera ha già sviluppato, con la sua misura, a volte più piccola della foto: non è uno sviluppo del RAW. Lo scontorno usa algoritmi classici: con soggetti che toccano i bordi, capelli sottili, vetro o sfondi dei colori del soggetto servono un riquadro o qualche tratto Tieni e Togli. L’anteprima è ridotta alla dimensione dello schermo e la foto intera viene calcolata all’esportazione. Il file esportato è in sRGB, a 8 bit per canale. In Disegno i testi usano i caratteri installati sul computer, quindi un SVG aperto altrove può mostrare un carattere diverso: per fissarli, convertili in tracciati. Per convertirli serve il permesso di leggere i caratteri installati (Chrome ed Edge) o il file del carattere; i caratteri variabili con contorni CFF2 non si leggono, e legature e varianti delle lettere non si applicano. Gli SVG di altri programmi entrano come immagini. Le descrizioni della foto si misurano sull’anteprima, e la dominante si stima dai grigi: una scena di un colore solo, come un tramonto o un prato, può sembrare una dominante. In Disegno le sovrapposizioni si misurano sulle forme con una griglia di punti: per oggetti molto piccoli o sottili sono approssimate. L’istogramma e la forma si ascoltano con l’audio del browser. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
 // Aree raggiungibili con F6 e Maiusc+F6.
 function regions(){const l=[$('bar')];if(drawerName)l.push($('drawer'));const side=s=>panesOf(state.mode[0]).filter(id=>paneState(id).side===s).map(id=>{const st=paneState(id).st;return st==='open'?$(id):st==='tessera'?$(id+'Tes'):null});
  l.push(...side('left'),...(isImmagini()?[$('stage'),$('viewbar')]:[$('drawStage'),$('drawbar')]),...side('right'),$('statusbar'));return l.filter(el=>el&&(el.offsetWidth||el.offsetHeight))}
@@ -931,7 +982,7 @@ function cycleRegion(dir){const list=regions(),a=document.activeElement;let i=li
 // Barra: gli strumenti di tutti i giorni restano in vista, le categorie sono cassetti che si aprono sopra il lavoro
 // e si richiudono dopo il comando. Ogni cassetto elenca per gruppi i comandi del registro.
 const RIBBON={
- i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll readStatus'],['Piano','planMenu stepPrev stepNext planFree'],['Appunti','adjCopy adjPaste'],['Cronologia','undo redo']],
+ i:{Inizio:[['Foto','open export'],['Regolazioni','auto compare resetAll'],['Descrivi','readStatus readZones readLight readCompare toolExplore'],['Piano','planMenu stepPrev stepNext planFree'],['Appunti','adjCopy adjPaste'],['Cronologia','undo redo']],
   Inquadra:[['Ruota','rotateLeft rotateRight flipH'],['Formato','ratioMenu straighten resetGeometry']],
   Look:[['Look','lookMenu lutImport lookAmount lookOff']],
   Dettaglio:[['Curve','curveS curveAdd curveDel curveReset'],['Dettaglio','fxClarity fxDehaze fxSharpen fxNoise'],['Colore','bwToggle']],
@@ -939,11 +990,11 @@ const RIBBON={
   Maschere:[['Nuova','maskFromSel maskBrush maskLinear maskRadial'],['Maschera','maskPaint maskRedraw maskAddSel maskSubSel maskInvert'],['Gestisci','maskPrev maskNext maskHide maskOverlay maskRename maskDelete maskDescribe']],
   Ritocca:[['Ritocco','toolSpot toolClone toolRedEye'],['Ritocchi','retouchLast retouchClear']],
   Sfondo:[['Scontorno','cutAuto cutBox cutKeep cutDrop cutRecalc cutRemove'],['Sfondo','cutBgNone cutBgColor cutBgBlur cutColor'],['Vista','cutMatte cutDescribe']],
-  Vista:[['Confronto','compare'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
+  Vista:[['Confronto','compare readCompare effectSay'],['Tasselli','showPlans showAdjust layoutMenu layoutReset'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  d:{Inizio:[['Disegno','openDraw saveSvg exportDraw'],['Appunti','paste cut copy duplicateItem'],['Inserisci','addText addImage addRect addEllipse'],['Cronologia','undo redo']],
   Inserisci:[['Forme','addRect addEllipse addPolygon addStar addArrow addBubble'],['Linee','addLine addArrowLine'],['Testo','addText'],['Immagini','addImage']],
   Disegna:[['Strumenti','toolSelect toolNodes toolPen toolPencil toolBrush toolEraser'],['Nodi','nodeAdd nodeDelete nodeType pathClose readPath toPath simplifyPath'],['Combina','boolUnion boolSubtract boolIntersect boolExclude boolCut']],
-  Disponi:[['Scelta','selectAll groupItems ungroupItems lockItems hideItems'],['Ordine','bringFront sendBack forward backward'],['Allinea','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Distribuisci','distH distV smartGuides'],['Oggetto','duplicateItem deleteItem readDraw']],
+  Disponi:[['Scelta','selectAll groupItems ungroupItems lockItems hideItems'],['Ordine','bringFront sendBack forward backward'],['Allinea','alignLeft alignCenter alignRight alignTop alignMiddle alignBottom'],['Distribuisci','distH distV smartGuides'],['Oggetto','duplicateItem deleteItem'],['Descrivi','readDraw readAround readCompo listenShape']],
   Stile:[['Riempimento ed effetti','gradientItem shadowItem'],['Testo','textOnPath textOffPath']],
   Immagine:[['Immagine','imgEdit imgMasks imgCutout imgPhotoReset'],['Ritaglio','imgClip imgUnclip']],
   Foglio:[['Foglio','sheetSize sheetDesc newDraw'],['Accessibilità','a11yCheck']],
@@ -1013,8 +1064,8 @@ for(const [id,d] of Object.entries(PANES)){const el=$(id);
 // Disposizione: a sinistra dell'area centrale gli ordini 0, 2, 4…, a destra 102, 104…; la fuga sta tra riquadro e centro.
 function applyLayout(){for(const m of ['i','d']){const ids=panesOf(m);ids.filter(id=>paneState(id).side==='left').forEach((id,i)=>placePane(id,2*i));ids.filter(id=>paneState(id).side==='right').forEach((id,i)=>placePane(id,102+2*i))}paneBadges()}
 function placePane(id,order){const s=paneState(id),d=PANES[id],el=$(id),sep=$(id+'Sep'),tes=$(id+'Tes'),left=s.side==='left';s.w=clamp(s.w,d.min,d.max);
- el.style.order=tes.style.order=order;sep.style.order=left?order+1:order-1;tes.dataset.side=s.side;el.style.setProperty('--w',s.w+'px');
- el.hidden=s.st!=='open';sep.hidden=s.st!=='open';tes.hidden=s.st!=='tessera';sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');
+ el.style.order=tes.style.order=order;sep.style.order=left?order+1:order-1;tes.dataset.side=sep.dataset.side=s.side;el.style.setProperty('--w',s.w+'px');
+ el.hidden=s.st!=='open';sep.hidden=s.st!=='open';tes.hidden=s.st!=='tessera';sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuemax',paneMax(id));sep.setAttribute('aria-valuetext',s.w+' pixel');
  el.querySelector('[data-pane-act=collapse]').innerHTML=ICON(left?'left':'right')}
 function paneBadges(){for(const [id,d] of Object.entries(PANES)){const n=d.count&&safe(d.count)||0,tes=$(id+'Tes');tes.querySelector('.badge').textContent=n?String(n):'';tes.setAttribute('aria-label',`${d.title}, riquadro ridotto${n?`: ${n} ${d.unit[n===1?0:1]}`:''}. Espandi`)}}
 new MutationObserver(paneBadges).observe($('layList'),{childList:true});
@@ -1025,10 +1076,15 @@ function paneSet(id,st,{focus=false,say=true}={}){const s=paneState(id),d=PANES[
  if(say)announce(d.title+': '+PANE_SAY[st]);refreshToggles()}
 function paneToggle(id){const off=paneState(id).st==='off';paneSet(id,off?'open':'off',{focus:off})}
 function paneMove(id){const s=paneState(id);s.side=s.side==='left'?'right':'left';savePrefs();applyLayout();announce(`${PANES[id].title} spostato a ${s.side==='left'?'sinistra':'destra'}`)}
-function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,Math.max(d.min,Math.min(d.max,innerWidth*.45))));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final)savePrefs()}
+// Il riquadro non supera il 45% della finestra: la fuga lo dice come massimo, anche quando la finestra cambia misura.
+const paneMax=id=>Math.max(PANES[id].min,Math.min(PANES[id].max,Math.round(innerWidth*.45)));
+function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,paneMax(id)));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuemax',paneMax(id));sep.setAttribute('aria-valuetext',s.w+' pixel');if(final)savePrefs()}
+addEventListener('resize',()=>{for(const id of Object.keys(PANES))$(id+'Sep').setAttribute('aria-valuemax',paneMax(id))});
 function paneMenu(id,btn){const s=paneState(id),d=PANES[id],left=s.side==='left',r=btn.getBoundingClientRect();
- openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Larghezza iniziale',icon:'fit',run:()=>setW(id,d.w)},'-',
+ openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Più largo',icon:'plus',run:()=>paneWider(id,1)},{label:'Più stretto',icon:'minus',run:()=>paneWider(id,-1)},{label:'Larghezza iniziale',icon:'fit',run:()=>{setW(id,d.w);announce(`${d.title}: larghezza iniziale, ${paneState(id).w} pixel`)}},'-',
   {label:'Togli dal piano',desc:'Torna dal menu Tasselli, in basso a sinistra',icon:'close',run:()=>paneSet(id,'off',{focus:true})}],r.right-240,r.bottom+4,'Opzioni del riquadro '+d.title,btn)}
+// Più largo e più stretto di 32 pixel, dal menu del riquadro: chi non trascina la fuga la cambia lo stesso.
+function paneWider(id,dir){const s=paneState(id),w0=s.w;setW(id,s.w+dir*32);announce(s.w===w0?`${PANES[id].title}: già ${dir>0?'alla larghezza massima':'alla larghezza minima'}, ${s.w} pixel`:`${PANES[id].title}: ${s.w} pixel`)}
 // Menu Tasselli nella barra di stato: quali riquadri sono sul piano e alcune disposizioni pronte.
 function layoutMenu(){const m=state.mode[0],btn=$('layoutBtn'),r=btn.getBoundingClientRect(),ids=panesOf(m),img=m==='i';
  const where=id=>{const s=paneState(id);return s.st==='open'?(s.side==='left'?'A sinistra':'A destra'):s.st==='tessera'?'Ridotto a tessera':'Tolto dal piano'};
@@ -1209,7 +1265,7 @@ const snap=()=>JSON.stringify(I.r);
 I.base=snap();
 function settle(label,opts){const now=snap();if(now===I.base)return false;I.hist.push({label,r:I.base});if(I.hist.length>200)I.hist.shift();I.redo=[];I.base=now;recipeChanged(opts);return true}
 function edit(label,fn,opts){if(!I.bmp){toast('Apri prima una foto');return false}fn(I.r);return settle(label,opts)}
-function photoUndo(redo){const from=redo?I.redo:I.hist,to=redo?I.hist:I.redo,e=from.pop();if(!e){toast(redo?'Niente da ripetere':'Niente da annullare');return}to.push({label:e.label,r:snap()});I.r=JSON.parse(e.r);I.base=e.r;recipeChanged({panel:true});announce((redo?'Ripetuto: ':'Annullato: ')+e.label)}
+function photoUndo(redo){const from=redo?I.redo:I.hist,to=redo?I.hist:I.redo,e=from.pop();if(!e){toast(redo?'Niente da ripetere':'Niente da annullare');return}const was=I.r;to.push({label:e.label,r:snap()});I.r=JSON.parse(e.r);I.base=e.r;recipeChanged({panel:true});const back=describeChanges(was,I.r);announce(`${redo?'Ripetuto':'Annullato'}: ${e.label}${back?`; ora ${back}`:''}.`)}
 // Dopo ogni modifica: anteprima, pannello, pulsanti attivi e bozza.
 function recipeChanged({panel=false}={}){requestRender();if(panel)renderPanel();else syncPanel();refreshToggles();if(photoLink.id)linkSync();else schedulePersist('immagini')}
 const changedAdj=r=>ADJ.filter(a=>r.adj[a[0]]);
@@ -1316,9 +1372,12 @@ function parseCube(text,fileName){let size=0,title='',min=[0,0,0],max=[1,1,1];co
  if([0,1,2].some(k=>!(max[k]>min[k])))throw Error('File .cube non valido: DOMAIN_MAX deve essere maggiore di DOMAIN_MIN.');
  return {name:title||baseName(fileName),size,data:new Float32Array(vals),min,max}}
 // Istogramma e misure della luce: luminosità per l'istogramma, rosso, verde e blu, parti bruciate e chiuse, trasparenza.
-function measure(img){const d=img.data,H=[new Uint32Array(256),new Uint32Array(256),new Uint32Array(256),new Uint32Array(256)],[HY,HR,HG,HB]=H;let n=0,sum=0,hi=0,lo=0,alpha=false;
- for(let i=0;i<d.length;i+=4){if(d[i+3]<250)alpha=true;if(d[i+3]<8)continue;const r=d[i],g=d[i+1],b=d[i+2],y=(54*r+183*g+19*b)>>8;HY[y]++;HR[r]++;HG[g]++;HB[b]++;sum+=y;n++;if(r>=253&&g>=253&&b>=253)hi++;else if(r<=2&&g<=2&&b<=2)lo++}
- return {H,n,mean:n?sum/n/255:0,high:n?hi/n:0,low:n?lo/n:0,alpha}}
+// Sono bruciati anche i pixel con un canale solo al massimo (un fiore rosso saturo perde i dettagli come il cielo bianco):
+// high li conta tutti, white solo il bianco pieno, ch[k] quelli bruciati nel solo rosso, verde o blu (o in due canali).
+function measure(img){const d=img.data,H=[new Uint32Array(256),new Uint32Array(256),new Uint32Array(256),new Uint32Array(256)],[HY,HR,HG,HB]=H,ch=[0,0,0];let n=0,sum=0,hi=0,wh=0,lo=0,alpha=false;
+ for(let i=0;i<d.length;i+=4){if(d[i+3]<250)alpha=true;if(d[i+3]<8)continue;const r=d[i],g=d[i+1],b=d[i+2],y=(54*r+183*g+19*b)>>8;HY[y]++;HR[r]++;HG[g]++;HB[b]++;sum+=y;n++;
+  if(r>=253||g>=253||b>=253){hi++;if(r>=253&&g>=253&&b>=253)wh++;else{if(r>=253)ch[0]++;if(g>=253)ch[1]++;if(b>=253)ch[2]++}}else if(r<=2&&g<=2&&b<=2)lo++}
+ return {H,n,mean:n?sum/n/255:0,high:n?hi/n:0,white:n?wh/n:0,ch:ch.map(c=>n?c/n:0),low:n?lo/n:0,alpha}}
 function pctl(st,p){const HY=st.H[0],t=st.n*p;let acc=0;for(let i=0;i<256;i++){acc+=HY[i];if(acc>=t)return i/255}return 1}
 // Regolazione automatica, dai pixel inquadrati e non ancora regolati: luce media verso il grigio medio,
 // bianchi e neri verso i bordi dell'istogramma, ombre e alte luci se servono, bilanciamento del bianco attenuato.
@@ -1344,7 +1403,7 @@ function geometryPixels(fast=false){const [w,h]=previewSize(fast),r=I.r,key=JSON
 function requestRender(fast=false){renderFast=(renderQueued?renderFast:true)&&fast;if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderPhoto(renderFast)})}
 function renderPhoto(fast){if(!I.bmp){I.stats=null;drawHist();drawAnts();return}const src=geometryPixels(fast);if(!outPx||outPx.width!==src.width||outPx.height!==src.height)outPx=new ImageData(src.width,src.height);
  lastMc=maskCtx(I.r,src.width,src.height,src,srcCache[fast?'fast':'full'].key);const img=I.compare?src:develop(src,outPx,I.r,lutOf(I.r.look),lastMc);if(photoCv.width!==img.width||photoCv.height!==img.height){photoCv.width=img.width;photoCv.height=img.height}photoCtx.putImageData(img,0,0);fitStage();
- const prev=I.stats;I.stats=measure(img);photoCv.classList.toggle('alpha',I.stats.alpha);drawHist();warnClipping(prev,I.stats);photoCv.setAttribute('aria-label',photoLabel());$('photoInfo').textContent=photoInfo();drawAnts()}
+ const prev=I.stats;I.stats=measure(img);photoCv.classList.toggle('alpha',I.stats.alpha);drawHist();warnClipping(prev,I.stats);photoEffect(fast);photoCv.setAttribute('aria-label',photoLabel());$('photoInfo').textContent=photoInfo();drawAnts()}
 // La foto occupa lo spazio disponibile senza deformarsi e senza superare la sua misura reale.
 function fitStage(){if(!I.bmp)return;const st=$('stage'),pad=24,[w,h]=outSize(I.r,I.bmp.width,I.bmp.height),k=Math.min((st.clientWidth-pad)/w,(st.clientHeight-pad)/h,1);photoCv.style.width=Math.max(1,Math.floor(w*k))+'px';photoCv.style.height=Math.max(1,Math.floor(h*k))+'px';placeOverlays()}
 function showPhoto(){const has=!!I.bmp;photoCv.hidden=!has;if(!has){antsCv.hidden=overCv.hidden=true;endTool(false)}$('photoEmpty').hidden=has;$('compareBadge').hidden=!(has&&I.compare);if(!has){for(const slot of Object.values(srcCache))Object.assign(slot,{key:'',px:null});$('photoInfo').textContent='';$('docInfo').textContent=''}requestRender()}
@@ -1358,13 +1417,26 @@ function drawHist(){const dpr=devicePixelRatio||1,W=Math.max(1,Math.round(histCv
  ctx.beginPath();ctx.moveTo(0,H);for(let i=0;i<256;i++)ctx.lineTo(x(i),scale(st.H[0][i]));ctx.lineTo(W,H);ctx.closePath();ctx.globalAlpha=.45;ctx.fillStyle=palette['hist-l'];ctx.fill();ctx.globalAlpha=1;
  if(!matchMedia('(forced-colors: active)').matches)[['hist-r',1],['hist-g',2],['hist-b',3]].forEach(([c,k])=>{ctx.beginPath();for(let i=0;i<256;i++)ctx[i?'lineTo':'moveTo'](x(i),scale(st.H[k][i]));ctx.strokeStyle=palette[c];ctx.lineWidth=dpr;ctx.globalAlpha=.8;ctx.stroke();ctx.globalAlpha=1});
  const mark=(left)=>{const s=7*dpr;ctx.beginPath();if(left){ctx.moveTo(2,2);ctx.lineTo(2+s,2);ctx.lineTo(2,2+s)}else{ctx.moveTo(W-2,2);ctx.lineTo(W-2-s,2);ctx.lineTo(W-2,2+s)}ctx.closePath();ctx.fillStyle=palette['hist-clip'];ctx.fill()};
- if(st.low>=CLIP_WARN)mark(true);if(st.high>=CLIP_WARN)mark(false);
+ if(st.low>=CLIP_WARN)mark(true);if(st.high>=CLIP_WARN)mark(false);histCursor(ctx,W,H);
  txt.textContent=histSentence(st);txt.classList.toggle('warn',st.low>=CLIP_WARN||st.high>=CLIP_WARN)}
-// Oltre l'1% di pixel completamente bianchi o neri la foto perde dettagli: si scrive e, al primo passaggio, si annuncia.
-const CLIP_WARN=.01;
-function histSentence(st){const parts=[`Luminosità media ${fmtPct(st.mean)}.`];if(st.high>=CLIP_WARN)parts.push(`Luci bruciate: ${fmtPct(st.high,1)} della foto, prova ad abbassare Esposizione, Alte luci o Bianchi.`);if(st.low>=CLIP_WARN)parts.push(`Ombre chiuse: ${fmtPct(st.low,1)} della foto, prova ad alzare Ombre o Neri.`);if(st.high<CLIP_WARN&&st.low<CLIP_WARN)parts.push('Nessuna parte bruciata o chiusa.');return parts.join(' ')}
-let clipSaid=0;
-function warnClipping(prev,st){if(!prev||I.compare||Date.now()-clipSaid<1500)return;const msg=[];if(st.high>=CLIP_WARN&&prev.high<CLIP_WARN)msg.push(`luci bruciate, ${fmtPct(st.high,1)}`);if(st.low>=CLIP_WARN&&prev.low<CLIP_WARN)msg.push(`ombre chiuse, ${fmtPct(st.low,1)}`);if(msg.length){clipSaid=Date.now();announce('Attenzione: '+msg.join(' e '),{join:true})}}
+// Oltre l'1% di pixel bruciati (anche in un canale solo) o neri la foto perde dettagli: si scrive e, quando si passa la
+// soglia, si annuncia.
+const CLIP_WARN=.01,CH_NAME=['rosso','verde','blu'];
+function clipDetail(st){const out=[];if(st.white>=.001&&st.white<st.high-.0005)out.push(`bianco pieno ${fmtPct(st.white,1)}`);const ch=st.ch.map((v,k)=>v>=.001?`nel ${CH_NAME[k]} ${fmtPct(v,1)}`:'').filter(Boolean);if(ch.length)out.push(`colori al massimo ${ch.length>1?ch.slice(0,-1).join(', ')+' e '+ch.at(-1):ch[0]}`);return out.join('; ')}
+// La frase dice anche com'è la luce a parole e la gamma dei toni (dal 2° al 98° percentile): poco più di metà vuol dire
+// foto piatta. Con lo sfondo trasparente si misura solo il soggetto.
+function histSentence(st){const p2=pctl(st,.02),p98=pctl(st,.98),parts=[`Luminosità media ${fmtPct(st.mean)}, foto ${lightWord(st.mean)}; toni da ${fmtInt(p2*100)} a ${fmtPct(p98)}${p98-p2<.5?': poco contrasto':''}.`];if(st.alpha)parts.push('Misurata sul soggetto: lo sfondo è trasparente.');
+ if(st.high>=CLIP_WARN){const d=clipDetail(st),col=st.high-st.white>=CLIP_WARN/2;parts.push(`Luci bruciate: ${fmtPct(st.high,1)} della foto${d?` (${d})`:''}, prova ad abbassare Esposizione, Alte luci o Bianchi${col?', o Saturazione per i colori più accesi':''}.`)}
+ if(st.low>=CLIP_WARN)parts.push(`Ombre chiuse: ${fmtPct(st.low,1)} della foto, prova ad alzare Ombre o Neri.`);if(st.high<CLIP_WARN&&st.low<CLIP_WARN)parts.push('Nessuna parte bruciata o chiusa.');return parts.join(' ')}
+// L'avviso parte quando ci si ferma, 600 ms dopo l'ultimo disegno, con la quota di quel momento; si sente anche quando si
+// torna sotto la soglia. clipSeen ricorda lo stato già detto (o quello all'apertura della foto, che non si annuncia).
+let clipSeen=null,clipTimer;
+const clipNow=st=>({bmp:I.bmp,high:st.high>=CLIP_WARN,low:st.low>=CLIP_WARN,hv:st.high,lv:st.low});
+function clipChange(prev,st){const up=[],down=[];if(st.high!==prev.high)(st.high?up:down).push(st.high?`luci bruciate, ${fmtPct(st.hv,1)}`:`luci bruciate da ${fmtPct(prev.hv,1)} a ${fmtPct(st.hv,1)}: recuperate`);if(st.low!==prev.low)(st.low?up:down).push(st.low?`ombre chiuse, ${fmtPct(st.lv,1)}`:`ombre chiuse da ${fmtPct(prev.lv,1)} a ${fmtPct(st.lv,1)}: riaperte`);
+ const d=down.join(' e ');return (up.length?'Attenzione: '+up.join(' e ')+'.':'')+(d?(up.length?' ':'')+d[0].toUpperCase()+d.slice(1)+'.':'')}
+// Con l'effetto delle modifiche acceso l'avviso è dentro l'effetto, che si dice poco dopo: qui si tiene solo il conto.
+function warnClipping(prev,st){if(I.compare)return;const now=clipNow(st);if(!prev||clipSeen?.bmp!==I.bmp||effectOn()){clipSeen=now;clearTimeout(clipTimer);return}clearTimeout(clipTimer);if(now.high===clipSeen.high&&now.low===clipSeen.low)return;
+ clipTimer=setTimeout(()=>{if(!I.stats||I.compare||clipSeen?.bmp!==I.bmp)return;const n=clipNow(I.stats),t=clipChange(clipSeen,n);clipSeen=n;if(t)announce(t)},600)}
 // Piani nel riquadro di sinistra: elenco con la scelta attiva, Invio per iniziare.
 let planCursor=0;
 function renderPlans(){const list=$('planList');planCursor=clamp(planCursor,0,PLANS.length-1);list.innerHTML=PLANS.map((p,i)=>`<div role="option" id="plan-${p.id}" class="lb-item plan-item${i===planCursor?' active':''}" data-plan="${p.id}" aria-selected="${p.id===I.plan}"><span class="n">${esc(p.name)}</span><span class="d">${esc(p.desc)}</span></div>`).join('');list.setAttribute('aria-activedescendant','plan-'+PLANS[planCursor].id)}
@@ -1393,6 +1465,8 @@ function renderPanel(){const plan=planOf(),body=$('adjBody'),head=$('stepHead'),
   head.innerHTML=`<p class="step-count">${esc(plan.name)} · passo ${i+1} di ${steps.length}</p><h3 id="stepTitle">${esc(s.title)}</h3><p id="stepText">${esc(s.text)}</p><div class="step-nav"><button type="button" class="btn sm" data-action="stepPrev"${i?'':' disabled'}>${ICON('left')}Indietro</button>${s.auto?`<button type="button" class="btn sm" data-action="stepAuto"${I.bmp?'':' disabled'}>${ICON('wand')}Proposta</button>`:''}<span class="grow"></span>${last?`<button type="button" class="btn sm primary" data-action="export"${I.bmp?'':' disabled'}>${ICON('save')}Esporta…</button>`:`<button type="button" class="btn sm primary" data-action="stepNext">Avanti${ICON('right')}</button>`}</div>`;
   body.innerHTML=(s.controls||[]).map(id=>controlHtml(id,true)).join('')+(s.export?`<dl><dt>Formato</dt><dd>${esc(exportLabel(s.export))}</dd><dt>Dati della foto</dt><dd>Fotocamera e posizione non vengono copiate</dd></dl>`:'')}
  else{head.hidden=true;head.innerHTML='';body.innerHTML=GROUPS.map(([g,ids])=>`<h3>${esc(g)}</h3>`+ids.map(id=>controlHtml(id,false)).join('')).join('')}
+ // Senza foto il corpo non ha comandi da raggiungere: si raggiunge lui, con un nome, così si scorre anche da tastiera.
+ if(I.bmp)for(const a of ['tabindex','role','aria-label'])body.removeAttribute(a);else{body.tabIndex=0;body.setAttribute('role','region');body.setAttribute('aria-label','Regolazioni: si usano dopo aver aperto una foto')}
  afterPanel();
  if(focusId){const el=$(focusId)||body.querySelector(`[data-action="${focusId}"]`)||head.querySelector(`[data-action="${focusId}"]`);if(el&&!el.disabled)el.focus();else (focusables(head)[0]||focusables(body)[0])?.focus()}}
 // Aggiorna valori e stati senza ricostruire il pannello, così il cursore che si sta usando non perde il focus.
@@ -1410,7 +1484,7 @@ const PLANS=[
  {id:'libera',name:'Tutti i controlli',desc:'Nessun piano: inquadratura, luce, colore, effetti e look insieme.'},
  {id:'social',name:'Foto per i social',desc:'Il formato giusto, una luce viva e un file leggero.',steps:[
   {title:'Formato',text:'Scegli il formato: 4:5 per i post, 9:16 per le storie, quadrato per tutto il resto. Poi sposta il ritaglio sul soggetto.',controls:['ratio','cx','cy'],auto:{ratio:'4:5'}},
-  {title:'Luce',text:'La proposta porta la luce a un livello medio e recupera le zone troppo chiare o troppo scure. Ritocca a occhio.',controls:['exposure','contrast','highlights','shadows'],auto:'light'},
+  {title:'Luce',text:'La proposta porta la luce a un livello medio e recupera le zone troppo chiare o troppo scure. Ritocca i cursori: quando ti fermi senti l’effetto sulla luce.',controls:['exposure','contrast','highlights','shadows'],auto:'light'},
   {title:'Colore',text:'Vividezza ravviva i colori spenti senza esagerare con la pelle; un look dà carattere a tutta la foto.',controls:['vibrance','temp','look','lookAmt'],auto:{adj:{vibrance:20}}},
   {title:'Esporta',text:'JPEG di 2048 pixel sul lato lungo: nitido sui telefoni e leggero da inviare.',export:{format:'jpeg',size:'2048',quality:85}}]},
  {id:'ritratto',name:'Ritratto',desc:'Pelle naturale, volto in luce, sfondo che non distrae.',steps:[
@@ -1519,7 +1593,8 @@ function adjPaste(){const c=prefs.adjClip;if(!c){toast('Non ci sono regolazioni 
 function readPhotoStatus(){if(!I.bmp){toast('Nessuna foto aperta: Ctrl+O per aprirne una');return}const [w,h]=outSize(I.r,I.bmp.width,I.bmp.height),r=I.r,ch=changedAdj(r).map(([id,label,,,,,fmt])=>label+' '+fmt(r.adj[id])),geo=[];
  if(r.ratio!=='orig')geo.push('formato '+ratioName(r.ratio));if(r.rot)geo.push('ruotata di '+r.rot+' gradi');if(r.flip)geo.push('riflessa');if(r.angle)geo.push('raddrizzata di '+fmtNum(r.angle,1)+' gradi');
  const plan=planOf();toast(`«${I.name}», ${fmtInt(w)} per ${fmtInt(h)} pixel${I.bmp.rawInfo?', anteprima JPEG della fotocamera, non uno sviluppo del RAW':''}${geo.length?', '+geo.join(', '):''}${I.compare?'. Stai guardando l’originale':''}. ${I.stats?histSentence(I.stats):''} ${ch.length?'Regolazioni: '+ch.join(', ')+'.':'Nessuna regolazione.'}${fxSummary().length?' '+fxSummary().join(', ').replace(/^./,x=>x.toUpperCase())+'.':''}${r.look!=='none'?` Look ${lookName(r.look)} al ${fmtInt(r.lookAmt)}%.`:''}${plan.steps?` Piano ${plan.name}, passo ${I.step+1} di ${plan.steps.length}: ${plan.steps[I.step].title}.`:''}${I.r.masks.length?` Maschere: ${I.r.masks.map(m=>`${m.name}${m.off?' (nascosta)':''}${maskAdjList(m).length?', '+maskAdjList(m).join(', '):', senza regolazioni'}`).join('; ')}.`:''}${I.r.heal.length?' '+retouchSay():''}${I.r.sel?' '+selSummary():''}`)}
-function toggleCompare(){if(!I.bmp){toast('Apri prima una foto');return}I.compare=!I.compare;$('compareBadge').hidden=!I.compare;requestRender()}
+function toggleCompare(){if(!I.bmp){toast('Apri prima una foto');return}const dev=I.compare?devStats:I.stats;I.compare=!I.compare;$('compareBadge').hidden=!I.compare;requestRender();
+ announce(I.compare?`Originale: luminosità media ${fmtPct(measure(geometryPixels()).mean)}${dev?`, con le modifiche ${fmtPct(dev.mean)}`:''}. Barra rovesciata per tornare alle modifiche.`:`Di nuovo con le modifiche${dev?`: luminosità media ${fmtPct(dev.mean)}`:''}.`)}
 async function resetAll(){if(!I.bmp||!hasEdits()){toast('La foto è già com’era');return}edit('Ripristina tutto',r=>{Object.assign(r,newRecipe())},{panel:true});announce('Foto ripristinata com’era: Ctrl+Z per tornare indietro')}
 function photoMenu(x,y){const items=[mi('auto',applyAuto),mi('compare'),'-',mi('rotateLeft'),mi('rotateRight'),mi('ratioMenu'),mi('lookMenu'),'-',mi('readStatus'),mi('export')];openMenu(items,x,y,'Menu della foto')}
 // Selezioni e maschere. Una maschera è un elenco di operazioni scritte in coordinate della foto originale divise per il
@@ -1705,6 +1780,8 @@ function colorName(r,g,b){const mx=Math.max(r,g,b)/255,mn=Math.min(r,g,b)/255,l=
  if(hue>=10&&hue<50&&l<.42)return l<.18?'marrone scuro':'marrone';if(hue>=18&&hue<55&&l>.62&&s<.6)return 'beige';
  const name=hue<12||hue>=345?(l>.7?'rosa':'rosso'):hue<40?'arancione':hue<66?'giallo':hue<160?'verde':hue<195?'azzurro':hue<255?'blu':hue<290?'viola':hue<330?'fucsia':'rosa';
  return name+(l<.25?' scuro':l>.75&&name!=='rosa'?' chiaro':'')+(s<.28?' tenue':'')}
+// Il nome di un colore scritto in esadecimale, con il codice tra parentesi: «blu scuro (#1b3a6b)».
+function hexName(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return String(hex||'');const v=parseInt(m[1],16);return `${colorName(v>>16,v>>8&255,v&255)} (#${m[1].toLowerCase()})`}
 // Dove sta una zona della foto: posizione del centro in terzi.
 function placeName(cx,cy){const v=cy<1/3?'in alto':cy>2/3?'in basso':'',o=cx<1/3?'a sinistra':cx>2/3?'a destra':'';return v&&o?v+' '+o:v||o||'al centro'}
 // Descrizione a parole di una maschera: quanta parte copre, dove, quante zone, quanto morbido è il bordo, quali colori.
@@ -1756,13 +1833,13 @@ function selDescribe(){const m=selMask();toast(m?describeMask(m,lastMc.w,lastMc.
 function colorAt([u,v],orig=false){const px=orig?lastMc.px:shownPx(),w=px.width,h=px.height,X=Math.min(w-1,Math.floor(u*w)),Y=Math.min(h-1,Math.floor(v*h)),d=px.data;let r=0,g=0,b=0,n=0;
  for(let y=Math.max(0,Y-1);y<=Math.min(h-1,Y+1);y++)for(let x=Math.max(0,X-1);x<=Math.min(w-1,X+1);x++){const o=(y*w+x)*4;r+=d[o];g+=d[o+1];b+=d[o+2];n++}return [r/n,g/n,b/n]}
 const posSay=([u,v])=>`${fmtPct(u)} da sinistra, ${fmtPct(v)} dall’alto`;
-function sayCursor(){const p=[T.u,T.v],m=selMask(),i=m?Math.min(lastMc.h-1,Math.floor(p[1]*lastMc.h))*lastMc.w+Math.min(lastMc.w-1,Math.floor(p[0]*lastMc.w)):-1;
- announce(`${posSay(p)}: ${colorName(...colorAt(p))}${m?m[i]>=128?', nella selezione':', fuori dalla selezione':''}${T.down?', pennello giù':''}`)}
+function sayCursor(){const p=[T.u,T.v];announce(`${posSay(p)}: ${cursorAt(p).text}${T.down?', pennello giù':''}`)}
 // Scelta dello strumento: la foto diventa un'area interattiva (le frecce muovono il cursore) finché lo strumento è attivo.
 function setPhotoTool(id){if(!I.bmp){toast('Apri prima una foto');return}if(T.tool===id){endTool();return}const t=PHOTO_TOOLS[id];T.tool=id;T.pts=[];if(t.sel)T.mode=T.selMode||'new';else if(t.modes&&!t.modes.some(([v])=>v===T.mode))T.mode=t.modes[0][0];T.drag=T.down=false;toolChanged();photoCv.focus();announce(`${PHOTO_TOOLS[id].label}. ${PHOTO_TOOLS[id].keys} Esc chiude lo strumento.`)}
-function endTool(say=true){if(!T.tool)return;const t=PHOTO_TOOLS[T.tool];T.tool=null;T.pts=[];T.drag=T.down=false;toolChanged();if(say)announce(t.label+': chiuso')}
-function toolChanged(){const t=T.tool&&PHOTO_TOOLS[T.tool];photoCv.setAttribute('role',t?'application':'img');if(t)photoCv.setAttribute('aria-roledescription','foto');else photoCv.removeAttribute('aria-roledescription');
- $('toolHint').textContent=t?`${t.label}. ${t.keys} Le frecce muovono il cursore (con Maiusc di più, con Ctrl di un pixel) e dicono il colore sotto il cursore. Esc annulla il punto in corso o chiude lo strumento.`:'';
+function endTool(say=true){if(!T.tool)return;const t=PHOTO_TOOLS[T.tool];T.tool=null;T.pts=[];T.drag=T.down=T.wait=false;toolChanged();if(say)announce(t.label+': chiuso')}
+// La foto è sempre un'area interattiva (role application): ha i suoi tasti anche senza strumento.
+function toolChanged(){const t=T.tool&&PHOTO_TOOLS[T.tool];
+ $('toolHint').textContent=t?`${t.label}. ${t.keys}${t.kind==='two'?' Con il mouse basta anche un clic sul primo punto e uno sul secondo.':''} Le frecce muovono il cursore (con Maiusc di più, con Ctrl di un pixel) e dicono il colore sotto il cursore. Esc annulla il punto in corso o chiude lo strumento.`:'';
  photoCv.setAttribute('aria-describedby',t?'toolHint':'photoHint');photoCv.classList.toggle('tooling',!!t);renderToolOpts();refreshToggles();drawOver()}
 // Opzioni dello strumento sotto la foto: modo della selezione, dimensione e durezza del pennello, tolleranze.
 const sizeToV=s=>Math.round(Math.log(s/.001)/Math.log(250)*100),vToSize=v=>.001*250**(v/100);
@@ -1783,7 +1860,7 @@ $('toolOpts').addEventListener('input',e=>{const el=e.target,o=el.dataset.toolOp
 // Cambia dimensione o durezza del pennello da tastiera, sulla foto.
 function brushKey(bigger,hard){if(hard)T.hard=clamp(Math.round(T.hard*10+(bigger?1:-1))/10,0,1);else T.size=clamp(T.size*(bigger?1.25:.8),.001,.25);saveTool();renderToolOpts();drawOver();announce(hard?'Durezza '+TOOL_OPTS.hard.fmt():'Dimensione '+TOOL_OPTS.size.fmt())}
 // Fine di un'operazione con i punti raccolti.
-function finishTwo(a,b,mode){const t=PHOTO_TOOLS[T.tool];T.pts=[];drawOver();const [fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
+function finishTwo(a,b,mode){const t=PHOTO_TOOLS[T.tool];T.pts=[];T.wait=false;drawOver();const [fw,fh]=outSize(I.r,I.bmp.width,I.bmp.height);
  if(Math.abs(b[0]-a[0])*fw<2&&Math.abs(b[1]-a[1])*fh<2&&!t.point){if(t.sel&&mode==='new'&&I.r.sel){selNone();return}announce('Troppo piccolo: sposta il cursore prima del secondo punto');return}t.two(a,b,mode)}
 function finishPoly(mode){const t=PHOTO_TOOLS[T.tool],p=T.pts;T.pts=[];drawOver();if(p.length<3){announce('Servono almeno tre punti');return}t.done(p,mode)}
 function finishPaint(mode){const t=PHOTO_TOOLS[T.tool],p=T.pts;T.pts=[];T.down=false;drawOver();if(p.length)t.done(p,mode)}
@@ -1799,17 +1876,21 @@ photoCv.addEventListener('keydown',e=>{const t=T.tool&&PHOTO_TOOLS[T.tool];if(!t
  if(k==='Enter'&&!e.ctrlKey){e.preventDefault();keyEnter(e.shiftKey);return}
  if(k===' '){e.preventDefault();if(t.kind==='paint')penToggle();else keyEnter(false);return}
  if(k==='Backspace'&&T.pts.length&&(t.kind==='poly'||t.kind==='lasso')){e.preventDefault();T.pts.pop();drawOver();announce(T.pts.length?`Tolto l’ultimo punto, ne restano ${T.pts.length}`:'Nessun punto');return}
- if(k==='Escape'){e.preventDefault();if(T.pts.length||T.down){T.pts=[];T.down=false;drawOver();announce('Annullato')}else endTool();return}
+ if(k==='Escape'){e.preventDefault();if(T.pts.length||T.down){T.pts=[];T.down=T.wait=false;drawOver();announce('Annullato')}else endTool();return}
  if((k==='['||k===']'||k==='{'||k==='}')&&toolOptsOf(T.tool).includes('size')){e.preventDefault();brushKey(k===']'||k==='}',e.shiftKey)}});
-// Mouse e penna: Maiusc aggiunge, Alt sottrae, tutti e due intersecano.
+// Mouse e penna: Maiusc aggiunge, Alt sottrae, tutti e due intersecano. Gli strumenti a due punti si usano trascinando
+// oppure con due clic: un clic senza movimento fissa il primo punto (T.wait) e il clic seguente chiude.
 const eventUV=e=>{const r=photoCv.getBoundingClientRect();return [clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1)]};
 const dispDist=(a,b)=>{const r=photoCv.getBoundingClientRect();return Math.hypot((a[0]-b[0])*r.width,(a[1]-b[1])*r.height)};
 photoCv.addEventListener('pointerdown',e=>{const t=T.tool&&PHOTO_TOOLS[T.tool];if(!t||e.button!==0)return;e.preventDefault();photoCv.focus({preventScroll:true});const p=eventUV(e),mode=e.shiftKey&&e.altKey?'int':e.shiftKey?'add':e.altKey?'sub':T.mode;[T.u,T.v]=p;T.kbd=false;T.pmode=mode;
  if(t.kind==='click'){t.at(p,mode);return}
+ if(t.kind==='two'&&T.wait&&T.pts.length===1){finishTwo(T.pts[0],p,T.pmode);return}
  if(t.kind==='poly'){if(T.pts.length>=3&&dispDist(p,T.pts[0])<8)finishPoly(mode);else{T.pts.push(p);drawOver()}return}
  photoCv.setPointerCapture(e.pointerId);T.pts=[p];T.drag=true;drawOver()});
-photoCv.addEventListener('pointermove',e=>{if(!T.tool||!I.bmp)return;const p=eventUV(e);[T.u,T.v]=p;T.kbd=false;if(T.drag){const t=PHOTO_TOOLS[T.tool];if(t.kind==='two')T.pts[1]=p;else if(dispDist(p,T.pts.at(-1))>=Math.max(2,t.kind==='paint'?brushDisp()*.2:0))T.pts.push(p)}drawOver()});
-photoCv.addEventListener('pointerup',()=>{if(!T.drag)return;T.drag=false;const t=PHOTO_TOOLS[T.tool];if(!t)return;if(t.kind==='two')finishTwo(T.pts[0],T.pts[1]||T.pts[0],T.pmode);else if(t.kind==='lasso')finishPoly(T.pmode);else if(t.kind==='paint'){T.pts.push([T.u,T.v]);finishPaint(T.pmode)}});
+photoCv.addEventListener('pointermove',e=>{if(!T.tool||!I.bmp)return;const p=eventUV(e);[T.u,T.v]=p;T.kbd=false;if(T.wait&&PHOTO_TOOLS[T.tool].kind==='two')T.pts[1]=p;else if(T.drag){const t=PHOTO_TOOLS[T.tool];if(t.kind==='two')T.pts[1]=p;else if(dispDist(p,T.pts.at(-1))>=Math.max(2,t.kind==='paint'?brushDisp()*.2:0))T.pts.push(p)}drawOver()});
+photoCv.addEventListener('pointerup',()=>{if(!T.drag)return;T.drag=false;const t=PHOTO_TOOLS[T.tool];if(!t)return;
+ if(t.kind==='two'){const a=T.pts[0],b=T.pts[1]||a;if(!t.point&&dispDist(a,b)<4){T.wait=true;T.pts=[a];drawOver();announce(`${t.first||'Primo punto'}: ${posSay(a)}. Clic ${t.second||'sul secondo punto'}; Esc annulla.`);return}finishTwo(a,b,T.pmode)}
+ else if(t.kind==='lasso')finishPoly(T.pmode);else if(t.kind==='paint'){T.pts.push([T.u,T.v]);finishPaint(T.pmode)}});
 photoCv.addEventListener('dblclick',()=>{if(T.tool&&PHOTO_TOOLS[T.tool].kind==='poly'&&T.pts.length>=3)finishPoly(T.pmode)});
 photoCv.addEventListener('pointerleave',()=>{if(T.tool&&!T.drag)drawOver(false)});
 // Il contorno della selezione e i segni degli strumenti stanno su due canvas sopra la foto, della stessa misura.
@@ -1967,7 +2048,7 @@ const newCut=()=>({method:'auto',box:null,keep:[],drop:[],edge:50,raster:null,us
 // che restituisce sono l'avanzamento, scritto nella barra di stato e annunciato ogni pochi secondi.
 async function runChunks(gen,label){let r,pct=0,said=Date.now();status(label+'…');document.body.style.cursor='progress';
  try{for(;;){const t=performance.now();do{r=gen.next();if(typeof r.value==='number')pct=r.value}while(!r.done&&performance.now()-t<28);if(r.done)return r.value;
-  status(`${label}: ${fmtPct(pct)}`);if(Date.now()-said>3500){said=Date.now();announce(`${label}: ${fmtPct(pct)}`)}await new Promise(res=>setTimeout(res,0))}}
+  status(`${label}: ${fmtPct(pct)}`,{quiet:true});if(Date.now()-said>3500){said=Date.now();announce(`${label}: ${fmtPct(pct)}`)}await new Promise(res=>setTimeout(res,0))}}
  finally{document.body.style.cursor='';status()}}
 // Flusso massimo (Boykov e Kolmogorov) su una griglia con 8 vicini. Due alberi crescono dalla sorgente (il soggetto) e
 // dal pozzo (lo sfondo) finché si toccano; si spinge il flusso lungo il percorso trovato e i nodi rimasti senza genitore
@@ -2164,7 +2245,7 @@ Object.assign(PHOTO_TOOLS,{
  cutKeep:{label:'Tieni',kind:'paint',color:'#20c060',keys:'Dipingi sulle parti del soggetto che sono state tolte. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta.',opts:['size'],done:p=>cutStroke('keep',p)},
  cutDrop:{label:'Togli',kind:'paint',color:'#ff3050',keys:'Dipingi sulle parti di sfondo rimaste. Da tastiera: Spazio abbassa o alza il pennello e con il pennello giù le frecce dipingono; Invio lascia un’impronta.',opts:['size'],done:p=>cutStroke('drop',p)}});
 function cutSetBg(bg){if(!needCut())return;edit('Sfondo: '+CUT_BG[bg].toLowerCase(),r=>{r.cut.bg=bg},{panel:true});announce('Sfondo: '+CUT_BG[bg].toLowerCase())}
-async function cutColor(){if(!needCut())return;const v=await modal('Colore dello sfondo','<p>Il colore pieno che va dietro al soggetto. Scrivi un colore esadecimale, come #FFFFFF per il bianco.</p>',[{id:'c',label:'Colore',type:'color',value:I.r.cut.color}],'Applica');if(v)edit('Colore dello sfondo',r=>{r.cut.color=v.c;r.cut.bg='color'},{panel:true})&&announce('Sfondo: colore '+v.c)}
+async function cutColor(){if(!needCut())return;const v=await modal('Colore dello sfondo','<p>Il colore pieno che va dietro al soggetto: sceglilo nel campo qui sotto, che apre il selettore dei colori del sistema.</p>',[{id:'c',label:'Colore',type:'color',value:I.r.cut.color}],'Applica');if(v)edit('Colore dello sfondo',r=>{r.cut.color=v.c;r.cut.bg='color'},{panel:true})&&announce('Sfondo: '+hexName(v.c))}
 function cutRemove(){if(!needCut())return;edit('Rimetti lo sfondo',r=>{r.cut=null},{panel:true});announce('Sfondo rimesso com’era: Ctrl+Z per toglierlo di nuovo')}
 function cutRecalc(){if(!needCut())return;cutRun({...I.r.cut,method:prefs.cutMethod||'auto'},'Ricalcola lo scontorno')}
 // Anteprima della trasparenza: su scacchiera o su un colore; non cambia il file esportato.
@@ -2355,7 +2436,11 @@ function retouchSpot(p){if(!lastMc)return;const s=spotSource(p);if(!s){announce(
  addRetouch({t:'heal',x,y,sx,sy,r:U5(T.size/2)},'Correttivo puntuale',`Corretto a ${posSay(p)}, con la zona ${placeDir(p,s)}.`)}
 const placeDir=(p,s)=>{const a=Math.atan2(s[1]-p[1],s[0]-p[0])*180/Math.PI,dirs=['a destra','in basso a destra','sotto','in basso a sinistra','a sinistra','in alto a sinistra','sopra','in alto a destra'];return dirs[Math.round(((a+360)%360)/45)%8]};
 function retouchClone(a,b){const [sx,sy]=uvUnits(a),[x,y]=uvUnits(b);addRetouch({t:T.heal?'heal':'clone',x,y,sx,sy,r:U5(T.size/2),h:T.hard},T.heal?'Timbro con riparazione':'Timbro clone',`Copiata la zona a ${posSay(a)} su ${posSay(b)}.`)}
-function retouchEye(p){const [x,y]=uvUnits(p);addRetouch({t:'eye',x,y,r:U5(T.size/2)},'Occhi rossi',`Rosso tolto a ${posSay(p)}.`)}
+// Prima di togliere il rosso si guarda se nel cerchio c'è: la parte di pixel che redEye cambierebbe davvero.
+function redShare([u,v]){if(!lastMc)return 0;const px=lastMc.px,w=px.width,h=px.height,d=px.data,cx=u*w,cy=v*h,R=Math.max(1,T.size/2*lastMc.k);let n=0,red=0;
+ for(let y=Math.max(0,Math.floor(cy-R));y<=Math.min(h-1,Math.ceil(cy+R));y++)for(let x=Math.max(0,Math.floor(cx-R));x<=Math.min(w-1,Math.ceil(cx+R));x++){if(Math.hypot(x+.5-cx,y+.5-cy)>=R)continue;const o=(y*w+x)*4;n++;if(d[o]/((d[o+1]+d[o+2])/2+8)>1.4)red++}return n?red/n:0}
+function retouchEye(p){const q=redShare(p);if(q<.02){announce(`Nel cerchio a ${posSay(p)} non c’è rosso da togliere: sposta il cursore sulla pupilla o allarga il cerchio con le parentesi quadre.`);return}
+ const [x,y]=uvUnits(p);addRetouch({t:'eye',x,y,r:U5(T.size/2)},'Occhi rossi',`Rosso tolto a ${posSay(p)}: era il ${fmtPct(q)} del cerchio.`)}
 function retouchLast(){if(!I.r.heal?.length){toast('Non ci sono ritocchi');return}edit('Togli l’ultimo ritocco',r=>{r.heal=r.heal.slice(0,-1)},{panel:true});announce(`Tolto l’ultimo ritocco: ne restano ${I.r.heal.length}`)}
 function retouchClear(){if(!I.r.heal?.length){toast('Non ci sono ritocchi');return}edit('Togli tutti i ritocchi',r=>{r.heal=[]},{panel:true});announce('Tolti tutti i ritocchi: Ctrl+Z per riaverli')}
 function retouchSay(r=I.r){const l=r.heal||[],n=t=>l.filter(o=>o.t===t).length,pl=(k,one,many)=>k===1?one:k+' '+many;
@@ -2367,6 +2452,115 @@ Object.assign(PHOTO_TOOLS,{
  redeye:{label:'Occhi rossi',kind:'click',opts:['size'],keys:'Clic al centro di un occhio rosso, con il cerchio grande come l’occhio. Da tastiera: Invio sul punto. Parentesi quadre cambiano la dimensione del cerchio.',at:p=>retouchEye(p)}});
 PANEL_HTML.retouch=()=>`<div class="tool-grid" role="group" aria-label="Strumenti di ritocco">${['toolSpot','toolClone','toolRedEye'].map(id=>cmdButton(id)).join('')}</div><div class="insp-actions">${['retouchLast','retouchClear'].map(id=>cmdButton(id)).join('')}</div><p class="sel-desc">${esc(retouchSay())}</p>`;
 Object.assign(PHOTO_TOOL_ACTIONS,{adjCopy,adjPaste,toolSpot:()=>setPhotoTool('spot'),toolClone:()=>setPhotoTool('clone'),toolRedEye:()=>setPhotoTool('redeye'),retouchLast,retouchClear});
+// Immagini a parole, per chi non vede la foto: l'effetto di una modifica quando ci si ferma, la luce e l'istogramma da
+// percorrere e da ascoltare, le zone con i colori e la dominante, il confronto con l'originale e lo strumento Esplora.
+// Le misure si fanno a richiesta su circa 60.000 pixel dell'anteprima, come in describeMask: costano pochi millisecondi.
+$$('svg defs')[0].insertAdjacentHTML('beforeend',`<symbol id="i-explore" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1.2"/></symbol>`);
+const ZONE_NAME=['in alto a sinistra','in alto al centro','in alto a destra','al centro a sinistra','al centro','al centro a destra','in basso a sinistra','in basso al centro','in basso a destra'];
+// Misure campionate: nove zone in terzi, colori per nome, saturazione, gamma tonale (2° e 98° percentile), calore
+// dell'insieme e i grigi di luce media, che dicono la dominante quando ce ne sono abbastanza.
+function photoSample(img){const w=img.width,h=img.height,d=img.data,step=Math.max(1,Math.floor(Math.sqrt(w*h/60000))),HY=new Uint32Array(256),col=new Map(),Z=ZONE_NAME.map(()=>({n:0,y:0,hi:0,lo:0,col:new Map()}));let n=0,sat=0,R=0,B=0,gr=0,gg=0,gb=0,gn=0;
+ for(let y=0;y<h;y+=step){const zy=Math.min(2,y*3/h|0);for(let x=0;x<w;x+=step){const i=(y*w+x)*4;if(d[i+3]<8)continue;const r=d[i],g=d[i+1],b=d[i+2],L=(54*r+183*g+19*b)>>8,mx=Math.max(r,g,b),mn=Math.min(r,g,b),name=colorName(r,g,b),z=Z[zy*3+Math.min(2,x*3/w|0)];
+  n++;HY[L]++;sat+=mx?(mx-mn)/mx:0;R+=r;B+=b;col.set(name,(col.get(name)||0)+1);z.n++;z.y+=L;z.col.set(name,(z.col.get(name)||0)+1);if(mx>=253)z.hi++;else if(mx<=2)z.lo++;
+  if(mx-mn<.2*mx&&L>40&&L<215){gr+=S2L[r];gg+=S2L[g];gb+=S2L[b];gn++}}}
+ const pc=p=>{const t=n*p;let a=0;for(let i=0;i<256;i++){a+=HY[i];if(a>=t)return i/255}return 1};
+ return {n,zones:Z,col,sat:n?sat/n:0,warm:R+B?(R-B)/(R+B):0,p2:pc(.02),p98:pc(.98),gray:gn>=Math.max(150,n*.02)?{r:gr/gn,g:gg/gn,b:gb/gn}:null}}
+const lightWord=m=>m<.15?'molto scura':m<.3?'scura':m<.42?'un po’ scura':m<.58?'di luce media':m<.7?'un po’ chiara':m<.85?'chiara':'molto chiara';
+const satWord=s=>s<.08?'quasi senza colore':s<.2?'colori tenui':s<.4?'colori pieni':'colori molto vivi';
+const topCols=(map,n,k=3,min=.06)=>[...map].sort((a,b)=>b[1]-a[1]).filter(([,c])=>c/n>=min).slice(0,k);
+// Dominante: quanto i grigi pendono verso il caldo o il freddo e verso il verde o il magenta, nella scala dei cursori
+// Temperatura e Tinta (la stessa della regolazione automatica): il valore che la toglierebbe.
+function castOf(s){const g=s.gray;return g?{t:Math.round((g.b-g.r)/(g.r+g.b)*120),u:Math.round((g.g-(g.r+g.b)/2)/g.g*120)}:null}
+function castSay(c){if(!c)return 'Non ci sono abbastanza grigi per stimare la dominante.';const a=Math.abs(c.t),b=Math.abs(c.u),out=[];
+ if(a>=4)out.push(`${a<10?'leggera ':''}${c.t<0?'calda':'fredda'}: Temperatura ${fmtSigned(clamp(c.t,-100,100))} la toglierebbe`);
+ if(b>=4)out.push(`${b<10?'leggera ':''}verso il ${c.u>0?'verde':'magenta'}: Tinta ${fmtSigned(clamp(c.u,-100,100))} la toglierebbe`);
+ return out.length?'Dominante '+out.join('; ')+'.':'Nessuna dominante: i grigi sono neutri.'}
+// Zone: la più chiara e la più scura, con il colore prevalente, la luce e le parti bruciate o chiuse.
+function zoneOf(z){return {c:topCols(z.col,z.n,1,0)[0]?.[0]||'vuota',y:z.n?z.y/z.n/255:0,hi:z.n?z.hi/z.n:0,lo:z.n?z.lo/z.n:0}}
+const zoneText=Z=>`${Z.c}, luce ${fmtPct(Z.y)}${Z.hi>=.01?`, bruciata per il ${fmtPct(Z.hi)}`:''}${Z.lo>=.01?`, chiusa per il ${fmtPct(Z.lo)}`:''}`;
+function zonesSay(s){const Z=s.zones.map(zoneOf),idx=[...Z.keys()].filter(i=>s.zones[i].n);if(!idx.length)return 'La foto è tutta trasparente.';const hi=idx.reduce((a,b)=>Z[b].y>Z[a].y?b:a),lo=idx.reduce((a,b)=>Z[b].y<Z[a].y?b:a);
+ return Z[hi].y-Z[lo].y<.08?`La luce è uniforme in tutta la foto, intorno al ${fmtPct(Z[hi].y)}.`:`La parte più chiara è ${ZONE_NAME[hi]} (${zoneText(Z[hi])}); la più scura ${ZONE_NAME[lo]} (${zoneText(Z[lo])}).`}
+const colorsSay=s=>`Colori: ${topCols(s.col,s.n).map(([k,c])=>`${k} ${fmtPct(c/s.n)}`).join(', ')||'molti, nessuno prevalente'}; ${satWord(s.sat)}.`;
+// Effetto di una modifica: le misure di prima (a) e di dopo (b), {st: measure, s: photoSample}. Solo ciò che cambia oltre
+// una soglia (luce media di un punto, gamma tonale di due, saturazione di due, parti bruciate o chiuse di 0,2), con le
+// soglie superate per prime e le buone notizie.
+function effectSay(a,b){const A=a.st,B=b.st,out=[],warn=[],p1=v=>fmtPct(v,1),tone=(x,y)=>`${fmtInt(x*100)}–${fmtPct(y)}`;
+ if(Math.abs(B.mean-A.mean)>=.01)out.push(`Luminosità media da ${fmtPct(A.mean)} a ${fmtPct(B.mean)}.`);
+ const da=a.s.p98-a.s.p2,db=b.s.p98-b.s.p2;if(Math.abs(b.s.p2-a.s.p2)>=.02||Math.abs(b.s.p98-a.s.p98)>=.02)out.push(`Toni da ${tone(a.s.p2,a.s.p98)} a ${tone(b.s.p2,b.s.p98)}${Math.abs(db-da)>=.03?(db>da?': più contrasto':': meno contrasto'):''}.`);
+ if(Math.abs(b.s.sat-a.s.sat)>=.02)out.push(`Colori ${b.s.sat>a.s.sat?'più vivi':'più tenui'}: saturazione media da ${fmtPct(a.s.sat)} a ${fmtPct(b.s.sat)}.`);
+ if(Math.abs(b.s.warm-a.s.warm)>=.015)out.push(b.s.warm>a.s.warm?'Più calda.':'Più fredda.');
+ for(const [k,name,good] of [['high','luci bruciate','recuperate'],['low','ombre chiuse','riaperte']]){const x=A[k],y=B[k];if(Math.abs(y-x)<.002)continue;
+  if(x<CLIP_WARN&&y>=CLIP_WARN)warn.push(`${name} da ${p1(x)} a ${p1(y)}`);else out.push(`${name[0].toUpperCase()+name.slice(1)} da ${p1(x)} a ${p1(y)}${x>=CLIP_WARN&&y<CLIP_WARN?': '+good:''}.`)}
+ if(warn.length)out.unshift(`Attenzione: ${warn.join(' e ')}.`);return out.length?out.join(' '):'Nessun cambiamento misurabile nella luce e nei colori.'}
+// L'effetto si dice da solo (si spegne con «Annuncia l’effetto delle modifiche»): 700 ms dopo l'ultimo disegno pieno
+// la foto si misura di nuovo e si confronta con fxBase, la misura dell'ultimo stato detto. Contano le regolazioni (cursori,
+// curve e dettaglio, look, maschere); inquadratura, ritocchi e scontorno hanno già i loro annunci, e dopo di loro la misura
+// di partenza si rifà senza dire niente. La selezione non cambia i pixel. devStats sono le misure dell'ultima foto
+// regolata mostrata, anche mentre si guarda l'originale.
+let fxBase=null,fxTimer=null,devStats=null;
+const fxKey=()=>JSON.stringify([I.r.adj,I.r.fx,I.r.look,I.r.lookAmt,(I.r.masks||[]).map(m=>[m.adj,m.ops,m.off,m.inv,m.amt])]),fxAll=()=>JSON.stringify({...I.r,sel:null});
+const effectOn=()=>prefs.effectSay!==false;
+const fxNow=()=>({bmp:I.bmp,key:fxKey(),all:fxAll(),st:I.stats,s:photoSample(outPx)});
+function photoEffect(fast){clearTimeout(fxTimer);if(fast||I.compare||!I.bmp||!outPx||!I.stats)return;devStats=I.stats;if(fxBase?.bmp!==I.bmp){fxBase=fxNow();return}if(fxAll()===fxBase.all)return;if(fxKey()===fxBase.key){fxBase=fxNow();return}
+ fxTimer=setTimeout(()=>{if(I.compare||!I.stats||fxBase?.bmp!==I.bmp)return;const now=fxNow(),msg=effectSay(fxBase,now);fxBase=now;if(effectOn())announce(msg)},700)}
+// Alt+Maiusc+L: la frase della luce; premuto di nuovo entro tre secondi porta all'istogramma.
+let lightAt=0;
+function readLight(){if(!I.bmp||!I.stats){toast('Apri prima una foto');return}if(Date.now()-lightAt<3000&&document.activeElement!==$('histNav')){lightAt=0;$('histNav').focus();return}lightAt=Date.now();announce(`${histSentence(I.stats)} Premi di nuovo Alt+Maiusc+L per percorrere l’istogramma.`)}
+// Alt+Maiusc+D: zone, colori e dominante in una frase; premuto di nuovo entro tre secondi apre la tabella delle zone.
+let zonesAt=0;
+function readZones(){if(!I.bmp||!lastMc){toast('Apri prima una foto');return}const s=photoSample(shownPx());if(Date.now()-zonesAt<3000){zonesAt=0;zonesTable(s);return}zonesAt=Date.now();
+ announce(`${I.compare?'Originale. ':''}${zonesSay(s)} ${colorsSay(s)} ${castSay(castOf(s))} Premi di nuovo Alt+Maiusc+D per la tabella delle zone.`)}
+async function zonesTable(s){const Z=s.zones.map(zoneOf),cols=['a sinistra','al centro','a destra'];
+ await modal('Zone e colori della foto',`<p>${esc(zonesSay(s))}</p><table><caption>La foto divisa in nove zone, per terzi: colore prevalente, luce media e parti bruciate o chiuse</caption><thead><tr><td></td>${cols.map(c=>`<th scope="col">${c[0].toUpperCase()+c.slice(1)}</th>`).join('')}</tr></thead><tbody>${['In alto','Al centro','In basso'].map((r,i)=>`<tr><th scope="row">${r}</th>${[0,1,2].map(j=>`<td>${esc(s.zones[i*3+j].n?zoneText(Z[i*3+j]):'trasparente')}</td>`).join('')}</tr>`).join('')}</tbody></table><h3>Colori</h3><p>${esc(colorsSay(s))}</p><h3>Dominante</h3><p>${esc(castSay(castOf(s)))} Le scene di un colore solo, come un tramonto o un prato, possono sembrare una dominante.</p>`,[],'Chiudi',{noCancel:true,wide:true})}
+// Alt+Maiusc+O: la foto regolata confrontata con l'originale con la stessa inquadratura, e la zona che cambia di più.
+function readCompare(){if(!I.bmp||!lastMc||!outPx){toast('Apri prima una foto');return}const src=geometryPixels(),o={st:measure(src),s:photoSample(src)},m={st:measure(outPx),s:photoSample(outPx)},say=effectSay(o,m);
+ const dz=o.s.zones.map((z,i)=>[i,zoneOf(z).y,zoneOf(m.s.zones[i]).y]).filter(([i])=>o.s.zones[i].n).sort((a,b)=>Math.abs(b[2]-b[1])-Math.abs(a[2]-a[1]))[0];
+ announce(`Rispetto all’originale. ${say}${dz&&Math.abs(dz[2]-dz[1])>=.03?` Zona più cambiata: ${ZONE_NAME[dz[0]]}, luce da ${fmtPct(dz[1])} a ${fmtPct(dz[2])}.`:''}`)}
+// Istogramma da percorrere, come i grafici di Calcolo: 16 fasce con le frecce, il canale con Su e Giù, gli estremi con Home e
+// Fine, la tabella con T, la descrizione con D, l'ascolto con S (Maiusc+S i tre colori). La fascia scelta si vede sul grafico.
+const HIST_CH=['Luminosità','Rosso','Verde','Blu'],HN={band:-1,ch:0};
+const levelShare=(st,ch,a,b)=>{let c=0;for(let k=a;k<=b;k++)c+=st.H[ch][k];return c/(st.n||1)};
+const bandSay=(st,i,ch=HN.ch)=>`${ch?HIST_CH[ch]+', f':'F'}ascia ${i+1} di 16, ${ch?'':'toni '}da ${fmtInt(i*16/2.55)} a ${fmtPct((i*16+15)/255)}: ${fmtPct(levelShare(st,ch,i*16,i*16+15),1)} dei pixel`;
+// La forma dell'istogramma in cinque zone di tono, dai neri ai bianchi.
+const TONE_BANDS=[['neri',0,12],['ombre',13,76],['toni medi',77,178],['luci',179,242],['bianchi',243,255]],TONE_ART={neri:'i neri',ombre:'le ombre','toni medi':'i toni medi',luci:'le luci',bianchi:'i bianchi'};
+function histShape(st,ch=0){const q=TONE_BANDS.map(([n,a,b])=>[n,levelShare(st,ch,a,b)]),top=[...q].sort((a,b)=>b[1]-a[1]);return `${ch?HIST_CH[ch]+': ':''}${q.filter(x=>x[1]>=.005).map(([n,v])=>`${n} ${fmtPct(v)}`).join(', ')}; prevalgono ${TONE_ART[top[0][0]]}.`}
+function histKey(e){const st=I.stats;if(!st||!I.bmp)return;const k=e.key;let say=null;
+ if(k==='ArrowRight'||k==='ArrowLeft'){HN.band=clamp(HN.band<0?(k==='ArrowRight'?0:15):HN.band+(k==='ArrowRight'?1:-1),0,15);say=bandSay(st,HN.band)}
+ else if(k==='ArrowUp'||k==='ArrowDown'){HN.ch=(HN.ch+(k==='ArrowDown'?1:3))%4;say=HN.band<0?`${HIST_CH[HN.ch]}: ${histShape(st,HN.ch).replace(/^[^:]*: /,'')}`:bandSay(st,HN.band)}
+ else if(k==='Home')say=`${HN.ch?HIST_CH[HN.ch]+' al minimo':'Nero pieno'}: ${fmtPct(levelShare(st,HN.ch,0,2),1)} dei pixel`;
+ else if(k==='End')say=`${HN.ch?HIST_CH[HN.ch]+' al massimo':'Bianco pieno'}: ${fmtPct(levelShare(st,HN.ch,253,255),1)} dei pixel`;
+ else if(k==='t'||k==='T'){e.preventDefault();histTable(st);return}
+ else if(k==='d'||k==='D')say=`${histSentence(st)} ${histShape(st,HN.ch)}`;
+ else if(k==='s'||k==='S'){e.preventDefault();histListen(st,e.shiftKey);return}
+ else if(k==='Escape'){e.preventDefault();if(toneHalt()){announce('Ascolto interrotto');return}$('photo').focus();return}
+ if(say==null)return;e.preventDefault();announce(say);drawHist()}
+async function histTable(st){await modal('Istogramma della foto',`<p>${esc(histSentence(st))}</p><table><caption>Quanti pixel cadono in ognuna delle 16 fasce di tono, per la luminosità e per i tre colori</caption><thead><tr><th scope="col">Fascia</th><th scope="col">Toni</th>${HIST_CH.map(c=>`<th scope="col">${c}</th>`).join('')}</tr></thead><tbody>${Array.from({length:16},(_,i)=>`<tr><th scope="row">${i+1}</th><td>da ${fmtInt(i*16/2.55)} a ${fmtPct((i*16+15)/255)}</td>${HIST_CH.map((c,ch)=>`<td>${fmtPct(levelShare(st,ch,i*16,i*16+15),1)}</td>`).join('')}</tr>`).join('')}</tbody></table>`,[],'Chiudi',{noCancel:true,wide:true})}
+// Ascolto: 32 note dalle ombre (a sinistra) alle luci (a destra), più acute dove ci sono più pixel (radice quadrata, come
+// il disegno); un colpo breve all'inizio o alla fine se le ombre sono chiuse o le luci bruciate oltre l'1%.
+function histListen(st,all){const part=ch=>{const v=Array.from({length:32},(_,i)=>levelShare(st,ch,i*8,i*8+7)),top=Math.max(...v)||1,marks=new Set();if(levelShare(st,ch,0,2)>=CLIP_WARN)marks.add(0);if(levelShare(st,ch,253,255)>=CLIP_WARN)marks.add(31);return {vals:v.map(x=>Math.sqrt(x/top)),marks,wave:ch===2?'triangle':'sine',label:all?HIST_CH[ch]:''}};
+ toneSeq(all?[1,2,3].map(part):[part(HN.ch)],{say:`Ascolto dell’istogramma ${all?'del rosso, del verde e del blu':HN.ch?'del '+HIST_CH[HN.ch].toLowerCase():'della luminosità'}: a sinistra le ombre, a destra le luci; più acuto dove ci sono più pixel. Esc per fermare.`})}
+function histCursor(ctx,W,H){if(HN.band<0||document.activeElement!==$('histNav'))return;const x0=HN.band*16/255*(W-1),x1=(HN.band*16+15)/255*(W-1),dpr=devicePixelRatio||1;ctx.save();ctx.strokeStyle=palette.accent||'#000';ctx.lineWidth=2*dpr;ctx.strokeRect(x0,dpr,Math.max(2,x1-x0),H-2*dpr);ctx.restore()}
+$('histNav').addEventListener('keydown',histKey);
+$('histNav').addEventListener('focus',()=>drawHist());$('histNav').addEventListener('blur',()=>{toneHalt();drawHist()});
+// Il cursore degli strumenti dice anche la luce, se lì la foto è bruciata o chiusa, se è nel soggetto o nello sfondo tolto
+// e quanto agisce la maschera scelta. Esplora è uno strumento che non cambia niente: Invio legge il dettaglio.
+function cursorAt(p){const m=lastMc,i=Math.min(m.h-1,Math.floor(p[1]*m.h))*m.w+Math.min(m.w-1,Math.floor(p[0]*m.w)),c=colorAt(p),mx=Math.max(...c),out=[colorName(...c),`luce ${fmtPct((54*c[0]+183*c[1]+19*c[2])/256/255)}`];
+ if(mx>=253)out.push('bruciato');else if(mx<=2)out.push('chiuso');
+ if(I.r.cut){const v=maskOf(cutOps(I.r,m),m)[i];out.push(v>=230?'nel soggetto':v<=25?'nello sfondo tolto':`sul bordo del soggetto, ${fmtPct(v/255)}`)}
+ const mk=maskIn();if(mk&&(['mbrush','linear','radial','explore'].includes(T.tool))){const v=maskPreview(mk)?.[i];if(v!=null)out.push(`maschera «${mk.name}» al ${fmtPct(v/255)}`)}
+ const sm=(PHOTO_TOOLS[T.tool]?.sel||T.tool==='explore')&&selMask();if(sm)out.push(sm[i]>=128?'nella selezione':'fuori dalla selezione');return {c,text:out.join(', ')}}
+function exploreDetail(p){const {c,text}=cursorAt(p);announce(`${posSay(p)}: ${text}; rosso ${fmtInt(c[0])}, verde ${fmtInt(c[1])}, blu ${fmtInt(c[2])}.`)}
+// Alt+Maiusc+frecce: il cursore va al primo cambio netto di colore o di luce in quella direzione, sulla foto che si vede.
+function edgeJump(dx,dy){const px=shownPx(),w=px.width,h=px.height,uv=(x,y)=>[(x+.5)/w,(y+.5)/h],step=2;let x=Math.min(w-1,T.u*w|0),y=Math.min(h-1,T.v*h|0),prev=colorAt(uv(x,y)),k=0;
+ for(;;){x+=dx*step;y+=dy*step;k++;if(x<0||y<0||x>=w||y>=h){announce(`Nessun bordo netto fino al margine ${dx>0?'destro':dx<0?'sinistro':dy>0?'inferiore':'superiore'} della foto`);return}
+  const c=colorAt(uv(x,y));if(k>2&&Math.hypot(c[0]-prev[0],c[1]-prev[1],c[2]-prev[2])>=34){[T.u,T.v]=uv(x,y);T.kbd=true;drawOver();
+  // Il colore di là dal bordo si prende qualche pixel più avanti, fuori dalla sfumatura del passaggio.
+  const to=colorAt(uv(clamp(x+dx*5,0,w-1),clamp(y+dy*5,0,h-1))),L=q=>fmtPct((54*q[0]+183*q[1]+19*q[2])/256/255);announce(`Bordo a ${posSay([T.u,T.v])}: da ${colorName(...prev)}, ${L(prev)}, a ${colorName(...to)}, ${L(to)}`);return}prev=c}}
+photoCv.addEventListener('keydown',e=>{if(!T.tool||!I.bmp||overlayOpen()||!e.key.startsWith('Arrow')||!e.altKey||!e.shiftKey||e.ctrlKey)return;e.preventDefault();e.stopPropagation();edgeJump(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0,e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0)});
+PHOTO_TOOLS.explore={label:'Esplora',kind:'click',keys:'Le frecce muovono un cursore che non cambia niente e dicono che cosa c’è sotto; Invio legge il dettaglio, Alt+Maiusc+frecce portano il cursore al bordo successivo.',at:p=>exploreDetail(p)};
+Object.assign(PHOTO_TOOL_ACTIONS,{toolExplore:()=>setPhotoTool('explore'),readLight,readZones,readCompare,effectSay:()=>{prefs.effectSay=!effectOn();savePrefs()}});
+STATIC_KEYS.i[0][1].push(['Esplora la foto: le frecce dicono che cosa c’è sotto','X'],['Con uno strumento, porta il cursore al bordo successivo','Alt+Maiusc+← → ↑ ↓']);
+STATIC_KEYS.i.splice(1,0,['Nell’istogramma (Alt+Maiusc+L due volte)',[['Fascia di tono successiva o precedente','← →'],['Luminosità, rosso, verde, blu','↑ ↓'],['Nero pieno e bianco pieno','Home / Fine'],['Tabella delle fasce','T'],['Descrizione','D'],['Ascolta; Maiusc i tre colori','S / Maiusc+S'],['Ferma l’ascolto o torna alla foto','Esc']]]);
 // Disegno: un foglio con oggetti uno sopra l'altro (rettangoli, ellissi, linee, testi e immagini), misurati in pixel
 // del foglio. Si salva in SVG, che si apre in ogni browser e programma di grafica; dentro c'è anche la descrizione
 // degli oggetti, così Disegno lo riapre modificabile. Gli oggetti più avanti nell'elenco stanno sopra.
@@ -2411,7 +2605,7 @@ const KIND_DEFAULTS={rect:(p,s)=>({w:Math.round(s*.5),h:Math.round(s*.3),fill:'#
 function addItem(kind,extra={}){const p=Dw.p,s=Math.min(p.w,p.h),it={id:uid(),kind,name:nextName(kind),x:0,y:0,w:100,h:100,rot:0,opacity:100,fill:'#0e6f8a',stroke:'#1b1b1b',sw:0,radius:0,...KIND_DEFAULTS[kind](p,s),...extra};
  if(kind==='text')measureText(it);it.x=Math.round((p.w-it.w)/2);it.y=Math.round((p.h-it.h)/2);
  Dw.sel=it.id;editD('Inserisci '+it.name,q=>{q.items.push(it)},{props:true});announce(`Inserito l’oggetto «${it.name}» al centro del foglio, sopra gli altri. Le proprietà sono nel riquadro a destra.`);return it}
-const describeItem=it=>{const b=box(it);return `${it.name}${it.name.startsWith(kindName(it))?'':', '+kindName(it).toLowerCase()}${it.kind==='text'?` «${it.text.replace(/\n/g,' ')}»`:''}${KIND_SAY[it.kind]?.(it)||''}${clipSay(it)}${styleSay(it)}, x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}${it.rot?`, ruotato di ${fmtNum(it.rot,0)} gradi`:''}${it.opacity<100?`, opacità ${it.opacity}%`:''}${it.hidden?', nascosto':''}${it.lock?', bloccato':''}`};
+const describeItem=it=>{const b=box(it);return `${it.name}${it.name.startsWith(kindName(it))?'':', '+kindName(it).toLowerCase()}${it.kind==='text'?` «${it.text.replace(/\n/g,' ')}»`:''}${KIND_SAY[it.kind]?.(it)||''}${clipSay(it)}${colorSay(it)}${styleSay(it)}, x ${fmtInt(b.x)}, y ${fmtInt(b.y)}, ${fmtInt(b.w)} per ${fmtInt(b.h)}${it.rot?`, ruotato di ${fmtNum(it.rot,0)} gradi`:''}${it.opacity<100?`, opacità ${it.opacity}%`:''}${it.hidden?', nascosto':''}${it.lock?', bloccato':''}`};
 // Immagini del disegno: il file originale resta com'è (HEIC e RAW convertite); per l'anteprima e per l'esportazione si usa
 // un indirizzo locale.
 function registerImage(id,blob,name,w,h){const old=Dw.imgs.get(id);if(old)URL.revokeObjectURL(old.url);Dw.imgs.set(id,{blob,name,w,h,type:blob.type,url:URL.createObjectURL(blob),bmp:null})}
@@ -2426,8 +2620,10 @@ function imgHasAlpha(x,w,h){for(let y=0;y<h;y+=256){const d=x.getImageData(0,y,w
 const imgConvert=(f,bmp)=>work(`Conversione di «${f.name}»`,async()=>{const heic=isHeic(f),cv=new OffscreenCanvas(bmp.width,bmp.height),x=cv.getContext('2d',{willReadFrequently:heic});x.drawImage(bmp,0,0);
  const png=heic&&imgHasAlpha(x,cv.width,cv.height),type=png?'image/png':'image/jpeg';return new File([await cv.convertToBlob({type,quality:.92})],baseName(f.name)+(png?'.png':'.jpg'),{type})});
 // Le immagini entrano grandi al massimo l'80% del foglio, con le loro proporzioni.
-async function addImages(files){for(let f of files){let w,h,raw;try{if(isSvgFile(f))[w,h]=await svgSize(f);else{const bmp=await decodePhoto(f);w=bmp.width;h=bmp.height;raw=bmp.rawInfo;if(imgToConvert(f))f=await imgConvert(f,bmp);bmp.close();if(!f)continue}}catch(e){toast(e.message);continue}
- const id=uid(),k=Math.min(1,Dw.p.w*.8/w,Dw.p.h*.8/h);registerImage(id,f,f.name,w,h);addItem('image',{img:id,w:Math.max(1,Math.round(w*k)),h:Math.max(1,Math.round(h*k)),name:safeFileName(baseName(f.name)).slice(0,40)||nextName('image')});if(raw)toast(rawNote(raw))}}
+// Durante la lettura la barra di stato dice quale file; i file che non entrano si dicono tutti insieme alla fine.
+async function addImages(files){const bad=[];for(let f of files){let w,h,raw;try{if(isSvgFile(f))[w,h]=await svgSize(f);else{status(`Lettura di «${f.name}»…`);const bmp=await decodePhoto(f).finally(()=>status());w=bmp.width;h=bmp.height;raw=bmp.rawInfo;if(imgToConvert(f))f=await imgConvert(f,bmp);bmp.close();if(!f)continue}}catch(e){bad.push(`«${f.name}»: ${e.message}`);continue}
+ const id=uid(),k=Math.min(1,Dw.p.w*.8/w,Dw.p.h*.8/h);registerImage(id,f,f.name,w,h);addItem('image',{img:id,w:Math.max(1,Math.round(w*k)),h:Math.max(1,Math.round(h*k)),name:safeFileName(baseName(f.name)).slice(0,40)||nextName('image')});if(raw)toast(rawNote(raw))}
+ if(bad.length)toast(`${bad.length===1?'Non è entrato nel foglio ':`Non sono entrati nel foglio ${bad.length} file: `}${bad.join('; ')}`)}
 async function newDrawingCmd(){if(Dw.p.items.length&&!(await confirmAction('Il disegno attuale verrà chiuso. Se non l’hai salvato in SVG lo perdi: vuoi continuare?','Nuovo disegno')))return;Object.assign(Dw,{p:newDrawing(),sel:null,hist:[],redo:[],zoom:0});Dw.base=snapD();$('docTitle').value=Dw.p.title;updateTitle();drawingChanged({props:true});announce('Nuovo disegno vuoto, formato post 4:5. Inserisci forme, testi e immagini dalla scheda Inserisci.')}
 // Bozza: il disegno a ogni modifica, ogni immagine e ogni maschera calcolata una volta sola; quelle non più usate si tolgono.
 const imgSaved=new Set(),rasSaved=new Set();
@@ -2503,16 +2699,24 @@ function imgHref(it){const m=Dw.imgs.get(it.img);if(!m)return '';if(!hasImgEdits
  processImage(m,it,PREVIEW_FAST).then(blob=>{const e=procCache.get(key);if(!e)return;e.url=URL.createObjectURL(blob);if(procCache.size>40){const [k0,v0]=procCache.entries().next().value;if(v0.url)URL.revokeObjectURL(v0.url);procCache.delete(k0)}renderSheet()}).catch(e=>console.warn('Immagine non regolata',e));return prev||m.url}
 // Livelli: dal più in alto al più in basso, come si vedono sul foglio.
 function renderLayers(){const list=$('layList'),items=[...Dw.p.items].reverse(),sel=new Set(selIds());$('layCount').textContent=items.length?`${items.length}`:'';
- list.innerHTML=items.length?items.map(it=>{const tags=[clipShape(it)&&'ritagliata',isClipShape(it)&&'ritaglio',it.g&&'gruppo',it.lock&&'bloccato',it.hidden&&'nascosto'].filter(Boolean).join(', ');return `<div role="option" id="lay-${it.id}" class="lb-item layer-item${it.id===Dw.sel?' active':''}" data-id="${it.id}" aria-selected="${sel.has(it.id)}">${ICON(kindIcon(it))}<span class="n">${esc(it.name)}${it.kind==='text'?`<span class="sr-only">, testo «${esc(it.text.replace(/\n/g,' '))}»</span>`:it.alt?`<span class="sr-only">, testo in tracciati${altOf(it)===it.name?'':` «${esc(altOf(it))}»`}</span>`:''}</span>${tags?`<span class="t"><span class="sr-only">, </span>${tags}</span>`:''}</div>`}).join(''):'<div class="lb-empty" role="option" aria-disabled="true" aria-selected="false" id="lay-empty">Foglio vuoto: inserisci un oggetto dalla scheda Inserisci.</div>';
- list.setAttribute('aria-activedescendant',Dw.sel&&itemOf(Dw.sel)?'lay-'+Dw.sel:items.length?'lay-'+items[0].id:'lay-empty')}
+ list.innerHTML=items.length?items.map(it=>{const tags=[clipShape(it)&&'ritagliata',isClipShape(it)&&'ritaglio',it.g&&'gruppo',it.lock&&'bloccato',it.hidden&&'nascosto'].filter(Boolean).join(', ');return `<div role="option" id="lay-${it.id}" class="lb-item layer-item${it.id===Dw.sel?' active':''}${it.id===Dw.layCur?' cursor':''}" data-id="${it.id}" aria-selected="${sel.has(it.id)}">${ICON(kindIcon(it))}<span class="n">${esc(it.name)}${it.kind==='text'?`<span class="sr-only">, testo «${esc(it.text.replace(/\n/g,' '))}»</span>`:it.alt?`<span class="sr-only">, testo in tracciati${altOf(it)===it.name?'':` «${esc(altOf(it))}»`}</span>`:''}</span>${tags?`<span class="t"><span class="sr-only">, </span>${tags}</span>`:''}</div>`}).join(''):'<div class="lb-empty" role="option" aria-disabled="true" aria-selected="false" id="lay-empty">Foglio vuoto: inserisci un oggetto dalla scheda Inserisci.</div>';
+ list.setAttribute('aria-activedescendant',itemOf(Dw.layCur)?'lay-'+Dw.layCur:Dw.sel&&itemOf(Dw.sel)?'lay-'+Dw.sel:items.length?'lay-'+items[0].id:'lay-empty')}
 // Un oggetto solo (anche dentro un gruppo, come dai livelli); nessuno con null.
-function selectItem(id,{say=true}={}){Dw.sel=id&&itemOf(id)?id:null;Dw.multi={for:Dw.sel,ids:[]};selChanged({say})}
-// Oggetto sopra o sotto quello scelto (dir 1 = sopra); con add si aggiunge alla scelta, insieme al suo gruppo.
-function selectStep(dir,add=false){const items=Dw.p.items;if(!items.length){toast('Il foglio è vuoto');return}const i=items.findIndex(x=>x.id===Dw.sel),j=i<0?(dir>0?0:items.length-1):clamp(i+dir,0,items.length-1);
- if(!add){selectItem(items[j].id);return}const had=selIds().includes(items[j].id);setSel([...selIds(),...groupIds(items[j])],items[j].id,{say:false});announce(had?describeSel():`Aggiunto alla scelta: ${describeItem(items[j])}. ${selIds().length} oggetti scelti.`)}
+function selectItem(id,{say=true}={}){Dw.layCur=null;Dw.sel=id&&itemOf(id)?id:null;Dw.multi={for:Dw.sel,ids:[]};selChanged({say})}
+// Oggetto sopra o sotto quello scelto (dir 1 = sopra); con add si aggiunge alla scelta, insieme al suo gruppo. Senza
+// scelta, PgSu parte dall'oggetto più in alto e PgGiù da quello più in basso; si dice sempre il livello.
+function selectStep(dir,add=false){const items=Dw.p.items,n=items.length;if(!n){toast('Il foglio è vuoto');return}const i=items.findIndex(x=>x.id===Dw.sel),j=i<0?(dir>0?n-1:0):clamp(i+dir,0,n-1),lev=`livello ${n-j} di ${n} dall’alto`;
+ if(!add){if(i===j){announce(`«${items[j].name}» è già l’oggetto più in ${dir>0?'alto':'basso'}, ${lev}.`);return}selectItem(items[j].id,{say:false});announce(`${describeSel()}, ${lev}${i<0?(dir>0?', il più in alto':', il più in basso'):''}.`);return}const had=selIds().includes(items[j].id);setSel([...selIds(),...groupIds(items[j])],items[j].id,{say:false});announce(had?describeSel():`Aggiunto alla scelta: ${describeItem(items[j])}. ${selIds().length} oggetti scelti.`)}
+// Il nome del colore scelto, sotto il campo; per il colore di un testo anche il contrasto con quello che ha sotto.
+function colorHint(id,value){if(value==='none')return 'Nessun colore';const it=selItem(),t=id==='fill'&&it?.kind==='text'&&selIds().length<2?it:null,bg=t&&behind(t),c=bg?.color&&contrastRatio(value,bg.color),need=t&&(t.size>=Dw.p.w/22||t.bold&&t.size>=Dw.p.w/28)?3:4.5;
+ return hexName(value)+(c?`; contrasto ${fmtNum(c,1)}:1 con ${bg.by?'«'+bg.by.name+'»':'lo sfondo'}${c<need?`: basso, ne serve ${fmtNum(need,1)}`:''}`:bg?.image?`; sotto c’è l’immagine «${bg.image.name}»`:'')}
+// Proporzioni: le immagini le mantengono se non si toglie la casella, le forme solo se la si mette (come Maiusc sulle
+// maniglie). Linee e testi hanno le loro regole.
+const keepsRatio=it=>it.kind!=='line'&&it.kind!=='text'&&(it.keep??it.kind==='image');
+const sizeSay=(it,keep)=>`${fmtInt(Math.abs(it.w))} per ${fmtInt(Math.abs(it.h))}${keep?', proporzioni mantenute':''}${it.kind==='image'?imgDeform(it):''}`;
 // Proprietà: del foglio se non c'è un oggetto scelto, dell'oggetto altrimenti. I numeri si scrivono anche con la virgola.
 const fld=(id,label,value,mode='decimal')=>`<label for="pr-${id}">${esc(label)}</label><input id="pr-${id}" data-prop="${id}" type="text" inputmode="${mode}" autocomplete="off" spellcheck="false" value="${esc(value)}">`;
-const colorFld=(id,label,value,none)=>`<label for="pr-${id}">${esc(label)}</label><input id="pr-${id}" data-prop="${id}" type="color" value="${esc(value==='none'?'#ffffff':value)}"${value==='none'?' disabled':''}>${none?`<label class="check"><input type="checkbox" data-prop="${id}None"${value==='none'?' checked':''}> ${esc(none)}</label>`:''}`;
+const colorFld=(id,label,value,none)=>`<label for="pr-${id}">${esc(label)}</label><input id="pr-${id}" data-prop="${id}" type="color" value="${esc(value==='none'?'#ffffff':value)}" aria-describedby="pr-${id}-name"${value==='none'?' disabled':''}><small class="hint" id="pr-${id}-name">${esc(colorHint(id,value))}</small>${none?`<label class="check"><input type="checkbox" data-prop="${id}None"${value==='none'?' checked':''}> ${esc(none)}</label>`:''}`;
 const rangeFld=(id,label,min,max,step,value,fmt)=>`<div class="adj"><label for="pr-${id}">${esc(label)}</label><output id="pr-${id}-o" aria-hidden="true">${esc(fmt(value))}</output><span></span><input type="range" id="pr-${id}" data-prop="${id}" min="${min}" max="${max}" step="${step}" value="${value}" aria-valuetext="${esc(fmt(value))}"></div>`;
 const selFld=(id,label,value,opts)=>`<label for="pr-${id}">${esc(label)}</label><select id="pr-${id}" data-prop="${id}">${opts.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(value)?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
 const IMG_ADJ=['exposure','contrast','highlights','shadows','temp','saturation'];
@@ -2521,7 +2725,7 @@ function renderProps(){const b=$('propBody'),it=selItem(),p=Dw.p,focusId=documen
  else if(!it)b.innerHTML=toolProps()+selFld('preset','Formato',sheetPreset(p),[['','Personalizzato'],...SHEETS.map(s=>[s[0],s[1]])])+`<div class="row2"><div>${fld('sw_','Larghezza (px)',p.w)}</div><div>${fld('sh_','Altezza (px)',p.h)}</div></div>`+colorFld('bg','Sfondo',p.bg,'Trasparente')+`<label for="pr-desc">Descrizione</label><textarea id="pr-desc" data-prop="desc" rows="4" aria-describedby="pr-desc-h">${esc(p.desc)}</textarea><small class="hint" id="pr-desc-h">Che cosa mostra il disegno, per chi non lo vede: va nel file SVG ed è il testo alternativo da usare quando lo pubblichi.</small>`;
  else{const bx=box(it);let h=fld('name','Nome',it.name,'text')+`<div class="row2"><div>${fld('x','X',bx.x)}</div><div>${fld('y','Y',bx.y)}</div></div>`;
   if(it.kind==='line')h+=`<div class="row2"><div>${fld('w','Lunghezza orizzontale',it.w)}</div><div>${fld('h','Lunghezza verticale',it.h)}</div></div>`;
-  else if(it.kind!=='text')h+=`<div class="row2"><div>${fld('w','Larghezza',it.w)}</div><div>${fld('h','Altezza',it.h)}</div></div>`;
+  else if(it.kind!=='text')h+=`<div class="row2"><div>${fld('w','Larghezza',it.w)}</div><div>${fld('h','Altezza',it.h)}</div></div><label class="check"><input type="checkbox" data-prop="keep"${keepsRatio(it)?' checked':''}> Mantieni le proporzioni</label>`;
   h+=fld('rot','Rotazione (gradi)',n2(it.rot));
   if(it.kind==='text')h+=`<label for="pr-text">Testo</label><textarea id="pr-text" data-prop="text" rows="3">${esc(it.text)}</textarea>`+selFld('font','Carattere',it.font,FONTS)+fld('size','Dimensione (px)',it.size)+`<label class="check"><input type="checkbox" data-prop="bold"${it.bold?' checked':''}> Grassetto</label> <label class="check"><input type="checkbox" data-prop="italic"${it.italic?' checked':''}> Corsivo</label>`+selFld('align','Allineamento',it.align,[['left','A sinistra'],['center','Al centro'],['right','A destra']])+colorFld('fill','Colore del testo',it.fill);
   if(['rect','ellipse','poly','arrow','bubble'].includes(it.kind))h+=colorFld('fill','Riempimento',it.fill,'Nessun riempimento')+colorFld('stroke','Contorno',it.stroke)+fld('sw','Spessore del contorno (px)',it.sw)+(it.kind==='rect'?fld('radius','Angoli arrotondati (px)',it.radius):'');
@@ -2535,8 +2739,10 @@ function renderProps(){const b=$('propBody'),it=selItem(),p=Dw.p,focusId=documen
 function syncProps(){const it=selItem(),a=document.activeElement;if(selIds().length>1){syncMulti();return}if(!it){if($('pr-sw_')&&a!==$('pr-sw_'))$('pr-sw_').value=Dw.p.w;if($('pr-sh_')&&a!==$('pr-sh_'))$('pr-sh_').value=Dw.p.h;return}if(!$('pr-name')){renderProps();return}const bx=box(it);
  for(const [k,v] of [['x',bx.x],['y',bx.y],['w',it.w],['h',it.h],['rot',n2(it.rot)],['size',it.size],['sw',it.sw],['radius',it.radius]]){const el=$('pr-'+k);if(el&&el!==a)el.value=v}
  const op=$('pr-opacity');if(op&&op!==a){op.value=it.opacity;op.setAttribute('aria-valuetext',it.opacity+'%');$('pr-opacity-o').textContent=it.opacity+'%'}if(curveOf(it))syncNodes(it)}
-// Valori scritti nei campi: si controllano e diventano una modifica.
-const PROP_NAME={mx:'Posizione',my:'Posizione',name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',text:'Testo',font:'Carattere',size:'Dimensione del testo',bold:'Grassetto',italic:'Corsivo',align:'Allineamento',fill:'Colore',fillNone:'Riempimento',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',hidden:'Nascosto',look:'Look',lookAmt:'Intensità del look',nx:'Posizione del nodo',ny:'Posizione del nodo',ntype:'Tipo di nodo',nclosed:'Tracciato chiuso',bsize:'Spessore del pennello',gtype:'Sfumatura',gangle:'Direzione della sfumatura',gstop:'Punto di colore',dash:'Tratteggio',cap:'Estremità',join:'Angoli',shadowOn:'Ombra',sx:'Ombra',sy:'Ombra',sblur:'Sfocatura dell’ombra',scolor:'Colore dell’ombra',sop:'Opacità dell’ombra',blur:'Sfocatura',blend:'Fusione',ls:'Spaziatura tra le lettere',wrap:'A capo nel riquadro',toff:'Inizio lungo la curva',start:'Inizio della linea',end:'Fine della linea',sides:'Lati',star:'Stella',inner:'Raggio interno',head:'Punta della freccia',shaft:'Corpo della freccia',double:'Due punte',tail:'Coda del fumetto',tip:'Punta della coda',tl:'Lunghezza della coda',tcolor:'Colore dello strumento',alt:'Testo per chi non vede',tsize:'Spessore dello strumento',nix:'Maniglia',niy:'Maniglia',nox:'Maniglia',noy:'Maniglia',sw_:'Larghezza del foglio',sh_:'Altezza del foglio',preset:'Formato del foglio',bg:'Sfondo',bgNone:'Sfondo',desc:'Descrizione'};
+// Valori scritti nei campi: si controllano e diventano una modifica. propSay è quello che si annuncia dopo, se serve
+// (per esempio l'altra misura cambiata per mantenere le proporzioni).
+let propSay='';
+const PROP_NAME={keep:'Proporzioni',mw:'Dimensioni',mh:'Dimensioni',mx:'Posizione',my:'Posizione',name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',text:'Testo',font:'Carattere',size:'Dimensione del testo',bold:'Grassetto',italic:'Corsivo',align:'Allineamento',fill:'Colore',fillNone:'Riempimento',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',hidden:'Nascosto',look:'Look',lookAmt:'Intensità del look',nx:'Posizione del nodo',ny:'Posizione del nodo',ntype:'Tipo di nodo',nclosed:'Tracciato chiuso',bsize:'Spessore del pennello',gtype:'Sfumatura',gangle:'Direzione della sfumatura',gstop:'Punto di colore',dash:'Tratteggio',cap:'Estremità',join:'Angoli',shadowOn:'Ombra',sx:'Ombra',sy:'Ombra',sblur:'Sfocatura dell’ombra',scolor:'Colore dell’ombra',sop:'Opacità dell’ombra',blur:'Sfocatura',blend:'Fusione',ls:'Spaziatura tra le lettere',wrap:'A capo nel riquadro',toff:'Inizio lungo la curva',start:'Inizio della linea',end:'Fine della linea',sides:'Lati',star:'Stella',inner:'Raggio interno',head:'Punta della freccia',shaft:'Corpo della freccia',double:'Due punte',tail:'Coda del fumetto',tip:'Punta della coda',tl:'Lunghezza della coda',tcolor:'Colore dello strumento',alt:'Testo per chi non vede',tsize:'Spessore dello strumento',nix:'Maniglia',niy:'Maniglia',nox:'Maniglia',noy:'Maniglia',sw_:'Larghezza del foglio',sh_:'Altezza del foglio',preset:'Formato del foglio',bg:'Sfondo',bgNone:'Sfondo',desc:'Descrizione'};
 function applyProp(key,el){const p=Dw.p,it=selItem(),v=el.type==='checkbox'?el.checked:el.value,n=num(v);
  const need=(lo,hi)=>{if(!(n>=lo&&n<=hi))throw Error(`Scrivi un numero tra ${fmtInt(lo)} e ${fmtInt(hi)}`);return n};
  if(selIds().length>1){applyMulti(key,v,need);return}
@@ -2548,7 +2754,7 @@ function applyProp(key,el){const p=Dw.p,it=selItem(),v=el.type==='checkbox'?el.c
  const o=it.subs&&(key==='w'||key==='h')?structuredClone(it):null;
  switch(key){case 'name':it.name=String(v).trim()||nextName(it.kind);break;
   case 'x':it.x+=Math.round(need(-1e5,1e5))-box(it).x;break;case 'y':it.y+=Math.round(need(-1e5,1e5))-box(it).y;break;
-  case 'w':it.w=Math.round(need(it.kind==='line'?-1e5:1,1e5));break;case 'h':it.h=Math.round(need(it.kind==='line'?-1e5:1,1e5));break;
+  case 'w':case 'h':{const k=key,o2=k==='w'?'h':'w',v0=it[k];it[k]=Math.round(need(it.kind==='line'?-1e5:1,1e5));const keep=keepsRatio(it)&&v0>0;if(keep)it[o2]=n2(Math.max(1,it[o2]*it[k]/v0));propSay=sizeSay(it,keep);break}
   case 'rot':it.rot=((need(-360,360)%360)+360)%360;break;case 'sw':it.sw=need(0,1000);break;case 'radius':it.radius=need(0,1e5);break;
   case 'size':it.size=need(1,2000);break;case 'opacity':case 'lookAmt':case 'inner':case 'head':case 'shaft':case 'tail':case 'tip':case 'tl':it[key]=Number(v);break;case 'sides':it.sides=Math.round(need(3,60));break;case 'fillNone':it.fill=v?'none':'#0e6f8a';break;
   default:it[key]=v}
@@ -2602,7 +2808,8 @@ sheetWrap.addEventListener('keydown',e=>{if(curTool().key?.(e))return;const it=s
  if(arrows[e.key]&&!e.altKey){e.preventDefault();if(!it){toast('Scegli prima un oggetto: PgSu e PgGiù, oppure i livelli');return}const [ax,ay]=arrows[e.key];
   if(!(e.ctrlKey||e.metaKey)){moveKeys(many,ax,ay,step);return}
   if(many.length>1){scaleKeys(many,ax,ay,step);return}if(it.lock){toast(`«${it.name}» è bloccato: sbloccalo per ridimensionarlo`);return}
-  if(it.kind==='text'){editD('Dimensione del testo',()=>{it.size=Math.max(1,it.size+(ax||-ay)*step);measureText(it)},{merge:true});announce(`Dimensione ${it.size} pixel`)}else{const o=structuredClone(it);editD('Ridimensiona',()=>{it.w=it.kind==='line'?it.w+ax*step:Math.max(1,it.w+ax*step);it.h=it.kind==='line'?it.h+ay*step:Math.max(1,it.h+ay*step);fitGeometry(it,o)},{merge:true});announce(`${fmtInt(Math.abs(it.w))} per ${fmtInt(Math.abs(it.h))}`)}return}
+  if(it.kind==='text'){editD('Dimensione del testo',()=>{it.size=Math.max(1,it.size+(ax||-ay)*step);measureText(it)},{merge:true});announce(`Dimensione ${it.size} pixel`)}else{const o=structuredClone(it),keep=keepsRatio(it);editD('Ridimensiona',()=>{if(keep&&ax){const w=Math.max(1,it.w+ax*step);it.h=n2(Math.max(1,it.h*w/it.w));it.w=w}else if(keep){const h=Math.max(1,it.h+ay*step);it.w=n2(Math.max(1,it.w*h/it.h));it.h=h}
+  else{it.w=it.kind==='line'?it.w+ax*step:Math.max(1,it.w+ax*step);it.h=it.kind==='line'?it.h+ay*step:Math.max(1,it.h+ay*step)}fitGeometry(it,o)},{merge:true});announce(sizeSay(it,keep))}return}
  if(e.key==='PageUp'||e.key==='PageDown'){e.preventDefault();selectStep(e.key==='PageUp'?1:-1,e.shiftKey);return}
  if(e.key==='Escape'&&Dw.sel){e.preventDefault();selectItem(null);return}
  if(e.key==='Enter'){e.preventDefault();focusables($('propBody'))[0]?.focus();return}
@@ -2610,7 +2817,11 @@ sheetWrap.addEventListener('keydown',e=>{if(curTool().key?.(e))return;const it=s
  if((e.shiftKey&&e.key==='F10')||e.key==='ContextMenu'){e.preventDefault();const r=sheetWrap.getBoundingClientRect();itemMenu(r.left+20,r.top+20)}});
 sheetWrap.addEventListener('contextmenu',e=>{e.preventDefault();itemMenu(e.clientX,e.clientY)});
 // Livelli: la scelta segue le frecce; Alt+Maiusc+frecce sposta l'oggetto sopra o sotto gli altri.
+// Scelta non contigua, come negli elenchi a scelta multipla: Ctrl+frecce muovono un cursore (Dw.layCur) senza cambiare
+// la scelta, Ctrl+Spazio aggiunge o toglie dalla scelta l'oggetto del cursore.
 $('layList').addEventListener('keydown',e=>{const items=[...Dw.p.items].reverse(),i=items.findIndex(x=>x.id===Dw.sel);if(!items.length)return;
+ if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();const c=items.findIndex(x=>x.id===(itemOf(Dw.layCur)?Dw.layCur:Dw.sel)),k=clamp(c<0?0:c+(e.key==='ArrowDown'?1:-1),0,items.length-1);Dw.layCur=items[k].id;renderLayers();announce(`${items[k].name}, ${selIds().includes(items[k].id)?'scelto':'non scelto'}, livello ${k+1} di ${items.length} dall’alto`);return}
+ if((e.ctrlKey||e.metaKey)&&e.key===' '){e.preventDefault();const id=itemOf(Dw.layCur)?Dw.layCur:Dw.sel;if(id){toggleSel(id);Dw.layCur=id;renderLayers()}return}
  if(e.altKey&&e.shiftKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();runCommand(e.key==='ArrowUp'?'forward':'backward');return}
  if(e.shiftKey&&!e.altKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();selectStep(e.key==='ArrowUp'?1:-1,true);return}
  let j=null;if(e.key==='ArrowDown')j=Math.min(items.length-1,i+1);else if(e.key==='ArrowUp')j=Math.max(0,i<0?0:i-1);else if(e.key==='Home')j=0;else if(e.key==='End')j=items.length-1;if(j!==null){e.preventDefault();selectItem(items[j].id);return}
@@ -2622,9 +2833,14 @@ $('layList').addEventListener('keydown',e=>{const items=[...Dw.p.items].reverse(
 $('layList').addEventListener('click',e=>{const o=e.target.closest('[data-id]');if(o){if(e.shiftKey||e.ctrlKey||e.metaKey)toggleSel(o.dataset.id);else selectItem(o.dataset.id,{say:false})}$('layList').focus()});
 // Pannello delle proprietà: colori, cursori e testo cambiano il foglio mentre si modificano, i numeri quando si confermano.
 $('propBody').addEventListener('input',e=>{const el=e.target,key=el.dataset.prop;if(!key||!(el.type==='range'||el.type==='color'||key==='text'))return;try{applyProp(key,el)}catch(err){return}
- if(el.type==='range'){const t=el.closest('.adj'),f=key.startsWith('adj.')?ADJ_BY[key.slice(4)].fmt:v=>fmtInt(v)+'%',txt=f(Number(el.value));el.setAttribute('aria-valuetext',txt);t.querySelector('output').textContent=txt}renderSheet();if(!selItem())renderLayers()});
-$('propBody').addEventListener('change',e=>{const el=e.target,key=el.dataset.prop;if(!key)return;const it=selItem();try{applyProp(key,el)}catch(err){toast(err.message);el.value=el.defaultValue;el.focus();return}
- const label=PROP_NAME[key.replace(/^adj\./,'').replace(/^gstop\..*/,'gstop')]||ADJ_BY[key.slice(4)]?.label||'Proprietà',n=selIds().length;settleD(n>1?`${label} di ${n} oggetti`:it?`${label} di ${it.name}`:label,{props:['preset','sw_','sh_','bgNone','fillNone','look','name','text','font','size','bold','italic','ntype','nclosed','star','sides','gtype','shadowOn','wrap'].includes(key)})});
+ if(el.type==='range'){const t=el.closest('.adj'),f=key.startsWith('adj.')?ADJ_BY[key.slice(4)].fmt:v=>fmtInt(v)+'%',txt=f(Number(el.value));el.setAttribute('aria-valuetext',txt);t.querySelector('output').textContent=txt}
+ if(el.type==='color'&&$(el.id+'-name'))$(el.id+'-name').textContent=colorHint(key,el.value);renderSheet();if(!selItem())renderLayers()});
+// Un valore sbagliato resta scritto nel campo, che si segna come non valido, con il messaggio sotto: il campo lo nomina.
+function propError(el,msg){const id=el.id+'-err';let box=$(id);if(!msg){if(box){box.remove();el.removeAttribute('aria-invalid');el.setAttribute('aria-describedby',(el.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!==id).join(' '));if(!el.getAttribute('aria-describedby'))el.removeAttribute('aria-describedby')}return}
+ if(!box){box=Object.assign(document.createElement('small'),{id,className:'hint err'});el.after(box);el.setAttribute('aria-describedby',[...(el.getAttribute('aria-describedby')||'').split(' ').filter(Boolean),id].join(' '))}
+ const what=(el.labels?.[0]?.textContent||'Valore').trim();box.textContent=`${what}: ${msg[0].toLowerCase()+msg.slice(1)}.`;el.setAttribute('aria-invalid','true');announce(box.textContent);el.focus()}
+$('propBody').addEventListener('change',e=>{const el=e.target,key=el.dataset.prop;if(!key)return;const it=selItem();try{applyProp(key,el)}catch(err){propError(el,err.message);return}if(el.id)propError(el,'');
+ const label=PROP_NAME[key.replace(/^adj\./,'').replace(/^gstop\..*/,'gstop')]||ADJ_BY[key.slice(4)]?.label||'Proprietà',n=selIds().length;const said=propSay||(el.type==='color'&&$(el.id+'-name')?`${el.labels?.[0]?.textContent||'Colore'}: ${colorHint(key,el.value)}`:'');propSay='';settleD(n>1?`${label} di ${n} oggetti`:it?`${label} di ${it.name}`:label,{props:['preset','sw_','sh_','bgNone','fillNone','look','name','text','font','size','bold','italic','ntype','nclosed','star','sides','gtype','shadowOn','wrap'].includes(key)});if(said)announce(said)});
 $('propBody').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();(Dw.sel?$('layList'):sheetWrap).focus()}});
 new ResizeObserver(()=>{if(!Dw.zoom&&state.mode==='disegno')renderSheet()}).observe(drawStage);
 // Comandi sugli oggetti scelti, uno o più: elimina, duplica, appunti, ordine sul foglio e allineamento.
@@ -2658,7 +2874,7 @@ function itemMenu(x,y){const many=selItems(),it=selItem();
 // Zoom: 0 vuol dire che il foglio entra tutto nello spazio disponibile.
 function zoomDraw(f){const k=f?clamp(sheetScale()*f,.05,8):0;Dw.zoom=k;renderSheet();announce(k?`Zoom ${fmtInt(k*100)}%`:'Si vede tutto il foglio')}
 function focusSheetProp(id){if(Dw.sel)selectItem(null,{say:false});$(id)?.focus()}
-function readDrawStatus(){const p=Dw.p,it=selItem(),n=selIds().length;toast(`«${p.title}», foglio ${fmtInt(p.w)} per ${fmtInt(p.h)} pixel${p.bg==='none'?' trasparente':''}, ${p.items.length===1?'un oggetto':p.items.length+' oggetti'}.${p.desc?'':' Senza descrizione.'} ${n>1?describeSel()+'.':it?'Scelto: '+describeItem(it)+`, livello ${p.items.length-p.items.indexOf(it)} di ${p.items.length} dall’alto${it.g?', in un gruppo':''}${it.lock?', bloccato':''}.`:'Nessun oggetto scelto.'}`)}
+function readDrawStatus(){const p=Dw.p,it=selItem(),n=selIds().length;toast(`«${p.title}», foglio ${fmtInt(p.w)} per ${fmtInt(p.h)} pixel, ${p.bg==='none'?'trasparente':'sfondo '+cName(p.bg)}, ${p.items.length===1?'un oggetto':p.items.length+' oggetti'}.${p.desc?` Descrizione: ${p.desc.trim()}${/[.!?]$/.test(p.desc.trim())?'':'.'}`:' Senza descrizione.'} ${n>1?describeSel()+'.':it?'Scelto: '+describeItem(it)+`, livello ${p.items.length-p.items.indexOf(it)} di ${p.items.length} dall’alto${it.g?', in un gruppo':''}.`:'Nessun oggetto scelto.'}`)}
 // SVG: si apre in ogni programma. Con meta dentro c'è anche il disegno modificabile e, per le immagini regolate e per
 // quelle nascoste, l'originale, con le maschere calcolate compresse; per le immagini da esportare basta il disegno visibile.
 // Le maschere e lo scontorno di un'immagine sono già nei suoi pixel, lo scontorno trasparente in un elemento mask.
@@ -2670,7 +2886,7 @@ async function drawingSvg({meta=true}={}){const p=Dw.p,parts=[],originals={},ras
   if(it.hidden)continue;if((it.g||null)!==g){if(g)parts.push('</g>');g=it.g||null;if(g)parts.push(`<g id="gruppo-${esc(g)}">`)}let href='',mask='';
   if(it.kind==='image'){if(!m)continue;if(edited){const o=await processImage(m,it,Infinity,m.type==='image/png'?'image/png':'image/jpeg',true);href=await blobToDataUrl(o.blob);if(o.cut)mask=await blobToDataUrl(await maskPng(o.cut,o.w,o.h))}else href=await blobToDataUrl(m.blob)}parts.push(itemSvg(it,{href,img:meta,mask}))}if(g)parts.push('</g>');
  const label=p.desc?' aria-labelledby="titolo descrizione"':' aria-labelledby="titolo"';
- return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}" role="img"${label}><title id="titolo">${esc(p.title)}</title>${p.desc?`<desc id="descrizione">${esc(p.desc)}</desc>`:''}${meta?`<metadata id="tassello-disegno">${esc(JSON.stringify({programma:'Tassello Grafica',versione:'1.2.0',p,originals,...(Object.keys(ras).length?{rasters:ras}:{})}))}</metadata>`:''}${p.bg==='none'?'':`<rect width="${p.w}" height="${p.h}" fill="${esc(p.bg)}"/>`}${parts.join('')}</svg>\n`}
+ return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}" role="img"${label}><title id="titolo">${esc(p.title)}</title>${p.desc?`<desc id="descrizione">${esc(p.desc)}</desc>`:''}${meta?`<metadata id="tassello-disegno">${esc(JSON.stringify({programma:'Tassello Grafica',versione:'1.3.0',p,originals,...(Object.keys(ras).length?{rasters:ras}:{})}))}</metadata>`:''}${p.bg==='none'?'':`<rect width="${p.w}" height="${p.h}" fill="${esc(p.bg)}"/>`}${parts.join('')}</svg>\n`}
 async function saveSvg(){if(!Dw.p.items.length&&!(await confirmAction('Il foglio è vuoto: vuoi salvarlo lo stesso?','Salva')))return;const svg=await work('Salvataggio del disegno',()=>drawingSvg());if(!svg)return;const blob=new Blob([svg],{type:'image/svg+xml'});download(blob,extName(Dw.p.title,'svg'),'image/svg+xml');toast(`Salvato in SVG, ${fmtBytes(blob.size)}: si riapre modificabile con Disegno${Dw.p.desc?'':'. Manca la descrizione per chi non vede il disegno'}`)}
 // Un SVG salvato da Disegno si riapre modificabile; gli altri SVG entrano nel foglio come immagini.
 async function openSvg(file){const doc=new DOMParser().parseFromString(await file.text(),'image/svg+xml'),meta=doc.getElementById('tassello-disegno');let data=null;try{data=meta&&JSON.parse(meta.textContent)}catch(e){}
@@ -2714,6 +2930,9 @@ function drawIssues(){const p=Dw.p,out=[];if(!p.desc.trim())out.push({msg:'Manca
   if(size<Math.max(10,p.w/90))out.push({it,msg:`«${it.name}»: testo molto piccolo (${fmtInt(size)} pixel su un foglio largo ${fmtInt(p.w)}), difficile da leggere sui telefoni.`});
   if(it.opacity<100)out.push({it,msg:`«${it.name}»: il testo è trasparente al ${it.opacity}%, il contrasto reale è più basso.`});
   if(it.blur)out.push({it,msg:`«${it.name}»: il testo è sfocato, quindi si legge male.`})}
+ // Oggetti fuori dal foglio, del tutto o in parte, e oggetti coperti del tutto da un altro: nel file non si vedono.
+ for(const it of p.items){if(it.hidden||isClipShape(it))continue;const o=outSay(rotBox(it)),c=relations([it]).find(r=>r.k==='under'&&r.sIn>=.98);
+  if(o)out.push({it,msg:`«${it.name}» ${o}: ${o.startsWith('è tutto')?'nelle immagini esportate non si vede':'la parte fuori non si vede nelle immagini esportate'}.`});if(c)out.push({it,msg:`«${it.name}» è coperto del tutto da «${c.o.name}»: non si vede.`})}
  return out}
 async function drawA11yCheck(){const issues=drawIssues();await modal('Verifica dell’accessibilità',issues.length?`<p>${issues.length===1?'Un punto da controllare':issues.length+' punti da controllare'}:</p><ul class="issue-list">${issues.map((x,i)=>`<li><span>${esc(x.msg)}</span><button type="button" class="btn sm" data-issue="${i}">${x.it?'Scegli':'Scrivi'}</button></li>`).join('')}</ul>`:'<p class="ok-msg">Nessun problema trovato: i testi hanno contrasto sufficiente e il disegno ha la sua descrizione.</p>',[],'Chiudi',{noCancel:true,onOpen:(pane,finish)=>pane.addEventListener('click',e=>{const b=e.target.closest('[data-issue]');if(!b)return;const x=issues[Number(b.dataset.issue)];finish(null);setTimeout(()=>{if(x.it){selectItem(x.it.id);sheetWrap.focus()}else focusSheetProp('pr-desc')},0)})})}
 // Scelta di più oggetti, gruppi, blocco, allineamento e distribuzione tra gli oggetti, guide intelligenti: lo stesso
@@ -2728,9 +2947,9 @@ $$('svg defs')[0].insertAdjacentHTML('beforeend',`<symbol id="i-selectAll" viewB
 <symbol id="i-distV" viewBox="0 0 24 24"><path d="M3 3h18M3 21h18"/><rect x="7" y="8" width="10" height="8" rx="1"/></symbol>
 <symbol id="i-magnet" viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3h-4v8a2 2 0 0 1-4 0V3z"/><path d="M6 7h4M14 7h4"/></symbol>`);
 $('layList').setAttribute('aria-multiselectable','true');
-$('layKeys').textContent='Frecce su e giù per scegliere un oggetto, Maiusc più frecce per aggiungere alla scelta quello sopra o sotto, Maiusc+clic per aggiungerlo o toglierlo, Alt+Maiusc più frecce per portarlo sopra o sotto gli altri, Invio per le proprietà, F2 per rinominarlo, Canc per eliminarlo, Maiusc+F10 per il menu.';
+$('layKeys').textContent='Frecce su e giù per scegliere un oggetto, Maiusc più frecce per aggiungere alla scelta quello sopra o sotto, Ctrl più frecce per muovere il cursore senza cambiare la scelta e Ctrl+Spazio per aggiungere o togliere l’oggetto del cursore, Maiusc+clic per aggiungerlo o toglierlo, Alt+Maiusc più frecce per portarlo sopra o sotto gli altri, Invio per le proprietà, F2 per rinominarlo, Canc per eliminarlo, Maiusc+F10 per il menu.';
 STATIC_KEYS.d[0][1].splice(3,0,['Aggiungi alla scelta l’oggetto sopra o sotto','Maiusc+PgSu / Maiusc+PgGiù'],['Aggancia la scelta alla guida successiva','Alt+Maiusc+← → ↑ ↓']);
-STATIC_KEYS.d[1][1].splice(1,0,['Aggiungi alla scelta l’oggetto sopra o sotto','Maiusc+↑ / Maiusc+↓']);
+STATIC_KEYS.d[1][1].splice(1,0,['Aggiungi alla scelta l’oggetto sopra o sotto','Maiusc+↑ / Maiusc+↓'],['Muovi il cursore senza cambiare la scelta','Ctrl+↑ / Ctrl+↓'],['Aggiungi o togli dalla scelta l’oggetto del cursore','Ctrl+Spazio']);
 STATIC_KEYS.d.push(['Con il puntatore',[['Aggiungi o togli un oggetto dalla scelta','Maiusc+clic'],['Scegli un oggetto solo dentro un gruppo','Alt+clic'],['Scegli gli oggetti dentro un riquadro','Trascina sul vuoto'],['Sposta senza agganciarti alle guide','Alt mentre trascini'],['Ridimensiona mantenendo le proporzioni','Maiusc sulle maniglie']]]);
 const namesOf=items=>{const n=items.map(x=>'«'+x.name+'»');return n.length>6?n.slice(0,5).join(', ')+` e altri ${n.length-5}`:n.length>1?n.slice(0,-1).join(', ')+' e '+n.at(-1):n.join('')};
 function boxOf(items){const b=items.map(box),x=Math.min(...b.map(v=>v.x)),y=Math.min(...b.map(v=>v.y));return{x,y,w:Math.max(...b.map(v=>v.x+v.w))-x,h:Math.max(...b.map(v=>v.y+v.h))-y}}
@@ -2741,7 +2960,7 @@ const hasFill=it=>it.kind!=='line'&&it.kind!=='image',hasStroke=it=>it.kind!=='t
 function describeSel(){const many=selItems();if(many.length<2)return many[0]?describeItem(many[0]):'Nessun oggetto scelto';const B=boxOf(many);return `${many.length} oggetti scelti: ${namesOf(many)}; insieme x ${fmtInt(B.x)}, y ${fmtInt(B.y)}, ${fmtInt(B.w)} per ${fmtInt(B.h)}`}
 // pick cambia la scelta senza ridisegnare (prima di una modifica, che ridisegna già); setSel ridisegna e annuncia.
 function pick(ids,primary){Dw.sel=primary??null;Dw.multi={for:Dw.sel,ids}}
-function selChanged({say=true}={}){Dw.last={label:'',t:0};Dw.lastAlign='';renderLayers();renderOverlay();renderProps();refreshToggles();sheetWrap.setAttribute('aria-label',sheetLabel());$('lay-'+Dw.sel)?.scrollIntoView({block:'nearest'});if(say)announce(Dw.sel?describeSel():'Nessun oggetto scelto: le proprietà sono quelle del foglio')}
+function selChanged({say=true}={}){Dw.last={label:'',t:0};Dw.lastAlign='';Dw.relBurst=null;renderLayers();renderOverlay();renderProps();refreshToggles();sheetWrap.setAttribute('aria-label',sheetLabel());$('lay-'+Dw.sel)?.scrollIntoView({block:'nearest'});if(say)announce(Dw.sel?describeSel():'Nessun oggetto scelto: le proprietà sono quelle del foglio')}
 function setSel(ids,primary,opts){ids=[...new Set(ids)].filter(itemOf);pick(ids,primary&&ids.includes(primary)?primary:ids.at(-1));selChanged(opts)}
 // Aggiunge o toglie un oggetto, con il suo gruppo, dalla scelta.
 function toggleSel(id){const it=itemOf(id);if(!it)return;const cur=new Set(selIds()),grp=groupIds(it),had=cur.has(id);for(const g of grp)had?cur.delete(g):cur.add(g);const rest=[...cur];setSel(rest,had?rest.at(-1):id,{say:false});
@@ -2751,7 +2970,7 @@ function selectAll(){const items=Dw.p.items.filter(x=>!x.hidden);if(!items.lengt
 function marqueeSelect(m,add){const hit=Dw.p.items.filter(x=>!x.hidden&&!x.lock&&covers(m,box(x)));if(!hit.length&&!add.length){renderOverlay();announce('Nessun oggetto dentro il riquadro');return}setSel([...add,...hit.flatMap(groupIds)],hit.at(-1)?.id||Dw.sel)}
 // Gli oggetti bloccati restano fermi: non si spostano, non si ridimensionano e non si eliminano.
 function movable(items,what='spostarlo'){const ok=items.filter(x=>!x.lock),n=items.length-ok.length;if(n)toast(items.length===1?`«${items[0].name}» è bloccato: sbloccalo per ${what}`:`${n===1?'Un oggetto scelto è bloccato':n+' oggetti scelti sono bloccati'}${ok.length?' e resta'+(n>1?'no':'')+' com’è':': sbloccali con Ctrl+Maiusc+L'}`);return ok}
-function needMany(n){const items=selItems();if(units(items).length<n){toast(`Scegli almeno ${n===2?'due':'tre'} oggetti: Maiusc+clic sul foglio, Maiusc+frecce nei livelli o Ctrl+A`);return null}return items}
+function needMany(n){const items=selItems();if(units(items).length<n){toast(`Scegli almeno ${n===2?'due':'tre'} oggetti: Maiusc+clic sul foglio, nei livelli Maiusc+frecce o Ctrl+frecce e Ctrl+Spazio, oppure Ctrl+A`);return null}return items}
 // Raggruppa: gli oggetti vanno uno sopra l'altro nei livelli, all'altezza del più alto, nell'ordine che avevano.
 function groupItems(){const items=needMany(2);if(!items)return;const g=uid(),ids=new Set(items.map(x=>x.id));
  editD('Raggruppa',p=>{const top=Math.max(...items.map(x=>p.items.indexOf(x))),rest=p.items.filter(x=>!ids.has(x.id));for(const it of items)it.g=g;rest.splice(p.items.slice(0,top+1).filter(x=>!ids.has(x.id)).length,0,...items);p.items=rest},{props:true});
@@ -2783,9 +3002,10 @@ function snapStep(ax,ay){const many=selItems();if(!many.length){needItem();retur
  for(const [v,lab] of ax?L.X:L.Y)for(const [e,elab] of edges){const d=v-e;if(d*dir>.5&&(!best||Math.abs(d)<Math.abs(best.d)))best={d,lab,elab}}
  if(!best){toast('Nessuna guida in quella direzione');return}editD('Aggancia alla guida',()=>{for(const it of items){if(ax)it.x=n2(it.x+best.d);else it.y=n2(it.y+best.d)}});Dw.lastAlign=alignSay(items);
  announce(`${items.length>1?'Gli oggetti scelti':'«'+items[0].name+'»'}: ${best.elab} è allineato al ${best.lab}`)}
-// Frecce sul foglio: la scelta si sposta; se finisce allineata a qualcosa lo si sente, una volta sola.
-function moveKeys(many,ax,ay,step){const ok=movable(many);if(!ok.length||!editD('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true}))return;const B=boxOf(ok),a=alignSay(ok);
- announce(`${ok.length>1?ok.length+' oggetti, ':''}x ${fmtInt(B.x)}, y ${fmtInt(B.y)}${a&&a!==Dw.lastAlign?'. '+a:''}`);Dw.lastAlign=a}
+// Frecce sul foglio: la scelta si sposta; se finisce allineata a qualcosa lo si sente, una volta sola, e così quando
+// comincia o smette di coprire, di toccare o di stare sotto un altro oggetto, o esce dal foglio (relChange, 07l).
+function moveKeys(many,ax,ay,step){const ok=movable(many);if(!ok.length)return;const t=Date.now();if(!Dw.relBurst||t-Dw.relBurst.t>500)Dw.relBurst={base:relKeys(ok)};Dw.relBurst.t=t;const before=Dw.relBurst.base;if(!editD('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true}))return;const B=boxOf(ok),a=alignSay(ok),r=relChange(ok,before);
+ announce(`${ok.length>1?ok.length+' oggetti, ':''}x ${fmtInt(B.x)}, y ${fmtInt(B.y)}${a&&a!==Dw.lastAlign?'. '+a[0].toUpperCase()+a.slice(1):''}${r?'. '+r[0].toUpperCase()+r.slice(1):''}`);Dw.lastAlign=a}
 // Più oggetti si ridimensionano insieme sul riquadro che li contiene: posizioni e misure in proporzione, i testi
 // cambiano dimensione. B è il riquadro di prima, N quello nuovo.
 function scaleItem(it,o,B,N){const sx=B.w?N.w/B.w:1,sy=B.h?N.h/B.h:1,b=box(o),nx=N.x+(b.x-B.x)*sx,ny=N.y+(b.y-B.y)*sy;
@@ -2793,16 +3013,19 @@ function scaleItem(it,o,B,N){const sx=B.w?N.w/B.w:1,sy=B.h?N.h/B.h:1,b=box(o),nx
  const nb=box(it);it.x=n2(it.x+nx-nb.x);it.y=n2(it.y+ny-nb.y)}
 function scaleDrag(d,dx,dy,shift){const B=d.B,H=d.h;let x=B.x,y=B.y,w=B.w,h=B.h;if(H.includes('e'))w=B.w+dx;if(H.includes('s'))h=B.h+dy;if(H.includes('w')){w=B.w-dx;x=B.x+dx}if(H.includes('n')){h=B.h-dy;y=B.y+dy}w=Math.max(1,w);h=Math.max(1,h);
  if(shift&&B.w&&B.h){const k=Math.max(w/B.w,h/B.h);w=B.w*k;h=B.h*k;if(H.includes('w'))x=B.x+B.w-w;if(H.includes('n'))y=B.y+B.h-h}for(const [it,o] of d.os)scaleItem(it,o,B,{x,y,w,h})}
-function scaleKeys(many,ax,ay,step){const ok=movable(many,'ridimensionarlo');if(!ok.length)return;const B=boxOf(ok),N={x:B.x,y:B.y,w:Math.max(1,B.w+ax*step),h:Math.max(1,B.h+ay*step)},os=ok.map(x=>[x,structuredClone(x)]);
- if(editD('Ridimensiona',()=>{for(const [it,o] of os)scaleItem(it,o,B,N)},{merge:true}))announce(`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}`)}
+// Se tra gli oggetti c'è chi mantiene le proporzioni (un'immagine, di solito), il riquadro comune cresce in proporzione.
+function scaleKeys(many,ax,ay,step){const ok=movable(many,'ridimensionarlo');if(!ok.length)return;const B=boxOf(ok),keep=ok.some(keepsRatio),k=ax?Math.max(1,B.w+ax*step)/B.w:Math.max(1,B.h+ay*step)/B.h,N=keep?{x:B.x,y:B.y,w:B.w*k,h:B.h*k}:{x:B.x,y:B.y,w:Math.max(1,B.w+ax*step),h:Math.max(1,B.h+ay*step)},os=ok.map(x=>[x,structuredClone(x)]);
+ if(editD('Ridimensiona',()=>{for(const [it,o] of os)scaleItem(it,o,B,N)},{merge:true}))announce(`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}${keep?', proporzioni mantenute':''}`)}
 // Proprietà di più oggetti: posizione del riquadro comune, colori, contorno e opacità per tutti, e i comandi per disporli.
 function multiProps(many){const B=boxOf(many),f=many.find(x=>hasFill(x)&&x.fill!=='none'),s=many.find(hasStroke),btn=id=>{const c=C[id];return `<button type="button" class="btn sm" id="pm-${id}" data-action="${id}"${c.toggle?` aria-pressed="${!!safe(c.toggle)}"`:''} aria-label="${esc(c.label)}" data-tip="${esc(c.label)}">${ICON(c.icon)}</button>`};
- return `<p class="hint">${esc(describeSel())}. Qui le modifiche valgono per tutti; per un oggetto solo sceglilo nei livelli.</p><div class="row2"><div>${fld('mx','X',n2(B.x))}</div><div>${fld('my','Y',n2(B.y))}</div></div>`
+ return `<p class="hint">${esc(describeSel())}. Qui le modifiche valgono per tutti; per un oggetto solo sceglilo nei livelli.</p><div class="row2"><div>${fld('mx','X',n2(B.x))}</div><div>${fld('my','Y',n2(B.y))}</div></div><div class="row2"><div>${fld('mw','Larghezza',n2(B.w))}</div><div>${fld('mh','Altezza',n2(B.h))}</div></div>`
   +(f?colorFld('fill','Riempimento',f.fill):'')+(s?colorFld('stroke','Contorno',s.stroke)+fld('sw','Spessore del contorno (px)',s.sw):'')+rangeFld('opacity','Opacità',0,100,1,selItem().opacity,v=>fmtInt(v)+'%')
   +`<h3>Disponi</h3><div class="btns">${['groupItems','ungroupItems','lockItems','hideItems'].map(btn).join('')}</div><div class="btns">${['alignLeft','alignCenter','alignRight','alignTop','alignMiddle','alignBottom','distH','distV'].map(btn).join('')}</div>`}
-function syncMulti(){if(!$('pr-mx')){renderProps();return}const a=document.activeElement,B=boxOf(selItems());for(const [k,v] of [['mx',n2(B.x)],['my',n2(B.y)]]){const el=$('pr-'+k);if(el!==a)el.value=v}}
+function syncMulti(){if(!$('pr-mx')){renderProps();return}const a=document.activeElement,B=boxOf(selItems());for(const [k,v] of [['mx',n2(B.x)],['my',n2(B.y)],['mw',n2(B.w)],['mh',n2(B.h)]]){const el=$('pr-'+k);if(el&&el!==a)el.value=v}}
 function applyMulti(key,v,need){const many=selItems(),ok=many.filter(x=>!x.lock);
  if(key==='mx'||key==='my'){if(!ok.length)throw Error('Gli oggetti scelti sono bloccati');const k=key==='mx'?'x':'y',d=need(-1e5,1e5)-boxOf(ok)[k];for(const it of ok)it[k]=n2(it[k]+d)}
+ // Larghezza e altezza del riquadro comune: come con Ctrl+frecce, in proporzione se qualcuno la mantiene.
+ else if(key==='mw'||key==='mh'){if(!ok.length)throw Error('Gli oggetti scelti sono bloccati');const B=boxOf(ok),n=need(1,1e5),keep=ok.some(keepsRatio),k=key==='mw'?n/B.w:n/B.h,N=keep?{...B,w:B.w*k,h:B.h*k}:{...B,[key==='mw'?'w':'h']:n},os=ok.map(x=>[x,structuredClone(x)]);for(const [it,o] of os)scaleItem(it,o,B,N);propSay=`${ok.length} oggetti, insieme ${fmtInt(N.w)} per ${fmtInt(N.h)}${keep?', proporzioni mantenute':''}`}
  else if(key==='opacity')for(const it of many)it.opacity=Number(v);
  else if(key==='fill'||key==='stroke'){for(const it of many)if(key==='fill'?hasFill(it):hasStroke(it))it[key]=v}
  else if(key==='sw'){const n=need(0,1000);for(const it of many)if(hasStroke(it))it.sw=n}}
@@ -2857,7 +3080,7 @@ function flatten(it,step=4){return it.subs.map(s=>{const f=s.nodes[0];if(!f)retu
 const DIRS=['a destra','in basso a destra','in basso','in basso a sinistra','a sinistra','in alto a sinistra','in alto','in alto a destra'];
 const dirWord=(dx,dy)=>DIRS[(Math.round(Math.atan2(dy,dx)/(Math.PI/4))+8)%8];
 function nodeLabel(it,j,L=nodeList(it)){const {s,n,i}=L[j],v=nodeVis(it,n);return `Nodo ${j+1}, ${n.s?'curvo':'d’angolo'}, x ${fmtInt(v.x)}, y ${fmtInt(v.y)}${!s.closed&&i===0?', inizio':!s.closed&&i===s.nodes.length-1?', fine':''}`}
-function pathSummary(it){const L=nodeList(it),closed=it.subs.filter(s=>s.closed).length,curves=L.filter(x=>x.n.s).length;return `${it.subs.length>1?it.subs.length+' parti, ':''}${closed===it.subs.length?'chiuso':closed?'in parte chiuso':'aperto'}, ${L.length===1?'un nodo':L.length+' nodi'}: ${L.length-curves} d’angolo e ${curves===1?'uno curvo':curves+' curvi'}`}
+function pathSummary(it){const L=nodeList(it),closed=it.subs.filter(s=>s.closed).length,curves=L.filter(x=>x.n.s).length;return `${it.subs.length>1?it.subs.length+' parti, ':''}${closed===it.subs.length?'chiuso':closed?'in parte chiuso':'aperto'}, ${L.length===1?(curves?'un nodo curvo':'un nodo d’angolo'):`${L.length} nodi: ${!curves?'tutti d’angolo':curves===L.length?'tutti curvi':`${L.length-curves===1?'uno':L.length-curves} d’angolo e ${curves===1?'uno curvo':curves+' curvi'}`}`}`}
 function describePath(it){const parts=it.subs.map((s,si)=>{if(!s.nodes.length)return '';const P=n=>nodeVis(it,n),f=P(s.nodes[0]);let t=`${it.subs.length>1?`Parte ${si+1}: parte`:'Parte'} da x ${fmtInt(f.x)}, y ${fmtInt(f.y)}`;const sg=segs(s);
   if(sg.length>24){const l=P(s.nodes.at(-1));return t+`, ${s.nodes.length} nodi${s.closed?', e torna al punto di partenza':`, finisce a x ${fmtInt(l.x)}, y ${fmtInt(l.y)}`}`}
   for(const [a,b,i] of sg){const A=P(a),B=P(b),back=s.closed&&i===s.nodes.length-1;t+=`; ${isLine(a,b)?'linea retta':'curva'} di ${fmtInt(Math.hypot(B.x-A.x,B.y-A.y))} pixel ${dirWord(B.x-A.x,B.y-A.y)}${back?' fino al punto di partenza':` fino a x ${fmtInt(B.x)}, y ${fmtInt(B.y)}`}`}return t+'.'});
@@ -3166,8 +3389,15 @@ const SHAPE_PROPS={poly:it=>fld('sides',it.star?'Punte':'Lati',it.sides)+`<label
  arrow:it=>rangeFld('head','Lunghezza della punta',10,300,5,it.head??100,pct)+rangeFld('shaft','Spessore del corpo',5,100,1,it.shaft??50,pct)+`<label class="check"><input type="checkbox" data-prop="double"${it.double?' checked':''}> Due punte</label>`,
  bubble:it=>rangeFld('tail','Posizione della coda',0,100,1,it.tail??30,pct)+rangeFld('tip','Punta della coda',0,100,1,it.tip??15,pct)+rangeFld('tl','Lunghezza della coda',5,60,1,it.tl??22,pct)+fld('radius','Angoli arrotondati (px)',it.radius),
  line:endsFld,path:it=>it.subs[0]&&!it.subs[0].closed?endsFld(it):''};
-Object.assign(KIND_SAY,{poly:it=>`, ${it.sides} ${it.star?'punte':'lati'}`,arrow:it=>`, ${it.double?'a due punte, ':''}punta ${dirWord(Math.cos((it.rot||0)*Math.PI/180),Math.sin((it.rot||0)*Math.PI/180))}`,
- bubble:it=>`, con la coda in basso ${(it.tip??15)<34?'a sinistra':(it.tip??15)>66?'a destra':'al centro'}`,line:it=>endsSay(it)});
+// Le forme si dicono per quello che sono: cerchio, quadrato, triangolo con la punta in alto, esagono; una linea dice se
+// sale o scende, quanto è lunga e inclinata, e dove punta la freccia.
+const POLY_NAME={3:'triangolo',4:'rombo',5:'pentagono',6:'esagono',7:'ettagono',8:'ottagono'};
+const rotDir=(it,dx,dy)=>{const r=(it.rot||0)*Math.PI/180;return dirWord(dx*Math.cos(r)-dy*Math.sin(r),dx*Math.sin(r)+dy*Math.cos(r))};
+function lineSay(it){const a=rotPt(it,it.x,it.y),b=rotPt(it,it.x+it.w,it.y+it.h);let dx=b.x-a.x,dy=b.y-a.y;const len=Math.hypot(dx,dy);if(len<.5)return ', lunga meno di un pixel';if(dx<0){dx=-dx;dy=-dy}const deg=Math.atan2(-dy,dx)*180/Math.PI,ad=Math.abs(deg);
+ return `, ${ad<1?'orizzontale':ad>89?'verticale':`${deg>0?'sale':'scende'} verso destra, inclinata di ${fmtInt(ad)} gradi`}, lunga ${fmtInt(len)} pixel${it.end==='arrow'?`, la freccia punta ${dirWord(b.x-a.x,b.y-a.y)}`:''}${it.start==='arrow'?`, ${it.end==='arrow'?'l’altra':'la freccia'} punta ${dirWord(a.x-b.x,a.y-b.y)}`:''}`}
+Object.assign(KIND_SAY,{poly:it=>it.star?`, stella di ${it.sides} punte`:`, ${POLY_NAME[it.sides]||'poligono di '+it.sides+' lati'}${it.sides===3?` con la punta ${rotDir(it,0,-1)}`:''}`,
+ rect:it=>`${Math.abs(it.w-it.h)<1?', quadrato':''}${it.radius?`, con gli angoli arrotondati di ${pxSay(it.radius)} pixel`:''}`,ellipse:it=>Math.abs(it.w-it.h)<1?`, cerchio di diametro ${fmtInt(it.w)}`:'',arrow:it=>`, ${it.double?'a due punte, ':''}punta ${dirWord(Math.cos((it.rot||0)*Math.PI/180),Math.sin((it.rot||0)*Math.PI/180))}`,
+ bubble:it=>`, con la coda in basso ${(it.tip??15)<34?'a sinistra':(it.tip??15)>66?'a destra':'al centro'}`,line:it=>lineSay(it)+endsSay(it)});
 const endsSay=it=>{const e=[hasEnd(it.start)&&`${it.start==='arrow'?'una freccia':'un punto'} all’inizio`,hasEnd(it.end)&&`${it.end==='arrow'?'una freccia':'un punto'} alla fine`].filter(Boolean);return e.length?', con '+e.join(' e '):''};
 // Converti in tracciato: le forme scelte diventano nodi modificabili, con lo stesso aspetto; i testi diventano i contorni
 // delle loro lettere, presi dal file del carattere (07k). Le immagini restano. Tutto insieme è un passo solo da annullare.
@@ -3204,7 +3434,7 @@ function fxDefs(it){const sh=it.shadow,bl=it.blur||0;if(!sh&&!bl)return '';const
 function styled(it,s){const defs=(it.grad&&it.fill!=='none'&&hasFill(it)?gradDefs(it):'')+fxDefs(it),fx=it.shadow||it.blur,bl=it.blend&&it.blend!=='normal';if(!defs&&!bl)return s;
  return (defs?`<defs>${defs}</defs>`:'')+(fx||bl?`<g${fx?` filter="url(#fx-${it.id})"`:''}${bl?` style="mix-blend-mode:${it.blend}"`:''}>${s}</g>`:s)}
 const BLENDS=[['normal','Normale'],['multiply','Moltiplica'],['screen','Scolora'],['overlay','Sovrapponi'],['darken','Scurisci'],['lighten','Schiarisci'],['color-dodge','Colore scherma'],['color-burn','Colore brucia'],['hard-light','Luce intensa'],['soft-light','Luce soffusa'],['difference','Differenza'],['exclusion','Esclusione'],['hue','Tonalità'],['saturation','Saturazione'],['color','Colore'],['luminosity','Luminosità']];
-function styleSay(it){const blend=BLENDS.find(b=>b[0]===it.blend&&it.blend!=='normal');return [it.grad&&it.fill!=='none'&&`sfumatura ${it.grad.type==='radial'?'radiale':'lineare'} di ${it.grad.stops.length} colori`,DASH[it.dash]&&it.sw>0&&'contorno tratteggiato',it.shadow&&'con l’ombra',it.blur&&`sfocato di ${fmtInt(it.blur)} pixel`,blend&&'fusione '+blend[1].toLowerCase()].filter(Boolean).map(s=>', '+s).join('')}
+function styleSay(it){const blend=BLENDS.find(b=>b[0]===it.blend&&it.blend!=='normal');return [it.grad&&it.fill!=='none'&&`sfumatura ${it.grad.type==='radial'?'radiale':'lineare'} da ${cName(it.grad.stops[0].c)} a ${cName(it.grad.stops.at(-1).c)}${it.grad.stops.length>2?`, ${it.grad.stops.length} colori`:''}`,DASH[it.dash]&&it.sw>0&&'contorno tratteggiato',it.shadow&&'con l’ombra',it.blur&&`sfocato di ${fmtInt(it.blur)} pixel`,blend&&'fusione '+blend[1].toLowerCase()].filter(Boolean).map(s=>', '+s).join('')}
 // Testo: le righe scritte, oppure quelle che vanno a capo da sole dentro la larghezza del riquadro.
 function textLines(it){const paras=String(it.text).split('\n');if(!it.wrap)return paras;measureCtx.font=fontCss(it);const ls=it.ls||0,wid=s=>measureCtx.measureText(s).width+ls*[...s].length,out=[];
  for(const p of paras){let line='';for(const w of p.split(/ +/)){const t=line?line+' '+w:w;if(line&&wid(t)>it.w){out.push(line);line=w}else line=t}out.push(line)}return out}
@@ -3325,7 +3555,7 @@ function boolOp(op){const many=selItems(),ok=many.filter(x=>hasArea(x)&&!x.lock)
  boolStyle(it,src,loops.length&&A.at(-1),open.length&&use.filter(drawIsOpen).at(-1));normPath(it);
  const ids=new Set(use.map(x=>x.id)),at=Dw.p.items.indexOf(src);pick([it.id],it.id);editD(`${name} di ${use.length} ${open.length?'oggetti':'forme'}`,p=>{const rest=p.items.filter((x,i)=>i<at&&!ids.has(x.id));p.items=[...rest,it,...p.items.filter((x,i)=>i>at&&!ids.has(x.id))]},{props:true});
  const nl=use.filter(drawIsOpen).length,parts=it.subs.length;
- announce(`${use.length} ${nl?'oggetti':'forme'} ${nl?done.replace(/e$/,'i'):done}:«${it.name}», tracciato di ${parts===1?'una parte':parts+' parti'} e ${nodeList(it).length} nodi.${open.length?` ${nl===1?'La linea resta aperta':'Le linee restano aperte'} nello stesso tracciato: ha${nl===1?'':'nno'} il contorno, non il riempimento.`:''}${keepLines.length?` ${keepLines.length===1?'La linea scelta è rimasta':'Le linee scelte sono rimaste'} com’era: per sottrarre da una linea, mettila in fondo.`:''}${many.length>ok.length?' I testi, le immagini e gli oggetti bloccati sono rimasti com’erano.':''}`)}
+ announce(`${use.length} ${nl?'oggetti':'forme'} ${nl?done.replace(/e$/,'i'):done}: «${it.name}», tracciato di ${parts===1?'una parte':parts+' parti'} e ${nodeList(it).length} nodi.${open.length?` ${nl===1?'La linea resta aperta':'Le linee restano aperte'} nello stesso tracciato: ha${nl===1?'':'nno'} il contorno, non il riempimento.`:''}${keepLines.length?` ${keepLines.length===1?'La linea scelta è rimasta com’era':'Le linee scelte sono rimaste com’erano'}: per sottrarre da una linea, mettila in fondo.`:''}${many.length>ok.length?' I testi, le immagini e gli oggetti bloccati sono rimasti com’erano.':''}`)}
 // Linee e forme: intersecando restano i tratti delle linee dentro tutte le forme, sottraendo (con una linea in fondo) quelli
 // fuori da tutte le forme. Ogni linea resta un oggetto con il suo stile; le forme fanno da sagoma e spariscono.
 function boolLines(op,ok,lines,areas){if(!areas.length){toast(`Per ${op==='intersect'?'intersecare':'sottrarre da'} una linea serve almeno una forma chiusa: un rettangolo, un’ellisse o un tracciato chiuso`);return}
@@ -3374,7 +3604,10 @@ function needPhotoImg(){const it=needItem();if(!it)return null;if(it.kind!=='ima
 function photoSay(it){const ph=it.photo||{},out=[],ml=ph.masks||[];if(ml.length)out.push(`${ml.length===1?'una maschera':ml.length+' maschere'} (${ml.map(m=>m.name).join(', ')})`);
  if(ph.cut)out.push('sfondo tolto, '+(ph.cut.bg==='color'?'colore pieno '+ph.cut.color:ph.cut.bg==='blur'?'foto sfocata dietro':'trasparente'));if(ph.heal?.length)out.push(ph.heal.length===1?'un ritocco':ph.heal.length+' ritocchi');
  if(GEO_KEYS.some(k=>k in ph))out.push('inquadratura cambiata');if(ph.fx)out.push('curve, colori o dettaglio');return out.join(', ')}
-KIND_SAY.image=it=>{const s=photoSay(it);return s?', '+s:''};
+// Un'immagine con proporzioni diverse da quelle della foto (inquadratura compresa) è deformata: si dice di quanto.
+function imgDeform(it){const m=photoOf(it);if(!m?.w||!m?.h||!it.w||!it.h)return '';const [fw,fh]=outSize(imgRecipe(it),m.w,m.h),q=(it.w/it.h)/(fw/fh);
+ return Math.abs(q-1)<.02?'':`, deformata: ${fmtPct(q>1?q-1:1/q-1)} più ${q>1?'larga':'alta'} dell’originale`}
+KIND_SAY.image=it=>{const s=photoSay(it);return (s?', '+s:'')+imgDeform(it)};
 // La modifica in Immagini. stash tiene la foto di Immagini messa da parte, con le sue maschere calcolate.
 const photoLink={id:null,stash:null};
 const STASH_KEYS=['file','name','title','bmp','r','base','hist','redo','step','seen','compare','plan','maskSel'];
@@ -3600,6 +3833,109 @@ function drawTextSubs(it,F){const f=F.font,k=it.size/f.upm,ls=it.ls||0,sk=F.slan
 function drawTextToPath(it,o){const one=String(it.text).replace(/\s+/g,' ').trim();Object.assign(it,{kind:'path',subs:o.subs,alt:String(it.text),tsize:it.size,tbold:!!it.bold});
  if(/^Testo \d+$/.test(it.name))it.name=one.length>40?one.slice(0,39)+'…':one;for(const k of ['text','font','size','bold','italic','align','lineH','ls','wrap','toff','rule'])delete it[k];normPath(it)}
 const altOf=it=>String(it.alt).replace(/\s+/g,' ').trim();
+// Disegno a parole, per chi non vede il foglio: i colori con il loro nome, i dintorni dell'oggetto scelto (Alt+Maiusc+R)
+// e le relazioni che cambiano mentre lo si sposta, la composizione del foglio (Alt+Maiusc+D) e l'ascolto della forma.
+// Le sovrapposizioni si misurano sulle forme vere, con una griglia di punti: tracciati e forme anche ruotati, testi e
+// immagini come riquadri ruotati, linee e tracciati aperti come punti lungo il tratto.
+const cName=hex=>{const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return 'trasparente';const v=parseInt(m[1],16);return colorName(v>>16,v>>8&255,v&255)};
+const pxSay=v=>fmtNum(v,v%1?1:0);
+// Il colore di un oggetto: «blu scuro con il contorno nero di 2 pixel», «colore bianco» per un testo, «nera, spessa 4
+// pixel» per una linea. Le sfumature le dice styleSay.
+function colorSay(it){if(it.kind==='image')return '';const grad=it.grad&&it.fill!=='none';if(it.kind==='text')return grad?'':`, colore ${cName(it.fill)}`;
+ if(drawIsOpen(it))return it.sw>0&&it.stroke!=='none'?`, ${cName(it.stroke)}, spessa ${pxSay(it.sw)} pixel`:', senza contorno';
+ const stroke=it.sw>0&&it.stroke!=='none'?` con il contorno ${cName(it.stroke)} di ${pxSay(it.sw)} pixel`:'';return grad?(stroke?','+stroke:''):`, ${it.fill==='none'?'senza riempimento':cName(it.fill)}${stroke}`}
+// Forma di un oggetto per le relazioni, in coordinate del foglio: b è il riquadro con la rotazione.
+function relShape(it){const b=box(it);let polys=hasArea(it)&&!drawIsOpen(it)?itemPolys(it):[];
+ if(!polys.length&&(it.kind==='text'||it.kind==='image'))polys=[[[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]].map(([x,y])=>{const p=rotPt(it,x,y);return [p.x,p.y]})];
+ return {it,b:rotBox(it),inside:polys.length?boolInside(it,polys):null,pts:polys.length?null:drawSheetSubs(it,true).flatMap(s=>flatten({x:0,y:0,subs:[s]},4)[0]||[])}}
+const unionBox=bs=>{const x=Math.min(...bs.map(b=>b.x)),y=Math.min(...bs.map(b=>b.y));return {x,y,w:Math.max(...bs.map(b=>b.x+b.w))-x,h:Math.max(...bs.map(b=>b.y+b.h))-y}};
+// Punti che stanno dentro l'insieme delle forme (una griglia sul riquadro), o i punti dei tratti se sono tutte linee.
+function relSamples(S,N=28){const ar=S.filter(s=>s.inside);if(!ar.length)return S.flatMap(s=>s.pts||[]);const B=unionBox(ar.map(s=>s.b)),out=[];
+ for(let i=0;i<N;i++)for(let j=0;j<N;j++){const x=B.x+(i+.5)/N*B.w,y=B.y+(j+.5)/N*B.h;if(ar.some(s=>s.inside(x,y)))out.push([x,y])}return out}
+const coverBy=(pts,O)=>O.inside&&pts.length?pts.filter(([x,y])=>O.inside(x,y)).length/pts.length:0;
+const boxGap=(a,b)=>Math.max(b.x-(a.x+a.w),a.x-(b.x+b.w),b.y-(a.y+a.h),a.y-(b.y+b.h));
+const pctWord=v=>v>=.98?'tutto':v>=.45&&v<=.55?'metà':`il ${fmtPct(v)}`;
+// Relazioni della scelta con gli altri oggetti visibili: chi copre chi (per quanto), chi la contiene, chi la tocca.
+// above: l'altro sta sopra la scelta nei livelli.
+function relations(items){const ids=new Set(items.map(x=>x.id)),top=Math.max(...items.map(x=>Dw.p.items.indexOf(x))),S=items.filter(x=>!x.hidden).map(relShape),sp=relSamples(S),B=unionBox(S.map(s=>s.b)),out=[];
+ for(const o of Dw.p.items){if(ids.has(o.id)||o.hidden||isClipShape(o))continue;const O=relShape(o),gap=boxGap(B,O.b);if(gap>.5)continue;const above=Dw.p.items.indexOf(o)>top;
+  const sIn=coverBy(sp,O),oIn=S.some(s=>s.inside)?coverBy(relSamples([O]),{inside:(x,y)=>S.some(s=>s.inside?.(x,y))}):0;
+  if(sIn<.02&&oIn<.02){if(gap>-.5)out.push({o,k:'touch'});continue}
+  out.push({o,k:above?'under':'over',sIn,oIn,inside:sIn>=.98})}
+ return out}
+function relPhrase(r){const n=`«${r.o.name}»`;if(r.k==='touch')return `tocca ${n}`;if(r.k==='under')return r.sIn>=.98?`è coperto del tutto da ${n}: non si vede`:`è coperto per ${pctWord(r.sIn)} da ${n}`;
+ const c=pctWord(r.oIn);return r.inside?`sta tutto dentro ${n} e ne copre ${c}`:c==='tutto'?`copre tutto ${n}`:`copre ${c} di ${n}`}
+// Fuori dal foglio: di quanto esce e da che parte, o se è tutto fuori.
+function outSay(b){const p=Dw.p,o=[[-b.x,'a sinistra'],[b.x+b.w-p.w,'a destra'],[-b.y,'in alto'],[b.y+b.h-p.h,'in basso']].filter(([v])=>v>.5);if(!o.length)return '';
+ if(b.x>=p.w||b.x+b.w<=0||b.y>=p.h||b.y+b.h<=0)return `è tutto fuori dal foglio, ${o.map(x=>x[1]).join(' e ')}`;return `esce dal foglio ${o.map(([v,s])=>`${s} di ${fmtInt(v)} pixel`).join(' e ')}`}
+// I vicini nelle quattro direzioni (tra gli oggetti che stanno nella stessa fascia), con lo spazio che c'è in mezzo.
+function nearSay(items){const p=Dw.p,ids=new Set(items.map(x=>x.id)),B=unionBox(items.map(rotBox)),D={right:null,left:null,down:null,up:null};
+ for(const o of p.items){if(ids.has(o.id)||o.hidden||isClipShape(o))continue;const b=rotBox(o),v=b.y<B.y+B.h&&B.y<b.y+b.h,h=b.x<B.x+B.w&&B.x<b.x+b.w,put=(k,d)=>{if(d>=-.5&&(!D[k]||d<D[k].d))D[k]={o,d:Math.max(0,d)}};
+  if(v){put('right',b.x-(B.x+B.w));put('left',B.x-(b.x+b.w))}if(h){put('down',b.y-(B.y+B.h));put('up',B.y-(b.y+b.h))}}
+ const edge={right:p.w-(B.x+B.w),left:B.x,down:p.h-(B.y+B.h),up:B.y},word={right:'a destra',left:'a sinistra',down:'sotto',up:'sopra'};
+ return Object.keys(D).map(k=>D[k]?`${word[k]}, ${D[k].d<.5?'attaccato':`a ${fmtInt(D[k].d)} pixel`}, «${D[k].o.name}»`:edge[k]>.5?`${word[k]} niente fino al bordo, ${fmtInt(edge[k])} pixel`:`${word[k]} il bordo del foglio`).join('; ')}
+// Tutti gli allineamenti della scelta con il foglio e con gli altri oggetti, non solo il primo.
+function alignAll(items){const B=boxOf(items),L=snapLines(new Set(items.map(x=>x.id))),out=[];
+ for(const [lines,edges] of [[L.X,[[B.x,'il bordo sinistro'],[B.x+B.w/2,'il centro in orizzontale'],[B.x+B.w,'il bordo destro']]],[L.Y,[[B.y,'il bordo superiore'],[B.y+B.h/2,'il centro in verticale'],[B.y+B.h,'il bordo inferiore']]]])
+  for(const [e,elab] of edges){const hits=lines.filter(([v])=>Math.abs(v-e)<.5).map(x=>'al '+x[1]);if(hits.length)out.push(`${elab} è allineato ${hits.length>1?hits.slice(0,-1).join(', ')+' e '+hits.at(-1):hits[0]}`)}
+ return out.join('; ')}
+// Alt+Maiusc+R: dove sta la scelta nel foglio, i vicini, le sovrapposizioni e gli allineamenti.
+function readAround(){const many=needSel().filter(x=>!x.hidden);if(!many.length)return;const p=Dw.p,B=unionBox(many.map(rotBox)),who=many.length>1?`I ${many.length} oggetti scelti`:`«${many[0].name}»`;
+ const near=[[B.x,'dal bordo sinistro'],[p.w-B.x-B.w,'dal bordo destro'],[B.y,'dal bordo superiore'],[p.h-B.y-B.h,'dal bordo inferiore']].filter(([v])=>v>=0).sort((a,b)=>a[0]-b[0]).slice(0,2);
+ const out=outSay(B),rel=relations(many).sort((a,b)=>(b.k!=='touch')-(a.k!=='touch')),al=alignAll(many);
+ announce(`${who}: ${placeName((B.x+B.w/2)/p.w,(B.y+B.h/2)/p.h)} nel foglio${near.length?', '+near.map(([v,s])=>`a ${fmtInt(v)} pixel ${s}`).join(' e '):''}${out?'; '+out:''}. ${nearSay(many)[0].toUpperCase()+nearSay(many).slice(1)}. ${rel.length?rel.map(relPhrase).join('; ').replace(/^./,c=>c.toUpperCase())+'.':'Non tocca e non copre altri oggetti.'}${al?' '+al[0].toUpperCase()+al.slice(1)+'.':''}`)}
+// Spostando la scelta con le frecce si dice solo quello che cambia: copre, è coperto, tocca, esce dal foglio. Il confronto
+// è con lo stato all'inizio della serie di tasti (Dw.relBurst, in moveKeys): con le frecce tenute premute ogni annuncio
+// sostituisce il precedente, e l'ultimo dice il cambiamento netto.
+function relKeys(items){const m=new Map();for(const r of relations(items))m.set(r.k+':'+r.o.id,r);const o=outSay(unionBox(items.filter(x=>!x.hidden).map(rotBox)));if(o)m.set('out',{say:o});return m}
+function relChange(items,before){const after=relKeys(items),out=[];
+ for(const [k,r] of after)if(!before.has(k)&&k!=='out')out.push(r.k==='over'?`ora copre «${r.o.name}»`:r.k==='under'?`ora è sotto «${r.o.name}»`:`ora tocca «${r.o.name}»`);
+ for(const [k,r] of before)if(!after.has(k)&&r.k!=='touch'&&k!=='out')out.push(r.k==='over'?`non copre più «${r.o.name}»`:`non è più sotto «${r.o.name}»`);
+ if(after.has('out')&&after.get('out').say!==before.get('out')?.say&&!before.has('out'))out.push(after.get('out').say);else if(before.has('out')&&!after.has('out'))out.push('di nuovo tutto nel foglio');
+ return out.slice(0,3).join('; ')}
+// Alt+Maiusc+D: la composizione in breve; premuto di nuovo entro tre secondi apre la finestra con tutte le parti.
+let compoAt=0;
+function compoParts(){const p=Dw.p,vis=p.items.filter(x=>!x.hidden&&!isClipShape(x)),inSheet=vis.filter(x=>!outSay(rotBox(x)).startsWith('è tutto')),out={};
+ out.sheet=`${(SHEETS.find(s=>s[2]===p.w&&s[3]===p.h)||[0,'Formato personalizzato'])[1].split(',')[0]}, ${fmtInt(p.w)} per ${fmtInt(p.h)} pixel, sfondo ${p.bg==='none'?'trasparente':cName(p.bg)}; ${vis.length===1?'un oggetto visibile':vis.length+' oggetti visibili'}${p.items.length>vis.length?`, ${p.items.length-vis.length} nascosti o usati come ritaglio`:''}${vis.length>inSheet.length?`, ${vis.length-inSheet.length} tutti fuori dal foglio`:''}.`;
+ if(!inSheet.length)return out;
+ // Zone in terzi: gli oggetti per il loro centro; quelli grandi occupano anche le zone vicine.
+ const zone=(x,y)=>Math.min(2,Math.max(0,Math.floor(y*3/p.h)))*3+Math.min(2,Math.max(0,Math.floor(x*3/p.w))),Z=ZONE_NAME.map(()=>[]);
+ for(const it of inSheet){const b=rotBox(it);Z[zone(b.x+b.w/2,b.y+b.h/2)].push(it.name)}
+ out.zones=ZONE_NAME.map((n,i)=>Z[i].length?`${n[0].toUpperCase()+n.slice(1)}: ${Z[i].map(x=>'«'+x+'»').join(', ')}`:'').filter(Boolean);out.empty=ZONE_NAME.filter((n,i)=>!Z[i].length);
+ // Margini: lo spazio libero intorno al contenuto.
+ const C=unionBox(inSheet.map(rotBox)),m=[Math.max(0,C.x),Math.max(0,p.w-C.x-C.w),Math.max(0,C.y),Math.max(0,p.h-C.y-C.h)],same=(a,b)=>Math.abs(a-b)<=Math.max(2,.02*Math.max(a,b));
+ out.margins=`${fmtInt(m[0])} a sinistra e ${fmtInt(m[1])} a destra${same(m[0],m[1])?', uguali':''}; ${fmtInt(m[2])} sopra e ${fmtInt(m[3])} sotto${same(m[2],m[3])?', uguali':''}${!same(m[2],m[3])&&Math.abs(m[2]-m[3])>p.h*.1?`: il contenuto sta ${m[2]<m[3]?'in alto':'in basso'}`:''}${!same(m[0],m[1])&&Math.abs(m[0]-m[1])>p.w*.1?`${!same(m[2],m[3])&&Math.abs(m[2]-m[3])>p.h*.1?' e':': il contenuto sta'} ${m[0]<m[1]?'a sinistra':'a destra'}`:''}.`;
+ // Equilibrio: il baricentro delle aree visibili nel foglio.
+ let a=0,sx=0,sy=0;for(const it of inSheet){const b=rotBox(it),x0=clamp(b.x,0,p.w),x1=clamp(b.x+b.w,0,p.w),y0=clamp(b.y,0,p.h),y1=clamp(b.y+b.h,0,p.h),w=Math.max(1,(x1-x0)*(y1-y0));a+=w;sx+=w*(x0+x1)/2;sy+=w*(y0+y1)/2}
+ const gx=sx/a/p.w-.5,gy=sy/a/p.h-.5,side=[Math.abs(gy)>.08?(gy<0?'in alto':'in basso'):'',Math.abs(gx)>.08?(gx<0?'a sinistra':'a destra'):''].filter(Boolean);out.balance=side.length?`Il peso è spostato ${side.join(' e ')}.`:'Il peso è al centro: il foglio è in equilibrio.';
+ // Allineamenti: gruppi di almeno tre oggetti con lo stesso bordo o lo stesso centro, e la spaziatura di quelli in colonna.
+ out.aligns=[];for(const [k,f,lab] of [['x',b=>b.x,'allineati a sinistra'],['cx',b=>b.x+b.w/2,'in colonna al centro'],['r',b=>b.x+b.w,'allineati a destra'],['y',b=>b.y,'allineati in alto'],['cy',b=>b.y+b.h/2,'in riga al centro']]){
+  const used=new Set();for(const it of inSheet){if(used.has(it.id))continue;const v=f(rotBox(it)),g=inSheet.filter(o=>Math.abs(f(rotBox(o))-v)<1);if(g.length<(k==='x'||k==='r'||k==='y'?3:2))continue;g.forEach(o=>used.add(o.id));
+   const col=k==='x'||k==='cx'||k==='r',sorted=[...g].sort((a,b)=>col?rotBox(a).y-rotBox(b).y:rotBox(a).x-rotBox(b).x),gaps=sorted.slice(1).map((o,i)=>{const a=rotBox(sorted[i]),b=rotBox(o);return col?b.y-(a.y+a.h):b.x-(a.x+a.w)}),eq=gaps.length>1&&gaps.every(d=>Math.abs(d-gaps[0])<=1)&&gaps[0]>0;
+   out.aligns.push(`${lab[0].toUpperCase()+lab.slice(1)}: ${sorted.map(o=>'«'+o.name+'»').join(', ')}${eq?`, spaziati di ${fmtInt(gaps[0])} pixel`:''}`)}}
+ // Sovrapposizioni: chi copre chi, per quanto, tra le coppie di oggetti visibili.
+ out.overlaps=[];for(let i=0;i<inSheet.length;i++)for(let j=i+1;j<inSheet.length;j++){const lo=inSheet[i],hi=inSheet[j];if(boxGap(rotBox(lo),rotBox(hi))>0)continue;const L=relShape(lo),H=relShape(hi),c=coverBy(relSamples([L]),H);if(c>=.02)out.overlaps.push(`«${hi.name}» copre ${pctWord(c)==='tutto'?'tutto':pctWord(c)+' di'} «${lo.name}»`)}
+ // Ordine di lettura dei testi: per righe dall'alto (testi che si sovrappongono in verticale stanno nella stessa riga), poi da sinistra.
+ const T=inSheet.filter(x=>x.kind==='text'||x.alt).map(x=>({x,b:rotBox(x)})).sort((a,b)=>a.b.y-b.b.y),rows=[];for(const t of T){const r=rows.find(r=>r.some(o=>t.b.y<o.b.y+o.b.h*.6&&o.b.y<t.b.y+t.b.h*.6));if(r)r.push(t);else rows.push([t])}
+ out.reading=rows.flatMap(r=>r.sort((a,b)=>a.b.x-b.b.x)).map(t=>`«${t.x.kind==='text'?t.x.text.replace(/\s+/g,' ').trim():altOf(t.x)}»`);return out}
+function readCompo(){const p=Dw.p;if(!p.items.length){toast('Il foglio è vuoto');return}const c=compoParts();if(Date.now()-compoAt<3000){compoAt=0;compoWindow(c);return}compoAt=Date.now();
+ announce(`${c.sheet} ${c.margins?'Margini: '+c.margins:''} ${c.balance||''} ${c.overlaps?.length?`${c.overlaps.length===1?'Una sovrapposizione':c.overlaps.length+' sovrapposizioni'}: ${c.overlaps.slice(0,2).join('; ')}${c.overlaps.length>2?' e altre':''}.`:'Nessuna sovrapposizione.'} Premi di nuovo Alt+Maiusc+D per la descrizione completa.`.replace(/\s+/g,' '))}
+async function compoWindow(c){const sec=(t,body)=>body?`<h3>${esc(t)}</h3>${body}`:'',list=a=>a?.length?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
+ await modal('Composizione del foglio',`<p>${esc(c.sheet)}</p>${sec('Zone del foglio, per terzi',list(c.zones)+(c.empty?.length?`<p>Vuote: ${esc(c.empty.join(', '))}.</p>`:''))}${sec('Margini',c.margins?`<p>${esc(c.margins)}</p>`:'')}${sec('Equilibrio',c.balance?`<p>${esc(c.balance)}</p>`:'')}${sec('Allineamenti e spaziature',list(c.aligns)||(c.zones?'<p>Nessun gruppo di oggetti allineati.</p>':''))}${sec('Sovrapposizioni',list(c.overlaps)||(c.zones?'<p>Nessuna.</p>':''))}${sec('Ordine di lettura dei testi',c.reading?.length?`<ol>${c.reading.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:'')}`,[],'Chiudi',{noCancel:true,wide:true})}
+// Ascolta la forma: il contorno dell'oggetto scelto in circa due secondi e mezzo, dal punto più in alto in senso orario;
+// più acuto dove il contorno è più in alto, da sinistra a destra nello stereo, con un colpo breve sugli angoli.
+function shapeOutline(it){const S=relShape(it);if(S.inside){const polys=hasArea(it)&&!drawIsOpen(it)?itemPolys(it):[[[S.b.x,S.b.y]]];const P=(polys.length?polys:[[]]).reduce((a,b)=>b.length>a.length?b:a,[]);if(P.length>2)return {pts:P,closed:true}}
+ if(it.kind==='text'||it.kind==='image'){const b=box(it);return {pts:[[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]].map(([x,y])=>{const q=rotPt(it,x,y);return [q.x,q.y]}),closed:true}}return {pts:S.pts||[],closed:false}}
+function listenShape(){const it=needItem();if(!it)return;let {pts,closed}=shapeOutline(it);if(pts.length<2){toast('Questo oggetto non ha un contorno da ascoltare');return}
+ if(closed){let a=0;for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[(i+1)%pts.length];a+=p[0]*q[1]-q[0]*p[1]}if(a<0)pts=[...pts].reverse();const k=pts.reduce((m,p,i)=>p[1]<pts[m][1]?i:m,0);pts=[...pts.slice(k),...pts.slice(0,k),pts[k]]}
+ // Lungo il contorno, 48 punti a passi uguali; gli angoli sono i punti dove la direzione gira di più di 35 gradi.
+ const len=[0];for(let i=1;i<pts.length;i++)len.push(len[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));const tot=len.at(-1)||1,N=48,R=[];let j=0;
+ for(let i=0;i<N;i++){const t=tot*i/(N-1);while(j<len.length-2&&len[j+1]<t)j++;const f=(t-len[j])/((len[j+1]-len[j])||1);R.push([pts[j][0]+(pts[j+1][0]-pts[j][0])*f,pts[j][1]+(pts[j+1][1]-pts[j][1])*f])}
+ const B=unionBox([{x:Math.min(...R.map(p=>p[0])),y:Math.min(...R.map(p=>p[1])),w:1,h:1},{x:Math.max(...R.map(p=>p[0])),y:Math.max(...R.map(p=>p[1])),w:0,h:0}]),marks=new Set();
+ for(let i=1;i<pts.length-1;i++){const a=Math.atan2(pts[i][1]-pts[i-1][1],pts[i][0]-pts[i-1][0]),b=Math.atan2(pts[i+1][1]-pts[i][1],pts[i+1][0]-pts[i][0]);let d=Math.abs(b-a);if(d>Math.PI)d=2*Math.PI-d;if(d>.6)marks.add(Math.round(len[i]/tot*(N-1)))}
+ toneSeq([{vals:R.map(p=>B.h>1?1-(p[1]-B.y)/B.h:.5),pans:R.map(p=>B.w>1?-.8+1.6*(p[0]-B.x)/B.w:0),marks}],{dur:.045,gap:.008,say:`Ascolto di «${it.name}»: ${closed?'dal punto più in alto, in senso orario':'dall’inizio alla fine del tratto'}; il tono sale quando il contorno sale, un colpo su ogni angolo. Esc per fermare.`})}
+sheetWrap.addEventListener('keydown',e=>{if(e.key==='Escape'&&toneHalt()){e.preventDefault();e.stopImmediatePropagation();announce('Ascolto interrotto')}},true);
+const DRAW_DESCRIBE_ACTIONS={readAround,readCompo,listenShape};
 // Ogni comando del registro corrisponde a una funzione: prima quelle dell'app attiva, poi quelle comuni.
 const I_ACTIONS={open:()=>pickFile(),export:exportDialog,closePhoto,auto:applyAuto,compare:toggleCompare,resetAll,readStatus:readPhotoStatus,sendToDraw:sendPhotoToDraw,
  rotateLeft:()=>rotate(-90),rotateRight:()=>rotate(90),flipH,ratioMenu,straighten:()=>liveRange('Raddrizza','angle'),resetGeometry,
@@ -3619,7 +3955,7 @@ const D_ACTIONS={openDraw:()=>pickFile(),saveSvg,exportDraw:exportDrawImage,newD
  boolUnion:()=>boolOp('union'),boolSubtract:()=>boolOp('subtract'),boolIntersect:()=>boolOp('intersect'),boolExclude:()=>boolOp('exclude'),boolCut,
  addPolygon:()=>addItem('poly'),addStar:()=>addItem('poly',{star:true,sides:5,inner:45,fill:'#e8a33d',name:nextName('poly','Stella')}),addArrow:()=>addItem('arrow'),addBubble:()=>addItem('bubble'),addArrowLine:()=>addItem('line',{end:'arrow',name:nextName('line','Linea con freccia')}),
  undo:()=>drawUndo(false),redo:()=>drawUndo(true)};
-Object.assign(D_ACTIONS,DRAW_PHOTO_ACTIONS);
+Object.assign(D_ACTIONS,DRAW_PHOTO_ACTIONS,DRAW_DESCRIBE_ACTIONS);
 const COMMON_ACTIONS={filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
  switchImmagini:()=>setMode('immagini'),switchDisegno:()=>setMode('disegno'),layoutMenu,layoutReset,showPlans:()=>paneToggle('planPane'),showAdjust:()=>paneToggle('adjPane'),showLayers:()=>paneToggle('layPane'),showProps:()=>paneToggle('propPane'),
  themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};
@@ -3720,7 +4056,7 @@ async function start(){applyPrefs();
  catch(e){console.error('Avvio non riuscito',e);toast('Avvio non riuscito: '+e.message)}finally{suppressAutosave=false}
  planCursor=Math.max(0,PLANS.findIndex(p=>p.id===I.plan));$('docTitle').value=I.title;updateTitle();renderBar();applyLayout();renderPlans();renderPanel();showPhoto();renderLayers();renderProps();refreshToggles();
  const ui=await dbGet('ui').catch(()=>null);if(ui?.mode==='disegno'){suppressAutosave=true;setMode('disegno',{focus:false});suppressAutosave=false}
- status(db?'Pronto · i file restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze: esporta il lavoro prima di chiudere')}
+ $('statusText').dataset.idle=db?'Pronto · i file restano sul dispositivo':'Pronto · il browser non permette di salvare le bozze';status(db?'':'Il browser non permette di salvare le bozze: esporta o salva il lavoro prima di chiudere')}
 // Dal sito ufficiale, e non dal file aperto con un doppio clic, il programma si può installare come app
 // che funziona anche senza rete e si aggiorna dal sito.
 function enableInstall(){if(location.protocol==='file:'||!('serviceWorker' in navigator))return;

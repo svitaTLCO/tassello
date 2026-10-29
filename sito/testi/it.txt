@@ -135,7 +135,7 @@ Per post e caroselli, storie, volantini, poster, brochure, newsletter, presentaz
           <li>Cornici ruotate, con ombre e sfumature; foto regolate nella cornice e regolazioni copiate da una all’altra; codici QR fatti senza internet, tabelle ed elementi</li>
           <li>Dati da CSV, XLSX, JSON o da Calcolo per una pagina per riga; feed RSS, testo da DOCX e una cartella collegata, anche di Google Drive, OneDrive o Dropbox</li>
           <li>Temi di colore, sagome per le immagini, griglie di foto, guide intelligenti e adattamento a un altro formato</li>
-          <li>Abbondanza e segni di taglio, poster e striscioni stampati a tessere su fogli A4 o A3, presentazione a schermo intero; esporta PNG e PDF</li>
+          <li>Abbondanza e segni di taglio, poster e striscioni stampati a tessere su fogli A4 o A3, presentazione a schermo intero; esporta PNG e PDF accessibile</li>
           <li>Ordine di lettura, testi alternativi e verifica dell’accessibilità per ogni pagina; tabelle leggibili anche nel PDF</li>
 
 [ufficio.scarica]
@@ -148,7 +148,7 @@ Prova Tassello Ufficio nel browser
 Installa come app
 
 [ufficio.limiti]
-Un file da circa 1,3 MB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base, non tutto: macro, revisioni tracciate, slicer delle tabelle pivot e grafici combinati non sono supportati, e Impagina non sostituisce un programma di impaginazione professionale. Conserva sempre una copia degli originali.
+Un file da circa 1,4 MB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base, non tutto: macro, revisioni tracciate, slicer delle tabelle pivot e grafici combinati non sono supportati, e Impagina non sostituisce un programma di impaginazione professionale. Conserva sempre una copia degli originali.
 
 [media.titolo]
 Tassello Media: Audio e Video
@@ -184,7 +184,7 @@ Scarica Tassello Media
 Prova Tassello Media nel browser
 
 [media.limiti]
-Un file da circa 470 KB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base: i file molto lunghi richiedono molta memoria e i video che il browser non sa decodificare si esportano in tempo reale, invece che un fotogramma alla volta. Conserva sempre una copia degli originali.
+Un file da circa 550 KB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base: i file molto lunghi richiedono molta memoria e i video che il browser non sa decodificare si esportano in tempo reale, invece che un fotogramma alla volta. Conserva sempre una copia degli originali.
 
 [grafica.titolo]
 Tassello Grafica: Immagini e Disegno
@@ -223,7 +223,7 @@ Scarica Tassello Grafica
 Prova Tassello Grafica nel browser
 
 [grafica.limiti]
-Un file da circa 560 KB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base: Immagini lavora su una foto alla volta, apre le foto HEIC solo se il sistema sa decodificare HEVC e dei RAW apre l’anteprima della fotocamera; lo scontorno usa algoritmi classici e con soggetti che toccano i bordi, capelli sottili o vetro servono un riquadro o qualche tratto; per convertire i testi in tracciati servono il permesso di leggere i caratteri installati o il file del carattere. Conserva sempre una copia degli originali.
+Un file da circa 620 KB per Chrome ed Edge recenti, anche senza rete. Copre il lavoro di base: Immagini lavora su una foto alla volta, apre le foto HEIC solo se il sistema sa decodificare HEVC e dei RAW apre l’anteprima della fotocamera; lo scontorno usa algoritmi classici e con soggetti che toccano i bordi, capelli sottili o vetro servono un riquadro o qualche tratto; per convertire i testi in tracciati servono il permesso di leggere i caratteri installati o il file del carattere. Conserva sempre una copia degli originali.
 
 [accessibilita.titolo]
 Accessibilità: la condizione, non un extra
@@ -371,6 +371,81 @@ Per Tassello Media o Tassello Grafica scrivi <code>tassello-media.html</code> o 
 Ogni file scaricato dalle <a href="https://github.com/svitaTLCO/tassello/releases">release su GitHub</a> (Tassello Ufficio dalla versione 1.3.0, Tassello Media e Tassello Grafica dalla prima release) ha anche una firma di provenienza, che dimostra che è stato costruito da GitHub a partire dal codice sorgente pubblico. Con lo strumento <a href="https://cli.github.com/">GitHub CLI</a>:
 
 # Messaggi dello script della pagina Verifica
+
+[accessibilita.dichiarazione]
+Leggi la <a href="accessibilita.html">dichiarazione di accessibilità</a>: che cosa abbiamo verificato, a che punto siamo e i limiti noti.
+
+[dichiarazione.pagina_titolo]
+Dichiarazione di accessibilità · Tassello
+
+[dichiarazione.descrizione]
+Che cosa abbiamo verificato dell’accessibilità di Tassello, a che punto siamo e che cosa non funziona ancora bene.
+
+[dichiarazione.titolo]
+Dichiarazione di accessibilità
+
+[dichiarazione.testo]
+Per Tassello l’accessibilità è la condizione per distribuire uno strumento. Qui trovi che cosa abbiamo verificato, a che punto siamo e che cosa non funziona ancora bene, perché tu sappia che cosa aspettarti.
+
+[dichiarazione.ambito_titolo]
+A che cosa si riferisce
+
+[dichiarazione.ambito]
+    <ul>
+      <li>Tassello Ufficio 1.10.0: Testo, Calcolo e Impagina</li>
+      <li>Tassello Media 1.4.0: Audio e Video</li>
+      <li>Tassello Grafica 1.3.0: Immagini e Disegno</li>
+      <li>questo sito e la pagina Verifica una copia</li>
+    </ul>
+    <p>Vale per Chrome o Edge recenti su un computer; le prove sono state fatte su Windows. Tablet, telefoni, il Mac con VoiceOver e gli altri browser non sono ancora supportati. L’interfaccia delle app è in italiano.</p>
+
+[dichiarazione.stato_titolo]
+Stato di conformità
+
+[dichiarazione.stato]
+    <p>Tassello è <b>parzialmente conforme</b> alle WCAG 2.2, livello AA. Le verifiche non trovano più difetti rispetto ai criteri di livello A e AA, tranne i limiti noti qui sotto; la conformità però non è ancora confermata da prove con screen reader veri, e per questo la dichiariamo parziale finché il gruppo di prova non avrà finito.</p>
+
+[dichiarazione.metodo_titolo]
+Come l’abbiamo valutata
+
+[dichiarazione.metodo]
+    <ul>
+      <li>Una verifica WCAG 2.2 AA in Edge su Windows, con axe-core e con controlli scritti apposta: circa 1.000 stati delle sette app e del sito, in quattro temi e con i colori forzati, ripetuti dopo le correzioni.</li>
+      <li>Prove automatiche nel browser per ogni tassello, che leggono anche il testo esatto degli annunci per lo screen reader.</li>
+      <li>Un’analisi, app per app, dei compiti che di solito si fanno guardando.</li>
+      <li>Prove con persone non vedenti, in corso, con la <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">guida alla prova</a>.</li>
+    </ul>
+
+[dichiarazione.offre_titolo]
+Che cosa offre Tassello
+
+[dichiarazione.offre]
+    <ul>
+      <li>Tutto si usa da tastiera. Le descrizioni hanno lo stesso tasto in ogni app: Alt+Maiusc+I quello che hai davanti, D l’insieme, R dove sta l’elemento scelto, L la luce o i livelli, O il confronto con l’originale.</li>
+      <li>Il risultato visivo detto a parole e in suoni: posizione e sovrapposizioni delle cornici e degli oggetti, luce e colori di una foto, scene e parlato di un video, livelli dell’audio, grafici e istogrammi da ascoltare, colori con il loro nome.</li>
+      <li>Verifiche dell’accessibilità per quello che produci, PDF di Impagina con titoli, paragrafi e testi alternativi, sottotitoli in Video.</li>
+      <li>Tema scuro, contrasto elevato, colori forzati, riduzione delle animazioni, ridisposizione fino a 320 px di larghezza.</li>
+    </ul>
+
+[dichiarazione.limiti_titolo]
+Limiti noti
+
+[dichiarazione.limiti]
+    <ul>
+      <li>Il comportamento con NVDA, JAWS e l’Assistente vocale va ancora confermato, soprattutto per gli annunci uniti in una frase e per le aree interattive: la foto, l’istogramma, l’anteprima video, la griglia di Calcolo.</li>
+      <li>In alcune finestre di Tassello Ufficio un valore fuori dai limiti viene corretto senza dire quale limite si è usato.</li>
+      <li>Alcuni compiti visivi restano difficili senza vista: mettere le cornici nella griglia in Impagina, seguire il bordo dello scontorno in Immagini, esplorare un disegno con un cursore, sentire luce e colore prima e dopo in Video. La verifica dei lampeggiamenti non riconosce ancora i lampi su una parte dello schermo né quelli rossi.</li>
+      <li>Le descrizioni misurano pixel e suono, senza intelligenza artificiale: non riconoscono persone o oggetti.</li>
+    </ul>
+
+[dichiarazione.segnala_titolo]
+Segnalazioni
+
+[dichiarazione.segnala]
+    <p>Se qualcosa non si usa con la tecnologia che usi, segnalalo con il modulo <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Problema di accessibilità</a>: per noi è un difetto da correggere e ha la precedenza. La dichiarazione completa è nel <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">repository</a>.</p>
+
+[dichiarazione.data]
+Dichiarazione redatta il 29 ottobre 2026; la aggiorniamo a ogni nuova versione.
 
 [js.controllo]
 Controllo in corso…

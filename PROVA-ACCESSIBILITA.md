@@ -55,6 +55,32 @@ Per passare da un'app all'altra dello stesso file:
 
 **Se le frecce non fanno niente.** Le aree di lavoro (la pagina di Impagina, la foto, il foglio di Disegno, la forma d'onda di Audio) usano le frecce per spostare e regolare. Se premi una freccia e lo screen reader legge il testo della pagina invece di spostare qualcosa, passa alla modalità in cui i tasti arrivano all'app: in NVDA con NVDA+Spazio, in JAWS con Insert+Z, nell'Assistente vocale con il tasto dell'Assistente vocale e Spazio. Annota se ti è servito e dove.
 
+## Le novità di questa versione
+
+Con Tassello Ufficio 1.10.0, Tassello Grafica 1.3.0 e Tassello Media 1.4.0 ci sono comandi nuovi pensati proprio per i lavori che di solito si fanno guardando. Per sapere quale versione hai: Alt+Q, scrivi «Informazioni» e premi Invio; il numero è nella prima riga.
+
+Le lettere hanno lo stesso significato in tutte le app, sempre con **Alt+Maiusc**:
+
+- **I**: descrive quello che hai davanti (c'era già);
+- **D**: descrive l'insieme, cioè com'è fatto e com'è disposto;
+- **R**: dice dove sta l'elemento scelto rispetto alla pagina e agli altri;
+- **L**: la luce o i livelli;
+- **O**: il confronto con l'originale, o tra prima e dopo;
+- **P** e **F**, in Testo: dove sei e la formattazione;
+- **C**, in Video: descrive la clip.
+
+| App | Tasti nuovi |
+|---|---|
+| Testo | Alt+Maiusc+P dove sei (pagina, riga, sezione, titolo); Alt+Maiusc+F la formattazione (due volte: Mostra formattazione); Ctrl+G vai alla pagina; Alt+PgGiù e Alt+PgSu pagina successiva e precedente. *Cambia maiuscole e minuscole* ora è Alt+Maiusc+F3. |
+| Calcolo | Alt+Maiusc+D descrive il foglio (tabelle, grafici, regole, note); F8 estende la selezione con le frecce; sul grafico R il riassunto della serie, M e Maiusc+M il massimo e il minimo, A il prossimo valore anomalo. |
+| Impagina | Alt+Maiusc+R dove sta la cornice scelta: posizione, cornici vicine, allineamenti e sovrapposizioni; Alt+Maiusc+D la panoramica della pagina: fasce, sfondi, sovrapposizioni e nove zone. I colori si sentono con il loro nome. |
+| Audio | Alt+Maiusc+D descrive il brano; Alt+Maiusc+L legge i livelli; Alt+Maiusc+O fa sentire prima e dopo l'ultimo effetto e dice che cosa è cambiato. |
+| Video | Alt+Maiusc+D descrive il fotogramma (luce, colori, zone); Alt+Maiusc+C descrive la clip (scene, luce, colori, movimento, parlato); sull'indicatore Ctrl+frecce su e giù vanno ai cambi di scena, Ctrl+frecce sinistra e destra alle pause del parlato; Maiusc+Spazio riproduce solo l'elemento scelto. |
+| Immagini | Alt+Maiusc+L descrive la luce (due volte: l'istogramma da percorrere con le frecce e da ascoltare); Alt+Maiusc+D zone, colori e dominante; Alt+Maiusc+O il confronto con l'originale; X lo strumento Esplora, un cursore che dice che cosa c'è sotto. Quando lasci un cursore senti che cosa è cambiato. |
+| Disegno | Alt+Maiusc+R i dintorni dell'oggetto scelto, con le sovrapposizioni dette anche mentre lo sposti; Alt+Maiusc+D la composizione del foglio (due volte: la descrizione completa); «Ascolta la forma» (con Alt+Q) fa sentire il contorno come toni; nell'elenco dei livelli Ctrl+frecce e Ctrl+Spazio scelgono più oggetti anche non vicini. |
+
+Nei compiti qui sotto trovi, dove servono, le righe **Prova anche**: dicci se questi comandi ti aiutano davvero e che cosa ti manca ancora.
+
 ## Come organizzare la prova
 
 - Scegli una o due app per volta. Non serve provarle tutte in un giorno.
@@ -84,6 +110,8 @@ Domande: sai dire se una riga è centrata, di che colore è il testo, quanto spa
 2. Scorri il testo e premi Alt+Maiusc+I in punti diversi: ti dice «Pagina 2 di 3».
 3. Prima di un titolo premi Ctrl+Invio per mandarlo alla pagina dopo.
 
+**Prova anche:** Alt+Maiusc+P per sapere in che pagina e in che punto sei, Ctrl+G per andare a una pagina, Alt+PgGiù e Alt+PgSu per passare alla pagina dopo o prima.
+
 Domande: sai su quale pagina sei mentre leggi? Sai se un titolo è rimasto da solo in fondo a una pagina? Ti accorgi dell'interruzione di pagina quando ci passi sopra?
 
 **Compito T3: verifica e PDF.**
@@ -111,6 +139,8 @@ Domande: i dati sono nelle celle in cui pensavi di scriverli? Te ne sei accorto 
 2. Premi Alt+F1: Tassello inserisce il grafico più adatto e ne legge un riassunto.
 3. Sul grafico: Freccia destra e Freccia sinistra passano da un valore all'altro, D ripete la descrizione, S fa ascoltare il grafico come una serie di suoni, T apre i dati in tabella, Esc esce.
 
+**Prova anche:** sul grafico R per il riassunto della serie, M e Maiusc+M per il massimo e il minimo, A per il prossimo valore anomalo; sul foglio Alt+Maiusc+D per la descrizione di tutto il foglio.
+
 Domande: capisci se gli importi crescono o calano? Ti accorgi del mese con il valore strano? Il suono ti aiuta?
 
 ### Impagina (Tassello Ufficio)
@@ -125,6 +155,8 @@ Premi Ctrl+Alt+I per passare a Impagina.
 4. Premi Alt+Maiusc+I per sentire la descrizione della pagina.
 5. Premi PgGiù più volte: ogni volta scegli la cornice successiva e senti dove si trova e quanto è grande.
 
+**Prova anche:** Alt+Maiusc+D per la panoramica della pagina: in quali fasce e zone stanno le cornici, che cosa fa da sfondo, che cosa si sovrappone.
+
 Domande: riesci a immaginare dove stanno il titolo, la foto e i testi? Sapresti descrivere la pagina a qualcuno, o disegnarla su un foglio? Che cosa ti è mancato?
 
 **Compito I2 (principale): spostare una cornice e allinearla.**
@@ -133,6 +165,8 @@ Domande: riesci a immaginare dove stanno il titolo, la foto e i testi? Sapresti 
 2. Le frecce la spostano di un millimetro, Maiusc con le frecce di un centimetro. Ctrl con le frecce la allarga o la stringe. Alt+Maiusc con le frecce la porta alla guida successiva e dice a che cosa si è allineata.
 3. Prova a metterla subito sotto un'altra cornice di testo, larga uguale, con un po' di spazio in mezzo e senza che si tocchino.
 4. Alla fine premi Alt+Q, scrivi «Verifica» e scegli «Verifica dell'accessibilità».
+
+**Prova anche:** Alt+Maiusc+R dopo ogni spostamento: dice dove sta la cornice rispetto alla pagina e alle altre, con che cosa è allineata e se ne copre un'altra. Poi la verifica controlla anche le cornici che escono dai margini o si sovrappongono.
 
 Domande: sai se le due cornici si toccano o si sovrappongono? Sai se la cornice è rimasta dentro i margini della pagina? La verifica te l'ha detto? Le misure in millimetri ti bastano, o vorresti sentire la posizione in un altro modo, per esempio «sotto il titolo, allineata a sinistra»?
 
@@ -170,6 +204,8 @@ Domande: prima di cominciare sapevi se il microfono era troppo lontano o troppo 
 3. Togli un errore o un colpo di tosse: I segna l'inizio, O segna la fine, Canc elimina.
 4. Premi L per sapere il livello in quel punto. Poi con Alt+Q cerca «Statistiche» e, se serve, «Normalizza».
 
+**Prova anche:** dopo un effetto, Alt+Maiusc+O per sentire e farti dire la differenza tra prima e dopo; Alt+Maiusc+L per i livelli.
+
 Domande: trovi il punto da tagliare senza vederlo? Dopo il taglio senti un clic? Sai dire se alla fine il volume è giusto?
 
 **Compito A3: voce e musica insieme.**
@@ -177,6 +213,8 @@ Domande: trovi il punto da tagliare senza vederlo? Dopo il taglio senti un clic?
 1. Importa una canzone con Ctrl+I: va in una nuova traccia.
 2. Con Ctrl+Alt+L vai alle tracce. Freccia su e Freccia giù cambiano traccia, Freccia destra e Freccia sinistra scelgono le regioni. Ctrl+Freccia destra e sinistra spostano la regione nel tempo.
 3. Fai partire la musica un po' prima della voce. Per abbassarne il volume, dalla corsia della traccia premi Maiusc+Tab fino al cursore «Volume».
+
+**Prova anche:** Alt+Maiusc+D per la descrizione del brano: tracce, regioni e che cosa suona insieme.
 
 Domande: sai quando entra la musica e quando parla la voce? Sai se la musica copre la voce, e di quanto?
 
@@ -189,6 +227,8 @@ Premi Ctrl+Alt+V per passare a Video.
 1. Premi Ctrl+I e scegli un video fatto con il telefono. Va nella raccolta: premi Invio per metterlo nella linea temporale.
 2. Con Ctrl+Alt+L vai alla linea temporale. Se senti il nome di una traccia, premi Freccia su per arrivare all'indicatore, cioè il punto del video in cui sei. Sull'indicatore Freccia destra e Freccia sinistra avanzano di un fotogramma, Maiusc con le frecce di un secondo, PgGiù e PgSu di cinque secondi, Spazio riproduce e ferma.
 3. Premi Alt+Maiusc+I in alcuni punti.
+
+**Prova anche:** Alt+Maiusc+C per la descrizione della clip, Alt+Maiusc+D per il fotogramma sotto l'indicatore, Ctrl+frecce su e giù per saltare da una scena all'altra.
 
 Domande: riesci a sapere che cosa si vede, se è buio o chiaro, dove cambia la scena? Che cosa vorresti sentire?
 
@@ -217,6 +257,8 @@ Apri Tassello Grafica: si apre Immagini. Le tue foto originali non vengono mai m
 1. Premi Ctrl+O e apri una foto all'aperto, per esempio un paesaggio con il cielo.
 2. Premi Alt+Maiusc+I: Tassello descrive la foto e la sua luce.
 
+**Prova anche:** Alt+Maiusc+D per zone, colori e dominante della foto; X per esplorarla con un cursore che dice che cosa c'è sotto.
+
 Domande: riesci a farti un'idea di che cosa c'è, dei colori, di dove sono le parti chiare e quelle scure? Che cosa vorresti sapere che non ti ha detto?
 
 **Compito F2 (principale): correggere la luce.**
@@ -226,6 +268,8 @@ Domande: riesci a farti un'idea di che cosa c'è, dei colori, di dove sono le pa
 3. Ogni tanto premi Alt+Maiusc+I per sentire com'è diventata la foto.
 4. Prova anche la correzione automatica con Ctrl+Maiusc+U.
 5. Per confrontare con l'originale premi la barra rovesciata, il tasto sotto Esc a sinistra dell'1, oppure il pulsante «Originale» nella barra sotto la foto. Ripremilo per tornare alla foto modificata.
+
+**Prova anche:** ascolta che cosa dice Tassello quando lasci un cursore; Alt+Maiusc+L per la luce e, premuto due volte, l'istogramma da percorrere e ascoltare; Alt+Maiusc+O per il confronto con l'originale.
 
 Domande: mentre muovi il cursore, ti accorgi se la foto diventa troppo chiara o troppo scura? Ti accorgi quando torna a posto? Riesci a dire che cosa è cambiato rispetto all'originale?
 
@@ -257,6 +301,8 @@ Premi Ctrl+Alt+D per passare a Disegno.
 3. Sul foglio, PgGiù e PgSu scelgono l'oggetto. Le frecce lo spostano, Maiusc con le frecce di più, Ctrl con le frecce cambia la misura. Alt+Maiusc con le frecce lo porta alla guida successiva e dice a che cosa si è allineato.
 4. Per misure precise premi F6 fino alle proprietà e scrivi X, Y, Larghezza e Altezza.
 5. Premi Alt+Maiusc+I per sentire la descrizione del foglio e dell'oggetto scelto. Con Maiusc+F6 torni all'elenco dei livelli, dove le frecce passano da un oggetto all'altro.
+
+**Prova anche:** Alt+Maiusc+R per i dintorni della forma scelta e Alt+Maiusc+D per la composizione di tutto il foglio; con Alt+Q, «Ascolta la forma».
 
 Domande: sai se il tetto appoggia sul muro o se c'è uno spazio? Sai se la porta sta dentro il muro, e se un oggetto ne copre un altro? Sai se il triangolo ha la punta in alto? Sapresti dire com'è venuta la casetta?
 

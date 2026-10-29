@@ -16,7 +16,7 @@ DOCS = HERE.parent / 'docs'
 SITE = 'https://svitatlco.github.io/tassello/'
 # La prima lingua è quella della radice del sito e fa da riferimento per le altre.
 LANGS = {'it': 'Italiano', 'en': 'English', 'fr': 'Français', 'es': 'Español'}
-PAGES = ['index.html', 'verifica.html']
+PAGES = ['index.html', 'verifica.html', 'accessibilita.html']
 TEXT = re.compile(r'\{\{([a-z][\w.]*)\}\}')
 COMPUTED = re.compile(r'\{\{([A-Z_]+)\}\}')
 IN_ATTRIBUTE = re.compile(r'="[^"<>]*\{\{([a-z][\w.]*)\}\}')

@@ -132,7 +132,7 @@ La mise en page, pour les publications et carrousels, stories, flyers, affiches,
           <li>Blocs pivotés, avec ombres et dégradés&nbsp;; photos réglées dans leur bloc, réglages copiés de l’un à l’autre&nbsp;; codes QR créés sans internet, tableaux et éléments graphiques</li>
           <li>Données CSV, XLSX, JSON ou de Calcolo pour créer une page par ligne&nbsp;; flux RSS, texte DOCX et un dossier relié, y compris Google Drive, OneDrive ou Dropbox</li>
           <li>Thèmes de couleurs, formes d’image, grilles de photos, repères intelligents et adaptation à un autre format</li>
-          <li>Fonds perdus et traits de coupe, affiches et banderoles imprimées en mosaïque sur des feuilles A4 ou A3, présentation en plein écran&nbsp;; export en PNG et PDF</li>
+          <li>Fonds perdus et traits de coupe, affiches et banderoles imprimées en mosaïque sur des feuilles A4 ou A3, présentation en plein écran&nbsp;; export en PNG et en PDF accessible</li>
           <li>Ordre de lecture, texte alternatif et vérification de l’accessibilité pour chaque page&nbsp;; tableaux lisibles aussi dans le PDF</li>
 
 [ufficio.scarica]
@@ -145,7 +145,7 @@ Essayer Tassello Ufficio dans le navigateur
 Installer comme application
 
 [ufficio.limiti]
-Un fichier d’environ 1,3&nbsp;Mo pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base, pas tout&nbsp;: les macros, le suivi des modifications, les segments des tableaux croisés dynamiques et les graphiques combinés ne sont pas pris en charge, et Impagina ne remplace pas un logiciel de mise en page professionnel. Conservez toujours une copie des originaux.
+Un fichier d’environ 1,4&nbsp;Mo pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base, pas tout&nbsp;: les macros, le suivi des modifications, les segments des tableaux croisés dynamiques et les graphiques combinés ne sont pas pris en charge, et Impagina ne remplace pas un logiciel de mise en page professionnel. Conservez toujours une copie des originaux.
 
 [media.titolo]
 Tassello Media&nbsp;: Audio et Video
@@ -181,7 +181,7 @@ Télécharger Tassello Media
 Essayer Tassello Media dans le navigateur
 
 [media.limiti]
-Un fichier d’environ 470&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: les fichiers très longs demandent beaucoup de mémoire, et les vidéos que le navigateur ne sait pas décoder s’exportent en temps réel au lieu d’image par image. Conservez toujours une copie des originaux.
+Un fichier d’environ 550&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: les fichiers très longs demandent beaucoup de mémoire, et les vidéos que le navigateur ne sait pas décoder s’exportent en temps réel au lieu d’image par image. Conservez toujours une copie des originaux.
 
 [grafica.titolo]
 Tassello Grafica&nbsp;: Immagini et Disegno
@@ -220,7 +220,7 @@ Télécharger Tassello Grafica
 Essayer Tassello Grafica dans le navigateur
 
 [grafica.limiti]
-Un fichier d’environ 560&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: Immagini traite une photo à la fois, n’ouvre les photos HEIC que si le système sait décoder le HEVC et ouvre l’aperçu de l’appareil dans les fichiers RAW&nbsp;; le détourage utilise des algorithmes classiques, donc un sujet qui touche les bords, des cheveux fins ou du verre demandent un cadre ou quelques traits&nbsp;; pour convertir les textes en tracés, il faut l’autorisation de lire les polices installées ou le fichier de la police. Conservez toujours une copie des originaux.
+Un fichier d’environ 620&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: Immagini traite une photo à la fois, n’ouvre les photos HEIC que si le système sait décoder le HEVC et ouvre l’aperçu de l’appareil dans les fichiers RAW&nbsp;; le détourage utilise des algorithmes classiques, donc un sujet qui touche les bords, des cheveux fins ou du verre demandent un cadre ou quelques traits&nbsp;; pour convertir les textes en tracés, il faut l’autorisation de lire les polices installées ou le fichier de la police. Conservez toujours une copie des originaux.
 
 [accessibilita.titolo]
 Accessibilité&nbsp;: la condition, pas un extra
@@ -368,6 +368,81 @@ Pour Tassello Media ou Tassello Grafica, écrivez <code>tassello-media.html</cod
 Chaque fichier téléchargé depuis les <a href="https://github.com/svitaTLCO/tassello/releases">versions publiées sur GitHub</a> (Tassello Ufficio depuis la version 1.3.0, Tassello Media et Tassello Grafica depuis leur première version publiée) porte aussi une signature de provenance, qui prouve que GitHub l’a construit à partir du code source public. Avec l’outil <a href="https://cli.github.com/">GitHub CLI</a>&nbsp;:
 
 # Messaggi dello script della pagina Verifica
+
+[accessibilita.dichiarazione]
+Lisez la <a href="accessibilita.html">déclaration d’accessibilité</a>&nbsp;: ce que nous avons vérifié, où nous en sommes et les limites connues.
+
+[dichiarazione.pagina_titolo]
+Déclaration d’accessibilité · Tassello
+
+[dichiarazione.descrizione]
+Ce que nous avons vérifié de l’accessibilité de Tassello, où nous en sommes et ce qui ne fonctionne pas encore bien.
+
+[dichiarazione.titolo]
+Déclaration d’accessibilité
+
+[dichiarazione.testo]
+Pour Tassello, l’accessibilité est la condition pour diffuser un outil. Voici ce que nous avons vérifié, où nous en sommes et ce qui ne fonctionne pas encore bien, pour que vous sachiez à quoi vous attendre.
+
+[dichiarazione.ambito_titolo]
+Ce qu’elle couvre
+
+[dichiarazione.ambito]
+    <ul>
+      <li>Tassello Ufficio 1.10.0&nbsp;: Testo, Calcolo et Impagina</li>
+      <li>Tassello Media 1.4.0&nbsp;: Audio et Video</li>
+      <li>Tassello Grafica 1.3.0&nbsp;: Immagini et Disegno</li>
+      <li>ce site et la page de vérification</li>
+    </ul>
+    <p>Elle s’applique à Chrome ou Edge récents sur un ordinateur&nbsp;; les essais ont été faits sous Windows. Les tablettes, les téléphones, le Mac avec VoiceOver et les autres navigateurs ne sont pas encore pris en charge. L’interface des applications est en italien.</p>
+
+[dichiarazione.stato_titolo]
+État de conformité
+
+[dichiarazione.stato]
+    <p>Tassello est <b>partiellement conforme</b> aux WCAG 2.2, niveau AA. Nos vérifications ne trouvent plus de défaut sur les critères de niveau A et AA, hormis les limites connues ci-dessous&nbsp;; la conformité n’est pas encore confirmée avec de vrais lecteurs d’écran, c’est pourquoi nous la déclarons partielle tant que le groupe d’essai n’a pas terminé.</p>
+
+[dichiarazione.metodo_titolo]
+Comment nous l’avons évaluée
+
+[dichiarazione.metodo]
+    <ul>
+      <li>Une vérification WCAG 2.2 AA dans Edge sous Windows, avec axe-core et des contrôles écrits pour l’occasion&nbsp;: environ 1&nbsp;000 états des sept applications et du site, dans quatre thèmes et avec les couleurs forcées, répétés après les corrections.</li>
+      <li>Des tests automatiques dans le navigateur pour chaque outil, qui lisent aussi le texte exact des annonces pour le lecteur d’écran.</li>
+      <li>Une analyse, application par application, des tâches qui se font d’habitude en regardant.</li>
+      <li>Des essais avec des personnes aveugles, en cours, avec le <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">guide d’essai</a> (en italien).</li>
+    </ul>
+
+[dichiarazione.offre_titolo]
+Ce que propose Tassello
+
+[dichiarazione.offre]
+    <ul>
+      <li>Tout se fait au clavier. Les descriptions ont la même touche dans chaque application&nbsp;: Alt+Maj+I ce que vous avez devant vous, D l’ensemble, R où se trouve l’élément choisi, L la lumière ou les niveaux, O la comparaison avec l’original.</li>
+      <li>Le résultat visuel en mots et en sons&nbsp;: position et chevauchements des blocs et des objets, lumière et couleurs d’une photo, scènes et parole d’une vidéo, niveaux sonores, graphiques et histogrammes à écouter, couleurs nommées.</li>
+      <li>Des vérifications d’accessibilité pour ce que vous créez, des PDF d’Impagina avec titres, paragraphes et textes alternatifs, des sous-titres dans Video.</li>
+      <li>Thème sombre, contraste élevé, couleurs forcées, animations réduites, redisposition jusqu’à 320&nbsp;px de large.</li>
+    </ul>
+
+[dichiarazione.limiti_titolo]
+Limites connues
+
+[dichiarazione.limiti]
+    <ul>
+      <li>Le comportement avec NVDA, JAWS et le Narrateur reste à confirmer, surtout pour les annonces réunies en une phrase et pour les zones interactives&nbsp;: la photo, l’histogramme, l’aperçu vidéo, la grille de Calcolo.</li>
+      <li>Certaines fenêtres de Tassello Ufficio corrigent une valeur hors limites sans dire quelle limite a été appliquée.</li>
+      <li>Certaines tâches visuelles restent difficiles sans la vue&nbsp;: placer les blocs sur la grille dans Impagina, suivre le bord du détourage dans Immagini, explorer un dessin avec un curseur, entendre la lumière et la couleur avant et après dans Video. La vérification des clignotements ne détecte pas encore les éclairs sur une partie de l’écran ni les éclairs rouges.</li>
+      <li>Les descriptions mesurent les pixels et le son, sans intelligence artificielle&nbsp;: elles ne reconnaissent ni les personnes ni les objets.</li>
+    </ul>
+
+[dichiarazione.segnala_titolo]
+Signalements
+
+[dichiarazione.segnala]
+    <p>Si quelque chose ne fonctionne pas avec la technologie que vous utilisez, signalez-le avec le formulaire <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Problème d’accessibilité</a>&nbsp;: pour nous c’est un défaut à corriger, et il passe en premier. La déclaration complète se trouve dans le <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">dépôt</a>.</p>
+
+[dichiarazione.data]
+Déclaration rédigée le 29 octobre 2026&nbsp;; nous la mettons à jour à chaque nouvelle version.
 
 [js.controllo]
 Vérification en cours…

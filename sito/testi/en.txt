@@ -131,7 +131,7 @@ The layout editor, for posts and carousels, stories, flyers, posters, brochures,
           <li>Rotated frames with shadows and gradients; photos adjusted inside their frame, with adjustments copied from one to another; offline QR codes, tables and graphic elements</li>
           <li>Data from CSV, XLSX, JSON or Calcolo to make one page per row; RSS feeds, text from DOCX and a linked folder, including Google Drive, OneDrive or Dropbox</li>
           <li>Colour themes, image shapes, photo grids, smart guides and resizing to another format</li>
-          <li>Bleed and crop marks, posters and banners printed as tiles on A4 or A3 sheets, full-screen slideshow; exports PNG and PDF</li>
+          <li>Bleed and crop marks, posters and banners printed as tiles on A4 or A3 sheets, full-screen slideshow; exports PNG and accessible PDF</li>
           <li>Reading order, alternative text and an accessibility check for every page; tables stay readable in the PDF</li>
 
 [ufficio.scarica]
@@ -144,7 +144,7 @@ Try Tassello Ufficio in your browser
 Install as an app
 
 [ufficio.limiti]
-A file of about 1.3 MB for recent Chrome and Edge, even offline. It covers the basics, not everything: macros, tracked changes, pivot table slicers and combo charts are not supported, and Impagina does not replace professional publishing software. Always keep a copy of your originals.
+A file of about 1.4 MB for recent Chrome and Edge, even offline. It covers the basics, not everything: macros, tracked changes, pivot table slicers and combo charts are not supported, and Impagina does not replace professional publishing software. Always keep a copy of your originals.
 
 [media.titolo]
 Tassello Media: Audio and Video
@@ -180,7 +180,7 @@ Download Tassello Media
 Try Tassello Media in your browser
 
 [media.limiti]
-A file of about 470 KB for recent Chrome and Edge, even offline. It covers the basics: very long files need a lot of memory, and videos the browser cannot decode are exported in real time instead of one frame at a time. Always keep a copy of your originals.
+A file of about 550 KB for recent Chrome and Edge, even offline. It covers the basics: very long files need a lot of memory, and videos the browser cannot decode are exported in real time instead of one frame at a time. Always keep a copy of your originals.
 
 [grafica.titolo]
 Tassello Grafica: Immagini and Disegno
@@ -219,7 +219,7 @@ Download Tassello Grafica
 Try Tassello Grafica in your browser
 
 [grafica.limiti]
-A file of about 560 KB for recent Chrome and Edge, even offline. It covers the basics: Immagini works on one photo at a time, opens HEIC photos only where the system can decode HEVC and opens the camera’s preview of RAW files; background removal uses classic algorithms, so subjects touching the edges, fine hair or glass need a box or a few strokes; converting text to paths needs permission to read installed fonts, or the font file. Always keep a copy of your originals.
+A file of about 620 KB for recent Chrome and Edge, even offline. It covers the basics: Immagini works on one photo at a time, opens HEIC photos only where the system can decode HEVC and opens the camera’s preview of RAW files; background removal uses classic algorithms, so subjects touching the edges, fine hair or glass need a box or a few strokes; converting text to paths needs permission to read installed fonts, or the font file. Always keep a copy of your originals.
 
 [accessibilita.titolo]
 Accessibility: the requirement, not an extra
@@ -367,6 +367,81 @@ For Tassello Media or Tassello Grafica, write <code>tassello-media.html</code> o
 Every file downloaded from the <a href="https://github.com/svitaTLCO/tassello/releases">GitHub releases</a> (Tassello Ufficio from version 1.3.0, Tassello Media and Tassello Grafica from their first release) also carries a provenance signature, which proves that GitHub built it from the public source code. With the <a href="https://cli.github.com/">GitHub CLI</a> tool:
 
 # Messaggi dello script della pagina Verifica
+
+[accessibilita.dichiarazione]
+Read the <a href="accessibilita.html">accessibility statement</a>: what we have checked, where we stand and the known limitations.
+
+[dichiarazione.pagina_titolo]
+Accessibility statement · Tassello
+
+[dichiarazione.descrizione]
+What we have checked about the accessibility of Tassello, where we stand and what does not work well yet.
+
+[dichiarazione.titolo]
+Accessibility statement
+
+[dichiarazione.testo]
+For Tassello, accessibility is the condition for releasing a tool. Here is what we have checked, where we stand and what does not work well yet, so you know what to expect.
+
+[dichiarazione.ambito_titolo]
+What it covers
+
+[dichiarazione.ambito]
+    <ul>
+      <li>Tassello Ufficio 1.10.0: Testo, Calcolo and Impagina</li>
+      <li>Tassello Media 1.4.0: Audio and Video</li>
+      <li>Tassello Grafica 1.3.0: Immagini and Disegno</li>
+      <li>this website and the verification page</li>
+    </ul>
+    <p>It applies to recent Chrome or Edge on a computer; testing was done on Windows. Tablets, phones, the Mac with VoiceOver and other browsers are not supported yet. The app interface is in Italian.</p>
+
+[dichiarazione.stato_titolo]
+Conformance status
+
+[dichiarazione.stato]
+    <p>Tassello is <b>partially conformant</b> with WCAG 2.2 level AA. Our checks find no remaining failures against level A and AA criteria, apart from the known limitations below; conformance is not yet confirmed with real screen readers, so we state it as partial until the testing group has finished.</p>
+
+[dichiarazione.metodo_titolo]
+How we evaluated it
+
+[dichiarazione.metodo]
+    <ul>
+      <li>A WCAG 2.2 AA evaluation in Edge on Windows, with axe-core and custom checks: about 1,000 states of the seven apps and the website, in four themes and with forced colours, repeated after the fixes.</li>
+      <li>Automated real-browser tests for each tool, which also read the exact screen reader announcements.</li>
+      <li>A task-by-task analysis, app by app, of the work usually done by looking.</li>
+      <li>Testing with blind people, in progress, using the <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">testing guide</a> (in Italian).</li>
+    </ul>
+
+[dichiarazione.offre_titolo]
+What Tassello offers
+
+[dichiarazione.offre]
+    <ul>
+      <li>Everything works from the keyboard. Descriptions use the same key in every app: Alt+Shift+I what is in front of you, D the whole, R where the selected item is, L light or levels, O the comparison with the original.</li>
+      <li>Visual results in words and sounds: position and overlaps of frames and objects, light and colours of a photo, scenes and speech in a video, audio levels, charts and histograms you can listen to, colours by name.</li>
+      <li>Accessibility checks for what you make, Impagina PDFs with headings, paragraphs and alternative text, captions in Video.</li>
+      <li>Dark theme, high contrast, forced colours, reduced motion, reflow down to 320 px wide.</li>
+    </ul>
+
+[dichiarazione.limiti_titolo]
+Known limitations
+
+[dichiarazione.limiti]
+    <ul>
+      <li>Behaviour with NVDA, JAWS and Narrator is still to be confirmed, especially for announcements joined into one sentence and for interactive areas: the photo, the histogram, the video preview, the Calcolo grid.</li>
+      <li>Some Tassello Ufficio dialogs correct an out-of-range value without saying which limit was used.</li>
+      <li>Some visual tasks are still hard without sight: placing frames on the grid in Impagina, following the cut-out edge in Immagini, exploring a drawing with a cursor, hearing light and colour before and after in Video. The flash check does not yet detect flashes on part of the screen or red flashes.</li>
+      <li>Descriptions measure pixels and sound without artificial intelligence: they do not recognise people or objects.</li>
+    </ul>
+
+[dichiarazione.segnala_titolo]
+Feedback
+
+[dichiarazione.segnala]
+    <p>If something does not work with the technology you use, report it with the <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Accessibility problem form</a>: we treat it as a bug and it comes first. The full statement is in the <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">repository</a>.</p>
+
+[dichiarazione.data]
+Statement written on 29 October 2026; we update it with every release.
 
 [js.controllo]
 Checking…

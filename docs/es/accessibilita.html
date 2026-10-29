@@ -1,0 +1,119 @@
+<!doctype html>
+<!-- Pagina generata da sito/build.py: modifica sito/pagine/accessibilita.html o i testi in sito/testi/, poi ricostruisci. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Declaración de accesibilidad · Tassello</title>
+<meta name="description" content="Qué hemos comprobado de la accesibilidad de Tassello, en qué punto estamos y qué no funciona todavía bien.">
+<meta name="color-scheme" content="light dark">
+<link rel="alternate" hreflang="it" href="https://svitatlco.github.io/tassello/accessibilita.html">
+<link rel="alternate" hreflang="en" href="https://svitatlco.github.io/tassello/en/accessibilita.html">
+<link rel="alternate" hreflang="fr" href="https://svitatlco.github.io/tassello/fr/accessibilita.html">
+<link rel="alternate" hreflang="es" href="https://svitatlco.github.io/tassello/es/accessibilita.html">
+<link rel="alternate" hreflang="x-default" href="https://svitatlco.github.io/tassello/accessibilita.html">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../stile.css">
+</head>
+<body>
+<a class="skip" href="#contenuto">Ir al contenido</a>
+<div class="wrap">
+<header class="top">
+  <a class="logo" href="./" aria-label="Tassello, página de inicio">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="46" height="46" rx="10" fill="#2457C5"/><path d="M64 0H86L100 14V36Q100 46 90 46H64Q54 46 54 36V10Q54 0 64 0Z" fill="#1E7A46"/><path d="M86 0V8Q86 14 92 14H100Z" fill="#fff" fill-opacity=".55"/><rect y="54" width="46" height="46" rx="10" fill="#B35500"/><rect x="54" y="54" width="46" height="46" rx="10" fill="#7A3DB8"/></svg>
+    tassello
+  </a>
+  <details class="lingua">
+    <summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span class="sr-only">Idioma: </span>Español</summary>
+    <ul>
+      <li><a href="../accessibilita.html" hreflang="it" lang="it">Italiano</a></li>
+      <li><a href="../en/accessibilita.html" hreflang="en" lang="en">English</a></li>
+      <li><a href="../fr/accessibilita.html" hreflang="fr" lang="fr">Français</a></li>
+      <li><a href="../es/accessibilita.html" hreflang="es" lang="es" aria-current="page">Español</a></li>
+    </ul>
+  </details>
+  <nav aria-label="Sitio">
+    <ul>
+      <li><a href="./">Página de inicio</a></li>
+      <li><a href="./#accessibilita">Accesibilidad</a></li>
+      <li><a href="https://github.com/svitaTLCO/tassello">Código fuente</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="contenuto">
+  <div class="page-head">
+    <h1>Declaración de accesibilidad</h1>
+    <p class="lead">Para Tassello, la accesibilidad es la condición para distribuir una herramienta. Aquí tienes qué hemos comprobado, en qué punto estamos y qué no funciona todavía bien, para que sepas qué esperar.</p>
+  </div>
+
+  <section aria-labelledby="ambito">
+    <h2 id="ambito">A qué se refiere</h2>
+    <ul>
+      <li>Tassello Ufficio 1.10.0: Testo, Calcolo e Impagina</li>
+      <li>Tassello Media 1.4.0: Audio y Video</li>
+      <li>Tassello Grafica 1.3.0: Immagini y Disegno</li>
+      <li>este sitio y la página de verificación</li>
+    </ul>
+    <p>Vale para Chrome o Edge recientes en un ordenador; las pruebas se hicieron en Windows. Las tabletas, los teléfonos, el Mac con VoiceOver y los demás navegadores todavía no son compatibles. La interfaz de las aplicaciones está en italiano.</p>
+  </section>
+
+  <section aria-labelledby="stato">
+    <h2 id="stato">Estado de conformidad</h2>
+    <p>Tassello es <b>parcialmente conforme</b> con las WCAG 2.2, nivel AA. Nuestras comprobaciones ya no encuentran fallos en los criterios de nivel A y AA, salvo los límites conocidos que siguen; sin embargo, la conformidad aún no está confirmada con lectores de pantalla reales, y por eso la declaramos parcial hasta que el grupo de prueba termine.</p>
+  </section>
+
+  <section aria-labelledby="metodo">
+    <h2 id="metodo">Cómo la hemos evaluado</h2>
+    <ul>
+      <li>Una evaluación WCAG 2.2 AA en Edge con Windows, con axe-core y comprobaciones escritas para la ocasión: unos 1.000 estados de las siete aplicaciones y del sitio, en cuatro temas y con colores forzados, repetida después de las correcciones.</li>
+      <li>Pruebas automáticas en el navegador para cada herramienta, que también leen el texto exacto de los avisos para el lector de pantalla.</li>
+      <li>Un análisis, aplicación por aplicación, de las tareas que suelen hacerse mirando.</li>
+      <li>Pruebas con personas ciegas, en curso, con la <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">guía de prueba</a> (en italiano).</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="offre">
+    <h2 id="offre">Qué ofrece Tassello</h2>
+    <ul>
+      <li>Todo se usa con el teclado. Las descripciones tienen la misma tecla en cada aplicación: Alt+Mayús+I lo que tienes delante, D el conjunto, R dónde está el elemento elegido, L la luz o los niveles, O la comparación con el original.</li>
+      <li>El resultado visual en palabras y sonidos: posición y superposiciones de marcos y objetos, luz y colores de una foto, escenas y voz de un vídeo, niveles de audio, gráficos e histogramas que se pueden escuchar, colores con su nombre.</li>
+      <li>Comprobaciones de accesibilidad de lo que creas, PDF de Impagina con títulos, párrafos y textos alternativos, subtítulos en Video.</li>
+      <li>Tema oscuro, alto contraste, colores forzados, menos animaciones, reajuste hasta 320 px de ancho.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="limiti">
+    <h2 id="limiti">Límites conocidos</h2>
+    <ul>
+      <li>El comportamiento con NVDA, JAWS y Narrador aún debe confirmarse, sobre todo para los avisos unidos en una frase y para las zonas interactivas: la foto, el histograma, la vista previa de vídeo, la cuadrícula de Calcolo.</li>
+      <li>Algunas ventanas de Tassello Ufficio corrigen un valor fuera de límites sin decir qué límite se ha usado.</li>
+      <li>Algunas tareas visuales siguen siendo difíciles sin vista: colocar los marcos en la cuadrícula de Impagina, seguir el borde del recorte en Immagini, explorar un dibujo con un cursor, oír la luz y el color antes y después en Video. La comprobación de destellos aún no detecta los destellos en una parte de la pantalla ni los rojos.</li>
+      <li>Las descripciones miden píxeles y sonido, sin inteligencia artificial: no reconocen personas ni objetos.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="segnala">
+    <h2 id="segnala">Avisos</h2>
+    <p>Si algo no funciona con la tecnología que usas, avísanos con el formulario <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Problema de accesibilidad</a>: para nosotros es un fallo que corregir y tiene prioridad. La declaración completa está en el <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">repositorio</a>.</p>
+  </section>
+
+  <p class="meta">Declaración redactada el 29 de octubre de 2026; la actualizamos con cada nueva versión.</p>
+</main>
+<footer>
+  <p>Canales oficiales: svitatlco.github.io/tassello y las <a href="https://github.com/svitaTLCO/tassello/releases">versiones publicadas en GitHub</a>. Las copias recibidas por otras vías, o modificadas por otros, no son oficiales: <a href="verifica.html">verifica una copia</a>.</p>
+  <p>© 2026 svitaTLCO y colaboradores. Tassello es software libre, distribuido con licencia <a href="https://github.com/svitaTLCO/tassello/blob/main/LICENSE">EUPL 1.2</a>. <a href="https://github.com/svitaTLCO/tassello">Código fuente y avisos</a>.</p>
+  <p>¿Has encontrado una copia sospechosa? <a href="https://github.com/svitaTLCO/tassello/issues/new?template=copia-sospetta.yml">Avísanos en GitHub</a>.</p>
+</footer>
+</div>
+<script>
+// Selettore della lingua: si chiude con Esc, con un clic fuori o quando il fuoco esce dall'elenco.
+(()=>{
+const menu=document.querySelector('.lingua'),summary=menu.querySelector('summary');
+addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open){menu.open=false;summary.focus()}});
+addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
+menu.addEventListener('focusout',e=>{if(e.relatedTarget&&!menu.contains(e.relatedTarget))menu.open=false});
+})();
+</script>
+</body>
+</html>
