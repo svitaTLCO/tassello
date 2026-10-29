@@ -13,12 +13,12 @@
 /* Mosaico: la finestra è fatta di tasselli (--surface) appoggiati su una fuga (--grout) che prende il colore dell'app. */
 :root{--zoom:1;--accent:#2457c5;--accent-strong:#1b4398;--accent-text:#1b4398;--accent-soft:#e7edfa;--sel-tint:rgba(36,87,197,.13);
 --grout:#dce3ef;--grout-deep:#cbd4e4;--gap:8px;--r:10px;--fold:var(--accent);--scrim:rgba(16,22,34,.16);
---bg:var(--grout);--chrome:#fff;--surface:#fff;--surface-2:#f1f3f7;--hover:#e9edf3;--pressed:#dde2ea;--line:#e1e5ec;--line-strong:#a9b0bc;--text:#161b26;--text-2:#3e4757;--text-3:#596374;--canvas:#e8ebf0;--hdr:#f1f3f7;--focus:#161b26;--danger:#b10e1c;
+--bg:var(--grout);--chrome:#fff;--surface:#fff;--surface-2:#f1f3f7;--hover:#e9edf3;--pressed:#dde2ea;--line:#e1e5ec;--line-strong:#7c8493;--danger:#b3261e;--text:#161b26;--text-2:#3e4757;--text-3:#596374;--canvas:#e8ebf0;--hdr:#f1f3f7;--focus:#161b26;--danger:#b10e1c;
 --shadow:0 12px 32px rgba(20,24,34,.18),0 2px 8px rgba(20,24,34,.08);--lift:0 18px 40px rgba(20,24,34,.26),0 2px 6px rgba(20,24,34,.1);color-scheme:light;
 --mono:'Cascadia Mono',Consolas,ui-monospace,'Courier New',monospace;
 font-family:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--text)}
 html[data-mode=excel]{--accent:#1e7a46;--accent-strong:#155c34;--accent-text:#155c34;--accent-soft:#e3f1e8;--sel-tint:rgba(30,122,70,.14);--grout:#dae7df;--grout-deep:#c8dacf}
-html[data-theme=dark]{color-scheme:dark;--grout:#0f131b;--grout-deep:#080b10;--scrim:rgba(0,0,0,.45);--chrome:#1e2026;--surface:#1e2026;--surface-2:#272a31;--hover:#2f333c;--pressed:#3a3f49;--line:#363a44;--line-strong:#6b7280;--text:#eef1f6;--text-2:#c9d0db;--text-3:#a3acbb;--canvas:#16181d;--hdr:#272a31;--focus:#fff;--accent-text:#9bbcf5;--accent-soft:#1c3156;--shadow:0 12px 32px rgba(0,0,0,.55);--lift:0 18px 40px rgba(0,0,0,.6)}
+html[data-theme=dark]{color-scheme:dark;--danger:#f2b8b5;--grout:#0f131b;--grout-deep:#080b10;--scrim:rgba(0,0,0,.45);--chrome:#1e2026;--surface:#1e2026;--surface-2:#272a31;--hover:#2f333c;--pressed:#3a3f49;--line:#363a44;--line-strong:#6b7280;--text:#eef1f6;--text-2:#c9d0db;--text-3:#a3acbb;--canvas:#16181d;--hdr:#272a31;--focus:#fff;--accent-text:#9bbcf5;--accent-soft:#1c3156;--shadow:0 12px 32px rgba(0,0,0,.55);--lift:0 18px 40px rgba(0,0,0,.6)}
 html[data-theme=dark][data-mode=excel]{--accent-text:#82d3a4;--accent-soft:#163a26;--grout:#0e1511;--grout-deep:#070c09}
 html[data-contrast=high]{--grout:#fff;--grout-deep:#fff;--line:#000;--line-strong:#000;--text-2:#000;--text-3:#111;--hover:#cfcfcf;--accent-text:#002a66}
 html[data-contrast=high][data-mode=excel]{--accent-text:#003d1c;--grout:#fff;--grout-deep:#fff}
@@ -77,7 +77,7 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .tb{flex-shrink:0;height:36px;min-width:36px;border:0;border-radius:8px;background:transparent;color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;white-space:nowrap}
 .tb.icon{width:36px;padding:0}
 .tb:hover{background:var(--hover)}.tb:active{background:var(--pressed)}
-.tb[aria-pressed=true],.tb[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text)}
+.tb[aria-pressed=true],.tb[aria-expanded=true]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 -2px 0 var(--accent-text)}
 .tb.drw{font-weight:600}
 .tb .chev{width:12px;height:12px;stroke-width:2.2}
 .tb:focus-visible{outline-offset:-2px}
@@ -163,7 +163,8 @@ kbd{font:600 11px/1 'Segoe UI',system-ui,sans-serif;display:inline-block;padding
 .tessera .badge{min-width:20px;height:20px;padding:0 5px;border-radius:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
 .tessera .badge:empty{display:none}
 .tessera .vt{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:600;white-space:nowrap}
-.sep{flex:0 0 var(--gap);align-self:stretch;display:grid;place-items:center;cursor:col-resize;touch-action:none;border-radius:4px}
+.sep{flex:0 0 var(--gap);align-self:stretch;display:grid;place-items:center;cursor:col-resize;touch-action:none;border-radius:4px;position:relative}
+.sep::after{content:'';position:absolute;inset:0 calc(var(--gap)/2 - 12px)}.sep.h::after{inset:calc(var(--gap)/2 - 12px) 0}
 .sep::before{content:'';width:4px;height:40px;max-height:60%;border-radius:2px;background:var(--accent);opacity:0;transition:opacity .12s}
 .sep:hover::before,.sep:focus-visible::before,.sep.dragging::before{opacity:1}
 .sep:focus-visible{outline-offset:0}
@@ -324,6 +325,10 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .modal input:not([type=checkbox]),.modal select,.modal textarea{width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text)}
 .modal textarea{resize:vertical}
 .modal .hint{display:block;color:var(--text-3);margin-top:4px}
+.modal .dlg-err{margin:6px 0 0;padding:6px 10px;border-left:3px solid var(--danger);color:var(--text);background:var(--surface-2,transparent);font-weight:600}
+#pgProps .pp-err{color:var(--text);font-weight:600;border-left:3px solid var(--danger);padding-left:6px}
+#pgProps [aria-invalid=true]{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+.modal [aria-invalid=true]{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
 .modal-actions{margin-top:20px;display:flex;gap:8px;justify-content:flex-end}
 .modal table{border-collapse:collapse;width:100%;font-size:12.5px}
 .modal th,.modal td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-weight:400}
@@ -364,7 +369,7 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .pal-group-h span+span{font:500 11px/1.4 var(--mono);letter-spacing:0}
 .pal-opt{display:flex;align-items:center;gap:12px;min-height:38px;padding:0 10px;border-radius:8px;cursor:pointer}
 .pal-opt .ico,.pal-opt .ti-text{color:var(--text-2)}
-.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text)}
+.pal-opt[aria-selected=true]{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 3px 0 0 var(--accent-text)}
 .pal-opt[aria-selected=true] .ico,.pal-opt[aria-selected=true] .pal-cat{color:inherit}
 .pal-opt kbd{border:0;background:var(--surface-2);font:500 11px/1 var(--mono);padding:4px 6px;border-radius:5px}
 .pal-opt[aria-selected=true] kbd{background:var(--surface)}
@@ -433,7 +438,7 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .nav-list{list-style:none;margin:0;padding:0 6px 12px;overflow:auto;flex:1}
 .nav-item{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--text);padding:6px 8px;border-radius:6px;font-size:13px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nav-item:hover{background:var(--hover)}.nav-item:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
-.nav-item[aria-current]{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+.nav-item[aria-current]{background:var(--accent-soft);color:var(--accent-text);font-weight:600;box-shadow:inset 3px 0 0 var(--accent-text)}
 .nav-item.lvl1{font-weight:600}.nav-item.lvl2{padding-left:20px}.nav-item.lvl3{padding-left:32px}.nav-item.lvl4{padding-left:44px}.nav-item.lvl5,.nav-item.lvl6{padding-left:56px}
 .nav-empty{font-size:13px;color:var(--text-3);padding:6px 8px}
 .smsplit{display:inline-flex;align-items:stretch}.smsplit>.tool:first-child{border-top-right-radius:0;border-bottom-right-radius:0;padding-right:3px}
@@ -521,7 +526,7 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .page-deco .wm.diag{transform:translateY(-50%) rotate(-45deg)}
 .page-deco .pb{position:absolute;box-sizing:border-box}
 .wm-print,.pb-print{display:none}
-.find-style select{margin-left:4px}
+.find-style select{margin-left:4px;min-height:28px}
 @media print{.wm-print{position:fixed;inset:0;align-items:center;justify-content:center;font:700 90pt Calibri,Arial,sans-serif;opacity:.3;z-index:-1;white-space:nowrap}.wm-print.diag{transform:rotate(-45deg)}.pb-print{position:fixed;inset:-8pt;z-index:-1;box-sizing:border-box}.page,.word-content{background:transparent!important}.page-deco{display:none!important}}
 @media (forced-colors:active){.word-content.show-marks :is(p,h1,h2,h3,h4,h5,h6,li)::after{color:GrayText}}
 @media (max-width:720px){.fx-row{grid-template-columns:1fr}.fx-opt{flex-direction:column;gap:2px}.fx-opt b{min-width:0}}
@@ -532,13 +537,24 @@ html[data-theme=dark] .tip{background:#f3f3f3;color:#111}
 .msg.show{opacity:1}
 html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
-@media (forced-colors:active){.tool[aria-pressed=true],.tb[aria-pressed=true],.tb[aria-expanded=true],.ditem[aria-pressed=true],.style-card[aria-pressed=true],.sheet-tab[aria-selected=true],.pal-opt[aria-selected=true]{outline:2px solid Highlight}.sheetgrid td.sel{forced-color-adjust:none;background:Highlight;color:HighlightText}.sheetgrid td.active{outline:3px solid Highlight}.swatch{forced-color-adjust:none}}
+@media (forced-colors:active){:focus-visible{outline-color:Highlight}.app-switch button[aria-pressed=true]{outline:2px solid Highlight}.tool[aria-pressed=true],.tb[aria-pressed=true],.tb[aria-expanded=true],.ditem[aria-pressed=true],.style-card[aria-pressed=true],.sheet-tab[aria-selected=true],.pal-opt[aria-selected=true]{outline:2px solid Highlight}.sheetgrid td.sel{forced-color-adjust:none;background:Highlight;color:HighlightText}.sheetgrid td.active{outline:3px solid Highlight}.swatch{forced-color-adjust:none}}
 /* Nelle finestre strette i testi dei pulsanti spariscono alla vista ma restano agli screen reader: sono il loro nome. */
 @media (max-width:1500px){.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.app-switch button{padding:0 6px}}
 @media (max-width:1200px){.status .st-btn:not(.lead) span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
 @media (max-width:720px){.bar{gap:6px;padding:6px 6px 0}.brand{display:none}.save-state,.search-tile kbd{display:none}.bar>.doc-tile{flex-basis:140px;min-width:90px}.primary-tile span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.primary-tile{padding:0 16px}.word-scroll{padding:10px}.file-side{width:180px}.file-info{padding:22px}.drawer-grid{grid-template-columns:1fr!important}.status{overflow-x:auto;scrollbar-width:none}#wordStats,#excelStats,#pgStats{display:none!important}}
 /* Nelle finestre strette i tasselli si mettono in colonna e le tessere diventano orizzontali. */
 @media (max-width:860px){#wordPane{flex-direction:column;gap:var(--gap)}.word-scroll{order:0!important;flex:1 1 320px}.pane{width:auto;max-height:260px;order:1!important}.sep{display:none}.tessera{width:auto;height:44px;flex-direction:row;padding:0 14px;margin:0!important;order:1!important}.tessera .vt{writing-mode:horizontal-tb;transform:none}}
+/* Ridisposizione (WCAG 1.4.10). Con poca altezza, per esempio 1280 × 1024 al 400%, la pagina scorre: barra e barra di stato
+   non restano fisse e vanno via con lo scorrimento, l'area di lavoro tiene un'altezza minima e i riquadri vanno sotto. */
+@media (max-height:500px){html,body{height:auto;overflow-y:auto}#app{height:auto;min-height:100dvh}.main,.editor-pane,.pg-work{flex:none}#wordPane,.pg-work{flex-direction:column;gap:var(--gap)}.pane{width:auto!important;max-height:none;order:1!important}.sep{display:none}.tessera{width:auto;height:44px;flex-direction:row;padding:0 14px;margin:0!important;order:1!important}.tessera .vt{writing-mode:horizontal-tb;transform:none}
+ .word-scroll{flex:none!important;height:max(170px,72vh);padding:10px 8px 24px}.grid-area{flex:none;height:max(190px,74vh)}.pg-view{flex:none;height:max(190px,74vh)}.pg-scroll{min-height:0;padding:8px}}
+/* Sotto i 480 px gli strumenti e la barra di stato vanno a capo invece di scorrere di lato, e i cassetti hanno una colonna.
+   Nella barra rapida restano Annulla, Ripeti e i primi strumenti: gli altri sono nei cassetti e in Cerca comandi. */
+@media (max-width:480px){.bar>.tile.tools{height:auto;min-height:48px}.tools{flex-wrap:wrap;overflow:visible;padding:4px}.tools>#drawers{flex-wrap:wrap;flex-shrink:1;min-width:0}#quick .h1,#quick .h2{display:none!important}.bar>.tools{flex:1 1 100%}.bar>.doc-tile{flex:1 1 50px!important;min-width:50px!important}.bar>.primary-tile{padding:0 12px}.status{flex-wrap:wrap;overflow:visible}.status .grow{display:none}
+ .drawer{left:4px!important;right:4px!important;max-width:none}.drawer-grid{grid-template-columns:minmax(0,1fr)!important}.drawer-grid>*{min-width:0}.dsel,.dcolor{flex-wrap:wrap}.dsel select,.dcolor select{max-width:100%}}
+/* Sotto i 600 px di larghezza la pagina di Testo prende la larghezza della finestra, come in Modalità lettura: si scrive senza
+   scorrere di lato (vista «bozza»). La stima delle pagine resta quella della pagina vera (draftView in 06b-layout.js). */
+@media (max-width:600px){#app:not(.reading) .page{width:100%!important;min-height:0!important}#app:not(.reading) .word-content{padding:14px 12px!important;column-count:auto!important}#app:not(.reading) .page-marks,#app:not(.reading) .page .hf{display:none!important}}
 @media print{.print-sheet{padding:4mm!important;display:block!important}.print-sheet table{table-layout:auto;border-collapse:collapse;font:10px Calibri,Arial}.print-sheet th,.print-sheet td{padding:3px 5px;min-width:20px;border:1px solid #bbb}.excel .grid-area{display:none!important}.print-sheet th{background:#f2f2f2}.bar,.drawer,.tessera,.sep,.findbar,.formula-line,.sheet-bar,.status,.filepanel,.skip,.tip,.msg{display:none!important}html,body,#app,.main,.word-scroll,.editor-pane{display:block!important;height:auto!important;padding:0!important;overflow:visible!important;background:#fff!important}.page{margin:0;width:100%!important;min-height:0!important;box-shadow:none!important;zoom:1!important}.word-content{min-height:0!important;padding:0!important}.word-content hr.pagebreak{border:0;margin:0}.word-content hr.pagebreak::after{display:none}.word-content .toc{border:0;padding:0}.nav-pane,.cmt-pane,.read-bar,.dict-bar,.line-focus,.page .hf,.page-marks{display:none!important}.word-content span.cmt,.word-content span.mfield{background:none!important;border:0!important}.word-content table.tb-none td,.word-content table.tb-none th{border-color:transparent!important}.word-content .toc a{border:0}.print-chart{break-inside:avoid;margin:14px 0}.print-chart svg{max-width:100%;height:auto}.print-chart figcaption{font:10px Calibri,Arial;color:#333;margin-top:4px}.chart-viewport{display:none!important}}
 /* Impagina: pagine e cornici a sinistra, la pagina al centro, le proprietà a destra */
 html[data-mode=impagina]{--accent:#b35500;--accent-strong:#8a4100;--accent-text:#8a4100;--accent-soft:#fbeee2;--sel-tint:rgba(179,85,0,.14);--grout:#ede2d8;--grout-deep:#e0d1c3}
@@ -561,7 +577,7 @@ html:not([data-mode=word]) .w-only,html[data-mode=impagina] .wx-only,html:not([d
 .lb:focus-visible .lb-item.active{box-shadow:inset 3px 0 0 var(--accent)}
 .lb-item .ico{width:16px;height:16px;color:var(--text-3)}.lb-item[aria-selected=true] .ico{color:inherit}
 .lb-item .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lb-item .d{display:block;font-size:11.5px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis}.lb-item[aria-selected=true] .d{color:inherit}
+.lb-item .d{display:block;font-size:11.5px;color:var(--text-3);white-space:normal;overflow-wrap:anywhere}.lb-item[aria-selected=true] .d{color:inherit}
 .lb-item .t{font:12px 'Cascadia Mono',Consolas,monospace;color:var(--text-3);flex-shrink:0}
 .lb-item.deco .n{font-style:italic}
 .lb-empty{padding:8px 10px;color:var(--text-3);font-size:12.5px}

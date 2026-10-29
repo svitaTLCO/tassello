@@ -50,7 +50,7 @@ function pgItemInfo(it){const p=Pg.p;if(it.kind==='text'){const s=p.stories[it.s
  if(it.kind==='shape')return (PG_ELEM_BY[it.shape]?.[1].toLowerCase()||'elemento')+(it.deco?', decorativo':it.alt?`, testo alternativo «${it.alt.slice(0,80)}»`:'');
  if(it.kind==='qr')return pgQrSay(it,{row:pgCur().I.row}).replace(/^codice QR /,'');
  return it.deco?'decorativa':it.alt?`testo alternativo «${it.alt.slice(0,80)}»`:''}
-function pgDescribeItem(it){const info=pgItemInfo(it),fx=pgFxSay(it);return `${it.name}, ${pgKindSay(it.kind)}${info?', '+info:''}${pgRot(it)?', '+pgRotSay(it):''}${fx?', '+fx:''}${it.mask&&it.mask!=='rect'?', sagoma '+PG_MASKS.find(x=>x[0]===it.mask)?.[1].toLowerCase():''}${it.g?', in un gruppo':''}${it.lock?', bloccata':''}, x ${pgU(it.x)}, y ${pgU(it.y)}, ${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`}
+function pgDescribeItem(it){const info=pgItemInfo(it),fx=pgFxSay(it);return `${it.name}, ${pgKindSay(it.kind)}${info?', '+info:''}${pgRot(it)?', '+pgRotSay(it):''}${fx?', '+fx:''}${it.mask&&it.mask!=='rect'?', sagoma '+PG_MASKS.find(x=>x[0]===it.mask)?.[1].toLowerCase():''}${it.g?', in un gruppo':''}${it.lock?', bloccata':''}, ${pgPlaceSay(it,{short:true})}; x ${pgU(it.x)}, y ${pgU(it.y)}, ${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`}
 function pgStageLabel(){const h=pgHolder(),sel=pgSel(),many=pgSelItems();return `${Pg.mid?'Mastro '+h.name:`Pagina ${Pg.pi+1} di ${Pg.p.pages.length}`}, ${h.items.length===1?'una cornice':h.items.length+' cornici'}. ${many.length>1?`${many.length} cornici scelte: ${many.map(x=>x.name).join(', ')}.`:sel?'Scelta: '+pgDescribeItem(sel):'Nessuna cornice scelta.'}`}
 // Il focus in Impagina: la pagina, oppure il primo formato da scegliere se non c'è ancora un documento.
 const pageFocus=()=>Pg.p?pgStage.focus():$('pgPresets').querySelector('button')?.focus();
@@ -81,7 +81,7 @@ const row2=(a,b)=>`<div class="row2"><div>${a}</div><div>${b}</div></div>`;
 const ppBtn=(action,label)=>`<button type="button" class="btn sm" id="pp-b-${action}" data-action="${action}">${esc(label)}</button>`;
 function pgRenderProps({story=false}={}){const b=$('pgProps'),p=Pg.p,it=pgSel(),h=pgHolder(),u=unitName(),focusId=document.activeElement?.closest?.('#pgProps')?document.activeElement.id:null;
  if(!story&&focusId==='pgStory'&&it?.kind==='text')return pgSyncProps();
- const many=pgSelItems();if(many.length>1){$('pgPropTitle').textContent=`${many.length} cornici scelte`;b.innerHTML=pgMultiProps(many);if(focusId&&$(focusId))$(focusId).focus();return}
+ const many=pgSelItems();if(many.length>1){$('pgPropTitle').textContent=`${many.length} cornici scelte`;b.innerHTML=pgMultiProps(many);colorHints(b);if(focusId&&$(focusId))$(focusId).focus();return}
  $('pgPropTitle').textContent=it?'Proprietà di '+it.name:Pg.mid?'Proprietà del mastro':'Pagina e documento';let s='';
  if(!it){if(Pg.mid)s+=ppF('mname','Nome del mastro',h.name,'text')+`<p class="hint">Le cornici del mastro compaiono su tutte le pagine che lo usano: mettici il numero di pagina, l’intestazione, il logo.</p>`;
   else{const pg=h,rows=p.data?.rows.length||0;s+=`<h3>Pagina ${Pg.pi+1}</h3>`+ppS('master','Mastro',pg.master,[['','Nessuno'],...p.masters.map(m=>[m.id,m.name])])+ppK('data','Ripeti per ogni riga dei dati',pg.data,p.data?`${plural(rows,'riga','righe')} da «${p.data.name}»: nel PDF e nei PNG questa pagina diventa ${rows===1?'una pagina':rows+' pagine'}.`:'Prima scegli i dati dalla scheda Fonti.')+ppT('alt','Descrizione della pagina',pg.alt||'','Per chi non vede: è il testo alternativo da usare quando pubblichi il PNG della pagina.')}
@@ -110,7 +110,7 @@ function pgRenderProps({story=false}={}){const b=$('pgProps'),p=Pg.p,it=pgSel(),
   if(it.kind!=='sign')s+=`<h3>Effetti</h3>`+ppS('shadow','Ombra',it.shadow||'none',PG_SIGN_SHADOWS,'L’ombra cade in basso a destra, anche se la cornice è ruotata.')+(it.shadow&&it.shadow!=='none'?ppC('shc','Colore dell’ombra',it.shc||'#1b1b1b'):'');
   s+=ppR('opacity','Opacità',0,100,it.opacity,v=>v+'%');
   if(!['text','sign','qr','table'].includes(it.kind))s+=`<h3>Per chi non vede</h3>`+ppK('deco','Decorativa: non serve descriverla',it.deco)+(it.deco?'':ppT('alt','Testo alternativo',it.alt,it.kind==='image'?'Che cosa mostra l’immagine, in una o due frasi. Puoi usare i campi dei dati, per esempio «Nome».':'Che cosa comunica la forma.'))}
- if(it)s+=ppK('lock','Bloccata: non si sposta e non si elimina per sbaglio',it.lock);b.innerHTML=s;pgStoryCss();if(focusId&&$(focusId))$(focusId).focus()}
+ if(it)s+=ppK('lock','Bloccata: non si sposta e non si elimina per sbaglio',it.lock);b.innerHTML=s;colorHints(b);pgStoryCss();if(focusId&&$(focusId))$(focusId).focus()}
 // Riempimento con la sfumatura e contorno con il suo tratto, per tutte le cornici che non sono insegne.
 function pgFillProps(it,label,none){return ppC('fill',label,it.fill,none)+(it.fill==='none'?'':ppS('grad','Sfumatura',it.grad||'',[['','Nessuna, colore pieno'],['lin','Lineare'],['rad','Radiale, dal centro']])+(it.grad?ppC('fill2','Secondo colore della sfumatura',it.fill2||'#ffffff')+(it.grad==='lin'?ppR('gangle','Direzione della sfumatura',0,360,it.gangle??90,v=>v+'°','°',15):''):''))}
 function pgEdgeProps(it,label){const u=unitName();return ppC('stroke',label,it.stroke)+ppF('sw',`Spessore del contorno (${u})`,fmtU(it.sw),'decimal',it.sw>0?'':'Con lo spessore a zero il contorno non c’è.')+(it.sw>0?ppS('dash','Tratto del contorno',it.dash||'',PG_DASHES):'')}
@@ -148,8 +148,13 @@ function pgResize(p,w,h,unit){p.w=w;p.h=h;if(unit)p.unit=unit}
 $('pgProps').addEventListener('input',e=>{const el=e.target,key=el.dataset.prop,it=pgSel();if(!key||!(el.type==='range'||el.type==='color'||(key==='text'&&(it?.kind==='sign'||it?.kind==='qr'))))return;try{pgApplyProp(key,el)}catch(err){return}
  if(it?.kind==='qr'&&$('pp-qr-state'))$('pp-qr-state').textContent=pgQrState(it,{row:pgCur().I.row});
  if(el.type==='range'){const t=PG_RFMT[key]?v=>PG_RFMT[key](Number(v)):v=>v+(el.dataset.unit??'%');el.setAttribute('aria-valuetext',t(el.value));$('pp-'+key+'-o').textContent=t(el.value)}Pg.ver++;pgRenderStage()});
+// Un valore che non va resta scritto nel campo, con il messaggio subito sotto, collegato al campo e annunciato; il campo
+// prende aria-invalid. Il messaggio sparisce quando il valore va bene. msg vuoto toglie il messaggio.
+function pgPropError(el,msg){const id=el.id+'-e';let box=$(id);if(!msg){if(box){box.remove();el.removeAttribute('aria-invalid');el.setAttribute('aria-describedby',(el.getAttribute('aria-describedby')||'').replace(id,'').trim());if(!el.getAttribute('aria-describedby'))el.removeAttribute('aria-describedby')}return}
+ const name=(el.labels?.[0]?.textContent||'').trim();if(!box){box=Object.assign(document.createElement('small'),{id,className:'hint pp-err'});box.setAttribute('role','alert');const h=el.nextElementSibling?.classList.contains('hint')?el.nextElementSibling:el;h.after(box);el.setAttribute('aria-describedby',((el.getAttribute('aria-describedby')||'')+' '+id).trim())}
+ el.setAttribute('aria-invalid','true');box.textContent='';setTimeout(()=>{box.textContent=(name?name+': ':'')+msg},40);el.focus();el.select?.()}
 $('pgProps').addEventListener('change',e=>{const el=e.target,key=el.dataset.prop;if(!key)return;if(key==='ps'){pgApplyParaStyle(el.value);return}if(key==='cs'){pgApplyCharStyle(el.value);return}const it=pgSel();
- try{pgApplyProp(key,el)}catch(err){toast(err.message);el.value=el.defaultValue;el.focus();return}
+ try{pgApplyProp(key,el)}catch(err){pgPropError(el,err.message);return}pgPropError(el,'');
  const label=key==='text'&&it?.kind==='qr'?'Contenuto':key==='shape'&&it?.kind==='shape'?'Elemento':PG_PROP[key]||'Proprietà';pgSettle(it?`${label} di ${it.name}`:label,{props:['tstyle','head','wrap','ec','quiet','dark','light','look','grad','dash','sw','fillNone','deco','preset','name','mname','cols','file','field','fit','bgNone','data','master','style','fillType','shape','shadow','fitSign','lock','ow','ow2','glow','ton','tsheet','torient','tsafe','tover'].includes(key),merge:el.type==='range'});if(key==='rot'&&it){el.value=pgFmt(pgRotOf(it));announce(`${it.name}: ${pgRotSay(it)}`)}if(key==='data'&&el.checked&&!Pg.p.data)toast('Ora scegli i dati dalla scheda Fonti: CSV, XLSX, JSON, un feed o un foglio di Calcolo')});
 $('pgProps').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)runCommand(b.dataset.action)});
 $('pgProps').addEventListener('keydown',e=>{if(e.key==='Escape'&&e.target.id!=='pgStory'){e.preventDefault();(Pg.sel?$('pgFrames'):pgStage).focus()}});
@@ -196,6 +201,9 @@ document.addEventListener('focusout',e=>{if(e.target.id==='pgStory')pgStorySync(
 const pgPt=e=>{const r=pgSvg.getBoundingClientRect(),k=pgScale();return{x:(e.clientX-r.left)/k,y:(e.clientY-r.top)/k}};
 function pgHit(pt){const items=pgHolder().items,tol=6/pgScale();for(let i=items.length-1;i>=0;i--){const it=items[i];if(it.hidden)continue;if(it.kind==='line'){const dx=it.w,dy=it.h,L=Math.hypot(dx,dy)||1,t=clampV(((pt.x-it.x)*dx+(pt.y-it.y)*dy)/(L*L),0,1);if(Math.hypot(it.x+t*dx-pt.x,it.y+t*dy-pt.y)<=Math.max(tol,it.sw))return it;continue}const q=pgTurn(it,pt.x,pt.y,true);if(q.x>=it.x&&q.x<=it.x+it.w&&q.y>=it.y&&q.y<=it.y+it.h)return it}return null}
 const pgSnapV=v=>Pg.p.snap?Math.round(v/Pg.p.step)*Pg.p.step:v;
+// Con «Aggancia alla griglia» le frecce portano il bordo alla riga successiva della griglia nel verso dato (n righe con Maiusc),
+// anche se la cornice partiva fuori griglia; senza, è la posizione più il passo.
+const pgGridGo=(v,dir,n,step)=>{if(!dir)return v;if(!Pg.p.snap)return v+dir*n*step;const g=Pg.p.step,k=v/g;return (dir>0?Math.floor(k+1e-6)+n:Math.ceil(k-1e-6)-n)*g};
 let pgDrag=null;
 pgStage.addEventListener('pointerdown',e=>{if(e.button!==0||!Pg.p)return;pgStage.focus({preventScroll:true});const pt=pgPt(e),hd=e.target.closest?.('[data-h]');
  if(hd&&pgSel()&&!pgSel().lock)pgDrag={mode:hd.dataset.h==='rot'?'rot':'resize',h:hd.dataset.h,o:{...pgSel()},pt,L:pgSnapLines(new Set([Pg.sel]))};
@@ -226,10 +234,12 @@ function pgOpenItem(it){if(it.kind==='text'){pgShowProps();$('pgStory')?.focus()
 pgStage.addEventListener('keydown',e=>{if(!Pg.p)return;const it=pgSel(),arrows={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
  if(arrows[e.key]&&e.altKey&&e.shiftKey){e.preventDefault();const [ax,ay]=arrows[e.key];pgSnapStep(ax,ay);return}
  if(arrows[e.key]&&!e.altKey){e.preventDefault();if(!it){toast('Scegli prima una cornice: PgGiù e PgSu, oppure l’elenco delle cornici');return}const [ax,ay]=arrows[e.key],step=(Pg.p.snap?Pg.p.step:pgMM()?MM:1)*(e.shiftKey?10:1),many=pgSelItems();
-  if(!(e.ctrlKey||e.metaKey)&&many.length>1){const ok=pgMovable(many);if(ok.length&&pgEdit('Sposta',()=>{for(const x of ok){x.x+=ax*step;x.y+=ay*step}},{merge:true})){const B=pgBox(ok);announce(`${ok.length} cornici, x ${pgU(B.x)}, y ${pgU(B.y)}`)}return}
+  const n=e.shiftKey?10:1,unit=step/n,onGrid=Pg.p.snap?', sulla griglia':'';
+  if(!(e.ctrlKey||e.metaKey)&&many.length>1){const ok=pgMovable(many),B0=pgBox(ok),dx=pgGridGo(B0.x,ax,n,unit)-B0.x,dy=pgGridGo(B0.y,ay,n,unit)-B0.y;if(ok.length&&pgEdit('Sposta',()=>{for(const x of ok){x.x+=dx;x.y+=dy}},{merge:true})){const B=pgBox(ok);announce(`${ok.length} cornici, x ${pgU(B.x)}, y ${pgU(B.y)}${onGrid}`)}return}
   if(it.lock){toast(`«${it.name}» è bloccata: sbloccala per spostarla`);return}
-  if(e.ctrlKey||e.metaKey){pgEdit('Ridimensiona',()=>{if(it.kind==='line'){it.w+=ax*step;it.h+=ay*step}else pgSizeTo(it,Math.max(2,it.w+ax*step),Math.max(2,it.h+ay*step))},{merge:true});announce(`${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}`)}
-  else{pgEdit('Sposta',()=>{it.x+=ax*step;it.y+=ay*step},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}`)}return}
+  const st0=pgRelState(it),then=()=>{const d=pgRelDiff(st0,pgRelState(it));return d?'; '+d:''};
+  if(e.ctrlKey||e.metaKey){pgEdit('Ridimensiona',()=>{if(it.kind==='line'){it.w+=ax*step;it.h+=ay*step}else pgSizeTo(it,Math.max(2,pgGridGo(it.x+it.w,ax,n,unit)-it.x),Math.max(2,pgGridGo(it.y+it.h,ay,n,unit)-it.y))},{merge:true});announce(`${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}${then()}`)}
+  else{pgEdit('Sposta',()=>{it.x=pgGridGo(it.x,ax,n,unit);it.y=pgGridGo(it.y,ay,n,unit)},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}${onGrid}${then()}`)}return}
  if(e.key==='PageUp'||e.key==='PageDown'){if(e.altKey||e.ctrlKey)return;e.preventDefault();pgSelectStep(e.key==='PageDown'?1:-1,e.shiftKey);return}
  if(e.key==='Escape'&&Pg.sel){e.preventDefault();pgSelect(null);return}
  if(e.key==='Enter'){e.preventDefault();if(it)pgOpenItem(it);else{pgShowProps();focusables($('pgProps'))[0]?.focus()}return}

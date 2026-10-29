@@ -43,7 +43,7 @@ def('wx','Generale',[
  ['find','Trova','search','Ctrl+F',{g:1,short:'Trova'}],
  ['replace','Sostituisci','replace','Ctrl+H',{g:1,short:'Sostituisci'}],
  ['findNext','Trova successivo','down','F3',{g:1}],
- ['findPrev','Trova precedente','up','Maiusc+F3',{g:1}]]);
+ ['findPrev','Trova precedente','up','Maiusc+F3',{g:1,kx:''}]]);
 def('wx','Formato carattere',[
  ['bold','Grassetto','t:<b>G</b>','Ctrl+B',{toggle:()=>isWord()?qs('bold'):isCalc()&&cs('bold')}],
  ['italic','Corsivo','t:<i>C</i>','Ctrl+I',{toggle:()=>isWord()?qs('italic'):isCalc()&&cs('italic')}],
@@ -115,7 +115,7 @@ def('w','Formattazione',[
  ['formatCopy','Copia il formato del testo','brush','Alt+Maiusc+C',{}],
  ['formatPaste','Applica il formato copiato','brush','Alt+Maiusc+V',{}],
  ['caseMenu','Maiuscole e minuscole','t:Aa','',{menu:1,short:'Maiuscole'}],
- ['changeCase','Cambia maiuscole e minuscole','t:Aa','Maiusc+F3',{ctx:'editor'}],
+ ['changeCase','Cambia maiuscole e minuscole','t:Aa','Alt+Maiusc+F3',{ctx:'editor'}],
  ['pasteSpecial','Incolla speciale','paste','Ctrl+Alt+V',{short:'Incolla speciale'}],
  ['revealFormat','Mostra formattazione','info','Maiusc+F1',{short:'Mostra formattazione'}],
  ['showMarks','Mostra segni di formattazione','t:¶','Ctrl+Maiusc+8',{short:'Segni ¶',toggle:()=>marksOn}],
@@ -203,6 +203,14 @@ def('w','Pagina e documento',[
  ['wordCount','Conteggio parole','t:123','Ctrl+Maiusc+G',{short:'Conteggio parole'}],
  ['readAloud','Leggi ad alta voce','speak','',{short:'Leggi ad alta voce',toggle:()=>speaking}],
  ['a11yCheck','Verifica accessibilità del documento','a11y','',{short:'Verifica accessibilità'}],
+ ['formatCheck','Verifica della formattazione','a11y','',{short:'Verifica formattazione'}],
+ ['whereAmI','Dove sono: pagina, riga, sezione e titolo','speak','Alt+Maiusc+P',{short:'Dove sono'}],
+ ['formatSay','Dimmi la formattazione (due volte: Mostra formattazione)','speak','Alt+Maiusc+F',{short:'Dimmi la formattazione'}],
+ ['pagesSummary','Pagine del documento: riepilogo con titoli e avvisi','page','',{short:'Pagine del documento'}],
+ ['wordGoPage','Vai alla pagina','goto','Ctrl+G',{short:'Vai alla pagina'}],
+ ['wordNextPage','Pagina successiva','down','Alt+PgGiù',{}],
+ ['wordPrevPage','Pagina precedente','up','Alt+PgSu',{}],
+ ['pageSayToggle','Annuncia i cambi di pagina','speak','',{short:'Annuncia le pagine',toggle:()=>prefs.sayPages!==false}],
  ['marginsMenu','Margini della pagina','margins','',{menu:1,short:'Margini'}],
  ['columnsMenu','Colonne di testo','columns','',{menu:1,short:'Colonne'}],
  ['pageSetup','Imposta pagina: formato, margini e colonne','page','',{short:'Imposta pagina'}],
@@ -261,6 +269,9 @@ def('x','Selezione e navigazione',[
  ['selectRow','Seleziona la riga','','Maiusc+Spazio',{ctx:'grid'}],
  ['selectCol','Seleziona la colonna','','Ctrl+Spazio',{ctx:'grid'}],
  ['goto','Vai alla cella o all’intervallo','goto','Ctrl+G',{g:1,short:'Vai a'}],
+ ['extendSel','Estendi la selezione','resize','F8',{ctx:'grid',short:'Estendi selezione',toggle:()=>extendSel}],
+ ['sheetDescribe','Descrivi il foglio: tabelle, grafici, regole e note','speak','Alt+Maiusc+D',{g:1,short:'Descrivi foglio'}],
+ ['sheetCheck','Verifica accessibilità del foglio','a11y','',{short:'Verifica accessibilità'}],
  ['toggleGrid','Mostra griglia','grid','',{short:'Griglia',toggle:()=>!hideGrid}]]);
 def('x','Strumenti del foglio',[
  ['freezeMenu','Blocca riquadri','freeze','',{menu:1,short:'Blocca riquadri'}],
@@ -431,7 +442,9 @@ def('p','Fonti',[
  ['pgDocx','Importa il testo da un DOCX o da un file di testo','import','',{short:'Testo da DOCX'}]]);
 def('p','Verifica',[
  ['pgCheck','Verifica dell’accessibilità','a11y','',{short:'Verifica accessibilità'}],
- ['pgDescribe','Descrivi la pagina e la cornice scelta','speak','Alt+Maiusc+I',{g:1,short:'Descrivi pagina'}]]);
+ ['pgDescribe','Descrivi la pagina e la cornice scelta','speak','Alt+Maiusc+I',{g:1,short:'Descrivi pagina'}],
+ ['pgPlace','Dove sta la cornice scelta: posizione, vicini e allineamenti','speak','Alt+Maiusc+R',{g:1,short:'Posizione a parole'}],
+ ['pgOverview','Panoramica della pagina: fasce, sfondi, sovrapposizioni e nove zone','speak','Alt+Maiusc+D',{g:1,short:'Panoramica'}]]);
 def('wp','Tasselli',[
  ['layoutMenu','Tasselli: mostra, riduci o togli i riquadri','mosaic','',{short:'Tasselli'}],
  ['layoutReset','Rimetti i tasselli come all’inizio','history','',{short:'Come all’inizio'}]]);
@@ -450,4 +463,4 @@ const available=c=>c.modes.includes(modeKey());
 function focusContext(){const a=document.activeElement;if(!a||a===document.body)return 'other';if(a.closest('#wordEditor'))return 'editor';if(a.id==='pgStage'||a.id==='pgFrames')return 'page';if(a.id==='pgPages')return 'pages';if(a===$('gridScroll'))return 'grid';if(a===$('gridInput'))return 'cell';if(a.matches('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select,[contenteditable="true"]'))return 'input';return 'other'}
 function findShortcut(e,ctx){let fallback=null;for(const c of Object.values(C)){const spec=keysOf(c);if(!spec||c.native||!available(c))continue;if(c.ctx&&c.ctx!==ctx)continue;if((ctx==='input'||ctx==='cell')&&!c.g)continue;if(parsedKeys(spec).some(k=>keyMatch(e,k))){if(c.ctx===ctx)return c;fallback??=c}}return fallback}
 const safe=fn=>{try{return fn()}catch(e){return false}};
-async function runCommand(id){const c=C[id];if(!c)return;if(isWord()&&document.activeElement===$('wordEditor')&&inEditor())wordSelectionSave();if(reading&&isWord()&&!READ_OK.has(id)){toast('«'+c.label+'» non è disponibile in modalità lettura: premi Esc per tornare alla modifica');return}if(formMode&&isWord()&&!READ_OK.has(id)&&!['formFill','ccEdit','controlsMenu','save','print','exportHtml'].includes(id)){toast('«'+c.label+'» non è disponibile durante la compilazione del modulo: premi Esc per uscire');return}if(!available(c)){toast('«'+c.label+'» non è disponibile in '+appName());return}if(isCalc()&&id!=='editCell')finishCell();hideTip();await handleAction(id);if(c.toggle&&!c.quiet){refreshToggles();announce(c.label+(safe(c.toggle)?' attivato':' disattivato'))}else{if(c.say)announce(c.say);refreshToggles()}}
+async function runCommand(id){const c=C[id];if(!c)return;if(isWord()&&document.activeElement===$('wordEditor')&&inEditor())wordSelectionSave();if(reading&&isWord()&&!READ_OK.has(id)){toast('«'+c.label+'» non è disponibile in modalità lettura: premi Esc per tornare alla modifica');return}if(formMode&&isWord()&&!READ_OK.has(id)&&!['formFill','ccEdit','controlsMenu','save','print','exportHtml'].includes(id)){toast('«'+c.label+'» non è disponibile durante la compilazione del modulo: premi Esc per uscire');return}if(!available(c)){toast('«'+c.label+'» non è disponibile in '+appName());return}if(isCalc()&&id!=='editCell')finishCell();hideTip();const said=saidN;await handleAction(id);refreshToggles();if(saidN!==said)return;if(c.toggle&&!c.quiet){const on=safe(c.toggle);announce(on&&c.say?c.say:c.label+(on?' attivato':' disattivato'))}else if(c.say)announce(c.say)}

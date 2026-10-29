@@ -59,5 +59,5 @@ function buildPrintSections(){const ed=$('wordEditor'),page=$('page');$('printSe
 function clearPrintSections(){$('printSect')?.remove();$('page').classList.remove('has-psec')}
 // Numero di pagina mostrato per un nodo (con le numerazioni che ricominciano nelle sezioni).
 function nodeY(n){const ed=$('wordEditor'),stop=ed.offsetParent;let el=n?.nodeType===1?n:n?.parentElement,y=0;while(el&&el!==ed&&el!==stop){y+=el.offsetTop;el=el.offsetParent}return y}
-function pageIndexAt(node){const y=nodeY(node);let i=0;for(const m of pageMarks){if(m.y<=y+1)i++;else break}return i}
+function pageIndexAt(node){const h=$('wordEditor').offsetHeight,y=nodeY(node)*(draftView()&&pageMarksH&&h?pageMarksH/h:1);let i=0;for(const m of pageMarks){if(m.y<=y+1)i++;else break}return i}
 const pageNumAt=node=>{const i=pageIndexAt(node);return pageNums[i]??i+1};

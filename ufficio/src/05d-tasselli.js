@@ -36,9 +36,13 @@ function paneSet(id,st,{focus=false,say=true}={}){const d=PANES[id],s=paneState(
  if(say)announce(d.title+': '+PANE_SAY[st]);refreshToggles()}
 function paneToggle(id){const off=paneSt(id)==='off';paneSet(id,off?'open':'off',{focus:off})}
 function paneMove(id){const s=paneState(id);s.side=s.side==='left'?'right':'left';savePrefs();applyTiles();announce(`${PANES[id].title} spostato a ${s.side==='left'?'sinistra':'destra'}`)}
-function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,Math.max(d.min,Math.min(d.max,innerWidth*.45))));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final)savePrefs()}
+// La larghezza massima vera è il 45% della finestra: aria-valuemax la segue, anche quando la finestra cambia.
+const paneMaxW=d=>Math.round(Math.max(d.min,Math.min(d.max,innerWidth*.45)));
+function setW(id,w,final=true){const d=PANES[id],s=paneState(id),sep=$(id+'Sep');s.w=Math.round(clamp(w,d.min,paneMaxW(d)));$(id).style.setProperty('--w',s.w+'px');sep.setAttribute('aria-valuemax',paneMaxW(d));sep.setAttribute('aria-valuenow',s.w);sep.setAttribute('aria-valuetext',s.w+' pixel');if(final)savePrefs()}
+function paneWider(id,dw){const s=paneState(id),before=s.w||PANES[id].w;setW(id,before+dw);announce(s.w===before?`${PANES[id].title}: ${s.w} pixel, ${dw>0?'il massimo':'il minimo'}`:`${PANES[id].title}: ${s.w} pixel`)}
+addEventListener('resize',()=>{for(const id of Object.keys(PANES)){const sep=$(id+'Sep');if(sep)sep.setAttribute('aria-valuemax',paneMaxW(PANES[id]))}});
 function paneMenu(id,btn){const s=paneState(id),d=PANES[id],left=s.side==='left',r=btn.getBoundingClientRect();
- openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Larghezza iniziale',icon:'fit',run:()=>setW(id,d.w)},'-',
+ openMenu([{label:left?'Sposta a destra':'Sposta a sinistra',icon:left?'right':'left',run:()=>paneMove(id)},{label:'Riduci a tessera',icon:left?'left':'right',run:()=>paneSet(id,'tessera',{focus:true})},{label:'Più largo',desc:'16 pixel in più; sulla fuga anche con le frecce',icon:'right',run:()=>paneWider(id,16)},{label:'Più stretto',desc:'16 pixel in meno',icon:'left',run:()=>paneWider(id,-16)},{label:'Larghezza iniziale',icon:'fit',run:()=>setW(id,d.w)},'-',
   {label:'Togli dal piano',desc:'Torna dal menu Tasselli, in basso a sinistra',icon:'close',run:()=>paneSet(id,'off',{focus:true})}],r.right-240,r.bottom+4,'Opzioni del riquadro '+d.title,btn)}
 // Menu Tasselli nella barra di stato: quali riquadri sono sul piano e alcune disposizioni pronte.
 function layoutMenu(){const m=modeKey(),ids=panesOf(m),btn=$('layoutBtn'),r=btn.getBoundingClientRect();if(!ids.length){toast('In Calcolo non ci sono riquadri da disporre');return}
