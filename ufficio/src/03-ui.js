@@ -65,6 +65,15 @@ function dlgError({msg,field}){const box=$('dlgErr'),el=field?$('dlg_'+field):nu
  const after=el?(el.type==='checkbox'?el.closest('label'):el).nextElementSibling?.classList.contains('hint')?(el.type==='checkbox'?el.closest('label'):el).nextElementSibling:(el.type==='checkbox'?el.closest('label'):el):null;
  if(after)after.after(box);else $('dialogForm').querySelector('.modal-actions').before(box);box.hidden=false;box.textContent='';setTimeout(()=>{box.textContent=msg},40);
  if(el){el.setAttribute('aria-invalid','true');el.dataset.desc=el.getAttribute('aria-describedby')||'';el.setAttribute('aria-describedby',(el.dataset.desc+' dlgErr').trim());el.addEventListener('input',()=>{dlgClearInvalid(el);box.hidden=true;box.textContent=''},{once:true});el.focus();if(el.select&&/^(text|search|url|email|number|)$/.test(el.type))el.select()}}
+// Numeri scritti in una finestra, da usare come opts.validate: spec è {id:[nome,minimo,massimo,{int,unit,empty}]}, oppure una
+// funzione dei valori che lo restituisce, per i limiti che dipendono da un altro campo. Un numero mancante, non valido o fuori
+// dai limiti diventa un errore sotto il suo campo che dice che cosa scrivere, invece di essere corretto senza dirlo (WCAG
+// 3.3.3); con empty il campo può restare vuoto. dlgNum legge il valore già controllato, con la virgola o con il punto.
+const dlgNum=s=>Number(String(s).trim().replace(',','.'));
+function dlgNums(spec){return v=>{const S=typeof spec==='function'?spec(v):spec,f=x=>String(+(+x).toFixed(2)).replace('.',',');
+ for(const [id,[name,lo,hi,o={}]] of Object.entries(S)){const s=String(v[id]??'').trim(),n=dlgNum(s),bad=$('dlg_'+id)?.validity?.badInput;if(s===''&&o.empty&&!bad)continue;
+  // Un campo numerico in cui si è scritto qualcosa che non è un numero arriva vuoto: lo dice validity.badInput.
+  if(s===''||!Number.isFinite(n)||o.int&&!Number.isInteger(n)||n<lo||n>hi)return {field:id,msg:`${name}: ${bad?'quello che hai scritto non è un numero':s===''?'manca il valore':`«${s}» non va bene`}. Scrivi ${o.int?'un numero intero':'un numero'} da ${f(lo)} a ${f(hi)}${o.unit?' '+o.unit:''}${o.empty?', oppure lascia vuoto':''}.`}}return null}}
 function dlgClearInvalid(el){el.removeAttribute('aria-invalid');if(el.dataset.desc!==undefined){if(el.dataset.desc)el.setAttribute('aria-describedby',el.dataset.desc);else el.removeAttribute('aria-describedby');delete el.dataset.desc}}
 const overlayOpen=()=>!$('modalbg').hidden||!$('palettebg').hidden||!$('filepanel').hidden||!$('menu').hidden;
 const tip=$('tip');let tipTimer;
