@@ -108,7 +108,7 @@ const PROP_NAME={keep:'Proporzioni',mw:'Dimensioni',mh:'Dimensioni',mx:'Posizion
 function applyProp(key,el){const p=Dw.p,it=selItem(),v=el.type==='checkbox'?el.checked:el.value,n=num(v);
  const need=(lo,hi)=>{if(!(n>=lo&&n<=hi))throw Error(`Scrivi un numero tra ${fmtInt(lo)} e ${fmtInt(hi)}`);return n};
  if(selIds().length>1){applyMulti(key,v,need);return}
- if(!it){if(key==='preset'){const s=SHEETS.find(x=>x[0]===v);if(s){p.w=s[2];p.h=s[3]}}else if(key==='sw_')p.w=Math.round(need(16,10000));else if(key==='sh_')p.h=Math.round(need(16,10000));else if(key==='bg')p.bg=v;else if(key==='bgNone')p.bg=v?'none':'#ffffff';else if(key==='desc')p.desc=v;else if(key==='tcolor')setInk('color',v);else if(key==='tsize')setInk(Dw.tool,Math.round(need(1,2000)));return}
+ if(!it){if(key==='preset'){const s=SHEETS.find(x=>x[0]===v);if(s){p.w=s[2];p.h=s[3]}}else if(key==='sw_')p.w=Math.round(need(16,10000));else if(key==='sh_')p.h=Math.round(need(16,10000));else if(key==='bg')p.bg=v;else if(key==='bgNone')p.bg=v?'none':'#ffffff';else if(key==='desc')p.desc=v;else if(key==='tcolor')setInk('color',v);else if(key==='tsize')setInk(Dw.tool,Math.round(need(1,2000)));else if(key==='tmode')setEraseMode(v);return}
  if(key.startsWith('adj.')){it.adj={...it.adj,[key.slice(4)]:Number(v)};return}
  if(applyStyleProp(it,key,v,need))return;
  if(/^n(x|y|type|closed|ix|iy|ox|oy)$/.test(key)){applyNodeProp(it,key,v,need);return}

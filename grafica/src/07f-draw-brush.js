@@ -1,7 +1,8 @@
 // Matita, pennello e gomma. La matita leviga il tratto a mano libera in un tracciato con il contorno; il pennello segue
 // la pressione della penna (pointer events) e salva il tratto come contorno pieno di un tracciato, così resta vettoriale
 // nell'SVG: la linea centrale con le pressioni resta in brush, e cambiando lo spessore il contorno si rifà. La gomma
-// toglie i tratti che tocca. Da tastiera il cursore del foglio disegna: Spazio abbassa e alza la matita.
+// taglia i tratti dove passa, oppure toglie i tratti interi. Da tastiera il cursore del foglio disegna e cancella: Spazio
+// abbassa e alza la matita, il pennello o la gomma.
 $$('svg defs')[0].insertAdjacentHTML('beforeend',`<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></symbol>
 <symbol id="i-brush" viewBox="0 0 24 24"><path d="M20 4c-3 1-8 6-10 9l2 2c3-2 8-7 9-10z"/><path d="M9 14c-3 0-4 2-4 4s-1 2-2 2c3 1 8 0 8-4z"/></symbol>
 <symbol id="i-eraser" viewBox="0 0 24 24"><path d="M4 16l9-10 7 7-7 7H8z"/><path d="M9 11l6 6M8 20h12"/></symbol>
@@ -90,26 +91,94 @@ const drawTool=tool=>({sel:'box',
   const c=cursorKey(e);if(!c)return false;if(ink.kb)ink.pts.push([c.x,c.y,ink.kp]);announce(curSay(c));renderOverlay();return true},
  overlay(k){return liveSvg(k)+cursorSvg(k)}});
 TOOLS.pencil=drawTool('pencil');TOOLS.brush=drawTool('brush');
-// Gomma: toglie i tratti di matita e di pennello che tocca, non le forme e non gli oggetti bloccati. Una passata è un
-// passo solo da annullare.
-const er={drag:null,hover:null};
-function hitStroke(it,pt,r){const P=unrot(it,pt),near=(a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=L?clamp(((P.x-a[0])*dx+(P.y-a[1])*dy)/L,0,1):0;return Math.hypot(a[0]+t*dx-P.x,a[1]+t*dy-P.y)};let inside=false;
- for(const poly of flatten(it,3))for(let i=1;i<poly.length;i++){const a=poly[i-1],b=poly[i];if(near(a,b)<=r+it.sw/2)return true;if(it.fill!=='none'&&(a[1]>P.y)!==(b[1]>P.y)&&P.x<a[0]+(P.y-a[1])*(b[0]-a[0])/(b[1]-a[1]))inside=!inside}return inside}
-const strokesAt=(pt,r)=>Dw.p.items.filter(it=>it.kind==='path'&&it.tool&&!it.hidden&&!it.lock&&hitStroke(it,pt,r));
+// Gomma: vale per i tratti di matita e di pennello, non per le forme, le immagini, i testi e gli oggetti bloccati. Due
+// modi, nelle proprietà dello strumento: «parte del tratto» (il predefinito) taglia i tratti dove passa e lascia i pezzi
+// come oggetti a sé; «tratti interi» toglie ogni tratto che tocca. Una passata è un passo solo da annullare.
+// Tagliando, durante la passata non si calcola niente: la scia si vede come maschera sui soli tratti toccati, e il taglio
+// vero si fa una volta, al rilascio.
+const er={drag:null,hover:null,kb:false};
+const eraseCut=()=>prefs.drawErase!=='whole';
+function setEraseMode(m){prefs.drawErase=m;savePrefs();if(Dw.tool==='eraser')renderProps();refreshToggles();announce(m==='whole'?'Gomma: toglie i tratti interi che tocca':'Gomma: cancella solo la parte del tratto su cui passa')}
+const erasable=it=>it.kind==='path'&&it.tool&&!it.hidden&&!it.lock&&!it.clipOf;
+// Riquadro di un tratto nel foglio, con il contorno e la rotazione: scarta in fretta i tratti lontani dalla gomma.
+function eraseBox(it){const b=box(it),m=(it.sw||0)/2;if(!it.rot)return {x0:b.x-m,y0:b.y-m,x1:b.x+b.w+m,y1:b.y+b.h+m};const r=Math.hypot(b.w,b.h)/2+m,cx=b.x+b.w/2,cy=b.y+b.h/2;return {x0:cx-r,y0:cy-r,x1:cx+r,y1:cy+r}}
+const eraseNear=(B,x,y,r)=>x>=B.x0-r&&x<=B.x1+r&&y>=B.y0-r&&y<=B.y1+r;
+function hitStroke(it,pt,r,polys=flatten(it,3)){const P=unrot(it,pt),near=(a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=L?clamp(((P.x-a[0])*dx+(P.y-a[1])*dy)/L,0,1):0;return Math.hypot(a[0]+t*dx-P.x,a[1]+t*dy-P.y)};let inside=false;
+ for(const poly of polys)for(let i=1;i<poly.length;i++){const a=poly[i-1],b=poly[i];if(near(a,b)<=r+it.sw/2)return true;if(it.fill!=='none'&&(a[1]>P.y)!==(b[1]>P.y)&&P.x<a[0]+(P.y-a[1])*(b[0]-a[0])/(b[1]-a[1]))inside=!inside}return inside}
+const strokesAt=(pt,r)=>Dw.p.items.filter(it=>erasable(it)&&eraseNear(eraseBox(it),pt.x,pt.y,r)&&hitStroke(it,pt,r));
+// Una spezzata passa a meno di r dalla scia? Si misura dai lati, non solo dai punti: un tratto dritto ha due punti soli.
+// I punti della scia distano al più un terzo del raggio, quindi basta guardarli contro ogni lato.
+// Al rilascio la distanza dalla scia si chiede migliaia di volte: una griglia la rende veloce. Ogni lato della scia sta
+// nelle celle che il suo riquadro tocca e un punto guarda solo le nove celle intorno. Le celle sono larghe c, la distanza
+// più grande che serve confrontare: oltre, basta sapere che è grande.
+function sweepIndex(S,c){const G=new Map(),at=(i,j)=>i+','+j;S.forEach((a,n)=>{const b=S[n+1]||a;for(let i=Math.floor(Math.min(a[0],b[0])/c);i<=Math.floor(Math.max(a[0],b[0])/c);i++)for(let j=Math.floor(Math.min(a[1],b[1])/c);j<=Math.floor(Math.max(a[1],b[1])/c);j++){const k=at(i,j);(G.get(k)||G.set(k,[]).get(k)).push(n)}});
+ return (x,y)=>{const i=Math.floor(x/c),j=Math.floor(y/c);let m=Infinity;for(let di=-1;di<2;di++)for(let dj=-1;dj<2;dj++)for(const n of G.get(at(i+di,j+dj))||[]){const a=S[n],b=S[n+1]||a,dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=L?clamp(((x-a[0])*dx+(y-a[1])*dy)/L,0,1):0,d=Math.hypot(a[0]+t*dx-x,a[1]+t*dy-y);if(d<m)m=d}return m}}
+const sweepNear=(poly,S,r)=>poly.some((a,i)=>{const b=poly[i+1]||a,dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy;return S.some(([x,y])=>{const t=L?clamp(((x-a[0])*dx+(y-a[1])*dy)/L,0,1):0;return Math.hypot(a[0]+t*dx-x,a[1]+t*dy-y)<=r})});
+// Pennellata: la linea centrale, resa fitta perché anche un tratto dritto di due punti si tagli nel mezzo, si interrompe
+// dove entra nella scia (il punto esatto per bisezione). Ogni capo tagliato arretra di mezzo spessore, così l'estremità
+// tonda finisce sul bordo della gomma. Restituisce i pezzi in coordinate del foglio, o null se la scia non la tocca.
+function eraseBrush(it,S,R,dist){const B=it.brush,hw=p=>Math.max(.3,B.size/2*(.25+.75*p)),mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t],st=Math.max(.5,R/3),out=q=>dist(q[0],q[1])>R;
+ const P=[];B.pts.forEach(([x,y,p],i)=>{const q=rotPt(it,it.x+x,it.y+y),c=[q.x,q.y,p],a=P.at(-1);if(a){const n=Math.ceil(Math.hypot(c[0]-a[0],c[1]-a[1])/st);for(let k=1;k<n;k++)P.push(mix(a,c,k/n))}P.push(c)});
+ const edge=(a,b)=>{let lo=0,hi=1;for(let k=0;k<12;k++){const m=(lo+hi)/2;if(out(mix(a,b,m)))lo=m;else hi=m}return mix(a,b,lo)},runs=[];let cur=null,cut=false;
+ P.forEach((q,i)=>{if(out(q)){if(!cur){cur={pts:i?[edge(q,P[i-1])]:[],head:i>0};runs.push(cur)}cur.pts.push(q)}else{cut=true;if(cur){cur.pts.push(edge(P[i-1],q));cur.tail=true;cur=null}}});
+ if(!cut)return null;
+ // Il capo arretra finché tutto il cerchio dell'estremità sta fuori dalla scia: vale anche se la gomma passa di sbieco.
+ const clear=q=>dist(q[0],q[1])>=R+hw(q[2]),trim=pts=>{const j=pts.findIndex(clear);if(j<1)return j<0?null:pts;let lo=0,hi=1;for(let k=0;k<12;k++){const m=(lo+hi)/2;if(clear(mix(pts[j-1],pts[j],m)))hi=m;else lo=m}return [mix(pts[j-1],pts[j],hi),...pts.slice(j)]};
+ return runs.map(r=>{let p=r.pts;if(r.head)p=trim(p);if(p&&r.tail)p=trim(p.reverse())?.reverse();return p}).filter(p=>p&&p.length>1)}
+// Tratto di matita: la scia allargata di mezzo spessore taglia le curve come «sottrai» con una linea, e i tratti fuori
+// restano curve uguali a prima. Null se la scia non lo tocca, oppure le parti che restano, in coordinate del foglio.
+function erasePencil(it,S,R,dist){const r=R+(it.sw||0)/2,subs=drawSheetSubs(it,true);if(!flatten({x:0,y:0,subs},3).some(p=>sweepNear(p,S,R)))return null;
+ return boolClipOpen(subs,[brushPoly(S.map(([x,y])=>[x,y,1]),2*r)],(x,y)=>dist(x,y)>r)}
+// Un tratto dopo la passata: i pezzi come oggetti (con lo stile, il gruppo e l'ordine del tratto), oppure null se la scia
+// non lo tocca. Un tratto senza linea centrale o con parti chiuse, perché modificato a mano nei nodi, si toglie intero.
+function eraseOne(it,S,R,dist){if(it.brush?.pts?.length){const runs=eraseBrush(it,S,R,dist);return runs&&runs.map(pts=>{const o=structuredClone(it);Object.assign(o,{x:0,y:0,w:0,h:0,rot:0,subs:[],brush:{...it.brush,pts:rdp(pts,it.brush.fit||.35,it.brush.size/2).map(([x,y,p])=>[n2(x),n2(y),Math.round(p*100)/100])}});brushOutline(o);return o})}
+ if(it.tool==='pencil'&&it.subs.every(s=>!s.closed)){const subs=erasePencil(it,S,R,dist);return subs&&subs.map(s=>normPath(Object.assign(structuredClone(it),{x:0,y:0,w:0,h:0,rot:0,subs:[s]})))}
+ return 'whole'}
+// I pezzi di «Pennellata 3» si chiamano «Pennellata 3a», «3b»…; un nome che non finisce con un numero prende « a», « b».
+function erasePieceName(base,i,used){for(let k=i;;k++){const l=String.fromCharCode(97+k%26)+(k>=26?Math.floor(k/26):''),n=/\d$/.test(base)?base+l:base+' '+l;if(!used.has(n)){used.add(n);return n}}}
+// La passata: la scia è una spezzata con i punti ad almeno un terzo del raggio l'uno dall'altro; i tratti toccati si
+// tengono da parte con le loro spezzate, calcolate una volta sola.
+function eraseStart(pt){er.drag={sweep:[],r:inkSize('eraser')/2,hit:new Set(),wrapped:new Set(),flat:new Map()};eraseAdd(pt)}
+function eraseAdd(pt,every){const d=er.drag,S=d.sweep,l=S.at(-1);if(l&&(every?pt.x===l[0]&&pt.y===l[1]:Math.hypot(pt.x-l[0],pt.y-l[1])<d.r/3))return;S.push([pt.x,pt.y]);
+ for(const it of Dw.p.items)if(!d.hit.has(it.id)&&erasable(it)&&eraseNear(eraseBox(it),pt.x,pt.y,d.r)){let f=d.flat.get(it.id);if(!f)d.flat.set(it.id,f=flatten(it,3));if(hitStroke(it,pt,d.r,f))d.hit.add(it.id)}erasePreview()}
+// Anteprima: i tratti toccati entrano in un gruppo con una maschera che nasconde la scia; si aggiorna solo la scia.
+function erasePreview(){const d=er.drag,S=d.sweep;let m=sheet.querySelector('#er-mask');
+ if(!m){sheet.insertAdjacentHTML('afterbegin',`<defs><mask id="er-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="${Dw.p.w}" height="${Dw.p.h}"><rect width="${Dw.p.w}" height="${Dw.p.h}" fill="#fff"/><path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round"/></mask></defs>`);m=sheet.querySelector('#er-mask')}
+ const path=m.querySelector('path');path.setAttribute('stroke-width',n2(2*d.r));path.setAttribute('d','M'+S.map(p=>n2(p[0])+' '+n2(p[1])).join('L')+(S.length<2?'h.01':''));
+ for(const id of d.hit)if(!d.wrapped.has(id)){const el=sheet.querySelector(`[data-id="${id}"]`);if(!el)continue;const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.setAttribute('mask','url(#er-mask)');el.replaceWith(g);g.append(el);d.wrapped.add(id)}}
+function eraseCancel(){const d=er.drag;er.drag=null;er.kb=false;if(d?.wrapped.size||sheet.querySelector('#er-mask'))renderSheet()}
+// Al rilascio: ogni tratto toccato si sostituisce, al suo posto nell'ordine dei livelli, con i pezzi che restano.
+function eraseCommit(){const d=er.drag;er.drag=null;er.kb=false;if(!d)return;const S=d.sweep,R=d.r,res=new Map(),say=[],used=new Set(Dw.p.items.map(x=>x.name)),hit=Dw.p.items.filter(x=>d.hit.has(x.id)),
+  dist=sweepIndex(S,R+Math.max(1,...hit.map(x=>x.brush?x.brush.size/2:(x.sw||0)/2))+1);
+ for(const it of hit){const r=eraseOne(it,S,R,dist);if(!r)continue;
+  const g=it.tool==='brush'?'a':'o';
+  if(r==='whole'){res.set(it.id,[]);say.push(`«${it.name}» cancellat${g} inter${g}, perché i suoi nodi sono stati modificati a mano`);continue}
+  res.set(it.id,r);if(!r.length)say.push(`«${it.name}» cancellat${g} del tutto`);else if(r.length===1){r[0].id=it.id;say.push(`«${it.name}» accorciat${g}`)}
+  else{used.delete(it.name);r.forEach((o,i)=>{o.id=i?uid():it.id;o.name=erasePieceName(it.name,i,used)});say.push(`«${it.name}» tagliat${g} in ${r.length}: ${namesOf(r)}`)}}
+ if(!res.size){renderSheet();announce(d.hit.size?`La gomma ha sfiorato ${namesOf(Dw.p.items.filter(x=>d.hit.has(x.id)))} senza passare sulla linea del tratto: niente da tagliare`:'Nessun tratto sotto la gomma');return}
+ const gone=new Set([...res].filter(([,r])=>!r.length).map(([id])=>id)),orig=Dw.p.items.filter(x=>res.has(x.id));if(Dw.multi?.ids?.some(id=>gone.has(id))||gone.has(Dw.sel))pick([],null);
+ editD(orig.length===1?'Gomma su '+orig[0].name:`Gomma su ${orig.length} tratti`,p=>{p.items=p.items.flatMap(x=>res.get(x.id)??[x])},{props:true});announce('Gomma: '+say.join('; '))}
+// Modo «tratti interi»: come prima, i tratti toccati spariscono mentre si passa.
 function eraseAt(pt){const gone=strokesAt(pt,inkSize('eraser')/2);if(!gone.length)return;const ids=new Set(gone.map(x=>x.id));Dw.p.items=Dw.p.items.filter(x=>!ids.has(x.id));if(ids.has(Dw.sel))pick([],null);er.drag.gone.push(...gone);renderSheet()}
 function eraseEnd(gone){if(!gone.length)return;settleD(gone.length>1?`Cancella ${gone.length} tratti`:'Cancella '+gone[0].name,{props:true});announce(`Cancellat${gone.length>1?`i ${gone.length} tratti`:'o il tratto'}: ${namesOf(gone)}`)}
 TOOLS.eraser={sel:'none',
- reset(){er.drag=null},
- down(e,pt){curFromPointer(pt);er.drag={gone:[]};eraseAt(pt);return true},
- move(e,pt){er.hover=pt;if(er.drag)for(const c of coalesced(e))eraseAt(toSheet(c));renderOverlay()},
- up(){const d=er.drag;er.drag=null;if(d)eraseEnd(d.gone)},
- key(e){if(e.key===' '){e.preventDefault();curShow();er.drag={gone:[]};eraseAt(Dw.cur);const g=er.drag.gone;er.drag=null;if(g.length)eraseEnd(g);else announce('Nessun tratto sotto il cursore');return true}
-  if(e.key==='Escape'){e.preventDefault();setTool('select');return true}
-  const c=cursorKey(e);if(!c)return false;const under=strokesAt(c,inkSize('eraser')/2);announce(curSay(c)+(under.length?`: sopra ${namesOf(under)}, Spazio per cancellare`:''));renderOverlay();return true},
+ reset(){if(er.drag?.sweep)eraseCancel();er.drag=null;er.kb=false},
+ down(e,pt){curFromPointer(pt);if(eraseCut())eraseStart(pt);else{er.drag={gone:[]};eraseAt(pt)}return true},
+ move(e,pt){er.hover=pt;if(er.drag&&!er.kb)for(const c of coalesced(e)){const q=toSheet(c);if(er.drag.sweep)eraseAdd(q);else eraseAt(q)}renderOverlay()},
+ up(){const d=er.drag;if(!d||er.kb)return;if(d.sweep)eraseCommit();else{er.drag=null;eraseEnd(d.gone)}},
+ key(e){const R=inkSize('eraser')/2;
+  if(e.key===' '){e.preventDefault();curShow();
+   if(!eraseCut()){er.drag={gone:[]};eraseAt(Dw.cur);const g=er.drag.gone;er.drag=null;if(g.length)eraseEnd(g);else announce('Nessun tratto sotto il cursore');return true}
+   if(er.kb){eraseCommit();return true}eraseStart(Dw.cur);er.kb=true;announce(`Gomma giù a ${curSay(Dw.cur)}${er.drag.hit.size?`, sopra ${namesOf(Dw.p.items.filter(x=>er.drag.hit.has(x.id)))}`:''}: muovi il cursore per cancellare, Spazio per finire, Esc per annullare`);renderOverlay();return true}
+  if(e.key==='Escape'){e.preventDefault();if(er.kb){eraseCancel();announce('Gomma annullata');renderOverlay()}else setTool('select');return true}
+  const c=cursorKey(e);if(!c)return false;let say=curSay(c);
+  if(er.kb){const before=new Set(er.drag.hit);eraseAdd(c,true);const added=Dw.p.items.filter(x=>er.drag.hit.has(x.id)&&!before.has(x.id));if(added.length)say+=`, tocca ${namesOf(added)}`}
+  else{const under=strokesAt(c,R);if(under.length)say+=`: sopra ${namesOf(under)}, Spazio per ${eraseCut()?'abbassare la gomma':'cancellare'}`}
+  announce(say);renderOverlay();return true},
  overlay(k){const h=Dw.cur.on?Dw.cur:er.hover;return h?`<circle class="k-cur" cx="${n2(h.x)}" cy="${n2(h.y)}" r="${n2(inkSize('eraser')/2)}" stroke-width="${n2(1.5/k)}"/>`:''}};
 sheetWrap.addEventListener('pointerleave',()=>{if(Dw.tool==='eraser'&&!er.drag){er.hover=null;renderOverlay()}});
 // Colore e spessore dello strumento nelle proprietà, quando non c'è niente di scelto.
-function toolProps(){const t=Dw.tool;if(!['pen','pencil','brush','eraser'].includes(t))return '';return `<h3>${esc(TOOL_INFO[t][0])}</h3>`+(t==='eraser'?fld('tsize','Dimensione della gomma (px)',inkSize('eraser')):colorFld('tcolor','Colore',inkColor())+fld('tsize',t==='brush'?'Spessore del pennello (px)':'Spessore (px)',inkSize(t)))
+function toolProps(){const t=Dw.tool;if(!['pen','pencil','brush','eraser'].includes(t))return '';return `<h3>${esc(TOOL_INFO[t][0])}</h3>`+(t==='eraser'?selFld('tmode','Che cosa cancella',eraseCut()?'cut':'whole',[['cut','La parte del tratto su cui passa'],['whole','I tratti interi che tocca']])+fld('tsize','Dimensione della gomma (px)',inkSize('eraser'))+'<small class="hint">Tagliando, i pezzi che restano diventano tratti a sé, con lo stesso stile; la passata si annulla con Ctrl+Z.</small>':colorFld('tcolor','Colore',inkColor())+fld('tsize',t==='brush'?'Spessore del pennello (px)':'Spessore (px)',inkSize(t)))
  +(t==='brush'?'<small class="hint">Con la penna di una tavoletta lo spessore segue la pressione; disegnando da tastiera i numeri da 1 a 9 la portano dal 10 al 90 per cento, Maiusc+0 al massimo.</small>':'')+'<h3>Foglio</h3>'}
 // Cambiando colore o spessore di un tratto, lo strumento li ricorda per il tratto successivo.
 function strokeProp(it,key,v,need){if(key==='bsize'){it.brush.size=need(1,2000);brushOutline(it);setInk('brush',it.brush.size)}else if(key==='fill'&&it.tool==='brush'||key==='stroke'&&it.tool!=='brush')setInk('color',v);else if(key==='sw'&&it.tool==='pencil')setInk('pencil',num(v))}
