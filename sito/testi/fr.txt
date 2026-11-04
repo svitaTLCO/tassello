@@ -206,7 +206,7 @@ Le dessin, pour les publications, les stories, les bannières, les flyers et les
 
 [disegno.elenco]
           <li>Feuilles aux formats d’aujourd’hui ou à la taille de votre choix, avec un fond plein ou transparent</li>
-          <li>Plume avec édition des nœuds, crayon, pinceau sensible à la pression et gomme&nbsp;; unir et soustraire formes et lignes, couper avec une ligne, simplifier les tracés</li>
+          <li>Plume avec édition des nœuds, crayon, pinceau sensible à la pression et gomme qui coupe les traits&nbsp;; unir et soustraire formes et lignes, couper avec une ligne, simplifier les tracés</li>
           <li>Formes, flèches, bulles et textes, même le long d’une courbe, convertibles en tracés, avec dégradés, pointillés, ombres et fusion</li>
           <li>Images avec les réglages, les masques et le détourage d’Immagini, et l’écrêtage dans une forme</li>
           <li>Sélection multiple, groupes, calques, alignement, répartition et repères intelligents</li>
@@ -220,7 +220,7 @@ Télécharger Tassello Grafica
 Essayer Tassello Grafica dans le navigateur
 
 [grafica.limiti]
-Un fichier d’environ 620&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: Immagini traite une photo à la fois, n’ouvre les photos HEIC que si le système sait décoder le HEVC et ouvre l’aperçu de l’appareil dans les fichiers RAW&nbsp;; le détourage utilise des algorithmes classiques, donc un sujet qui touche les bords, des cheveux fins ou du verre demandent un cadre ou quelques traits&nbsp;; pour convertir les textes en tracés, il faut l’autorisation de lire les polices installées ou le fichier de la police. Conservez toujours une copie des originaux.
+Un fichier d’environ 630&nbsp;Ko pour Chrome et Edge récents, même hors ligne. Il couvre le travail de base&nbsp;: Immagini traite une photo à la fois, n’ouvre les photos HEIC que si le système sait décoder le HEVC et ouvre l’aperçu de l’appareil dans les fichiers RAW&nbsp;; le détourage utilise des algorithmes classiques, donc un sujet qui touche les bords, des cheveux fins ou du verre demandent un cadre ou quelques traits&nbsp;; pour convertir les textes en tracés, il faut l’autorisation de lire les polices installées ou le fichier de la police. Conservez toujours une copie des originaux.
 
 [accessibilita.titolo]
 Accessibilité&nbsp;: la condition, pas un extra
@@ -391,7 +391,7 @@ Ce qu’elle couvre
     <ul>
       <li>Tassello Ufficio 1.10.0&nbsp;: Testo, Calcolo et Impagina</li>
       <li>Tassello Media 1.4.0&nbsp;: Audio et Video</li>
-      <li>Tassello Grafica 1.3.0&nbsp;: Immagini et Disegno</li>
+      <li>Tassello Grafica 1.3.1&nbsp;: Immagini et Disegno</li>
       <li>ce site et la page de vérification</li>
     </ul>
     <p>Elle s’applique à Chrome ou Edge récents sur un ordinateur&nbsp;; les essais ont été faits sous Windows. Les tablettes, les téléphones, le Mac avec VoiceOver et les autres navigateurs ne sont pas encore pris en charge. L’interface des applications est en italien.</p>
@@ -442,7 +442,7 @@ Signalements
     <p>Si quelque chose ne fonctionne pas avec la technologie que vous utilisez, signalez-le avec le formulaire <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Problème d’accessibilité</a>&nbsp;: pour nous c’est un défaut à corriger, et il passe en premier. La déclaration complète se trouve dans le <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">dépôt</a>.</p>
 
 [dichiarazione.data]
-Déclaration rédigée le 29 octobre 2026&nbsp;; nous la mettons à jour à chaque nouvelle version.
+Déclaration rédigée le 29 octobre 2026 et mise à jour le 4 novembre 2026&nbsp;; nous la mettons à jour à chaque nouvelle version.
 
 [js.controllo]
 Vérification en cours…

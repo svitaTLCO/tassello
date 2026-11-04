@@ -205,7 +205,7 @@ The drawing tool, for posts, stories, banners, flyers and icons.
 
 [disegno.elenco]
           <li>Canvases in today’s formats or any size you like, with a solid or transparent background</li>
-          <li>A pen with node editing, pencil, pressure-sensitive brush and eraser; combine and subtract shapes and lines, cut with a line, simplify paths</li>
+          <li>A pen with node editing, pencil, pressure-sensitive brush and an eraser that cuts strokes; combine and subtract shapes and lines, cut with a line, simplify paths</li>
           <li>Shapes, arrows, speech bubbles and text, even along a curve, convertible to paths, with gradients, dashes, shadows and blending</li>
           <li>Images with the adjustments, masks and background removal from Immagini, and clipping inside a shape</li>
           <li>Multiple selection, groups, layers, alignment, distribution and smart guides</li>
@@ -219,7 +219,7 @@ Download Tassello Grafica
 Try Tassello Grafica in your browser
 
 [grafica.limiti]
-A file of about 620 KB for recent Chrome and Edge, even offline. It covers the basics: Immagini works on one photo at a time, opens HEIC photos only where the system can decode HEVC and opens the camera’s preview of RAW files; background removal uses classic algorithms, so subjects touching the edges, fine hair or glass need a box or a few strokes; converting text to paths needs permission to read installed fonts, or the font file. Always keep a copy of your originals.
+A file of about 630 KB for recent Chrome and Edge, even offline. It covers the basics: Immagini works on one photo at a time, opens HEIC photos only where the system can decode HEVC and opens the camera’s preview of RAW files; background removal uses classic algorithms, so subjects touching the edges, fine hair or glass need a box or a few strokes; converting text to paths needs permission to read installed fonts, or the font file. Always keep a copy of your originals.
 
 [accessibilita.titolo]
 Accessibility: the requirement, not an extra
@@ -390,7 +390,7 @@ What it covers
     <ul>
       <li>Tassello Ufficio 1.10.0: Testo, Calcolo and Impagina</li>
       <li>Tassello Media 1.4.0: Audio and Video</li>
-      <li>Tassello Grafica 1.3.0: Immagini and Disegno</li>
+      <li>Tassello Grafica 1.3.1: Immagini and Disegno</li>
       <li>this website and the verification page</li>
     </ul>
     <p>It applies to recent Chrome or Edge on a computer; testing was done on Windows. Tablets, phones, the Mac with VoiceOver and other browsers are not supported yet. The app interface is in Italian.</p>
@@ -441,7 +441,7 @@ Feedback
     <p>If something does not work with the technology you use, report it with the <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Accessibility problem form</a>: we treat it as a bug and it comes first. The full statement is in the <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">repository</a>.</p>
 
 [dichiarazione.data]
-Statement written on 29 October 2026; we update it with every release.
+Statement written on 29 October 2026 and updated on 4 November 2026; we update it with every release.
 
 [js.controllo]
 Checking…

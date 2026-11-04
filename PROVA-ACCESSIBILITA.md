@@ -57,7 +57,7 @@ Per passare da un'app all'altra dello stesso file:
 
 ## Le novità di questa versione
 
-Con Tassello Ufficio 1.10.0, Tassello Grafica 1.3.0 e Tassello Media 1.4.0 ci sono comandi nuovi pensati proprio per i lavori che di solito si fanno guardando. Per sapere quale versione hai: Alt+Q, scrivi «Informazioni» e premi Invio; il numero è nella prima riga.
+Con Tassello Ufficio 1.10.0, Tassello Grafica 1.3.1 e Tassello Media 1.4.0 ci sono comandi nuovi pensati proprio per i lavori che di solito si fanno guardando. Per sapere quale versione hai: Alt+Q, scrivi «Informazioni» e premi Invio; il numero è nella prima riga.
 
 Le lettere hanno lo stesso significato in tutte le app, sempre con **Alt+Maiusc**:
 
@@ -77,7 +77,7 @@ Le lettere hanno lo stesso significato in tutte le app, sempre con **Alt+Maiusc*
 | Audio | Alt+Maiusc+D descrive il brano; Alt+Maiusc+L legge i livelli; Alt+Maiusc+O fa sentire prima e dopo l'ultimo effetto e dice che cosa è cambiato. |
 | Video | Alt+Maiusc+D descrive il fotogramma (luce, colori, zone); Alt+Maiusc+C descrive la clip (scene, luce, colori, movimento, parlato); sull'indicatore Ctrl+frecce su e giù vanno ai cambi di scena, Ctrl+frecce sinistra e destra alle pause del parlato; Maiusc+Spazio riproduce solo l'elemento scelto. |
 | Immagini | Alt+Maiusc+L descrive la luce (due volte: l'istogramma da percorrere con le frecce e da ascoltare); Alt+Maiusc+D zone, colori e dominante; Alt+Maiusc+O il confronto con l'originale; X lo strumento Esplora, un cursore che dice che cosa c'è sotto. Quando lasci un cursore senti che cosa è cambiato. |
-| Disegno | Alt+Maiusc+R i dintorni dell'oggetto scelto, con le sovrapposizioni dette anche mentre lo sposti; Alt+Maiusc+D la composizione del foglio (due volte: la descrizione completa); «Ascolta la forma» (con Alt+Q) fa sentire il contorno come toni; nell'elenco dei livelli Ctrl+frecce e Ctrl+Spazio scelgono più oggetti anche non vicini. |
+| Disegno | Alt+Maiusc+R i dintorni dell'oggetto scelto, con le sovrapposizioni dette anche mentre lo sposti; Alt+Maiusc+D la composizione del foglio (due volte: la descrizione completa); «Ascolta la forma» (con Alt+Q) fa sentire il contorno come toni; nell'elenco dei livelli Ctrl+frecce e Ctrl+Spazio scelgono più oggetti anche non vicini. Con la Gomma (E) Spazio la abbassa e la alza e le frecce cancellano lungo il percorso: i tratti si tagliano dove passi e i pezzi restano come tratti a sé; nelle proprietà della gomma puoi scegliere di togliere invece i tratti interi. |
 
 Nei compiti qui sotto trovi, dove servono, le righe **Prova anche**: dicci se questi comandi ti aiutano davvero e che cosa ti manca ancora.
 

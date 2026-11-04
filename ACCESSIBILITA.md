@@ -8,12 +8,12 @@ Per Tassello l'accessibilità è la condizione per distribuire uno strumento, no
 
 - **Tassello Ufficio 1.10.0**: Testo, Calcolo e Impagina;
 - **Tassello Media 1.4.0**: Audio e Video;
-- **Tassello Grafica 1.3.0**: Immagini e Disegno;
+- **Tassello Grafica 1.3.1**: Immagini e Disegno;
 - il **sito** [svitatlco.github.io/tassello](https://svitatlco.github.io/tassello/) e la pagina **Verifica una copia**, in italiano, inglese, francese e spagnolo.
 
 Vale per **Chrome o Edge recenti su un computer**. Le prove sono state fatte su Windows; tablet, telefoni, il Mac con VoiceOver e gli altri browser non sono ancora supportati. L'interfaccia delle app è in italiano.
 
-Dichiarazione redatta il 29 ottobre 2026. La aggiorniamo a ogni nuova versione.
+Dichiarazione redatta il 29 ottobre 2026 e aggiornata il 4 novembre 2026. La aggiorniamo a ogni nuova versione.
 
 ## Stato di conformità
 
@@ -69,7 +69,7 @@ Tassello è un progetto libero e volontario, non un servizio pubblico: questa di
 
 ## In English
 
-This statement covers Tassello Ufficio 1.10.0, Tassello Media 1.4.0, Tassello Grafica 1.3.0, the website and the verification page, used with recent Chrome or Edge on a computer (tested on Windows). The app interface is in Italian. Written on 29 October 2026 and updated with every release.
+This statement covers Tassello Ufficio 1.10.0, Tassello Media 1.4.0, Tassello Grafica 1.3.1, the website and the verification page, used with recent Chrome or Edge on a computer (tested on Windows). The app interface is in Italian. Written on 29 October 2026, updated on 4 November 2026, and updated with every release.
 
 **Status: partially conformant with WCAG 2.2 level AA.** An evaluation with axe-core 4.14 and custom checks on about 1,000 states of the seven apps and the website (four themes and forced colours, repeated after fixes), real-browser tests that read the exact screen reader announcements, and a task-by-task analysis of visual work found no remaining A or AA failures except the known limitations below. Conformance is not yet confirmed with real screen readers: a group of blind testers is working through the [testing guide](PROVA-ACCESSIBILITA.md).
 
