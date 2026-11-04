@@ -389,7 +389,7 @@ Ce qu’elle couvre
 
 [dichiarazione.ambito]
     <ul>
-      <li>Tassello Ufficio 1.10.0&nbsp;: Testo, Calcolo et Impagina</li>
+      <li>Tassello Ufficio 1.10.1&nbsp;: Testo, Calcolo et Impagina</li>
       <li>Tassello Media 1.4.0&nbsp;: Audio et Video</li>
       <li>Tassello Grafica 1.3.1&nbsp;: Immagini et Disegno</li>
       <li>ce site et la page de vérification</li>
@@ -430,7 +430,6 @@ Limites connues
 [dichiarazione.limiti]
     <ul>
       <li>Le comportement avec NVDA, JAWS et le Narrateur reste à confirmer, surtout pour les annonces réunies en une phrase et pour les zones interactives&nbsp;: la photo, l’histogramme, l’aperçu vidéo, la grille de Calcolo.</li>
-      <li>Certaines fenêtres de Tassello Ufficio corrigent une valeur hors limites sans dire quelle limite a été appliquée.</li>
       <li>Certaines tâches visuelles restent difficiles sans la vue&nbsp;: placer les blocs sur la grille dans Impagina, suivre le bord du détourage dans Immagini, explorer un dessin avec un curseur, entendre la lumière et la couleur avant et après dans Video. La vérification des clignotements ne détecte pas encore les éclairs sur une partie de l’écran ni les éclairs rouges.</li>
       <li>Les descriptions mesurent les pixels et le son, sans intelligence artificielle&nbsp;: elles ne reconnaissent ni les personnes ni les objets.</li>
     </ul>

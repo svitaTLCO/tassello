@@ -388,7 +388,7 @@ A qué se refiere
 
 [dichiarazione.ambito]
     <ul>
-      <li>Tassello Ufficio 1.10.0: Testo, Calcolo e Impagina</li>
+      <li>Tassello Ufficio 1.10.1: Testo, Calcolo e Impagina</li>
       <li>Tassello Media 1.4.0: Audio y Video</li>
       <li>Tassello Grafica 1.3.1: Immagini y Disegno</li>
       <li>este sitio y la página de verificación</li>
@@ -429,7 +429,6 @@ Límites conocidos
 [dichiarazione.limiti]
     <ul>
       <li>El comportamiento con NVDA, JAWS y Narrador aún debe confirmarse, sobre todo para los avisos unidos en una frase y para las zonas interactivas: la foto, el histograma, la vista previa de vídeo, la cuadrícula de Calcolo.</li>
-      <li>Algunas ventanas de Tassello Ufficio corrigen un valor fuera de límites sin decir qué límite se ha usado.</li>
       <li>Algunas tareas visuales siguen siendo difíciles sin vista: colocar los marcos en la cuadrícula de Impagina, seguir el borde del recorte en Immagini, explorar un dibujo con un cursor, oír la luz y el color antes y después en Video. La comprobación de destellos aún no detecta los destellos en una parte de la pantalla ni los rojos.</li>
       <li>Las descripciones miden píxeles y sonido, sin inteligencia artificial: no reconocen personas ni objetos.</li>
     </ul>

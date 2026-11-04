@@ -57,7 +57,7 @@ Per passare da un'app all'altra dello stesso file:
 
 ## Le novità di questa versione
 
-Con Tassello Ufficio 1.10.0, Tassello Grafica 1.3.1 e Tassello Media 1.4.0 ci sono comandi nuovi pensati proprio per i lavori che di solito si fanno guardando. Per sapere quale versione hai: Alt+Q, scrivi «Informazioni» e premi Invio; il numero è nella prima riga.
+Con Tassello Ufficio 1.10.1, Tassello Grafica 1.3.1 e Tassello Media 1.4.0 ci sono comandi nuovi pensati proprio per i lavori che di solito si fanno guardando. Per sapere quale versione hai: Alt+Q, scrivi «Informazioni» e premi Invio; il numero è nella prima riga.
 
 Le lettere hanno lo stesso significato in tutte le app, sempre con **Alt+Maiusc**:
 
@@ -78,6 +78,8 @@ Le lettere hanno lo stesso significato in tutte le app, sempre con **Alt+Maiusc*
 | Video | Alt+Maiusc+D descrive il fotogramma (luce, colori, zone); Alt+Maiusc+C descrive la clip (scene, luce, colori, movimento, parlato); sull'indicatore Ctrl+frecce su e giù vanno ai cambi di scena, Ctrl+frecce sinistra e destra alle pause del parlato; Maiusc+Spazio riproduce solo l'elemento scelto. |
 | Immagini | Alt+Maiusc+L descrive la luce (due volte: l'istogramma da percorrere con le frecce e da ascoltare); Alt+Maiusc+D zone, colori e dominante; Alt+Maiusc+O il confronto con l'originale; X lo strumento Esplora, un cursore che dice che cosa c'è sotto. Quando lasci un cursore senti che cosa è cambiato. |
 | Disegno | Alt+Maiusc+R i dintorni dell'oggetto scelto, con le sovrapposizioni dette anche mentre lo sposti; Alt+Maiusc+D la composizione del foglio (due volte: la descrizione completa); «Ascolta la forma» (con Alt+Q) fa sentire il contorno come toni; nell'elenco dei livelli Ctrl+frecce e Ctrl+Spazio scelgono più oggetti anche non vicini. Con la Gomma (E) Spazio la abbassa e la alza e le frecce cancellano lungo il percorso: i tratti si tagliano dove passi e i pezzi restano come tratti a sé; nelle proprietà della gomma puoi scegliere di togliere invece i tratti interi. |
+
+Da Tassello Ufficio 1.10.1, se in una finestra di Testo o di Calcolo scrivi un numero che non va bene, la finestra non lo corregge più da sola: resta aperta, il fuoco torna sul campo e senti che cosa scrivere, per esempio «Righe di dati: «50» non va bene. Scrivi un numero intero da 1 a 40.» È il compito T4.
 
 Nei compiti qui sotto trovi, dove servono, le righe **Prova anche**: dicci se questi comandi ti aiutano davvero e che cosa ti manca ancora.
 
@@ -120,6 +122,14 @@ Domande: sai su quale pagina sei mentre leggi? Sai se un titolo è rimasto da so
 2. Premi Ctrl+P, scegli «Salva come PDF» e salva il file. Aprilo e leggilo.
 
 Domande: il PDF ha le pagine che ti aspettavi? La verifica ti ha detto qualcosa sull'aspetto del documento, o solo sulla struttura?
+
+**Compito T4: un numero sbagliato in una finestra.**
+
+1. Premi Alt+Q, scrivi «Inserisci tabella» e premi Invio. Nel campo «Righe di dati» scrivi 50 e premi Invio.
+2. Ascolta il messaggio. Poi scrivi 4 e premi Invio: la tabella si inserisce.
+3. Prova anche con Alt+Q e «Imposta pagina»: scrivi 12 come margine superiore, oppure una parola al posto del numero.
+
+Domande: hai sentito il messaggio subito, senza doverlo cercare? Ti ha detto che cosa scrivere? Il fuoco era sul campo da correggere?
 
 ### Calcolo (Tassello Ufficio)
 
