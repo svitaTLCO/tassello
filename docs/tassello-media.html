@@ -1095,7 +1095,7 @@ const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc
  v:[['Sull’indicatore di riproduzione',[['Un fotogramma indietro o avanti','← →'],['Un secondo indietro o avanti','Maiusc+← / Maiusc+→'],['Cinque secondi indietro o avanti','PgSu / PgGiù'],['Taglio precedente o successivo','↑ / ↓'],['Pausa precedente o successiva nel parlato','Ctrl+← / Ctrl+→'],['Cambio di scena precedente o successivo','Ctrl+↑ / Ctrl+↓'],['Inizio o fine del montaggio','Home / Fine'],['Riproduci o pausa','Spazio'],['Riproduci solo l’elemento scelto','Maiusc+Spazio'],['Ascolta 2 secondi prima o dopo l’indicatore','P / D'],['Indietro di cinque secondi, pausa, avanti veloce (L di nuovo raddoppia la velocità)','J / K / L'],['Dividi la clip all’indicatore','S'],['Taglia inizio o fine della clip all’indicatore','Q / W'],['Zoom avanti, indietro, tutto','+ / − / 0']]],['Nelle tracce',[['Elemento precedente o successivo','← →'],['Primo o ultimo elemento','Home / Fine'],['Sposta l’elemento di un secondo indietro o avanti: le clip attaccate in quella direzione si spostano insieme','Ctrl+← / Ctrl+→'],['Sposta l’elemento di un fotogramma','Ctrl+Maiusc+← / Ctrl+Maiusc+→'],['Modifica le proprietà','Invio o F2'],['Elimina l’elemento','Canc'],['Menu dell’elemento','Maiusc+F10'],['Riproduci solo l’elemento scelto','Maiusc+Spazio'],['Traccia sopra o sotto','↑ / ↓']]],['Nella raccolta',[['Scegli un file','↑ ↓'],['Aggiungi alla linea temporale (l’audio all’indicatore)','Invio'],['Inserisci all’indicatore','Maiusc+Invio'],['Menu del file','Maiusc+F10'],['Togli dalla raccolta','Canc']]],['Nelle proprietà',[['Applica il valore scritto','Invio'],['Torna alla linea temporale senza applicare','Esc']]]]};
 function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${isAudio()?'Audio':'Video'}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
-async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.15.1</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima e «Ascolta l’originale». Alt+Maiusc+D descrive il brano (tracce, regioni, spazi vuoti, sovrapposizioni e che cosa suona insieme), Alt+Maiusc+L legge i livelli: sulle tracce l’uscita del brano intorno all’indicatore, quanto lavora il limitatore e le tracce a confronto, nell’editor la selezione o il tratto intorno al cursore. Ogni effetto dice che cosa ha cambiato (volume percepito, picco, rumore di fondo), Normalizza dice anche da dove parte, e Alt+Maiusc+O fa sentire lo stesso tratto prima e dopo l’ultimo effetto. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli, lampeggiamenti pericolosi, sottotitoli vuoti e parlato senza sottotitoli. Alt+Maiusc+I dice che cosa c’è nell’istante, compresi l’audio della traccia audio e le transizioni in corso; Alt+Maiusc+D descrive il fotogramma (luce, contrasto, colori, zone, bande nere, differenza dal fotogramma prima) e Alt+Maiusc+C la clip (scene, luce, colori, movimento e parlato). Sull’indicatore Ctrl+frecce sinistra e destra vanno alle pause del parlato e Ctrl+frecce su e giù ai cambi di scena; un sottotitolo aggiunto con Ctrl+Alt+S comincia alla ripresa del parlato, e i sottotitoli vuoti si possono preparare dal parlato. Nelle Proprietà i colori si dicono a parole, con il contrasto tra testo e sfondo, e ogni clip può avere una descrizione scritta, che si legge con lei.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit con i metadati broadcast BWF, MP3 con i tag e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori; con un preset di consegna porta il brano a −23, −19, −16 o −14 LUFS e tiene il picco vero sotto −1 dBTP, poi dice nel report che cosa ha ottenuto. Converte più file in una volta, tiene take multiple con nota e comping a sezioni, automazione del volume e del bilanciamento, bus, punch fra due punti, de-esser, de-hum, de-click, limitatore e una catena «prepara la voce».</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Le descrizioni delle immagini sono misure dei pixel (luce, colori, zone, movimento, tagli tra le scene): non riconoscono persone, oggetti o scritte e non sostituiscono una descrizione fatta da una persona; i cambi di scena graduali (dissolvenze lente) possono sfuggire. Le pause del parlato si riconoscono dal volume, quindi una musica forte sotto la voce le nasconde. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.16.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima e «Ascolta l’originale». Alt+Maiusc+D descrive il brano (tracce, regioni, spazi vuoti, sovrapposizioni e che cosa suona insieme), Alt+Maiusc+L legge i livelli: sulle tracce l’uscita del brano intorno all’indicatore, quanto lavora il limitatore e le tracce a confronto, nell’editor la selezione o il tratto intorno al cursore. Ogni effetto dice che cosa ha cambiato (volume percepito, picco, rumore di fondo), Normalizza dice anche da dove parte, e Alt+Maiusc+O fa sentire lo stesso tratto prima e dopo l’ultimo effetto. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli, lampeggiamenti pericolosi, sottotitoli vuoti e parlato senza sottotitoli. Alt+Maiusc+I dice che cosa c’è nell’istante, compresi l’audio della traccia audio e le transizioni in corso; Alt+Maiusc+D descrive il fotogramma (luce, contrasto, colori, zone, bande nere, differenza dal fotogramma prima) e Alt+Maiusc+C la clip (scene, luce, colori, movimento e parlato). Sull’indicatore Ctrl+frecce sinistra e destra vanno alle pause del parlato e Ctrl+frecce su e giù ai cambi di scena; un sottotitolo aggiunto con Ctrl+Alt+S comincia alla ripresa del parlato, e i sottotitoli vuoti si possono preparare dal parlato. Nelle Proprietà i colori si dicono a parole, con il contrasto tra testo e sfondo, e ogni clip può avere una descrizione scritta, che si legge con lei.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit con i metadati broadcast BWF, MP3 con i tag e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori; con un preset di consegna porta il brano a −23, −19, −16 o −14 LUFS e tiene il picco vero sotto −1 dBTP, poi dice nel report che cosa ha ottenuto. Converte più file in una volta, tiene take multiple con nota e comping a sezioni, automazione di volume, bilanciamento, riverbero, bassi, alti e compressione, bus, punch fra due punti, de-esser, de-hum, de-click, limitatore e una catena «prepara la voce».</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Le descrizioni delle immagini sono misure dei pixel (luce, colori, zone, movimento, tagli tra le scene): non riconoscono persone, oggetti o scritte e non sostituiscono una descrizione fatta da una persona; i cambi di scena graduali (dissolvenze lente) possono sfuggire. Le pause del parlato si riconoscono dal volume, quindi una musica forte sotto la voce le nasconde. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
 // Aree raggiungibili con F6 e Maiusc+F6.
 let lastTrack='trk-main';
 function regions(){const l=[$('bar')];if(drawerName)l.push($('drawer'));const side=s=>panesOf(state.mode[0]).filter(id=>paneState(id).side===s).map(id=>{const st=paneState(id).st;return st==='open'?$(id):st==='tessera'?$(id+'Tes'):null});
@@ -2582,7 +2582,7 @@ async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.bu
   const markers=r.fmt.startsWith('wav')?deliveryMarkers(r.what,base,base+src.length,out.sampleRate):[];
   let blob,meta;
   if(r.fmt==='mp3'){status('Codifica MP3…');blob=await mp3Blob(out,bitrate/1000,tags,progress);meta='ID3v2.3 con titolo, autore e descrizione'}
-  else if(r.fmt.startsWith('wav')){const bex=r.bwf?{description:r.comment.trim()||tags.title,originator:r.artist.trim()||'Tassello Media',reference:name,date:new Date(),loudness:{value:m.lufs,range:m.lra,truePeak:m.truePeak},codingHistory:`A=PCM,F=${out.sampleRate},W=${r.fmt.slice(3)},M=${out.numberOfChannels===1?'mono':'stereo'},T=Tassello Media 1.15.1`}:null;
+  else if(r.fmt.startsWith('wav')){const bex=r.bwf?{description:r.comment.trim()||tags.title,originator:r.artist.trim()||'Tassello Media',reference:name,date:new Date(),loudness:{value:m.lufs,range:m.lra,truePeak:m.truePeak},codingHistory:`A=PCM,F=${out.sampleRate},W=${r.fmt.slice(3)},M=${out.numberOfChannels===1?'mono':'stereo'},T=Tassello Media 1.16.0`}:null;
    blob=wavBlob(out,Number(r.fmt.slice(3)),markers,0,out.length,{dither:r.dither&&r.fmt==='wav16',bext:bex});meta=bex?'BWF bext con descrizione, autore e valori di volume':'nessuno'}
   else{blob=await compressedBlob(out,r.fmt,bitrate,progress,tags);meta=r.fmt==='aac'?'titolo, autore e descrizione nei tag del file':'il WebM non porta metadati'}
   return{blob,name,m,limited:prep.limited,content,meta,fmtLabel:deliveryFormatLabel(r.fmt,out.numberOfChannels,out.sampleRate,r.dither,bitrate/1000),plan,compressed:!r.fmt.startsWith('wav')}});
@@ -2670,7 +2670,7 @@ const fineStep=()=>P.grid==='beats'?beatDur()/4:0.01;
 const selRegion=()=>P.sel?regionOf(P.sel):null;
 const selTrack=()=>trackOf(P.track)||P.tracks[0]||null;
 const audioModified=()=>P.regions.length>0&&P.version!==P.exported;
-function newTrack(name){const n=P.tracks.length;return{id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0,duck:0,voice:false,kind:'audio',out:null,volAuto:[],panAuto:[],autoOn:{vol:false,pan:false}}}
+function newTrack(name){const n=P.tracks.length;return{id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0,duck:0,voice:false,kind:'audio',out:null,auto:{vol:[],pan:[],reverb:[],low:[],high:[],comp:[]},autoOn:{vol:false,pan:false,reverb:false,low:false,high:false,comp:false}}}
 function addSource(buf){const id=uid();SOURCES.set(id,buf);dirtySources.add(id);return id}
 function newRegion(track,src,start,name){return{id:uid(),track,src,off:0,dur:SOURCES.get(src).duration,start:Math.max(0,start),gain:0,fadeIn:0,fadeOut:0,name:name||'Regione',markers:[]}}
 // Cronologia del progetto: istantanee di tracce e regioni. L'editor della regione ha la sua cronologia, più fine.
@@ -2711,7 +2711,11 @@ async function newAudioProject(){if(audioModified()&&!(await confirmAction('Il p
 // Pulizia di bozze e progetti aperti da file: ogni valore viene controllato prima di entrare nel progetto.
 function cleanAudioProject(p){const n=(v,d,lo=-Infinity,hi=Infinity)=>Number.isFinite(Number(v))?clamp(Number(v),lo,hi):d,s=(v,l=200)=>String(v??'').slice(0,l),col=v=>/^#[0-9a-f]{6}$/i.test(v)?v:null,arr=v=>Array.isArray(v)?v.slice(0,2000):[];
  const pts=(v,lo,hi)=>arr(v).filter(x=>Number.isFinite(Number(x?.t))&&Number.isFinite(Number(x?.v))).map(x=>({t:clamp(Number(x.t),0,86400),v:clamp(Number(x.v),lo,hi)})).sort((a,b)=>a.t-b.t).slice(0,500);
- const tracks=arr(p?.tracks).filter(t=>t&&t.id).map((t,i)=>({id:s(t.id,40),name:s(t.name||`Traccia ${i+1}`,80),color:col(t.color)||TRACK_COLORS[i%8][0],vol:n(t.vol,0,-60,12),pan:n(t.pan,0,-1,1),mute:!!t.mute,solo:!!t.solo,low:n(t.low,0,-15,15),high:n(t.high,0,-15,15),comp:n(t.comp,0,0,100),reverb:n(t.reverb,0,0,100),duck:n(t.duck,0,0,18),voice:!!t.voice,kind:t.kind==='bus'?'bus':'audio',out:t.out?String(t.out).slice(0,40):null,volAuto:pts(t.volAuto,-60,12),panAuto:pts(t.panAuto,-1,1),autoOn:{vol:!!t.autoOn?.vol,pan:!!t.autoOn?.pan}}));
+ const tracks=arr(p?.tracks).filter(t=>t&&t.id).map((t,i)=>{const a=t.auto&&typeof t.auto==='object'?t.auto:{};
+  return{id:s(t.id,40),name:s(t.name||`Traccia ${i+1}`,80),color:col(t.color)||TRACK_COLORS[i%8][0],vol:n(t.vol,0,-60,12),pan:n(t.pan,0,-1,1),mute:!!t.mute,solo:!!t.solo,low:n(t.low,0,-15,15),high:n(t.high,0,-15,15),comp:n(t.comp,0,0,100),reverb:n(t.reverb,0,0,100),duck:n(t.duck,0,0,18),voice:!!t.voice,kind:t.kind==='bus'?'bus':'audio',out:t.out?String(t.out).slice(0,40):null,
+   // I punti di volume e bilanciamento delle versioni 1.10-1.15 entrano nel nuovo elenco unico.
+   auto:{vol:pts(a.vol??t.volAuto,-60,12),pan:pts(a.pan??t.panAuto,-1,1),reverb:pts(a.reverb,0,100),low:pts(a.low,-15,15),high:pts(a.high,-15,15),comp:pts(a.comp,0,100)},
+   autoOn:{vol:!!t.autoOn?.vol,pan:!!t.autoOn?.pan,reverb:!!t.autoOn?.reverb,low:!!t.autoOn?.low,high:!!t.autoOn?.high,comp:!!t.autoOn?.comp}}});
  // Uscite: solo verso un bus che esiste, mai verso sé stessi e mai un giro chiuso.
  {const byId=new Map(tracks.map(t=>[t.id,t]));for(const t of tracks){if(t.out&&(!byId.has(t.out)||t.out===t.id||byId.get(t.out).kind!=='bus'))t.out=null;
   const seen=new Set([t.id]);let x=t,d=0;while(x?.out){if(seen.has(x.out)){t.out=null;break}seen.add(x.out);if(++d>6){t.out=null;break}x=byId.get(x.out)}}}
@@ -2741,7 +2745,7 @@ async function restoreAudio(){let meta=await dbGet('audio-project');
 async function gcSources(){try{const used=new Set(P.regions.flatMap(r=>regionSources(r).map(id=>'asrc:'+id)));for(const k of await dbKeys())if(String(k).startsWith('asrc:')&&!used.has(k))await dbDel(k)}catch(e){}}
 // Progetto in un file: ZIP con progetto-audio.json e un WAV per ogni suono (32 bit in virgola mobile, senza perdite).
 async function saveAudioProjectZip(){if(!P.tracks.length){toast('Il progetto è vuoto');return}const used=[...new Set(P.regions.flatMap(regionSources))].filter(id=>SOURCES.has(id));
- const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.15.1',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
+ const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.16.0',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(P.title+' (progetto audio)','zip'));P.exported=P.version;schedulePersist('audio');toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Audio`)}
 async function openAudioProjectZip(entries){let data;try{data=JSON.parse(await entries['progetto-audio.json'].text())}catch(e){toast('Il file progetto-audio.json è danneggiato');return}
  if(audioModified()&&!(await confirmAction('Aprendo il progetto sostituisci quello attuale. Continuare?','Apri')))return;const p=cleanAudioProject(data.progetto||data),bufs=new Map();
@@ -2755,7 +2759,18 @@ async function openAudioProjectZip(entries){let data;try{data=JSON.parse(await e
 // suono di 6 ms (come il limitatore finale), quindi quando una traccia lo usa le altre ricevono lo stesso ritardo.
 const MIX={playing:false,from:0,c0:0,origin:0,raf:0,timer:0,graph:null,srcs:[],passes:[],analyser:null,out:null,metroUntil:0,cycKey:'',recording:false,lat:0};
 const PRE_DELAY=0.006,LOOKAHEAD=0.4,START_GAP=0.04,EDGE_FADE=0.003;
-const hasAuto=(t,k)=>!!(t.autoOn?.[k]&&t[k+'Auto']?.length);
+const AUTO_KEYS=['vol','pan','reverb','low','high','comp'];
+const hasAuto=(t,k)=>!!(t.autoOn?.[k]&&t.auto?.[k]?.length);
+// Valori da dare ai nodi per un punto di automazione: volume, bassi e alti in decibel, pan e invio lineari,
+// compressione su tre parametri (soglia, rapporto, recupero) come fanno i cursori della traccia.
+function autoPairs(n,k,v){const db=x=>fromDb(x);
+ if(k==='vol')return[[n.auto.gain,db(v)]];
+ if(k==='pan')return[[n.pan.pan,clamp(v,-1,1)]];
+ if(k==='reverb')return[[n.send.gain,v/100*0.6]];
+ if(k==='low'||k==='high')return n[k]?[[n[k].gain,clamp(v,-15,15)]]:[];
+ if(k==='comp')return n.comp?[[n.comp.threshold,-10-26*(v/100)],[n.comp.ratio,1+7*(v/100)],[n.make.gain,db(9*(v/100))]]:[];
+ return[]}
+const autoExp=k=>k==='vol';
 // Valore di un inviluppo a un istante: lineare fra un punto e il successivo, fermo prima del primo e dopo l'ultimo.
 function autoValueAt(points,t){if(!points?.length)return null;if(t<=points[0].t)return points[0].v;const last=points.at(-1);if(t>=last.t)return last.v;
  let lo=0,hi=points.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(points[m].t<=t)lo=m;else hi=m}
@@ -2767,7 +2782,7 @@ function impulse(ctx){let b=IR.get(ctx);if(b)return b;const n=Math.round(ctx.sam
 const pathOf=t=>{const out=[];let x=t,guard=0;while(x&&guard++<8){out.push(x);x=x.out?trackOf(x.out):null}return out};
 const depthOf=t=>pathOf(t).length-1;
 // Ogni compressore sul percorso ritarda il suono di PRE_DELAY: il ritardo totale è quello del percorso più lungo.
-const pathComp=t=>pathOf(t).reduce((n,x)=>n+(x.comp>0?1:0),0);
+const pathComp=t=>pathOf(t).reduce((n,x)=>n+((x.comp>0||hasAuto(x,'comp'))?1:0),0);
 const mixLatency=tracks=>PRE_DELAY*(1+Math.max(0,...tracks.map(pathComp)));
 // Una traccia si sente se nessuno del suo percorso è muto e, con un solo acceso, se nel percorso c'è il solo.
 function audible(t){const solo=P.tracks.some(x=>x.solo),path=pathOf(t);if(path.some(x=>x.mute))return false;return !solo||path.some(x=>x.solo)}
@@ -2777,25 +2792,26 @@ function newGraph(ctx,dest){const master=ctx.createGain(),lim=ctx.createDynamics
 // destinazione (o del master), così gruppi diversi non condividono lo stesso spazio.
 function chainTrack(gr,t,delayUnits){const ctx=gr.ctx;let n=gr.tracks.get(t.id);
  if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),auto:ctx.createGain(),meter:ctx.createAnalyser(),send:ctx.createGain(),rev:null,shape:''};n.meter.fftSize=256;n.pan.connect(n.vol);n.vol.connect(n.auto);n.auto.connect(n.meter);n.auto.connect(n.send);gr.tracks.set(t.id,n)}
- const shape=`${t.low!==0}|${t.high!==0}|${t.comp>0}|${t.reverb>0}|${t.out||''}|${delayUnits}`;
+ const on=k=>hasAuto(t,k)?1:0,shape=`${t.low!==0||on('low')}|${t.high!==0||on('high')}|${t.comp>0||on('comp')}|${t.reverb>0}|${t.out||''}|${delayUnits}`;
  if(n.shape===shape)return n;
  n.input.disconnect();n.send.disconnect();for(const k of ['low','high','comp','make','delay']){n[k]?.disconnect();n[k]=null}
  let at=n.input;const link=x=>{at.connect(x);at=x;return x};
- if(t.low!==0){link(n.low=ctx.createBiquadFilter());n.low.type='lowshelf';n.low.frequency.value=200}
- if(t.high!==0){link(n.high=ctx.createBiquadFilter());n.high.type='highshelf';n.high.frequency.value=4000}
- if(t.comp>0){link(n.comp=ctx.createDynamicsCompressor());n.comp.knee.value=6;n.comp.attack.value=0.006;n.comp.release.value=0.18;link(n.make=ctx.createGain())}
+ if(t.low!==0||on('low')){link(n.low=ctx.createBiquadFilter());n.low.type='lowshelf';n.low.frequency.value=200}
+ if(t.high!==0||on('high')){link(n.high=ctx.createBiquadFilter());n.high.type='highshelf';n.high.frequency.value=4000}
+ if(t.comp>0||on('comp')){link(n.comp=ctx.createDynamicsCompressor());n.comp.knee.value=6;n.comp.attack.value=0.006;n.comp.release.value=0.18;link(n.make=ctx.createGain())}
  if(delayUnits>0){link(n.delay=ctx.createDelay(0.06));n.delay.delayTime.value=delayUnits*PRE_DELAY}
  at.connect(n.pan);
  const holder=t.out?gr.tracks.get(t.out):null,dest=holder?holder.input:gr.master;
  n.meter.disconnect();n.meter.connect(dest);
- if(t.reverb>0){const rev=holder||gr;if(!rev.rev){rev.rev=ctx.createConvolver();rev.rev.buffer=impulse(ctx);rev.rev.connect(holder?holder.input:gr.master)}n.send.connect(rev.rev)}
+ if(t.reverb>0||on('reverb')){const rev=holder||gr;if(!rev.rev){rev.rev=ctx.createConvolver();rev.rev.buffer=impulse(ctx);rev.rev.connect(holder?holder.input:gr.master)}n.send.connect(rev.rev)}
  n.shape=shape;return n}
 function setTrackNodes(t,n,{only=null,ctx=null}={}){const set=(p,v)=>ctx?p.setTargetAtTime(v,ctx.currentTime,0.02):p.value=v,c=t.comp/100,live=only?true:audible(t);
- if(n.low)set(n.low.gain,t.low);if(n.high)set(n.high.gain,t.high);if(n.comp){set(n.comp.threshold,-10-26*c);set(n.comp.ratio,1+7*c);set(n.make.gain,fromDb(9*c))}
- if(!hasAuto(t,'pan'))set(n.pan.pan,t.pan);
+ if(n.low&&!hasAuto(t,'low'))set(n.low.gain,t.low);if(n.high&&!hasAuto(t,'high'))set(n.high.gain,t.high);
+ if(n.comp&&!hasAuto(t,'comp')){set(n.comp.threshold,-10-26*c);set(n.comp.ratio,1+7*c);set(n.make.gain,fromDb(9*c))}
+ if(!hasAuto(t,'pan'))set(n.pan.pan,t.pan);if(!hasAuto(t,'reverb'))set(n.send.gain,t.reverb/100*0.6);
  set(n.vol.gain,hasAuto(t,'vol')?(live?1:0):(live?fromDb(t.vol):0));
  if(!hasAuto(t,'vol'))set(n.auto.gain,1);
- set(n.send.gain,t.reverb/100*0.6)}
+}
 // Allinea il mixer alle tracce: i bus prima delle loro tracce, poi i valori dei cursori. only: una sola traccia (e i
 // suoi bus), per esportarla senza muto né solo.
 function syncGraph(gr,tracks,{only=null,live=false}={}){const ids=new Set(tracks.map(t=>t.id));
@@ -2807,13 +2823,15 @@ function syncGraph(gr,tracks,{only=null,live=false}={}){const ids=new Set(tracks
 // monotoni (un punto con lo stesso tempo viene saltato) perché Web Audio rifiuta due rampe sullo stesso istante.
 function scheduleTrackAuto(ctx,gr,from,when,end,{only=null}={}){const stop=Math.max(from+0.01,Math.min(Number.isFinite(end)?end:projDur(),Math.max(projDur(),from+0.01)));
  for(const t of P.tracks){if(only&&t.id!==only)continue;const n=gr.tracks.get(t.id);if(!n)continue;
-  for(const k of ['vol','pan']){const pts=t[k+'Auto'],param=k==='vol'?n.auto.gain:n.pan.pan;if(!hasAuto(t,k)){if(k==='vol'){param.cancelScheduledValues(when);param.setValueAtTime(1,when)}continue}
+  for(const k of AUTO_KEYS){const pts=t.auto?.[k];
+   if(!hasAuto(t,k)){if(k==='vol'){n.auto.gain.cancelScheduledValues(when);n.auto.gain.setValueAtTime(1,when)}continue}
    const ev=[{t:from,v:autoValueAt(pts,from)}];for(const p of pts)if(p.t>from+1e-6&&p.t<stop-1e-6)ev.push({t:p.t,v:p.v});ev.push({t:stop,v:autoValueAt(pts,stop)});
-   param.cancelScheduledValues(when);let last=-Infinity;
-   ev.forEach((e,i)=>{if(i){if(e.t<=last+1e-6)return;
-     // il volume va in linea retta in decibel: una rampa esponenziale in ampiezza, cioè lineare in dB
-     if(k==='vol')param.exponentialRampToValueAtTime(fromDb(e.v),when+(e.t-from));else param.linearRampToValueAtTime(clamp(e.v,-1,1),when+(e.t-from))}
-    else param.setValueAtTime(k==='vol'?fromDb(e.v):clamp(e.v,-1,1),when);last=e.t})}}}
+   const pairs=autoPairs(n,k,ev[0].v);if(!pairs.length)continue;
+   for(const [param] of pairs)param.cancelScheduledValues(when);
+   let last=-Infinity;
+   ev.forEach((e,i)=>{if(i&&e.t<=last+1e-6)return;const vals=autoPairs(n,k,e.v);
+    for(const [param,val] of vals){if(i)param[autoExp(k)?'exponentialRampToValueAtTime':'linearRampToValueAtTime'](val,when+(e.t-from));else param.setValueAtTime(val,when)}
+    last=e.t})}}}
 // Il mixer della riproduzione resta pronto tra un ascolto e l'altro: spostarsi nel brano riprogramma solo le regioni.
 function liveGraph(live){const ctx=actxGet();if(!MIX.graph||MIX.graph.ctx!==ctx)MIX.graph=newGraph(ctx,mixOut());return syncGraph(MIX.graph,P.tracks,{live})}
 // Regioni del brano tra from ed end, a partire dall'istante when del contesto. Il guadagno segue i punti dell'inviluppo
@@ -2952,13 +2970,17 @@ function renderArrange(){if(!isAudio())return;const act=document.activeElement,k
  for(const r of P.regions){const cv=document.querySelector(`#rg-${r.id} canvas`);if(cv&&r.dur*P.pxs>12)drawRegionWave(cv,r)}
  drawAutoLines();
  drawArRuler();placeArPlayhead(MIX.playing?mixPos():P.t);updateArrangeUI();if(keep&&$(keep)&&document.activeElement!==$(keep))$(keep).focus({preventScroll:true})}
-// Automazione disegnata sulla corsia: linea continua per il volume, tratteggiata per il bilanciamento.
-function drawAutoLine(cv,t){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const dur=Math.max(projDur(),t.volAuto?.at(-1)?.t||0,1),X=p=>p*P.pxs,Y=v=>h-clamp((v+60)/72,0,1)*h;
- if(t.autoOn?.vol&&t.volAuto?.length){const list=[{t:0,v:t.volAuto[0].v},...t.volAuto,{t:dur,v:t.volAuto.at(-1).v}];
+// Automazione disegnata sulla corsia: linea continua per il volume, tratteggiata per il bilanciamento; per gli altri
+// parametri un indicatore compatto in alto (un quadratino colorato per parametro acceso), perché sei linee
+// sovrapposte non si leggerebbero.
+const AUTO_DOT={reverb:'#2457c5',low:'#1e7a46',high:'#b35500',comp:'#7a3db8'};
+function drawAutoLine(cv,t){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const vol=t.auto?.vol||[],pan=t.auto?.pan||[],dur=Math.max(projDur(),vol.at(-1)?.t||0,pan.at(-1)?.t||0,1),X=p=>p*P.pxs,Y=v=>h-clamp((v+60)/72,0,1)*h;
+ if(t.autoOn?.vol&&vol.length){const list=[{t:0,v:vol[0].v},...vol,{t:dur,v:vol.at(-1).v}];
   g.strokeStyle=palette.accent;g.lineWidth=1.5;g.beginPath();list.forEach((p,i)=>i?g.lineTo(X(p.t),Y(p.v)):g.moveTo(X(p.t),Y(p.v)));g.stroke();
-  g.fillStyle=palette.accent;for(const p of t.volAuto){g.beginPath();g.arc(X(p.t),Y(p.v),2.5,0,Math.PI*2);g.fill()}}
- if(t.autoOn?.pan&&t.panAuto?.length){const list=[{t:0,v:t.panAuto[0].v},...t.panAuto,{t:dur,v:t.panAuto.at(-1).v}],YP=v=>h-clamp((v+1)/2,0,1)*h;
-  g.strokeStyle=palette['text-3'];g.lineWidth=1;g.setLineDash([4,3]);g.beginPath();list.forEach((p,i)=>i?g.lineTo(X(p.t),YP(p.v)):g.moveTo(X(p.t),YP(p.v)));g.stroke();g.setLineDash([])}}
+  g.fillStyle=palette.accent;for(const p of vol){g.beginPath();g.arc(X(p.t),Y(p.v),2.5,0,Math.PI*2);g.fill()}}
+ if(t.autoOn?.pan&&pan.length){const list=[{t:0,v:pan[0].v},...pan,{t:dur,v:pan.at(-1).v}],YP=v=>h-clamp((v+1)/2,0,1)*h;
+  g.strokeStyle=palette['text-3'];g.lineWidth=1;g.setLineDash([4,3]);g.beginPath();list.forEach((p,i)=>i?g.lineTo(X(p.t),YP(p.v)):g.moveTo(X(p.t),YP(p.v)));g.stroke();g.setLineDash([])}
+ let x=4;for(const k of ['reverb','low','high','comp']){if(t.autoOn?.[k]&&t.auto?.[k]?.length){g.fillStyle=AUTO_DOT[k];g.fillRect(x,3,4,4);x+=7}}}
 function drawAutoLines(){for(const t of P.tracks){const cv=$('autl-'+t.id);if(cv)drawAutoLine(cv,t)}}
 const TL_REGION={};
 function drawArRuler(){const cv=$('arRulerCanvas'),W=Math.min(arWidth()-HEAD_W,32000);cv.style.width=W+'px';const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);
@@ -3118,47 +3140,64 @@ async function crossfadeNext(){const r=selRegion();if(!r){toast('Scegli prima un
 
 // ——— Automazione di volume e bilanciamento: punti nel tempo, modificabili da una tabella. Con l'automazione accesa
 // i valori del cursore non contano: li dà la curva, e muto e solo restano.
-function autoTable(title,list,fmt,kind){const rows=list.length?list.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(fmt(p.v))}</td><td><button type="button" class="btn" data-del="${kind}:${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>';
- return `<table><caption>${esc(title)}</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Valore</th><th scope="col">Togli</th></tr></thead><tbody>${rows}</tbody></table>`}
+// Parametri che si possono automatizzare: nome, intervallo, unità e valore attuale dei cursori. La stessa tabella
+// serve alla finestra, alla descrizione del brano e ai comandi rapidi.
+const AUTO_UI={vol:['Volume',-60,12,'dB'],pan:['Bilanciamento',-100,100,'%'],reverb:['Riverbero',0,100,'%'],low:['Bassi',-15,15,'dB'],high:['Alti',-15,15,'dB'],comp:['Compressione',0,100,'%']};
+const autoManual=(t,k)=>k==='vol'?t.vol:k==='pan'?Math.round(t.pan*100):k==='reverb'?t.reverb:k==='low'?t.low:k==='high'?t.high:t.comp;
+const autoShow=(k,v)=>k==='vol'||k==='low'||k==='high'?fmtDb(v):k==='pan'?panWords(v):fmtNum(v,0)+'%';
+function autoTable(kind,list){const label=AUTO_UI[kind][0];
+ const rows=list.length?list.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(autoShow(kind,p.v))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>';
+ return `<table><caption>Punti: ${esc(label.toLowerCase())}</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Valore</th><th scope="col">Togli</th></tr></thead><tbody>${rows}</tbody></table>`}
 // Un bus è una traccia senza regioni: raccoglie le tracce che lo scelgono come uscita, con un volume, un
 // compressore e un riverbero soli.
 function newBus(){const n=P.tracks.filter(t=>t.kind==='bus').length+1,tr=newTrack('Bus '+n);tr.kind='bus';
  pCommit('Nuovo bus',()=>{P.tracks.push(tr);P.track=tr.id});renderArrange();focusLane(tr.id);announce(`Bus «${tr.name}» creato. Scegli la sua uscita nelle proprietà delle tracce da raggruppare`)}
 async function autoEditDialog(){const t=selTrack();if(!t){toast('Crea prima una traccia');return}
- const draft={vol:(t.volAuto||[]).map(p=>({...p})),pan:(t.panAuto||[]).map(p=>({...p}))};
- const render=()=>{const box=$('autoList');if(box)box.innerHTML=autoTable('Punti del volume',draft.vol,v=>fmtDb(v),'vol')+autoTable('Punti del bilanciamento',draft.pan,v=>panWords(v),'pan')};
- const put=(k,time,v)=>{const list=draft[k],at=list.findIndex(p=>Math.abs(p.t-time)<0.001),p={t:clamp(time,0,86400),v};if(at>=0)list[at]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);render();
-  announce(`Punto di ${k==='vol'?'volume':'bilanciamento'} a ${sayTime(time,2)}: ${k==='vol'?fmtDb(v):panWords(v)}`)};
- const res=await modal('Automazione della traccia',`<p id="autoIntro">Traccia «${esc(t.name)}». I punti valgono dall’inizio del brano e fra un punto e il successivo il valore cambia in linea retta; un punto allo stesso tempo sostituisce quello che c’è. Con l’automazione accesa il cursore della traccia non conta.</p><div id="autoList"></div>`,
+ const draft=Object.fromEntries(Object.keys(AUTO_UI).map(k=>[k,(t.auto?.[k]||[]).map(p=>({...p}))]));
+ let param='vol';
+ const render=()=>{const box=$('autoList');if(box)box.innerHTML=autoTable(param,draft[param])};
+ const sync=()=>{const el=$('dlg_value');if(!el)return;const [,lo,hi]=AUTO_UI[param],last=draft[param].at(-1);
+  el.min=String(lo);el.max=String(hi);el.step=param==='pan'?String(5):String(param==='vol'||param==='low'||param==='high'?0.5:1);
+  el.value=String(last?last.v:autoManual(t,param))};
+ const put=()=>{const time=parseTime($('dlg_time').value);if(!(time>=0)){toast('Tempo del punto non valido');return}
+  const raw=num($('dlg_value').value);if(!Number.isFinite(raw)){toast('Valore del punto non valido');return}
+  const [,lo,hi]=AUTO_UI[param],v=clamp(raw,lo,hi),list=draft[param],at=list.findIndex(p=>Math.abs(p.t-time)<0.001),p={t:clamp(time,0,86400),v};
+  if(at>=0)list[at]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);render();
+  announce(`Punto di ${AUTO_UI[param][0].toLowerCase()} a ${sayTime(time,2)}: ${autoShow(param,v)}`)};
+ const res=await modal('Automazione della traccia',`<p id="autoIntro">Traccia «${esc(t.name)}». I punti valgono dall’inizio del brano e fra un punto e il successivo il valore cambia in linea retta (in decibel per volume, bassi e alti). Un punto allo stesso tempo sostituisce quello che c’è; con l’automazione accesa il cursore del parametro non conta.</p><div id="autoList"></div>`,
   [{id:'onVol',label:'Il volume segue l’automazione',type:'checkbox',value:!!t.autoOn?.vol},
    {id:'onPan',label:'Il bilanciamento segue l’automazione',type:'checkbox',value:!!t.autoOn?.pan},
+   {id:'onReverb',label:'Il riverbero segue l’automazione',type:'checkbox',value:!!t.autoOn?.reverb},
+   {id:'onLow',label:'I bassi seguono l’automazione',type:'checkbox',value:!!t.autoOn?.low},
+   {id:'onHigh',label:'Gli alti seguono l’automazione',type:'checkbox',value:!!t.autoOn?.high},
+   {id:'onComp',label:'La compressione segue l’automazione',type:'checkbox',value:!!t.autoOn?.comp},
+   {id:'param',label:'Parametro da modificare',type:'select',value:'vol',options:Object.entries(AUTO_UI).map(([k,[l]])=>[k,l])},
    {id:'time',label:'Tempo del punto',type:'time',value:fmtTime(P.t,2)},
-   {id:'vol',label:'Volume del punto in dB',type:'number',min:-60,max:12,step:0.5,value:t.vol},
-   {id:'pan',label:'Bilanciamento del punto',type:'range',min:-100,max:100,step:5,value:Math.round(t.pan*100),fmt:v=>panWords(v/100)}],'Salva',
-  {wide:true,buttons:[{label:'Aggiungi al volume',run:v=>{const time=parseTime(v.time);if(!(time>=0)){toast('Tempo del punto non valido');return}put('vol',time,num(v.vol))}},
-    {label:'Aggiungi al bilanciamento',run:v=>{const time=parseTime(v.time);if(!(time>=0)){toast('Tempo del punto non valido');return}put('pan',time,num(v.pan)/100)}}],
-   onOpen:pane=>{render();pane.addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;const [k,i]=b.dataset.del.split(':');draft[k].splice(Number(i),1);render();announce('Punto tolto')})}});
+   {id:'value',label:'Valore del punto',type:'number',value:autoManual(t,'vol'),hint:'Nell’unità del parametro: decibel, percento oppure da sinistra (−100) a destra (100).'}],'Salva',
+  {wide:true,buttons:[{label:'Aggiungi il punto',run:put}],
+   onOpen:pane=>{render();sync();
+    pane.querySelector('#dlg_param').addEventListener('change',e=>{param=e.target.value;render();sync();announce(`Parametro: ${AUTO_UI[param][0].toLowerCase()}`)});
+    pane.addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;draft[param].splice(Number(b.dataset.del),1);render();announce('Punto tolto')})}});
  if(!res)return;
  const norm=(list,lo,hi)=>list.filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.v)).map(p=>({t:clamp(p.t,0,86400),v:clamp(p.v,lo,hi)})).sort((a,b)=>a.t-b.t).slice(0,500);
- pCommit('Automazione della traccia',()=>{t.volAuto=norm(draft.vol,-60,12);t.panAuto=norm(draft.pan,-1,1);
-  t.autoOn={vol:!!res.onVol,pan:!!res.onPan};
-  if(t.autoOn.vol&&!t.volAuto.length)t.volAuto=[{t:0,v:t.vol},{t:Math.max(projDur(),1),v:t.vol}];
-  if(t.autoOn.pan&&!t.panAuto.length)t.panAuto=[{t:0,v:t.pan},{t:Math.max(projDur(),1),v:t.pan}]});
- announce(`Automazione: ${t.volAuto.length===1?'un punto di volume':t.volAuto.length+' punti di volume'}${t.autoOn.vol?' (attiva)':''}, ${t.panAuto.length===1?'un punto di bilanciamento':t.panAuto.length+' punti di bilanciamento'}${t.autoOn.pan?' (attiva)':''}`)}
+ pCommit('Automazione della traccia',()=>{const out={};for(const k of Object.keys(AUTO_UI)){const [,lo,hi]=AUTO_UI[k];out[k]=norm(draft[k],lo,hi)}
+  t.auto=out;t.autoOn={vol:!!res.onVol,pan:!!res.onPan,reverb:!!res.onReverb,low:!!res.onLow,high:!!res.onHigh,comp:!!res.onComp};
+  for(const k of Object.keys(AUTO_UI))if(t.autoOn[k]&&!out[k].length){const v=k==='pan'?autoManual(t,k)/100:autoManual(t,k);out[k]=[{t:0,v},{t:Math.max(projDur(),1),v}]}});
+ const conta=k=>`${t.auto[k].length===1?'un punto':t.auto[k].length+' punti'} di ${AUTO_UI[k][0].toLowerCase()}`;
+ announce('Automazione: '+Object.keys(AUTO_UI).filter(k=>t.autoOn[k]).map(conta).join(', '))}
 function autoAddPoint(k){const t=selTrack();if(!t){toast('Crea prima una traccia');return}
- const at=clamp(MIX.playing?mixPos():P.t,0,86400),key=k+'Auto',cur=autoValueAt(t[key],at)??(k==='vol'?t.vol:t.pan);
- pCommit(k==='vol'?'Punto di volume':'Punto di bilanciamento',()=>{const list=t[key]=t[key]||[],i=list.findIndex(p=>Math.abs(p.t-at)<0.001),p={t:at,v:cur};if(i>=0)list[i]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);t.autoOn={...(t.autoOn||{}),[k]:true}});
- announce(`Punto di ${k==='vol'?'volume':'bilanciamento'} a ${sayTime(at,2)}: ${k==='vol'?fmtDb(cur):panWords(cur)}`)}
+ const at=clamp(MIX.playing?mixPos():P.t,0,86400),cur=autoValueAt(t.auto?.[k],at)??(k==='pan'?autoManual(t,k)/100:autoManual(t,k));
+ pCommit('Punto di '+AUTO_UI[k][0].toLowerCase(),()=>{t.auto??={};const list=t.auto[k]=t.auto[k]||[],i=list.findIndex(p=>Math.abs(p.t-at)<0.001),p={t:at,v:cur};if(i>=0)list[i]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);t.autoOn={...(t.autoOn||{}),[k]:true}});
+ announce(`Punto di ${AUTO_UI[k][0].toLowerCase()} a ${sayTime(at,2)}: ${autoShow(k,cur)}`)}
 function autoToggle(k){const t=selTrack();if(!t){toast('Crea prima una traccia');return}
- const on=!t.autoOn?.[k];
- pCommit(k==='vol'?'Volume automatico':'Bilanciamento automatico',()=>{t.autoOn={...(t.autoOn||{}),[k]:on};
-  if(!t[k+'Auto']?.length)t[k+'Auto']=[{t:0,v:k==='vol'?t.vol:t.pan},{t:Math.max(projDur(),1),v:k==='vol'?t.vol:t.pan}]});
- announce(`${k==='vol'?'Volume':'Bilanciamento'} ${on?'automatico':'di nuovo manuale'} sulla traccia «${t.name}»`)}
+ const on=!t.autoOn?.[k],label=AUTO_UI[k][0].toLowerCase();
+ pCommit('Automazione del '+label,()=>{t.autoOn={...(t.autoOn||{}),[k]:on};
+  if(!t.auto?.[k]?.length){const v=k==='pan'?autoManual(t,k)/100:autoManual(t,k);t.auto={...(t.auto||{}),[k]:[{t:0,v},{t:Math.max(projDur(),1),v}]}}});
+ announce(`${AUTO_UI[k][0]} ${on?'automatico':'di nuovo manuale'} sulla traccia «${t.name}»`)}
 async function autoClear(){const t=selTrack();if(!t){toast('Crea prima una traccia');return}
- if(!(t.volAuto?.length||t.panAuto?.length)){toast('Questa traccia non ha automazione');return}
+ if(!Object.keys(AUTO_UI).some(k=>t.auto?.[k]?.length)){toast('Questa traccia non ha automazione');return}
  if(!(await confirmAction(`Togliere tutti i punti di automazione della traccia «${t.name}»?`,'Togli')))return;
- pCommit('Togli l’automazione',()=>{t.volAuto=[];t.panAuto=[];t.autoOn={vol:false,pan:false}});announce('Automazione tolta')}
-
+ pCommit('Togli l’automazione',()=>{t.auto=Object.fromEntries(Object.keys(AUTO_UI).map(k=>[k,[]]));t.autoOn={vol:false,pan:false,reverb:false,low:false,high:false,comp:false}});announce('Automazione tolta')}
 // ——— Take di una regione: più registrazioni dello stesso passaggio, con un nome e una nota, una attiva alla volta.
 function ensureTakes(r){if(!r.takes?.length)r.takes=[{id:uid(),src:r.src,off:r.off,dur:r.dur,name:'Take 1',note:''}]}
 function activateTake(r,t){r.src=t.src;r.off=t.off;r.dur=t.dur}
@@ -3296,8 +3335,9 @@ async function readLevels({track=null}={}){if(inEditorArea()&&!track){if(!A.buf)
  const res=await work('Misura dei livelli',async()=>{const solo=P.tracks.some(x=>x.solo),live=P.tracks.filter(x=>here.some(r=>r.track===x.id)&&!x.mute&&(!solo||x.solo)&&(!track||x.id===track));
   const ms=b=>measureCh([b.getChannelData(0),b.getChannelData(1)],b.sampleRate);if(track){const tr=trackOf(track);return{track:tr,m:tr&&live.length?ms(await renderMix({only:track,from,to})):null}}
   const out=ms(await renderMix({from,to})),raw=ms(await renderMix({from,to,limit:false})),per=[];for(const x of live)per.push({t:x,m:ms(await renderMix({only:x.id,from,to}))});return{out,raw,per}});if(!res)return;
- const where=`intorno a ${sayTime(t)}`;if(track){const tr=res.track,av=tr?.autoOn?.vol&&tr.volAuto?.length?autoValueAt(tr.volAuto,t):null;
-  toast(res.m?`Traccia «${tr.name}» ${where}: ${levelSentence(res.m,{floor:false})}.${av!==null?` Automazione del volume: ${fmtDb(av)}.`:''}`:`La traccia «${tr?.name||''}» non suona ${where}${tr?.mute?': è muta':''}.`);return}
+ const where=`intorno a ${sayTime(t)}`;if(track){const tr=res.track,
+  autos=tr?['vol','pan','reverb','low','high','comp'].filter(k=>tr.autoOn?.[k]&&tr.auto?.[k]?.length).map(k=>`${k==='vol'?'volume':k==='pan'?'bilanciamento':k==='reverb'?'riverbero':k==='low'?'bassi':k==='high'?'alti':'compressione'} ${autoShow(k,autoValueAt(tr.auto[k],t))}`):[];
+  toast(res.m?`Traccia «${tr.name}» ${where}: ${levelSentence(res.m,{floor:false})}.${autos.length?` Automazione: ${autos.join(', ')}.`:''}`:`La traccia «${tr?.name||''}» non suona ${where}${tr?.mute?': è muta':''}.`);return}
  const red=res.raw.peak-res.out.peak,lim=red>=0.5?`Il limitatore abbassa i picchi di ${fmtDb(red)}.`:'Il limitatore non interviene.',lv=x=>Number.isFinite(x.m.lufs)?x.m.lufs:x.m.rms,per=res.per.filter(x=>Number.isFinite(lv(x))).sort((x,y)=>lv(y)-lv(x));
  let cmp='';if(per.length>1){const unit=per.every(x=>Number.isFinite(x.m.lufs))?' LUFS':' dB';cmp=' '+per.map(x=>`${x.t.name} ${fmtNum(lv(x),1)}${unit}`).join(', ')+`: «${per[0].t.name}» sta ${fmtNum(lv(per[0])-lv(per[1]),1)} dB sopra «${per[1].t.name}».`}
  else if(per.length===1)cmp=` Suona solo la traccia «${per[0].t.name}».`;
@@ -3306,7 +3346,7 @@ async function readLevels({track=null}={}){if(inEditorArea()&&!track){if(!A.buf)
 // ——— Descrivi il brano (Alt+Maiusc+D): una finestra con il riassunto (letto all'apertura), che cosa suona insieme nel
 // tempo e una tabella per traccia con regioni, spazi vuoti e sovrapposizioni.
 function trackWords(t){const w=[];if(t.mute)w.push('muta');if(t.solo)w.push('in solo');if(t.vol)w.push('volume '+fmtDb(t.vol));if(Math.abs(t.pan)>=0.005)w.push('bilanciamento '+panWords(t.pan));
- if(t.low)w.push('bassi '+signedDb(t.low));if(t.high)w.push('alti '+signedDb(t.high));if(t.comp)w.push('compressione '+t.comp+'%');if(t.reverb)w.push('riverbero '+t.reverb+'%');if(t.voice)w.push('è la voce');if(t.duck)w.push('si abbassa di '+fmtDb(-t.duck)+' quando parla la voce');if(t.kind==='bus')w.push('bus');else if(t.out)w.push('esce sul bus «'+((trackOf(t.out)||{}).name||'')+'»');if(t.autoOn?.vol&&t.volAuto?.length)w.push('volume automatico con '+(t.volAuto.length===1?'un punto':t.volAuto.length+' punti'));if(t.autoOn?.pan&&t.panAuto?.length)w.push('bilanciamento automatico con '+(t.panAuto.length===1?'un punto':t.panAuto.length+' punti'));w.push('colore '+colorName(t.color));return w.join(', ')}
+ if(t.low)w.push('bassi '+signedDb(t.low));if(t.high)w.push('alti '+signedDb(t.high));if(t.comp)w.push('compressione '+t.comp+'%');if(t.reverb)w.push('riverbero '+t.reverb+'%');if(t.voice)w.push('è la voce');if(t.duck)w.push('si abbassa di '+fmtDb(-t.duck)+' quando parla la voce');if(t.kind==='bus')w.push('bus');else if(t.out)w.push('esce sul bus «'+((trackOf(t.out)||{}).name||'')+'»');for(const [k,nome] of [['vol','volume'],['pan','bilanciamento'],['reverb','riverbero'],['low','bassi'],['high','alti'],['comp','compressione']])if(t.autoOn?.[k]&&t.auto?.[k]?.length)w.push(nome+' automatico con '+(t.auto[k].length===1?'un punto':t.auto[k].length+' punti'));w.push('colore '+colorName(t.color));return w.join(', ')}
 // Tratti di tempo con le tracce che suonano: da un bordo di regione al successivo, unendo i tratti uguali.
 function songSpans(){const pts=arEdges().filter(p=>p<=projDur()+1e-6),out=[];for(let i=0;i+1<pts.length;i++){const a=pts[i],b=pts[i+1];if(b-a<0.02)continue;const m=(a+b)/2,on=P.tracks.filter(t=>P.regions.some(r=>r.track===t.id&&r.start<=m&&regionEnd(r)>m)).map(t=>t.name+(t.mute?' (muta)':''));
   const key=on.join('|');if(out.length&&out.at(-1).key===key)out.at(-1).b=b;else out.push({a,b,key,on})}return out}
@@ -3385,7 +3425,7 @@ async function batchConvertFiles(files,opt,progress=status){const used=new Set()
    let blob;
    if(opt.fmt==='mp3')blob=await mp3Blob(src,opt.kbps,tags);
    else if(opt.fmt.startsWith('wav')){const bex=opt.bwf?{description:opt.comment||base,originator:opt.artist||'Tassello Media',reference:name,date:new Date(),
-     loudness:{value:m.lufs,range:m.lra,truePeak:m.truePeak},codingHistory:`A=PCM,F=${src.sampleRate},W=${opt.fmt.slice(3)},M=${src.numberOfChannels===1?'mono':'stereo'},T=Tassello Media 1.15.1`}:null;
+     loudness:{value:m.lufs,range:m.lra,truePeak:m.truePeak},codingHistory:`A=PCM,F=${src.sampleRate},W=${opt.fmt.slice(3)},M=${src.numberOfChannels===1?'mono':'stereo'},T=Tassello Media 1.16.0`}:null;
     blob=wavBlob(src,Number(opt.fmt.slice(3)),[],0,src.length,{dither:opt.dither&&opt.fmt==='wav16',bext:bex})}
    else blob=await compressedBlob(src,opt.fmt,opt.kbps*1000,()=>{},tags);
    out.push({name,data:blob});rows.push({file:f.name,name,ok:true,dur:m.dur,lufs:m.lufs,tp:m.truePeak,size:blob.size,limited:prep.limited})}
@@ -3526,7 +3566,7 @@ async function gcMedia(){try{const keys=await dbKeys(),used=new Set(V.p.media.ma
 // Progetto in un file: ZIP con progetto.json e la cartella media, senza compressione.
 async function saveProjectZip(){if(!V.p.media.length&&!V.p.main.length&&!V.p.titles.length&&!V.p.subs.length){toast('Il progetto è vuoto');return}const files=[],p=structuredClone(V.p);
  for(const m of p.media){const rt=MEDIA.get(m.id);if(!rt)continue;m.file=`media/${m.id}-${safeFileName(m.name)}`;files.push({name:m.file,data:rt.blob})}
- files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.15.1',progetto:p},null,1)});
+ files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.16.0',progetto:p},null,1)});
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(V.p.title+' (progetto video)','zip'));toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Video`)}
 async function openProjectZip(file){const entries=await work('Apertura del progetto',()=>unzipBlob(file));if(!entries)return false;const json=entries['progetto.json'];if(!json)return false;let data;try{data=JSON.parse(await json.text())}catch(e){toast('Il file progetto.json è danneggiato');return true}
  const p=data.progetto||data,blobs={};for(const m of p.media||[]){const b=entries[m.file];if(b)blobs[m.id]=new File([b],m.name||'file',{type:b.type})}

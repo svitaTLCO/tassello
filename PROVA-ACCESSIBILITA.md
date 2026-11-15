@@ -238,8 +238,8 @@ Domande: sai quando entra la musica e quando parla la voce? Sai se la musica cop
 **Compito A3c: far scendere la musica sotto la voce con l'automazione.**
 
 1. Con la traccia della musica scelta, cerca «Automazione» in Alt+Q e premi Invio.
-2. Lascia il tempo del punto sull'indicatore, scrivi il volume che vuoi (per esempio −18) e premi «Aggiungi al volume». La tabella dei punti si aggiorna e il punto è annunciato.
-3. Sposta l'indicatore dove la musica deve tornare su, aggiungi un secondo punto con volume 0, poi salva.
+2. Lascia il tempo del punto sull'indicatore, scrivi il volume che vuoi (per esempio −18) e premi «Aggiungi il punto». La tabella dei punti si aggiorna e il punto è annunciato. Con il campo «Parametro da modificare» puoi passare a bilanciamento, riverbero, bassi, alti o compressione: la tabella mostra i punti di quel parametro e le caselle in alto dicono quali parametri seguono l'automazione.
+3. Sposta l'indicatore dove la musica deve tornare su, aggiungi un secondo punto con volume 0, poi salva. Prova anche ad accendere il riverbero o la compressione e a muoverli con due punti.
 4. Ascolta: com'era prima, il volume scende e risale; con Alt+Maiusc+L sulla traccia un messaggio dice anche il valore dell'automazione in quel punto.
 
 Domande: capisci dalla tabella dove sono i punti e che valore hanno? Ti serve sentire il punto mentre lo aggiungi?

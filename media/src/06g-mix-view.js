@@ -35,13 +35,17 @@ function renderArrange(){if(!isAudio())return;const act=document.activeElement,k
  for(const r of P.regions){const cv=document.querySelector(`#rg-${r.id} canvas`);if(cv&&r.dur*P.pxs>12)drawRegionWave(cv,r)}
  drawAutoLines();
  drawArRuler();placeArPlayhead(MIX.playing?mixPos():P.t);updateArrangeUI();if(keep&&$(keep)&&document.activeElement!==$(keep))$(keep).focus({preventScroll:true})}
-// Automazione disegnata sulla corsia: linea continua per il volume, tratteggiata per il bilanciamento.
-function drawAutoLine(cv,t){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const dur=Math.max(projDur(),t.volAuto?.at(-1)?.t||0,1),X=p=>p*P.pxs,Y=v=>h-clamp((v+60)/72,0,1)*h;
- if(t.autoOn?.vol&&t.volAuto?.length){const list=[{t:0,v:t.volAuto[0].v},...t.volAuto,{t:dur,v:t.volAuto.at(-1).v}];
+// Automazione disegnata sulla corsia: linea continua per il volume, tratteggiata per il bilanciamento; per gli altri
+// parametri un indicatore compatto in alto (un quadratino colorato per parametro acceso), perché sei linee
+// sovrapposte non si leggerebbero.
+const AUTO_DOT={reverb:'#2457c5',low:'#1e7a46',high:'#b35500',comp:'#7a3db8'};
+function drawAutoLine(cv,t){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const vol=t.auto?.vol||[],pan=t.auto?.pan||[],dur=Math.max(projDur(),vol.at(-1)?.t||0,pan.at(-1)?.t||0,1),X=p=>p*P.pxs,Y=v=>h-clamp((v+60)/72,0,1)*h;
+ if(t.autoOn?.vol&&vol.length){const list=[{t:0,v:vol[0].v},...vol,{t:dur,v:vol.at(-1).v}];
   g.strokeStyle=palette.accent;g.lineWidth=1.5;g.beginPath();list.forEach((p,i)=>i?g.lineTo(X(p.t),Y(p.v)):g.moveTo(X(p.t),Y(p.v)));g.stroke();
-  g.fillStyle=palette.accent;for(const p of t.volAuto){g.beginPath();g.arc(X(p.t),Y(p.v),2.5,0,Math.PI*2);g.fill()}}
- if(t.autoOn?.pan&&t.panAuto?.length){const list=[{t:0,v:t.panAuto[0].v},...t.panAuto,{t:dur,v:t.panAuto.at(-1).v}],YP=v=>h-clamp((v+1)/2,0,1)*h;
-  g.strokeStyle=palette['text-3'];g.lineWidth=1;g.setLineDash([4,3]);g.beginPath();list.forEach((p,i)=>i?g.lineTo(X(p.t),YP(p.v)):g.moveTo(X(p.t),YP(p.v)));g.stroke();g.setLineDash([])}}
+  g.fillStyle=palette.accent;for(const p of vol){g.beginPath();g.arc(X(p.t),Y(p.v),2.5,0,Math.PI*2);g.fill()}}
+ if(t.autoOn?.pan&&pan.length){const list=[{t:0,v:pan[0].v},...pan,{t:dur,v:pan.at(-1).v}],YP=v=>h-clamp((v+1)/2,0,1)*h;
+  g.strokeStyle=palette['text-3'];g.lineWidth=1;g.setLineDash([4,3]);g.beginPath();list.forEach((p,i)=>i?g.lineTo(X(p.t),YP(p.v)):g.moveTo(X(p.t),YP(p.v)));g.stroke();g.setLineDash([])}
+ let x=4;for(const k of ['reverb','low','high','comp']){if(t.autoOn?.[k]&&t.auto?.[k]?.length){g.fillStyle=AUTO_DOT[k];g.fillRect(x,3,4,4);x+=7}}}
 function drawAutoLines(){for(const t of P.tracks){const cv=$('autl-'+t.id);if(cv)drawAutoLine(cv,t)}}
 const TL_REGION={};
 function drawArRuler(){const cv=$('arRulerCanvas'),W=Math.min(arWidth()-HEAD_W,32000);cv.style.width=W+'px';const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);
@@ -201,47 +205,64 @@ async function crossfadeNext(){const r=selRegion();if(!r){toast('Scegli prima un
 
 // ——— Automazione di volume e bilanciamento: punti nel tempo, modificabili da una tabella. Con l'automazione accesa
 // i valori del cursore non contano: li dà la curva, e muto e solo restano.
-function autoTable(title,list,fmt,kind){const rows=list.length?list.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(fmt(p.v))}</td><td><button type="button" class="btn" data-del="${kind}:${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>';
- return `<table><caption>${esc(title)}</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Valore</th><th scope="col">Togli</th></tr></thead><tbody>${rows}</tbody></table>`}
+// Parametri che si possono automatizzare: nome, intervallo, unità e valore attuale dei cursori. La stessa tabella
+// serve alla finestra, alla descrizione del brano e ai comandi rapidi.
+const AUTO_UI={vol:['Volume',-60,12,'dB'],pan:['Bilanciamento',-100,100,'%'],reverb:['Riverbero',0,100,'%'],low:['Bassi',-15,15,'dB'],high:['Alti',-15,15,'dB'],comp:['Compressione',0,100,'%']};
+const autoManual=(t,k)=>k==='vol'?t.vol:k==='pan'?Math.round(t.pan*100):k==='reverb'?t.reverb:k==='low'?t.low:k==='high'?t.high:t.comp;
+const autoShow=(k,v)=>k==='vol'||k==='low'||k==='high'?fmtDb(v):k==='pan'?panWords(v):fmtNum(v,0)+'%';
+function autoTable(kind,list){const label=AUTO_UI[kind][0];
+ const rows=list.length?list.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(autoShow(kind,p.v))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>';
+ return `<table><caption>Punti: ${esc(label.toLowerCase())}</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Valore</th><th scope="col">Togli</th></tr></thead><tbody>${rows}</tbody></table>`}
 // Un bus è una traccia senza regioni: raccoglie le tracce che lo scelgono come uscita, con un volume, un
 // compressore e un riverbero soli.
 function newBus(){const n=P.tracks.filter(t=>t.kind==='bus').length+1,tr=newTrack('Bus '+n);tr.kind='bus';
  pCommit('Nuovo bus',()=>{P.tracks.push(tr);P.track=tr.id});renderArrange();focusLane(tr.id);announce(`Bus «${tr.name}» creato. Scegli la sua uscita nelle proprietà delle tracce da raggruppare`)}
 async function autoEditDialog(){const t=selTrack();if(!t){toast('Crea prima una traccia');return}
- const draft={vol:(t.volAuto||[]).map(p=>({...p})),pan:(t.panAuto||[]).map(p=>({...p}))};
- const render=()=>{const box=$('autoList');if(box)box.innerHTML=autoTable('Punti del volume',draft.vol,v=>fmtDb(v),'vol')+autoTable('Punti del bilanciamento',draft.pan,v=>panWords(v),'pan')};
- const put=(k,time,v)=>{const list=draft[k],at=list.findIndex(p=>Math.abs(p.t-time)<0.001),p={t:clamp(time,0,86400),v};if(at>=0)list[at]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);render();
-  announce(`Punto di ${k==='vol'?'volume':'bilanciamento'} a ${sayTime(time,2)}: ${k==='vol'?fmtDb(v):panWords(v)}`)};
- const res=await modal('Automazione della traccia',`<p id="autoIntro">Traccia «${esc(t.name)}». I punti valgono dall’inizio del brano e fra un punto e il successivo il valore cambia in linea retta; un punto allo stesso tempo sostituisce quello che c’è. Con l’automazione accesa il cursore della traccia non conta.</p><div id="autoList"></div>`,
+ const draft=Object.fromEntries(Object.keys(AUTO_UI).map(k=>[k,(t.auto?.[k]||[]).map(p=>({...p}))]));
+ let param='vol';
+ const render=()=>{const box=$('autoList');if(box)box.innerHTML=autoTable(param,draft[param])};
+ const sync=()=>{const el=$('dlg_value');if(!el)return;const [,lo,hi]=AUTO_UI[param],last=draft[param].at(-1);
+  el.min=String(lo);el.max=String(hi);el.step=param==='pan'?String(5):String(param==='vol'||param==='low'||param==='high'?0.5:1);
+  el.value=String(last?(param==='pan'?last.v*100:last.v):autoManual(t,param))};
+ const put=()=>{const time=parseTime($('dlg_time').value);if(!(time>=0)){toast('Tempo del punto non valido');return}
+  const raw=num($('dlg_value').value);if(!Number.isFinite(raw)){toast('Valore del punto non valido');return}
+  const [,lo,hi]=AUTO_UI[param],v=param==='pan'?clamp(raw/100,-1,1):clamp(raw,lo,hi),list=draft[param],at=list.findIndex(p=>Math.abs(p.t-time)<0.001),p={t:clamp(time,0,86400),v};
+  if(at>=0)list[at]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);render();
+  announce(`Punto di ${AUTO_UI[param][0].toLowerCase()} a ${sayTime(time,2)}: ${autoShow(param,v)}`)};
+ const res=await modal('Automazione della traccia',`<p id="autoIntro">Traccia «${esc(t.name)}». I punti valgono dall’inizio del brano e fra un punto e il successivo il valore cambia in linea retta (in decibel per volume, bassi e alti). Un punto allo stesso tempo sostituisce quello che c’è; con l’automazione accesa il cursore del parametro non conta.</p><div id="autoList"></div>`,
   [{id:'onVol',label:'Il volume segue l’automazione',type:'checkbox',value:!!t.autoOn?.vol},
    {id:'onPan',label:'Il bilanciamento segue l’automazione',type:'checkbox',value:!!t.autoOn?.pan},
+   {id:'onReverb',label:'Il riverbero segue l’automazione',type:'checkbox',value:!!t.autoOn?.reverb},
+   {id:'onLow',label:'I bassi seguono l’automazione',type:'checkbox',value:!!t.autoOn?.low},
+   {id:'onHigh',label:'Gli alti seguono l’automazione',type:'checkbox',value:!!t.autoOn?.high},
+   {id:'onComp',label:'La compressione segue l’automazione',type:'checkbox',value:!!t.autoOn?.comp},
+   {id:'param',label:'Parametro da modificare',type:'select',value:'vol',options:Object.entries(AUTO_UI).map(([k,[l]])=>[k,l])},
    {id:'time',label:'Tempo del punto',type:'time',value:fmtTime(P.t,2)},
-   {id:'vol',label:'Volume del punto in dB',type:'number',min:-60,max:12,step:0.5,value:t.vol},
-   {id:'pan',label:'Bilanciamento del punto',type:'range',min:-100,max:100,step:5,value:Math.round(t.pan*100),fmt:v=>panWords(v/100)}],'Salva',
-  {wide:true,buttons:[{label:'Aggiungi al volume',run:v=>{const time=parseTime(v.time);if(!(time>=0)){toast('Tempo del punto non valido');return}put('vol',time,num(v.vol))}},
-    {label:'Aggiungi al bilanciamento',run:v=>{const time=parseTime(v.time);if(!(time>=0)){toast('Tempo del punto non valido');return}put('pan',time,num(v.pan)/100)}}],
-   onOpen:pane=>{render();pane.addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;const [k,i]=b.dataset.del.split(':');draft[k].splice(Number(i),1);render();announce('Punto tolto')})}});
+   {id:'value',label:'Valore del punto',type:'number',value:autoManual(t,'vol'),hint:'Nell’unità del parametro: decibel, percento oppure da sinistra (−100) a destra (100).'}],'Salva',
+  {wide:true,buttons:[{label:'Aggiungi il punto',run:put}],
+   onOpen:pane=>{render();sync();
+    pane.querySelector('#dlg_param').addEventListener('change',e=>{param=e.target.value;render();sync();announce(`Parametro: ${AUTO_UI[param][0].toLowerCase()}`)});
+    pane.addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;draft[param].splice(Number(b.dataset.del),1);render();announce('Punto tolto')})}});
  if(!res)return;
  const norm=(list,lo,hi)=>list.filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.v)).map(p=>({t:clamp(p.t,0,86400),v:clamp(p.v,lo,hi)})).sort((a,b)=>a.t-b.t).slice(0,500);
- pCommit('Automazione della traccia',()=>{t.volAuto=norm(draft.vol,-60,12);t.panAuto=norm(draft.pan,-1,1);
-  t.autoOn={vol:!!res.onVol,pan:!!res.onPan};
-  if(t.autoOn.vol&&!t.volAuto.length)t.volAuto=[{t:0,v:t.vol},{t:Math.max(projDur(),1),v:t.vol}];
-  if(t.autoOn.pan&&!t.panAuto.length)t.panAuto=[{t:0,v:t.pan},{t:Math.max(projDur(),1),v:t.pan}]});
- announce(`Automazione: ${t.volAuto.length===1?'un punto di volume':t.volAuto.length+' punti di volume'}${t.autoOn.vol?' (attiva)':''}, ${t.panAuto.length===1?'un punto di bilanciamento':t.panAuto.length+' punti di bilanciamento'}${t.autoOn.pan?' (attiva)':''}`)}
+ pCommit('Automazione della traccia',()=>{const out={};for(const k of Object.keys(AUTO_UI)){const [,lo,hi]=AUTO_UI[k],range=k==='pan'?[-1,1]:[lo,hi];out[k]=norm(draft[k],range[0],range[1])}
+  t.auto=out;t.autoOn={vol:!!res.onVol,pan:!!res.onPan,reverb:!!res.onReverb,low:!!res.onLow,high:!!res.onHigh,comp:!!res.onComp};
+  for(const k of Object.keys(AUTO_UI))if(t.autoOn[k]&&!out[k].length){const v=k==='pan'?autoManual(t,k)/100:autoManual(t,k);out[k]=[{t:0,v},{t:Math.max(projDur(),1),v}]}});
+ const conta=k=>`${t.auto[k].length===1?'un punto':t.auto[k].length+' punti'} di ${AUTO_UI[k][0].toLowerCase()}`;
+ announce('Automazione: '+Object.keys(AUTO_UI).filter(k=>t.autoOn[k]).map(conta).join(', '))}
 function autoAddPoint(k){const t=selTrack();if(!t){toast('Crea prima una traccia');return}
- const at=clamp(MIX.playing?mixPos():P.t,0,86400),key=k+'Auto',cur=autoValueAt(t[key],at)??(k==='vol'?t.vol:t.pan);
- pCommit(k==='vol'?'Punto di volume':'Punto di bilanciamento',()=>{const list=t[key]=t[key]||[],i=list.findIndex(p=>Math.abs(p.t-at)<0.001),p={t:at,v:cur};if(i>=0)list[i]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);t.autoOn={...(t.autoOn||{}),[k]:true}});
- announce(`Punto di ${k==='vol'?'volume':'bilanciamento'} a ${sayTime(at,2)}: ${k==='vol'?fmtDb(cur):panWords(cur)}`)}
+ const at=clamp(MIX.playing?mixPos():P.t,0,86400),cur=autoValueAt(t.auto?.[k],at)??(k==='pan'?autoManual(t,k)/100:autoManual(t,k));
+ pCommit('Punto di '+AUTO_UI[k][0].toLowerCase(),()=>{t.auto??={};const list=t.auto[k]=t.auto[k]||[],i=list.findIndex(p=>Math.abs(p.t-at)<0.001),p={t:at,v:cur};if(i>=0)list[i]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);t.autoOn={...(t.autoOn||{}),[k]:true}});
+ announce(`Punto di ${AUTO_UI[k][0].toLowerCase()} a ${sayTime(at,2)}: ${autoShow(k,cur)}`)}
 function autoToggle(k){const t=selTrack();if(!t){toast('Crea prima una traccia');return}
- const on=!t.autoOn?.[k];
- pCommit(k==='vol'?'Volume automatico':'Bilanciamento automatico',()=>{t.autoOn={...(t.autoOn||{}),[k]:on};
-  if(!t[k+'Auto']?.length)t[k+'Auto']=[{t:0,v:k==='vol'?t.vol:t.pan},{t:Math.max(projDur(),1),v:k==='vol'?t.vol:t.pan}]});
- announce(`${k==='vol'?'Volume':'Bilanciamento'} ${on?'automatico':'di nuovo manuale'} sulla traccia «${t.name}»`)}
+ const on=!t.autoOn?.[k],label=AUTO_UI[k][0].toLowerCase();
+ pCommit('Automazione del '+label,()=>{t.autoOn={...(t.autoOn||{}),[k]:on};
+  if(!t.auto?.[k]?.length){const v=k==='pan'?autoManual(t,k)/100:autoManual(t,k);t.auto={...(t.auto||{}),[k]:[{t:0,v},{t:Math.max(projDur(),1),v}]}}});
+ announce(`${AUTO_UI[k][0]} ${on?'automatico':'di nuovo manuale'} sulla traccia «${t.name}»`)}
 async function autoClear(){const t=selTrack();if(!t){toast('Crea prima una traccia');return}
- if(!(t.volAuto?.length||t.panAuto?.length)){toast('Questa traccia non ha automazione');return}
+ if(!Object.keys(AUTO_UI).some(k=>t.auto?.[k]?.length)){toast('Questa traccia non ha automazione');return}
  if(!(await confirmAction(`Togliere tutti i punti di automazione della traccia «${t.name}»?`,'Togli')))return;
- pCommit('Togli l’automazione',()=>{t.volAuto=[];t.panAuto=[];t.autoOn={vol:false,pan:false}});announce('Automazione tolta')}
-
+ pCommit('Togli l’automazione',()=>{t.auto=Object.fromEntries(Object.keys(AUTO_UI).map(k=>[k,[]]));t.autoOn={vol:false,pan:false,reverb:false,low:false,high:false,comp:false}});announce('Automazione tolta')}
 // ——— Take di una regione: più registrazioni dello stesso passaggio, con un nome e una nota, una attiva alla volta.
 function ensureTakes(r){if(!r.takes?.length)r.takes=[{id:uid(),src:r.src,off:r.off,dur:r.dur,name:'Take 1',note:''}]}
 function activateTake(r,t){r.src=t.src;r.off=t.off;r.dur=t.dur}
