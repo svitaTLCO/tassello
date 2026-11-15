@@ -250,7 +250,7 @@ function deliveryReportData({name,fmtLabel,content,m,limited,plan,compressed,not
  const text=rows.map(([k,v])=>k+': '+v).join('\n')+'\n'+(checks.length?'Esito: '+checks.join('; ')+'\n':'')+(noteFinal?noteFinal+'\n':'');
  return{name,rows,summary,note:noteFinal,text}}
 function showDeliveryReport(rep){const html=rep.rows.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
- return modal('Report di consegna',`<p id="dlvSum">${esc(rep.summary)}</p><dl class="stats">${html}</dl><p>${esc(rep.note)}</p>`,[],'Chiudi',{noCancel:true,wide:true,describedBy:'dlvSum',
+ return modal('Report di consegna',`<p id="dlvSum">${esc(rep.summary)}</p><dl class="stats">${html}</dl><p>${esc(rep.note)}</p>`,[],'Chiudi',{noCancel:true,wide:true,
   buttons:[{label:'Salva il report',run:()=>{download(rep.text,extName(rep.name+' - report','txt'),'text/plain');announce('Report di consegna salvato come file di testo')}}]})}
 // Comando Alt+Maiusc+R: misura quello che c'è (selezione, regione o brano) senza esportare nulla.
 async function deliveryReportDialog(){const inEditor=!!A.buf;

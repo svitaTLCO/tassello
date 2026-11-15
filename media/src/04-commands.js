@@ -74,7 +74,7 @@ def('v','File',[
  ['importMedia','Importa file multimediali','import','Ctrl+I',{g:1,short:'Importa'}]]);
 def('av','Generale',[
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],
- ['shortcuts','Scorciatoie da tastiera','keyboard','F1 / Ctrl+/',{g:1,short:'Scorciatoie'}],
+ ['shortcuts','Scorciatoie da tastiera','keyboard','Ctrl+/',{g:1,short:'Scorciatoie'}],
  ['help','Informazioni e limiti','info','',{short:'Informazioni'}],
  ['nextRegion','Vai all’area successiva','','F6',{g:1}],
  ['prevRegion','Vai all’area precedente','','Maiusc+F6',{g:1}],
