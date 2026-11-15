@@ -1,8 +1,13 @@
 {
   "programma": "Tassello Ufficio",
   "file": "tassello-ufficio.html",
-  "ultima": "1.11.6",
+  "ultima": "1.12.0",
   "versioni": [
+    {
+      "versione": "1.12.0",
+      "data": "2026-11-16",
+      "sha256": "05613cfe7fda57967728c83fce900f0aaeb32a7d05602d8557d6d548f0f16e33"
+    },
     {
       "versione": "1.11.6",
       "data": "2026-11-15",

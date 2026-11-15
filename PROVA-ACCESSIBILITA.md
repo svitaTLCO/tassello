@@ -180,6 +180,16 @@ Domande: riesci a immaginare dove stanno il titolo, la foto e i testi? Sapresti 
 
 Domande: sai se le due cornici si toccano o si sovrappongono? Sai se la cornice è rimasta dentro i margini della pagina? La verifica te l'ha detto? Le misure in millimetri ti bastano, o vorresti sentire la posizione in un altro modo, per esempio «sotto il titolo, allineata a sinistra»?
 
+**Compito I2b (nuovo): misure scritte e disposizione.**
+
+1. Scegli una cornice con PgGiù, poi passa alle proprietà con F6 e scegli il campo X.
+2. Scrivi `metà` e premi Invio. Poi `+12`, poi `metà paggina`.
+3. Con Alt+Q cerca «Metti sotto», scegli la cornice di riferimento, lo spazio e l'allineamento, e conferma.
+4. Con Alt+Q prova «Stessa misura…» e «Distanza da…».
+5. Con Alt+Q accendi «Aggancia alla griglia», torna sulla pagina e premi una freccia. Poi cerca «Dove sono nella griglia» e «Vai alla casella».
+
+Domande: quando scrivi una misura senti il valore risolto e l'avviso se la cornice esce dai margini? L'errore per «metà paggina» ti dice che cosa scrivere? I comandi di disposizione ti dicono con quale cornice e a che distanza? La casella e la riga ti aiutano a capire dove sei?
+
 **Compito I3: colori e contrasto.**
 
 1. Premi Alt+Q, scrivi «Temi» e scegli «Temi di colore». Scegli un tema con le frecce e premi Invio.

@@ -2,6 +2,10 @@
 // pagina con guide e maniglie, a destra le proprietà. Ogni modifica passa da pgChanged, che ridisegna e salva la bozza.
 const pgStage=$('pgStage'),pgSvg=$('pgSvg'),pgOver=$('pgOver'),pgScroll=$('pgScroll');
 let pgLay=null,pgLayKey='',pgViewI=[],pgMLay=null,pgMLayKey='';
+// La linea che unisce due cornici per un attimo, dopo un comando di disposizione: è l'eco visiva di quello che
+// lo screen reader ha appena detto. Non resta nel documento.
+let pgLinkEcho=null,pgLinkTimer=0;
+function pgLinkFlash(a,b){if(!a||!b)return;pgLinkEcho={a:a.id,b:b.id};pgRenderOverlay();clearTimeout(pgLinkTimer);pgLinkTimer=setTimeout(()=>{pgLinkEcho=null;pgRenderOverlay()},1500)}
 function pgChanged({props=false,story=false}={}){Pg.ver++;if(!isPage()||!Pg.p)return pgPersistSoon();pgRenderAll({props,story});refreshToggles();pgPersistSoon()}
 // Impaginazione della vista attuale: la pagina (con la riga dei dati in anteprima) o il mastro con i campi scritti per esteso.
 function pgPagesLay(){const key=Pg.ver+'|'+Pg.row;if(pgLayKey!==key){pgViewI=pgViewInstances(Pg.p);pgLay=pgLayout(Pg.p,pgViewI);pgLayKey=key}return pgLay}
@@ -19,6 +23,7 @@ function pgRenderStage(){const p=Pg.p,k=pgScale(),c=pgCur();for(const s of [pgSv
  const pg=pgCurPage(),rows=p.data?.rows.length||0;$('pgPageInfo').textContent=Pg.mid?pgHolder().name:`Pagina ${Pg.pi+1} di ${p.pages.length}`;$('pgRowBar').hidden=!(pg?.data&&rows);if(pg?.data&&rows)$('pgRowInfo').textContent=`Riga ${Math.min(Pg.row,rows-1)+1} di ${rows}`}
 // Guide, griglia, contorni delle cornici, catene del testo, testo in eccesso e maniglie della cornice scelta.
 function pgRenderOverlay(){const p=Pg.p,k=pgScale(),sw=pr2(1/k),h=pgHolder(),sel=pgSel(),c=pgCur();let s='';
+ if(pgLinkEcho){const A=h.items.find(x=>x.id===pgLinkEcho.a),B=h.items.find(x=>x.id===pgLinkEcho.b);if(A&&B){const a=pgBoxOf(A),b=pgBoxOf(B),ax=a.x+a.w/2,ay=a.y+a.h/2,bx=b.x+b.w/2,by=b.y+b.h/2;s+=`<path class="g-link" d="M${pr2(ax)} ${pr2(ay)}L${pr2(bx)} ${pr2(by)}" stroke-width="${pr2(1.5/k)}" stroke-dasharray="${pr2(5/k)} ${pr2(3/k)}"/>`}}
  if(Pg.grid){const st=Math.max(2,p.step);let d='';for(let x=st;x<p.w;x+=st)d+=`M${pr2(x)} 0V${pr2(p.h)}`;for(let y=st;y<p.h;y+=st)d+=`M0 ${pr2(y)}H${pr2(p.w)}`;s+=`<path class="g-grid" d="${d}" stroke-width="${sw}"/>`}
  if(Pg.guides){const i=pgInner(p);s+=`<rect class="g-margin" x="${pr2(i.x)}" y="${pr2(i.y)}" width="${pr2(i.w)}" height="${pr2(i.h)}" fill="none" stroke-width="${sw}"/>`;if(p.cols>1){const cw=(i.w-(p.cols-1)*p.gut)/p.cols;let d='';for(let n=1;n<p.cols;n++){const x=i.x+n*cw+(n-1)*p.gut;d+=`M${pr2(x)} ${pr2(i.y)}V${pr2(i.y+i.h)}M${pr2(x+p.gut)} ${pr2(i.y)}V${pr2(i.y+i.h)}`}s+=`<path class="g-col" d="${d}" stroke-width="${sw}"/>`}
   if(Pg.p.tiles?.on&&!Pg.mid)s+=pgTileOverlay(k);else if(p.bleed>0)s+=`<rect class="g-bleed" x="${pr2(-p.bleed)}" y="${pr2(-p.bleed)}" width="${pr2(p.w+2*p.bleed)}" height="${pr2(p.h+2*p.bleed)}" fill="none" stroke-width="${sw}" stroke-dasharray="${pr2(6/k)} ${pr2(3/k)}"/>`;
@@ -110,7 +115,7 @@ function pgRenderProps({story=false}={}){const b=$('pgProps'),p=Pg.p,it=pgSel(),
   if(it.kind!=='sign')s+=`<h3>Effetti</h3>`+ppS('shadow','Ombra',it.shadow||'none',PG_SIGN_SHADOWS,'L’ombra cade in basso a destra, anche se la cornice è ruotata.')+(it.shadow&&it.shadow!=='none'?ppC('shc','Colore dell’ombra',it.shc||'#1b1b1b'):'');
   s+=ppR('opacity','Opacità',0,100,it.opacity,v=>v+'%');
   if(!['text','sign','qr','table'].includes(it.kind))s+=`<h3>Per chi non vede</h3>`+ppK('deco','Decorativa: non serve descriverla',it.deco)+(it.deco?'':ppT('alt','Testo alternativo',it.alt,it.kind==='image'?'Che cosa mostra l’immagine, in una o due frasi. Puoi usare i campi dei dati, per esempio «Nome».':'Che cosa comunica la forma.'))}
- if(it)s+=ppK('lock','Bloccata: non si sposta e non si elimina per sbaglio',it.lock);b.innerHTML=s;colorHints(b);pgStoryCss();if(focusId&&$(focusId))$(focusId).focus()}
+ if(it)s+=ppK('lock','Bloccata: non si sposta e non si elimina per sbaglio',it.lock);b.innerHTML=s;pgCalcSetup();colorHints(b);pgStoryCss();if(focusId&&$(focusId))$(focusId).focus()}
 // Riempimento con la sfumatura e contorno con il suo tratto, per tutte le cornici che non sono insegne.
 function pgFillProps(it,label,none){return ppC('fill',label,it.fill,none)+(it.fill==='none'?'':ppS('grad','Sfumatura',it.grad||'',[['','Nessuna, colore pieno'],['lin','Lineare'],['rad','Radiale, dal centro']])+(it.grad?ppC('fill2','Secondo colore della sfumatura',it.fill2||'#ffffff')+(it.grad==='lin'?ppR('gangle','Direzione della sfumatura',0,360,it.gangle??90,v=>v+'°','°',15):''):''))}
 function pgEdgeProps(it,label){const u=unitName();return ppC('stroke',label,it.stroke)+ppF('sw',`Spessore del contorno (${u})`,fmtU(it.sw),'decimal',it.sw>0?'':'Con lo spessore a zero il contorno non c’è.')+(it.sw>0?ppS('dash','Tratto del contorno',it.dash||'',PG_DASHES):'')}
@@ -120,7 +125,13 @@ function pgSyncProps(){if(pgSelItems().length>1){if(!$('pp-multi'))pgRenderProps
  for(const [k,v] of [['x',fmtU(it.x)],['y',fmtU(it.y)],['w',fmtU(it.w)],['h',fmtU(it.h)],['rot',pgFmt(pgRotOf(it))]]){const el=$('pp-'+k);if(el&&el!==a)el.value=v}}
 // Valori scritti nei campi: si controllano e diventano una modifica. PG_RFMT dà il formato dei cursori che non sono percentuali.
 const PG_RFMT={},PG_PROP={name:'Nome',x:'Posizione',y:'Posizione',w:'Dimensioni',h:'Dimensioni',rot:'Rotazione',cols:'Colonne',gut:'Spazio tra colonne',pad:'Margine interno',valign:'Allineamento verticale',fill:'Colore',fillNone:'Sfondo',stroke:'Contorno',sw:'Spessore',radius:'Angoli',opacity:'Opacità',alt:'Testo alternativo',deco:'Decorativa',fit:'Adattamento',fx:'Punto focale',fy:'Punto focale',file:'Immagine',field:'Campo dell’immagine',mname:'Nome del mastro',lock:'Blocco',mask:'Sagoma',text:'Testo dell’insegna',fitSign:'Adatta alla cornice',style:'Stile dell’insegna',font:'Carattere',bold:'Grassetto',italic:'Corsivo',caps:'Maiuscole',size:'Dimensione',ls:'Spaziatura tra le lettere',align:'Allineamento',shape:'Forma della scritta',curve:'Curvatura',fillType:'Riempimento',c1:'Colore',c2:'Secondo colore',angle:'Direzione della sfumatura',ow:'Contorno',oc:'Colore del contorno',ow2:'Secondo contorno',oc2:'Colore del secondo contorno',shadow:'Ombra',shc:'Colore dell’ombra',tstyle:'Stile della tabella',head:'Intestazione',tfont:'Carattere',tsize:'Dimensione del testo',ink:'Colore del testo',hc:'Sfondo dell’intestazione',hink:'Testo dell’intestazione',line:'Colore delle linee',zc:'Righe alterne',wrap:'Scontorno del testo',wrapGap:'Distanza dello scontorno',bleed:'Abbondanza',marks:'Segni di taglio',ec:'Correzione degli errori',quiet:'Margine chiaro',dark:'Colore del codice',light:'Sfondo del codice',grad:'Sfumatura',fill2:'Secondo colore',gangle:'Direzione della sfumatura',dash:'Tratto del contorno',glow:'Neon',gc:'Colore del neon',ton:'Stampa a tessere',tsheet:'Foglio',torient:'Orientamento dei fogli',tsafe:'Margine dei fogli',tover:'Sovrapposizione',tmarks:'Segni di taglio',tmap:'Foglio di montaggio',master:'Mastro della pagina',data:'Ripeti per ogni riga',preset:'Formato',dw:'Larghezza della pagina',dh:'Altezza della pagina',mt:'Margini',mb:'Margini',ml:'Margini',mr:'Margini',step:'Passo della griglia',bg:'Colore della pagina',bgNone:'Colore della pagina'};
-function pgApplyProp(key,el){const p=Pg.p,it=pgSel(),v=el.type==='checkbox'?el.checked:el.value,n=pgNum(v);
+const pgMeasureKeys=['x','y','w','h'];
+const pgMeasureHelp=raw=>`Non capisco «${String(raw).trim()}». Prova con 105, 1/2, 50%, metà pagina o +12.`;
+const pgPlainMeasure=raw=>/^\d+(?:[.,]\d+)?$/.test(String(raw).trim());
+function pgApplyProp(key,el){const p=Pg.p,it=pgSel(),v=el.type==='checkbox'?el.checked:el.value;
+ const measure=it&&pgMeasureKeys.includes(key)?pgMeasure(v,{key,unit:unitName(),page:p,item:it,mm:MM,current:toU(it[key])}):NaN;
+ if(it&&pgMeasureKeys.includes(key)&&!Number.isFinite(measure))throw Error(pgMeasureHelp(v));
+ const n=it&&pgMeasureKeys.includes(key)?measure:pgNum(v);
  const need=(lo,hi,conv=fromU)=>{const x=conv(n);if(!(x>=lo&&x<=hi))throw Error(`Scrivi un numero tra ${pgFmt(toU(lo))} e ${pgFmt(toU(hi))}`);return x};
  if(!it){const pg=pgCurPage();switch(key){case 'mname':pgHolder().name=String(v).trim().slice(0,40)||pgHolder().name;return;case 'master':pg.master=v;return;case 'data':pg.data=!!v;return;case 'alt':pg.alt=String(v).slice(0,2000);return;
   case 'preset':{const pr=PG_PRESETS.find(x=>x[0]===v);p.preset=v;if(pr)pgResize(p,pr[2],pr[3],pr[4]);return}case 'dw':pgResize(p,need(20,20000),p.h);p.preset='';return;case 'dh':pgResize(p,p.w,need(20,20000));p.preset='';return;
@@ -148,16 +159,41 @@ function pgResize(p,w,h,unit){p.w=w;p.h=h;if(unit)p.unit=unit}
 $('pgProps').addEventListener('input',e=>{const el=e.target,key=el.dataset.prop,it=pgSel();if(!key||!(el.type==='range'||el.type==='color'||(key==='text'&&(it?.kind==='sign'||it?.kind==='qr'))))return;try{pgApplyProp(key,el)}catch(err){return}
  if(it?.kind==='qr'&&$('pp-qr-state'))$('pp-qr-state').textContent=pgQrState(it,{row:pgCur().I.row});
  if(el.type==='range'){const t=PG_RFMT[key]?v=>PG_RFMT[key](Number(v)):v=>v+(el.dataset.unit??'%');el.setAttribute('aria-valuetext',t(el.value));$('pp-'+key+'-o').textContent=t(el.value)}Pg.ver++;pgRenderStage()});
+// L'anteprima sotto i campi X, Y, larghezza e altezza: solo per chi guarda, perché l'annuncio dice già il valore.
+// Il riferimento alle spiegazioni è invece per tutti: dice che si possono scrivere frazioni, percentuali e misure relative.
+function pgCalcSetup(){
+ for(const k of pgMeasureKeys){const el=$('pp-'+k);if(!el)continue;
+  let c=$('pp-'+k+'-calc');
+  if(!c){c=document.createElement('small');c.id='pp-'+k+'-calc';c.className='hint pp-calc';c.hidden=true;c.setAttribute('aria-hidden','true');el.after(c)}
+  if(k==='x'){const ids=[...(el.getAttribute('aria-describedby')||'').split(/\s+/),'pp-measure-hint'].filter(Boolean);el.setAttribute('aria-describedby',[...new Set(ids)].join(' '))}}
+ if(!$('pp-measure-hint')){const a=$('pp-h')||$('pp-x'),host=a?.closest('.row2')||a;if(host){const p=document.createElement('p');p.id='pp-measure-hint';p.className='hint';p.textContent='Misure: 1/2, 50%, metà, 2 colonne, +12.';host.after(p)}}
+}
+function pgCalcHint(el){const key=el?.dataset?.prop,it=pgSel();if(!pgMeasureKeys.includes(key)||!it)return;const c=$('pp-'+key+'-calc');if(!c)return;const raw=String(el.value||'').trim();
+ if(!raw||pgPlainMeasure(raw)){c.hidden=true;c.textContent='';return}
+ const m=pgMeasure(raw,{key,unit:unitName(),page:Pg.p,item:it,mm:MM,current:toU(it[key])});
+ if(!Number.isFinite(m)){c.hidden=false;c.textContent='Non riconosciuto';return}
+ c.hidden=false;c.textContent='= '+fmtU(fromU(m))+' '+unitName()}
+function pgCalcHide(){for(const k of pgMeasureKeys){const c=$('pp-'+k+'-calc');if(c){c.hidden=true;c.textContent=''}}}
 // Un valore che non va resta scritto nel campo, con il messaggio subito sotto, collegato al campo e annunciato; il campo
 // prende aria-invalid. Il messaggio sparisce quando il valore va bene. msg vuoto toglie il messaggio.
 function pgPropError(el,msg){const id=el.id+'-e';let box=$(id);if(!msg){if(box){box.remove();el.removeAttribute('aria-invalid');el.setAttribute('aria-describedby',(el.getAttribute('aria-describedby')||'').replace(id,'').trim());if(!el.getAttribute('aria-describedby'))el.removeAttribute('aria-describedby')}return}
  const name=(el.labels?.[0]?.textContent||'').trim();if(!box){box=Object.assign(document.createElement('small'),{id,className:'hint pp-err'});box.setAttribute('role','alert');const h=el.nextElementSibling?.classList.contains('hint')?el.nextElementSibling:el;h.after(box);el.setAttribute('aria-describedby',((el.getAttribute('aria-describedby')||'')+' '+id).trim())}
  el.setAttribute('aria-invalid','true');box.textContent='';setTimeout(()=>{box.textContent=(name?name+': ':'')+msg},40);el.focus();el.select?.()}
 $('pgProps').addEventListener('change',e=>{const el=e.target,key=el.dataset.prop;if(!key)return;if(key==='ps'){pgApplyParaStyle(el.value);return}if(key==='cs'){pgApplyCharStyle(el.value);return}const it=pgSel();
+ const raw=String(el.value??'').trim(),expr=!!it&&pgMeasureKeys.includes(key)&&!pgPlainMeasure(raw);
  try{pgApplyProp(key,el)}catch(err){pgPropError(el,err.message);return}pgPropError(el,'');
- const label=key==='text'&&it?.kind==='qr'?'Contenuto':key==='shape'&&it?.kind==='shape'?'Elemento':PG_PROP[key]||'Proprietà';pgSettle(it?`${label} di ${it.name}`:label,{props:['tstyle','head','wrap','ec','quiet','dark','light','look','grad','dash','sw','fillNone','deco','preset','name','mname','cols','file','field','fit','bgNone','data','master','style','fillType','shape','shadow','fitSign','lock','ow','ow2','glow','ton','tsheet','torient','tsafe','tover'].includes(key),merge:el.type==='range'});if(key==='rot'&&it){el.value=pgFmt(pgRotOf(it));announce(`${it.name}: ${pgRotSay(it)}`)}if(key==='data'&&el.checked&&!Pg.p.data)toast('Ora scegli i dati dalla scheda Fonti: CSV, XLSX, JSON, un feed o un foglio di Calcolo')});
+ const label=key==='text'&&it?.kind==='qr'?'Contenuto':key==='shape'&&it?.kind==='shape'?'Elemento':PG_PROP[key]||'Proprietà';pgSettle(it?`${label} di ${it.name}`:label,{props:['tstyle','head','wrap','ec','quiet','dark','light','look','grad','dash','sw','fillNone','deco','preset','name','mname','cols','file','field','fit','bgNone','data','master','style','fillType','shape','shadow','fitSign','lock','ow','ow2','glow','ton','tsheet','torient','tsafe','tover'].includes(key),merge:el.type==='range'});
+ if(expr&&it){const fresh=$('pp-'+key);if(fresh)fresh.value=fmtU(it[key]);const val=key==='w'||key==='h'?fmtU(Math.abs(it[key])):fmtU(it[key]);const out=pgOutSay(it);announce(`${it.name}: ${key==='x'?'x':key==='y'?'y':key==='w'?'larghezza':'altezza'} ${val} ${unitName()} (${raw})${out?'; '+out:''}`)}
+ if(key==='rot'&&it){el.value=pgFmt(pgRotOf(it));announce(`${it.name}: ${pgRotSay(it)}`)}if(key==='data'&&el.checked&&!Pg.p.data)toast('Ora scegli i dati dalla scheda Fonti: CSV, XLSX, JSON, un feed o un foglio di Calcolo')});
+// L'anteprima della misura si aggiorna mentre si scrive e sparisce quando si esce dal campo; non annuncia nulla:
+// l'annuncio arriva quando la misura viene applicata.
+$('pgProps').addEventListener('input',e=>{const k=e.target?.dataset?.prop;if(pgMeasureKeys.includes(k)&&e.target.type==='text')pgCalcHint(e.target)});
+$('pgProps').addEventListener('focusin',e=>{const k=e.target?.dataset?.prop;if(pgMeasureKeys.includes(k)&&e.target.type==='text')pgCalcHint(e.target)});
+$('pgProps').addEventListener('focusout',pgCalcHide);
 $('pgProps').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)runCommand(b.dataset.action)});
-$('pgProps').addEventListener('keydown',e=>{if(e.key==='Escape'&&e.target.id!=='pgStory'){e.preventDefault();(Pg.sel?$('pgFrames'):pgStage).focus()}});
+$('pgProps').addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&e.target.matches?.('input[data-prop]')&&e.target.type==='text'&&!e.target.readOnly){e.preventDefault();e.target.dispatchEvent(new Event('change',{bubbles:true}));return}
+ if(e.key==='Escape'&&e.target.id!=='pgStory'){e.preventDefault();(Pg.sel?$('pgFrames'):pgStage).focus()}});
 // Editor del testo: un paragrafo per riga, con lo stile del paragrafo e quello del carattere come attributi.
 function pgStoryHtml(s){return s.paras.map(pa=>`<p data-ps="${esc(pa.ps)}">${pa.runs.map(r=>r.cs?`<span data-cs="${esc(r.cs)}">${esc(r.t)}</span>`:esc(r.t)).join('')||'<br>'}</p>`).join('')}
 // Aspetto degli stili nell'editor: proporzioni rispetto al corpo del testo e colori leggibili sul bianco.
@@ -204,6 +240,9 @@ const pgSnapV=v=>Pg.p.snap?Math.round(v/Pg.p.step)*Pg.p.step:v;
 // Con «Aggancia alla griglia» le frecce portano il bordo alla riga successiva della griglia nel verso dato (n righe con Maiusc),
 // anche se la cornice partiva fuori griglia; senza, è la posizione più il passo.
 const pgGridGo=(v,dir,n,step)=>{if(!dir)return v;if(!Pg.p.snap)return v+dir*n*step;const g=Pg.p.step,k=v/g;return (dir>0?Math.floor(k+1e-6)+n:Math.ceil(k-1e-6)-n)*g};
+// La casella e la riga della griglia, per dire dove sta la cornice senza contare i millimetri.
+const pgCellOf=(v,step)=>Math.floor(v/step+1e-6)+1;
+function pgCellSay(it){const p=Pg.p,st=Math.max(1,p.step);if(!p.snap)return '';const c=pgCellOf(it.x,st),r=pgCellOf(it.y,st),nc=Math.max(1,Math.ceil(p.w/st)),nr=Math.max(1,Math.ceil(p.h/st));return c<1||c>nc||r<1||r>nr?', fuori dalla griglia':`, casella ${c} di ${nc}, riga ${r} di ${nr}`}
 let pgDrag=null;
 pgStage.addEventListener('pointerdown',e=>{if(e.button!==0||!Pg.p)return;pgStage.focus({preventScroll:true});const pt=pgPt(e),hd=e.target.closest?.('[data-h]');
  if(hd&&pgSel()&&!pgSel().lock)pgDrag={mode:hd.dataset.h==='rot'?'rot':'resize',h:hd.dataset.h,o:{...pgSel()},pt,L:pgSnapLines(new Set([Pg.sel]))};
@@ -239,7 +278,7 @@ pgStage.addEventListener('keydown',e=>{if(!Pg.p)return;const it=pgSel(),arrows={
   if(it.lock){toast(`«${it.name}» è bloccata: sbloccala per spostarla`);return}
   const st0=pgRelState(it),then=()=>{const d=pgRelDiff(st0,pgRelState(it));return d?'; '+d:''};
   if(e.ctrlKey||e.metaKey){pgEdit('Ridimensiona',()=>{if(it.kind==='line'){it.w+=ax*step;it.h+=ay*step}else pgSizeTo(it,Math.max(2,pgGridGo(it.x+it.w,ax,n,unit)-it.x),Math.max(2,pgGridGo(it.y+it.h,ay,n,unit)-it.y))},{merge:true});announce(`${fmtU(Math.abs(it.w))} per ${pgU(Math.abs(it.h))}${then()}`)}
-  else{pgEdit('Sposta',()=>{it.x=pgGridGo(it.x,ax,n,unit);it.y=pgGridGo(it.y,ay,n,unit)},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}${onGrid}${then()}`)}return}
+  else{pgEdit('Sposta',()=>{it.x=pgGridGo(it.x,ax,n,unit);it.y=pgGridGo(it.y,ay,n,unit)},{merge:true});announce(`x ${pgU(it.x)}, y ${pgU(it.y)}${onGrid}${pgCellSay(it)}${then()}`)}return}
  if(e.key==='PageUp'||e.key==='PageDown'){if(e.altKey||e.ctrlKey)return;e.preventDefault();pgSelectStep(e.key==='PageDown'?1:-1,e.shiftKey);return}
  if(e.key==='Escape'&&Pg.sel){e.preventDefault();pgSelect(null);return}
  if(e.key==='Enter'){e.preventDefault();if(it)pgOpenItem(it);else{pgShowProps();focusables($('pgProps'))[0]?.focus()}return}

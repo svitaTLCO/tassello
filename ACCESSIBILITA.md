@@ -6,14 +6,14 @@ Per Tassello l'accessibilità è la condizione per distribuire uno strumento, no
 
 ## A che cosa si riferisce
 
-- **Tassello Ufficio 1.11.6**: Testo, Calcolo e Impagina;
+- **Tassello Ufficio 1.12.0**: Testo, Calcolo e Impagina;
 - **Tassello Media 1.17.8**: Audio e Video;
 - **Tassello Grafica 1.4.7**: Immagini e Disegno;
 - il **sito** [svitatlco.github.io/tassello](https://svitatlco.github.io/tassello/) e la pagina **Verifica una copia**, in italiano, inglese, francese e spagnolo.
 
 Vale per **Chrome o Edge recenti su un computer**. Le prove sono state fatte su Windows; tablet, telefoni, il Mac con VoiceOver e gli altri browser non sono ancora supportati. L'interfaccia delle app è in italiano.
 
-Dichiarazione redatta il 29 ottobre 2026 e aggiornata il 15 novembre 2026. La aggiorniamo a ogni nuova versione.
+Dichiarazione redatta il 29 ottobre 2026 e aggiornata il 16 novembre 2026. La aggiorniamo a ogni nuova versione.
 
 ## Stato di conformità
 
@@ -32,7 +32,9 @@ Il 28 e il 29 ottobre 2026:
 
 Il 4 novembre 2026, dopo aver corretto le finestre di Tassello Ufficio che cambiavano in silenzio un numero fuori dai limiti, abbiamo ripetuto le prove di Ufficio nel browser.
 
-Il 15 novembre 2026 abbiamo fatto una campagna con NVDA 2026.2 su Windows 11, in Chrome, su circa 45 superfici delle tre app: finestre di dialogo, messaggi d'errore, slider, report, elenchi e tabelle. L'interfaccia era pilotata con tasti inviati al documento e il log di sintesi di NVDA è stato letto per intero. Queste prove dicono che cosa NVDA pronuncia, non se il ritmo e i tempi sono comodi; non sostituiscono una prova con tastiera e computer reali, né con JAWS, Narrator, VoiceOver o TalkBack.
+Il 15 novembre 2026 abbiamo fatto una campagna con NVDA 2026.2 su Windows 11, in Chrome, su circa 45 superfici delle tre app: finestre di dialogo, messaggi d'errore, slider, report, elenchi e tabelle. L'interfaccia era pilotata con tasti inviati al documento e il log di sintesi di NVDA è stato letto per intero. Il 16 novembre 2026 abbiamo provato con NVDA 2026.2, in Chrome su Windows 11, le misure scritte in Impagina: `metà`, `1/2`, `50%`, `2 colonne`, `+12`. NVDA dice il valore risolto («Titolo: x 540 px (metà)»), avvisa quando la cornice esce dai margini, legge il messaggio specifico quando la misura non si capisce, e legge i comandi «Metti sotto…», «Stessa misura…» e «Distanza da…» con il risultato. Anche Invio applica il campo, come il passaggio a un altro campo.
+
+Queste prove dicono che cosa NVDA pronuncia, non se il ritmo e i tempi sono comodi; non sostituiscono una prova con tastiera e computer reali, né con JAWS, Narrator, VoiceOver o TalkBack.
 
 Cosa manca, e cosa chiediamo alla community. Non abbiamo ancora provato JAWS e Narrator su Windows, VoiceOver su macOS e iOS, TalkBack su Android, né fatto una valutazione con persone. Chiediamo a chi può: provare le tre app con il proprio screen reader e la propria tastiera, seguendo la [guida alla prova](PROVA-ACCESSIBILITA.md); segnalare che cosa non viene annunciato, dove il fuoco si sposta male e quali descrizioni non bastano, indicando app, versione, browser, screen reader, passi e risultato atteso. Ogni segnalazione passa dal [modulo Problema di accessibilità](https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml) e per noi è un difetto.
 
@@ -57,7 +59,6 @@ Cosa manca, e cosa chiediamo alla community. Non abbiamo ancora provato JAWS e N
    - i messaggi che compaiono sotto un campo quando un valore non va bene;
    - le aree interattive: la foto e l'istogramma di Immagini, l'anteprima di Video, la griglia di Calcolo, il foglio di Disegno.
 2. **Compiti visivi ancora difficili senza vista:**
-   - in Impagina mettere le cornici nella griglia e scrivere misure relative, come «metà pagina»;
    - in Immagini seguire il bordo dello scontorno, e giudicare nitidezza e rumore;
    - in Disegno esplorare il foglio con un cursore, e disegnare con la Penna e la Matita dal cursore;
    - in Video sentire luce e colore prima e dopo; la verifica dei lampeggiamenti non riconosce ancora i lampi su una parte dello schermo né i lampi rossi;
@@ -73,11 +74,13 @@ Tassello è un progetto libero e volontario, non un servizio pubblico: questa di
 
 ## In English
 
-This statement covers Tassello Ufficio 1.11.6, Tassello Media 1.17.8, Tassello Grafica 1.4.7, the website and the verification page, used with recent Chrome or Edge on a computer (tested on Windows). The app interface is in Italian. Written on 29 October 2026, updated on 15 November 2026, and updated with every release.
+This statement covers Tassello Ufficio 1.12.0, Tassello Media 1.17.8, Tassello Grafica 1.4.7, the website and the verification page, used with recent Chrome or Edge on a computer (tested on Windows). The app interface is in Italian. Written on 29 October 2026, updated on 16 November 2026, and updated with every release.
 
-**Status: partially conformant with WCAG 2.2 level AA.** An evaluation with axe-core 4.14 and custom checks on about 1,000 states of the seven apps and the website (four themes and forced colours, repeated after fixes), real-browser tests that read the exact screen reader announcements, and a task-by-task analysis of visual work found no remaining A or AA failures except the known limitations below. NVDA 2026.2 has been tested on Windows 11 in Chrome across about 45 surfaces of the three apps, driving the interface with keys sent to the document and reading the speech log in full: that says what NVDA announces, not whether pacing is comfortable. JAWS, Narrator, VoiceOver and TalkBack have not been tested, and no evaluation with people has been done yet.
+**Status: partially conformant with WCAG 2.2 level AA.** An evaluation with axe-core 4.14 and custom checks on about 1,000 states of the seven apps and the website (four themes and forced colours, repeated after fixes), real-browser tests that read the exact screen reader announcements, and a task-by-task analysis of visual work found no remaining A or AA failures except the known limitations below. NVDA 2026.2 has been tested on Windows 11 in Chrome across about 45 surfaces of the three apps, driving the interface with keys sent to the document and reading the speech log in full: that says what NVDA announces, not whether pacing is comfortable. On 16 November 2026 NVDA 2026.2 was used on Windows 11 in Chrome to test the written measures in Impagina (`metà`, `1/2`, `50%`, `2 colonne`, `+12`): it announces the resolved value («Titolo: x 540 px (metà)»), warns when the frame leaves the margins, reads the specific message when a measure is not understood, and reads the «Metti sotto…», «Stessa misura…» and «Distanza da…» commands with their result. Enter now applies a field as well as moving away.
 
-**Known limitations:** NVDA has been tested automatically on Windows 11 by reading its speech log; JAWS, Narrator, VoiceOver and TalkBack are still to be confirmed; some visual tasks are still hard without sight (placing frames on the grid in Impagina, following a cut-out edge in Immagini, exploring a drawing with a cursor in Disegno, colour changes before and after in Video, partial-screen and red flashes in the flash check, recording levels in Audio); descriptions measure pixels and sound and do not recognise people or objects; only recent Chrome and Edge on computers are supported.
+JAWS, Narrator, VoiceOver and TalkBack have not been tested, and no evaluation with people has been done yet.
+
+**Known limitations:** NVDA has been tested automatically on Windows 11 by reading its speech log; JAWS, Narrator, VoiceOver and TalkBack are still to be confirmed; some visual tasks are still hard without sight (following a cut-out edge in Immagini, exploring a drawing with a cursor in Disegno, colour changes before and after in Video, partial-screen and red flashes in the flash check, recording levels in Audio); descriptions measure pixels and sound and do not recognise people or objects; only recent Chrome and Edge on computers are supported.
 
 **What we ask the community:** try the three apps with your own screen reader and keyboard (JAWS and Narrator on Windows, VoiceOver on macOS and iOS, TalkBack on Android), following the [testing guide](PROVA-ACCESSIBILITA.md); report what is not announced, where focus moves badly and which descriptions are not enough, giving app, version, browser, screen reader, steps and expected result, through the [Accessibility problem form](https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml).
 

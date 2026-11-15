@@ -107,3 +107,69 @@ function pgTplMark(p,e){if(!e||e.mine||e.id==='vuoto')return;p.tpl={n:e.n,d:e.d|
 let pgLastPs=null;
 document.addEventListener('selectionchange',()=>{const ed=$('pgStory');if(!ed||document.activeElement!==ed||!Pg.p)return;const a=getSelection().anchorNode,el=a?.nodeType===3?a.parentElement:a,ps=el?.closest?.('p[data-ps]')?.dataset.ps||null;if(ps===pgLastPs)return;const first=pgLastPs===null;pgLastPs=ps;if(!first&&ps&&Pg.p.ps[ps])announce('Paragrafo '+Pg.p.ps[ps].name)});
 document.addEventListener('focusout',e=>{if(e.target.id==='pgStory')pgLastPs=null});
+
+// Disposizione rispetto a un'altra cornice, una volta sola: calcola numeri e finisce nell'Annulla.
+const pgInsideSay=it=>{const o=pgOutSay(it);return o?o.charAt(0).toUpperCase()+o.slice(1)+'.':'Dentro i margini.'};
+const pgOtherFrames=it=>pgReadOrder(pgHolder()).filter(x=>x.id!==it.id&&!x.hidden);
+const PG_DIM=[['w','La larghezza'],['h','L’altezza'],['both','Larghezza e altezza']];
+const pgTargetField=(others,value)=>({id:'target',label:'Cornice di riferimento',type:'select',value:value||others[0].id,options:others.map(x=>[x.id,`${x.name} (${PG_KIND[x.kind]})`])});
+async function pgUnder(){
+ const it=pgNeed();if(!it)return;const others=pgOtherFrames(it);if(!others.length){toast('Servono almeno due cornici: inseriscine un’altra');return}
+ const v=await modal('Metti sotto un’altra cornice','<p>Scegli la cornice che fa da riferimento: questa si mette sotto, con lo spazio indicato. Il comando vale una volta sola: dopo, le due cornici tornano indipendenti.</p>',[
+  pgTargetField(others),
+  {id:'gap',label:`Spazio in mezzo (${unitName()})`,value:fmtU(4*MM)},
+  {id:'same',label:'Larga come la cornice di riferimento',type:'checkbox',value:true},
+  {id:'align',label:'Allineamento in orizzontale',type:'select',value:'left',options:[['left','A sinistra'],['center','Al centro'],['right','A destra'],['keep','Dov’è adesso']]}],'Metti sotto');
+ if(!v)return;const target=others.find(x=>x.id===v.target);if(!target)return;
+ const gap=fromU(pgNum(v.gap));if(!Number.isFinite(gap)||gap<0){toast(`Scrivi lo spazio in ${unitName()}, per esempio ${fmtU(4*MM)}`);return}
+ const it2=pgMovable([it],'spostarla')[0];if(!it2)return;const align=v.align,same=!!v.same;
+ pgEdit('Sotto '+target.name,()=>{const t=pgBoxOf(target),b0=pgBoxOf(it2),w=same?t.w:Math.abs(it2.w),h=Math.abs(it2.h);
+  const nx=align==='keep'?b0.x:align==='left'?t.x:align==='right'?t.x+t.w-w:t.x+(t.w-w)/2,ny=t.y+t.h+gap;
+  pgSizeTo(it2,w,h);const b1=pgBoxOf(it2);it2.x+=nx-b1.x;it2.y+=ny-b1.y});
+ const alignSay=align==='left'?'allineata a sinistra':align==='right'?'allineata a destra':align==='center'?'centrata rispetto a «'+target.name+'»':'dov’era';
+ announce(`«${it2.name}» sotto «${target.name}», ${alignSay}${same?`, larga come «${target.name}»`:''}, ${pgU(gap)} di spazio. ${pgInsideSay(it2)}`);
+ pgLinkFlash(it2,target);
+}
+async function pgLike(){
+ const it=pgNeed();if(!it)return;const others=pgOtherFrames(it);if(!others.length){toast('Servono almeno due cornici: inseriscine un’altra');return}
+ const v=await modal('Stessa misura di un’altra cornice','<p>Prendi la larghezza, l’altezza o tutte e due da un’altra cornice. Il comando vale una volta sola: dopo, le due cornici tornano indipendenti.</p>',[pgTargetField(others),{id:'dim',label:'Che cosa prendere',type:'select',value:'w',options:PG_DIM}],'Prendi la misura');
+ if(!v)return;const target=others.find(x=>x.id===v.target);if(!target)return;
+ const it2=pgMovable([it],'ridimensionarla')[0];if(!it2)return;const dim=v.dim,t=pgBoxOf(target);
+ pgEdit('Misura di '+target.name,()=>{let w=Math.abs(it2.w),h=Math.abs(it2.h);if(dim==='w'||dim==='both')w=t.w;if(dim==='h'||dim==='both')h=t.h;pgSizeTo(it2,w,h)});
+ const say=dim==='w'?'larghezza':dim==='h'?'altezza':'larghezza e altezza';
+ announce(`«${it2.name}»: ${say} come «${target.name}», ${dim==='h'?pgU(Math.abs(it2.h)):`${fmtU(Math.abs(it2.w))} per ${pgU(Math.abs(it2.h))}`}. ${pgInsideSay(it2)}`);
+ pgLinkFlash(it2,target);
+}
+async function pgGap(){
+ const it=pgNeed();if(!it)return;const others=pgOtherFrames(it);if(!others.length){toast('Servono almeno due cornici: inseriscine un’altra');return}
+ const v=await modal('A che distanza da un’altra cornice','<p>La cornice si mette alla distanza indicata, nella direzione scelta. Il comando vale una volta sola: dopo, le due cornici tornano indipendenti.</p>',[
+  pgTargetField(others),
+  {id:'dir',label:'Direzione',type:'select',value:'below',options:[['below','Sotto'],['above','Sopra'],['right','A destra'],['left','A sinistra']]},
+  {id:'gap',label:`Distanza (${unitName()})`,value:fmtU(4*MM)}],'Metti a distanza');
+ if(!v)return;const target=others.find(x=>x.id===v.target);if(!target)return;
+ const gap=fromU(pgNum(v.gap));if(!Number.isFinite(gap)||gap<0){toast(`Scrivi la distanza in ${unitName()}, per esempio ${fmtU(4*MM)}`);return}
+ const it2=pgMovable([it],'spostarla')[0];if(!it2)return;const dir=v.dir;
+ pgEdit('Distanza da '+target.name,()=>{const t=pgBoxOf(target),b=pgBoxOf(it2);
+  if(dir==='below')it2.y+=t.y+t.h+gap-b.y;else if(dir==='above')it2.y+=t.y-gap-b.h-b.y;else if(dir==='right')it2.x+=t.x+t.w+gap-b.x;else it2.x+=t.x-gap-b.w-b.x});
+ const dirSay=dir==='below'?'sotto':dir==='above'?'sopra':dir==='right'?'a destra di':'a sinistra di';
+ announce(`«${it2.name}» ${dirSay} «${target.name}», a ${pgU(gap)}. ${pgInsideSay(it2)}`);
+ pgLinkFlash(it2,target);
+}
+// La griglia a caselle: la cornice va alla casella scelta o dice dove sta, senza contare i millimetri.
+async function pgCellGo(){
+ const it=pgNeed();if(!it)return;const p=Pg.p,st=Math.max(1,p.step),nc=Math.max(1,Math.ceil(p.w/st)),nr=Math.max(1,Math.ceil(p.h/st));
+ const v=await modal('Vai alla casella',`<p>La griglia ha caselle di ${pgU(st)}: ${nc} colonne e ${nr} righe${p.snap?'. L’aggancio è acceso.':'. L’aggancio è spento: la cornice va alla casella, ma le frecce continuano a muoversi di un millimetro.'}</p>`,[
+  {id:'col',label:`Colonna (1–${nc})`,value:String(Math.min(nc,Math.max(1,pgCellOf(it.x,st))))},
+  {id:'row',label:`Riga (1–${nr})`,value:String(Math.min(nr,Math.max(1,pgCellOf(it.y,st))))}],'Vai');
+ if(!v)return;const col=Math.round(pgNum(v.col)),row=Math.round(pgNum(v.row));
+ if(!(col>=1&&col<=nc&&row>=1&&row<=nr)){toast(`Casella fuori dalla griglia: colonne da 1 a ${nc}, righe da 1 a ${nr}`);return}
+ const it2=pgMovable([it],'spostarla')[0];if(!it2)return;
+ pgEdit('Vai alla casella',()=>{it2.x=(col-1)*st;it2.y=(row-1)*st});
+ announce(`«${it2.name}» alla casella ${col} di ${nc}, riga ${row} di ${nr}: x ${pgU(it2.x)}, y ${pgU(it2.y)}. ${pgInsideSay(it2)}`);
+}
+function pgCellWhere(){
+ const it=pgNeed();if(!it)return;const p=Pg.p,st=Math.max(1,p.step),nc=Math.max(1,Math.ceil(p.w/st)),nr=Math.max(1,Math.ceil(p.h/st));
+ const c=pgCellOf(it.x,st),r=pgCellOf(it.y,st),cols=Math.max(1,Math.ceil((Math.abs(it.w)-1e-6)/st)),rows=Math.max(1,Math.ceil((Math.abs(it.h)-1e-6)/st));
+ if(c<1||c>nc||r<1||r>nr){announce(`«${it.name}» è fuori dalla griglia: x ${pgU(it.x)}, y ${pgU(it.y)}; la griglia ha ${nc} colonne e ${nr} righe`);return}
+ announce(`«${it.name}»: casella ${c} di ${nc}, riga ${r} di ${nr}; occupa ${cols} ${cols===1?'casella':'caselle'} e ${rows} ${rows===1?'riga':'righe'}. x ${pgU(it.x)}, y ${pgU(it.y)}${p.snap?'':'. L’aggancio alla griglia è spento'}`);
+}

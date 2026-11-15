@@ -388,7 +388,7 @@ A qué se refiere
 
 [dichiarazione.ambito]
     <ul>
-      <li>Tassello Ufficio 1.11.6: Testo, Calcolo e Impagina</li>
+      <li>Tassello Ufficio 1.12.0: Testo, Calcolo e Impagina</li>
       <li>Tassello Media 1.17.8: Audio y Video</li>
       <li>Tassello Grafica 1.4.7: Immagini y Disegno</li>
       <li>este sitio y la página de verificación</li>
@@ -410,7 +410,8 @@ Cómo la hemos evaluado
       <li>Pruebas automáticas en el navegador para cada herramienta, que también leen el texto exacto de los avisos para el lector de pantalla.</li>
       <li>Un análisis, aplicación por aplicación, de las tareas que suelen hacerse mirando.</li>
       <li>Pruebas con personas ciegas, en curso, con la <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">guía de prueba</a> (en italiano).</li>
-      <li>El 15 de noviembre de 2026, una campaña con NVDA 2026.2 en Windows 11 con Chrome, sobre unas 45 superficies de las tres aplicaciones: ventanas, errores, controles deslizantes, informes, listas y tablas. La interfaz se manejó con teclas enviadas al documento y se leyó entero el registro de voz: dice qué anuncia NVDA, no si los tiempos son cómodos.</li>
+      <li>El 16 de noviembre de 2026, una campaña con NVDA 2026.2 en Windows 11 con Chrome, sobre unas 45 superficies de las tres aplicaciones: ventanas, errores, controles deslizantes, informes, listas y tablas. La interfaz se manejó con teclas enviadas al documento y se leyó entero el registro de voz: dice qué anuncia NVDA, no si los tiempos son cómodos.</li>
+      <li>El 16 de noviembre de 2026, con NVDA 2026.2 en Windows 11 con Chrome, probamos las medidas escritas en Impagina: el valor resuelto, el aviso cuando el marco sale de los márgenes, el error cuando la medida no se entiende y los comandos de disposición.</li>
     </ul>
 
 [dichiarazione.offre_titolo]
@@ -430,7 +431,7 @@ Límites conocidos
 [dichiarazione.limiti]
     <ul>
       <li>NVDA se ha probado de forma automática en Windows 11 leyendo su registro de voz; JAWS, Narrator, VoiceOver y TalkBack aún deben confirmarse, sobre todo para los avisos unidos en una frase y para las zonas interactivas: la foto, el histograma, la vista previa de vídeo, la cuadrícula de Calcolo.</li>
-      <li>Algunas tareas visuales siguen siendo difíciles sin vista: colocar los marcos en la cuadrícula de Impagina, seguir el borde del recorte en Immagini, explorar un dibujo con un cursor, oír la luz y el color antes y después en Video. La comprobación de destellos aún no detecta los destellos en una parte de la pantalla ni los rojos.</li>
+      <li>Algunas tareas visuales siguen siendo difíciles sin vista: seguir el borde del recorte en Immagini, explorar un dibujo con un cursor, oír la luz y el color antes y después en Video. La comprobación de destellos aún no detecta los destellos en una parte de la pantalla ni los rojos.</li>
       <li>Las descripciones miden píxeles y sonido, sin inteligencia artificial: no reconocen personas ni objetos.</li>
     </ul>
 
@@ -443,7 +444,7 @@ Avisos
     <p>Pedimos a quien pueda que pruebe las tres aplicaciones con su propio lector de pantalla y su teclado —JAWS y Narrator en Windows, VoiceOver en macOS e iOS, TalkBack en Android— siguiendo la guía de prueba, y que avise de lo que no se anuncia, de dónde se mueve mal el foco y de qué descripciones no bastan, indicando aplicación, versión, navegador, lector de pantalla, pasos y resultado esperado.</p>
 
 [dichiarazione.data]
-Declaración redactada el 29 de octubre de 2026 y actualizada el 15 de noviembre de 2026; la actualizamos con cada nueva versión.
+Declaración redactada el 29 de octubre de 2026 y actualizada el 16 de noviembre de 2026; la actualizamos con cada nueva versión.
 
 [js.controllo]
 Comprobando…

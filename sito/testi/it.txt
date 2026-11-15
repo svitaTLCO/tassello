@@ -392,7 +392,7 @@ A che cosa si riferisce
 
 [dichiarazione.ambito]
     <ul>
-      <li>Tassello Ufficio 1.11.6: Testo, Calcolo e Impagina</li>
+      <li>Tassello Ufficio 1.12.0: Testo, Calcolo e Impagina</li>
       <li>Tassello Media 1.17.8: Audio e Video</li>
       <li>Tassello Grafica 1.4.7: Immagini e Disegno</li>
       <li>questo sito e la pagina Verifica una copia</li>
@@ -414,7 +414,8 @@ Come l’abbiamo valutata
       <li>Prove automatiche nel browser per ogni tassello, che leggono anche il testo esatto degli annunci per lo screen reader.</li>
       <li>Un’analisi, app per app, dei compiti che di solito si fanno guardando.</li>
       <li>Prove con persone non vedenti, in corso, con la <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">guida alla prova</a>.</li>
-      <li>Il 15 novembre 2026, una campagna con NVDA 2026.2 su Windows 11 in Chrome, su circa 45 superfici delle tre app: finestre, errori, slider, report, elenchi e tabelle. L’interfaccia era pilotata con tasti inviati al documento e il log di sintesi è stato letto per intero: dice che cosa NVDA pronuncia, non se i tempi sono comodi.</li>
+      <li>Il 16 novembre 2026, una campagna con NVDA 2026.2 su Windows 11 in Chrome, su circa 45 superfici delle tre app: finestre, errori, slider, report, elenchi e tabelle. L’interfaccia era pilotata con tasti inviati al documento e il log di sintesi è stato letto per intero: dice che cosa NVDA pronuncia, non se i tempi sono comodi.</li>
+      <li>Il 16 novembre 2026, con NVDA 2026.2 su Windows 11 in Chrome, abbiamo provato le misure scritte in Impagina: il valore risolto, l’avviso quando la cornice esce dai margini, l’errore quando la misura non si capisce e i comandi di disposizione.</li>
     </ul>
 
 [dichiarazione.offre_titolo]
@@ -434,7 +435,7 @@ Limiti noti
 [dichiarazione.limiti]
     <ul>
       <li>Le prove con NVDA sono state fatte in modo automatico su Windows 11, leggendo il log di sintesi; restano da confermare JAWS, Narrator, VoiceOver e TalkBack, soprattutto per gli annunci uniti in una frase e per le aree interattive: la foto, l’istogramma, l’anteprima video, la griglia di Calcolo.</li>
-      <li>Alcuni compiti visivi restano difficili senza vista: mettere le cornici nella griglia in Impagina, seguire il bordo dello scontorno in Immagini, esplorare un disegno con un cursore, sentire luce e colore prima e dopo in Video. La verifica dei lampeggiamenti non riconosce ancora i lampi su una parte dello schermo né quelli rossi.</li>
+      <li>Alcuni compiti visivi restano difficili senza vista: seguire il bordo dello scontorno in Immagini, esplorare un disegno con un cursore, sentire luce e colore prima e dopo in Video. La verifica dei lampeggiamenti non riconosce ancora i lampi su una parte dello schermo né quelli rossi.</li>
       <li>Le descrizioni misurano pixel e suono, senza intelligenza artificiale: non riconoscono persone o oggetti.</li>
     </ul>
 
@@ -447,7 +448,7 @@ Segnalazioni
     <p>Chiediamo a chi può di provare le tre app con il proprio screen reader e la propria tastiera — JAWS e Narrator su Windows, VoiceOver su macOS e iOS, TalkBack su Android — seguendo la guida alla prova, e di segnalare che cosa non viene annunciato, dove il fuoco si sposta male e quali descrizioni non bastano, indicando app, versione, browser, screen reader, passi e risultato atteso.</p>
 
 [dichiarazione.data]
-Dichiarazione redatta il 29 ottobre 2026 e aggiornata il 15 novembre 2026; la aggiorniamo a ogni nuova versione.
+Dichiarazione redatta il 29 ottobre 2026 e aggiornata il 16 novembre 2026; la aggiorniamo a ogni nuova versione.
 
 [js.controllo]
 Controllo in corso…
