@@ -37,6 +37,9 @@ const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=
 function focusables(root){return $$(FOCUSABLE,root).filter(el=>!el.closest('[hidden]')&&(el.offsetWidth||el.offsetHeight||el===document.activeElement))}
 function refocus(el){const t=el?.isConnected?el:(el?.id&&$(el.id));if(t&&t!==document.body){if(t.id==='wordEditor')restoreWordFocus();else t.focus({preventScroll:true})}}
 function trapTab(e,root){if(e.key!=='Tab')return;const f=focusables(root);if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&i<=0){e.preventDefault();f.at(-1).focus()}else if(!e.shiftKey&&(i===f.length-1||i<0)){e.preventDefault();f[0].focus()}}
+const num=v=>{const s=String(v??'').trim().replace(/\s/g,'').replace(/−/g,'-').replace(',','.');return s===''?NaN:Number(s)};
+const fmtNum=(n,d=1)=>Number(n).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}).replace(/^-/,'−');
+
 // Finestra di dialogo modale con campi etichettati. opts.validate(valori) può rifiutare i valori con un messaggio (una stringa,
 // o {msg,field} per indicare il campo): la finestra resta aperta con quello che si è scritto, il messaggio compare sotto il
 // campo ed è annunciato, il campo prende aria-invalid ed è collegato al messaggio, e il fuoco torna lì. Il messaggio sparisce
@@ -45,26 +48,44 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  const field=x=>{const id='dlg_'+x.id,hint=x.hint?`<small class="hint" id="${id}_h">${esc(x.hint)}</small>`:'',desc=x.hint?` aria-describedby="${id}_h"`:'';
   if(x.type==='checkbox')return `<label class="check"><input type="checkbox" id="${id}"${x.value?' checked':''}${desc}> ${esc(x.label)}</label>${hint}`;
   const lab=`<label for="${id}">${esc(x.label)}</label>`;
-  if(x.type==='select')return lab+`<select id="${id}"${desc}>${x.options.map(opt=>`<option value="${esc(opt.value)}"${String(opt.value)===String(x.value??'')?' selected':''}>${esc(opt.label)}</option>`).join('')}</select>`+hint;
+  if(x.type==='select')return lab+`<select id="${id}"${desc}>${x.options.map(opt=>{const [v,l]=Array.isArray(opt)?opt:[opt.value,opt.label];return `<option value="${esc(v)}"${String(v)===String(x.value??'')?' selected':''}>${esc(l)}</option>`}).join('')}</select>`+hint;
   if(x.type==='textarea')return lab+`<textarea id="${id}" rows="${x.rows||3}"${desc}>${esc(x.value||'')}</textarea>`+hint;
-  return lab+`<input id="${id}" type="${x.type||'text'}" value="${esc(x.value??'')}"${x.min!==undefined?` min="${x.min}"`:''}${x.max!==undefined?` max="${x.max}"`:''} autocomplete="off"${desc}>`+hint};
- pane.className='modal'+(opts.wide?' wide':'');pane.setAttribute('aria-describedby','dlgBody');
- pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="dlg-err" id="dlgErr" role="alert" hidden></p><div class="modal-actions">${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
- bg.hidden=false;colorHints(pane);
- const finish=v=>{bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
- if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
+  if(x.type==='range'){const f=x.fmt||String;return lab+`<div class="rangebox"><input type="range" id="${id}" min="${x.min}" max="${x.max}" step="${x.step||1}" value="${esc(x.value)}" aria-valuetext="${esc(f(Number(x.value)))}"${desc}><output id="${id}_o" aria-hidden="true">${esc(f(Number(x.value)))}</output></div>`+hint}
+  // Numeri e tempi sono campi di testo: si possono scrivere con la virgola, come si usa in italiano.
+  const decimal=x.type==='time'||x.type==='number',type=decimal?'text':x.type||'text',value=x.type==='number'&&typeof x.value==='number'?fmtNum(x.value,x.value%1?Math.min(3,String(x.value).split('.')[1]?.length||1):0).replace(/\./g,''):x.value;
+  return lab+`<input id="${id}" type="${type}" value="${esc(value??'')}" autocomplete="off" spellcheck="false"${decimal?' inputmode="decimal"':''}${desc}>`+hint};
+ const limits=v=>{for(const x of fields){if(x.type!=='number'||(x.min===undefined&&x.max===undefined))continue;const n=num(v[x.id]),lo=x.min??-Infinity,hi=x.max??Infinity;
+  if(!Number.isFinite(n)||n<lo||n>hi)return{msg:`${x.label}: scrivi un numero ${x.min!==undefined&&x.max!==undefined?`da ${fmtNum(lo,lo%1?2:0)} a ${fmtNum(hi,hi%1?2:0)}`:x.min!==undefined?`da ${fmtNum(lo,lo%1?2:0)} in su`:`fino a ${fmtNum(hi,hi%1?2:0)}`}.`,field:x.id}}return null};
+ // Il campo sbagliato prende aria-invalid e il messaggio come descrizione; il valore originale di aria-describedby
+ // resta in data-desc, così correggendo il campo si torna esattamente com'era.
+ const markInvalid=(el,on)=>{if(on){if(el.dataset.desc===undefined)el.dataset.desc=el.getAttribute('aria-describedby')||'';el.setAttribute('aria-invalid','true');
+   el.setAttribute('aria-describedby',[...new Set((el.dataset.desc+' dlgErr').split(' ').filter(Boolean))].join(' '))}
+  else{el.removeAttribute('aria-invalid');if(el.dataset.desc!==undefined){if(el.dataset.desc)el.setAttribute('aria-describedby',el.dataset.desc);else el.removeAttribute('aria-describedby');delete el.dataset.desc}}};
+ const clearErr=()=>{for(const el of $$('[aria-invalid]',pane))markInvalid(el,false);const box=$('dlgErr');if(box){box.textContent='';box.hidden=true}};
+ // Si mostra il riquadro prima di scriverci: role=alert lo rilegge anche quando il messaggio è lo stesso di prima.
+ const showErr=err=>{clearErr();const box=$('dlgErr');if(!box)return;const el=err.field&&$('dlg_'+err.field);
+  if(el){markInvalid(el,true);el.focus();if(el.select&&/^(text|search|url|email|)$/.test(el.type))el.select()}
+  const anchor=el?(el.type==='checkbox'?el.closest('label'):el):null;
+  if(anchor){const after=anchor.nextElementSibling;box.hidden=false;(after?.classList.contains('hint')?after:anchor).after(box)}
+  else{box.hidden=false;$('dialogForm').querySelector('.modal-actions').before(box)}
+  box.textContent='';setTimeout(()=>{box.textContent=err.msg},50)};
+ pane.className='modal'+(opts.wide?' wide':'');pane.setAttribute('aria-describedby',opts.describedBy||'dlgBody');
+ const extra=(opts.buttons||[]).map((b,i)=>`<button type="button" class="btn${i?'':' left'}" id="dlgBtn${i}">${esc(b.label)}</button>`).join('');
+ pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="dlg-err" id="dlgErr" role="alert" hidden></p><div class="modal-actions">${extra}${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
+ bg.hidden=false;if(typeof colorHints==='function')colorHints(pane);
  const values=()=>{const obj={};for(const x of fields){const el=$('dlg_'+x.id);obj[x.id]=x.type==='checkbox'?el.checked:el.value}return obj};
- $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v);if(bad){dlgError(typeof bad==='string'?{msg:bad,field:fields.length===1?fields[0].id:''}:bad);return}finish(v)};
+ for(const x of fields)if(x.type==='range'){const el=$('dlg_'+x.id),f=x.fmt||String;el.addEventListener('input',()=>{const t=f(Number(el.value));$('dlg_'+x.id+'_o').textContent=t;el.setAttribute('aria-valuetext',t)})}
+ const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
+ if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
+ (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane,finish)});
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v)||limits(v);
+  if(bad){const err=typeof bad==='string'?{msg:bad}:{...bad};if(err.field===undefined&&fields.length===1)err.field=fields[0].id;showErr(err);return}finish(v)};
+ $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute?.('aria-invalid'))clearErr()});
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);
- setTimeout(()=>{const f=fields[0]?$('dlg_'+fields[0].id):(pane.querySelector('[data-autofocus]')||$('okDlg'));f?.focus({preventScroll:!fields[0]});pane.scrollTop=0;if(f?.select&&f.type!=='checkbox')f.select()},0);
+ setTimeout(()=>{const f=fields[0]?$('dlg_'+fields[0].id):(pane.querySelector('[data-autofocus]')||$('okDlg'));f?.focus({preventScroll:!fields[0]});pane.scrollTop=0;if(f?.select&&f.type==='text')f.select()},0);
 });}
-// Mostra l'errore della finestra aperta: sotto il campo indicato (o sopra i pulsanti), riscritto perché venga riletto anche se uguale.
-function dlgError({msg,field}){const box=$('dlgErr'),el=field?$('dlg_'+field):null;if(!box)return;for(const x of $$('[aria-invalid=true]',$('modal')))dlgClearInvalid(x);
- const after=el?(el.type==='checkbox'?el.closest('label'):el).nextElementSibling?.classList.contains('hint')?(el.type==='checkbox'?el.closest('label'):el).nextElementSibling:(el.type==='checkbox'?el.closest('label'):el):null;
- if(after)after.after(box);else $('dialogForm').querySelector('.modal-actions').before(box);box.hidden=false;box.textContent='';setTimeout(()=>{box.textContent=msg},40);
- if(el){el.setAttribute('aria-invalid','true');el.dataset.desc=el.getAttribute('aria-describedby')||'';el.setAttribute('aria-describedby',(el.dataset.desc+' dlgErr').trim());el.addEventListener('input',()=>{dlgClearInvalid(el);box.hidden=true;box.textContent=''},{once:true});el.focus();if(el.select&&/^(text|search|url|email|number|)$/.test(el.type))el.select()}}
 // Numeri scritti in una finestra, da usare come opts.validate: spec è {id:[nome,minimo,massimo,{int,unit,empty}]}, oppure una
 // funzione dei valori che lo restituisce, per i limiti che dipendono da un altro campo. Un numero mancante, non valido o fuori
 // dai limiti diventa un errore sotto il suo campo che dice che cosa scrivere, invece di essere corretto senza dirlo (WCAG
@@ -74,7 +95,6 @@ function dlgNums(spec){return v=>{const S=typeof spec==='function'?spec(v):spec,
  for(const [id,[name,lo,hi,o={}]] of Object.entries(S)){const s=String(v[id]??'').trim(),n=dlgNum(s),bad=$('dlg_'+id)?.validity?.badInput;if(s===''&&o.empty&&!bad)continue;
   // Un campo numerico in cui si è scritto qualcosa che non è un numero arriva vuoto: lo dice validity.badInput.
   if(s===''||!Number.isFinite(n)||o.int&&!Number.isInteger(n)||n<lo||n>hi)return {field:id,msg:`${name}: ${bad?'quello che hai scritto non è un numero':s===''?'manca il valore':`«${s}» non va bene`}. Scrivi ${o.int?'un numero intero':'un numero'} da ${f(lo)} a ${f(hi)}${o.unit?' '+o.unit:''}${o.empty?', oppure lascia vuoto':''}.`}}return null}}
-function dlgClearInvalid(el){el.removeAttribute('aria-invalid');if(el.dataset.desc!==undefined){if(el.dataset.desc)el.setAttribute('aria-describedby',el.dataset.desc);else el.removeAttribute('aria-describedby');delete el.dataset.desc}}
 const overlayOpen=()=>!$('modalbg').hidden||!$('palettebg').hidden||!$('filepanel').hidden||!$('menu').hidden;
 const tip=$('tip');let tipTimer;
 function showTip(el){const t=el.dataset.tip;if(!t||!el.isConnected)return;tip.textContent=t;tip.hidden=false;const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;let x=Math.min(innerWidth-w-6,Math.max(6,r.left+r.width/2-w/2)),y=r.bottom+6;if(y+h>innerHeight-4)y=r.top-h-6;tip.style.left=x+'px';tip.style.top=y+'px'}

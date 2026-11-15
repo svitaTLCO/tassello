@@ -1,8 +1,38 @@
 {
   "programma": "Tassello Ufficio",
   "file": "tassello-ufficio.html",
-  "ultima": "1.10.2",
+  "ultima": "1.11.5",
   "versioni": [
+    {
+      "versione": "1.11.5",
+      "data": "2026-11-15",
+      "sha256": "21a2c7fd29ee6a76734ed6189f051fa6d0d61e5146c54d6c2f0d164061899b95"
+    },
+    {
+      "versione": "1.11.4",
+      "data": "2026-11-15",
+      "sha256": "75a954afd711bfadfa14c1e234ff7449ae7c04f68018b7c13390e1d1ce8f15c3"
+    },
+    {
+      "versione": "1.11.3",
+      "data": "2026-11-15",
+      "sha256": "d2202e455ac2fbf7946f07a0f5facb3d2e5220ac7438e4120b3f64cb45709f50"
+    },
+    {
+      "versione": "1.11.2",
+      "data": "2026-11-15",
+      "sha256": "ffe2f06fdba1503f7d5f15513c978422e428bc31b8e75198431e3096f7f11eaa"
+    },
+    {
+      "versione": "1.11.1",
+      "data": "2026-11-15",
+      "sha256": "0e0841fbcc4ed762bca378591ec40991917ef7b6e0cede31821c6f93c17d7a53"
+    },
+    {
+      "versione": "1.11.0",
+      "data": "2026-11-15",
+      "sha256": "f9f2abf73b89769072f61b4c938c7990b84d64ee7034671e7e477c503e77b44e"
+    },
     {
       "versione": "1.10.2",
       "data": "2026-11-15",
