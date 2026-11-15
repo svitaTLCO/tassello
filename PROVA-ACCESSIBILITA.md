@@ -74,7 +74,7 @@ Le lettere hanno lo stesso significato in tutte le app, sempre con **Alt+Maiusc*
 | Testo | Alt+Maiusc+P dove sei (pagina, riga, sezione, titolo); Alt+Maiusc+F la formattazione (due volte: Mostra formattazione); Ctrl+G vai alla pagina; Alt+PgGiù e Alt+PgSu pagina successiva e precedente. *Cambia maiuscole e minuscole* ora è Alt+Maiusc+F3. |
 | Calcolo | Alt+Maiusc+D descrive il foglio (tabelle, grafici, regole, note); F8 estende la selezione con le frecce; sul grafico R il riassunto della serie, M e Maiusc+M il massimo e il minimo, A il prossimo valore anomalo. |
 | Impagina | Alt+Maiusc+R dove sta la cornice scelta: posizione, cornici vicine, allineamenti e sovrapposizioni; Alt+Maiusc+D la panoramica della pagina: fasce, sfondi, sovrapposizioni e nove zone. I colori si sentono con il loro nome. |
-| Audio | Alt+Maiusc+D descrive il brano; Alt+Maiusc+L legge i livelli; Alt+Maiusc+O fa sentire prima e dopo l'ultimo effetto e dice che cosa è cambiato. |
+| Audio | Alt+Maiusc+D descrive il brano; Alt+Maiusc+L legge i livelli; Alt+Maiusc+O fa sentire prima e dopo l'ultimo effetto e dice che cosa è cambiato; Alt+Maiusc+R il report di consegna: durata, volume percepito, picco vero e range di volume; Ctrl+Maiusc+K converte più file in una volta. |
 | Video | Alt+Maiusc+D descrive il fotogramma (luce, colori, zone); Alt+Maiusc+C descrive la clip (scene, luce, colori, movimento, parlato); sull'indicatore Ctrl+frecce su e giù vanno ai cambi di scena, Ctrl+frecce sinistra e destra alle pause del parlato; Maiusc+Spazio riproduce solo l'elemento scelto. |
 | Immagini | Alt+Maiusc+L descrive la luce (due volte: l'istogramma da percorrere con le frecce e da ascoltare); Alt+Maiusc+D zone, colori e dominante; Alt+Maiusc+O il confronto con l'originale; X lo strumento Esplora, un cursore che dice che cosa c'è sotto. Quando lasci un cursore senti che cosa è cambiato. |
 | Disegno | Alt+Maiusc+R i dintorni dell'oggetto scelto, con le sovrapposizioni dette anche mentre lo sposti; Alt+Maiusc+D la composizione del foglio (due volte: la descrizione completa); «Ascolta la forma» (con Alt+Q) fa sentire il contorno come toni; nell'elenco dei livelli Ctrl+frecce e Ctrl+Spazio scelgono più oggetti anche non vicini. Con la Gomma (E) Spazio la abbassa e la alza e le frecce cancellano lungo il percorso: i tratti si tagliano dove passi e i pezzi restano come tratti a sé; nelle proprietà della gomma puoi scegliere di togliere invece i tratti interi. |
@@ -216,6 +216,13 @@ Domande: prima di cominciare sapevi se il microfono era troppo lontano o troppo 
 
 **Prova anche:** dopo un effetto, Alt+Maiusc+O per sentire e farti dire la differenza tra prima e dopo; Alt+Maiusc+L per i livelli.
 
+**Compito A2b: preparare la voce in un passaggio.**
+
+1. Con l'editor della regione aperto, cerca «Prepara la voce» in Alt+Q e premi Invio.
+2. La finestra elenca i passaggi: taglio dei toni bassi, ronzio, sibilanti, volume e picco. Lascia i valori proposti e premi «Anteprima»: senti sei secondi con la catena applicata.
+3. Premi «Ascolta l'originale» per confrontare, poi Applica.
+4. Alla fine un messaggio dice che cosa è cambiato: volume percepito prima e dopo, picco, e quali passaggi sono stati fatti. Con Alt+Maiusc+O risenti prima e dopo.
+
 Domande: trovi il punto da tagliare senza vederlo? Dopo il taglio senti un clic? Sai dire se alla fine il volume è giusto?
 
 **Compito A3: voce e musica insieme.**
@@ -224,9 +231,81 @@ Domande: trovi il punto da tagliare senza vederlo? Dopo il taglio senti un clic?
 2. Con Ctrl+Alt+L vai alle tracce. Freccia su e Freccia giù cambiano traccia, Freccia destra e Freccia sinistra scelgono le regioni. Ctrl+Freccia destra e sinistra spostano la regione nel tempo.
 3. Fai partire la musica un po' prima della voce. Per abbassarne il volume, dalla corsia della traccia premi Maiusc+Tab fino al cursore «Volume».
 
-**Prova anche:** Alt+Maiusc+D per la descrizione del brano: tracce, regioni e che cosa suona insieme.
+**Prova anche:** Alt+Maiusc+D per la descrizione del brano: tracce, regioni e che cosa suona insieme. Con il cursore sulla traccia della voce, cerca «Traccia voce» in Alt+Q e attivalo: poi apri «Suono della traccia» della musica e alza «Si abbassa quando parla la voce». La musica si abbassa da sola mentre la voce parla, anche nel file esportato.
 
-Domande: sai quando entra la musica e quando parla la voce? Sai se la musica copre la voce, e di quanto?
+Domande: sai quando entra la musica e quando parla la voce? Sai se la musica copre la voce, e di quanto? Ti accorgi che la musica si è abbassata, o ti serve un modo per sentirlo?
+
+**Compito A3c: far scendere la musica sotto la voce con l'automazione.**
+
+1. Con la traccia della musica scelta, cerca «Automazione» in Alt+Q e premi Invio.
+2. Lascia il tempo del punto sull'indicatore, scrivi il volume che vuoi (per esempio −18) e premi «Aggiungi il punto». La tabella dei punti si aggiorna e il punto è annunciato. Con il campo «Parametro da modificare» puoi passare a bilanciamento, riverbero, bassi, alti o compressione: la tabella mostra i punti di quel parametro e le caselle in alto dicono quali parametri seguono l'automazione.
+3. Sposta l'indicatore dove la musica deve tornare su, aggiungi un secondo punto con volume 0, poi salva. Prova anche ad accendere il riverbero o la compressione e a muoverli con due punti.
+4. Ascolta: com'era prima, il volume scende e risale; con Alt+Maiusc+L sulla traccia un messaggio dice anche il valore dell'automazione in quel punto.
+
+Domande: capisci dalla tabella dove sono i punti e che valore hanno? Ti serve sentire il punto mentre lo aggiungi?
+
+**Compito A3d: raggruppare le voci in un bus.**
+
+1. Cerca «Nuovo bus» in Alt+Q: nasce una traccia chiamata «Bus 1», senza regioni.
+2. Scegli una traccia voce, apri «Suono della traccia» e nel campo «Uscita» scegli il bus: la voce ora passa dal bus.
+3. Fai lo stesso con una seconda voce. Poi scegli il bus e abbassa il suo volume: calano tutte e due insieme.
+
+Domande: dal nome della traccia capisci che è un bus? Il campo «Uscita» ti dice dove va il suono?
+
+**Compito A8: guadagno della regione e limitatore finale.**
+
+1. Scegli una regione, cerca «Guadagno della regione nel tempo» in Alt+Q e premi Invio.
+2. Scrivi il tempo del punto (dentro la regione), il guadagno e premi «Aggiungi il punto»; la tabella mostra i punti con i tempi del brano. Accendi «Il guadagno segue l'automazione» e salva.
+3. Con Alt+Q cerca «Limitatore finale»: aggiungi due punti al tetto (per esempio −20 dB all'inizio e 0 alla fine) e accendi l'automazione.
+4. Con Alt+Maiusc+D la descrizione del brano dice quanti punti ha il guadagno di ogni regione e il limitatore finale.
+
+Domande: capisci in che punto del brano sei mentre aggiungi il punto? Il tetto del limitatore ti dice abbastanza, o ti serve sentirlo?
+
+**Compito A6: scegliere la take buona e comporla.**
+
+1. Registra due volte la stessa frase: la seconda volta, nella finestra «Registra», scegli «Come nuova take nella regione».
+2. Cerca «Take» in Alt+Q: la finestra elenca le take con durata e nota. Scegli la seconda, scrivi una nota («buona») e salva.
+3. Con Alt+Maiusc+] e Alt+Maiusc+[ passi da una take all'altra senza aprire la finestra.
+4. Cerca «Comping» e aggiungi una sezione: scegli Da, A e la take. La tabella mostra i tratti; il brano suona la take attiva tranne nelle sezioni.
+
+Domande: senti la differenza fra le take senza vedere la forma d'onda? Capisci dall'elenco quale stai ascoltando? Le sezioni sono chiare a parole?
+
+**Compito A7: registrare solo una parola con il punch.**
+
+1. Cerca «Punch» in Alt+Q, scegli «Punch: registra solo tra due punti», imposta Da e A intorno alla parola da rifare e attiva il punch.
+2. Porta l'indicatore un po' prima e premi Ctrl+Alt+R: la registrazione parte con l'ascolto prima del punto.
+3. Ferma subito dopo il punto A. Entra solo quel tratto; il resto della regione viene accorciato o diviso, senza sovrapposizioni.
+4. Con Alt+Maiusc+D la descrizione del brano dice che il punch è attivo e fra quali punti.
+
+Domande: capisci quando parte davvero la registrazione? Ti accorgi che il tratto fuori dal punch è stato scartato?
+
+**Compito A3b: far entrare un pezzo in uno spazio preciso.**
+
+1. Apri una regione con Ctrl+E, poi Ctrl+Maiusc+F: si apre «Adatta alla durata».
+2. Scrivi la durata che ti serve, per esempio `2:30`, e premi Adatta. Il pezzo si allunga o si accorcia senza cambiare l'intonazione.
+3. Sulla linea temporale, con due regioni vicine sulla stessa traccia, premi «Incrocia» (nel cassetto Tracce) e scegli la durata dell'incrocio.
+
+Domande: la voce resta naturale dopo l'adattamento? L'incrocio si sente come uno stacco o come un passaggio?
+
+**Compito A4: preparare il file per la trasmissione.**
+
+1. Premi Ctrl+S: si apre la finestra «Esporta l'audio».
+2. Il primo campo è «Consegna»: con le frecce scegli «Radio EBU R128». I campi sotto si aggiornano da soli: WAV 24 bit, 48000 hertz, −23 LUFS, picco vero −1 dBTP.
+3. Scrivi «Autore o emittente» e «Descrizione»: finiscono nei metadati del file, il blocco BWF dei WAV e i tag ID3 degli MP3. Con il campo «Formato» puoi scegliere anche MP3, per i playout che lo vogliono.
+4. Lascia attivo «Mostra il report di consegna dopo l'esportazione» e premi Esporta.
+5. Leggi il report: durata, volume percepito, picco vero, range di volume, rumore di fondo e che metadati sono stati scritti. Il pulsante «Salva il report» produce un file di testo da allegare al file esportato.
+
+Domande: prima di esportare sapevi a che volume sarebbe uscito il file? Il report ti dice se è pronto per la trasmissione? Sai che cosa contiene il file oltre al suono, e ti serve saperlo?
+
+**Compito A5: convertire i file arrivati da fonti diverse.**
+
+1. Premi Ctrl+Maiusc+K: si apre la finestra dei file del sistema. Scegli due o tre file audio diversi, anche di formati e frequenze diverse, e conferma.
+2. Nella finestra «Converti più file» scegli «Consegna» con le frecce, per esempio «Radio EBU R128»; il formato, la frequenza e il volume si aggiornano.
+3. Nel campo «Schema del nome» scrivi `{nome}-{numero}`: i file escono numerati.
+4. Premi Converti e aspetta: la barra di stato dice a che file è arrivata.
+5. Alla fine arriva uno ZIP con i file convertiti e una finestra con il riepilogo: per ogni file durata, volume, picco vero e dimensione. Il pulsante «Salva il riepilogo» produce un file di testo.
+
+Domande: sapevi quali file avevi scelto, e in che ordine? Il riepilogo ti dice se qualcuno non è riuscito e perché? Ti serve sentire i file per controllarli?
 
 ### Video (Tassello Media)
 

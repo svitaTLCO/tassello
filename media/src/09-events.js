@@ -46,4 +46,4 @@ tlScroll.addEventListener('scroll',()=>updateTimelineZoomUI());
 view.addEventListener('keydown',e=>{if(timelineKeys(e,null))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();frameStep(e.key==='ArrowRight'?1:-1);announce(playheadText(V.t))}});
 view.addEventListener('click',()=>vPlayPause());
 // Prima di chiudere: avviso se un'esportazione è in corso o se l'audio non è entrato nella bozza.
-addEventListener('beforeunload',e=>{const big=[...new Set(P.regions.map(r=>r.src))].reduce((n,id)=>{const b=SOURCES.get(id);return n+(b?b.length*b.numberOfChannels*4:0)},0)>DRAFT_LIMIT;if(VE.exp||MIX.recording||(big&&audioModified())){e.preventDefault();e.returnValue=''}});
+addEventListener('beforeunload',e=>{const big=[...new Set(P.regions.flatMap(regionSources))].reduce((n,id)=>{const b=SOURCES.get(id);return n+(b?b.length*b.numberOfChannels*4:0)},0)>DRAFT_LIMIT;if(VE.exp||MIX.recording||(big&&audioModified())){e.preventDefault();e.returnValue=''}});

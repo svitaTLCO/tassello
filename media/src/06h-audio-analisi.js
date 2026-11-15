@@ -50,7 +50,9 @@ async function readLevels({track=null}={}){if(inEditorArea()&&!track){if(!A.buf)
  const res=await work('Misura dei livelli',async()=>{const solo=P.tracks.some(x=>x.solo),live=P.tracks.filter(x=>here.some(r=>r.track===x.id)&&!x.mute&&(!solo||x.solo)&&(!track||x.id===track));
   const ms=b=>measureCh([b.getChannelData(0),b.getChannelData(1)],b.sampleRate);if(track){const tr=trackOf(track);return{track:tr,m:tr&&live.length?ms(await renderMix({only:track,from,to})):null}}
   const out=ms(await renderMix({from,to})),raw=ms(await renderMix({from,to,limit:false})),per=[];for(const x of live)per.push({t:x,m:ms(await renderMix({only:x.id,from,to}))});return{out,raw,per}});if(!res)return;
- const where=`intorno a ${sayTime(t)}`;if(track){toast(res.m?`Traccia «${res.track.name}» ${where}: ${levelSentence(res.m,{floor:false})}.`:`La traccia «${res.track?.name||''}» non suona ${where}${res.track?.mute?': è muta':''}.`);return}
+ const where=`intorno a ${sayTime(t)}`;if(track){const tr=res.track,
+  autos=tr?['vol','pan','reverb','low','high','comp'].filter(k=>tr.autoOn?.[k]&&tr.auto?.[k]?.length).map(k=>`${k==='vol'?'volume':k==='pan'?'bilanciamento':k==='reverb'?'riverbero':k==='low'?'bassi':k==='high'?'alti':'compressione'} ${autoShow(k,autoValueAt(tr.auto[k],t))}`):[];
+  toast(res.m?`Traccia «${tr.name}» ${where}: ${levelSentence(res.m,{floor:false})}.${autos.length?` Automazione: ${autos.join(', ')}.`:''}`:`La traccia «${tr?.name||''}» non suona ${where}${tr?.mute?': è muta':''}.`);return}
  const red=res.raw.peak-res.out.peak,lim=red>=0.5?`Il limitatore abbassa i picchi di ${fmtDb(red)}.`:'Il limitatore non interviene.',lv=x=>Number.isFinite(x.m.lufs)?x.m.lufs:x.m.rms,per=res.per.filter(x=>Number.isFinite(lv(x))).sort((x,y)=>lv(y)-lv(x));
  let cmp='';if(per.length>1){const unit=per.every(x=>Number.isFinite(x.m.lufs))?' LUFS':' dB';cmp=' '+per.map(x=>`${x.t.name} ${fmtNum(lv(x),1)}${unit}`).join(', ')+`: «${per[0].t.name}» sta ${fmtNum(lv(per[0])-lv(per[1]),1)} dB sopra «${per[1].t.name}».`}
  else if(per.length===1)cmp=` Suona solo la traccia «${per[0].t.name}».`;
@@ -59,7 +61,7 @@ async function readLevels({track=null}={}){if(inEditorArea()&&!track){if(!A.buf)
 // ——— Descrivi il brano (Alt+Maiusc+D): una finestra con il riassunto (letto all'apertura), che cosa suona insieme nel
 // tempo e una tabella per traccia con regioni, spazi vuoti e sovrapposizioni.
 function trackWords(t){const w=[];if(t.mute)w.push('muta');if(t.solo)w.push('in solo');if(t.vol)w.push('volume '+fmtDb(t.vol));if(Math.abs(t.pan)>=0.005)w.push('bilanciamento '+panWords(t.pan));
- if(t.low)w.push('bassi '+signedDb(t.low));if(t.high)w.push('alti '+signedDb(t.high));if(t.comp)w.push('compressione '+t.comp+'%');if(t.reverb)w.push('riverbero '+t.reverb+'%');w.push('colore '+colorName(t.color));return w.join(', ')}
+ if(t.low)w.push('bassi '+signedDb(t.low));if(t.high)w.push('alti '+signedDb(t.high));if(t.comp)w.push('compressione '+t.comp+'%');if(t.reverb)w.push('riverbero '+t.reverb+'%');if(t.voice)w.push('è la voce');if(t.duck)w.push('si abbassa di '+fmtDb(-t.duck)+' quando parla la voce');if(t.kind==='bus')w.push('bus');else if(t.out)w.push('esce sul bus «'+((trackOf(t.out)||{}).name||'')+'»');for(const [k,nome] of [['vol','volume'],['pan','bilanciamento'],['reverb','riverbero'],['low','bassi'],['high','alti'],['comp','compressione']])if(t.autoOn?.[k]&&t.auto?.[k]?.length)w.push(nome+' automatico con '+(t.auto[k].length===1?'un punto':t.auto[k].length+' punti'));w.push('colore '+colorName(t.color));return w.join(', ')}
 // Tratti di tempo con le tracce che suonano: da un bordo di regione al successivo, unendo i tratti uguali.
 function songSpans(){const pts=arEdges().filter(p=>p<=projDur()+1e-6),out=[];for(let i=0;i+1<pts.length;i++){const a=pts[i],b=pts[i+1];if(b-a<0.02)continue;const m=(a+b)/2,on=P.tracks.filter(t=>P.regions.some(r=>r.track===t.id&&r.start<=m&&regionEnd(r)>m)).map(t=>t.name+(t.mute?' (muta)':''));
   const key=on.join('|');if(out.length&&out.at(-1).key===key)out.at(-1).b=b;else out.push({a,b,key,on})}return out}
@@ -67,12 +69,46 @@ const andList=l=>l.length<2?(l[0]||''):l.slice(0,-1).join(', ')+' e '+l.at(-1);
 function describeSong(){if(!P.tracks.length){toast('Il progetto è vuoto. Ctrl+Alt+R registra, Ctrl+I importa un file audio in una nuova traccia.');return}
  const T=projDur(),rows=[],sum=[`Brano di ${sayTime(T)}, ${P.tracks.length===1?'una traccia':P.tracks.length+' tracce'}, ${P.regions.length===1?'una regione':P.regions.length+' regioni'}, ${fmtNum(P.bpm,0)} BPM.`];let overlaps=0;
  const tables=P.tracks.map(t=>{const regs=regionsOn(t.id),lines=[];let prevEnd=0;
-  regs.forEach((r,i)=>{const gap=r.start-prevEnd;if(gap>=1)lines.push([`spazio vuoto`,sayTime(prevEnd),sayTime(r.start),sayTime(gap),'']);const notes=[];if(r.gain)notes.push('guadagno '+fmtDb(r.gain));if(r.fadeIn)notes.push('entrata di '+sayTime(r.fadeIn));if(r.fadeOut)notes.push('uscita di '+sayTime(r.fadeOut));if(r.markers?.length)notes.push(r.markers.length===1?'un marcatore':r.markers.length+' marcatori');
+  regs.forEach((r,i)=>{const gap=r.start-prevEnd;if(gap>=1)lines.push([`spazio vuoto`,sayTime(prevEnd),sayTime(r.start),sayTime(gap),'']);const notes=[];if(r.gain)notes.push('guadagno '+fmtDb(r.gain));if(r.fadeIn)notes.push('entrata di '+sayTime(r.fadeIn));if(r.fadeOut)notes.push('uscita di '+sayTime(r.fadeOut));if(r.markers?.length)notes.push(r.markers.length===1?'un marcatore':r.markers.length+' marcatori');if(r.gainOn&&r.gainAuto?.length)notes.push('guadagno automatico con '+(r.gainAuto.length===1?'un punto':r.gainAuto.length+' punti'));if(r.takes?.length>1)notes.push(r.takes.length+' take');if(r.comp?.length)notes.push(r.comp.length===1?'una sezione di comping':r.comp.length+' sezioni di comping');
    for(const o of regs.slice(i+1)){const ov=Math.min(regionEnd(r),regionEnd(o))-o.start;if(ov>0.01){notes.push(`si sovrappone a «${o.name}» per ${sayTime(ov)}`);overlaps++}}
    lines.push([`«${r.name}»`,sayTime(r.start),sayTime(regionEnd(r)),sayTime(r.dur),notes.join(', ')]);prevEnd=Math.max(prevEnd,regionEnd(r))});
   const first=regs[0],lastEnd=regs.reduce((x,r)=>Math.max(x,regionEnd(r)),0);
   sum.push(`${t.name}: ${!regs.length?'vuota':regs.length===1&&first.start<=0.05*T&&lastEnd>=0.95*T?'una regione per tutto il brano':`${regs.length===1?'una regione':regs.length+' regioni'} da ${sayTime(first.start)} a ${sayTime(lastEnd)}`}${t.mute?', muta':''}${t.solo?', in solo':''}.`);
   return `<h3>Traccia «${esc(t.name)}»</h3><p>${esc(capital(trackWords(t)))}.</p>`+(lines.length?`<table><caption>Regioni della traccia «${esc(t.name)}»</caption><thead><tr><th scope="col">Regione</th><th scope="col">Da</th><th scope="col">A</th><th scope="col">Durata</th><th scope="col">Note</th></tr></thead><tbody>${lines.map(l=>`<tr><th scope="row">${esc(l[0])}</th>${l.slice(1).map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`:'<p>Nessuna regione.</p>')});
  if(overlaps)sum.push(overlaps===1?'Una sovrapposizione sulla stessa traccia.':overlaps+' sovrapposizioni sulla stessa traccia.');
+ if(P.punch?.on)sum.push(`Punch attivo da ${sayTime(P.punch.a,1)} a ${sayTime(P.punch.b,1)}.`);
+ if(P.limiter?.on&&P.limiter.ceil?.length){const v=P.limiter.ceil.map(p=>p.v);sum.push(`Limitatore finale automatico con ${P.limiter.ceil.length===1?'un punto':P.limiter.ceil.length+' punti'}, da ${fmtDb(Math.min(...v))} a ${fmtDb(Math.max(...v))}.`)}
  const spans=songSpans(),together=spans.map(s=>`<tr><th scope="row">${esc(sayTime(s.a))} – ${esc(sayTime(s.b))}</th><td>${esc(s.on.length?andList(s.on):'silenzio')}</td></tr>`).join('');
  modal('Descrizione del brano',`<p id="songSum">${esc(sum.join(' '))}</p><h3>Che cosa suona insieme</h3><table><caption>Tracce che suonano, tratto per tratto</caption><thead><tr><th scope="col">Tratto</th><th scope="col">Suonano</th></tr></thead><tbody>${together}</tbody></table>${tables.join('')}`,[],'Chiudi',{noCancel:true,wide:true,describedBy:'songSum'})}
+
+// ——— Consegna in onda: picco vero e range di volume. Sono le due misure che chiedono i capitolati radiofonici
+// (EBU R128: −23 LUFS di volume percepito, picco vero non oltre −1 dBTP).
+// Il picco vero supera il picco dei campioni quando l'onda passa in mezzo a due campioni. Si interpola quattro volte
+// più fitto solo dentro i blocchi più forti del file, dove sta sempre il massimo: la misura resta rapida anche su
+// registrazioni lunghe e sbaglia meno di un decimo di decibel rispetto a un misuratore dedicato.
+const TP_TAPS=8,TP_PH=[],TP_BLOCK=512,TP_TOP=64;
+function tpCoefficients(){if(TP_PH.length)return TP_PH;
+ for(let p=1;p<4;p++){const f=p/4,h=new Float32Array(2*TP_TAPS);let s=0;
+  for(let k=0;k<2*TP_TAPS;k++){const m=k-TP_TAPS+1,z=f-m,w=0.42+0.5*Math.cos(Math.PI*m/TP_TAPS)+0.08*Math.cos(2*Math.PI*m/TP_TAPS),v=(z?Math.sin(Math.PI*z)/(Math.PI*z):1)*w;h[k]=v;s+=v}
+  for(let k=0;k<h.length;k++)h[k]/=s;TP_PH.push(h)}
+ return TP_PH}
+function truePeakDb(ch,rate){let peak=0;for(const d of ch)for(let i=0;i<d.length;i++){const v=d[i]<0?-d[i]:d[i];if(v>peak)peak=v}
+ if(!(peak>0))return -Infinity;
+ const top=[];
+ for(let c=0;c<ch.length;c++){const d=ch[c],blocks=Math.ceil(d.length/TP_BLOCK);
+  for(let b=0;b<blocks;b++){const a=b*TP_BLOCK,e=Math.min(d.length,a+TP_BLOCK);let v=0;for(let i=a;i<e;i++){const x=d[i]<0?-d[i]:d[i];if(x>v)v=x}
+   if(top.length<TP_TOP){top.push({c,a,v});top.sort((x,y)=>x.v-y.v)}else if(v>top[0].v){top[0]={c,a,v};top.sort((x,y)=>x.v-y.v)}}}
+ const h=tpCoefficients();
+ for(const t of top){const d=ch[t.c],a=Math.max(TP_TAPS,t.a-TP_TAPS),e=Math.min(d.length-TP_TAPS,t.a+TP_BLOCK+TP_TAPS);
+  for(let i=a;i<e;i++)for(let p=0;p<3;p++){let s=0;for(let k=0;k<2*TP_TAPS;k++)s+=d[i+k-TP_TAPS+1]*h[p][k];const v=s<0?-s:s;if(v>peak)peak=v}}
+ return toDb(peak)}
+// Range di volume (LRA, EBU Tech 3342): differenza tra il 10° e il 95° percentile del volume a finestre di tre
+// secondi, dopo la soglia assoluta a −70 LUFS e quella relativa a −20 LU sotto la media.
+function loudnessRange(ch,rate){const [s1,s2]=kWeight(rate),f=ch.slice(0,2).map(d=>biquad(biquad(d,s1),s2)),win=Math.round(rate*3),hop=Math.max(1,Math.round(rate)),len=f[0]?.length||0,z=[];
+ for(let s=0;s+win<=len;s+=hop){let sum=0;for(const d of f){let q=0;for(let i=s;i<s+win;i++)q+=d[i]*d[i];sum+=q/win}z.push(sum)}
+ const L=v=>-0.691+10*Math.log10(v),abs=z.filter(v=>v>0&&L(v)>-70);if(abs.length<2)return 0;
+ const rel=L(abs.reduce((a,b)=>a+b,0)/abs.length)-20,g=abs.filter(v=>L(v)>rel).map(L).sort((a,b)=>a-b);
+ if(g.length<2)return 0;const pct=q=>g[clamp(Math.round((g.length-1)*q),0,g.length-1)];return Math.max(0,pct(0.95)-pct(0.10))}
+// Tutto quello che serve al report di consegna: picco, picco vero, volume percepito, range, rumore di fondo, durata.
+function analyzeDelivery(ch,rate){const m=measureCh(ch,rate);let clip=0;for(const d of ch)for(let i=0;i<d.length;i++)if(d[i]>=0.999||d[i]<=-0.999)clip++;
+ return{...m,truePeak:truePeakDb(ch,rate),lra:loudnessRange(ch,rate),channels:ch.length,clip}}

@@ -1,8 +1,78 @@
 {
   "programma": "Tassello Media",
   "file": "tassello-media.html",
-  "ultima": "1.4.0",
+  "ultima": "1.17.1",
   "versioni": [
+    {
+      "versione": "1.17.1",
+      "data": "2026-11-15",
+      "sha256": "837b7f8fa2afec7742455aedaa20a6bfb421bfe1f248437bbce628a6fec1fa2a"
+    },
+    {
+      "versione": "1.17.0",
+      "data": "2026-11-15",
+      "sha256": "d2efeadfceb48ce1adc1a27e2afabb64485bf848f1fd463197ecf463705fd221"
+    },
+    {
+      "versione": "1.16.0",
+      "data": "2026-11-15",
+      "sha256": "cb25a8cde30defa9dff225c5998d467fa738b57a744f4df9429a8d2b1b6df174"
+    },
+    {
+      "versione": "1.15.1",
+      "data": "2026-11-15",
+      "sha256": "7597e4477666e361c9a51266497e56eeeaa1ef32209483b9f17baa8e4b3fa8cd"
+    },
+    {
+      "versione": "1.15.0",
+      "data": "2026-11-15",
+      "sha256": "a1f43a95f1c994d126b3986be5090556885b7c233eef5cfa815fb97dae592a71"
+    },
+    {
+      "versione": "1.14.0",
+      "data": "2026-11-15",
+      "sha256": "0c9f2746c714b99177dc0a18701c229699fa97ee8754d99933b873603eec9d06"
+    },
+    {
+      "versione": "1.13.0",
+      "data": "2026-11-15",
+      "sha256": "55f81c8097c485beb4831cab49d47f59785bd0b250e36eaf334c8c74f7a5374e"
+    },
+    {
+      "versione": "1.11.0",
+      "data": "2026-11-15",
+      "sha256": "4d6de4c3d50cc53b9c6e8312cd38b284af46a6e5732e8d6ce3bbbc501e7e12ca"
+    },
+    {
+      "versione": "1.10.0",
+      "data": "2026-11-15",
+      "sha256": "0288e897e770150a25d5389dc53e2459c686ae17fdbd03977b3205ff847f2152"
+    },
+    {
+      "versione": "1.9.0",
+      "data": "2026-11-15",
+      "sha256": "8e4ef635a308fa21e96811685ef02ce145584caa2c50e9437951784f5a2f81ae"
+    },
+    {
+      "versione": "1.8.0",
+      "data": "2026-11-15",
+      "sha256": "f36b3c8db553a5142918e35bc8d1af624f77a7ecff8629a56c0a8908356a7996"
+    },
+    {
+      "versione": "1.7.0",
+      "data": "2026-11-15",
+      "sha256": "e4427faaa85d1028ba8ee86fcc5ce28a8803762c9ea5b781fa957bd6d9596f1d"
+    },
+    {
+      "versione": "1.6.0",
+      "data": "2026-11-15",
+      "sha256": "b4e02e0e918da08b6e26d31b46749e7c49111179e9ec9b866710b66106d098c6"
+    },
+    {
+      "versione": "1.5.0",
+      "data": "2026-11-15",
+      "sha256": "bdaa8d40d85c019499d403cfdea57b185cd53077815166c6a3f3f9d2d99b92ac"
+    },
     {
       "versione": "1.4.0",
       "data": "2026-10-29",

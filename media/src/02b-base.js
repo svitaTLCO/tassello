@@ -10,7 +10,7 @@ const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
 const words=s=>s.split(/\s+/).filter(Boolean);
 const uid=()=>Math.random().toString(36).slice(2,10);
 // Nomi dei file: niente caratteri vietati da Windows, al massimo 80 caratteri, estensione corretta.
-const MEDIA_EXT=/\.(?:wav|wave|mp3|m4a|aac|ogg|oga|opus|flac|webm|weba|mp4|m4v|mov|mkv|avi|zip|txt|srt|vtt|png|jpe?g|webp|gif)$/i;
+const MEDIA_EXT=/\.(?:wav|wave|aiff?|aifc|mp3|m4a|aac|ogg|oga|opus|flac|webm|weba|mp4|m4v|mov|mkv|avi|zip|txt|srt|vtt|png|jpe?g|webp|gif)$/i;
 function safeFileName(name){const s=String(name||'').replace(/[\x00-\x1f\\/:*?"<>|]/g,'_').trim().slice(0,80);return s||'Senza titolo'}
 const baseName=name=>String(name||'').replace(MEDIA_EXT,'');
 const extName=(name,ext)=>`${safeFileName(baseName(name))}.${ext}`;
@@ -106,7 +106,7 @@ const tip=$('tip');let tipTimer;
 function showTip(el){const t=el.dataset.tip;if(!t||!el.isConnected)return;tip.textContent=t;tip.hidden=false;const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;let x=Math.min(innerWidth-w-6,Math.max(6,r.left+r.width/2-w/2)),y=r.bottom+6;if(y+h>innerHeight-4)y=r.top-h-6;tip.style.left=x+'px';tip.style.top=y+'px'}
 function hideTip(){clearTimeout(tipTimer);tip.hidden=true}
 // Preferenze: tema, contrasto, passo delle frecce, ascolto durante lo spostamento, formati di esportazione.
-const prefs={theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',contrast:matchMedia('(prefers-contrast: more)').matches,step:0.1,scrub:true,follow:true,audioFormat:'wav16',videoFormat:'',showSubs:true,pauseDb:-40,snap:true};
+const prefs={theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',contrast:matchMedia('(prefers-contrast: more)').matches,step:0.1,scrub:true,follow:true,audioFormat:'wav16',videoFormat:'',showSubs:true,pauseDb:-40,snap:true,delivery:'manual',deliveryRate:'auto',deliveryCh:'auto',deliveryLufs:'none',deliveryTp:'none',dither:false,report:true,artist:'',comment:'',bwf:false,batchPattern:'{nome}'};
 const PREFS_KEY='tassello-media.preferenze';
 try{Object.assign(prefs,JSON.parse(localStorage.getItem(PREFS_KEY)||'{}'))}catch(e){}
 function savePrefs(){try{localStorage.setItem(PREFS_KEY,JSON.stringify(prefs))}catch(e){}}
