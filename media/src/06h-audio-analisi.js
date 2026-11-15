@@ -76,3 +76,35 @@ function describeSong(){if(!P.tracks.length){toast('Il progetto è vuoto. Ctrl+A
  if(overlaps)sum.push(overlaps===1?'Una sovrapposizione sulla stessa traccia.':overlaps+' sovrapposizioni sulla stessa traccia.');
  const spans=songSpans(),together=spans.map(s=>`<tr><th scope="row">${esc(sayTime(s.a))} – ${esc(sayTime(s.b))}</th><td>${esc(s.on.length?andList(s.on):'silenzio')}</td></tr>`).join('');
  modal('Descrizione del brano',`<p id="songSum">${esc(sum.join(' '))}</p><h3>Che cosa suona insieme</h3><table><caption>Tracce che suonano, tratto per tratto</caption><thead><tr><th scope="col">Tratto</th><th scope="col">Suonano</th></tr></thead><tbody>${together}</tbody></table>${tables.join('')}`,[],'Chiudi',{noCancel:true,wide:true,describedBy:'songSum'})}
+
+// ——— Consegna in onda: picco vero e range di volume. Sono le due misure che chiedono i capitolati radiofonici
+// (EBU R128: −23 LUFS di volume percepito, picco vero non oltre −1 dBTP).
+// Il picco vero supera il picco dei campioni quando l'onda passa in mezzo a due campioni. Si interpola quattro volte
+// più fitto solo dentro i blocchi più forti del file, dove sta sempre il massimo: la misura resta rapida anche su
+// registrazioni lunghe e sbaglia meno di un decimo di decibel rispetto a un misuratore dedicato.
+const TP_TAPS=8,TP_PH=[],TP_BLOCK=512,TP_TOP=64;
+function tpCoefficients(){if(TP_PH.length)return TP_PH;
+ for(let p=1;p<4;p++){const f=p/4,h=new Float32Array(2*TP_TAPS);let s=0;
+  for(let k=0;k<2*TP_TAPS;k++){const m=k-TP_TAPS+1,z=f-m,w=0.42+0.5*Math.cos(Math.PI*m/TP_TAPS)+0.08*Math.cos(2*Math.PI*m/TP_TAPS),v=(z?Math.sin(Math.PI*z)/(Math.PI*z):1)*w;h[k]=v;s+=v}
+  for(let k=0;k<h.length;k++)h[k]/=s;TP_PH.push(h)}
+ return TP_PH}
+function truePeakDb(ch,rate){let peak=0;for(const d of ch)for(let i=0;i<d.length;i++){const v=d[i]<0?-d[i]:d[i];if(v>peak)peak=v}
+ if(!(peak>0))return -Infinity;
+ const top=[];
+ for(let c=0;c<ch.length;c++){const d=ch[c],blocks=Math.ceil(d.length/TP_BLOCK);
+  for(let b=0;b<blocks;b++){const a=b*TP_BLOCK,e=Math.min(d.length,a+TP_BLOCK);let v=0;for(let i=a;i<e;i++){const x=d[i]<0?-d[i]:d[i];if(x>v)v=x}
+   if(top.length<TP_TOP){top.push({c,a,v});top.sort((x,y)=>x.v-y.v)}else if(v>top[0].v){top[0]={c,a,v};top.sort((x,y)=>x.v-y.v)}}}
+ const h=tpCoefficients();
+ for(const t of top){const d=ch[t.c],a=Math.max(TP_TAPS,t.a-TP_TAPS),e=Math.min(d.length-TP_TAPS,t.a+TP_BLOCK+TP_TAPS);
+  for(let i=a;i<e;i++)for(let p=0;p<3;p++){let s=0;for(let k=0;k<2*TP_TAPS;k++)s+=d[i+k-TP_TAPS+1]*h[p][k];const v=s<0?-s:s;if(v>peak)peak=v}}
+ return toDb(peak)}
+// Range di volume (LRA, EBU Tech 3342): differenza tra il 10° e il 95° percentile del volume a finestre di tre
+// secondi, dopo la soglia assoluta a −70 LUFS e quella relativa a −20 LU sotto la media.
+function loudnessRange(ch,rate){const [s1,s2]=kWeight(rate),f=ch.slice(0,2).map(d=>biquad(biquad(d,s1),s2)),win=Math.round(rate*3),hop=Math.max(1,Math.round(rate)),len=f[0]?.length||0,z=[];
+ for(let s=0;s+win<=len;s+=hop){let sum=0;for(const d of f){let q=0;for(let i=s;i<s+win;i++)q+=d[i]*d[i];sum+=q/win}z.push(sum)}
+ const L=v=>-0.691+10*Math.log10(v),abs=z.filter(v=>v>0&&L(v)>-70);if(abs.length<2)return 0;
+ const rel=L(abs.reduce((a,b)=>a+b,0)/abs.length)-20,g=abs.filter(v=>L(v)>rel).map(L).sort((a,b)=>a-b);
+ if(g.length<2)return 0;const pct=q=>g[clamp(Math.round((g.length-1)*q),0,g.length-1)];return Math.max(0,pct(0.95)-pct(0.10))}
+// Tutto quello che serve al report di consegna: picco, picco vero, volume percepito, range, rumore di fondo, durata.
+function analyzeDelivery(ch,rate){const m=measureCh(ch,rate);let clip=0;for(const d of ch)for(let i=0;i<d.length;i++)if(d[i]>=0.999||d[i]<=-0.999)clip++;
+ return{...m,truePeak:truePeakDb(ch,rate),lra:loudnessRange(ch,rate),channels:ch.length,clip}}

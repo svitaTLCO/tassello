@@ -131,6 +131,7 @@ def('a','Inserisci',[
  ['markPane','Riquadro dei marcatori','markers','',{short:'Riquadro',toggle:()=>!$('markPane').hidden,said:['Riquadro dei marcatori aperto','Riquadro dei marcatori chiuso']}]]);
 def('a','Analisi',[
  ['stats','Statistiche: durata, picco, volume medio e distorsioni','stats','',{short:'Statistiche'}],
+ ['deliveryReport','Report di consegna: durata, volume percepito, picco vero e range…','stats','Alt+Maiusc+R',{g:1,short:'Report di consegna'}],
  ['readLevel','Leggi il livello intorno al cursore','speak','',{short:'Livello'}],
  ['nextPause','Vai alla pausa successiva','right','',{short:'Pausa dopo'}],
  ['prevPause','Vai alla pausa precedente','left','',{short:'Pausa prima'}],

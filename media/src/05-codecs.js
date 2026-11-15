@@ -31,7 +31,8 @@ function readWav(buf){const v=new DataView(buf);if(v.byteLength<12)return null;c
  const markers=cues.filter(c=>c.pos<=frames).sort((a,b)=>a.pos-b.pos).map((c,i)=>({id:uid(),pos:c.pos,label:labels.get(c.id)||'Marcatore '+(i+1)}));
  return{rate,buffer:out,markers}}
 // WAV a 16 o 24 bit interi oppure 32 bit in virgola mobile, dal campione start a end; i marcatori diventano cue e labl.
-function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length){const ch=buffer.numberOfChannels,rate=buffer.sampleRate,frames=Math.max(0,end-start),float=bits===32,bps=bits/8,dataLen=frames*ch*bps;
+// Con dither i 16 bit ricevono un rumore triangolare di un bit: serve quando si scende da 24 o da 32 bit.
+function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length,{dither=false}={}){const ch=buffer.numberOfChannels,rate=buffer.sampleRate,frames=Math.max(0,end-start),float=bits===32,bps=bits/8,dataLen=frames*ch*bps;
  if(dataLen+1e6>0xFFFFFFFF)throw Error('Il file supera i 4 GB del formato WAV: esporta una parte alla volta');
  const ms=markers.filter(m=>m.pos>=start&&m.pos<=end);
  const labl=ms.map((m,i)=>{const t=te.encode((m.label||'')+'\0'),pad=t.length&1,b=new Uint8Array(12+t.length+pad),v=new DataView(b.buffer);b.set([108,97,98,108]);v.setUint32(4,4+t.length,true);v.setUint32(8,i+1,true);b.set(t,12);return b});
@@ -44,11 +45,16 @@ function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length){const ch=b
  const parts=[head],chans=Array.from({length:ch},(_,c)=>buffer.getChannelData(c)),BLOCK=1<<18;
  for(let i=start;i<end;i+=BLOCK){const n=Math.min(BLOCK,end-i);
   if(float){const a=new Float32Array(n*ch);for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c;j<n;j++,k+=ch)a[k]=d[i+j]}parts.push(a)}
-  else if(bits===16){const a=new Int16Array(n*ch);for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c;j<n;j++,k+=ch){const x=d[i+j];a[k]=x<=-1?-32768:x>=1?32767:Math.round(x*32767)}}parts.push(a)}
+  else if(bits===16){const a=new Int16Array(n*ch);for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c;j<n;j++,k+=ch){const x=dither?d[i+j]+(Math.random()-Math.random())/32768:d[i+j];a[k]=x<=-1?-32768:x>=1?32767:Math.round(x*32767)}}parts.push(a)}
   else{const a=new Uint8Array(n*ch*3),step=ch*3;for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c*3;j<n;j++,k+=step){const x=d[i+j],s=x<=-1?-8388608:x>=1?8388607:Math.round(x*8388607);a[k]=s&255;a[k+1]=s>>8&255;a[k+2]=s>>16&255}}parts.push(a)}}
  if(dataLen&1)parts.push(new Uint8Array(1));parts.push(...tail);return new Blob(parts,{type:'audio/wav'})}
 // AudioBuffer con i canali dati; la frequenza resta quella del file.
 function makeBuffer(channels,rate){const len=channels[0]?.length||0;if(!len)return null;const b=new AudioBuffer({length:len,numberOfChannels:channels.length,sampleRate:rate});channels.forEach((d,c)=>b.copyToChannel(d,c));return b}
+// Lo stesso audio con un altro numero di canali: verso il mono si sommano sinistro e destro a metà, dal mono i due
+// canali diventano uguali. Serve alla consegna, dove alcuni playout accettano solo file mono.
+function channelBuffer(buf,ch){if(buf.numberOfChannels===ch)return buf;const n=buf.length,out=new AudioBuffer({length:n,numberOfChannels:ch,sampleRate:buf.sampleRate}),src=Array.from({length:buf.numberOfChannels},(_,c)=>buf.getChannelData(c));
+ if(ch===1){const d=out.getChannelData(0);for(let i=0;i<n;i++){let s=0;for(const x of src)s+=x[i];d[i]=s/src.length}return out}
+ for(let c=0;c<ch;c++)out.copyToChannel(src[Math.min(c,src.length-1)],c);return out}
 // Cambio di frequenza con il motore audio del browser (OfflineAudioContext).
 async function resampleBuffer(buf,rate){if(!buf||buf.sampleRate===rate)return buf;const oc=new OfflineAudioContext(buf.numberOfChannels,Math.max(1,Math.round(buf.length*rate/buf.sampleRate)),rate),s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start();return oc.startRendering()}
 // Decodifica di qualunque file audio (o dell'audio di un video) che il browser sa leggere. I WAV passano dal lettore

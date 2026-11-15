@@ -133,14 +133,101 @@ async function markersFromPauses(){if(!A.buf){toast('Nessun audio aperto');retur
  if(!(await confirmAction(`Aggiungo ${fresh.length} marcatori, uno all’inizio di ogni parte che segue una pausa?`,'Aggiungi')))return;let n=A.markers.length;metaEdit('Marcatori sulle pause',()=>{for(const s of fresh)A.markers.push({id:uid(),pos:s,label:'Parte '+(++n)});A.markers.sort((a,b)=>a.pos-b.pos)});paneSet('markPane','open',{say:false});announce(fresh.length+' marcatori aggiunti')}
 // Esportazione: il brano (tutte le tracce mixate), la regione nell'editor o la sua selezione. WAV sempre,
 // M4A (AAC) e WebM (Opus) se il browser sa codificarli; nel WAV del brano i marcatori delle regioni diventano cue.
+// ——— Consegna in onda. Un preset mette insieme formato, frequenza, numero di canali, volume percepito e picco
+// vero; poi il file viene misurato e il report dice, a parole, se rispetta quello che è stato chiesto.
+const DELIVERY={
+ manual:{label:'Manuale: scegli tu formato e volume',rate:'',bits:'',lufs:'none',tp:'none',ch:'auto',dither:false},
+ radio:{label:'Radio EBU R128: WAV 24 bit 48 kHz, −23 LUFS, picco vero −1 dBTP',rate:'48000',bits:'wav24',lufs:'-23',tp:'-1',ch:'auto',dither:false},
+ podcast:{label:'Podcast e web: WAV 24 bit 48 kHz, −16 LUFS, picco vero −1 dBTP',rate:'48000',bits:'wav24',lufs:'-16',tp:'-1',ch:'auto',dither:false},
+ streaming:{label:'Streaming: WAV 24 bit 48 kHz, −14 LUFS, picco vero −1 dBTP',rate:'48000',bits:'wav24',lufs:'-14',tp:'-1',ch:'auto',dither:false},
+ cd:{label:'CD e archivio: WAV 16 bit 44,1 kHz con dither, senza normalizzazione',rate:'44100',bits:'wav16',lufs:'none',tp:'none',ch:'2',dither:true}};
+const LUFS_CHOICES=[['none','Nessuna normalizzazione'],['-23','−23 LUFS (radio, EBU R128)'],['-19','−19 LUFS (radio parlata)'],['-16','−16 LUFS (podcast)'],['-14','−14 LUFS (streaming)']];
+const TP_CHOICES=[['none','Nessun limite'],['-1','−1 dBTP (broadcast)'],['-2','−2 dBTP (con margine)']];
+// Guadagno applicato sul posto, campione per campione.
+function gainBuffer(buf,g){if(!Number.isFinite(g)||!g||g===1)return buf;for(let c=0;c<buf.numberOfChannels;c++){const d=buf.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=g}return buf}
+// Limitatore con attacco immediato e rilascio di 50 ms: abbassa solo i picchi sopra il tetto e poi torna su.
+// Il tetto è sul picco dei campioni; chi chiama controlla il picco vero e, se serve, abbassa ancora un poco.
+function limitBuffer(buf,ceilingDb){const ceil=fromDb(ceilingDb),n=buf.length,ch=Array.from({length:buf.numberOfChannels},(_,c)=>buf.getChannelData(c)),rel=Math.exp(-1/(buf.sampleRate*0.05));let env=1,hit=0;
+ for(let i=0;i<n;i++){let p=0;for(const d of ch){const v=d[i]<0?-d[i]:d[i];if(v>p)p=v}const t=p>ceil?ceil/p:1;env=t<env?t:Math.min(t,env+(1-env)*rel);
+  if(env<0.999){hit++;for(const d of ch)d[i]*=env}}
+ return hit>0}
+// Prepara la copia da esportare: canali, frequenza, volume percepito e picco vero. Non tocca l'audio del progetto.
+async function prepareDelivery(buf,plan,progress=()=>{}){let out=makeBuffer(Array.from({length:buf.numberOfChannels},(_,c)=>buf.getChannelData(c).slice()),buf.sampleRate);
+ if(plan.ch&&out.numberOfChannels!==plan.ch){progress('Conversione dei canali…');out=channelBuffer(out,plan.ch)}
+ if(plan.rate&&out.sampleRate!==plan.rate){progress('Conversione della frequenza…');out=await resampleBuffer(out,plan.rate)}
+ let limited=false;
+ if(plan.lufs!==null||plan.tp!==null){const chans=()=>Array.from({length:out.numberOfChannels},(_,c)=>out.getChannelData(c));
+  if(plan.lufs!==null){progress('Misura del volume percepito…');const m=measureCh(chans(),out.sampleRate);if(Number.isFinite(m.lufs))gainBuffer(out,fromDb(plan.lufs-m.lufs))}
+  if(plan.tp!==null){progress('Controllo del picco vero…');limited=limitBuffer(out,plan.tp);
+   const tp=truePeakDb(chans(),out.sampleRate);if(tp>plan.tp+0.02)gainBuffer(out,fromDb(plan.tp-tp))}}
+ return{out,limited}}
+// I marcatori da scrivere nel WAV: quelli del brano, oppure quelli della regione spostati all'inizio dell'esportazione.
+function deliveryMarkers(what,base,end,rate){if(what==='song')return songMarkers(rate);const k=rate/A.rate;
+ return A.markers.filter(m=>m.pos>=base&&m.pos<=end).map(m=>({id:m.id,pos:Math.round((m.pos-base)*k),label:m.label}))}
+function deliveryFormatLabel(fmt,ch,rate,dither){const bits=fmt.startsWith('wav')?`WAV ${fmt.slice(3)} bit${fmt==='wav16'&&dither?' con dither':''}`:CODECS[fmt].label;
+ return `${bits}, ${fmtInt(rate)} hertz, ${ch===1?'mono':'stereo'}`}
+// Righe del report: le stesse che si leggono nella finestra e che finiscono nel file di testo da allegare.
+const fmtDbTp=d=>Number.isFinite(d)?fmtNum(d,1)+' dBTP':'non misurabile';
+function deliveryReportData({name,fmtLabel,content,m,limited,plan,compressed,note}){const lufs=Number.isFinite(m.lufs)?fmtNum(m.lufs,1)+' LUFS':'non misurabile';
+ const rows=[['File',name],['Data',new Date().toLocaleString('it-IT')],['Contenuto',content],['Durata',`${fmtTime(m.dur)} (${sayTime(m.dur)})`],['Formato',fmtLabel],
+  ['Volume percepito',lufs],['Picco vero',fmtDbTp(m.truePeak)],['Picco dei campioni',fmtDb(m.peak)],['Range di volume (LRA)',fmtNum(m.lra,1)+' LU'],
+  ['Rumore di fondo',fmtDb(m.floor)],['Campioni al fondo scala',m.clip?fmtInt(m.clip):'nessuno'],['Limitatore',limited?'intervenuto sui picchi':'non è intervenuto']];
+ const checks=[];
+ if(plan.lufs!==null&&Number.isFinite(m.lufs))checks.push(Math.abs(m.lufs-plan.lufs)<=0.5?`volume conforme a ${fmtNum(plan.lufs,0)} LUFS`:`volume fuori di ${fmtNum(Math.abs(m.lufs-plan.lufs),1)} LU rispetto a ${fmtNum(plan.lufs,0)} LUFS`);
+ if(plan.tp!==null)checks.push(m.truePeak<=plan.tp+0.05?`picco vero entro ${fmtNum(plan.tp,0)} dBTP`:`picco vero oltre ${fmtNum(plan.tp,0)} dBTP`);
+ const summary=`${sayTime(m.dur)}, ${lufs}, picco vero ${fmtDbTp(m.truePeak)}.`+(checks.length?' '+capital(checks.join(' e '))+'.':'');
+ const noteFinal=note||(compressed?'Le misure sono fatte sul mix prima della codifica: il file compresso può cambiarle di poco.':'Le misure valgono il file esportato.');
+ const text=rows.map(([k,v])=>k+': '+v).join('\n')+'\n'+(checks.length?'Esito: '+checks.join('; ')+'\n':'')+(noteFinal?noteFinal+'\n':'');
+ return{name,rows,summary,note:noteFinal,text}}
+function showDeliveryReport(rep){const html=rep.rows.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+ return modal('Report di consegna',`<p id="dlvSum">${esc(rep.summary)}</p><dl class="stats">${html}</dl><p>${esc(rep.note)}</p>`,[],'Chiudi',{noCancel:true,wide:true,describedBy:'dlvSum',
+  buttons:[{label:'Salva il report',run:()=>{download(rep.text,extName(rep.name+' - report','txt'),'text/plain');announce('Report di consegna salvato come file di testo')}}]})}
+// Comando Alt+Maiusc+R: misura quello che c'è (selezione, regione o brano) senza esportare nulla.
+async function deliveryReportDialog(){const inEditor=!!A.buf;
+ if(!A.buf&&!P.regions.length){toast('Non c’è audio da misurare: apri una regione o importa un file');return}
+ const sel=inEditor&&hasSel();const res=await work('Misure di consegna',async()=>{
+  let src,content,plan={lufs:null,tp:null,ch:0,rate:0};
+  if(inEditor){const [a,b]=sel?[A.selA,A.selB]:[0,alen()];src=makeBuffer(sliceCh(A.buf,a,b),A.rate);
+   content=`${sel?'La selezione':'La regione'}${A.region?` «${regionOf(A.region)?.name||''}»`:''}`;plan={...plan,ch:src.numberOfChannels,rate:src.sampleRate}}
+  else{status('Mixaggio del brano…');src=await renderMix();content='Il brano, tutte le tracce mixate';plan={...plan,ch:2,rate:src.sampleRate}}
+  const chs=Array.from({length:src.numberOfChannels},(_,c)=>src.getChannelData(c));
+  return{ch:src.numberOfChannels,rate:src.sampleRate,m:analyzeDelivery(chs,src.sampleRate),content,plan}});
+ if(!res)return;
+ const name=inEditor?(A.title||P.title):P.title,rep=deliveryReportData({name:name,fmtLabel:`${res.ch===1?'mono':'stereo'}, ${fmtInt(res.rate)} hertz`,content:res.content,m:res.m,limited:false,plan:res.plan,compressed:false,note:'Nessun file esportato: la misura è fatta sull’audio del progetto.'});
+ await showDeliveryReport(rep)}
+
 async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.buf){toast('Il progetto è vuoto: niente da esportare');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
  const opts=[['wav16','WAV 16 bit (qualità CD, per tutti i programmi)'],['wav24','WAV 24 bit (per altri programmi professionali)'],['wav32','WAV 32 bit in virgola mobile (senza perdite)'],...(aac?[['aac','M4A con AAC (compresso, per telefoni e messaggi)']]:[]),...(opus?[['opus','WebM con Opus (compresso, molto leggero)']]:[])];
  const what=[...(song?[['song',`Il brano: tutte le tracce mixate (${fmtTime(projDur(),1)})`]]:[]),...(A.buf?[['region','Solo la regione nell’editor'+(A.region?` «${regionOf(A.region)?.name||''}»`:'')]]:[]),...(A.buf&&hasSel()?[['sel','Solo la selezione nell’editor']]:[])];
  const fmt=opts.some(o=>o[0]===prefs.audioFormat)?prefs.audioFormat:'wav16';
- const r=await modal('Esporta l’audio',`<p>I formati WAV conservano i marcatori. ${aac||opus?'I formati compressi sono più leggeri ma perdono un po’ di qualità.':'Questo browser non sa creare file compressi: per M4A usa Chrome o Edge recenti.'}</p>`,[{id:'what',label:'Che cosa esportare',type:'select',value:what[0][0],options:what},{id:'fmt',label:'Formato',type:'select',value:fmt,options:opts},{id:'kbps',label:'Qualità dei formati compressi',type:'select',value:String(prefs.kbps||160),options:[['96','96 kbps (voce)'],['128','128 kbps'],['160','160 kbps'],['192','192 kbps (musica)'],['256','256 kbps']]},{id:'name',label:'Nome del file',value:song?P.title:A.title||P.title}],'Esporta');
- if(!r)return;prefs.audioFormat=r.fmt;prefs.kbps=Number(r.kbps);savePrefs();const bitrate=Number(r.kbps)*1000,progress=p=>status(`Esportazione ${Math.round(p*100)}%`);
- const blob=await work('Esportazione',async()=>{if(r.what==='song'){status('Mixaggio del brano…');const buf=await renderMix();return r.fmt.startsWith('wav')?wavBlob(buf,Number(r.fmt.slice(3)),songMarkers(buf.sampleRate)):compressedBlob(buf,r.fmt,bitrate,progress)}const [a,b]=r.what==='sel'?[A.selA,A.selB]:[0,alen()];return audioBlob(r.fmt,a,b,bitrate,progress)});if(!blob)return;
- const ext=r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext,name=extName(r.name||P.title,ext);download(blob,name);if(r.what==='song'){P.exported=P.version;schedulePersist('audio')}toast(`Esportato ${name} (${fmtBytes(blob.size)})`)}
+ const r=await modal('Esporta l’audio',`<p>La consegna mette insieme formato, frequenza, canali e volume; i campi si possono cambiare uno per uno. I formati WAV conservano i marcatori. ${aac||opus?'I formati compressi sono più leggeri ma perdono un po’ di qualità.':'Questo browser non sa creare file compressi: per M4A usa Chrome o Edge recenti.'}</p>`,[
+  {id:'preset',label:'Consegna',type:'select',value:prefs.delivery||'manual',options:Object.entries(DELIVERY).map(([k,v])=>[k,v.label]),hint:'Il preset imposta i campi sotto; puoi cambiarli prima di esportare.'},
+  {id:'what',label:'Che cosa esportare',type:'select',value:what[0][0],options:what},
+  {id:'fmt',label:'Formato',type:'select',value:fmt,options:opts},
+  {id:'rate',label:'Frequenza',type:'select',value:prefs.deliveryRate||'auto',options:[['auto','Come la sorgente'],['44100','44100 Hz (CD)'],['48000','48000 Hz (radio e video)']]},
+  {id:'ch',label:'Canali',type:'select',value:prefs.deliveryCh||'auto',options:[['auto','Come la sorgente'],['1','Mono'],['2','Stereo']],hint:'Molti playout accettano la voce solo in mono.'},
+  {id:'lufs',label:'Volume percepito',type:'select',value:prefs.deliveryLufs||'none',options:LUFS_CHOICES,hint:'Il volume viene portato al valore scelto prima di esportare.'},
+  {id:'tp',label:'Picco vero massimo',type:'select',value:prefs.deliveryTp||'-1',options:TP_CHOICES,hint:'−1 dBTP è il tetto dei capitolati broadcast.'},
+  {id:'dither',label:'Dither sui 16 bit',type:'checkbox',value:!!prefs.dither,hint:'Un rumore di un bit che serve quando si scende da 24 a 16 bit.'},
+  {id:'report',label:'Mostra il report di consegna dopo l’esportazione',type:'checkbox',value:prefs.report!==false},
+  {id:'kbps',label:'Qualità dei formati compressi',type:'select',value:String(prefs.kbps||160),options:[['96','96 kbps (voce)'],['128','128 kbps'],['160','160 kbps'],['192','192 kbps (musica)'],['256','256 kbps']]},
+  {id:'name',label:'Nome del file',value:song?P.title:A.title||P.title}],'Esporta',{onOpen:pane=>{const pick=id=>pane.querySelector('#dlg_'+id),set=(id,v)=>{const el=pick(id);if(el&&String(el.value)!==String(v))el.value=String(v)};
+   pick('preset').addEventListener('change',e=>{const d=DELIVERY[e.target.value]||DELIVERY.manual;if(d.bits&&opts.some(o=>o[0]===d.bits))set('fmt',d.bits);set('rate',d.rate||'auto');set('ch',d.ch||'auto');set('lufs',d.lufs);set('tp',d.tp);const dh=pick('dither');if(dh)dh.checked=!!d.dither;announce(d.label)})}});
+ if(!r)return;prefs.audioFormat=r.fmt;prefs.kbps=Number(r.kbps);prefs.delivery=r.preset;prefs.deliveryRate=r.rate;prefs.deliveryCh=r.ch;prefs.deliveryLufs=r.lufs;prefs.deliveryTp=r.tp;prefs.dither=r.dither;prefs.report=r.report;savePrefs();
+ const plan={rate:r.rate==='auto'?0:Number(r.rate),ch:r.ch==='auto'?0:Number(r.ch),lufs:r.lufs==='none'?null:Number(r.lufs),tp:r.tp==='none'?null:Number(r.tp)};
+ const bitrate=Number(r.kbps)*1000,progress=p=>status(`Esportazione ${Math.round(p*100)}%`),ext=r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext;
+ const res=await work('Preparazione della consegna',async()=>{let src,content,base=0;
+  if(r.what==='song'){const rr=plan.rate||48000;status('Mixaggio del brano…');src=await renderMix({rate:rr});content=`Il brano, ${P.tracks.length===1?'una traccia':P.tracks.length+' tracce'} mixate`}
+  else{const [a,b]=r.what==='sel'?[A.selA,A.selB]:[0,alen()];src=makeBuffer(sliceCh(A.buf,a,b),A.rate);base=a;content=r.what==='sel'?'La selezione nell’editor':'La regione nell’editor'+(A.region?` «${regionOf(A.region)?.name||''}»`:'')}
+  const prep=await prepareDelivery(src,plan,status),out=prep.out,chs=Array.from({length:out.numberOfChannels},(_,c)=>out.getChannelData(c));
+  status('Misure di consegna…');const m=analyzeDelivery(chs,out.sampleRate),name=extName(r.name||(r.what==='song'?P.title:A.title||P.title),ext);
+  const markers=r.fmt.startsWith('wav')?deliveryMarkers(r.what,base,base+src.length,out.sampleRate):[];
+  const blob=r.fmt.startsWith('wav')?wavBlob(out,Number(r.fmt.slice(3)),markers,0,out.length,{dither:r.dither&&r.fmt==='wav16'}):await compressedBlob(out,r.fmt,bitrate,progress);
+  return{blob,name,m,limited:prep.limited,content,fmtLabel:deliveryFormatLabel(r.fmt,out.numberOfChannels,out.sampleRate,r.dither),plan,compressed:!r.fmt.startsWith('wav')}});
+ if(!res)return;
+ download(res.blob,res.name);if(r.what==='song'){P.exported=P.version;schedulePersist('audio')}
+ toast(`Esportato ${res.name} (${fmtBytes(res.blob.size)})`);
+ if(r.report)await showDeliveryReport(deliveryReportData(res))}
 async function audioBlob(fmt,a,b,bitrate,progress){if(fmt.startsWith('wav'))return wavBlob(A.buf,Number(fmt.slice(3)),A.markers,a,b);const part=a===0&&b===alen()?A.buf:makeBuffer(sliceCh(A.buf,a,b),A.rate);return compressedBlob(part,fmt,bitrate,progress)}
 async function exportParts(){if(!A.buf){toast('Apri prima una regione nell’editor: le parti vanno da un suo marcatore al successivo');return}if(!A.markers.length){toast('Servono dei marcatori: ogni parte va da un marcatore al successivo');return}const cuts=[...new Set([0,...A.markers.map(m=>m.pos),alen()])].sort((x,y)=>x-y).filter(p=>p>=0&&p<=alen()),parts=[];for(let i=0;i<cuts.length-1;i++)if(cuts[i+1]-cuts[i]>A.rate*0.05)parts.push([cuts[i],cuts[i+1]]);
  const r=await modal('Esporta le parti tra i marcatori',`<p>${parts.length} parti, raccolte in un archivio ZIP. Ogni file prende il nome del marcatore da cui comincia.</p>`,[{id:'fmt',label:'Formato',type:'select',value:prefs.audioFormat?.startsWith('wav')?prefs.audioFormat:'wav16',options:[['wav16','WAV 16 bit'],['wav24','WAV 24 bit'],['wav32','WAV 32 bit in virgola mobile'],...((await codecSupported('aac'))?[['aac','M4A con AAC']]:[]),...((await codecSupported('opus'))?[['opus','WebM con Opus']]:[])]}],'Esporta');if(!r)return;

@@ -74,7 +74,7 @@ Le lettere hanno lo stesso significato in tutte le app, sempre con **Alt+Maiusc*
 | Testo | Alt+Maiusc+P dove sei (pagina, riga, sezione, titolo); Alt+Maiusc+F la formattazione (due volte: Mostra formattazione); Ctrl+G vai alla pagina; Alt+PgGiù e Alt+PgSu pagina successiva e precedente. *Cambia maiuscole e minuscole* ora è Alt+Maiusc+F3. |
 | Calcolo | Alt+Maiusc+D descrive il foglio (tabelle, grafici, regole, note); F8 estende la selezione con le frecce; sul grafico R il riassunto della serie, M e Maiusc+M il massimo e il minimo, A il prossimo valore anomalo. |
 | Impagina | Alt+Maiusc+R dove sta la cornice scelta: posizione, cornici vicine, allineamenti e sovrapposizioni; Alt+Maiusc+D la panoramica della pagina: fasce, sfondi, sovrapposizioni e nove zone. I colori si sentono con il loro nome. |
-| Audio | Alt+Maiusc+D descrive il brano; Alt+Maiusc+L legge i livelli; Alt+Maiusc+O fa sentire prima e dopo l'ultimo effetto e dice che cosa è cambiato. |
+| Audio | Alt+Maiusc+D descrive il brano; Alt+Maiusc+L legge i livelli; Alt+Maiusc+O fa sentire prima e dopo l'ultimo effetto e dice che cosa è cambiato; Alt+Maiusc+R il report di consegna: durata, volume percepito, picco vero e range di volume. |
 | Video | Alt+Maiusc+D descrive il fotogramma (luce, colori, zone); Alt+Maiusc+C descrive la clip (scene, luce, colori, movimento, parlato); sull'indicatore Ctrl+frecce su e giù vanno ai cambi di scena, Ctrl+frecce sinistra e destra alle pause del parlato; Maiusc+Spazio riproduce solo l'elemento scelto. |
 | Immagini | Alt+Maiusc+L descrive la luce (due volte: l'istogramma da percorrere con le frecce e da ascoltare); Alt+Maiusc+D zone, colori e dominante; Alt+Maiusc+O il confronto con l'originale; X lo strumento Esplora, un cursore che dice che cosa c'è sotto. Quando lasci un cursore senti che cosa è cambiato. |
 | Disegno | Alt+Maiusc+R i dintorni dell'oggetto scelto, con le sovrapposizioni dette anche mentre lo sposti; Alt+Maiusc+D la composizione del foglio (due volte: la descrizione completa); «Ascolta la forma» (con Alt+Q) fa sentire il contorno come toni; nell'elenco dei livelli Ctrl+frecce e Ctrl+Spazio scelgono più oggetti anche non vicini. Con la Gomma (E) Spazio la abbassa e la alza e le frecce cancellano lungo il percorso: i tratti si tagliano dove passi e i pezzi restano come tratti a sé; nelle proprietà della gomma puoi scegliere di togliere invece i tratti interi. |
@@ -227,6 +227,15 @@ Domande: trovi il punto da tagliare senza vederlo? Dopo il taglio senti un clic?
 **Prova anche:** Alt+Maiusc+D per la descrizione del brano: tracce, regioni e che cosa suona insieme.
 
 Domande: sai quando entra la musica e quando parla la voce? Sai se la musica copre la voce, e di quanto?
+
+**Compito A4: preparare il file per la trasmissione.**
+
+1. Premi Ctrl+S: si apre la finestra «Esporta l'audio».
+2. Il primo campo è «Consegna»: con le frecce scegli «Radio EBU R128». I campi sotto si aggiornano da soli: WAV 24 bit, 48000 hertz, −23 LUFS, picco vero −1 dBTP.
+3. Lascia attivo «Mostra il report di consegna dopo l'esportazione» e premi Esporta.
+4. Leggi il report: durata, volume percepito, picco vero, range di volume e rumore di fondo. Il pulsante «Salva il report» produce un file di testo da allegare al file esportato.
+
+Domande: prima di esportare sapevi a che volume sarebbe uscito il file? Il report ti dice se è pronto per la trasmissione? Avresti voluto sentire la differenza tra il file esportato e quello di partenza?
 
 ### Video (Tassello Media)
 
