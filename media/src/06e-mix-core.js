@@ -3,7 +3,7 @@
 // dividono e ripetono liberamente sul tempo. L'editor della forma d'onda lavora su una regione alla volta e le sue
 // modifiche cambiano solo quella regione. I suoni stanno in SOURCES; le regioni ne indicano un tratto (off, dur).
 const TRACK_COLORS=[['#b35500','Arancio'],['#2457c5','Blu'],['#1e7a46','Verde'],['#7a3db8','Viola'],['#b0306a','Magenta'],['#0f7a8a','Turchese'],['#8a6d00','Ocra'],['#575757','Grigio']];
-const P={title:'Audio1',bpm:120,sig:4,grid:'time',metro:false,countIn:false,cycle:{on:false,a:0,b:0},latency:'auto',tracks:[],regions:[],sel:null,track:null,t:0,pxs:40,version:0,exported:0};
+const P={title:'Audio1',bpm:120,sig:4,grid:'time',metro:false,countIn:false,cycle:{on:false,a:0,b:0},punch:{on:false,a:0,b:0,pre:2},latency:'auto',tracks:[],regions:[],sel:null,track:null,t:0,pxs:40,version:0,exported:0};
 const SOURCES=new Map(),dirtySources=new Set();
 let phist=[],predo=[],rclip=null;
 const trackOf=id=>P.tracks.find(t=>t.id===id);
@@ -67,8 +67,8 @@ function cleanAudioProject(p){const n=(v,d,lo=-Infinity,hi=Infinity)=>Number.isF
  const ids=new Set(tracks.map(t=>t.id));
  const regions=arr(p?.regions).filter(r=>r&&ids.has(r.track)&&r.src).map(r=>({id:s(r.id||uid(),40),track:s(r.track,40),src:s(r.src,40),off:n(r.off,0,0),dur:n(r.dur,0,0),start:n(r.start,0,0),gain:n(r.gain,0,-60,24),fadeIn:n(r.fadeIn,0,0,600),fadeOut:n(r.fadeOut,0,0,600),name:s(r.name||'Regione',120),takes:arr(r.takes).filter(t=>t&&t.src).map(t=>({id:s(t.id||uid(),40),src:s(t.src,40),off:n(t.off,0,0),dur:n(t.dur,0,0),name:s(t.name||'Take',120),note:s(t.note||'',200)})).slice(0,20),comp:arr(r.comp).filter(c=>c&&c.take&&Number.isFinite(Number(c.from))&&Number.isFinite(Number(c.to))).map(c=>({from:clamp(Number(c.from),0,86400),to:clamp(Number(c.to),0,86400),take:s(c.take,40)})).filter(c=>c.to>c.from).sort((a,b)=>a.from-b.from).slice(0,200),markers:arr(r.markers).filter(m=>Number.isFinite(m?.pos)).map(m=>({id:s(m.id||uid(),40),pos:Math.max(0,Math.round(m.pos)),label:s(m.label)}))})).filter(r=>r.dur>0);
  for(const r of regions)r.comp=(r.comp||[]).filter(c=>r.takes.some(t=>t.id===c.take));
- return{title:s(p?.title||'Audio1',120),bpm:n(p?.bpm,120,30,300),sig:[2,3,4,5,6,7].includes(Number(p?.sig))?Number(p.sig):4,grid:p?.grid==='beats'?'beats':'time',metro:!!p?.metro,countIn:!!p?.countIn,cycle:{on:!!p?.cycle?.on,a:n(p?.cycle?.a,0,0),b:n(p?.cycle?.b,0,0)},latency:p?.latency==='auto'||p?.latency==null?'auto':n(p.latency,0,0,1000),tracks,regions,sel:null,track:tracks[0]?.id||null,t:n(p?.t,0,0),pxs:n(p?.pxs,40,1,2000)}}
-const projectData=()=>({title:P.title,bpm:P.bpm,sig:P.sig,grid:P.grid,metro:P.metro,countIn:P.countIn,cycle:P.cycle,latency:P.latency,tracks:P.tracks,regions:P.regions,t:P.t,pxs:P.pxs});
+ return{title:s(p?.title||'Audio1',120),bpm:n(p?.bpm,120,30,300),sig:[2,3,4,5,6,7].includes(Number(p?.sig))?Number(p.sig):4,grid:p?.grid==='beats'?'beats':'time',metro:!!p?.metro,countIn:!!p?.countIn,cycle:{on:!!p?.cycle?.on,a:n(p?.cycle?.a,0,0),b:n(p?.cycle?.b,0,0)},punch:{on:!!p?.punch?.on,a:n(p?.punch?.a,0,0),b:n(p?.punch?.b,0,0),pre:p?.punch?.pre==='bar'?'bar':n(p?.punch?.pre,2,0,5)},latency:p?.latency==='auto'||p?.latency==null?'auto':n(p.latency,0,0,1000),tracks,regions,sel:null,track:tracks[0]?.id||null,t:n(p?.t,0,0),pxs:n(p?.pxs,40,1,2000)}}
+const projectData=()=>({title:P.title,bpm:P.bpm,sig:P.sig,grid:P.grid,metro:P.metro,countIn:P.countIn,cycle:P.cycle,punch:P.punch,latency:P.latency,tracks:P.tracks,regions:P.regions,t:P.t,pxs:P.pxs});
 // Bozza: progetto e stato dell'editor a ogni modifica; i suoni solo quando sono nuovi o cambiati.
 // Un suono entra nella bozza come un unico Blob con i canali uno dopo l'altro: il browser lo scrive senza bloccare
 // la pagina, mentre un elenco di numeri andrebbe copiato e convertito tutto prima di salvarlo.

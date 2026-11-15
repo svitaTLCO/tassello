@@ -54,6 +54,8 @@ def('a','Tracce',[
  ['compEdit','Comping: scegli da quale take viene ogni sezione della regione…','split','',{short:'Comping'}],
  ['cycle','Ciclo: ripeti il tratto tra inizio e fine del ciclo','loop','',{short:'Ciclo',toggle:()=>P.cycle.on}],
  ['cycleRegion','Ciclo sulla regione scelta','loop','',{short:'Ciclo sulla regione'}],
+ ['punchRange','Punch: registra solo tra due punti…','record','',{short:'Punch…'}],
+ ['punchToggle','Punch: registra solo il tratto scelto','record','',{short:'Punch',toggle:()=>!!P.punch.on}],
  ['metronome','Metronomo','metronome','',{short:'Metronomo',toggle:()=>P.metro}],
  ['countInToggle','Battuta di conteggio prima di registrare','metronome','',{short:'Conteggio',toggle:()=>P.countIn,said:['Battuta di conteggio attivata: prima di registrare suona una battuta','Battuta di conteggio disattivata']}],
  ['tempoSettings','Tempo, battuta, griglia e latenza…','metronome','',{short:'Tempo'}],

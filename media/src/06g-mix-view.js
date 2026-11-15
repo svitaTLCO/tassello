@@ -161,7 +161,7 @@ async function trackSettings(t=selTrack()){if(!t){toast('Crea prima una traccia'
  if(!v)return;const changedDuck=Number(v.duck)!==orig.duck||!!v.voice!==!!orig.voice;pCommit('Suono della traccia',()=>{Object.assign(t,{name:v.name.trim().slice(0,80)||t.name,color:v.color,vol:Number(v.vol),pan:Number(v.pan)/100,low:Number(v.low),high:Number(v.high),comp:Number(v.comp),reverb:Number(v.reverb),duck:Number(v.duck)||0,out:v.out||null});if(v.voice)for(const x of P.tracks){x.voice=x.id===t.id;if(x.voice)x.duck=0}else t.voice=false},{live:true});if(changedDuck&&MIX.playing)mixRestart();renderArrange();focusLane(t.id);announce('Suono della traccia aggiornato')}
 async function tempoSettings(){const v=await modal('Tempo e griglia',`<p>Con la griglia a battute regioni e indicatore si muovono di un tempo alla volta e si agganciano alle battute. La latenza compensa il ritardo tra quello che senti e quello che registri: lasciala automatica, oppure aumentala se le registrazioni risultano in ritardo.</p>`,[{id:'bpm',label:'Tempo in battiti al minuto (BPM)',type:'number',value:P.bpm},{id:'sig',label:'Tempi per battuta',type:'select',value:String(P.sig),options:[2,3,4,5,6,7].map(n=>[String(n),n+'/4'])},{id:'grid',label:'Griglia',type:'select',value:P.grid,options:[['time','Secondi'],['beats','Battute e tempi']]},{id:'metro',label:'Metronomo durante l’ascolto e la registrazione',type:'checkbox',value:P.metro},{id:'countIn',label:'Una battuta di conteggio prima di registrare',type:'checkbox',value:P.countIn},{id:'lat',label:'Compensazione della latenza in millisecondi',type:'text',value:P.latency==='auto'?'automatica':String(P.latency),hint:'Scrivi «automatica» oppure un numero da 0 a 1000, per esempio 40.'}],'Salva',{validate:v=>{const b=num(v.bpm),l=v.lat.trim(),n=num(l);return !(b>=30&&b<=300)?{msg:'Tempo in battiti al minuto: scrivi un numero da 30 a 300.',field:'bpm'}:l&&!/^auto/i.test(l)&&!(n>=0&&n<=1000)?{msg:'Compensazione della latenza: scrivi «automatica» oppure un numero da 0 a 1000.',field:'lat'}:null}});
  if(!v)return;P.metro=v.metro;P.countIn=v.countIn;P.latency=/^auto/i.test(v.lat.trim())||!v.lat.trim()?'auto':clamp(num(v.lat)||0,0,1000);pCommit('Tempo e griglia',()=>{P.bpm=num(v.bpm);P.sig=Number(v.sig);P.grid=v.grid});renderArrange();schedulePersist('audio');announce(`Tempo ${fmtNum(P.bpm,0)} BPM, ${P.sig}/4, griglia ${P.grid==='beats'?'a battute':'in secondi'}${P.metro?', metronomo attivo':''}`)}
-function readSongStatus(){if(!P.tracks.length){toast('Il progetto è vuoto. Ctrl+Alt+R registra, Ctrl+I importa un file audio in una nuova traccia.');return}const t=MIX.playing?mixPos():P.t,tr=selTrack(),r=selRegion();
+function readSongStatus(){if(!P.tracks.length){toast('Il progetto è vuoto. Ctrl+Alt+R registra, Ctrl+I importa un file audio in una nuova traccia.');return}const t=MIX.playing?mixPos():P.t,tr=selTrack(),r=selRegion(),punch=P.punch?.on?` Punch da ${sayTime(P.punch.a,1)} a ${sayTime(P.punch.b,1)}.`:'';
  toast(`${jobNow()}${MIX.playing?'In ascolto a':'Indicatore a'} ${arPlayheadText(t)}. Brano di ${sayTime(projDur())}, ${P.tracks.length} tracce, ${fmtNum(P.bpm,0)} BPM. ${tr?`Traccia scelta «${tr.name}»: volume ${fmtDb(tr.vol)}, ${panWords(tr.pan)}${tr.mute?', muta':''}${tr.solo?', in solo':''}.`:''} ${r?`Regione scelta «${r.name}» da ${sayTime(r.start)} a ${sayTime(regionEnd(r))}.`:''}${A.region?` Nell’editor: «${regionOf(A.region)?.name||''}».`:''}`)}
 function arZoomToSlider(){return Math.round(100*Math.log(P.pxs)/Math.log(2000))}
 function sliderToArZoom(v){P.pxs=Math.pow(2000,v/100);renderArrange();ensureArVisible(P.t)}
@@ -297,3 +297,33 @@ async function compDialog(){const r=selRegion();if(!r){toast('Scegli prima una r
  if(!res)return;
  pCommit('Comping',()=>{r.comp=draft.map(c=>({from:clamp(c.from,0,r.dur),to:clamp(c.to,0,r.dur),take:c.take})).filter(c=>c.to>c.from).sort((a,b)=>a.from-b.from)});
  announce(r.comp.length?`Comping: ${r.comp.length===1?'una sezione':r.comp.length+' sezioni'} su ${r.takes.length} take`:'Comping tolto: suona la take attiva')}
+
+// ——— Punch: registrare solo fra due punti. La registrazione parte prima, così si sente l'attacco, e alla fine si
+// tiene solo il tratto scelto; quello che c'era sotto viene diviso o accorciato, senza sovrapposizioni.
+function punchPre(){return P.punch.pre==='bar'?barDur():(Number(P.punch.pre)||0)}
+async function punchDialog(){const a0=P.punch.a||P.t,b0=Math.max(a0+0.5,P.punch.b>a0?P.punch.b:a0+2);
+ const res=await modal('Punch',`<p>La registrazione parte prima del punto «Da» così senti l’attacco, ma entra solo il tratto fra «Da» e «A». Quello che c’era sotto viene accorciato o diviso: niente si sovrappone. Ferma la registrazione subito dopo «A».</p>`,
+  [{id:'a',label:'Da',type:'time',value:fmtTime(a0,2)},{id:'b',label:'A',type:'time',value:fmtTime(b0,2)},
+   {id:'pre',label:'Ascolta prima per',type:'select',value:String(P.punch.pre??2),options:[['0','Niente'],['1','1 secondo'],['2','2 secondi'],['3','3 secondi'],['5','5 secondi'],['bar','Una battuta']]},
+   {id:'on',label:'Punch attivo',type:'checkbox',value:!!P.punch.on}],'Salva',
+  {validate:v=>{const a=parseTime(v.a),b=parseTime(v.b);return a>=0&&b>a+0.05?null:{msg:'«A» deve venire dopo «Da», di almeno 0,05 secondi.',field:'b'}}});
+ if(!res)return;const a=parseTime(res.a),b=parseTime(res.b);
+ pCommit('Punch',()=>{P.punch={on:!!res.on,a,b,pre:res.pre==='bar'?'bar':Number(res.pre)}});
+ announce(`Punch ${res.on?'attivo':'spento'}: da ${sayTime(a,2)} a ${sayTime(b,2)}${res.on?', con '+sayTime(punchPre())+' di ascolto prima':''}`)}
+function punchToggle(){const a=P.punch.a||P.t,b=P.punch.b>P.punch.a?P.punch.b:P.t+2;
+ pCommit('Punch',()=>{P.punch={...P.punch,on:!P.punch.on,a,b}});
+ announce(P.punch.on?`Punch attivo da ${sayTime(P.punch.a,2)} a ${sayTime(P.punch.b,2)}`:'Punch spento')}
+// Toglie da una traccia il tratto [a,b): le regioni che lo attraversano vengono accorciate o divise in due.
+function trimRegionTo(r,at){const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);r.dur=Math.max(0.01,at-r.start);r.markers=(r.markers||[]).filter(m=>m.pos<=cut)}
+function splitRegionAt(r,at){const e=regionEnd(r);if(at<=r.start+1e-6||at>=e-1e-6)return null;const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);
+ const right={...r,id:uid(),start:at,off:r.off+(at-r.start),dur:e-at,markers:(r.markers||[]).map(m=>({...m,pos:m.pos-cut})).filter(m=>m.pos>=0)};
+ trimRegionTo(r,at);return right}
+// Il tratto di registrazione che entra col punch: dal punto «Da» al punto «A», scartando l'ascolto prima.
+function punchPart(buf,start,pu){const rate=buf.sampleRate,a0=Math.max(0,Math.round((pu.a-start)*rate)),b0=Math.min(buf.length,Math.round((pu.b-start)*rate));
+ if(b0-a0<rate*0.02)return null;return{part:makeBuffer(sliceCh(buf,a0,b0),rate),at:pu.a}}
+function clearRange(trackId,a,b){const out=[];for(const r of P.regions){if(r.track!==trackId){out.push(r);continue}const s=r.start,e=regionEnd(r);
+ if(e<=a+1e-6||s>=b-1e-6){out.push(r);continue}
+ if(s<a&&e>b){const right=splitRegionAt(r,b);if(right)out.push(right);trimRegionTo(r,a);out.push(r);continue}
+ if(s<a){trimRegionTo(r,a);out.push(r);continue}
+ if(e>b){const right=splitRegionAt(r,b);if(right)out.push(right);continue}}
+ P.regions=out}

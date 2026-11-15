@@ -261,6 +261,15 @@ Domande: dal nome della traccia capisci che è un bus? Il campo «Uscita» ti di
 
 Domande: senti la differenza fra le take senza vedere la forma d'onda? Capisci dall'elenco quale stai ascoltando? Le sezioni sono chiare a parole?
 
+**Compito A7: registrare solo una parola con il punch.**
+
+1. Cerca «Punch» in Alt+Q, scegli «Punch: registra solo tra due punti», imposta Da e A intorno alla parola da rifare e attiva il punch.
+2. Porta l'indicatore un po' prima e premi Ctrl+Alt+R: la registrazione parte con l'ascolto prima del punto.
+3. Ferma subito dopo il punto A. Entra solo quel tratto; il resto della regione viene accorciato o diviso, senza sovrapposizioni.
+4. Con Alt+Maiusc+D la descrizione del brano dice che il punch è attivo e fra quali punti.
+
+Domande: capisci quando parte davvero la registrazione? Ti accorgi che il tratto fuori dal punch è stato scartato?
+
 **Compito A3b: far entrare un pezzo in uno spazio preciso.**
 
 1. Apri una regione con Ctrl+E, poi Ctrl+Maiusc+F: si apre «Adatta alla durata».
