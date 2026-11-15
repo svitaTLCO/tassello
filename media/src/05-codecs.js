@@ -8,7 +8,7 @@ function readWav(buf){const v=new DataView(buf);if(v.byteLength<12)return null;c
  while(at+8<=v.byteLength){const id=ascii4(v,at),body=at+8;let size=v.getUint32(at+4,true);
   // RF64: le dimensioni vere stanno nel blocco ds64, perché il campo a 32 bit vale 0xFFFFFFFF.
   if(id==='ds64'&&size>=28)ds={riff:Number(v.getBigUint64(body,true)),data:Number(v.getBigUint64(body+8,true)),samples:Number(v.getBigUint64(body+16,true))};
-  if(id==='data'&&size===0xFFFFFFFF&&ds)size=ds.data;
+  if(id==='data'&&size===0xFFFFFFFF&&ds){if(ds.data>Number.MAX_SAFE_INTEGER)throw Error('File RF64 troppo grande per essere letto in questa pagina');size=ds.data}
   if(id==='data'&&(size===0xFFFFFFFF||body+size>v.byteLength))size=v.byteLength-body;
   if(body+size>v.byteLength&&id!=='data')break;
   if(id==='fmt '&&size>=16){fmt={tag:v.getUint16(body,true),ch:v.getUint16(body+2,true),rate:v.getUint32(body+4,true),align:v.getUint16(body+12,true),bits:v.getUint16(body+14,true)};if(fmt.tag===0xFFFE&&size>=26)fmt.tag=v.getUint16(body+24,true)}

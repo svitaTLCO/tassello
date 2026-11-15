@@ -41,9 +41,9 @@ async function recordAudio(){if(MIX.playing)mixStop(true);stopPlayback(false);co
    if(place==='replace'||place==='cursor'){const ins=await conformAudio(buf),[a,b]=place==='replace'?[A.selA,A.selB]:[A.cursor,A.cursor];audioEdit('Registrazione',a,b,ins);announce('Registrazione di '+sayTime(buf.duration)+' inserita nella regione: ora è selezionata');$('wave').focus();return}
    const ctx=actxGet(),lat=P.latency==='auto'?(ctx.outputLatency||0)+(ctx.baseLatency||0)+info.inputLatency+glat:P.latency/1000;let start=playFrom;
    if(c0!==null&&info.first!==null)start=playFrom+(info.first-c0)-lat;if(start<0){const cut=Math.min(buf.length-1,Math.round(-start*buf.sampleRate));buf=makeBuffer(sliceCh(buf,cut,buf.length),buf.sampleRate);start=0}
-   if(punchOn&&place==='track'){const pu=P.punch,cut=punchPart(buf,start,pu);
+   if(punchOn&&(place==='track'||place==='newtrack')){const pu=P.punch,cut=punchPart(buf,start,pu);
     if(!cut){toast('Il punch non ha preso audio: controlla i punti e riprova');return}
-    const part=cut.part,tr=t||newTrack('Voce');
+    const part=cut.part,tr=place==='track'&&t?t:newTrack(P.tracks.length?'Voce '+(P.tracks.length+1):'Voce');
     pCommit('Punch',()=>{if(!P.tracks.includes(tr))P.tracks.push(tr);clearRange(tr.id,pu.a,pu.a+part.duration);
      const r=newRegion(tr.id,addSource(part),pu.a,'Punch '+fmtTime(pu.a,0));P.regions.push(r);P.sel=r.id;P.track=tr.id});
     P.t=pu.a;updateArrangeUI();focusLane(tr.id);announce(`Punch: ${sayTime(part.duration)} nella traccia «${tr.name}», da ${sayTime(pu.a,2)}`);return}

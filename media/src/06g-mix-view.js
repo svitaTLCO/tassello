@@ -326,4 +326,4 @@ function clearRange(trackId,a,b){const out=[];for(const r of P.regions){if(r.tra
  if(s<a&&e>b){const right=splitRegionAt(r,b);if(right)out.push(right);trimRegionTo(r,a);out.push(r);continue}
  if(s<a){trimRegionTo(r,a);out.push(r);continue}
  if(e>b){const right=splitRegionAt(r,b);if(right)out.push(right);continue}}
- P.regions=out}
+ P.regions=out.filter(r=>r.dur>0.005)}
