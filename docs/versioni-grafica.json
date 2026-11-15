@@ -1,8 +1,13 @@
 {
   "programma": "Tassello Grafica",
   "file": "tassello-grafica.html",
-  "ultima": "1.4.6",
+  "ultima": "1.4.7",
   "versioni": [
+    {
+      "versione": "1.4.7",
+      "data": "2026-11-15",
+      "sha256": "7a7bd258bfb7274dbb4010e07d9f4591302368b7d6d35470af226edf12058949"
+    },
     {
       "versione": "1.4.6",
       "data": "2026-11-15",

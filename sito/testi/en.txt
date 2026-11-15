@@ -231,7 +231,7 @@ A tassello is released only if it works with a screen reader and with the keyboa
 Keyboard
 
 [accessibilita.tastiera]
-<kbd>F6</kbd> moves between areas, <kbd>Alt</kbd>+<kbd>Q</kbd> finds any command, <kbd>F1</kbd> lists the shortcuts.
+<kbd>F6</kbd> moves between areas, <kbd>Alt</kbd>+<kbd>Q</kbd> finds any command, <kbd>Ctrl</kbd>+<kbd>/</kbd> lists the shortcuts.
 
 [accessibilita.lettore_titolo]
 Screen readers
@@ -388,9 +388,9 @@ What it covers
 
 [dichiarazione.ambito]
     <ul>
-      <li>Tassello Ufficio 1.10.1: Testo, Calcolo and Impagina</li>
-      <li>Tassello Media 1.4.0: Audio and Video</li>
-      <li>Tassello Grafica 1.3.1: Immagini and Disegno</li>
+      <li>Tassello Ufficio 1.11.6: Testo, Calcolo and Impagina</li>
+      <li>Tassello Media 1.17.8: Audio and Video</li>
+      <li>Tassello Grafica 1.4.7: Immagini and Disegno</li>
       <li>this website and the verification page</li>
     </ul>
     <p>It applies to recent Chrome or Edge on a computer; testing was done on Windows. Tablets, phones, the Mac with VoiceOver and other browsers are not supported yet. The app interface is in Italian.</p>
@@ -440,7 +440,7 @@ Feedback
     <p>If something does not work with the technology you use, report it with the <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Accessibility problem form</a>: we treat it as a bug and it comes first. The full statement is in the <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">repository</a>.</p>
 
 [dichiarazione.data]
-Statement written on 29 October 2026 and updated on 4 November 2026; we update it with every release.
+Statement written on 29 October 2026 and updated on 15 November 2026; we update it with every release.
 
 [js.controllo]
 Checking…
