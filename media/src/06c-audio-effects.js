@@ -47,6 +47,46 @@ function compress(ch,rate,{threshold,ratio,attack,release,makeup}){const a=Math.
  for(let i=0;i<n;i++){let x=0;for(const d of ch)x=Math.max(x,Math.abs(d[i]));env=x>env?x+(env-x)*a:x+(env-x)*r;const lv=toDb(env),over=lv-threshold;let gr=0;if(over>knee/2)gr=over*(1-1/ratio);else if(over>-knee/2)gr=(1-1/ratio)*(over+knee/2)**2/(2*knee);const g=fromDb(makeup-gr);for(let c=0;c<ch.length;c++)out[c][i]=ch[c][i]*g}return out}
 // Pause in un tratto qualsiasi, con la soglia scelta: serve ad "Accorcia le pause".
 function pausesIn(ch,rate,minSec){const win=Math.round(rate/100),n=ch[0].length,th=pauseThreshold(),list=[];let s=-1;for(let i=0;i*win<=n;i++){let q=0;const a=i*win,b=Math.min(n,a+win);for(const d of ch){let v=0;for(let j=a;j<b;j++)v+=d[j]*d[j];q=Math.max(q,v/Math.max(1,b-a))}const quiet=b>a&&10*Math.log10(q||1e-12)<th;if(quiet&&s<0)s=a;else if(!quiet&&s>=0){if(a-s>=minSec*rate)list.push([s,a]);s=-1}}if(s>=0&&n-s>=minSec*rate)list.push([s,n]);return list}
+// ——— Pulizia della voce: filtri biquad (RBJ), de-esser, de-hum, de-click e limitatore. Sono gli interventi che
+// servono prima di mandare in onda una registrazione: le "s" fastidiose, il ronzio a 50 Hz, i colpi del tavolo e i
+// picchi che farebbero distorcere il trasmettitore.
+function biqCoef(type,rate,f,q=0.707){const w=2*Math.PI*clamp(f,10,rate/2-10)/rate,c=Math.cos(w),s=Math.sin(w),al=s/(2*q),a0=1+al;
+ if(type==='hp')return{b0:(1+c)/2/a0,b1:-(1+c)/a0,b2:(1+c)/2/a0,a1:-2*c/a0,a2:(1-al)/a0};
+ if(type==='lp')return{b0:(1-c)/2/a0,b1:(1-c)/a0,b2:(1-c)/2/a0,a1:-2*c/a0,a2:(1-al)/a0};
+ return{b0:1/a0,b1:-2*c/a0,b2:1/a0,a1:-2*c/a0,a2:(1-al)/a0}}
+// Filtro del secondo ordine in forma diretta trasposta: stabile anche con frequenze molto basse.
+function biqRun(d,co){const {b0,b1,b2,a1,a2}=co,out=new Float32Array(d.length);let x1=0,x2=0,y1=0,y2=0;
+ for(let i=0;i<d.length;i++){const x=d[i],y=b0*x+b1*x1+b2*x2-a1*y1-a2*y2;out[i]=y;x2=x1;x1=x;y2=y1;y1=y}return out}
+// De-esser: divide il suono in due bande con un incrocio Linkwitz-Riley del quarto ordine (le due bande, sommate,
+// ridanno il segnale con lo stesso livello), segue il livello della banda acuta e la abbassa solo quando supera la
+// soglia. Sommare le bande invece di sottrarre la parte acuta evita le cancellazioni di fase che renderebbero
+// l'intervento imprevedibile.
+function lrSplit(d,rate,f){const lp=biqRun(biqRun(d,biqCoef('lp',rate,f,0.7071)),biqCoef('lp',rate,f,0.7071)),
+ hp=biqRun(biqRun(d,biqCoef('hp',rate,f,0.7071)),biqCoef('hp',rate,f,0.7071));return{lp,hp}}
+function deEsser(ch,rate,{freq=5000,thDb=-30,reduction=8}){const att=Math.exp(-1/(rate*0.001)),rel=Math.exp(-1/(rate*0.03));
+ return ch.map(d=>{const {lp,hp}=lrSplit(d,rate,freq),out=new Float32Array(d.length);let env=0;
+  for(let i=0;i<d.length;i++){const v=hp[i]<0?-hp[i]:hp[i];env=v>env?v+(env-v)*att:env+(env-v)*rel;const over=toDb(env)-thDb,g=over>0?fromDb(-Math.min(reduction,over*0.8)):1;
+   out[i]=lp[i]+hp[i]*g}
+  return out})}
+// De-hum: notch a 50 o 60 Hz e sulle armoniche, strette (Q 30) per non toccare la voce.
+function deHum(ch,rate,{base=50,harmonics=4}){let out=ch;for(let k=1;k<=harmonics;k++){const f=base*k;if(f>=rate/2-200)break;const co=biqCoef('notch',rate,f,30);out=out.map(d=>biqRun(d,co))}return out}
+// De-click: un colpo è un campione che si stacca dai vicini; si sostituisce il tratto con una retta fra i due bordi.
+// La soglia si misura sul livello tipico (la mediana a finestre di un millisecondo), che il colpo non sposta.
+function deClick(ch,rate,{sensitivity=12,maxMs=5}){const n=ch[0].length,out=ch.map(d=>d.slice()),thr=fromDb(sensitivity),
+ maxRun=Math.max(2,Math.round(rate*maxMs/1000)),step=Math.max(1,Math.round(rate*0.001)),m=Math.ceil(n/step),env=new Float32Array(m),vals=new Float32Array(ch.length*step);
+ for(let k=0;k<m;k++){const a=k*step,b=Math.min(n,a+step);let q=0;for(const d of ch)for(let i=a;i<b;i++)vals[q++]=Math.abs(d[i]);
+  const v=vals.subarray(0,q);v.sort();env[k]=q?v[Math.floor(q/2)]:0}
+ const lim=i=>Math.max(thr*env[Math.min(m-1,Math.floor(i/step))],1e-4);
+ for(let c=0;c<ch.length;c++){const d=ch[c],o=out[c];
+  for(let i=2;i<n-2;i++){const med=(d[i-2]+d[i-1]+d[i+1]+d[i+2])/4;
+   if(Math.abs(d[i]-med)>lim(i)){let b=i;while(b+1<n-2&&b-i<maxRun&&Math.abs(d[b+1]-(d[b]+d[b-1]+d[b+2]+d[b+3])/4)>lim(b+1))b++;
+    const left=o[i-1]??0,right=o[Math.min(n-1,b+1)]??0;for(let j=i;j<=b;j++)o[j]=left+(right-left)*((j-i+1)/(b-i+2));i=b}}}
+ return out}
+// Limitatore: abbassa solo i picchi sopra il tetto, con rilascio regolabile. Usa lo stesso calcolo della consegna.
+function limitSamples(ch,rate,ceilDb,releaseMs=50){const ceil=fromDb(ceilDb),rel=Math.exp(-1/(rate*releaseMs/1000)),n=ch[0].length,out=ch.map(d=>new Float32Array(d.length));let env=1,hit=0;
+ for(let i=0;i<n;i++){let p=0;for(const d of ch){const v=d[i]<0?-d[i]:d[i];if(v>p)p=v}const t=p>ceil?ceil/p:1;env=t<env?t:Math.min(t,env+(1-env)*rel);if(env<0.999)hit++;
+  for(let c=0;c<ch.length;c++)out[c][i]=ch[c][i]*env}
+ return{out,hit}}
 const EFFECTS={
  amplify:{label:'Amplifica o attenua',fields:(p,pk)=>[{id:'db',label:'Guadagno in decibel',type:'number',value:p.db??Math.round((headroom(pk)-1)*10)/10,hint:`Valori negativi attenuano. Il massimo senza distorsione è ${fmtDb(headroom(pk))}.`}],parse:v=>({db:num(v.db)}),check:p=>Number.isFinite(p.db)?null:{msg:'Guadagno in decibel: scrivi un numero, per esempio 3 o −6.',field:'db'},
   run:(ch,rate,p)=>{const g=fromDb(p.db);return mapCh(ch,x=>x*g)},done:(p,out)=>`Guadagno di ${fmtDb(p.db)} applicato${peakOf(out)>1?'. Attenzione: ora ci sono distorsioni':''}`},
@@ -82,7 +122,37 @@ const EFFECTS={
    return ch.map(d=>{const parts=[];let at=0;for(const [a,b] of cuts){parts.push(d.subarray(at,a));at=b}parts.push(d.subarray(at));const o=new Float32Array(parts.reduce((n,x)=>n+x.length,0));let w=0;for(const [k,x] of parts.entries()){o.set(x,w);if(k){for(let i=0;i<fade&&w+i<o.length;i++)o[w+i]*=i/fade;for(let i=1;i<=fade&&w-i>=0;i++)o[w-i]*=i/fade}w+=x.length}return o})},
   map:(p,ctx)=>x=>{let d=0;for(const [a,b] of ctx.cuts||[]){if(x>=b)d+=b-a;else if(x>a)return a-d}return x-d},done:(p,out,ctx)=>ctx.cuts?.length?`Accorciate ${ctx.cuts.length} pause: tolti ${sayTime(ctx.removed/A.rate)}`:'Nessuna pausa abbastanza lunga da accorciare'},
  echo:{label:'Eco',fields:p=>[{id:'delay',label:'Ritardo in millisecondi',type:'number',min:20,max:3000,step:10,value:p.delay??300},{id:'decay',label:'Volume di ogni ripetizione in percentuale',type:'range',min:5,max:90,step:1,value:p.decay??40,fmt:v=>v+'%'}],parse:v=>({delay:num(v.delay),decay:num(v.decay)}),check:()=>null,
-  run:(ch,rate,p)=>{const D=Math.round(p.delay/1000*rate),k=p.decay/100;return ch.map(d=>{const o=Float32Array.from(d);for(let i=D;i<o.length;i++)o[i]+=o[i-D]*k;return o})}}};
+  run:(ch,rate,p)=>{const D=Math.round(p.delay/1000*rate),k=p.decay/100;return ch.map(d=>{const o=Float32Array.from(d);for(let i=D;i<o.length;i++)o[i]+=o[i-D]*k;return o})}},
+ deEsser:{label:'Riduci le “s” (de-esser)',intro:'Abbassa solo le frequenze delle sibilanti, e solo quando superano la soglia: la voce resta naturale e le “s” non fischiano più.',
+  fields:p=>[{id:'freq',label:'Dove cominciano le “s”',type:'select',value:String(p.freq??5000),options:[['4000','4000 hertz (voci maschili)'],['5000','5000 hertz (voce media)'],['6000','6000 hertz (voci femminili)'],['7000','7000 hertz (voci molto acute)']]},{id:'th',label:'Soglia in dB',type:'number',min:-60,max:-10,step:1,value:p.th??-30,hint:'Più alta è (per esempio −24), più spesso interviene.'},{id:'red',label:'Quanto abbassare al massimo',type:'range',min:2,max:16,step:1,value:p.red??8,fmt:v=>v+' dB'}],
+  parse:v=>({freq:Number(v.freq),th:num(v.th),red:Number(v.red)}),check:p=>Number.isFinite(p.th)?null:{msg:'Soglia: scrivi un numero di decibel tra −60 e −10, per esempio −30.',field:'th'},
+  run:(ch,rate,p)=>deEsser(ch,rate,{freq:p.freq,thDb:p.th,reduction:p.red}),saysChange:true,
+  done:p=>`Sibilanti sopra ${fmtDb(p.th)} ridotte fino a ${p.red} dB, a partire da ${fmtInt(p.freq)} hertz`},
+ deHum:{label:'Togli il ronzio (de-hum)',intro:'Toglie il ronzio della rete elettrica e le sue armoniche: 50 hertz in Italia e in Europa, 60 negli Stati Uniti.',
+  fields:p=>[{id:'base',label:'Frequenza della rete',type:'select',value:String(p.base??50),options:[['50','50 hertz (Europa)'],['60','60 hertz (Stati Uniti)']]},{id:'h',label:'Quante armoniche togliere',type:'select',value:String(p.h??4),options:[['2','2 (fino a 100 hertz)'],['3','3 (fino a 150 hertz)'],['4','4 (fino a 200 hertz)']]}],
+  parse:v=>({base:Number(v.base),h:Number(v.h)}),check:()=>null,run:(ch,rate,p)=>deHum(ch,rate,{base:p.base,harmonics:p.h}),saysChange:true,
+  done:p=>`Ronzio a ${p.base} hertz e ${p.h-1===1?'la sua armonica':(p.h-1)+' armoniche'} tolti`},
+ deClick:{label:'Togli i colpi (de-click)',intro:'Trova i colpi secchi — il tavolo, il microfono urtato, un tic — e li sostituisce con una linea fra i due campioni vicini.',
+  fields:p=>[{id:'sens',label:'Sensibilità in dB',type:'number',min:4,max:30,step:1,value:p.sens??12,hint:'Più basso è, più colpi trova, e più rischio di toccare il suono.'},{id:'len',label:'Durata massima di un colpo in millisecondi',type:'number',min:1,max:20,value:p.len??5}],
+  parse:v=>({sens:num(v.sens),len:num(v.len)}),check:p=>Number.isFinite(p.sens)?null:{msg:'Sensibilità: scrivi un numero di decibel tra 4 e 30.',field:'sens'},
+  run:(ch,rate,p)=>deClick(ch,rate,{sensitivity:p.sens,maxMs:p.len}),saysChange:true,done:p=>`Colpi che si staccano di più di ${p.sens} dB tolti, fino a ${fmtInt(p.len)} millisecondi`},
+ limiter:{label:'Limitatore',intro:'Tiene i picchi sotto il tetto scelto senza cambiare il resto: serve prima di mandare in onda o di esportare.',
+  fields:p=>[{id:'ceil',label:'Tetto in dB',type:'number',min:-20,max:0,step:0.5,value:p.ceil??-1,hint:'−1 dB è il valore dei capitolati broadcast.'},{id:'rel',label:'Rilascio in millisecondi',type:'range',min:10,max:500,step:10,value:p.rel??50,fmt:v=>v+' ms'}],
+  parse:v=>({ceil:num(v.ceil),rel:Number(v.rel)}),check:p=>Number.isFinite(p.ceil)&&p.ceil<=0?null:{msg:'Tetto: scrivi un numero di decibel tra −20 e 0, per esempio −1.',field:'ceil'},
+  run:(ch,rate,p)=>limitSamples(ch,rate,p.ceil,p.rel).out,now:true,saysChange:true,
+  done:(p,out,{before,after})=>`Picco da ${fmtDb(before.peak)} a ${fmtDb(after.peak)}, con il tetto a ${fmtDb(p.ceil)}`},
+ voiceChain:{label:'Prepara la voce',intro:'La catena della voce in un solo passaggio: taglia i toni bassi, toglie il ronzio e le “s”, comprime, porta il volume al valore scelto e tiene i picchi sotto il tetto. Si può ascoltare prima di applicarla.',
+  fields:p=>[{id:'hp',label:'Togli i toni bassi sotto',type:'select',value:String(p.hp??80),options:[['0','Nessuno'],['60','60 hertz'],['80','80 hertz (voce)'],['120','120 hertz']]},{id:'hum',label:'Ronzio della rete',type:'select',value:String(p.hum??50),options:[['0','Nessuno'],['50','50 hertz'],['60','60 hertz']]},{id:'ess',label:'Riduci le “s”',type:'select',value:String(p.ess??5000),options:[['0','No'],['4000','Sì, voci maschili'],['5000','Sì, voce media'],['6000','Sì, voci femminili']]},{id:'lufs',label:'Volume percepito',type:'select',value:String(p.lufs??-23),options:[['-23','−23 LUFS (radio)'],['-19','−19 LUFS (radio parlata)'],['-16','−16 LUFS (podcast)']]},{id:'tp',label:'Picco vero massimo',type:'select',value:String(p.tp??-1),options:[['-1','−1 dBTP'],['-2','−2 dBTP']]}],
+  parse:v=>({hp:Number(v.hp),hum:Number(v.hum),ess:Number(v.ess),lufs:Number(v.lufs),tp:Number(v.tp)}),check:()=>null,
+  run:(ch,rate,p)=>{let x=ch.map(d=>d.slice());
+   if(p.hp>0){const co=biqCoef('hp',rate,p.hp,0.707);x=x.map(d=>biqRun(d,co))}
+   if(p.hum>0)x=deHum(x,rate,{base:p.hum,harmonics:4});
+   if(p.ess>0)x=deEsser(x,rate,{freq:p.ess,thDb:-30,reduction:8});
+   x=compress(x,rate,{threshold:-20,ratio:3,attack:8,release:150,makeup:0});
+   const l=loudness(x,rate);if(Number.isFinite(l))x=mapCh(x,v=>v*fromDb(p.lufs-l));
+   return limitSamples(x,rate,p.tp,50).out},
+  now:true,saysChange:true,
+  done:(p,out,{before,after})=>`Voce preparata: ${p.hp?`sotto i ${fmtInt(p.hp)} hertz tagliato, `:''}${p.hum?`ronzio a ${p.hum} hertz tolto, `:''}${p.ess?'sibilanti ridotte, ':''}compressione, volume da ${Number.isFinite(before.lufs)?fmtNum(before.lufs,1)+' LUFS':'non misurabile'} a ${Number.isFinite(after.lufs)?fmtNum(after.lufs,1)+' LUFS':'non misurabile'}, picco ${fmtDb(after.peak)}`}};
 // Parte su cui agisce un effetto: la selezione, oppure (per le dissolvenze senza selezione) dall'inizio al cursore
 // o dal cursore alla fine, oppure tutto l'audio.
 function effectRange(id){if(hasSel())return[A.selA,A.selB];if(id==='fadeIn'&&A.cursor>0)return[0,A.cursor];if(id==='fadeOut'&&A.cursor<alen())return[A.cursor,alen()];return[0,alen()]}

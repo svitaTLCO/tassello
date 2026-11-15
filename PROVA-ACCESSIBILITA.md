@@ -216,6 +216,13 @@ Domande: prima di cominciare sapevi se il microfono era troppo lontano o troppo 
 
 **Prova anche:** dopo un effetto, Alt+Maiusc+O per sentire e farti dire la differenza tra prima e dopo; Alt+Maiusc+L per i livelli.
 
+**Compito A2b: preparare la voce in un passaggio.**
+
+1. Con l'editor della regione aperto, cerca «Prepara la voce» in Alt+Q e premi Invio.
+2. La finestra elenca i passaggi: taglio dei toni bassi, ronzio, sibilanti, volume e picco. Lascia i valori proposti e premi «Anteprima»: senti sei secondi con la catena applicata.
+3. Premi «Ascolta l'originale» per confrontare, poi Applica.
+4. Alla fine un messaggio dice che cosa è cambiato: volume percepito prima e dopo, picco, e quali passaggi sono stati fatti. Con Alt+Maiusc+O risenti prima e dopo.
+
 Domande: trovi il punto da tagliare senza vederlo? Dopo il taglio senti un clic? Sai dire se alla fine il volume è giusto?
 
 **Compito A3: voce e musica insieme.**
