@@ -5,9 +5,6 @@
 // suono di 6 ms (come il limitatore finale), quindi quando una traccia lo usa le altre ricevono lo stesso ritardo.
 const MIX={playing:false,from:0,c0:0,origin:0,raf:0,timer:0,graph:null,srcs:[],passes:[],analyser:null,out:null,metroUntil:0,cycKey:'',recording:false,lat:0};
 const PRE_DELAY=0.006,LOOKAHEAD=0.4,START_GAP=0.04,EDGE_FADE=0.003;
-const trackLive=t=>{const solo=P.tracks.some(x=>x.solo);return t.mute||(solo&&!t.solo)?0:fromDb(t.vol)};
-// Con l'automazione accesa il cursore non conta: il volume diventa un cancello (muto/solo) e i valori li dà la curva.
-const trackGate=t=>{const solo=P.tracks.some(x=>x.solo);return t.mute||(solo&&!t.solo)?0:1};
 const hasAuto=(t,k)=>!!(t.autoOn?.[k]&&t[k+'Auto']?.length);
 // Valore di un inviluppo a un istante: lineare fra un punto e il successivo, fermo prima del primo e dopo l'ultimo.
 function autoValueAt(points,t){if(!points?.length)return null;if(t<=points[0].t)return points[0].v;const last=points.at(-1);if(t>=last.t)return last.v;
@@ -16,34 +13,46 @@ function autoValueAt(points,t){if(!points?.length)return null;if(t<=points[0].t)
 // Riverbero: risposta all'impulso generata (rumore che si spegne in 2,4 secondi), una per contesto audio.
 const IR=new WeakMap();
 function impulse(ctx){let b=IR.get(ctx);if(b)return b;const n=Math.round(ctx.sampleRate*2.4);b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.5)}IR.set(ctx,b);return b}
-const anyComp=tracks=>tracks.some(t=>t.comp>0);
-// Ritardo di tutto il mixer: limitatore, più il compressore se almeno una traccia lo usa.
-const mixLatency=tracks=>PRE_DELAY*(anyComp(tracks)?2:1);
-const chainShape=(t,comp)=>`${t.low!==0}${t.high!==0}${t.comp>0}${comp&&!(t.comp>0)}${t.reverb>0}`;
+// Percorso di una traccia fino al master: la traccia, il suo bus, il bus del bus e così via.
+const pathOf=t=>{const out=[];let x=t,guard=0;while(x&&guard++<8){out.push(x);x=x.out?trackOf(x.out):null}return out};
+const depthOf=t=>pathOf(t).length-1;
+// Ogni compressore sul percorso ritarda il suono di PRE_DELAY: il ritardo totale è quello del percorso più lungo.
+const pathComp=t=>pathOf(t).reduce((n,x)=>n+(x.comp>0?1:0),0);
+const mixLatency=tracks=>PRE_DELAY*(1+Math.max(0,...tracks.map(pathComp)));
+// Una traccia si sente se nessuno del suo percorso è muto e, con un solo acceso, se nel percorso c'è il solo.
+function audible(t){const solo=P.tracks.some(x=>x.solo),path=pathOf(t);if(path.some(x=>x.mute))return false;return !solo||path.some(x=>x.solo)}
 function newGraph(ctx,dest){const master=ctx.createGain(),lim=ctx.createDynamicsCompressor();lim.threshold.value=-1.5;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.12;master.connect(lim);lim.connect(dest);return{ctx,master,lim,rev:null,tracks:new Map(),lat:PRE_DELAY}}
-// Catena di una traccia con i soli effetti attivi; si rifà quando un effetto passa da zero ad attivo o viceversa.
-// Le sorgenti entrano in input, che resta sempre lo stesso.
-function chainTrack(gr,t,comp){const ctx=gr.ctx;let n=gr.tracks.get(t.id);
- if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),auto:ctx.createGain(),meter:ctx.createAnalyser(),send:ctx.createGain(),shape:''};n.meter.fftSize=256;n.pan.connect(n.vol);n.vol.connect(n.auto);n.auto.connect(n.meter);n.meter.connect(gr.master);n.auto.connect(n.send);gr.tracks.set(t.id,n)}
- const shape=chainShape(t,comp);if(n.shape===shape)return n;n.input.disconnect();n.send.disconnect();for(const k of ['low','high','comp','make','delay']){n[k]?.disconnect();n[k]=null}
+// Catena di una traccia con i soli effetti attivi; si rifà quando un effetto o l'uscita cambiano. Le sorgenti entrano
+// in input, che resta sempre lo stesso. Il volume automatico ha un nodo suo; il riverbero è quello del bus di
+// destinazione (o del master), così gruppi diversi non condividono lo stesso spazio.
+function chainTrack(gr,t,delayUnits){const ctx=gr.ctx;let n=gr.tracks.get(t.id);
+ if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),auto:ctx.createGain(),meter:ctx.createAnalyser(),send:ctx.createGain(),rev:null,shape:''};n.meter.fftSize=256;n.pan.connect(n.vol);n.vol.connect(n.auto);n.auto.connect(n.meter);n.auto.connect(n.send);gr.tracks.set(t.id,n)}
+ const shape=`${t.low!==0}|${t.high!==0}|${t.comp>0}|${t.reverb>0}|${t.out||''}|${delayUnits}`;
+ if(n.shape===shape)return n;
+ n.input.disconnect();n.send.disconnect();for(const k of ['low','high','comp','make','delay']){n[k]?.disconnect();n[k]=null}
  let at=n.input;const link=x=>{at.connect(x);at=x;return x};
  if(t.low!==0){link(n.low=ctx.createBiquadFilter());n.low.type='lowshelf';n.low.frequency.value=200}
  if(t.high!==0){link(n.high=ctx.createBiquadFilter());n.high.type='highshelf';n.high.frequency.value=4000}
  if(t.comp>0){link(n.comp=ctx.createDynamicsCompressor());n.comp.knee.value=6;n.comp.attack.value=0.006;n.comp.release.value=0.18;link(n.make=ctx.createGain())}
- else if(comp){link(n.delay=ctx.createDelay(0.05));n.delay.delayTime.value=PRE_DELAY}
- at.connect(n.pan);if(t.reverb>0){if(!gr.rev){gr.rev=ctx.createConvolver();gr.rev.buffer=impulse(ctx);gr.rev.connect(gr.master)}n.send.connect(gr.rev)}
+ if(delayUnits>0){link(n.delay=ctx.createDelay(0.06));n.delay.delayTime.value=delayUnits*PRE_DELAY}
+ at.connect(n.pan);
+ const holder=t.out?gr.tracks.get(t.out):null,dest=holder?holder.input:gr.master;
+ n.meter.disconnect();n.meter.connect(dest);
+ if(t.reverb>0){const rev=holder||gr;if(!rev.rev){rev.rev=ctx.createConvolver();rev.rev.buffer=impulse(ctx);rev.rev.connect(holder?holder.input:gr.master)}n.send.connect(rev.rev)}
  n.shape=shape;return n}
-function setTrackNodes(t,n,{only=null,ctx=null}={}){const set=(p,v)=>ctx?p.setTargetAtTime(v,ctx.currentTime,0.02):p.value=v,c=t.comp/100;
+function setTrackNodes(t,n,{only=null,ctx=null}={}){const set=(p,v)=>ctx?p.setTargetAtTime(v,ctx.currentTime,0.02):p.value=v,c=t.comp/100,live=only?true:audible(t);
  if(n.low)set(n.low.gain,t.low);if(n.high)set(n.high.gain,t.high);if(n.comp){set(n.comp.threshold,-10-26*c);set(n.comp.ratio,1+7*c);set(n.make.gain,fromDb(9*c))}
  if(!hasAuto(t,'pan'))set(n.pan.pan,t.pan);
- set(n.vol.gain,hasAuto(t,'vol')?(only?1:trackGate(t)):(only?fromDb(t.vol):trackLive(t)));
+ set(n.vol.gain,hasAuto(t,'vol')?(live?1:0):(live?fromDb(t.vol):0));
  if(!hasAuto(t,'vol'))set(n.auto.gain,1);
  set(n.send.gain,t.reverb/100*0.6)}
-// Allinea il mixer alle tracce: catene nuove o da rifare, tracce tolte, poi i valori dei cursori.
-// only: una sola traccia, per esportarla da sola (senza muto né solo).
-function syncGraph(gr,tracks,{only=null,live=false}={}){const comp=anyComp(tracks),ids=new Set(tracks.map(t=>t.id));
- for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.auto,n.meter,n.send])x?.disconnect();gr.tracks.delete(id)}
- for(const t of tracks)setTrackNodes(t,chainTrack(gr,t,comp),{only,ctx:live?gr.ctx:null});gr.lat=mixLatency(tracks);return gr}
+// Allinea il mixer alle tracce: i bus prima delle loro tracce, poi i valori dei cursori. only: una sola traccia (e i
+// suoi bus), per esportarla senza muto né solo.
+function syncGraph(gr,tracks,{only=null,live=false}={}){const ids=new Set(tracks.map(t=>t.id));
+ for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.auto,n.meter,n.send])x?.disconnect();n.rev?.disconnect();gr.tracks.delete(id)}
+ const maxLat=Math.max(0,...tracks.map(pathComp));
+ for(const t of [...tracks].sort((a,b)=>depthOf(a)-depthOf(b)))setTrackNodes(t,chainTrack(gr,t,maxLat-pathComp(t)),{only,ctx:live?gr.ctx:null});
+ gr.lat=mixLatency(tracks);return gr}
 // Programma l'automazione di una passata: punti in [from, end) e valore fermo ai due estremi. Gli eventi sono
 // monotoni (un punto con lo stesso tempo viene saltato) perché Web Audio rifiuta due rampe sullo stesso istante.
 function scheduleTrackAuto(ctx,gr,from,when,end,{only=null}={}){const stop=Math.max(from+0.01,Math.min(Number.isFinite(end)?end:projDur(),Math.max(projDur(),from+0.01)));
@@ -76,7 +85,7 @@ function scheduleRegions(ctx,gr,from,when,{end=Infinity}={}){const out=[],stop=e
 // uguale in tempo reale e nel mix esportato.
 const DUCK_STEP=0.02;
 function voiceWindowLevels(id,from,to){const n=Math.max(1,Math.ceil((to-from)/DUCK_STEP)),lv=new Float32Array(n).fill(-120),tr=trackOf(id);
- if(!tr||tr.mute)return lv;
+ if(!tr||!audible(tr))return lv;
  for(const r of regionsOn(id)){if(regionEnd(r)<=from||r.start>=to)continue;const buf=SOURCES.get(r.src);if(!buf)continue;
   const rate=buf.sampleRate,a=Math.max(from,r.start),b=Math.min(to,regionEnd(r)),chans=Array.from({length:buf.numberOfChannels},(_,c)=>buf.getChannelData(c)),
    w0=Math.max(0,Math.floor((a-from)/DUCK_STEP)),w1=Math.min(n,Math.ceil((b-from)/DUCK_STEP));
@@ -85,9 +94,8 @@ function voiceWindowLevels(id,from,to){const n=Math.max(1,Math.ceil((to-from)/DU
    for(const d of chans)for(let j=s0;j<s1;j++){const v=d[j]<0?-d[j]:d[j];if(v>pk)pk=v}
    if(pk>0)lv[w]=Math.max(lv[w],20*Math.log10(pk))}}
  return lv}
-function duckGains(from,to){const out=new Map(),voice=P.tracks.find(t=>t.voice&&!t.mute),solo=P.tracks.some(x=>x.solo);
- if(!voice||(solo&&!voice.solo))return out;
- const targets=P.tracks.filter(t=>t.id!==voice.id&&t.duck>0&&!t.mute);if(!targets.length)return out;
+function duckGains(from,to){const out=new Map(),voice=P.tracks.find(t=>t.voice&&audible(t));if(!voice)return out;
+ const targets=P.tracks.filter(t=>t.id!==voice.id&&t.duck>0&&audible(t));if(!targets.length)return out;
  const lv=voiceWindowLevels(voice.id,from,to),n=lv.length,ordered=Array.from(lv).sort((a,b)=>a-b),
   thr=clamp((ordered[Math.min(n-1,Math.floor(n*0.95))]??-120)-30,-55,-30),
   att=1-Math.exp(-DUCK_STEP/0.06),rel=1-Math.exp(-DUCK_STEP/0.35);
@@ -132,7 +140,9 @@ function songPlayPause(){if(MIX.playing){mixStop(true);announce('Pausa a '+sayTi
 function songStop(){const o=MIX.playing?MIX.origin:0;mixStop(false);P.t=o;updateArrangeUI();announce('Fermo, indicatore a '+sayTime(o))}
 // Mixaggio fuori linea: tutto il brano, oppure una sola traccia (only) con la sua sola catena, per esportarla da sola.
 // Si mixano 6 o 12 ms in più e si tolgono all'inizio: è il ritardo di limitatore e compressori.
-async function renderMix({only=null,from=0,to=null,rate=48000,limit=true}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');const tracks=only?P.tracks.filter(t=>t.id===only):P.tracks,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate);
+async function renderMix({only=null,from=0,to=null,rate=48000,limit=true}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');
+ const chain=only?(()=>{const set=new Set();let x=trackOf(only);while(x&&!set.has(x.id)){set.add(x.id);x=x.out?trackOf(x.out):null}return P.tracks.filter(t=>set.has(t.id))})():P.tracks,
+  tracks=chain,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate);
  const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});if(!limit){gr.lim.threshold.value=0;gr.lim.ratio.value=1}scheduleTrackAuto(oc,gr,from,0,to,{only});scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
  for(let c=0;c<2;c++)res.copyToChannel(out.getChannelData(c).subarray(skip,skip+n),c);return res}
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.

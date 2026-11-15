@@ -19,6 +19,7 @@ def('a','File',[
  ['batchConvert','Converti più file: stesso formato, frequenza e volume per tutti…','export','Ctrl+Maiusc+K',{g:1,short:'Converti file'}]]);
 def('a','Tracce',[
  ['newTrack','Nuova traccia vuota','plus','Alt+Maiusc+N',{short:'Nuova traccia'}],
+ ['newBus','Nuovo bus: raccoglie più tracce con un volume e un compressore soli','tracks','',{short:'Nuovo bus'}],
  ['importTrack','Importa file audio, ognuno in una nuova traccia','import','Ctrl+I',{g:1,short:'Importa audio'}],
  ['trackSettings','Suono della traccia: volume, bilanciamento, bassi, alti, compressione e riverbero…','eq','',{short:'Suono della traccia'}],
  ['trackMute','Muto della traccia scelta','mute','',{short:'Muto',toggle:()=>!!selTrack()?.mute}],

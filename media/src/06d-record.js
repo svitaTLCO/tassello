@@ -29,6 +29,7 @@ async function recordDialog({title='Registra dal microfono',intro='',places=null
 // Registrazione nel progetto: sulla traccia scelta (o in una nuova) dall'indicatore, ascoltando le altre tracce
 // e il metronomo; oppure dentro la regione aperta nell'editor, come un normale inserimento.
 async function recordAudio(){if(MIX.playing)mixStop(true);stopPlayback(false);const t=selTrack(),from=P.t,inEditor=!!(A.buf&&A.region);
+ if(t?.kind==='bus'){toast('Un bus non registra: scegli una traccia audio');return}
  const places=[...(t?[['track',`Nella traccia «${t.name}», da ${fmtTime(from,1)}`]]:[]),['newtrack',`In una nuova traccia, da ${fmtTime(from,1)}`],...(inEditor?[...(hasSel()?[['replace','Nell’editor, al posto della selezione della regione']]:[]),['cursor','Nell’editor, al cursore della regione']]:[])];
  let c0=null,glat=0;const hasOthers=P.regions.length>0||P.metro;
  await recordDialog({title:'Registra',intro:hasOthers?'Mentre registri senti le altre tracce dall’indicatore in poi: usa le cuffie, così il microfono non le riprende.'+(P.countIn?' Prima di iniziare senti una battuta di conteggio.':''):(P.countIn?'Prima di iniziare senti una battuta di conteggio.':''),places,

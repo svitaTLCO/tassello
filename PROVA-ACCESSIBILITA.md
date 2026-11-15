@@ -244,6 +244,14 @@ Domande: sai quando entra la musica e quando parla la voce? Sai se la musica cop
 
 Domande: capisci dalla tabella dove sono i punti e che valore hanno? Ti serve sentire il punto mentre lo aggiungi?
 
+**Compito A3d: raggruppare le voci in un bus.**
+
+1. Cerca «Nuovo bus» in Alt+Q: nasce una traccia chiamata «Bus 1», senza regioni.
+2. Scegli una traccia voce, apri «Suono della traccia» e nel campo «Uscita» scegli il bus: la voce ora passa dal bus.
+3. Fai lo stesso con una seconda voce. Poi scegli il bus e abbassa il suo volume: calano tutte e due insieme.
+
+Domande: dal nome della traccia capisci che è un bus? Il campo «Uscita» ti dice dove va il suono?
+
 **Compito A3b: far entrare un pezzo in uno spazio preciso.**
 
 1. Apri una regione con Ctrl+E, poi Ctrl+Maiusc+F: si apre «Adatta alla durata».
