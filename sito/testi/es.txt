@@ -231,7 +231,7 @@ Un tassello solo se distribuye si se puede usar con un lector de pantalla y solo
 Teclado
 
 [accessibilita.tastiera]
-<kbd>F6</kbd> pasa de un área a otra, <kbd>Alt</kbd>+<kbd>Q</kbd> busca cualquier comando, <kbd>F1</kbd> muestra los atajos.
+<kbd>F6</kbd> pasa de un área a otra, <kbd>Alt</kbd>+<kbd>Q</kbd> busca cualquier comando, <kbd>Ctrl</kbd>+<kbd>/</kbd> muestra los atajos.
 
 [accessibilita.lettore_titolo]
 Lectores de pantalla
@@ -388,9 +388,9 @@ A qué se refiere
 
 [dichiarazione.ambito]
     <ul>
-      <li>Tassello Ufficio 1.10.1: Testo, Calcolo e Impagina</li>
-      <li>Tassello Media 1.4.0: Audio y Video</li>
-      <li>Tassello Grafica 1.3.1: Immagini y Disegno</li>
+      <li>Tassello Ufficio 1.11.6: Testo, Calcolo e Impagina</li>
+      <li>Tassello Media 1.17.8: Audio y Video</li>
+      <li>Tassello Grafica 1.4.7: Immagini y Disegno</li>
       <li>este sitio y la página de verificación</li>
     </ul>
     <p>Vale para Chrome o Edge recientes en un ordenador; las pruebas se hicieron en Windows. Las tabletas, los teléfonos, el Mac con VoiceOver y los demás navegadores todavía no son compatibles. La interfaz de las aplicaciones está en italiano.</p>
@@ -440,7 +440,7 @@ Avisos
     <p>Si algo no funciona con la tecnología que usas, avísanos con el formulario <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Problema de accesibilidad</a>: para nosotros es un fallo que corregir y tiene prioridad. La declaración completa está en el <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">repositorio</a>.</p>
 
 [dichiarazione.data]
-Declaración redactada el 29 de octubre de 2026 y actualizada el 4 de noviembre de 2026; la actualizamos con cada nueva versión.
+Declaración redactada el 29 de octubre de 2026 y actualizada el 15 de noviembre de 2026; la actualizamos con cada nueva versión.
 
 [js.controllo]
 Comprobando…

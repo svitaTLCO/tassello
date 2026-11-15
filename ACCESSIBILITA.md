@@ -6,14 +6,14 @@ Per Tassello l'accessibilità è la condizione per distribuire uno strumento, no
 
 ## A che cosa si riferisce
 
-- **Tassello Ufficio 1.10.1**: Testo, Calcolo e Impagina;
-- **Tassello Media 1.4.0**: Audio e Video;
-- **Tassello Grafica 1.3.1**: Immagini e Disegno;
+- **Tassello Ufficio 1.11.6**: Testo, Calcolo e Impagina;
+- **Tassello Media 1.17.8**: Audio e Video;
+- **Tassello Grafica 1.4.7**: Immagini e Disegno;
 - il **sito** [svitatlco.github.io/tassello](https://svitatlco.github.io/tassello/) e la pagina **Verifica una copia**, in italiano, inglese, francese e spagnolo.
 
 Vale per **Chrome o Edge recenti su un computer**. Le prove sono state fatte su Windows; tablet, telefoni, il Mac con VoiceOver e gli altri browser non sono ancora supportati. L'interfaccia delle app è in italiano.
 
-Dichiarazione redatta il 29 ottobre 2026 e aggiornata il 4 novembre 2026. La aggiorniamo a ogni nuova versione.
+Dichiarazione redatta il 29 ottobre 2026 e aggiornata il 15 novembre 2026. La aggiorniamo a ogni nuova versione.
 
 ## Stato di conformità
 
@@ -36,7 +36,7 @@ Non abbiamo ancora fatto noi prove sistematiche con NVDA, JAWS o l'Assistente vo
 
 ## Che cosa offre Tassello
 
-- **Tastiera.** Tutto si usa da tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, F1 elenca le scorciatoie. Le descrizioni hanno lo stesso tasto in tutte le app: Alt+Maiusc+I descrive quello che hai davanti, Alt+Maiusc+D l'insieme, Alt+Maiusc+R dove sta l'elemento scelto, Alt+Maiusc+L la luce o i livelli, Alt+Maiusc+O il confronto con l'originale.
+- **Tastiera.** Tutto si usa da tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, Ctrl+/ elenca le scorciatoie (F1 lo tiene Chrome per la sua guida). Le descrizioni hanno lo stesso tasto in tutte le app: Alt+Maiusc+I descrive quello che hai davanti, Alt+Maiusc+D l'insieme, Alt+Maiusc+R dove sta l'elemento scelto, Alt+Maiusc+L la luce o i livelli, Alt+Maiusc+O il confronto con l'originale.
 - **Il risultato visivo detto a parole e in suoni.** Alcuni esempi:
   - la posizione delle cornici e le sovrapposizioni in Impagina e in Disegno;
   - la luce, l'istogramma, le zone e i colori di una foto;
@@ -71,7 +71,7 @@ Tassello è un progetto libero e volontario, non un servizio pubblico: questa di
 
 ## In English
 
-This statement covers Tassello Ufficio 1.10.1, Tassello Media 1.4.0, Tassello Grafica 1.3.1, the website and the verification page, used with recent Chrome or Edge on a computer (tested on Windows). The app interface is in Italian. Written on 29 October 2026, updated on 4 November 2026, and updated with every release.
+This statement covers Tassello Ufficio 1.11.6, Tassello Media 1.17.8, Tassello Grafica 1.4.7, the website and the verification page, used with recent Chrome or Edge on a computer (tested on Windows). The app interface is in Italian. Written on 29 October 2026, updated on 15 November 2026, and updated with every release.
 
 **Status: partially conformant with WCAG 2.2 level AA.** An evaluation with axe-core 4.14 and custom checks on about 1,000 states of the seven apps and the website (four themes and forced colours, repeated after fixes), real-browser tests that read the exact screen reader announcements, and a task-by-task analysis of visual work found no remaining A or AA failures except the known limitations below. Conformance is not yet confirmed with real screen readers: a group of blind testers is working through the [testing guide](PROVA-ACCESSIBILITA.md).
 
