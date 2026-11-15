@@ -6,24 +6,37 @@ async function recordDialog({title='Registra dal microfono',intro='',places=null
  if(!navigator.mediaDevices?.getUserMedia){toast('Questo browser non permette di usare il microfono');return}
  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}catch(e){toast(e.name==='NotAllowedError'?'Il permesso per il microfono è stato negato: consentilo nelle impostazioni del sito e riprova':'Microfono non disponibile: '+e.message);return}
  const ctx=actxGet(),track=stream.getAudioTracks()[0],settings=track.getSettings?.()||{},nch=clamp(settings.channelCount||1,1,2),src=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,nch,nch),chunks=Array.from({length:nch},()=>[]);
- let recording=false,starting=false,stopped=false,frames=0,first=null,peak=0,recent=[],lastWarn=0,lowWarned=false,raf=0;
+ let recording=false,starting=false,stopped=false,frames=0,first=null,peak=0,recent=[],lastWarn=0,lowWarned=false,raf=0,holdDb=-60,earconOn=!!prefs.recEarcon,earconTimer=0,testLeft=0,testPeak=0;
  proc.onaudioprocess=e=>{const ib=e.inputBuffer;let pk=0;for(let c=0;c<nch;c++){const d=ib.getChannelData(Math.min(c,ib.numberOfChannels-1));for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v}if(recording)chunks[c].push(d.slice())}for(let c=0;c<e.outputBuffer.numberOfChannels;c++)e.outputBuffer.getChannelData(c).fill(0);
   if(recording){if(first===null)first=ctx.currentTime-ib.length/ctx.sampleRate;frames+=ib.length}peak=Math.max(pk,peak*0.85);recent.push(pk);if(recent.length>Math.ceil(ctx.sampleRate*1.5/4096))recent.shift();
   if(recording){const now=performance.now();if(pk>=0.99&&now-lastWarn>4000){lastWarn=now;announce('Livello troppo alto: allontanati dal microfono o abbassane il volume')}if(!lowWarned&&frames>ctx.sampleRate*3&&Math.max(...recent)<0.01){lowWarned=true;announce('Livello molto basso: avvicinati al microfono')}}};
  src.connect(proc);proc.connect(ctx.destination);
  const stopAll=()=>{if(recording||starting){recording=false;starting=false;stopped=true;onStop?.()}};
- const cleanup=()=>{stopAll();cancelAnimationFrame(raf);proc.onaudioprocess=null;try{src.disconnect();proc.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop())};
+ const cleanup=()=>{stopAll();earconStop();cancelAnimationFrame(raf);proc.onaudioprocess=null;try{src.disconnect();proc.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop())};
  const recentDb=()=>toDb(Math.max(0,...recent));
- const fields=places?[{id:'place',label:'Dove mettere la registrazione',type:'select',value:places[0][0],options:places}]:[];
- const startStop=async(v,pane)=>{const b=pane.querySelector('#dlgBtn0');
+ // Il livello si ascolta: impulsi brevi che salgono con la voce. Tacciono col metronomo, perché due ritmi insieme
+ // non si decodificano. La stessa banda è disegnata sul misuratore, così il suono e lo schermo dicono la stessa cosa.
+ const earconStop=()=>{if(earconTimer){clearInterval(earconTimer);earconTimer=0}};
+ const earconBlip=()=>{if(!earconOn||P.metro)return;const db=toDb(Math.max(0,...recent)),ctx=actxGet(),o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime;
+  o.type='sine';o.frequency.value=300*2**(clamp((db+60)/60,0,1)*2);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.03,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+.038);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+.045)};
+ const earconSet=on=>{earconOn=!!on;prefs.recEarcon=earconOn;savePrefs();earconStop();if(earconOn)earconTimer=setInterval(earconBlip,120)};
+ const testLevel=()=>{if(testLeft){announce('La prova del livello è già in corso');return}testLeft=3;testPeak=0;announce('Prova del livello: parla per tre secondi');
+  const t0=performance.now(),timer=setInterval(()=>{testPeak=Math.max(testPeak,Math.max(0,...recent));if(performance.now()-t0>=3000){clearInterval(timer);testLeft=0;const db=toDb(testPeak);
+   if(!(testPeak>5e-4))announce('Non sento nulla: avvicinati al microfono o controlla l’ingresso');
+   else{const delta=Math.round(-6-db);announce(`Livello ${levelWords(db)}, picco ${fmtDb(db)}. ${delta>1?`Il guadagno consigliato è +${delta} dB.`:delta<-1?`Sei ${-delta} dB troppo alto: abbassa di ${-delta} dB.`:'Il livello va bene.'}`)}}},100)};
+ const fields=[...(places?[{id:'place',label:'Dove mettere la registrazione',type:'select',value:places[0][0],options:places}]:[]),
+  {id:'earcon',label:'Suono del livello: impulsi che salgono con la voce',type:'checkbox',value:!!prefs.recEarcon}];
+ const clearDlgErr=()=>{const x=$('dlgErr');if(x){x.hidden=true;x.textContent=''}};
+ const startStop=async(v,pane)=>{clearDlgErr();const b=pane.querySelector('#dlgBtn0');
   if(onStart){if(stopped||starting)return;if(recording){stopAll();b.disabled=true;b.textContent='Fermata';$('recDot').hidden=true;$('recState').textContent=`Registrazione conclusa: ${sayTime(frames/ctx.sampleRate)}. Premi Inserisci la registrazione.`;announce('Registrazione fermata');pane.querySelector('#okDlg').focus();return}
    starting=true;b.textContent='Ferma';$('recState').textContent='Si parte…';await onStart(v.place);if(!starting)return;starting=false;recording=true;$('recDot').hidden=false;$('recState').textContent='Registrazione in corso.';announce('Registrazione avviata');return}
   recording=!recording;b.textContent=recording?'Pausa':'Riprendi';$('recDot').hidden=!recording;$('recState').textContent=recording?'Registrazione in corso.':'Registrazione in pausa: '+sayTime(frames/ctx.sampleRate)+' registrati.';announce(recording?'Registrazione avviata':'Registrazione in pausa')};
- const res=await modal(title,`${intro?`<p>${esc(intro)}</p>`:''}<p>Microfono: <b>${esc(track.label||'predefinito')}</b>, ${nch===1?'mono':'stereo'}. Prova a parlare: l’indicatore mostra il livello. Premi <b>Avvia</b> per registrare${onStart?' e <b>Ferma</b> per concludere':''}, poi <b>Inserisci la registrazione</b>.</p><div class="rec-time" role="timer" aria-live="off" id="recTime"><span class="rec-dot" id="recDot" hidden></span>0:00,0</div><canvas class="rec-meter" id="recMeter" width="600" height="44" aria-hidden="true"></canvas><p id="recState" role="status">Pronto per registrare.</p>`,fields,'Inserisci la registrazione',{
+ const res=await modal(title,`${intro?`<p>${esc(intro)}</p>`:''}<p>Microfono: <b>${esc(track.label||'predefinito')}</b>, ${nch===1?'mono':'stereo'}. Prova a parlare: l’indicatore mostra il livello. Con <b>Suono del livello</b> acceso senti degli impulsi che salgono con la voce; con il metronomo acceso tacciono. Premi <b>Avvia</b> per registrare${onStart?' e <b>Ferma</b> per concludere':''}, poi <b>Inserisci la registrazione</b>.</p><div class="rec-time" role="timer" aria-live="off" id="recTime"><span class="rec-dot" id="recDot" hidden></span>0:00,0</div><canvas class="rec-meter" id="recMeter" width="600" height="44" aria-hidden="true"></canvas><p id="recState" role="status">Pronto per registrare.</p><p class="pg-btns"><button type="button" class="btn sm" id="recTest">Prova il livello per tre secondi</button></p>`,fields,'Inserisci la registrazione',{
   buttons:[{label:'Avvia',run:startStop},{label:'Tempo e livello',run:()=>announce(`${recording?'In registrazione':'Fermo'}: ${sayTime(frames/ctx.sampleRate)} registrati. Livello ${levelWords(recentDb())}, picco ${fmtDb(recentDb())}`)}],
   validate:()=>frames>0?null:'Non hai ancora registrato nulla: premi Avvia',onClose:cleanup,
-  onOpen:pane=>{const cv=$('recMeter'),t=$('recTime');const loop=()=>{drawMeter(cv,toDb(peak));t.lastChild.textContent=fmtTime(frames/ctx.sampleRate,1);raf=requestAnimationFrame(loop)};loop();pane.querySelector('#dlgBtn0').classList.add('primary')}});
+  onOpen:pane=>{const cv=$('recMeter'),t=$('recTime'),cb=$('dlg_earcon'),tb=$('recTest');if(cb)cb.addEventListener('change',()=>earconSet(cb.checked));if(tb)tb.onclick=testLevel;earconSet(earconOn);const loop=()=>{holdDb=Math.max(toDb(peak),holdDb-.08);drawMeter(cv,toDb(peak),{hold:holdDb});t.lastChild.textContent=fmtTime(frames/ctx.sampleRate,1);raf=requestAnimationFrame(loop)};loop();pane.querySelector('#dlgBtn0').classList.add('primary')}});
  stopAll();if(!res||!frames)return;
+ if(res.earcon!==undefined){prefs.recEarcon=!!res.earcon;savePrefs()}
  const out=chunks.map(list=>{const d=new Float32Array(frames);let at=0;for(const c of list){d.set(c.subarray(0,Math.min(c.length,frames-at)),at);at+=c.length;if(at>=frames)break}return d});
  await onDone(makeBuffer(out,ctx.sampleRate),res.place,{first,inputLatency:Number(settings.latency)||0})}
 // Registrazione nel progetto: sulla traccia scelta (o in una nuova) dall'indicatore, ascoltando le altre tracce

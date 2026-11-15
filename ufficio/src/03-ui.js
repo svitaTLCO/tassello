@@ -81,6 +81,7 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v)||limits(v);
   if(bad){const err=typeof bad==='string'?{msg:bad}:{...bad};if(err.field===undefined&&fields.length===1)err.field=fields[0].id;showErr(err);return}finish(v)};
  $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute?.('aria-invalid'))clearErr()});
+ $('dialogForm').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='SELECT'){e.preventDefault();e.stopPropagation();$('dialogForm').requestSubmit()}});
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
  opts.onOpen?.(pane,finish);

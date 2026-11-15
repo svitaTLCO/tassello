@@ -211,11 +211,12 @@ Apri Tassello Media: si apre Audio. Metti le cuffie.
 
 **Compito A1 (principale): registrare una frase con il livello giusto.**
 
-1. Premi Ctrl+Alt+R: si apre la finestra «Registra».
-2. Parla per qualche secondo e, mentre parli, vai con Tab al pulsante «Tempo e livello» e premilo: ti dice se il livello è buono, basso o troppo alto.
-3. Premi Avvia, leggi una frase di due o tre righe, poi premi Ferma e inserisci la registrazione.
+1. Premi Ctrl+Alt+R: si apre la finestra «Registra». Con Tab arriva a «Suono del livello» e accendilo: senti degli impulsi che salgono con la voce.
+2. Scegli «Prova il livello per tre secondi» e parla: alla fine dice il livello, il picco e il guadagno consigliato.
+3. Parla per qualche secondo e premi «Tempo e livello»: ti dice se il livello è buono, basso o troppo alto.
+4. Premi Avvia, leggi una frase di due o tre righe, poi premi Ferma e inserisci la registrazione. Se il progetto ha un metronomo, riascolta: gli impulsi devono tacere.
 
-Domande: prima di cominciare sapevi se il microfono era troppo lontano o troppo vicino? Durante la registrazione ti sei accorto se la voce distorceva? Alla fine sapevi com'era venuta?
+Domande: gli impulsi ti dicono se sei troppo alto o troppo basso senza interrompere la frase? Il misuratore sullo schermo dice la stessa cosa degli impulsi? La prova di tre secondi ti ha dato un guadagno utile? Con il metronomo acceso gli impulsi tacciono, o si confondono con i colpi? Alla fine sapevi com'era venuta la registrazione?
 
 **Compito A2 (principale): ripulire la registrazione.**
 

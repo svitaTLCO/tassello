@@ -51,7 +51,13 @@ function drawRuler(){const {g,w,h}=fitCanvas($('aRuler'));g.clearRect(0,0,w,h);i
 function drawOverview(){const {g,w,h}=fitCanvas($('aOverview')),P=palette;g.fillStyle=P['wave-bg'];g.fillRect(0,0,w,h);if(!A.buf)return;const L=alen(),lv=getPeaks().levels.at(-1),mid=h/2;g.fillStyle=P.wave;
  for(let x=0;x<w;x++){let hi=0;for(let c=0;c<A.nch;c++){const s=levelStats(lv,c,x/w*L,(x+1)/w*L);if(s)hi=Math.max(hi,s.hi,-s.lo)}g.fillRect(x,mid-hi*(mid-2),1,Math.max(1,2*hi*(mid-2)))}
  const vx=AV.start/L*w,vw=Math.max(3,waveWidth()*AV.spp/L*w);g.strokeStyle=P.accent;g.lineWidth=2;g.strokeRect(vx+1,1,vw-2,h-2);saveLayer($('aOverview'),w,h);g.fillStyle=P.playhead;g.fillRect((aplay.playing?playPos():A.cursor)/L*w-1,0,2,h)}
-function drawMeter(cv,db){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const f=v=>clamp((v+60)/60,0,1),x=f(db)*w;g.fillStyle='#1e7a46';g.fillRect(0,0,Math.min(x,f(-12)*w),h);if(x>f(-12)*w){g.fillStyle='#b38600';g.fillRect(f(-12)*w,0,Math.min(x,f(-3)*w)-f(-12)*w,h)}if(x>f(-3)*w){g.fillStyle='#c50f1f';g.fillRect(f(-3)*w,0,x-f(-3)*w,h)}g.fillStyle=palette['text-3'];for(const d of [-48,-36,-24,-12,-6,-3])g.fillRect(f(d)*w,h-4,1,4)}
+// Indicatore di livello: la banda d'ascolto (verde), il livello con le sue soglie e, se richiesto, il picco trattenuto.
+// La banda è la stessa che l'earcon comunica: due rese dello stesso modello.
+function drawMeter(cv,db,{band=[-18,-6],hold=null}={}){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const f=v=>clamp((v+60)/60,0,1);
+ if(band){const x0=f(band[0])*w,x1=f(band[1])*w;g.fillStyle='rgba(30,122,70,.16)';g.fillRect(x0,0,x1-x0,h);g.fillStyle='rgba(30,122,70,.55)';g.fillRect(x0,0,1,h);g.fillRect(x1-1,0,1,h)}
+ const x=f(db)*w;g.fillStyle='#1e7a46';g.fillRect(0,0,Math.min(x,f(-12)*w),h);if(x>f(-12)*w){g.fillStyle='#b38600';g.fillRect(f(-12)*w,0,Math.min(x,f(-3)*w)-f(-12)*w,h)}if(x>f(-3)*w){g.fillStyle='#c50f1f';g.fillRect(f(-3)*w,0,x-f(-3)*w,h)}
+ if(hold!=null&&Number.isFinite(hold)){const xh=clamp(f(hold)*w,0,w-2);g.fillStyle=hold>-3?'#c50f1f':palette.text;g.fillRect(xh,0,2,h)}
+ g.fillStyle=palette['text-3'];for(const d of [-48,-36,-24,-12,-6,-3])g.fillRect(f(d)*w,h-4,1,4)}
 // Contatore della traccia: una barra sottile sotto il nome, verde, gialla e rossa come il master.
 function drawLaneMeter(cv,db){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const x=clamp((db+60)/60,0,1)*w;
  g.fillStyle=palette['line'];g.fillRect(0,0,w,h);g.fillStyle=db>-3?'#c50f1f':db>-12?'#b38600':'#1e7a46';g.fillRect(0,0,x,h)}
