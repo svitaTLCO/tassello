@@ -21,7 +21,7 @@ def('w','File',[['exportHtml','Esporta come pagina HTML','export','',{short:'Esp
 def('x','File',[['exportCSV','Esporta il foglio in CSV','export','',{short:'Esporta CSV'}],['importCSV','Importa un file CSV','import','',{short:'Importa CSV'}]]);
 def('wxp','Generale',[
  ['palette','Cerca comando','search','Alt+Q',{g:1,short:'Cerca comando'}],
- ['shortcuts','Scorciatoie da tastiera','keyboard','F1 / Ctrl+/',{g:1,short:'Scorciatoie'}],
+ ['shortcuts','Scorciatoie da tastiera','keyboard','Ctrl+/',{g:1,short:'Scorciatoie'}],
  ['help','Informazioni e limiti','info','',{short:'Informazioni'}],
  ['nextRegion','Vai all’area successiva','','F6',{g:1}],
  ['prevRegion','Vai all’area precedente','','Maiusc+F6',{g:1}],

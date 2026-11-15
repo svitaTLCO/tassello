@@ -94,7 +94,7 @@ Il terzo tassello contiene due app per le foto e le grafiche di tutti i giorni:
 
 Per Tassello l'accessibilità non è una funzione in più da attivare: è il requisito senza il quale un tassello non viene distribuito. Ogni comando, finestra e messaggio nasce per essere usato anche con uno screen reader o con la sola tastiera.
 
-- <kbd>F6</kbd> passa tra le aree, <kbd>Alt</kbd>+<kbd>Q</kbd> cerca qualsiasi comando, <kbd>F1</kbd> elenca tutte le scorciatoie;
+- <kbd>F6</kbd> passa tra le aree, <kbd>Alt</kbd>+<kbd>Q</kbd> cerca qualsiasi comando, <kbd>Ctrl</kbd>+<kbd>/</kbd> elenca tutte le scorciatoie;
 - le descrizioni hanno lo stesso tasto in ogni app: Alt+Maiusc+I descrive quello che hai davanti, D l'insieme, R dove sta l'elemento scelto rispetto agli altri, L la luce o i livelli, O il confronto con l'originale o tra prima e dopo; i colori si sentono con il loro nome e gli annunci arrivati insieme si uniscono in una frase invece di coprirsi;
 - il risultato visivo si sente a parole: in Impagina la posizione della cornice rispetto alla pagina e alle altre, le sovrapposizioni e la panoramica della pagina; in Calcolo la descrizione del foglio e, sui grafici, riassunto, massimo, minimo e valori anomali; in Testo dove sei e la formattazione; in Immagini l'effetto di un cursore quando lo lasci, la luce, l'istogramma da percorrere e ascoltare, zone e dominante della foto e lo strumento Esplora; in Disegno i dintorni dell'oggetto e la composizione, con «Ascolta la forma»; in Audio il brano e i livelli, e che cosa ha cambiato ogni effetto; in Video il fotogramma, la clip, i cambi di scena e le pause del parlato;
 - barra, cassetti, riquadri, griglia, grafici, finestre e menu usano i ruoli ARIA standard e annunciano celle, valori e stati;

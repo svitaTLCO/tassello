@@ -42,7 +42,7 @@ Scarica Tassello solo dal sito ufficiale o dalla pagina delle [release su GitHub
 
 - **F6** e **Maiusc+F6**: passano da un'area all'altra della finestra, per esempio dall'elenco delle pagine alla pagina e poi alle proprietà.
 - **Alt+Q**: cerca un comando per nome. Scrivi una parte del nome, scegli con le frecce e premi Invio. Se non sai come si fa una cosa, prova da qui.
-- **F1**: l'elenco di tutte le scorciatoie dell'app in cui sei.
+- **Ctrl+/**: l'elenco di tutte le scorciatoie dell'app in cui sei (F1 lo tiene Chrome per la sua guida).
 - **Alt+Maiusc+I**: descrive dove sei e com'è fatto quello che hai davanti: la pagina, la foto, il disegno, il punto del video.
 - **Esc**: chiude una finestra o esce da uno strumento.
 - **Ctrl+Z**: annulla l'ultima modifica.
