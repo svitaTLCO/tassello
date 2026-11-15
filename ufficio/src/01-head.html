@@ -322,14 +322,19 @@ html[data-contrast=high] .chart{border:2px solid #000}
 .dlg-body p{margin:0 0 10px}
 .modal label{display:block;margin:12px 0 5px;font-weight:600}
 .modal label.check{display:flex;margin-top:12px}
-.modal input:not([type=checkbox]),.modal select,.modal textarea{width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text)}
+.modal input:not([type=checkbox]):not([type=range]):not([type=color]),.modal select,.modal textarea{width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text)}
+.modal input[type=range]{width:100%;accent-color:var(--accent)}
+.modal input[type=color]{width:60px;height:34px;padding:2px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface)}
+.modal .rangebox{display:flex;align-items:center;gap:10px}.modal .rangebox output{min-width:76px;text-align:right;font-variant-numeric:tabular-nums}
 .modal textarea{resize:vertical}
 .modal .hint{display:block;color:var(--text-3);margin-top:4px}
-.modal .dlg-err{margin:6px 0 0;padding:6px 10px;border-left:3px solid var(--danger);color:var(--text);background:var(--surface-2,transparent);font-weight:600}
+.modal .dlg-err{margin:6px 0 0;padding:6px 10px;border-left:3px solid var(--danger);color:var(--text);background:var(--surface-2,transparent);font-weight:600}.modal .dlg-err:empty{display:none}
 #pgProps .pp-err{color:var(--text);font-weight:600;border-left:3px solid var(--danger);padding-left:6px}
 #pgProps [aria-invalid=true]{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
 .modal [aria-invalid=true]{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
-.modal-actions{margin-top:20px;display:flex;gap:8px;justify-content:flex-end}
+.modal-actions{margin-top:20px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.modal-actions .left{margin-right:auto}
+.stats{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:6px 0 0}.stats dt{color:var(--text-3)}.stats dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
 .modal table{border-collapse:collapse;width:100%;font-size:12.5px}
 .modal th,.modal td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-weight:400}
 .modal caption{text-align:left;font-weight:600;font-size:14px;padding:14px 0 6px;color:var(--text)}
