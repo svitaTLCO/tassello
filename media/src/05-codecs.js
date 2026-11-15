@@ -4,8 +4,11 @@
 const ascii4=(v,at)=>String.fromCharCode(v.getUint8(at),v.getUint8(at+1),v.getUint8(at+2),v.getUint8(at+3));
 const MAX_CHANNELS=8;
 function readWav(buf){const v=new DataView(buf);if(v.byteLength<12)return null;const riff=ascii4(v,0);if((riff!=='RIFF'&&riff!=='RF64')||ascii4(v,8)!=='WAVE')return null;
- let at=12,fmt=null,data=null;const cues=[],labels=new Map();
+ let at=12,fmt=null,data=null,ds=null;const cues=[],labels=new Map();
  while(at+8<=v.byteLength){const id=ascii4(v,at),body=at+8;let size=v.getUint32(at+4,true);
+  // RF64: le dimensioni vere stanno nel blocco ds64, perché il campo a 32 bit vale 0xFFFFFFFF.
+  if(id==='ds64'&&size>=28)ds={riff:Number(v.getBigUint64(body,true)),data:Number(v.getBigUint64(body+8,true)),samples:Number(v.getBigUint64(body+16,true))};
+  if(id==='data'&&size===0xFFFFFFFF&&ds)size=ds.data;
   if(id==='data'&&(size===0xFFFFFFFF||body+size>v.byteLength))size=v.byteLength-body;
   if(body+size>v.byteLength&&id!=='data')break;
   if(id==='fmt '&&size>=16){fmt={tag:v.getUint16(body,true),ch:v.getUint16(body+2,true),rate:v.getUint32(body+4,true),align:v.getUint16(body+12,true),bits:v.getUint16(body+14,true)};if(fmt.tag===0xFFFE&&size>=26)fmt.tag=v.getUint16(body+24,true)}
@@ -45,20 +48,24 @@ function bextChunk({description='',originator='',reference='',date=new Date(),lo
  const out=new Uint8Array(8+body.length);out.set(te.encode('bext'),0);new DataView(out.buffer).setUint32(4,body.length,true);out.set(body,8);return out}
 // WAV a 16 o 24 bit interi oppure 32 bit in virgola mobile, dal campione start a end; i marcatori diventano cue e labl.
 // Con dither i 16 bit ricevono un rumore triangolare di un bit: serve quando si scende da 24 o da 32 bit.
-function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length,{dither=false,bext=null}={}){const ch=buffer.numberOfChannels,rate=buffer.sampleRate,frames=Math.max(0,end-start),float=bits===32,bps=bits/8,dataLen=frames*ch*bps;
- if(dataLen+1e6>0xFFFFFFFF)throw Error('Il file supera i 4 GB del formato WAV: esporta una parte alla volta');
+function wavBlob(buffer,bits=16,markers=[],start=0,end=buffer.length,{dither=false,bext=null,rf64=false}={}){const ch=buffer.numberOfChannels,rate=buffer.sampleRate,frames=Math.max(0,end-start),float=bits===32,bps=bits/8,dataLen=frames*ch*bps;
  const ms=markers.filter(m=>m.pos>=start&&m.pos<=end);
  const labl=ms.map((m,i)=>{const t=te.encode((m.label||'')+'\0'),pad=t.length&1,b=new Uint8Array(12+t.length+pad),v=new DataView(b.buffer);b.set([108,97,98,108]);v.setUint32(4,4+t.length,true);v.setUint32(8,i+1,true);b.set(t,12);return b});
  const tail=[];if(ms.length){const cue=new Uint8Array(12+ms.length*24),v=new DataView(cue.buffer);cue.set([99,117,101,32]);v.setUint32(4,4+ms.length*24,true);v.setUint32(8,ms.length,true);ms.forEach((m,i)=>{const p=12+i*24;v.setUint32(p,i+1,true);v.setUint32(p+4,m.pos-start,true);cue.set([100,97,116,97],p+8);v.setUint32(p+20,m.pos-start,true)});
   const listLen=4+labl.reduce((n,b)=>n+b.length,0),list=new Uint8Array(12),lv=new DataView(list.buffer);list.set([76,73,83,84]);lv.setUint32(4,listLen,true);list.set([97,100,116,108],8);tail.push(cue,list,...labl)}
  // Il blocco bext va per primo, subito dopo WAVE: è l'ordine che i playout radiofonici si aspettano.
- const bx=bext?bextChunk(bext):null,bxLen=bx?bx.length:0,fmtLen=float?18:16,fact=float?12:0,head=new ArrayBuffer(12+bxLen+8+fmtLen+fact+8),v=new DataView(head),tailLen=tail.reduce((n,b)=>n+b.length,0);
+ // Oltre i 4 GB il WAV diventa RF64: le dimensioni vere stanno nel blocco ds64 e i campi a 32 bit valgono 0xFFFFFFFF.
+ const tailLen=tail.reduce((n,b)=>n+b.length,0),bx=bext?bextChunk(bext):null,bxLen=bx?bx.length:0,fmtLen=float?18:16,fact=float?12:0,
+  big=rf64||12+36+bxLen+8+fmtLen+fact+8+dataLen+(dataLen&1)+tailLen>0xFFFFFFFF,
+  head=new ArrayBuffer(12+(big?36:0)+bxLen+8+fmtLen+fact+8),v=new DataView(head);
  const w4=(at,s)=>{for(let i=0;i<4;i++)v.setUint8(at+i,s.charCodeAt(i))};
- w4(0,'RIFF');v.setUint32(4,head.byteLength-8+dataLen+(dataLen&1)+tailLen,true);w4(8,'WAVE');
- let at=12;if(bx){new Uint8Array(head).set(bx,at);at+=bxLen}
+ w4(0,big?'RF64':'RIFF');v.setUint32(4,big?0xFFFFFFFF:head.byteLength-8+dataLen+(dataLen&1)+tailLen,true);w4(8,'WAVE');
+ let at=12;
+ if(big){const riff=head.byteLength-8+dataLen+(dataLen&1)+tailLen;w4(at,'ds64');v.setUint32(at+4,28,true);v.setBigUint64(at+8,BigInt(riff),true);v.setBigUint64(at+16,BigInt(dataLen),true);v.setBigUint64(at+24,BigInt(frames),true);v.setUint32(at+32,0,true);at+=36}
+ if(bx){new Uint8Array(head).set(bx,at);at+=bxLen}
  w4(at,'fmt ');v.setUint32(at+4,fmtLen,true);v.setUint16(at+8,float?3:1,true);v.setUint16(at+10,ch,true);v.setUint32(at+12,rate,true);v.setUint32(at+16,rate*ch*bps,true);v.setUint16(at+20,ch*bps,true);v.setUint16(at+22,bits,true);at+=8+fmtLen;
  if(float){v.setUint16(at,0,true);at+=2;w4(at,'fact');v.setUint32(at+4,4,true);v.setUint32(at+8,frames,true);at+=12}
- w4(at,'data');v.setUint32(at+4,dataLen,true);
+ w4(at,'data');v.setUint32(at+4,big?0xFFFFFFFF:dataLen,true);
  const parts=[head],chans=Array.from({length:ch},(_,c)=>buffer.getChannelData(c)),BLOCK=1<<18;
  for(let i=start;i<end;i+=BLOCK){const n=Math.min(BLOCK,end-i);
   if(float){const a=new Float32Array(n*ch);for(let c=0;c<ch;c++){const d=chans[c];for(let j=0,k=c;j<n;j++,k+=ch)a[k]=d[i+j]}parts.push(a)}
@@ -78,6 +85,23 @@ async function resampleBuffer(buf,rate){if(!buf||buf.sampleRate===rate)return bu
 // numero in virgola mobile a 80 bit. Si leggono PCM a 8, 16, 24 e 32 bit, sowt (little-endian) e fl32/fl64.
 function ext80(v,at){const e=v.getUint16(at);if(!e&&!v.getUint32(at+2)&&!v.getUint32(at+6))return 0;
  const exp=(e&0x7fff)-16383,mant=v.getUint32(at+2)*4294967296+v.getUint32(at+6);return (e&0x8000?-1:1)*mant*2**(exp-63)}
+// Tabelle G.711 per i file AIFC compressi a 8 bit (telefono, dettatura, vecchi archivi).
+const ULAW_TABLE=(()=>{const t=new Int16Array(256);for(let i=0;i<256;i++){const u=~i&255,s=(u&0x80)?-1:1,e=(u>>4)&7,m=u&15;t[i]=s*((((m<<3)+0x84)<<e)-0x84)}return t})();
+const ALAW_TABLE=(()=>{const t=new Int16Array(256);for(let i=0;i<256;i++){let a=i^0x55;const s=(a&0x80)?1:-1,m=(a&0x0f)<<4,seg=(a&0x70)>>4;let v;
+ if(seg===0)v=m+8;else if(seg===1)v=m+0x108;else{v=(m+0x108)<<(seg-1)}t[i]=s*v}return t})();
+// IMA ADPCM di Apple (ima4): blocchi di 34 byte per canale, 64 campioni, intestazione con valore iniziale e passo.
+const IMA_STEP=[7,8,9,10,11,12,13,14,16,17,19,21,23,25,28,31,34,37,41,45,50,55,60,66,73,80,88,97,107,118,130,143,157,173,190,209,230,253,279,307,337,371,408,449,494,544,598,658,724,796,876,963,1060,1166,1282,1411,1552,1707,1878,2066,2272,2499,2749,3024],
+ IMA_INDEX=[-1,-1,-1,-1,2,4,6,8,-1,-1,-1,-1,2,4,6,8];
+// Blocco IMA4: intestazione con il valore iniziale (16 bit, bassi 7 per il passo) e 32 byte di nibble, dal basso.
+// Come in QuickTime, se il passo non cambia e il valore iniziale è vicino a quello del blocco precedente si continua
+// da lì invece di ripartire: è quello che tiene unita la forma d'onda fra un blocco e l'altro.
+function ima4Decode(v,at,out,start,count,st){const raw=(v.getUint8(at)<<8)|v.getUint8(at+1);let pred=raw&0xFF80;if(pred&0x8000)pred-=0x10000;
+ const idx=raw&0x7f;
+ if(st.idx===idx){if(Math.abs(pred-st.pred)>0x7f){st.idx=idx;st.pred=pred}}else{st.idx=idx;st.pred=pred}
+ let m=0;for(let k=0;k<32;k++){const byte=v.getUint8(at+2+k);
+  for(const nib of [byte&0x0f,byte>>4]){if(m>=Math.min(64,count))return;
+   const step=IMA_STEP[st.idx];let diff=step>>3;if(nib&4)diff+=step;if(nib&2)diff+=step>>1;if(nib&1)diff+=step>>2;
+   st.pred=clamp(st.pred+((nib&8)?-diff:diff),-32768,32767);st.idx=clamp(st.idx+IMA_INDEX[nib],0,88);out[start+m]=st.pred/32768;m++}}}
 function readAiff(buf){const v=new DataView(buf);if(v.byteLength<12||ascii4(v,0)!=='FORM')return null;const kind=ascii4(v,8);
  if(kind!=='AIFF'&&kind!=='AIFC')return null;
  let at=12,comm=null,snd=null;
@@ -87,15 +111,20 @@ function readAiff(buf){const v=new DataView(buf);if(v.byteLength<12||ascii4(v,0)
   else if(id==='SSND'&&size>=8)snd={off:body+8+v.getUint32(body),len:size-8-v.getUint32(body)};
   at=body+size+(size&1)}
  if(!comm||!snd)throw Error('File AIFF incompleto: mancano il formato o i campioni');
- const {ch,bits,frames,rate}=comm,comp=(comm.comp||'NONE').trim(),le=comp==='sowt',flt=/^(fl|FL)(32|64)$/.test(comp),bps=bits/8;
+ const {ch,bits,frames,rate}=comm,comp=(comm.comp||'NONE').trim(),le=comp==='sowt'||comp==='in24'||comp==='in32',flt=/^(fl|FL)(32|64)$/.test(comp),
+  ima=comp==='ima4',ulaw=comp==='ulaw'||comp==='ULAW',alaw=comp==='alaw'||comp==='ALAW',bps=bits/8;
  if(!(rate>=3000&&rate<=768000))throw Error('Frequenza di campionamento non supportata: '+rate+' hertz');
  if(!ch||ch>MAX_CHANNELS)throw Error(`File AIFF con ${ch} canali: se ne aprono al massimo ${MAX_CHANNELS}`);
- if(!(le||flt||comp==='NONE'||comp==='twos'))throw Error('Formato AIFF non supportato: '+comp);
- if(!le&&!flt&&![8,16,24,32].includes(bits))throw Error('Formato AIFF non supportato: '+bits+' bit');
+ if(!(le||flt||ima||ulaw||alaw||comp==='NONE'||comp==='twos'))throw Error('Formato AIFF non supportato: '+comp);
+ if(!le&&!flt&&!ima&&!ulaw&&!alaw&&![8,16,24,32].includes(bits))throw Error('Formato AIFF non supportato: '+bits+' bit');
  if(flt&&!(bits===32||bits===64))throw Error('Formato AIFF non supportato: '+bits+' bit');
- const n=Math.min(frames,Math.floor(snd.len/(ch*bps))),out=new AudioBuffer({length:n,numberOfChannels:ch,sampleRate:rate}),
-  chans=Array.from({length:ch},(_,c)=>out.getChannelData(c)),off=snd.off;
- if(flt&&bits===32)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getFloat32(off+k*4,le)}
+ const imaBlocks=Math.floor(snd.len/(34*ch)),
+  n=ima?Math.min(imaBlocks*64,frames<=imaBlocks?frames*64:frames):Math.min(frames,Math.floor(snd.len/(ch*bps))),
+  out=new AudioBuffer({length:n,numberOfChannels:ch,sampleRate:rate}),chans=Array.from({length:ch},(_,c)=>out.getChannelData(c)),off=snd.off;
+ if(ima){const blocks=Math.ceil(n/64),st=Array.from({length:ch},()=>({pred:0,idx:0}));for(let b=0;b<blocks;b++)for(let c=0;c<ch;c++){const at=off+(b*ch+c)*34;if(at+34>v.byteLength)continue;
+   ima4Decode(v,at,chans[c],b*64,n-b*64,st[c])}}
+ else if(ulaw||alaw)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=(ulaw?ULAW_TABLE:ALAW_TABLE)[v.getUint8(off+k)]/32768}
+ else if(flt&&bits===32)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getFloat32(off+k*4,le)}
  else if(flt)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getFloat64(off+k*8,le)}
  else if(bits===16)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getInt16(off+k*2,le)*(1/32768)}
  else if(bits===32)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getInt32(off+k*4,le)*(1/2147483648)}
