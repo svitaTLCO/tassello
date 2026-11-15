@@ -1,8 +1,38 @@
 {
   "programma": "Tassello Media",
   "file": "tassello-media.html",
-  "ultima": "1.17.1",
+  "ultima": "1.17.7",
   "versioni": [
+    {
+      "versione": "1.17.7",
+      "data": "2026-11-15",
+      "sha256": "471b17fea26891e6cea4f720a3892402fe220195bb6e6f61bab1aea849075dcd"
+    },
+    {
+      "versione": "1.17.6",
+      "data": "2026-11-15",
+      "sha256": "693cddcd8e0961ff22e3132515eb6e20ccf345d7cf29dfca3d7ce83baf06fc8e"
+    },
+    {
+      "versione": "1.17.5",
+      "data": "2026-11-15",
+      "sha256": "d7375083971058e27d32a4ba31ca299b57994aa70cc2881b3390c3d0c999b45e"
+    },
+    {
+      "versione": "1.17.4",
+      "data": "2026-11-15",
+      "sha256": "e4f4afbd60da1c889dbe94426d32e728f6ee049febff392871f16fe0532b87a4"
+    },
+    {
+      "versione": "1.17.3",
+      "data": "2026-11-15",
+      "sha256": "b9d93edfee5a294be12ce3252bc7f35fcae2290e4954becc896979b7a322a71f"
+    },
+    {
+      "versione": "1.17.2",
+      "data": "2026-11-15",
+      "sha256": "804c9070aa1b4f27967611f68218a5e05b7631b02bae957c4d570c014baced18"
+    },
     {
       "versione": "1.17.1",
       "data": "2026-11-15",
