@@ -82,7 +82,8 @@ function scheduleTrackAuto(ctx,gr,from,when,end,{only=null}={}){const stop=Math.
 function liveGraph(live){const ctx=actxGet();if(!MIX.graph||MIX.graph.ctx!==ctx)MIX.graph=newGraph(ctx,mixOut());return syncGraph(MIX.graph,P.tracks,{live})}
 // Regioni del brano tra from ed end, a partire dall'istante when del contesto. Il guadagno segue i punti dell'inviluppo
 // (dissolvenze della regione); dove la regione è tagliata (ascolto da metà, fine del ciclo) entra ed esce in 3 ms.
-function regionGainAt(r,x){let v=fromDb(r.gain);if(r.fadeIn>0)v*=clamp(x/r.fadeIn,0,1);if(r.fadeOut>0)v*=clamp((r.dur-x)/r.fadeOut,0,1);return v}
+const hasGainAuto=r=>!!(r.gainOn&&r.gainAuto?.length);
+function regionGainAt(r,x){let v=hasGainAuto(r)?fromDb(autoValueAt(r.gainAuto,x)):fromDb(r.gain);if(r.fadeIn>0)v*=clamp(x/r.fadeIn,0,1);if(r.fadeOut>0)v*=clamp((r.dur-x)/r.fadeOut,0,1);return v}
 // Le sezioni di comping di una regione: dove non c'è una sezione vale la take attiva. I tempi sono relativi alla
 // regione e off è il punto dentro la take da cui partire (prendendo la sezione al tempo x si parte da take.off + x).
 function compSegments(r){const dur=r.dur,base={a:0,b:dur,src:r.src,off:r.off};
@@ -99,9 +100,9 @@ function scheduleRegions(ctx,gr,from,when,{end=Infinity}={}){const out=[],stop=e
    const t=Math.max(from,r.start+seg.a),e=Math.min(end,r.start+seg.b);if(e-t<=1e-4)continue;
    const off=seg.off+(t-(r.start+seg.a)),len=e-t,a=t-r.start,z=e-r.start,x=Math.min(EDGE_FADE,len/2),cutIn=a>1e-4,cutOut=z<r.dur-1e-4,
     s=ctx.createBufferSource(),g=ctx.createGain(),at=when+(t-from);s.buffer=buf;
-   const env=y=>regionGainAt(r,y)*(cutIn?clamp((y-a)/x,0,1):1)*(cutOut?clamp((z-y)/x,0,1):1),dg=duck.get(r.track);
-   if(dg){const N=Math.max(2,Math.ceil(len/DUCK_STEP)+1),arr=new Float32Array(N);
-    for(let i=0;i<N;i++){const y=a+(i/(N-1))*(z-a),d=dg[clamp(Math.floor((t+(y-a)-from)/DUCK_STEP),0,dg.length-1)]??1;arr[i]=env(y)*d}
+   const env=y=>regionGainAt(r,y)*(cutIn?clamp((y-a)/x,0,1):1)*(cutOut?clamp((z-y)/x,0,1):1),dg=duck.get(r.track),ga=hasGainAuto(r);
+   if(dg||ga){const N=Math.max(2,Math.ceil(len/DUCK_STEP)+1),arr=new Float32Array(N);
+    for(let i=0;i<N;i++){const y=a+(i/(N-1))*(z-a),d=dg?dg[clamp(Math.floor((t+(y-a)-from)/DUCK_STEP),0,dg.length-1)]??1:1;arr[i]=env(y)*d}
     g.gain.setValueCurveAtTime(arr,at,len)}
    else{const pts=new Set([a,z]);if(cutIn)pts.add(a+x);if(cutOut)pts.add(z-x);for(const b of [r.fadeIn,r.dur-r.fadeOut])if(b>a&&b<z)pts.add(b);
     [...pts].sort((p,q)=>p-q).forEach((y,i)=>i?g.gain.linearRampToValueAtTime(env(y),at+(y-a)):g.gain.setValueAtTime(env(y),at))}
@@ -130,6 +131,14 @@ function duckGains(from,to){const out=new Map(),voice=P.tracks.find(t=>t.voice&&
  for(const t of targets){const g=new Float32Array(n),down=fromDb(-clamp(t.duck,0,18));let cur=1;
   for(let i=0;i<n;i++){const want=lv[i]>thr?down:1;cur=want<cur?cur+(want-cur)*att:cur+(want-cur)*rel;g[i]=cur}out.set(t.id,g)}
  return out}
+// Tetto del limitatore finale nel tempo: valori in decibel, linea retta in dB; spento, resta il tetto di sempre.
+function scheduleLimiter(ctx,gr,from,when,end){const lim=gr.lim,pts=P.limiter?.ceil||[],on=!!P.limiter?.on&&pts.length>0;
+ lim.threshold.cancelScheduledValues(when);
+ if(!on){lim.threshold.setValueAtTime(-1.5,when);return}
+ const stop=Math.max(from+0.01,Math.min(Number.isFinite(end)?end:projDur(),Math.max(projDur(),from+0.01))),
+  ev=[{t:from,v:autoValueAt(pts,from)}];for(const p of pts)if(p.t>from+1e-6&&p.t<stop-1e-6)ev.push({t:p.t,v:p.v});ev.push({t:stop,v:autoValueAt(pts,stop)});
+ let last=-Infinity;
+ ev.forEach((e,i)=>{if(i&&e.t<=last+1e-6)return;if(i)lim.threshold.linearRampToValueAtTime(clamp(e.v,-20,0),when+(e.t-from));else lim.threshold.setValueAtTime(clamp(e.v,-20,0),when);last=e.t})}
 // Metronomo: un colpo per tempo, più acuto sul primo della battuta.
 function clickAt(ctx,dest,t,accent){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=accent?1600:1000;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(accent?0.55:0.38,t+0.002);g.gain.exponentialRampToValueAtTime(0.001,t+0.06);o.connect(g);g.connect(dest);o.start(t);o.stop(t+0.07);return{s:o,g,click:true,until:t+0.07}}
 async function countIn(){const ctx=actxGet(),out=mixOut(),t0=ctx.currentTime+0.08;for(let k=0;k<P.sig;k++)clickAt(ctx,out,t0+k*beatDur(),k===0);announce('Conteggio di una battuta');await new Promise(r=>setTimeout(r,(P.sig*beatDur()+0.08)*1000-30))}
@@ -140,7 +149,7 @@ function mixOut(){const ctx=actxGet();if(!MIX.out){MIX.out=ctx.createGain();MIX.
 // del metronomo; l'indicatore si ridisegna a ogni fotogramma.
 const cycleOn=()=>{const c=P.cycle;return c.on&&c.b>c.a+0.05&&!MIX.recording};
 const cycleKey=()=>cycleOn()?P.cycle.a+':'+P.cycle.b:'';
-function addPass(a,b,w){MIX.passes.push({a,b,w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}));scheduleTrackAuto(actx,MIX.graph,a,w,b)}
+function addPass(a,b,w){MIX.passes.push({a,b,w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}));scheduleTrackAuto(actx,MIX.graph,a,w,b);scheduleLimiter(actx,MIX.graph,a,w,b)}
 function mixPos(){if(!MIX.playing||!actx||!MIX.passes.length)return P.t;const now=actx.currentTime;let p=MIX.passes[0];for(const q of MIX.passes)if(q.w<=now)p=q;return Math.min(p.b,p.a+Math.max(0,now-p.w))}
 // Fermata: le regioni escono in 3 ms, i colpi del metronomo già programmati si staccano.
 function mixKill(){clearInterval(MIX.timer);cancelAnimationFrame(MIX.raf);const now=actx?.currentTime||0;
@@ -171,7 +180,7 @@ function songStop(){const o=MIX.playing?MIX.origin:0;mixStop(false);P.t=o;update
 async function renderMix({only=null,from=0,to=null,rate=48000,limit=true}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');
  const chain=only?(()=>{const set=new Set();let x=trackOf(only);while(x&&!set.has(x.id)){set.add(x.id);x=x.out?trackOf(x.out):null}return P.tracks.filter(t=>set.has(t.id))})():P.tracks,
   tracks=chain,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate);
- const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});if(!limit){gr.lim.threshold.value=0;gr.lim.ratio.value=1}scheduleTrackAuto(oc,gr,from,0,to,{only});scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
+ const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});if(!limit){gr.lim.threshold.value=0;gr.lim.ratio.value=1}else scheduleLimiter(oc,gr,from,0,to);scheduleTrackAuto(oc,gr,from,0,to,{only});scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
  for(let c=0;c<2;c++)res.copyToChannel(out.getChannelData(c).subarray(skip,skip+n),c);return res}
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.
 function songMarkers(rate){const out=[];for(const r of P.regions){const sr=SOURCES.get(r.src)?.sampleRate||rate;for(const m of r.markers||[]){const x=m.pos/sr;if(x<0||x>r.dur)continue;out.push({id:m.id,pos:Math.round((r.start+x)*rate),label:m.label})}}return out.sort((a,b)=>a.pos-b.pos)}

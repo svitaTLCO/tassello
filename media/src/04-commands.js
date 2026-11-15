@@ -16,7 +16,9 @@ def('a','File',[
  ['exportLabels','Esporta i marcatori come testo','export','',{short:'Esporta marcatori'}],
  ['importLabels','Importa marcatori da un file di testo','import','',{short:'Importa marcatori'}],
  ['insertFile','Inserisci un file audio al cursore della regione','import','',{short:'Inserisci file'}],
- ['batchConvert','Converti più file: stesso formato, frequenza e volume per tutti…','export','Ctrl+Maiusc+K',{g:1,short:'Converti file'}]]);
+ ['batchConvert','Converti più file: stesso formato, frequenza e volume per tutti…','export','Ctrl+Maiusc+K',{g:1,short:'Converti file'}],
+ ['limiterAuto','Limitatore finale: il tetto nel tempo…','compress','',{short:'Limitatore finale'}],
+ ['limiterToggle','Il limitatore finale segue l’automazione','compress','',{short:'Limitatore auto',toggle:()=>!!P.limiter?.on}]]);
 def('a','Tracce',[
  ['newTrack','Nuova traccia vuota','plus','Alt+Maiusc+N',{short:'Nuova traccia'}],
  ['newBus','Nuovo bus: raccoglie più tracce con un volume e un compressore soli','tracks','',{short:'Nuovo bus'}],
@@ -32,6 +34,8 @@ def('a','Tracce',[
  ['trackDown','Sposta la traccia in giù','down','',{short:'Giù'}],
  ['regionEdit','Apri la regione nell’editor','wave','',{short:'Modifica regione'}],
  ['regionProps','Proprietà della regione: nome, traccia, inizio, guadagno, dissolvenze…','gear','',{short:'Proprietà'}],
+ ['regionGainAuto','Guadagno della regione nel tempo: punti in decibel…','volume','',{short:'Guadagno auto'}],
+ ['regionGainPoint','Aggiungi un punto di guadagno all’indicatore, dentro la regione scelta','plus','',{short:'Punto guadagno'}],
  ['regionSplit','Dividi la regione all’indicatore','split','Ctrl+K',{short:'Dividi'}],
  ['regionTrimStart','Accorcia l’inizio della regione fino all’indicatore','trimStart','',{short:'Accorcia inizio'}],
  ['regionTrimEnd','Accorcia la fine della regione dall’indicatore','trimEnd','',{short:'Accorcia fine'}],

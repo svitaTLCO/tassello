@@ -252,6 +252,15 @@ Domande: capisci dalla tabella dove sono i punti e che valore hanno? Ti serve se
 
 Domande: dal nome della traccia capisci che è un bus? Il campo «Uscita» ti dice dove va il suono?
 
+**Compito A8: guadagno della regione e limitatore finale.**
+
+1. Scegli una regione, cerca «Guadagno della regione nel tempo» in Alt+Q e premi Invio.
+2. Scrivi il tempo del punto (dentro la regione), il guadagno e premi «Aggiungi il punto»; la tabella mostra i punti con i tempi del brano. Accendi «Il guadagno segue l'automazione» e salva.
+3. Con Alt+Q cerca «Limitatore finale»: aggiungi due punti al tetto (per esempio −20 dB all'inizio e 0 alla fine) e accendi l'automazione.
+4. Con Alt+Maiusc+D la descrizione del brano dice quanti punti ha il guadagno di ogni regione e il limitatore finale.
+
+Domande: capisci in che punto del brano sei mentre aggiungi il punto? Il tetto del limitatore ti dice abbastanza, o ti serve sentirlo?
+
 **Compito A6: scegliere la take buona e comporla.**
 
 1. Registra due volte la stessa frase: la seconda volta, nella finestra «Registra», scegli «Come nuova take nella regione».

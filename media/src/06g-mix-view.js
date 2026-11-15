@@ -137,7 +137,7 @@ function duplicateRegion(r=selRegion()){if(!r){toast('Scegli prima una regione')
 async function loopRegion(r=selRegion()){if(!r){toast('Scegli prima una regione');return}const v=await modal('Ripeti la regione',`<p>Le copie di «${esc(r.name)}» vengono messe una dopo l’altra sulla stessa traccia, come un giro che si ripete.</p>`,[{id:'n',label:'Quante volte ripeterla',type:'number',value:3}],'Ripeti',{validate:v=>num(v.n)>=1&&num(v.n)<=100?null:{msg:'Scegli un numero da 1 a 100',field:'n'}});if(!v)return;const n=Math.round(num(v.n));pCommit('Ripeti la regione',()=>{for(let k=1;k<=n;k++)P.regions.push({...structuredClone(r),id:uid(),start:r.start+k*r.dur})});focusLane(r.track);announce(`«${r.name}» ripetuta ${n} volte: ora arriva a ${sayTime(r.start+(n+1)*r.dur)}`)}
 async function renameRegion(r=selRegion()){if(!r)return;const v=await modal('Rinomina la regione','',[{id:'name',label:'Nome',value:r.name}],'Rinomina');if(!v||!v.name.trim())return;pCommit('Rinomina la regione',()=>{r.name=v.name.trim().slice(0,120)});focusLane(r.track);announce('Regione rinominata «'+r.name+'»')}
 async function regionProps(r=selRegion()){if(!r){toast('Scegli prima una regione');return}const src=SOURCES.get(r.src);
- const v=await modal('Proprietà della regione',`<p>Usa ${esc(fmtTime(r.dur,2))} del suono, da ${esc(fmtTime(r.off,2))}${src?` su ${esc(fmtTime(src.duration,2))}`:''}.</p>`,[{id:'name',label:'Nome',value:r.name},{id:'track',label:'Traccia',type:'select',value:r.track,options:P.tracks.map(t=>[t.id,t.name])},{id:'start',label:'Inizio nel brano',type:'time',value:fmtTime(r.start,3)},{id:'gain',label:'Guadagno',type:'range',min:-24,max:12,step:0.5,value:r.gain,fmt:fmtDb},{id:'fadeIn',label:'Dissolvenza in entrata (secondi)',type:'number',min:0,max:Math.floor(r.dur*100)/100,value:r.fadeIn},{id:'fadeOut',label:'Dissolvenza in uscita (secondi)',type:'number',min:0,max:Math.floor(r.dur*100)/100,value:r.fadeOut}],'Applica',{validate:v=>parseTime(v.start)>=0?null:{msg:'Inizio nel brano: scrivi un tempo, per esempio 12,5 oppure 1:02,5.',field:'start'}});
+ const v=await modal('Proprietà della regione',`<p>Usa ${esc(fmtTime(r.dur,2))} del suono, da ${esc(fmtTime(r.off,2))}${src?` su ${esc(fmtTime(src.duration,2))}`:''}.${r.gainOn?' Il guadagno segue l’automazione: il campo qui sotto non conta finché resta accesa.':''}</p>`,[{id:'name',label:'Nome',value:r.name},{id:'track',label:'Traccia',type:'select',value:r.track,options:P.tracks.map(t=>[t.id,t.name])},{id:'start',label:'Inizio nel brano',type:'time',value:fmtTime(r.start,3)},{id:'gain',label:'Guadagno',type:'range',min:-24,max:12,step:0.5,value:r.gain,fmt:fmtDb},{id:'fadeIn',label:'Dissolvenza in entrata (secondi)',type:'number',min:0,max:Math.floor(r.dur*100)/100,value:r.fadeIn},{id:'fadeOut',label:'Dissolvenza in uscita (secondi)',type:'number',min:0,max:Math.floor(r.dur*100)/100,value:r.fadeOut}],'Applica',{validate:v=>parseTime(v.start)>=0?null:{msg:'Inizio nel brano: scrivi un tempo, per esempio 12,5 oppure 1:02,5.',field:'start'}});
  if(!v)return;pCommit('Proprietà della regione',()=>{r.name=v.name.trim().slice(0,120)||r.name;r.track=v.track;r.start=parseTime(v.start);r.gain=Number(v.gain);r.fadeIn=clamp(num(v.fadeIn)||0,0,r.dur);r.fadeOut=clamp(num(v.fadeOut)||0,0,r.dur)});P.track=r.track;focusLane(r.track);announce('Regione aggiornata')}
 function fadeRegion(which){const r=selRegion();if(!r){toast('Scegli prima una regione');return}const key=which==='in'?'fadeIn':'fadeOut',on=!(r[key]>0),d=Math.min(0.5,r.dur/3);pCommit(which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita',()=>{r[key]=on?d:0});announce(`${which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita'} ${on?'di '+sayTime(d,1):'tolta'}`)}
 // Marcatore all'indicatore del brano (anche durante l'ascolto): va nella regione che suona lì, sulla traccia scelta se
@@ -335,9 +335,9 @@ function punchToggle(){const a=P.punch.a||P.t,b=P.punch.b>P.punch.a?P.punch.b:P.
  pCommit('Punch',()=>{P.punch={...P.punch,on:!P.punch.on,a,b}});
  announce(P.punch.on?`Punch attivo da ${sayTime(P.punch.a,2)} a ${sayTime(P.punch.b,2)}`:'Punch spento')}
 // Toglie da una traccia il tratto [a,b): le regioni che lo attraversano vengono accorciate o divise in due.
-function trimRegionTo(r,at){const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);r.dur=Math.max(0.01,at-r.start);r.markers=(r.markers||[]).filter(m=>m.pos<=cut)}
+function trimRegionTo(r,at){const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);r.dur=Math.max(0.01,at-r.start);r.markers=(r.markers||[]).filter(m=>m.pos<=cut);if(r.gainAuto)r.gainAuto=r.gainAuto.filter(p=>p.t<=r.dur)}
 function splitRegionAt(r,at){const e=regionEnd(r);if(at<=r.start+1e-6||at>=e-1e-6)return null;const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);
- const right={...r,id:uid(),start:at,off:r.off+(at-r.start),dur:e-at,markers:(r.markers||[]).map(m=>({...m,pos:m.pos-cut})).filter(m=>m.pos>=0)};
+ const right={...r,id:uid(),start:at,off:r.off+(at-r.start),dur:e-at,gainAuto:(r.gainAuto||[]).map(p=>({...p,t:p.t-(at-r.start)})).filter(p=>p.t>=0),markers:(r.markers||[]).map(m=>({...m,pos:m.pos-cut})).filter(m=>m.pos>=0)};
  trimRegionTo(r,at);return right}
 // Il tratto di registrazione che entra col punch: dal punto «Da» al punto «A», scartando l'ascolto prima.
 function punchPart(buf,start,pu){const rate=buf.sampleRate,a0=Math.max(0,Math.round((pu.a-start)*rate)),b0=Math.min(buf.length,Math.round((pu.b-start)*rate));
@@ -348,3 +348,49 @@ function clearRange(trackId,a,b){const out=[];for(const r of P.regions){if(r.tra
  if(s<a){trimRegionTo(r,a);out.push(r);continue}
  if(e>b){const right=splitRegionAt(r,b);if(right)out.push(right);continue}}
  P.regions=out.filter(r=>r.dur>0.005)}
+
+// ——— Guadagno della regione nel tempo: i punti sono relativi all'inizio della regione, ma nella finestra si
+// scrivono e si leggono come tempi del brano, che è come li pensa chi lavora.
+async function regionGainDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+ let draft=(r.gainAuto||[]).map(p=>({...p}));
+ const table=()=>`<table><caption>Punti del guadagno</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Guadagno</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(r.start+p.t,2))}</th><td>${esc(fmtDb(p.v))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(r.start+p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>'}</tbody></table>`;
+ const render=()=>{const box=$('rgList');if(box)box.innerHTML=table()};
+ const put=()=>{const time=parseTime($('dlg_time').value);if(!(time>=0)){toast('Tempo del punto non valido');return}
+  const rel=time-r.start;if(rel<-0.001||rel>r.dur+0.001){toast(`Il punto deve stare dentro la regione, da ${fmtTime(r.start,2)} a ${fmtTime(regionEnd(r),2)}`);return}
+  const g=clamp(num($('dlg_gain').value),-60,24);if(!Number.isFinite(g)){toast('Guadagno non valido');return}
+  const at=Math.max(0,Math.min(r.dur,rel)),i=draft.findIndex(p=>Math.abs(p.t-at)<0.001),p={t:at,v:g};if(i>=0)draft[i]=p;else draft.push(p);draft.sort((a,b)=>a.t-b.t);render();
+  announce(`Punto di guadagno a ${sayTime(time,2)}: ${fmtDb(g)}`)};
+ const res=await modal('Guadagno della regione',`<p>Regione «${esc(r.name)}», da ${esc(fmtTime(r.start,2))} a ${esc(fmtTime(regionEnd(r),2))}. Con l’automazione accesa i punti sostituiscono il guadagno della regione; fra un punto e il successivo il valore cambia in linea retta in decibel.</p><div id="rgList"></div>`,
+  [{id:'on',label:'Il guadagno segue l’automazione',type:'checkbox',value:!!r.gainOn},
+   {id:'time',label:'Tempo del punto nel brano',type:'time',value:fmtTime(P.t>=r.start&&P.t<=regionEnd(r)?P.t:r.start,2)},
+   {id:'gain',label:'Guadagno del punto in dB',type:'number',min:-60,max:24,step:0.5,value:r.gain}],'Salva',
+  {wide:true,buttons:[{label:'Aggiungi il punto',run:put}],
+   onOpen:pane=>{render();pane.addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;draft.splice(Number(b.dataset.del),1);render();announce('Punto tolto')})}});
+ if(!res)return;
+ pCommit('Guadagno automatico della regione',()=>{const norm=draft.filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.v)).map(p=>({t:clamp(p.t,0,r.dur),v:clamp(p.v,-60,24)})).sort((a,b)=>a.t-b.t).slice(0,500);
+  r.gainAuto=norm;r.gainOn=!!res.on;if(r.gainOn&&!r.gainAuto.length)r.gainAuto=[{t:0,v:r.gain},{t:r.dur,v:r.gain}]});
+ announce(r.gainOn?`Guadagno automatico: ${r.gainAuto.length===1?'un punto':r.gainAuto.length+' punti'}`:'Guadagno della regione di nuovo manuale')}
+function regionGainPoint(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+ const at=MIX.playing?mixPos():P.t;if(at<r.start-0.001||at>regionEnd(r)+0.001){toast(`L’indicatore è fuori dalla regione: va da ${fmtTime(r.start,2)} a ${fmtTime(regionEnd(r),2)}`);return}
+ const rel=clamp(at-r.start,0,r.dur),cur=autoValueAt(r.gainAuto,rel)??r.gain;
+ pCommit('Punto di guadagno',()=>{const list=r.gainAuto=r.gainAuto||[],i=list.findIndex(p=>Math.abs(p.t-rel)<0.001),p={t:rel,v:cur};if(i>=0)list[i]=p;else list.push(p);list.sort((a,b)=>a.t-b.t);r.gainOn=true});
+ announce(`Punto di guadagno a ${sayTime(at,2)}: ${fmtDb(cur)}`)}
+// ——— Limitatore finale: il tetto nel tempo. Spento, resta quello di sempre (−1,5 dB).
+async function limiterDialog(){let draft=(P.limiter?.ceil||[]).map(p=>({...p}));
+ const table=()=>`<table><caption>Punti del tetto</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Tetto</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(fmtDb(p.v))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto: il tetto è fisso a −1,5 dB.</td></tr>'}</tbody></table>`;
+ const render=()=>{const box=$('limList');if(box)box.innerHTML=table()};
+ const put=()=>{const time=parseTime($('dlg_time').value);if(!(time>=0)){toast('Tempo del punto non valido');return}
+  const v=clamp(num($('dlg_ceil').value),-20,0);if(!Number.isFinite(v)){toast('Tetto non valido');return}
+  const i=draft.findIndex(p=>Math.abs(p.t-time)<0.001),p={t:time,v};if(i>=0)draft[i]=p;else draft.push(p);draft.sort((a,b)=>a.t-b.t);render();
+  announce(`Tetto a ${sayTime(time,2)}: ${fmtDb(v)}`)};
+ const res=await modal('Limitatore finale',`<p>Il tetto del limitatore all’uscita del brano, nel tempo: serve a tenere i picchi più stretti o più larghi a seconda del momento. Spento, il tetto resta fisso a −1,5 dB.</p><div id="limList"></div>`,
+  [{id:'on',label:'Il limitatore finale segue l’automazione',type:'checkbox',value:!!P.limiter?.on},
+   {id:'time',label:'Tempo del punto',type:'time',value:fmtTime(P.t,2)},
+   {id:'ceil',label:'Tetto del punto in dB',type:'number',min:-20,max:0,step:0.5,value:draft.at(-1)?.v??-1.5}],'Salva',
+  {wide:true,buttons:[{label:'Aggiungi il punto',run:put}],
+   onOpen:pane=>{render();pane.addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;draft.splice(Number(b.dataset.del),1);render();announce('Punto tolto')})}});
+ if(!res)return;
+ pCommit('Limitatore finale',()=>{const norm=draft.filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.v)).map(p=>({t:clamp(p.t,0,86400),v:clamp(p.v,-20,0)})).sort((a,b)=>a.t-b.t).slice(0,500);
+  P.limiter={on:!!res.on,ceil:norm};if(P.limiter.on&&!P.limiter.ceil.length)P.limiter.ceil=[{t:0,v:-1.5},{t:Math.max(projDur(),1),v:-1.5}]});
+ announce(P.limiter.on?`Limitatore finale automatico: ${P.limiter.ceil.length===1?'un punto':P.limiter.ceil.length+' punti'}`:'Limitatore finale di nuovo fisso a −1,5 dB')}
+function limiterToggle(){const on=!P.limiter?.on;pCommit('Limitatore finale',()=>{P.limiter={on,ceil:(P.limiter?.ceil||[]).length?P.limiter.ceil:[{t:0,v:-1.5},{t:Math.max(projDur(),1),v:-1.5}]}});announce(on?'Limitatore finale automatico':'Limitatore finale fisso a −1,5 dB')}
