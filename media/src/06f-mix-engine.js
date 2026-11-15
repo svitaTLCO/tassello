@@ -17,7 +17,7 @@ function newGraph(ctx,dest){const master=ctx.createGain(),lim=ctx.createDynamics
 // Catena di una traccia con i soli effetti attivi; si rifà quando un effetto passa da zero ad attivo o viceversa.
 // Le sorgenti entrano in input, che resta sempre lo stesso.
 function chainTrack(gr,t,comp){const ctx=gr.ctx;let n=gr.tracks.get(t.id);
- if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),send:ctx.createGain(),shape:''};n.pan.connect(n.vol);n.vol.connect(gr.master);n.vol.connect(n.send);gr.tracks.set(t.id,n)}
+ if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),meter:ctx.createAnalyser(),send:ctx.createGain(),shape:''};n.meter.fftSize=256;n.pan.connect(n.vol);n.vol.connect(n.meter);n.meter.connect(gr.master);n.vol.connect(n.send);gr.tracks.set(t.id,n)}
  const shape=chainShape(t,comp);if(n.shape===shape)return n;n.input.disconnect();n.send.disconnect();for(const k of ['low','high','comp','make','delay']){n[k]?.disconnect();n[k]=null}
  let at=n.input;const link=x=>{at.connect(x);at=x;return x};
  if(t.low!==0){link(n.low=ctx.createBiquadFilter());n.low.type='lowshelf';n.low.frequency.value=200}
@@ -32,19 +32,47 @@ function setTrackNodes(t,n,{only=null,ctx=null}={}){const set=(p,v)=>ctx?p.setTa
 // Allinea il mixer alle tracce: catene nuove o da rifare, tracce tolte, poi i valori dei cursori.
 // only: una sola traccia, per esportarla da sola (senza muto né solo).
 function syncGraph(gr,tracks,{only=null,live=false}={}){const comp=anyComp(tracks),ids=new Set(tracks.map(t=>t.id));
- for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.send])x?.disconnect();gr.tracks.delete(id)}
+ for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.meter,n.send])x?.disconnect();gr.tracks.delete(id)}
  for(const t of tracks)setTrackNodes(t,chainTrack(gr,t,comp),{only,ctx:live?gr.ctx:null});gr.lat=mixLatency(tracks);return gr}
 // Il mixer della riproduzione resta pronto tra un ascolto e l'altro: spostarsi nel brano riprogramma solo le regioni.
 function liveGraph(live){const ctx=actxGet();if(!MIX.graph||MIX.graph.ctx!==ctx)MIX.graph=newGraph(ctx,mixOut());return syncGraph(MIX.graph,P.tracks,{live})}
 // Regioni del brano tra from ed end, a partire dall'istante when del contesto. Il guadagno segue i punti dell'inviluppo
 // (dissolvenze della regione); dove la regione è tagliata (ascolto da metà, fine del ciclo) entra ed esce in 3 ms.
 function regionGainAt(r,x){let v=fromDb(r.gain);if(r.fadeIn>0)v*=clamp(x/r.fadeIn,0,1);if(r.fadeOut>0)v*=clamp((r.dur-x)/r.fadeOut,0,1);return v}
-function scheduleRegions(ctx,gr,from,when,{end=Infinity}={}){const out=[];for(const r of P.regions){if(regionEnd(r)<=from+1e-6||r.start>=end)continue;const buf=SOURCES.get(r.src),tn=gr.tracks.get(r.track);if(!buf||!tn)continue;
+function scheduleRegions(ctx,gr,from,when,{end=Infinity}={}){const out=[],stop=end===Infinity?Math.max(projDur(),from+1):end,duck=duckGains(from,stop);for(const r of P.regions){if(regionEnd(r)<=from+1e-6||r.start>=end)continue;const buf=SOURCES.get(r.src),tn=gr.tracks.get(r.track);if(!buf||!tn)continue;
   const t=Math.max(from,r.start),into=t-r.start,len=Math.min(r.dur-into,end-t);if(len<=1e-4)continue;const s=ctx.createBufferSource(),g=ctx.createGain(),at=when+(t-from),e=into+len,x=Math.min(EDGE_FADE,len/2),cutIn=into>1e-4,cutOut=e<r.dur-1e-4;s.buffer=buf;
   const pts=new Set([into,e]);if(cutIn)pts.add(into+x);if(cutOut)pts.add(e-x);for(const b of [r.fadeIn,r.dur-r.fadeOut])if(b>into&&b<e)pts.add(b);
   const env=y=>regionGainAt(r,y)*(cutIn?clamp((y-into)/x,0,1):1)*(cutOut?clamp((e-y)/x,0,1):1);
-  [...pts].sort((a,b)=>a-b).forEach((y,i)=>i?g.gain.linearRampToValueAtTime(env(y),at+(y-into)):g.gain.setValueAtTime(env(y),at));
+  const dg=duck.get(r.track);
+  if(dg){const N=Math.max(2,Math.ceil(len/DUCK_STEP)+1),arr=new Float32Array(N);
+   for(let i=0;i<N;i++){const y=into+(i/(N-1))*len,d=dg[clamp(Math.floor((t+y-from)/DUCK_STEP),0,dg.length-1)]??1;arr[i]=env(y)*d}
+   g.gain.setValueCurveAtTime(arr,at,len)}
+  else[...pts].sort((a,b)=>a-b).forEach((y,i)=>i?g.gain.linearRampToValueAtTime(env(y),at+(y-into)):g.gain.setValueAtTime(env(y),at));
   s.connect(g);g.connect(tn.input);s.start(at,r.off+into,len);out.push({s,g,until:at+len})}return out}
+// ——— Ducking: quando parla la traccia della voce le altre si abbassano. Il livello della voce si misura a finestre
+// di 20 ms, la soglia segue il materiale (95° percentile meno 30 dB) e l'abbassamento entra in 60 ms e risale in 350,
+// così le consonanti non fanno "pompare" la musica. Il guadagno viene scritto nella curva della regione: suona
+// uguale in tempo reale e nel mix esportato.
+const DUCK_STEP=0.02;
+function voiceWindowLevels(id,from,to){const n=Math.max(1,Math.ceil((to-from)/DUCK_STEP)),lv=new Float32Array(n).fill(-120),tr=trackOf(id);
+ if(!tr||tr.mute)return lv;
+ for(const r of regionsOn(id)){if(regionEnd(r)<=from||r.start>=to)continue;const buf=SOURCES.get(r.src);if(!buf)continue;
+  const rate=buf.sampleRate,a=Math.max(from,r.start),b=Math.min(to,regionEnd(r)),chans=Array.from({length:buf.numberOfChannels},(_,c)=>buf.getChannelData(c)),
+   w0=Math.max(0,Math.floor((a-from)/DUCK_STEP)),w1=Math.min(n,Math.ceil((b-from)/DUCK_STEP));
+  for(let w=w0;w<w1;w++){const t0=a+Math.max(0,w*DUCK_STEP-(a-from)),t1=Math.min(b,t0+DUCK_STEP),
+   s0=Math.max(0,Math.round((r.off+(t0-r.start))*rate)),s1=Math.min(buf.length,Math.round((r.off+(t1-r.start))*rate));let pk=0;
+   for(const d of chans)for(let j=s0;j<s1;j++){const v=d[j]<0?-d[j]:d[j];if(v>pk)pk=v}
+   if(pk>0)lv[w]=Math.max(lv[w],20*Math.log10(pk))}}
+ return lv}
+function duckGains(from,to){const out=new Map(),voice=P.tracks.find(t=>t.voice&&!t.mute),solo=P.tracks.some(x=>x.solo);
+ if(!voice||(solo&&!voice.solo))return out;
+ const targets=P.tracks.filter(t=>t.id!==voice.id&&t.duck>0&&!t.mute);if(!targets.length)return out;
+ const lv=voiceWindowLevels(voice.id,from,to),n=lv.length,ordered=Array.from(lv).sort((a,b)=>a-b),
+  thr=clamp((ordered[Math.min(n-1,Math.floor(n*0.95))]??-120)-30,-55,-30),
+  att=1-Math.exp(-DUCK_STEP/0.06),rel=1-Math.exp(-DUCK_STEP/0.35);
+ for(const t of targets){const g=new Float32Array(n),down=fromDb(-clamp(t.duck,0,18));let cur=1;
+  for(let i=0;i<n;i++){const want=lv[i]>thr?down:1;cur=want<cur?cur+(want-cur)*att:cur+(want-cur)*rel;g[i]=cur}out.set(t.id,g)}
+ return out}
 // Metronomo: un colpo per tempo, più acuto sul primo della battuta.
 function clickAt(ctx,dest,t,accent){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=accent?1600:1000;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(accent?0.55:0.38,t+0.002);g.gain.exponentialRampToValueAtTime(0.001,t+0.06);o.connect(g);g.connect(dest);o.start(t);o.stop(t+0.07);return{s:o,g,click:true,until:t+0.07}}
 async function countIn(){const ctx=actxGet(),out=mixOut(),t0=ctx.currentTime+0.08;for(let k=0;k<P.sig;k++)clickAt(ctx,out,t0+k*beatDur(),k===0);announce('Conteggio di una battuta');await new Promise(r=>setTimeout(r,(P.sig*beatDur()+0.08)*1000-30))}
@@ -60,7 +88,7 @@ function mixPos(){if(!MIX.playing||!actx||!MIX.passes.length)return P.t;const no
 // Fermata: le regioni escono in 3 ms, i colpi del metronomo già programmati si staccano.
 function mixKill(){clearInterval(MIX.timer);cancelAnimationFrame(MIX.raf);const now=actx?.currentTime||0;
  for(const x of MIX.srcs){if(x.click){x.g.disconnect();continue}try{x.g.gain.cancelScheduledValues(now);x.g.gain.setValueAtTime(x.g.gain.value,now);x.g.gain.linearRampToValueAtTime(0,now+EDGE_FADE);x.s.stop(now+EDGE_FADE)}catch(e){}}
- MIX.srcs=[];MIX.passes=[];MIX.playing=false}
+ MIX.srcs=[];MIX.passes=[];MIX.playing=false;for(const t of P.tracks){const cv=$('tmtr-'+t.id);if(cv)drawLaneMeter(cv,-Infinity)}}
 function mixPlay(from=P.t,{recording=false,origin=from}={}){mixKill();stopPlayback(false);const ctx=actxGet();MIX.recording=recording;liveGraph(false);const when=ctx.currentTime+START_GAP,c=P.cycle;
  const [a,b]=cycleOn()?[from>=c.b-1e-6?c.a:from,c.b]:[from,Infinity];
  Object.assign(MIX,{playing:true,from:a,c0:when,origin,lat:MIX.graph.lat,metroUntil:when-1e-3,cycKey:cycleKey()});P.t=a;addPass(a,b,when);
@@ -76,6 +104,7 @@ function mixPump(){if(!MIX.playing)return;const ctx=actx,now=ctx.currentTime,hor
  if(!MIX.recording&&!P.metro&&!cycleOn()&&mixPos()>=projDur()+0.05){const o=MIX.origin;mixKill();P.t=o;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI();announce('Fine del brano')}}
 function mixTick(){if(!MIX.playing)return;const pos=mixPos();placeArPlayhead(pos);$('aClock').textContent=fmtTime(pos);if(prefs.follow)followAr(pos);playingValue(arPlayheadEl,pos,arPlayheadText);
  if(MIX.analyser){MIX.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}
+ if(MIX.graph)for(const [id,n] of MIX.graph.tracks){const cv=$('tmtr-'+id);if(!cv)continue;n.meter.getFloatTimeDomainData(laneBuf);let pk=0;for(const x of laneBuf)pk=Math.max(pk,Math.abs(x));drawLaneMeter(cv,toDb(pk))}
  MIX.raf=requestAnimationFrame(mixTick)}
 function playUIProject(on){const b=$('aPlay');b.setAttribute('aria-label',on?'Pausa del brano':'Riproduci il brano');b.innerHTML=ICON(on?'pause':'play')}
 function songPlayPause(){if(MIX.playing){mixStop(true);announce('Pausa a '+sayTime(P.t,1));return}if(!P.regions.length&&!P.metro){toast('Il progetto è vuoto: registra o importa un file');return}let from=P.t;if(from>=projDur()-0.01&&!P.metro)from=0;mixPlay(from)}

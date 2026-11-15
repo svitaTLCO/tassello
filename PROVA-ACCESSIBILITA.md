@@ -224,9 +224,17 @@ Domande: trovi il punto da tagliare senza vederlo? Dopo il taglio senti un clic?
 2. Con Ctrl+Alt+L vai alle tracce. Freccia su e Freccia giù cambiano traccia, Freccia destra e Freccia sinistra scelgono le regioni. Ctrl+Freccia destra e sinistra spostano la regione nel tempo.
 3. Fai partire la musica un po' prima della voce. Per abbassarne il volume, dalla corsia della traccia premi Maiusc+Tab fino al cursore «Volume».
 
-**Prova anche:** Alt+Maiusc+D per la descrizione del brano: tracce, regioni e che cosa suona insieme.
+**Prova anche:** Alt+Maiusc+D per la descrizione del brano: tracce, regioni e che cosa suona insieme. Con il cursore sulla traccia della voce, cerca «Traccia voce» in Alt+Q e attivalo: poi apri «Suono della traccia» della musica e alza «Si abbassa quando parla la voce». La musica si abbassa da sola mentre la voce parla, anche nel file esportato.
 
-Domande: sai quando entra la musica e quando parla la voce? Sai se la musica copre la voce, e di quanto?
+Domande: sai quando entra la musica e quando parla la voce? Sai se la musica copre la voce, e di quanto? Ti accorgi che la musica si è abbassata, o ti serve un modo per sentirlo?
+
+**Compito A3b: far entrare un pezzo in uno spazio preciso.**
+
+1. Apri una regione con Ctrl+E, poi Ctrl+Maiusc+F: si apre «Adatta alla durata».
+2. Scrivi la durata che ti serve, per esempio `2:30`, e premi Adatta. Il pezzo si allunga o si accorcia senza cambiare l'intonazione.
+3. Sulla linea temporale, con due regioni vicine sulla stessa traccia, premi «Incrocia» (nel cassetto Tracce) e scegli la durata dell'incrocio.
+
+Domande: la voce resta naturale dopo l'adattamento? L'incrocio si sente come uno stacco o come un passaggio?
 
 **Compito A4: preparare il file per la trasmissione.**
 

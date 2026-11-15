@@ -17,7 +17,7 @@ const fineStep=()=>P.grid==='beats'?beatDur()/4:0.01;
 const selRegion=()=>P.sel?regionOf(P.sel):null;
 const selTrack=()=>trackOf(P.track)||P.tracks[0]||null;
 const audioModified=()=>P.regions.length>0&&P.version!==P.exported;
-function newTrack(name){const n=P.tracks.length;return{id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0}}
+function newTrack(name){const n=P.tracks.length;return{id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0,duck:0,voice:false}}
 function addSource(buf){const id=uid();SOURCES.set(id,buf);dirtySources.add(id);return id}
 function newRegion(track,src,start,name){return{id:uid(),track,src,off:0,dur:SOURCES.get(src).duration,start:Math.max(0,start),gain:0,fadeIn:0,fadeOut:0,name:name||'Regione',markers:[]}}
 // Cronologia del progetto: istantanee di tracce e regioni. L'editor della regione ha la sua cronologia, più fine.

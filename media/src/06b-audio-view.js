@@ -52,7 +52,10 @@ function drawOverview(){const {g,w,h}=fitCanvas($('aOverview')),P=palette;g.fill
  for(let x=0;x<w;x++){let hi=0;for(let c=0;c<A.nch;c++){const s=levelStats(lv,c,x/w*L,(x+1)/w*L);if(s)hi=Math.max(hi,s.hi,-s.lo)}g.fillRect(x,mid-hi*(mid-2),1,Math.max(1,2*hi*(mid-2)))}
  const vx=AV.start/L*w,vw=Math.max(3,waveWidth()*AV.spp/L*w);g.strokeStyle=P.accent;g.lineWidth=2;g.strokeRect(vx+1,1,vw-2,h-2);saveLayer($('aOverview'),w,h);g.fillStyle=P.playhead;g.fillRect((aplay.playing?playPos():A.cursor)/L*w-1,0,2,h)}
 function drawMeter(cv,db){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const f=v=>clamp((v+60)/60,0,1),x=f(db)*w;g.fillStyle='#1e7a46';g.fillRect(0,0,Math.min(x,f(-12)*w),h);if(x>f(-12)*w){g.fillStyle='#b38600';g.fillRect(f(-12)*w,0,Math.min(x,f(-3)*w)-f(-12)*w,h)}if(x>f(-3)*w){g.fillStyle='#c50f1f';g.fillRect(f(-3)*w,0,x-f(-3)*w,h)}g.fillStyle=palette['text-3'];for(const d of [-48,-36,-24,-12,-6,-3])g.fillRect(f(d)*w,h-4,1,4)}
-const meterBuf=new Float32Array(2048);
+// Contatore della traccia: una barra sottile sotto il nome, verde, gialla e rossa come il master.
+function drawLaneMeter(cv,db){const {g,w,h}=fitCanvas(cv);g.clearRect(0,0,w,h);const x=clamp((db+60)/60,0,1)*w;
+ g.fillStyle=palette['line'];g.fillRect(0,0,w,h);g.fillStyle=db>-3?'#c50f1f':db>-12?'#b38600':'#1e7a46';g.fillRect(0,0,x,h)}
+const meterBuf=new Float32Array(2048),laneBuf=new Float32Array(256);
 function aTick(){if(!aplay.playing)return;const pos=playPos();if(prefs.follow){const W=waveWidth(),end=AV.start+W*AV.spp;if(pos>end||pos<AV.start){AV.start=pos-W*AV.spp*0.05;viewClamp()}}
  if(layerKey!==viewKey())drawAudioNow();else drawPlayheadOnly(pos);if(aplay.analyser){aplay.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}aplay.raf=requestAnimationFrame(aTick)}
 function playUI(on){const b=document.querySelector('#editorArea [data-action=playRegion]');if(b)b.textContent=on?'Pausa':'Ascolta la regione';if(!on)drawMeter($('aMeter'),-Infinity)}
