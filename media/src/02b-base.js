@@ -80,20 +80,30 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
   return lab+`<input id="${id}" type="${type}" value="${esc(value??'')}" autocomplete="off" spellcheck="false"${decimal?' inputmode="decimal"':''}${desc}>`+hint};
  const limits=v=>{for(const x of fields){if(x.type!=='number'||(x.min===undefined&&x.max===undefined))continue;const n=num(v[x.id]),lo=x.min??-Infinity,hi=x.max??Infinity;
   if(!Number.isFinite(n)||n<lo||n>hi)return{msg:`${x.label}: scrivi un numero ${x.min!==undefined&&x.max!==undefined?`da ${fmtNum(lo,lo%1?2:0)} a ${fmtNum(hi,hi%1?2:0)}`:x.min!==undefined?`da ${fmtNum(lo,lo%1?2:0)} in su`:`fino a ${fmtNum(hi,hi%1?2:0)}`}.`,field:x.id}}return null};
- const described=(el,on)=>{const ids=(el.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!=='dlgErr');if(on)ids.push('dlgErr');if(ids.length)el.setAttribute('aria-describedby',ids.join(' '));else el.removeAttribute('aria-describedby')};
- const clearErr=()=>{for(const el of $$('[aria-invalid]',pane)){el.removeAttribute('aria-invalid');described(el,false)}const box=$('dlgErr');if(box)box.textContent=''};
- // Il messaggio si svuota e si riscrive: role=alert lo rilegge anche se è lo stesso di prima.
- const showErr=err=>{clearErr();const el=err.field&&$('dlg_'+err.field);if(el){el.setAttribute('aria-invalid','true');described(el,true);el.focus()}setTimeout(()=>{const box=$('dlgErr');if(box)box.textContent=err.msg},50)};
+ // Il campo sbagliato prende aria-invalid e il messaggio come descrizione; il valore originale di aria-describedby
+ // resta in data-desc, così correggendo il campo si torna esattamente com'era.
+ const markInvalid=(el,on)=>{if(on){if(el.dataset.desc===undefined)el.dataset.desc=el.getAttribute('aria-describedby')||'';el.setAttribute('aria-invalid','true');
+   el.setAttribute('aria-describedby',[...new Set((el.dataset.desc+' dlgErr').split(' ').filter(Boolean))].join(' '))}
+  else{el.removeAttribute('aria-invalid');if(el.dataset.desc!==undefined){if(el.dataset.desc)el.setAttribute('aria-describedby',el.dataset.desc);else el.removeAttribute('aria-describedby');delete el.dataset.desc}}};
+ const clearErr=()=>{for(const el of $$('[aria-invalid]',pane))markInvalid(el,false);const box=$('dlgErr');if(box){box.textContent='';box.hidden=true}};
+ // Si mostra il riquadro prima di scriverci: role=alert lo rilegge anche quando il messaggio è lo stesso di prima.
+ const showErr=err=>{clearErr();const box=$('dlgErr');if(!box)return;const el=err.field&&$('dlg_'+err.field);
+  if(el){markInvalid(el,true);el.focus();if(el.select&&/^(text|search|url|email|)$/.test(el.type))el.select()}
+  const anchor=el?(el.type==='checkbox'?el.closest('label'):el):null;
+  if(anchor){const after=anchor.nextElementSibling;box.hidden=false;(after?.classList.contains('hint')?after:anchor).after(box)}
+  else{box.hidden=false;$('dialogForm').querySelector('.modal-actions').before(box)}
+  box.textContent='';setTimeout(()=>{box.textContent=err.msg},50)};
  pane.className='modal'+(opts.wide?' wide':'');pane.setAttribute('aria-describedby',opts.describedBy||'dlgBody');
  const extra=(opts.buttons||[]).map((b,i)=>`<button type="button" class="btn${i?'':' left'}" id="dlgBtn${i}">${esc(b.label)}</button>`).join('');
- pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="hint" id="dlgErr" role="alert"></p><div class="modal-actions">${extra}${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
- bg.hidden=false;
+ pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="dlg-err" id="dlgErr" role="alert" hidden></p><div class="modal-actions">${extra}${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
+ bg.hidden=false;if(typeof colorHints==='function')colorHints(pane);
  const values=()=>{const obj={};for(const x of fields){const el=$('dlg_'+x.id);obj[x.id]=x.type==='checkbox'?el.checked:el.value}return obj};
  for(const x of fields)if(x.type==='range'){const el=$('dlg_'+x.id),f=x.fmt||String;el.addEventListener('input',()=>{const t=f(Number(el.value));$('dlg_'+x.id+'_o').textContent=t;el.setAttribute('aria-valuetext',t)})}
  const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
  (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
- $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=limits(v)||opts.validate?.(v);if(bad){showErr(typeof bad==='string'?{msg:bad}:bad);return}finish(v)};
+ $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v)||limits(v);
+  if(bad){const err=typeof bad==='string'?{msg:bad}:{...bad};if(err.field===undefined&&fields.length===1)err.field=fields[0].id;showErr(err);return}finish(v)};
  $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute?.('aria-invalid'))clearErr()});
  bg.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(null)}else trapTab(e,pane)};
  bg.onmousedown=e=>{if(e.target===bg)finish(null)};
