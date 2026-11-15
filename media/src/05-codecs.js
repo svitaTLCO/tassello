@@ -74,12 +74,42 @@ function channelBuffer(buf,ch){if(buf.numberOfChannels===ch)return buf;const n=b
  for(let c=0;c<ch;c++)out.copyToChannel(src[Math.min(c,src.length-1)],c);return out}
 // Cambio di frequenza con il motore audio del browser (OfflineAudioContext).
 async function resampleBuffer(buf,rate){if(!buf||buf.sampleRate===rate)return buf;const oc=new OfflineAudioContext(buf.numberOfChannels,Math.max(1,Math.round(buf.length*rate/buf.sampleRate)),rate),s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start();return oc.startRendering()}
+// AIFF e AIFC, i formati dei registratori e dei Mac: i campioni sono in ordine big-endian e la frequenza è un
+// numero in virgola mobile a 80 bit. Si leggono PCM a 8, 16, 24 e 32 bit, sowt (little-endian) e fl32/fl64.
+function ext80(v,at){const e=v.getUint16(at);if(!e&&!v.getUint32(at+2)&&!v.getUint32(at+6))return 0;
+ const exp=(e&0x7fff)-16383,mant=v.getUint32(at+2)*4294967296+v.getUint32(at+6);return (e&0x8000?-1:1)*mant*2**(exp-63)}
+function readAiff(buf){const v=new DataView(buf);if(v.byteLength<12||ascii4(v,0)!=='FORM')return null;const kind=ascii4(v,8);
+ if(kind!=='AIFF'&&kind!=='AIFC')return null;
+ let at=12,comm=null,snd=null;
+ while(at+8<=v.byteLength){const id=ascii4(v,at);let size=v.getUint32(at+4);const body=at+8;
+  if(body+size>v.byteLength)size=v.byteLength-body;
+  if(id==='COMM'&&size>=18)comm={ch:v.getUint16(body),frames:v.getUint32(body+2),bits:v.getUint16(body+6),rate:Math.round(ext80(v,body+8)),comp:size>=22?ascii4(v,body+18):'NONE'};
+  else if(id==='SSND'&&size>=8)snd={off:body+8+v.getUint32(body),len:size-8-v.getUint32(body)};
+  at=body+size+(size&1)}
+ if(!comm||!snd)throw Error('File AIFF incompleto: mancano il formato o i campioni');
+ const {ch,bits,frames,rate}=comm,comp=(comm.comp||'NONE').trim(),le=comp==='sowt',flt=/^(fl|FL)(32|64)$/.test(comp),bps=bits/8;
+ if(!(rate>=3000&&rate<=768000))throw Error('Frequenza di campionamento non supportata: '+rate+' hertz');
+ if(!ch||ch>MAX_CHANNELS)throw Error(`File AIFF con ${ch} canali: se ne aprono al massimo ${MAX_CHANNELS}`);
+ if(!(le||flt||comp==='NONE'||comp==='twos'))throw Error('Formato AIFF non supportato: '+comp);
+ if(!le&&!flt&&![8,16,24,32].includes(bits))throw Error('Formato AIFF non supportato: '+bits+' bit');
+ if(flt&&!(bits===32||bits===64))throw Error('Formato AIFF non supportato: '+bits+' bit');
+ const n=Math.min(frames,Math.floor(snd.len/(ch*bps))),out=new AudioBuffer({length:n,numberOfChannels:ch,sampleRate:rate}),
+  chans=Array.from({length:ch},(_,c)=>out.getChannelData(c)),off=snd.off;
+ if(flt&&bits===32)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getFloat32(off+k*4,le)}
+ else if(flt)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getFloat64(off+k*8,le)}
+ else if(bits===16)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getInt16(off+k*2,le)*(1/32768)}
+ else if(bits===32)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getInt32(off+k*4,le)*(1/2147483648)}
+ else if(bits===8)for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch)d[i]=v.getInt8(off+k)*(1/128)}
+ else for(let c=0;c<ch;c++){const d=chans[c];for(let i=0,k=c;i<n;i++,k+=ch){const q=off+k*3,s=le?v.getUint8(q)|v.getUint8(q+1)<<8|v.getUint8(q+2)<<16:v.getUint8(q)<<16|v.getUint8(q+1)<<8|v.getUint8(q+2);d[i]=(s<<8>>8)*(1/8388608)}}
+ return{rate,buffer:out,markers:[]}}
 // Decodifica di qualunque file audio (o dell'audio di un video) che il browser sa leggere. I WAV passano dal lettore
 // interno, che conserva la frequenza originale, i bit in virgola mobile e i marcatori. Con rate gli altri formati
 // escono già a quella frequenza, convertiti dal decodificatore stesso invece che in un secondo passaggio.
 let decodeCtx=null;const decodeAt=new Map();
-async function decodeAudioFile(file,{rate=0}={}){const buf=await file.arrayBuffer();let wav=null;try{wav=readWav(buf)}catch(e){if(/WAV/.test(e.message)&&!/non supportato/.test(e.message))throw e}
+async function decodeAudioFile(file,{rate=0}={}){const buf=await file.arrayBuffer();let wav=null,aiff=null;try{wav=readWav(buf)}catch(e){if(/WAV/.test(e.message)&&!/non supportato/.test(e.message))throw e}
  if(wav)return{buffer:wav.buffer,markers:wav.markers};
+ try{aiff=readAiff(buf)}catch(e){if(/AIFF/.test(e.message)&&!/non supportato/.test(e.message))throw e}
+ if(aiff)return{buffer:aiff.buffer,markers:aiff.markers};
  decodeCtx??=new (window.AudioContext||window.webkitAudioContext)();if(rate&&!decodeAt.has(rate))decodeAt.set(rate,new OfflineAudioContext(1,1,rate));let out;
  try{out=await (rate?decodeAt.get(rate):decodeCtx).decodeAudioData(buf)}catch(e){throw Error(`Il browser non sa leggere l’audio di «${file.name}»`)}
  return{buffer:out,markers:[]}}

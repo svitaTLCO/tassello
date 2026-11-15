@@ -15,7 +15,8 @@ def('a','File',[
  ['exportParts','Esporta le parti tra i marcatori','export','',{short:'Esporta le parti'}],
  ['exportLabels','Esporta i marcatori come testo','export','',{short:'Esporta marcatori'}],
  ['importLabels','Importa marcatori da un file di testo','import','',{short:'Importa marcatori'}],
- ['insertFile','Inserisci un file audio al cursore della regione','import','',{short:'Inserisci file'}]]);
+ ['insertFile','Inserisci un file audio al cursore della regione','import','',{short:'Inserisci file'}],
+ ['batchConvert','Converti più file: stesso formato, frequenza e volume per tutti…','export','Ctrl+Maiusc+K',{g:1,short:'Converti file'}]]);
 def('a','Tracce',[
  ['newTrack','Nuova traccia vuota','plus','Alt+Maiusc+N',{short:'Nuova traccia'}],
  ['importTrack','Importa file audio, ognuno in una nuova traccia','import','Ctrl+I',{g:1,short:'Importa audio'}],

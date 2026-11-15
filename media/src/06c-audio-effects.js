@@ -196,6 +196,13 @@ async function deliveryReportDialog(){const inEditor=!!A.buf;
  const name=inEditor?(A.title||P.title):P.title,rep=deliveryReportData({name:name,fmtLabel:`${res.ch===1?'mono':'stereo'}, ${fmtInt(res.rate)} hertz`,content:res.content,m:res.m,limited:false,plan:res.plan,compressed:false,note:'Nessun file esportato: la misura è fatta sull’audio del progetto.'});
  await showDeliveryReport(rep)}
 
+// Il preset scelto nella finestra imposta formato, frequenza, canali, volume e metadati; i campi restano modificabili.
+function bindDeliveryPreset(pane,opts){const pick=id=>pane.querySelector('#dlg_'+id),set=(id,v)=>{const el=pick(id);if(el&&String(el.value)!==String(v))el.value=String(v)};
+ const sel=pick('preset');if(!sel)return;
+ sel.addEventListener('change',e=>{const d=DELIVERY[e.target.value]||DELIVERY.manual;
+  if(d.bits&&opts.some(o=>o[0]===d.bits))set('fmt',d.bits);
+  set('rate',d.rate||'auto');set('ch',d.ch||'auto');set('lufs',d.lufs);set('tp',d.tp);
+  const dh=pick('dither');if(dh)dh.checked=!!d.dither;const bh=pick('bwf');if(bh)bh.checked=!!d.bwf;announce(d.label)})}
 async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.buf){toast('Il progetto è vuoto: niente da esportare');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
  const opts=[['wav16','WAV 16 bit (qualità CD, per tutti i programmi)'],['wav24','WAV 24 bit (per altri programmi professionali)'],['wav32','WAV 32 bit in virgola mobile (senza perdite)'],['mp3','MP3 (per playout, telefonini e archivio)'],...(aac?[['aac','M4A con AAC (compresso, per telefoni e messaggi)']]:[]),...(opus?[['opus','WebM con Opus (compresso, molto leggero)']]:[])];
  const what=[...(song?[['song',`Il brano: tutte le tracce mixate (${fmtTime(projDur(),1)})`]]:[]),...(A.buf?[['region','Solo la regione nell’editor'+(A.region?` «${regionOf(A.region)?.name||''}»`:'')]]:[]),...(A.buf&&hasSel()?[['sel','Solo la selezione nell’editor']]:[])];
@@ -214,8 +221,7 @@ async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.bu
   {id:'artist',label:'Autore o emittente',value:prefs.artist||'',hint:'Finisce nei metadati: BWF per i WAV, ID3 per gli MP3, i tag del file per gli M4A.'},
   {id:'comment',label:'Descrizione',value:prefs.comment||'',hint:'Per esempio «Servizio del 15 novembre, primo blocco».'},
   {id:'bwf',label:'Metadati broadcast (BWF) nei WAV',type:'checkbox',value:prefs.bwf!==false,hint:'Descrizione, autore, data e i valori di volume che i playout mostrano in scaletta.'},
-  {id:'name',label:'Nome del file',value:song?P.title:A.title||P.title}],'Esporta',{onOpen:pane=>{const pick=id=>pane.querySelector('#dlg_'+id),set=(id,v)=>{const el=pick(id);if(el&&String(el.value)!==String(v))el.value=String(v)};
-   pick('preset').addEventListener('change',e=>{const d=DELIVERY[e.target.value]||DELIVERY.manual;if(d.bits&&opts.some(o=>o[0]===d.bits))set('fmt',d.bits);set('rate',d.rate||'auto');set('ch',d.ch||'auto');set('lufs',d.lufs);set('tp',d.tp);const dh=pick('dither');if(dh)dh.checked=!!d.dither;const bh=pick('bwf');if(bh)bh.checked=!!d.bwf;announce(d.label)})}});
+  {id:'name',label:'Nome del file',value:song?P.title:A.title||P.title}],'Esporta',{onOpen:pane=>bindDeliveryPreset(pane,opts)});
  if(!r)return;prefs.audioFormat=r.fmt;prefs.kbps=Number(r.kbps);prefs.delivery=r.preset;prefs.deliveryRate=r.rate;prefs.deliveryCh=r.ch;prefs.deliveryLufs=r.lufs;prefs.deliveryTp=r.tp;prefs.dither=r.dither;prefs.report=r.report;prefs.artist=r.artist.trim();prefs.comment=r.comment.trim();prefs.bwf=r.bwf;savePrefs();
  const plan={rate:r.rate==='auto'?0:Number(r.rate),ch:r.ch==='auto'?0:Number(r.ch),lufs:r.lufs==='none'?null:Number(r.lufs),tp:r.tp==='none'?null:Number(r.tp)};
  const bitrate=Number(r.kbps)*1000,progress=p=>status(`Esportazione ${Math.round(p*100)}%`),ext=r.fmt==='mp3'?'mp3':r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext;

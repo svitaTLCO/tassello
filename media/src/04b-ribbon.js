@@ -6,7 +6,7 @@ const RIBBON={
   Effetti:[['Volume','amplify normalize fadeIn fadeOut'],['Tempo','speed tempo reverse truncate'],['Pulizia','noiseGate captureNoise eq compressor removeDC echo'],['Canali','toMono toStereo swapChannels'],['Formato','resample'],['Ripeti','repeatEffect']],
   Inserisci:[['Suoni','insertFile generate recordAudio'],['Marcatori','markerAdd markerPrev markerNext markerRename markerDelete markersClear'],['Automatici','markersFromPauses']],
   Analisi:[['Descrivi','describeSong readLevels compareFx'],['Misura','stats readLevel deliveryReport'],['Pause','prevPause nextPause pauseSettings'],['Distorsioni','findClip']],
-  Esporta:[['Brano','saveAudio exportStems saveAudioProject'],['Regione','exportParts'],['Marcatori','exportLabels importLabels']],
+  Esporta:[['Brano','saveAudio exportStems saveAudioProject'],['Regione','exportParts'],['Conversione','batchConvert'],['Marcatori','exportLabels importLabels']],
   Vista:[['Zoom','zoomIn zoomOut zoomFit zoomSel'],['Tasselli','toggleEditor markPane layoutMenu layoutReset'],['Mostra','follow snap'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  v:{Inizio:[['Appunti','paste cut copy'],['File','importMedia addToTimeline'],['Montaggio','split trimStart trimEnd duplicateItem deleteItem'],['Posizione','moveEarlier swapPrev moveLater swapNext snap'],['Riproduzione','playPause stop vPlayItem vPlayBefore vPlayAfter prevEdit nextEdit'],['Cronologia','undo redo']],
   Inserisci:[['Testo','addTitle addSub addCard'],['Audio','recordVoice'],['File','importMedia']],
