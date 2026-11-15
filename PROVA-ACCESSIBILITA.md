@@ -232,10 +232,11 @@ Domande: sai quando entra la musica e quando parla la voce? Sai se la musica cop
 
 1. Premi Ctrl+S: si apre la finestra «Esporta l'audio».
 2. Il primo campo è «Consegna»: con le frecce scegli «Radio EBU R128». I campi sotto si aggiornano da soli: WAV 24 bit, 48000 hertz, −23 LUFS, picco vero −1 dBTP.
-3. Lascia attivo «Mostra il report di consegna dopo l'esportazione» e premi Esporta.
-4. Leggi il report: durata, volume percepito, picco vero, range di volume e rumore di fondo. Il pulsante «Salva il report» produce un file di testo da allegare al file esportato.
+3. Scrivi «Autore o emittente» e «Descrizione»: finiscono nei metadati del file, il blocco BWF dei WAV e i tag ID3 degli MP3. Con il campo «Formato» puoi scegliere anche MP3, per i playout che lo vogliono.
+4. Lascia attivo «Mostra il report di consegna dopo l'esportazione» e premi Esporta.
+5. Leggi il report: durata, volume percepito, picco vero, range di volume, rumore di fondo e che metadati sono stati scritti. Il pulsante «Salva il report» produce un file di testo da allegare al file esportato.
 
-Domande: prima di esportare sapevi a che volume sarebbe uscito il file? Il report ti dice se è pronto per la trasmissione? Avresti voluto sentire la differenza tra il file esportato e quello di partenza?
+Domande: prima di esportare sapevi a che volume sarebbe uscito il file? Il report ti dice se è pronto per la trasmissione? Sai che cosa contiene il file oltre al suono, e ti serve saperlo?
 
 ### Video (Tassello Media)
 

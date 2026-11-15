@@ -11,15 +11,22 @@ const MATRIX=[0x00010000,0,0,0,0x00010000,0,0,0,0x40000000].flatMap(be32);
 const descr=(tag,body)=>[tag,0x80,0x80,0x80,body.length,...body];
 // Descrizione della traccia AAC (mp4a con esds): la usano l'M4A e l'MP4 del video.
 const mp4aEntry=(desc,ch,rate,bitrate)=>box('mp4a',[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,...be16(ch),...be16(16),0,0,0,0,...be32(rate<<16>>>0)],fullBox('esds',0,0,descr(3,[0,1,0,...descr(4,[0x40,0x15,0,0,0,...be32(bitrate),...be32(bitrate),...descr(5,[...desc])]),...descr(6,[2])])));
-function m4aBlob({packets,desc,rate,ch,bitrate}){if(!desc)throw Error('Il codificatore AAC non ha fornito la configurazione');
+// Tag iTunes dentro moov/udta/meta/ilst: titolo, autore, album e descrizione si vedono in tutti i lettori.
+const ilstItem=(type,val)=>val?[box(type,box('data',[0,0,0,1],be32(0),te.encode(val)))]:[];
+function m4aTags(tags){if(!tags)return null;const items=[...ilstItem('\u00A9nam',tags.title),...ilstItem('\u00A9ART',tags.artist),...ilstItem('\u00A9alb',tags.album),...ilstItem('\u00A9cmt',tags.comment),...ilstItem('\u00A9day',tags.year)];
+ if(!items.length)return null;
+ return box('udta',box('meta',[0,0,0,0],fullBox('hdlr',0,0,be32(0),chars('mdir'),chars('appl'),new Array(9).fill(0)),box('ilst',...items)))}
+function m4aBlob({packets,desc,rate,ch,bitrate,tags}){if(!desc)throw Error('Il codificatore AAC non ha fornito la configurazione');
+ const udta=m4aTags(tags);
  const sizes=packets.map(p=>p.data.length),deltas=packets.map(p=>p.dur?Math.round(p.dur*rate/1e6):1024),duration=deltas.reduce((a,b)=>a+b,0);
  const runs=[];for(const d of deltas){const last=runs.at(-1);if(last&&last[1]===d)last[0]++;else runs.push([1,d])}
  const mp4a=mp4aEntry(desc,ch,rate,bitrate);
  const stbl=chunkOffset=>box('stbl',fullBox('stsd',0,0,be32(1),mp4a),fullBox('stts',0,0,be32(runs.length),runs.flatMap(([n,d])=>[...be32(n),...be32(d)])),fullBox('stsc',0,0,be32(1),be32(1),be32(packets.length),be32(1)),fullBox('stsz',0,0,be32(0),be32(packets.length),sizes.flatMap(be32)),fullBox('stco',0,0,be32(1),be32(chunkOffset)));
- const moov=chunkOffset=>box('moov',fullBox('mvhd',0,0,be32(0),be32(0),be32(rate),be32(duration),be32(0x00010000),be16(0x0100),[0,0,0,0,0,0,0,0,0,0],MATRIX,new Array(24).fill(0),be32(2)),
-  box('trak',fullBox('tkhd',0,3,be32(0),be32(0),be32(1),be32(0),be32(duration),new Array(8).fill(0),be16(0),be16(0),be16(0x0100),be16(0),MATRIX,be32(0),be32(0)),
+ const moov=chunkOffset=>{const mvhd=fullBox('mvhd',0,0,be32(0),be32(0),be32(rate),be32(duration),be32(0x00010000),be16(0x0100),[0,0,0,0,0,0,0,0,0,0],MATRIX,new Array(24).fill(0),be32(2));
+  const trak=box('trak',fullBox('tkhd',0,3,be32(0),be32(0),be32(1),be32(0),be32(duration),new Array(8).fill(0),be16(0),be16(0),be16(0x0100),be16(0),MATRIX,be32(0),be32(0)),
    box('mdia',fullBox('mdhd',0,0,be32(0),be32(0),be32(rate),be32(duration),be16(0x55C4),be16(0)),fullBox('hdlr',0,0,be32(0),chars('soun'),new Array(12).fill(0),[...chars('SoundHandler'),0]),
-    box('minf',fullBox('smhd',0,0,be16(0),be16(0)),box('dinf',fullBox('dref',0,0,be32(1),fullBox('url ',0,1))),stbl(chunkOffset)))));
+    box('minf',fullBox('smhd',0,0,be16(0),be16(0)),box('dinf',fullBox('dref',0,0,be32(1),fullBox('url ',0,1))),stbl(chunkOffset))));
+  return box('moov',mvhd,trak,...(udta?[udta]:[]))};
  const ftyp=box('ftyp',chars('M4A '),be32(0x200),chars('isomiso2M4A mp42')),size=moov(0).length,mdatLen=sizes.reduce((a,b)=>a+b,0);
  const mdatHead=new Uint8Array(8);new DataView(mdatHead.buffer).setUint32(0,8+mdatLen);mdatHead.set(chars('mdat'),4);
  return new Blob([ftyp,moov(ftyp.length+size+8),mdatHead,...packets.map(p=>p.data)],{type:'audio/mp4'})}
