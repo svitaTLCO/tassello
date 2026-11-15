@@ -241,3 +241,59 @@ async function autoClear(){const t=selTrack();if(!t){toast('Crea prima una tracc
  if(!(t.volAuto?.length||t.panAuto?.length)){toast('Questa traccia non ha automazione');return}
  if(!(await confirmAction(`Togliere tutti i punti di automazione della traccia «${t.name}»?`,'Togli')))return;
  pCommit('Togli l’automazione',()=>{t.volAuto=[];t.panAuto=[];t.autoOn={vol:false,pan:false}});announce('Automazione tolta')}
+
+// ——— Take di una regione: più registrazioni dello stesso passaggio, con un nome e una nota, una attiva alla volta.
+function ensureTakes(r){if(!r.takes?.length)r.takes=[{id:uid(),src:r.src,off:r.off,dur:r.dur,name:'Take 1',note:''}]}
+function activateTake(r,t){r.src=t.src;r.off=t.off;r.dur=t.dur}
+function addTakeToRegion(r,buf){if(!buf?.length||!buf.duration)return null;ensureTakes(r);const n=r.takes.length+1,t={id:uid(),src:addSource(buf),off:0,dur:buf.duration,name:`Take ${n}, ${fmtTime(buf.duration)}, ${new Date().toLocaleDateString('it-IT')}`,note:''};
+ r.takes.push(t);activateTake(r,t);return t}
+function previewTake(r,take){const src=SOURCES.get(take?.src);if(!src){toast('Questa take non è disponibile');return}
+ stopPlayback(false);stopPreview();const ctx=actxGet(),a=Math.round(take.off*src.sampleRate),len=Math.min(Math.round(take.dur*src.sampleRate),Math.round(6*src.sampleRate)),
+  buf=makeBuffer(Array.from({length:src.numberOfChannels},(_,c)=>src.getChannelData(c).slice(a,a+len)),src.sampleRate);
+ const s=ctx.createBufferSource();s.buffer=buf;s.connect(audioOut());s.start();previewSrc=s;announce(`Ascolto della take «${take.name}»: ${sayTime(buf.duration)}`)}
+async function takesDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+ const list=r.takes?.length?r.takes:[{id:'tmp',src:r.src,off:r.off,dur:r.dur,name:'Take 1',note:''}],
+  active=Math.max(0,list.findIndex(t=>t.src===r.src&&Math.abs(t.off-r.off)<1e-6));
+ const rows=list.map((t,i)=>`<tr><th scope="row">${i+1}</th><td>${esc(t.name)}</td><td>${esc(fmtTime(t.dur))}</td><td>${esc(t.note||'—')}</td><td>${i===active?'attiva':''}</td></tr>`).join('');
+ const res=await modal('Take della regione',`<p>Regione «${esc(r.name)}». La take scelta diventa quella che si sente e la regione prende la sua durata; le take restano tutte finché non le togli.</p><table><caption>Take della regione</caption><thead><tr><th scope="col">#</th><th scope="col">Nome</th><th scope="col">Durata</th><th scope="col">Nota</th><th scope="col">Stato</th></tr></thead><tbody>${rows}</tbody></table>`,
+  [{id:'take',label:'Take',type:'select',value:String(active),options:list.map((t,i)=>[String(i),`${i+1}. ${t.name}${t.note?' — '+t.note:''}`])},
+   {id:'name',label:'Nome della take',value:list[active].name},
+   {id:'note',label:'Nota (facoltativa)',value:list[active].note||'',hint:'Per esempio «buona», «tosse», «da rifare».'},
+   {id:'only',label:'Tieni solo questa take',type:'checkbox',value:false}],
+  'Salva',{wide:true,buttons:[{label:'Ascolta',run:v=>previewTake(r,list[Number(v.take)])}],onClose:stopPreview});
+ if(!res)return;const chosen=list[Number(res.take)];
+ pCommit('Take della regione',()=>{ensureTakes(r);if(res.only)r.takes=[chosen];chosen.name=res.name.trim().slice(0,120)||chosen.name;chosen.note=res.note.trim().slice(0,200);activateTake(r,chosen)});
+ announce(`Take «${chosen.name}» attiva, ${r.takes.length===1?'unica take':r.takes.length+' take'} nella regione`)}
+function takeStep(dir){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+ if((r.takes?.length||0)<2){pCommit('Take della regione',()=>{ensureTakes(r)});toast('Questa regione ha una sola take');return}
+ const i=Math.max(0,r.takes.findIndex(t=>t.src===r.src&&Math.abs(t.off-r.off)<1e-6)),j=(i+dir+r.takes.length)%r.takes.length,t=r.takes[j];
+ pCommit('Cambia take',()=>activateTake(r,t));announce(`Take ${j+1} di ${r.takes.length}: ${t.name}${t.note?', '+t.note:''}`)}
+async function takeDelete(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+ const list=r.takes||[];if(list.length<2){toast('Deve restare almeno una take');return}
+ const res=await modal('Togli una take',`<p>La take tolta sparisce dalla regione; le altre restano.</p>`,
+  [{id:'take',label:'Take da togliere',type:'select',value:'0',options:list.map((t,i)=>[String(i),`${i+1}. ${t.name}${t.note?' — '+t.note:''}`])}],'Togli');
+ if(!res)return;const i=Number(res.take),removed=list[i];
+ pCommit('Togli la take',()=>{r.takes.splice(i,1);r.comp=(r.comp||[]).filter(c=>c.take!==removed.id);if(removed.src===r.src)activateTake(r,r.takes[Math.min(i,r.takes.length-1)])});
+ announce(`Take «${removed.name}» tolta; ${r.takes.length===1?'resta una take':r.takes.length+' take'}`)}
+
+// ——— Comping: la regione suona la take attiva, tranne nelle sezioni che ne scelgono un'altra. Le sezioni non
+// distruggono niente: si tolgono e l'audio torna com'era.
+async function compDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+ if(!r.takes?.length)pCommit('Take della regione',()=>ensureTakes(r));
+ const list=r.takes.map(t=>({...t})),end=r.start+r.dur;
+ let draft=(r.comp||[]).map(c=>({...c}));
+ const nameOf=id=>(list.find(t=>t.id===id)||{}).name||'—';
+ const table=()=>`<table><caption>Sezioni di comping</caption><thead><tr><th scope="col">Da</th><th scope="col">A</th><th scope="col">Take</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((c,i)=>`<tr><th scope="row">${esc(fmtTime(r.start+c.from,2))}</th><td>${esc(fmtTime(r.start+c.to,2))}</td><td>${esc(nameOf(c.take))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli la sezione da ${esc(fmtTime(r.start+c.from,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="4">Nessuna sezione: suona la take attiva.</td></tr>'}</tbody></table>`;
+ const render=()=>{const box=$('compList');if(box)box.innerHTML=table()};
+ const add=(from,to,take)=>{const a=Math.max(0,from-r.start),b=Math.min(r.dur,to-r.start);if(!(b>a)){toast('La sezione è fuori dalla regione o è vuota');return}
+  const out=[];for(const c of draft){if(c.to<=a||c.from>=b){out.push(c);continue}if(c.from<a)out.push({from:c.from,to:a,take:c.take});if(c.to>b)out.push({from:b,to:c.to,take:c.take})}
+  out.push({from:a,to:b,take});draft=out.sort((x,y)=>x.from-y.from);render();announce(`Sezione da ${sayTime(from,2)} a ${sayTime(to,2)} con la take «${nameOf(take)}»`)};
+ const res=await modal('Comping della regione',`<p>Regione «${esc(r.name)}», da ${esc(fmtTime(r.start,2))} a ${esc(fmtTime(end,2))}. Dove non c’è una sezione suona la take attiva; le sezioni si sovrappongono a quelle che c’erano. Nell’editor si sente la take attiva: il comping vale nel brano e nell’esportazione.</p><div id="compList"></div>`,
+  [{id:'from',label:'Da',type:'time',value:fmtTime(P.t>r.start&&P.t<end?P.t:r.start,2)},
+   {id:'to',label:'A',type:'time',value:fmtTime(Math.min(end,Math.max(P.t,r.start)+1),2)},
+   {id:'take',label:'Take',type:'select',value:list.find(t=>t.src===r.src)?.id||list[0].id,options:list.map(t=>[t.id,`${t.name}${t.note?' — '+t.note:''}`])}],
+  'Salva',{wide:true,buttons:[{label:'Aggiungi la sezione',run:v=>{const a=parseTime(v.from),b=parseTime(v.to);if(!(a>=0&&b>a)){toast('Da e A: scrivi due tempi, con A dopo Da');return}add(a,b,v.take)}}],
+   onOpen:pane=>{render();pane.addEventListener('click',e=>{const btn=e.target.closest('[data-del]');if(!btn)return;draft.splice(Number(btn.dataset.del),1);render();announce('Sezione tolta')})}});
+ if(!res)return;
+ pCommit('Comping',()=>{r.comp=draft.map(c=>({from:clamp(c.from,0,r.dur),to:clamp(c.to,0,r.dur),take:c.take})).filter(c=>c.to>c.from).sort((a,b)=>a.from-b.from)});
+ announce(r.comp.length?`Comping: ${r.comp.length===1?'una sezione':r.comp.length+' sezioni'} su ${r.takes.length} take`:'Comping tolto: suona la take attiva')}

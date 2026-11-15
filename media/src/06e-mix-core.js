@@ -7,6 +7,8 @@ const P={title:'Audio1',bpm:120,sig:4,grid:'time',metro:false,countIn:false,cycl
 const SOURCES=new Map(),dirtySources=new Set();
 let phist=[],predo=[],rclip=null;
 const trackOf=id=>P.tracks.find(t=>t.id===id);
+// Tutte le sorgenti di una regione: quella attiva e le take.
+const regionSources=r=>[r.src,...(r.takes||[]).map(t=>t.src)].filter(Boolean);
 const regionOf=id=>P.regions.find(r=>r.id===id);
 const regionsOn=tid=>P.regions.filter(r=>r.track===tid).sort((a,b)=>a.start-b.start||(a.id<b.id?-1:1));
 const regionEnd=r=>r.start+r.dur;
@@ -63,7 +65,8 @@ function cleanAudioProject(p){const n=(v,d,lo=-Infinity,hi=Infinity)=>Number.isF
  {const byId=new Map(tracks.map(t=>[t.id,t]));for(const t of tracks){if(t.out&&(!byId.has(t.out)||t.out===t.id||byId.get(t.out).kind!=='bus'))t.out=null;
   const seen=new Set([t.id]);let x=t;while(x?.out){if(seen.has(x.out)){t.out=null;break}seen.add(x.out);x=byId.get(x.out)}}}
  const ids=new Set(tracks.map(t=>t.id));
- const regions=arr(p?.regions).filter(r=>r&&ids.has(r.track)&&r.src).map(r=>({id:s(r.id||uid(),40),track:s(r.track,40),src:s(r.src,40),off:n(r.off,0,0),dur:n(r.dur,0,0),start:n(r.start,0,0),gain:n(r.gain,0,-60,24),fadeIn:n(r.fadeIn,0,0,600),fadeOut:n(r.fadeOut,0,0,600),name:s(r.name||'Regione',120),markers:arr(r.markers).filter(m=>Number.isFinite(m?.pos)).map(m=>({id:s(m.id||uid(),40),pos:Math.max(0,Math.round(m.pos)),label:s(m.label)}))})).filter(r=>r.dur>0);
+ const regions=arr(p?.regions).filter(r=>r&&ids.has(r.track)&&r.src).map(r=>({id:s(r.id||uid(),40),track:s(r.track,40),src:s(r.src,40),off:n(r.off,0,0),dur:n(r.dur,0,0),start:n(r.start,0,0),gain:n(r.gain,0,-60,24),fadeIn:n(r.fadeIn,0,0,600),fadeOut:n(r.fadeOut,0,0,600),name:s(r.name||'Regione',120),takes:arr(r.takes).filter(t=>t&&t.src).map(t=>({id:s(t.id||uid(),40),src:s(t.src,40),off:n(t.off,0,0),dur:n(t.dur,0,0),name:s(t.name||'Take',120),note:s(t.note||'',200)})).slice(0,20),comp:arr(r.comp).filter(c=>c&&c.take&&Number.isFinite(Number(c.from))&&Number.isFinite(Number(c.to))).map(c=>({from:clamp(Number(c.from),0,86400),to:clamp(Number(c.to),0,86400),take:s(c.take,40)})).filter(c=>c.to>c.from).sort((a,b)=>a.from-b.from).slice(0,200),markers:arr(r.markers).filter(m=>Number.isFinite(m?.pos)).map(m=>({id:s(m.id||uid(),40),pos:Math.max(0,Math.round(m.pos)),label:s(m.label)}))})).filter(r=>r.dur>0);
+ for(const r of regions)r.comp=(r.comp||[]).filter(c=>r.takes.some(t=>t.id===c.take));
  return{title:s(p?.title||'Audio1',120),bpm:n(p?.bpm,120,30,300),sig:[2,3,4,5,6,7].includes(Number(p?.sig))?Number(p.sig):4,grid:p?.grid==='beats'?'beats':'time',metro:!!p?.metro,countIn:!!p?.countIn,cycle:{on:!!p?.cycle?.on,a:n(p?.cycle?.a,0,0),b:n(p?.cycle?.b,0,0)},latency:p?.latency==='auto'||p?.latency==null?'auto':n(p.latency,0,0,1000),tracks,regions,sel:null,track:tracks[0]?.id||null,t:n(p?.t,0,0),pxs:n(p?.pxs,40,1,2000)}}
 const projectData=()=>({title:P.title,bpm:P.bpm,sig:P.sig,grid:P.grid,metro:P.metro,countIn:P.countIn,cycle:P.cycle,latency:P.latency,tracks:P.tracks,regions:P.regions,t:P.t,pxs:P.pxs});
 // Bozza: progetto e stato dell'editor a ogni modifica; i suoni solo quando sono nuovi o cambiati.
@@ -73,7 +76,7 @@ const sourceDraft=b=>({rate:b.sampleRate,nch:b.numberOfChannels,length:b.length,
 async function sourceFromDraft(d){if(d?.channels?.length)return makeBuffer(d.channels,d.rate);if(!(d?.data instanceof Blob)||!(d.length>0)||!(d.nch>0)||d.data.size!==d.length*d.nch*4)return null;
  const all=await d.data.arrayBuffer(),b=new AudioBuffer({length:d.length,numberOfChannels:d.nch,sampleRate:d.rate});for(let c=0;c<d.nch;c++)b.copyToChannel(new Float32Array(all,c*d.length*4,d.length),c);return b}
 async function persistAudio(){const meta={...projectData(),sel:P.sel,track:P.track,version:P.version,exported:P.exported,editor:A.region?{region:A.region,cursor:A.cursor,selA:A.selA,selB:A.selB}:null};
- const used=new Set(P.regions.map(r=>r.src));let bytes=0;for(const id of used){const b=SOURCES.get(id);if(b)bytes+=b.length*b.numberOfChannels*4}
+ const used=new Set(P.regions.flatMap(regionSources));let bytes=0;for(const id of used){const b=SOURCES.get(id);if(b)bytes+=b.length*b.numberOfChannels*4}
  if(bytes>DRAFT_LIMIT){await dbPut('audio-project',{...meta,regions:[],tooBig:true});return 'Progetto troppo grande per la bozza: salvalo in ZIP per non perderlo'}
  // Un suono non più usato resta da salvare: se l'eliminazione della sua regione viene annullata, serve ancora.
  for(const id of [...dirtySources]){const b=SOURCES.get(id);if(!b){dirtySources.delete(id);continue}if(used.has(id)){dirtySources.delete(id);await dbPut('asrc:'+id,sourceDraft(b))}}
@@ -81,16 +84,16 @@ async function persistAudio(){const meta={...projectData(),sel:P.sel,track:P.tra
 async function restoreAudio(){let meta=await dbGet('audio-project');
  if(!meta){const old=await dbGet('audio-meta'),data=await dbGet('audio-data');if(old&&data?.channels?.length){const buf=makeBuffer(data.channels,data.rate);if(buf){const t=newTrack(String(old.title||'Traccia 1').slice(0,80)),src=addSource(buf),r=newRegion(t.id,src,0,String(old.title||'Regione 1').slice(0,120));r.markers=Array.isArray(old.markers)?old.markers:[];Object.assign(P,{title:String(old.title||'Audio1').slice(0,120),tracks:[t],regions:[r],track:t.id,sel:r.id});await persistAudio();await dbDel('audio-meta');await dbDel('audio-data')}}return}
  Object.assign(P,cleanAudioProject(meta));P.sel=regionOf(meta.sel)?meta.sel:null;P.track=trackOf(meta.track)?meta.track:P.tracks[0]?.id||null;P.version=meta.version||0;P.exported=meta.exported??P.version;
- const missing=[];for(const id of new Set(P.regions.map(r=>r.src))){const b=await sourceFromDraft(await dbGet('asrc:'+id)).catch(()=>null);if(b)SOURCES.set(id,b);else missing.push(id)}
+ const missing=[];for(const id of new Set(P.regions.flatMap(regionSources))){const b=await sourceFromDraft(await dbGet('asrc:'+id)).catch(()=>null);if(b)SOURCES.set(id,b);else missing.push(id)}
  if(missing.length){P.regions=P.regions.filter(r=>!missing.includes(r.src));toast('Alcune regioni non sono state recuperate dalla bozza')}if(meta.tooBig)toast('Il progetto era troppo grande per la bozza: riaprilo dal file ZIP salvato')
  const ed=meta.editor&&regionOf(meta.editor.region);if(ed&&openRegion(ed,{focus:false,quiet:true})){A.cursor=meta.editor.cursor|0;A.selA=meta.editor.selA|0;A.selB=meta.editor.selB|0;clampSel()}}
-async function gcSources(){try{const used=new Set(P.regions.map(r=>'asrc:'+r.src));for(const k of await dbKeys())if(String(k).startsWith('asrc:')&&!used.has(k))await dbDel(k)}catch(e){}}
+async function gcSources(){try{const used=new Set(P.regions.flatMap(r=>regionSources(r).map(id=>'asrc:'+id)));for(const k of await dbKeys())if(String(k).startsWith('asrc:')&&!used.has(k))await dbDel(k)}catch(e){}}
 // Progetto in un file: ZIP con progetto-audio.json e un WAV per ogni suono (32 bit in virgola mobile, senza perdite).
-async function saveAudioProjectZip(){if(!P.tracks.length){toast('Il progetto è vuoto');return}const used=[...new Set(P.regions.map(r=>r.src))].filter(id=>SOURCES.has(id));
+async function saveAudioProjectZip(){if(!P.tracks.length){toast('Il progetto è vuoto');return}const used=[...new Set(P.regions.flatMap(regionSources))].filter(id=>SOURCES.has(id));
  const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'{{VERSIONE}}',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(P.title+' (progetto audio)','zip'));P.exported=P.version;schedulePersist('audio');toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Audio`)}
 async function openAudioProjectZip(entries){let data;try{data=JSON.parse(await entries['progetto-audio.json'].text())}catch(e){toast('Il file progetto-audio.json è danneggiato');return}
  if(audioModified()&&!(await confirmAction('Aprendo il progetto sostituisci quello attuale. Continuare?','Apri')))return;const p=cleanAudioProject(data.progetto||data),bufs=new Map();
- for(const id of new Set(p.regions.map(r=>r.src))){const f=entries[`audio/${id}.wav`];if(!f)continue;try{const b=readWav(await f.arrayBuffer())?.buffer;if(b)bufs.set(id,b)}catch(e){}}
+ for(const id of new Set(p.regions.flatMap(regionSources))){const f=entries[`audio/${id}.wav`];if(!f)continue;try{const b=readWav(await f.arrayBuffer())?.buffer;if(b)bufs.set(id,b)}catch(e){}}
  mixStop(false);closeRegionEditor();SOURCES.clear();dirtySources.clear();for(const [id,b] of bufs){SOURCES.set(id,b);dirtySources.add(id)}phist=[];predo=[];Object.assign(P,p);P.regions=P.regions.filter(r=>SOURCES.has(r.src));P.exported=P.version+1;projectChanged();
  $('docTitle').value=P.title;updateTitle();await gcSources();announce(`Progetto «${P.title}» aperto: ${P.tracks.length} tracce, ${P.regions.length} regioni, ${sayTime(projDur())}`)}

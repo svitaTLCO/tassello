@@ -252,6 +252,15 @@ Domande: capisci dalla tabella dove sono i punti e che valore hanno? Ti serve se
 
 Domande: dal nome della traccia capisci che è un bus? Il campo «Uscita» ti dice dove va il suono?
 
+**Compito A6: scegliere la take buona e comporla.**
+
+1. Registra due volte la stessa frase: la seconda volta, nella finestra «Registra», scegli «Come nuova take nella regione».
+2. Cerca «Take» in Alt+Q: la finestra elenca le take con durata e nota. Scegli la seconda, scrivi una nota («buona») e salva.
+3. Con Alt+Maiusc+] e Alt+Maiusc+[ passi da una take all'altra senza aprire la finestra.
+4. Cerca «Comping» e aggiungi una sezione: scegli Da, A e la take. La tabella mostra i tratti; il brano suona la take attiva tranne nelle sezioni.
+
+Domande: senti la differenza fra le take senza vedere la forma d'onda? Capisci dall'elenco quale stai ascoltando? Le sezioni sono chiare a parole?
+
 **Compito A3b: far entrare un pezzo in uno spazio preciso.**
 
 1. Apri una regione con Ctrl+E, poi Ctrl+Maiusc+F: si apre «Adatta alla durata».

@@ -69,16 +69,30 @@ function liveGraph(live){const ctx=actxGet();if(!MIX.graph||MIX.graph.ctx!==ctx)
 // Regioni del brano tra from ed end, a partire dall'istante when del contesto. Il guadagno segue i punti dell'inviluppo
 // (dissolvenze della regione); dove la regione è tagliata (ascolto da metà, fine del ciclo) entra ed esce in 3 ms.
 function regionGainAt(r,x){let v=fromDb(r.gain);if(r.fadeIn>0)v*=clamp(x/r.fadeIn,0,1);if(r.fadeOut>0)v*=clamp((r.dur-x)/r.fadeOut,0,1);return v}
-function scheduleRegions(ctx,gr,from,when,{end=Infinity}={}){const out=[],stop=end===Infinity?Math.max(projDur(),from+1):end,duck=duckGains(from,stop);for(const r of P.regions){if(regionEnd(r)<=from+1e-6||r.start>=end)continue;const buf=SOURCES.get(r.src),tn=gr.tracks.get(r.track);if(!buf||!tn)continue;
-  const t=Math.max(from,r.start),into=t-r.start,len=Math.min(r.dur-into,end-t);if(len<=1e-4)continue;const s=ctx.createBufferSource(),g=ctx.createGain(),at=when+(t-from),e=into+len,x=Math.min(EDGE_FADE,len/2),cutIn=into>1e-4,cutOut=e<r.dur-1e-4;s.buffer=buf;
-  const pts=new Set([into,e]);if(cutIn)pts.add(into+x);if(cutOut)pts.add(e-x);for(const b of [r.fadeIn,r.dur-r.fadeOut])if(b>into&&b<e)pts.add(b);
-  const env=y=>regionGainAt(r,y)*(cutIn?clamp((y-into)/x,0,1):1)*(cutOut?clamp((e-y)/x,0,1):1);
-  const dg=duck.get(r.track);
-  if(dg){const N=Math.max(2,Math.ceil(len/DUCK_STEP)+1),arr=new Float32Array(N);
-   for(let i=0;i<N;i++){const y=into+(i/(N-1))*len,d=dg[clamp(Math.floor((t+y-from)/DUCK_STEP),0,dg.length-1)]??1;arr[i]=env(y)*d}
-   g.gain.setValueCurveAtTime(arr,at,len)}
-  else[...pts].sort((a,b)=>a-b).forEach((y,i)=>i?g.gain.linearRampToValueAtTime(env(y),at+(y-into)):g.gain.setValueAtTime(env(y),at));
-  s.connect(g);g.connect(tn.input);s.start(at,r.off+into,len);out.push({s,g,until:at+len})}return out}
+// Le sezioni di comping di una regione: dove non c'è una sezione vale la take attiva. I tempi sono relativi alla
+// regione e off è il punto dentro la take da cui partire (prendendo la sezione al tempo x si parte da take.off + x).
+function compSegments(r){const dur=r.dur,base={a:0,b:dur,src:r.src,off:r.off};
+ const cuts=(r.comp||[]).map(c=>({a:clamp(c.from,0,dur),b:clamp(c.to,0,dur),take:c.take})).filter(c=>c.b>c.a).sort((x,y)=>x.a-y.a);
+ if(!cuts.length)return[base];
+ const segs=[];let at=0;
+ for(const c of cuts){if(c.a>at+1e-6)segs.push({...base,a:at,b:c.a});const tk=(r.takes||[]).find(t=>t.id===c.take),a=Math.max(at,c.a);
+  if(c.b>a)segs.push({a,b:c.b,src:tk?tk.src:r.src,off:(tk?tk.off:r.off)+a});at=Math.max(at,c.b)}
+ if(at<dur-1e-6)segs.push({...base,a:at,b:dur});
+ return segs.filter(s=>s.b>s.a&&s.src&&SOURCES.has(s.src))}
+function scheduleRegions(ctx,gr,from,when,{end=Infinity}={}){const out=[],stop=end===Infinity?Math.max(projDur(),from+1):end,duck=duckGains(from,stop);
+ for(const r of P.regions){if(regionEnd(r)<=from+1e-6||r.start>=end)continue;const tn=gr.tracks.get(r.track);if(!tn)continue;
+  for(const seg of compSegments(r)){const buf=SOURCES.get(seg.src);if(!buf)continue;
+   const t=Math.max(from,r.start+seg.a),e=Math.min(end,r.start+seg.b);if(e-t<=1e-4)continue;
+   const off=seg.off+(t-(r.start+seg.a)),len=e-t,a=t-r.start,z=e-r.start,x=Math.min(EDGE_FADE,len/2),cutIn=a>1e-4,cutOut=z<r.dur-1e-4,
+    s=ctx.createBufferSource(),g=ctx.createGain(),at=when+(t-from);s.buffer=buf;
+   const env=y=>regionGainAt(r,y)*(cutIn?clamp((y-a)/x,0,1):1)*(cutOut?clamp((z-y)/x,0,1):1),dg=duck.get(r.track);
+   if(dg){const N=Math.max(2,Math.ceil(len/DUCK_STEP)+1),arr=new Float32Array(N);
+    for(let i=0;i<N;i++){const y=a+(i/(N-1))*(z-a),d=dg[clamp(Math.floor((t+(y-a)-from)/DUCK_STEP),0,dg.length-1)]??1;arr[i]=env(y)*d}
+    g.gain.setValueCurveAtTime(arr,at,len)}
+   else{const pts=new Set([a,z]);if(cutIn)pts.add(a+x);if(cutOut)pts.add(z-x);for(const b of [r.fadeIn,r.dur-r.fadeOut])if(b>a&&b<z)pts.add(b);
+    [...pts].sort((p,q)=>p-q).forEach((y,i)=>i?g.gain.linearRampToValueAtTime(env(y),at+(y-a)):g.gain.setValueAtTime(env(y),at))}
+   s.connect(g);g.connect(tn.input);s.start(at,off,len);out.push({s,g,until:at+len})}}
+ return out}
 // ——— Ducking: quando parla la traccia della voce le altre si abbassano. Il livello della voce si misura a finestre
 // di 20 ms, la soglia segue il materiale (95° percentile meno 30 dB) e l'abbassamento entra in 60 ms e risale in 350,
 // così le consonanti non fanno "pompare" la musica. Il guadagno viene scritto nella curva della regione: suona
