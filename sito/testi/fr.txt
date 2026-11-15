@@ -411,6 +411,7 @@ Comment nous l’avons évaluée
       <li>Des tests automatiques dans le navigateur pour chaque outil, qui lisent aussi le texte exact des annonces pour le lecteur d’écran.</li>
       <li>Une analyse, application par application, des tâches qui se font d’habitude en regardant.</li>
       <li>Des essais avec des personnes aveugles, en cours, avec le <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">guide d’essai</a> (en italien).</li>
+      <li>Le 15 novembre 2026, une campagne avec NVDA 2026.2 sous Windows 11 dans Chrome, sur environ 45 surfaces des trois applications : fenêtres, erreurs, curseurs, rapports, listes et tableaux. L’interface était pilotée par des touches envoyées au document et le journal de synthèse a été lu en entier : il dit ce que NVDA prononce, pas si les temps sont confortables.</li>
     </ul>
 
 [dichiarazione.offre_titolo]
@@ -429,7 +430,7 @@ Limites connues
 
 [dichiarazione.limiti]
     <ul>
-      <li>Le comportement avec NVDA, JAWS et le Narrateur reste à confirmer, surtout pour les annonces réunies en une phrase et pour les zones interactives&nbsp;: la photo, l’histogramme, l’aperçu vidéo, la grille de Calcolo.</li>
+      <li>NVDA a été essayé automatiquement sous Windows 11 en lisant son journal de synthèse ; JAWS, Narrator, VoiceOver et TalkBack restent à confirmer, surtout pour les annonces réunies en une phrase et pour les zones interactives&nbsp;: la photo, l’histogramme, l’aperçu vidéo, la grille de Calcolo.</li>
       <li>Certaines tâches visuelles restent difficiles sans la vue&nbsp;: placer les blocs sur la grille dans Impagina, suivre le bord du détourage dans Immagini, explorer un dessin avec un curseur, entendre la lumière et la couleur avant et après dans Video. La vérification des clignotements ne détecte pas encore les éclairs sur une partie de l’écran ni les éclairs rouges.</li>
       <li>Les descriptions mesurent les pixels et le son, sans intelligence artificielle&nbsp;: elles ne reconnaissent ni les personnes ni les objets.</li>
     </ul>
@@ -439,6 +440,8 @@ Signalements
 
 [dichiarazione.segnala]
     <p>Si quelque chose ne fonctionne pas avec la technologie que vous utilisez, signalez-le avec le formulaire <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Problème d’accessibilité</a>&nbsp;: pour nous c’est un défaut à corriger, et il passe en premier. La déclaration complète se trouve dans le <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">dépôt</a>.</p>
+
+    <p>Nous demandons à qui le peut d’essayer les trois applications avec son propre lecteur d’écran et son clavier — JAWS et Narrator sous Windows, VoiceOver sous macOS et iOS, TalkBack sous Android — en suivant le guide d’essai, et de signaler ce qui n’est pas annoncé, où le focus se déplace mal et quelles descriptions ne suffisent pas, en indiquant l’application, la version, le navigateur, le lecteur d’écran, les étapes et le résultat attendu.</p>
 
 [dichiarazione.data]
 Déclaration rédigée le 29 octobre 2026 et mise à jour le 15 novembre 2026&nbsp;; nous la mettons à jour à chaque nouvelle version.

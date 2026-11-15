@@ -410,6 +410,7 @@ How we evaluated it
       <li>Automated real-browser tests for each tool, which also read the exact screen reader announcements.</li>
       <li>A task-by-task analysis, app by app, of the work usually done by looking.</li>
       <li>Testing with blind people, in progress, using the <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">testing guide</a> (in Italian).</li>
+      <li>On 15 November 2026, a campaign with NVDA 2026.2 on Windows 11 in Chrome, across about 45 surfaces of the three apps: dialogs, error messages, sliders, reports, lists and tables. The interface was driven with keys sent to the document and NVDA’s speech log was read in full: it says what NVDA announces, not whether timing is comfortable.</li>
     </ul>
 
 [dichiarazione.offre_titolo]
@@ -428,7 +429,7 @@ Known limitations
 
 [dichiarazione.limiti]
     <ul>
-      <li>Behaviour with NVDA, JAWS and Narrator is still to be confirmed, especially for announcements joined into one sentence and for interactive areas: the photo, the histogram, the video preview, the Calcolo grid.</li>
+      <li>NVDA has been tested automatically on Windows 11 by reading its speech log; JAWS, Narrator, VoiceOver and TalkBack are still to be confirmed, especially for announcements joined into one sentence and for interactive areas: the photo, the histogram, the video preview, the Calcolo grid.</li>
       <li>Some visual tasks are still hard without sight: placing frames on the grid in Impagina, following the cut-out edge in Immagini, exploring a drawing with a cursor, hearing light and colour before and after in Video. The flash check does not yet detect flashes on part of the screen or red flashes.</li>
       <li>Descriptions measure pixels and sound without artificial intelligence: they do not recognise people or objects.</li>
     </ul>
@@ -438,6 +439,8 @@ Feedback
 
 [dichiarazione.segnala]
     <p>If something does not work with the technology you use, report it with the <a href="https://github.com/svitaTLCO/tassello/issues/new?template=accessibilita.yml">Accessibility problem form</a>: we treat it as a bug and it comes first. The full statement is in the <a href="https://github.com/svitaTLCO/tassello/blob/main/ACCESSIBILITA.md">repository</a>.</p>
+
+    <p>We ask anyone who can to try the three apps with their own screen reader and keyboard — JAWS and Narrator on Windows, VoiceOver on macOS and iOS, TalkBack on Android — following the testing guide, and to report what is not announced, where focus moves badly and which descriptions are not enough, giving the app, version, browser, screen reader, steps and expected result.</p>
 
 [dichiarazione.data]
 Statement written on 29 October 2026 and updated on 15 November 2026; we update it with every release.
