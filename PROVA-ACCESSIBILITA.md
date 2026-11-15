@@ -235,6 +235,15 @@ Domande: trovi il punto da tagliare senza vederlo? Dopo il taglio senti un clic?
 
 Domande: sai quando entra la musica e quando parla la voce? Sai se la musica copre la voce, e di quanto? Ti accorgi che la musica si è abbassata, o ti serve un modo per sentirlo?
 
+**Compito A3c: far scendere la musica sotto la voce con l'automazione.**
+
+1. Con la traccia della musica scelta, cerca «Automazione» in Alt+Q e premi Invio.
+2. Lascia il tempo del punto sull'indicatore, scrivi il volume che vuoi (per esempio −18) e premi «Aggiungi al volume». La tabella dei punti si aggiorna e il punto è annunciato.
+3. Sposta l'indicatore dove la musica deve tornare su, aggiungi un secondo punto con volume 0, poi salva.
+4. Ascolta: com'era prima, il volume scende e risale; con Alt+Maiusc+L sulla traccia un messaggio dice anche il valore dell'automazione in quel punto.
+
+Domande: capisci dalla tabella dove sono i punti e che valore hanno? Ti serve sentire il punto mentre lo aggiungi?
+
 **Compito A3b: far entrare un pezzo in uno spazio preciso.**
 
 1. Apri una regione con Ctrl+E, poi Ctrl+Maiusc+F: si apre «Adatta alla durata».

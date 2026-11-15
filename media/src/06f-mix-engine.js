@@ -6,6 +6,13 @@
 const MIX={playing:false,from:0,c0:0,origin:0,raf:0,timer:0,graph:null,srcs:[],passes:[],analyser:null,out:null,metroUntil:0,cycKey:'',recording:false,lat:0};
 const PRE_DELAY=0.006,LOOKAHEAD=0.4,START_GAP=0.04,EDGE_FADE=0.003;
 const trackLive=t=>{const solo=P.tracks.some(x=>x.solo);return t.mute||(solo&&!t.solo)?0:fromDb(t.vol)};
+// Con l'automazione accesa il cursore non conta: il volume diventa un cancello (muto/solo) e i valori li dà la curva.
+const trackGate=t=>{const solo=P.tracks.some(x=>x.solo);return t.mute||(solo&&!t.solo)?0:1};
+const hasAuto=(t,k)=>!!(t.autoOn?.[k]&&t[k+'Auto']?.length);
+// Valore di un inviluppo a un istante: lineare fra un punto e il successivo, fermo prima del primo e dopo l'ultimo.
+function autoValueAt(points,t){if(!points?.length)return null;if(t<=points[0].t)return points[0].v;const last=points.at(-1);if(t>=last.t)return last.v;
+ let lo=0,hi=points.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(points[m].t<=t)lo=m;else hi=m}
+ const a=points[lo],b=points[hi],k=(t-a.t)/((b.t-a.t)||1);return a.v+(b.v-a.v)*k}
 // Riverbero: risposta all'impulso generata (rumore che si spegne in 2,4 secondi), una per contesto audio.
 const IR=new WeakMap();
 function impulse(ctx){let b=IR.get(ctx);if(b)return b;const n=Math.round(ctx.sampleRate*2.4);b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.5)}IR.set(ctx,b);return b}
@@ -17,7 +24,7 @@ function newGraph(ctx,dest){const master=ctx.createGain(),lim=ctx.createDynamics
 // Catena di una traccia con i soli effetti attivi; si rifà quando un effetto passa da zero ad attivo o viceversa.
 // Le sorgenti entrano in input, che resta sempre lo stesso.
 function chainTrack(gr,t,comp){const ctx=gr.ctx;let n=gr.tracks.get(t.id);
- if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),meter:ctx.createAnalyser(),send:ctx.createGain(),shape:''};n.meter.fftSize=256;n.pan.connect(n.vol);n.vol.connect(n.meter);n.meter.connect(gr.master);n.vol.connect(n.send);gr.tracks.set(t.id,n)}
+ if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),auto:ctx.createGain(),meter:ctx.createAnalyser(),send:ctx.createGain(),shape:''};n.meter.fftSize=256;n.pan.connect(n.vol);n.vol.connect(n.auto);n.auto.connect(n.meter);n.meter.connect(gr.master);n.auto.connect(n.send);gr.tracks.set(t.id,n)}
  const shape=chainShape(t,comp);if(n.shape===shape)return n;n.input.disconnect();n.send.disconnect();for(const k of ['low','high','comp','make','delay']){n[k]?.disconnect();n[k]=null}
  let at=n.input;const link=x=>{at.connect(x);at=x;return x};
  if(t.low!==0){link(n.low=ctx.createBiquadFilter());n.low.type='lowshelf';n.low.frequency.value=200}
@@ -28,12 +35,26 @@ function chainTrack(gr,t,comp){const ctx=gr.ctx;let n=gr.tracks.get(t.id);
  n.shape=shape;return n}
 function setTrackNodes(t,n,{only=null,ctx=null}={}){const set=(p,v)=>ctx?p.setTargetAtTime(v,ctx.currentTime,0.02):p.value=v,c=t.comp/100;
  if(n.low)set(n.low.gain,t.low);if(n.high)set(n.high.gain,t.high);if(n.comp){set(n.comp.threshold,-10-26*c);set(n.comp.ratio,1+7*c);set(n.make.gain,fromDb(9*c))}
- set(n.pan.pan,t.pan);set(n.vol.gain,only?fromDb(t.vol):trackLive(t));set(n.send.gain,t.reverb/100*0.6)}
+ if(!hasAuto(t,'pan'))set(n.pan.pan,t.pan);
+ set(n.vol.gain,hasAuto(t,'vol')?(only?1:trackGate(t)):(only?fromDb(t.vol):trackLive(t)));
+ if(!hasAuto(t,'vol'))set(n.auto.gain,1);
+ set(n.send.gain,t.reverb/100*0.6)}
 // Allinea il mixer alle tracce: catene nuove o da rifare, tracce tolte, poi i valori dei cursori.
 // only: una sola traccia, per esportarla da sola (senza muto né solo).
 function syncGraph(gr,tracks,{only=null,live=false}={}){const comp=anyComp(tracks),ids=new Set(tracks.map(t=>t.id));
- for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.meter,n.send])x?.disconnect();gr.tracks.delete(id)}
+ for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.auto,n.meter,n.send])x?.disconnect();gr.tracks.delete(id)}
  for(const t of tracks)setTrackNodes(t,chainTrack(gr,t,comp),{only,ctx:live?gr.ctx:null});gr.lat=mixLatency(tracks);return gr}
+// Programma l'automazione di una passata: punti in [from, end) e valore fermo ai due estremi. Gli eventi sono
+// monotoni (un punto con lo stesso tempo viene saltato) perché Web Audio rifiuta due rampe sullo stesso istante.
+function scheduleTrackAuto(ctx,gr,from,when,end,{only=null}={}){const stop=Math.max(from+0.01,Math.min(Number.isFinite(end)?end:projDur(),Math.max(projDur(),from+0.01)));
+ for(const t of P.tracks){if(only&&t.id!==only)continue;const n=gr.tracks.get(t.id);if(!n)continue;
+  for(const k of ['vol','pan']){const pts=t[k+'Auto'],param=k==='vol'?n.auto.gain:n.pan.pan;if(!hasAuto(t,k)){if(k==='vol'){param.cancelScheduledValues(when);param.setValueAtTime(1,when)}continue}
+   const ev=[{t:from,v:autoValueAt(pts,from)}];for(const p of pts)if(p.t>from+1e-6&&p.t<stop-1e-6)ev.push({t:p.t,v:p.v});ev.push({t:stop,v:autoValueAt(pts,stop)});
+   param.cancelScheduledValues(when);let last=-Infinity;
+   ev.forEach((e,i)=>{if(i){if(e.t<=last+1e-6)return;
+     // il volume va in linea retta in decibel: una rampa esponenziale in ampiezza, cioè lineare in dB
+     if(k==='vol')param.exponentialRampToValueAtTime(fromDb(e.v),when+(e.t-from));else param.linearRampToValueAtTime(clamp(e.v,-1,1),when+(e.t-from))}
+    else param.setValueAtTime(k==='vol'?fromDb(e.v):clamp(e.v,-1,1),when);last=e.t})}}}
 // Il mixer della riproduzione resta pronto tra un ascolto e l'altro: spostarsi nel brano riprogramma solo le regioni.
 function liveGraph(live){const ctx=actxGet();if(!MIX.graph||MIX.graph.ctx!==ctx)MIX.graph=newGraph(ctx,mixOut());return syncGraph(MIX.graph,P.tracks,{live})}
 // Regioni del brano tra from ed end, a partire dall'istante when del contesto. Il guadagno segue i punti dell'inviluppo
@@ -83,7 +104,7 @@ function mixOut(){const ctx=actxGet();if(!MIX.out){MIX.out=ctx.createGain();MIX.
 // del metronomo; l'indicatore si ridisegna a ogni fotogramma.
 const cycleOn=()=>{const c=P.cycle;return c.on&&c.b>c.a+0.05&&!MIX.recording};
 const cycleKey=()=>cycleOn()?P.cycle.a+':'+P.cycle.b:'';
-function addPass(a,b,w){MIX.passes.push({a,b,w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}))}
+function addPass(a,b,w){MIX.passes.push({a,b,w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}));scheduleTrackAuto(actx,MIX.graph,a,w,b)}
 function mixPos(){if(!MIX.playing||!actx||!MIX.passes.length)return P.t;const now=actx.currentTime;let p=MIX.passes[0];for(const q of MIX.passes)if(q.w<=now)p=q;return Math.min(p.b,p.a+Math.max(0,now-p.w))}
 // Fermata: le regioni escono in 3 ms, i colpi del metronomo già programmati si staccano.
 function mixKill(){clearInterval(MIX.timer);cancelAnimationFrame(MIX.raf);const now=actx?.currentTime||0;
@@ -112,7 +133,7 @@ function songStop(){const o=MIX.playing?MIX.origin:0;mixStop(false);P.t=o;update
 // Mixaggio fuori linea: tutto il brano, oppure una sola traccia (only) con la sua sola catena, per esportarla da sola.
 // Si mixano 6 o 12 ms in più e si tolgono all'inizio: è il ritardo di limitatore e compressori.
 async function renderMix({only=null,from=0,to=null,rate=48000,limit=true}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');const tracks=only?P.tracks.filter(t=>t.id===only):P.tracks,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate);
- const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});if(!limit){gr.lim.threshold.value=0;gr.lim.ratio.value=1}scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
+ const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});if(!limit){gr.lim.threshold.value=0;gr.lim.ratio.value=1}scheduleTrackAuto(oc,gr,from,0,to,{only});scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
  for(let c=0;c<2;c++)res.copyToChannel(out.getChannelData(c).subarray(skip,skip+n),c);return res}
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.
 function songMarkers(rate){const out=[];for(const r of P.regions){const sr=SOURCES.get(r.src)?.sampleRate||rate;for(const m of r.markers||[]){const x=m.pos/sr;if(x<0||x>r.dur)continue;out.push({id:m.id,pos:Math.round((r.start+x)*rate),label:m.label})}}return out.sort((a,b)=>a.pos-b.pos)}
