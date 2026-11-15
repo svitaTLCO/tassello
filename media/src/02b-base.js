@@ -101,7 +101,7 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  for(const x of fields)if(x.type==='range'){const el=$('dlg_'+x.id),f=x.fmt||String;el.addEventListener('input',()=>{const t=f(Number(el.value));$('dlg_'+x.id+'_o').textContent=t;el.setAttribute('aria-valuetext',t)})}
  const finish=v=>{opts.onClose?.();bg.hidden=true;bg.onkeydown=null;bg.onmousedown=null;pane.innerHTML='';if(opts.restore!==false)refocus(prev);resolve(v)};
  if($('cancelDlg'))$('cancelDlg').onclick=()=>finish(null);
- (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane)});
+ (opts.buttons||[]).forEach((b,i)=>{$('dlgBtn'+i).onclick=()=>b.run(values(),pane,finish)});
  $('dialogForm').onsubmit=e=>{e.preventDefault();const v=values(),bad=opts.validate?.(v)||limits(v);
   if(bad){const err=typeof bad==='string'?{msg:bad}:{...bad};if(err.field===undefined&&fields.length===1)err.field=fields[0].id;showErr(err);return}finish(v)};
  $('dialogForm').addEventListener('input',e=>{if(e.target.getAttribute?.('aria-invalid'))clearErr()});

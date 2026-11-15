@@ -211,7 +211,7 @@ const AUTO_UI={vol:['Volume',-60,12,'dB'],pan:['Bilanciamento',-100,100,'%'],rev
 const autoManual=(t,k)=>k==='vol'?t.vol:k==='pan'?Math.round(t.pan*100):k==='reverb'?t.reverb:k==='low'?t.low:k==='high'?t.high:t.comp;
 const autoShow=(k,v)=>k==='vol'||k==='low'||k==='high'?fmtDb(v):k==='pan'?panWords(v):fmtNum(v,0)+'%';
 function autoTable(kind,list){const label=AUTO_UI[kind][0];
- const rows=list.length?list.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(autoShow(kind,p.v))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>';
+ const rows=list.length?list.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(autoShow(kind,p.v))}</td><td><button type="button" class="btn sm" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>';
  return `<table><caption>Punti: ${esc(label.toLowerCase())}</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Valore</th><th scope="col">Togli</th></tr></thead><tbody>${rows}</tbody></table>`}
 // Un bus è una traccia senza regioni: raccoglie le tracce che lo scelgono come uscita, con un volume, un
 // compressore e un riverbero soli.
@@ -304,7 +304,7 @@ async function compDialog(){const r=selRegion();if(!r){toast('Scegli prima una r
  const list=r.takes.map(t=>({...t})),end=r.start+r.dur;
  let draft=(r.comp||[]).map(c=>({...c}));
  const nameOf=id=>(list.find(t=>t.id===id)||{}).name||'—';
- const table=()=>`<table><caption>Sezioni di comping</caption><thead><tr><th scope="col">Da</th><th scope="col">A</th><th scope="col">Take</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((c,i)=>`<tr><th scope="row">${esc(fmtTime(r.start+c.from,2))}</th><td>${esc(fmtTime(r.start+c.to,2))}</td><td>${esc(nameOf(c.take))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli la sezione da ${esc(fmtTime(r.start+c.from,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="4">Nessuna sezione: suona la take attiva.</td></tr>'}</tbody></table>`;
+ const table=()=>`<table><caption>Sezioni di comping</caption><thead><tr><th scope="col">Da</th><th scope="col">A</th><th scope="col">Take</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((c,i)=>`<tr><th scope="row">${esc(fmtTime(r.start+c.from,2))}</th><td>${esc(fmtTime(r.start+c.to,2))}</td><td>${esc(nameOf(c.take))}</td><td><button type="button" class="btn sm" data-del="${i}" aria-label="Togli la sezione da ${esc(fmtTime(r.start+c.from,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="4">Nessuna sezione: suona la take attiva.</td></tr>'}</tbody></table>`;
  const render=()=>{const box=$('compList');if(box)box.innerHTML=table()};
  const add=(from,to,take)=>{const a=Math.max(0,from-r.start),b=Math.min(r.dur,to-r.start);if(!(b>a)){toast('La sezione è fuori dalla regione o è vuota');return}
   const out=[];for(const c of draft){if(c.to<=a||c.from>=b){out.push(c);continue}if(c.from<a)out.push({from:c.from,to:a,take:c.take});if(c.to>b)out.push({from:b,to:c.to,take:c.take})}
@@ -353,7 +353,7 @@ function clearRange(trackId,a,b){const out=[];for(const r of P.regions){if(r.tra
 // scrivono e si leggono come tempi del brano, che è come li pensa chi lavora.
 async function regionGainDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
  let draft=(r.gainAuto||[]).map(p=>({...p}));
- const table=()=>`<table><caption>Punti del guadagno</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Guadagno</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(r.start+p.t,2))}</th><td>${esc(fmtDb(p.v))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(r.start+p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>'}</tbody></table>`;
+ const table=()=>`<table><caption>Punti del guadagno</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Guadagno</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(r.start+p.t,2))}</th><td>${esc(fmtDb(p.v))}</td><td><button type="button" class="btn sm" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(r.start+p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto.</td></tr>'}</tbody></table>`;
  const render=()=>{const box=$('rgList');if(box)box.innerHTML=table()};
  const put=()=>{const time=parseTime($('dlg_time').value);if(!(time>=0)){toast('Tempo del punto non valido');return}
   const rel=time-r.start;if(rel<-0.001||rel>r.dur+0.001){toast(`Il punto deve stare dentro la regione, da ${fmtTime(r.start,2)} a ${fmtTime(regionEnd(r),2)}`);return}
@@ -377,7 +377,7 @@ function regionGainPoint(){const r=selRegion();if(!r){toast('Scegli prima una re
  announce(`Punto di guadagno a ${sayTime(at,2)}: ${fmtDb(cur)}`)}
 // ——— Limitatore finale: il tetto nel tempo. Spento, resta quello di sempre (−1,5 dB).
 async function limiterDialog(){let draft=(P.limiter?.ceil||[]).map(p=>({...p}));
- const table=()=>`<table><caption>Punti del tetto</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Tetto</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(fmtDb(p.v))}</td><td><button type="button" class="btn" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto: il tetto è fisso a −1,5 dB.</td></tr>'}</tbody></table>`;
+ const table=()=>`<table><caption>Punti del tetto</caption><thead><tr><th scope="col">Tempo</th><th scope="col">Tetto</th><th scope="col">Togli</th></tr></thead><tbody>${draft.length?draft.map((p,i)=>`<tr><th scope="row">${esc(fmtTime(p.t,2))}</th><td>${esc(fmtDb(p.v))}</td><td><button type="button" class="btn sm" data-del="${i}" aria-label="Togli il punto a ${esc(fmtTime(p.t,2))}">Togli</button></td></tr>`).join(''):'<tr><td colspan="3">Nessun punto: il tetto è fisso a −1,5 dB.</td></tr>'}</tbody></table>`;
  const render=()=>{const box=$('limList');if(box)box.innerHTML=table()};
  const put=()=>{const time=parseTime($('dlg_time').value);if(!(time>=0)){toast('Tempo del punto non valido');return}
   const v=clamp(num($('dlg_ceil').value),-20,0);if(!Number.isFinite(v)){toast('Tetto non valido');return}
