@@ -244,6 +244,8 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .stage{flex:1;min-height:120px;position:relative;background:var(--stage);border-radius:var(--r) var(--r) 0 0}
 .stage canvas{position:absolute;inset:10px;margin:auto;max-width:calc(100% - 20px);max-height:calc(100% - 20px);background:#000;box-shadow:0 2px 12px rgba(0,0,0,.25);border-radius:var(--r-xs);display:block;cursor:pointer}
 .stage canvas:focus-visible{outline:3px solid #fff;outline-offset:3px;box-shadow:0 0 0 6px #000}
+.stage .flash-box{position:absolute;border:3px dashed #ff3b30;background:rgba(255,59,48,.18);border-radius:4px;pointer-events:none;z-index:5;box-shadow:0 0 0 2px rgba(0,0,0,.55)}
+html[data-contrast=high] .stage .flash-box{border-color:#000;background:transparent;box-shadow:0 0 0 3px #fff}
 .viewer .transport{border-radius:0 0 var(--r) var(--r)}
 .media-item{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center}
 .media-item .thumb{width:64px;height:36px;border-radius:var(--r-xs);background:#222 center/cover no-repeat;display:grid;place-items:center;color:var(--on-solid)}
@@ -278,6 +280,8 @@ html[data-theme=dark] .tp-btn.rec{color:#ff7a7a}
 .tl-inner{position:relative;min-width:100%}
 .tl-ruler{height:26px;position:relative;border-bottom:1px solid var(--line);background:var(--surface);cursor:pointer}
 .tl-ruler canvas{position:absolute;left:0;top:0;height:100%;display:block}
+.flash-mark{position:absolute;bottom:0;width:3px;height:12px;background:#ff3b30;border-radius:1px;pointer-events:none}
+.flash-mark.red{background:#ff0000;box-shadow:0 0 0 1px #fff}
 .track{position:relative;height:var(--trk-h,46px);border-bottom:1px solid var(--line)}
 .track.tall{--trk-h:58px}
 .track:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}

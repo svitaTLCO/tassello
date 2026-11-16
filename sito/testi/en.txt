@@ -389,7 +389,7 @@ What it covers
 [dichiarazione.ambito]
     <ul>
       <li>Tassello Ufficio 1.12.1: Testo, Calcolo and Impagina</li>
-      <li>Tassello Media 1.18.0: Audio and Video</li>
+      <li>Tassello Media 1.19.0: Audio and Video</li>
       <li>Tassello Grafica 1.4.8: Immagini and Disegno</li>
       <li>this website and the verification page</li>
     </ul>
@@ -413,6 +413,7 @@ How we evaluated it
       <li>On 16 November 2026, a campaign with NVDA 2026.2 on Windows 11 in Chrome, across about 45 surfaces of the three apps: dialogs, error messages, sliders, reports, lists and tables. The interface was driven with keys sent to the document and NVDA’s speech log was read in full: it says what NVDA announces, not whether timing is comfortable.</li>
       <li>On 16 November 2026, with NVDA 2026.2 on Windows 11 in Chrome, we tested written measures in Impagina: the resolved value, the warning when a frame leaves the margins, the error when a measure is not understood, and the placement commands.</li>
       <li>On the same day, in Audio, NVDA read the recording dialog with the level sound and the three-second test: «Sei 7 dB troppo alto: abbassa di 7 dB».</li>
+      <li>Also on 16 November, a fixture with a full-screen flash, one on the right half and one red: NVDA reads three items with time, zone and area, and the «Vai» and «Mostra dove» buttons.</li>
     </ul>
 
 [dichiarazione.offre_titolo]
@@ -432,7 +433,7 @@ Known limitations
 [dichiarazione.limiti]
     <ul>
       <li>NVDA has been tested automatically on Windows 11 by reading its speech log; JAWS, Narrator, VoiceOver and TalkBack are still to be confirmed, especially for announcements joined into one sentence and for interactive areas: the photo, the histogram, the video preview, the Calcolo grid.</li>
-      <li>Some visual tasks are still hard without sight: following the cut-out edge in Immagini, exploring a drawing with a cursor, hearing light and colour before and after in Video. The flash check does not yet detect flashes on part of the screen or red flashes.</li>
+      <li>Some visual tasks are still hard without sight: following the cut-out edge in Immagini, exploring a drawing with a cursor, hearing light and colour before and after in Video.</li>
       <li>Descriptions measure pixels and sound without artificial intelligence: they do not recognise people or objects.</li>
     </ul>
 

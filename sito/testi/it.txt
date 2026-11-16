@@ -393,7 +393,7 @@ A che cosa si riferisce
 [dichiarazione.ambito]
     <ul>
       <li>Tassello Ufficio 1.12.1: Testo, Calcolo e Impagina</li>
-      <li>Tassello Media 1.18.0: Audio e Video</li>
+      <li>Tassello Media 1.19.0: Audio e Video</li>
       <li>Tassello Grafica 1.4.8: Immagini e Disegno</li>
       <li>questo sito e la pagina Verifica una copia</li>
     </ul>
@@ -417,6 +417,7 @@ Come l’abbiamo valutata
       <li>Il 16 novembre 2026, una campagna con NVDA 2026.2 su Windows 11 in Chrome, su circa 45 superfici delle tre app: finestre, errori, slider, report, elenchi e tabelle. L’interfaccia era pilotata con tasti inviati al documento e il log di sintesi è stato letto per intero: dice che cosa NVDA pronuncia, non se i tempi sono comodi.</li>
       <li>Il 16 novembre 2026, con NVDA 2026.2 su Windows 11 in Chrome, abbiamo provato le misure scritte in Impagina: il valore risolto, l’avviso quando la cornice esce dai margini, l’errore quando la misura non si capisce e i comandi di disposizione.</li>
       <li>Lo stesso giorno, in Audio, NVDA ha letto la finestra di registrazione con il suono del livello e la prova di tre secondi: «Sei 7 dB troppo alto: abbassa di 7 dB».</li>
+      <li>Sempre il 16 novembre, un video di prova con un lampo a schermo intero, uno sulla metà destra e uno rosso: NVDA legge tre punti con tempo, zona e area, e i pulsanti «Vai» e «Mostra dove».</li>
     </ul>
 
 [dichiarazione.offre_titolo]
@@ -436,7 +437,7 @@ Limiti noti
 [dichiarazione.limiti]
     <ul>
       <li>Le prove con NVDA sono state fatte in modo automatico su Windows 11, leggendo il log di sintesi; restano da confermare JAWS, Narrator, VoiceOver e TalkBack, soprattutto per gli annunci uniti in una frase e per le aree interattive: la foto, l’istogramma, l’anteprima video, la griglia di Calcolo.</li>
-      <li>Alcuni compiti visivi restano difficili senza vista: seguire il bordo dello scontorno in Immagini, esplorare un disegno con un cursore, sentire luce e colore prima e dopo in Video. La verifica dei lampeggiamenti non riconosce ancora i lampi su una parte dello schermo né quelli rossi.</li>
+      <li>Alcuni compiti visivi restano difficili senza vista: seguire il bordo dello scontorno in Immagini, esplorare un disegno con un cursore, sentire luce e colore prima e dopo in Video.</li>
       <li>Le descrizioni misurano pixel e suono, senza intelligenza artificiale: non riconoscono persone o oggetti.</li>
     </ul>
 

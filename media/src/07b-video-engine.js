@@ -93,34 +93,60 @@ async function exportVideoDialog(){const T=totalDur();if(T<=0){toast('La linea t
  if(!r)return;prefs.videoFormat=r.fmt;savePrefs();const opts={bps:Number(r.q)*1e6,burn:r.burn,srt:r.srt,name:r.name||V.p.title};if(plan.ok){await fastExport(plan,{fmt:r.fmt,...opts});return}const type=types.find(x=>x[1]===r.fmt)||types[0];await runExport({mime:type[0],ext:type[1],...opts})}
 async function runExport({mime,ext,bps,burn,srt,name}){vStop();const T=totalDur(),ctx=actxGet();await ctx.resume();const stream=view.captureStream(V.p.fps),dest=ctx.createMediaStreamDestination();vMaster().limiter.connect(dest);
  const rec=new MediaRecorder(new MediaStream([...stream.getVideoTracks(),...dest.stream.getAudioTracks()]),{mimeType:mime,videoBitsPerSecond:bps,audioBitsPerSecond:192000}),chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
- let finish;const done=new Promise(res=>{finish=res});VE.exp={rec,burn,T,lum:[],finish,lastPct:-1,step:-1,completed:false,close:null};
+ let finish;const done=new Promise(res=>{finish=res});VE.exp={rec,burn,T,lum:[],tiles:[],finish,lastPct:-1,step:-1,completed:false,close:null};
  modal('Esportazione del video',`<p>Il montaggio scorre nell’anteprima mentre viene registrato. Puoi annullare in qualsiasi momento.</p><div class="progress" id="expBar" role="progressbar" aria-label="Avanzamento dell’esportazione" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div><p id="expText">Preparazione…</p>`,[],'Annulla l’esportazione',{noCancel:true,restore:false,onOpen:(pane,close)=>{VE.exp.close=close}}).then(()=>{if(VE.exp&&!VE.exp.completed)VE.exp.finish('cancel')});
  V.t=0;VE.frame++;await showFrame(0);rec.start(1000);announce('Esportazione avviata');vPlay();
  const outcome=await done,exp=VE.exp;exp.completed=true;vStop();await new Promise(r=>{rec.onstop=r;if(rec.state!=='inactive')rec.stop();else r()});try{vMaster().limiter.disconnect(dest)}catch(e){}stream.getTracks().forEach(t=>t.stop());exp.close?.(null);VE.exp=null;$('viewCanvas').focus();
  if(outcome==='cancel'){toast('Esportazione annullata');return}
  let blob=new Blob(chunks,{type:mime.split(';')[0]});if(ext==='webm')blob=await fixWebmDuration(blob,T*1000);const file=extName(name,ext);download(blob,file);if(srt&&V.p.subs.length)download(srtText(V.p.subs),extName(name,'srt'),'application/x-subrip');
- await lumDone(exp);const warn=flashWarnings(exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');
- toast(`Video esportato: ${file} (${fmtBytes(blob.size)}).${warn.length?` Attenzione: possibili lampeggiamenti pericolosi a ${warn.slice(0,3).map(w=>fmtTime(w,0)).join(', ')}. Apri Verifica l’accessibilità.`:''}`)}
+ await lumDone(exp);const events=flashEvents(exp.lum,exp.tiles);V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:events.map(e=>e.t),events};schedulePersist('video');
+ toast(`Video esportato: ${file} (${fmtBytes(blob.size)}).${events.length?` Attenzione: possibili lampeggiamenti pericolosi a ${events.slice(0,3).map(e=>fmtTime(e.t,0)).join(', ')}. Apri Verifica l’accessibilità.`:''}`)}
 // Durante l'esportazione: avanzamento e misura della luminosità media di ogni fotogramma, per trovare i lampeggiamenti.
-const lumCanvas=document.createElement('canvas');lumCanvas.width=32;lumCanvas.height=18;const lumG=lumCanvas.getContext('2d',{willReadFrequently:true});
+const lumCanvas=document.createElement('canvas');lumCanvas.width=32;lumCanvas.height=24;const lumG=lumCanvas.getContext('2d',{willReadFrequently:true});
 const linear=v=>{v/=255;return v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4};
-function frameLuminance(src){lumG.drawImage(src,0,0,32,18);const d=lumG.getImageData(0,0,32,18).data;let s=0;for(let i=0;i<d.length;i+=4)s+=0.2126*linear(d[i])+0.7152*linear(d[i+1])+0.0722*linear(d[i+2]);return s/(d.length/4)}
-// Il fotogramma si riduce a 32 × 18 fuori dalla pagina (createImageBitmap): leggerlo intero bloccherebbe il disegno
+// 32 × 24 → 48 tessere da 4 × 4: per ognuna la luminanza relativa media e la quota di pixel rosso saturo
+// (R/(R+G+B) ≥ 0,8, la definizione WCAG dei lampi rossi). Le finestre da 4 × 3 tessere sono un quarto d'area.
+function frameTiles(src){lumG.drawImage(src,0,0,32,24);const d=lumG.getImageData(0,0,32,24).data,L=new Float32Array(48),R=new Float32Array(48);
+ for(let y=0;y<24;y++)for(let x=0;x<32;x++){const i=(y*32+x)*4,r=d[i],g=d[i+1],b=d[i+2],ti=((y>>2)*8)+(x>>2);
+  L[ti]+=(0.2126*linear(r)+0.7152*linear(g)+0.0722*linear(b))/16;const sum=r+g+b;if(sum>0&&r/sum>=.8)R[ti]+=1/16}
+ const pack=new Uint8Array(96);let total=0;for(let i=0;i<48;i++){total+=L[i];pack[i]=Math.round(clamp(L[i],0,1)*255);pack[48+i]=Math.round(clamp(R[i],0,1)*255)}return {L:total/48,pack}}
+// Il fotogramma si riduce a 32 × 24 fuori dalla pagina (createImageBitmap): leggerlo intero bloccherebbe il disegno
 // per circa 14 ms in 1080p e all'esportazione si perderebbero fotogrammi. Le misure arrivano poco dopo, in ordine di tempo.
-function measureFrame(e,t,src=view){e.inflight=(e.inflight||0)+1;createImageBitmap(src,{resizeWidth:32,resizeHeight:18,resizeQuality:'medium'}).then(b=>{e.lum.push([t,frameLuminance(b)]);b.close()}).catch(()=>{}).finally(()=>{if(--e.inflight===0)e.idle?.()})}
+function measureFrame(e,t,src=view){e.inflight=(e.inflight||0)+1;createImageBitmap(src,{resizeWidth:32,resizeHeight:24,resizeQuality:'medium'}).then(b=>{const m=frameTiles(b);e.lum.push([t,m.L]);e.tiles.push([t,m.pack]);b.close()}).catch(()=>{}).finally(()=>{if(--e.inflight===0)e.idle?.()})}
 const lumDone=e=>e.inflight?new Promise(r=>{e.idle=r}):Promise.resolve();
 function expFrame(t,src=view){const e=VE.exp;measureFrame(e,t,src);const pct=Math.floor(t/e.T*100);if(pct!==e.lastPct){e.lastPct=pct;const bar=$('expBar');if(bar){bar.setAttribute('aria-valuenow',pct);bar.setAttribute('aria-valuetext',`${pct}%, ${sayTime(t)} di ${sayTime(e.T)}`);bar.firstChild.style.width=pct+'%';$('expText').textContent=`${pct}% · ${fmtTime(t,0)} di ${fmtTime(e.T,0)}`}const step=Math.floor(pct/10);if(step!==e.step&&step>0){e.step=step;announce(`${e.word||'Esportazione'} al ${step*10}%`)}}}
 // Impronta di ciò che si vede: se cambia, l'analisi dei lampeggiamenti va rifatta.
 function visualKey(){const s=JSON.stringify([V.p.main,V.p.titles,V.p.w,V.p.h,V.p.fps,V.p.bg,V.p.burnSubs&&V.p.subs]);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36)}
-// Lampeggiamenti (WCAG 2.3.1): coppie di variazioni opposte di luminosità di almeno il 10%, più di tre in un secondo.
-function flashWarnings(series){const ev=[];if(series.length<2)return[];let ext=series[0][1],trend=0;for(const [t,L] of series){if(trend>=0){if(L>ext)ext=L;else if(ext-L>=0.1&&Math.min(ext,L)<0.8){ev.push(t);trend=-1;ext=L}}else{if(L<ext)ext=L;else if(L-ext>=0.1&&Math.min(ext,L)<0.8){ev.push(t);trend=1;ext=L}}}
- const out=[];for(let i=0,j=0;i<ev.length;i++){while(ev[i]-ev[j]>1)j++;if(i-j+1>6&&(!out.length||ev[i]-out.at(-1)>2))out.push(ev[j])}return out}
+// Un lampo è una coppia di variazioni opposte; più di tre in un secondo sono pericolosi. Si cerca su ogni
+// finestra da un quarto d'area, così valgono anche i lampi su una parte dello schermo, e si distinguono i rossi.
+function scanFlash(series,step,cond,emit){let ext=series[0][1],trend=0;const ev=[];
+ for(let i=1;i<series.length;i++){const [t,v]=series[i];if(trend>=0){if(v>ext)ext=v;else if(ext-v>=step&&cond(ext,v)){ev.push([t,ext-v]);trend=-1;ext=v}}else{if(v<ext)ext=v;else if(v-ext>=step&&cond(ext,v)){ev.push([t,v-ext]);trend=1;ext=v}}}
+ // Un burst è una serie di transizioni senza pause di almeno 0,3 s. Dentro un burst bastano sette
+ // transizioni in un secondo (più di tre lampi) per l'avviso; un burst nuovo è un avviso nuovo.
+ let start=0;
+ for(let i=1;i<=ev.length;i++)if(i===ev.length||ev[i][0]-ev[i-1][0]>.3){
+  const burst=ev.slice(start,i);
+  if(burst.length>=7){let ok=false;for(let a=0,b=0;a<burst.length;a++){while(burst[a][0]-burst[b][0]>1)b++;if(a-b+1>=7){ok=true;break}}
+   if(ok)emit(burst[0][0],Math.max(...burst.map(x=>x[1])))}
+  start=i}}
+function flashEvents(lum,tiles){const frames=(tiles||[]).filter(x=>x&&x[1] instanceof Uint8Array).sort((a,b)=>a[0]-b[0]);if(frames.length<2)return[];
+ const series=[];for(let wy=0;wy<4;wy++)for(let wx=0;wx<5;wx++)series.push({wx,wy,l:[],r:[]});
+ for(const [t,pack] of frames)for(const w of series){let l=0,r=0;for(let y=0;y<3;y++)for(let x=0;x<4;x++){const i=((w.wy+y)*8)+(w.wx+x);l+=pack[i];r+=pack[48+i]}w.l.push([t,l/12/255]);w.r.push([t,r/12/255])}
+ const raw=[];for(const w of series){scanFlash(w.l,.1,(a,b)=>Math.min(a,b)<.8,(t,swing)=>raw.push({t,kind:'lum',wx:w.wx,wy:w.wy,swing}));
+  scanFlash(w.r,.25,(a,b)=>Math.max(a,b)>=.6,(t,swing)=>raw.push({t,kind:'red',wx:w.wx,wy:w.wy,swing}))}
+ const groups=[];for(const e of raw.sort((a,b)=>a.t-b.t||a.kind.localeCompare(b.kind))){const g=groups.at(-1);if(g&&g.kind===e.kind&&e.t-g.end<=.25){g.items.push(e);g.end=e.t}else groups.push({kind:e.kind,t:e.t,end:e.t,items:[e]})}
+ const out=[];
+ for(const g of groups){const max=Math.max(...g.items.map(x=>x.swing)),keep=g.items.filter(x=>x.swing>=Math.max(.08,max*.8)),xs=keep.map(x=>x.wx),ys=keep.map(x=>x.wy);
+  const x0=Math.min(...xs)*12.5,x1=(Math.max(...xs)+4)*12.5,y0=Math.min(...ys)*100/6,y1=(Math.max(...ys)+3)*100/6;
+  out.push({t:g.t,kind:g.kind,x:x0,y:y0,w:x1-x0,h:y1-y0,share:(x1-x0)*(y1-y0)/100})}
+ // Un lampo rosso è anche un lampo di luminanza: si tiene quello rosso e si toglie il doppione.
+ return out.filter(e=>e.kind==='red'||!out.some(x=>x.kind==='red'&&Math.abs(x.t-e.t)<=.2&&Math.min(x.x+x.w,e.x+e.w)>Math.max(x.x,e.x)&&Math.min(x.y+x.h,e.y+e.h)>Math.max(x.y,e.y))).sort((a,b)=>a.t-b.t)}
 // Analisi dei lampeggiamenti senza esportare: il montaggio scorre senza audio e si misura ogni fotogramma.
 async function analyzeFlashes(){const T=totalDur();if(T<=0){toast('La linea temporale è vuota');return null}if((await fastPlan()).decodable)return fastFlashes();vStop();vMaster().gain.value=0;let finish;const done=new Promise(r=>{finish=r});
- VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:V.p.burnSubs,T,lum:[],finish,lastPct:-1,step:-1,completed:false,close:null,word:'Analisi'};
+ VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:V.p.burnSubs,T,lum:[],tiles:[],finish,lastPct:-1,step:-1,completed:false,close:null,word:'Analisi'};
  modal('Analisi dei lampeggiamenti',`<p>Il montaggio scorre senza audio e viene misurata la luminosità di ogni fotogramma. Dura circa ${esc(sayTime(T))}.</p><div class="progress" id="expBar" role="progressbar" aria-label="Avanzamento dell’analisi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div><p id="expText">Preparazione…</p>`,[],'Annulla',{noCancel:true,restore:false,onOpen:(p,close)=>{VE.exp.close=close}}).then(()=>{if(VE.exp&&!VE.exp.completed)VE.exp.finish('cancel')});
  V.t=0;await showFrame(0);vPlay();const outcome=await done,exp=VE.exp;exp.completed=true;vStop();exp.close?.(null);VE.exp=null;vMaster().gain.value=1;if(outcome==='cancel'){toast('Analisi annullata');return null}
- await lumDone(exp);const warn=flashWarnings(exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
+ await lumDone(exp);const events=flashEvents(exp.lum,exp.tiles);V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:events.map(e=>e.t),events};schedulePersist('video');return events}
 // Solo audio: mixaggio fuori linea delle clip e della traccia audio (di ogni file si legge solo il tratto usato), molto più veloce del tempo reale.
 // Le clip accelerate o rallentate mantengono l'intonazione, come nell'anteprima.
 const decoded=new Map();

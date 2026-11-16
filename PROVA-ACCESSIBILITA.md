@@ -348,6 +348,14 @@ Domande: come hai trovato il punto? Avresti voluto sentire l'audio mentre ti spo
 
 Domande: sai dove sta il titolo sullo schermo e se si legge bene? Il sottotitolo comincia insieme alla frase o in ritardo? Il titolo copre i sottotitoli?
 
+**Compito V4 (nuovo): i lampeggiamenti.**
+
+1. Apri un video con un lampo a schermo intero e uno su una parte dello schermo, per esempio un cartello che lampeggia solo a destra. Se puoi, aggiungi un lampo rosso.
+2. Con Alt+Q cerca «Verifica l'accessibilità del video» e premi «Analizza i lampeggiamenti».
+3. Leggi i punti: ognuno dice il tempo, la zona e la percentuale d'area. Premi «Vai» per andare al punto; poi «Mostra dove» per vedere il riquadro sull'anteprima.
+
+Domande: capisci dove e quando lampeggia? La zona a parole e la percentuale d'area ti bastano? Il punto è quello giusto? Se il video è tuo, sapresti dire che cosa cambiare?
+
 ### Immagini (Tassello Grafica)
 
 Apri Tassello Grafica: si apre Immagini. Le tue foto originali non vengono mai modificate: Tassello salva sempre un file nuovo.

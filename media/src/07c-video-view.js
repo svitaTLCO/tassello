@@ -12,7 +12,11 @@ function itemLabel(kind,it,i,n){const x=it.x,parts=[];const noun={main:'Clip',ti
  else if(kind==='subs'){const cps=x.text.replace(/\s+/g,' ').length/Math.max(0.1,x.end-x.start);if(cps>17)parts.push(`veloce, ${Math.round(cps)} caratteri al secondo`)}return parts.join(', ')}
 function tlWidth(){return Math.max(tlScroll.clientWidth,Math.ceil((totalDur()+8)*V.pxs))}
 const EMPTY_TRACK={main:'Traccia video vuota: aggiungi un file dalla raccolta con Invio, oppure un cartello',titles:'Nessun titolo: Aggiungi titolo li mette all’indicatore',audio:'Nessuna musica o voce fuori campo',subs:'Nessun sottotitolo: Ctrl+Alt+S ne aggiunge uno all’indicatore'};
-function drawTimeline(){if(isAudio())return;tlInner.style.width=tlWidth()+'px';drawTlRuler();for(const kind of TRACKS)renderTrack(kind);placePlayhead(VE.playing?nowT():V.t);updateZoomUI()}
+function drawTimeline(){if(isAudio())return;tlInner.style.width=tlWidth()+'px';drawTlRuler();for(const kind of TRACKS)renderTrack(kind);placePlayhead(VE.playing?nowT():V.t);renderFlashMarks();updateZoomUI()}
+// I segni dei lampeggiamenti trovati, sulla riga del tempo: rossi per i lampi rossi. Il testo accessibile è
+// nell'elenco della verifica; questi servono a chi guarda.
+function renderFlashMarks(){const host=$('tlRuler');if(!host)return;for(const x of host.querySelectorAll('.flash-mark'))x.remove();const fl=V.p.flash;if(!fl||fl.key!==visualKey())return;
+ for(const ev of fl.events||[]){const m=document.createElement('div');m.className='flash-mark'+(ev.kind==='red'?' red':'');m.style.left=(ev.t*V.pxs)+'px';m.title=`${ev.kind==='red'?'Lampo rosso':'Lampeggiamento'} a ${fmtTime(ev.t,0)}`;m.setAttribute('aria-hidden','true');host.appendChild(m)}}
 function renderTrack(kind){const el=$('trk-'+kind),items=itemsOf(kind),n=items.length;if(!n){el.innerHTML=`<div class="lb-empty" role="option" aria-disabled="true" aria-selected="false" id="it-empty-${kind}" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);white-space:nowrap">${esc(EMPTY_TRACK[kind])}</div>`;el.setAttribute('aria-activedescendant','it-empty-'+kind);el.setAttribute('aria-label',TRACK_NAME[kind]+', vuota');return}
  const selId=V.sel?.kind===kind?V.sel.id:null;if(!items.some(it=>it.x.id===TL_ACTIVE[kind]))TL_ACTIVE[kind]=selId||items[0].x.id;if(selId)TL_ACTIVE[kind]=selId;
  el.innerHTML=items.map((it,i)=>{const x=it.x,m=kind==='main'&&x.kind!=='card'?mediaMeta(x.media):null,cls=kind==='main'?(x.kind==='card'?'k-card':m?.type==='image'?'k-image':'k-video'):'k-'+(kind==='titles'?'title':kind==='subs'?'sub':'audio'),w=Math.max(4,(it.end-it.start)*V.pxs),badge=kind==='main'?[x.speed!==1?fmtNum(x.speed,x.speed%1?2:0)+'×':'',x.filter!=='none'?FILTERS[x.filter][0]:'',x.mute?'muto':''].filter(Boolean).join(' · '):'';
@@ -160,3 +164,11 @@ $('inspBody').addEventListener('change',e=>{if(e.target.dataset.f)applyInspector
 $('inspBody').addEventListener('input',e=>{const el=e.target,f=inspFieldsNow.find(x=>x.id===el.dataset?.f);if(el.type==='range'&&f)el.setAttribute('aria-valuetext',f.fmt(Number(el.value)));if(el.type==='color'&&f&&$(el.id+'_c'))$(el.id+'_c').textContent=colorHint(f,el.value);if(el.type!=='range')inspClear(el)});
 $('inspBody').addEventListener('keydown',e=>{const el=e.target;if(e.key==='Enter'&&el.matches('input[type=text]')){e.preventDefault();applyInspector(el)}else if(e.key==='Escape'){e.preventDefault();renderInspector();(V.sel?$('trk-'+V.sel.kind):playheadEl).focus()}});
 $('inspBody').addEventListener('submit',e=>e.preventDefault());
+
+// Il riquadro che mostra dove è stato trovato un lampo, sopra l'anteprima e per tre secondi.
+let flashBoxTimer=0;
+function showFlashBox(ev){const st=$('stage'),cv=$('viewCanvas'),box=$('flashBox');if(!st||!cv||!box||!ev)return;
+ const S=st.getBoundingClientRect(),C=cv.getBoundingClientRect();if(!C.width||!C.height)return;
+ box.hidden=false;box.style.left=(C.left-S.left+ev.x/100*C.width)+'px';box.style.top=(C.top-S.top+ev.y/100*C.height)+'px';
+ box.style.width=(ev.w/100*C.width)+'px';box.style.height=(ev.h/100*C.height)+'px';
+ clearTimeout(flashBoxTimer);flashBoxTimer=setTimeout(()=>{box.hidden=true},3000)}

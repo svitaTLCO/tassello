@@ -77,7 +77,7 @@ async function pickAccel(cfg){let best='no-preference',bestMs=Infinity;const W=c
    await enc.flush();const ms=performance.now()-t0;if(!err&&ms<bestMs){bestMs=ms;best=hw}}catch(e){}finally{try{enc.close()}catch(e){}}}
  return best}
 // Finestra di avanzamento comune a esportazione e analisi; annullare ferma il lavoro al fotogramma seguente.
-function progressDialog(title,intro,button,what){let cancelled=false;VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:false,T:totalDur(),lum:[],finish:()=>{cancelled=true},lastPct:-1,step:-1,completed:false,close:null};
+function progressDialog(title,intro,button,what){let cancelled=false;VE.exp={rec:{state:'inactive',pause(){},resume(){}},burn:false,T:totalDur(),lum:[],tiles:[],finish:()=>{cancelled=true},lastPct:-1,step:-1,completed:false,close:null};
  modal(title,`<p>${intro}</p><div class="progress" id="expBar" role="progressbar" aria-label="${what}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div></div></div><p id="expText">Preparazione…</p>`,[],button,{noCancel:true,restore:false,onOpen:(p,close)=>{VE.exp.close=close}}).then(()=>{if(VE.exp&&!VE.exp.completed)cancelled=true});
  return{exp:VE.exp,cancelled:()=>cancelled,text:s=>{const el=$('expText');if(el)el.textContent=s},end:()=>{const e=VE.exp;if(e){e.completed=true;e.close?.(null)}VE.exp=null;requestFrame()}}}
 async function fastExport(plan,{fmt,bps,burn,srt,name}){vStop();const f=plan.formats.find(x=>x.ext===fmt)||plan.formats[0],W=V.p.w,H=V.p.h,fps=V.p.fps,T=totalDur();
@@ -98,13 +98,13 @@ async function fastExport(plan,{fmt,bps,burn,srt,name}){vStop();const f=plan.for
   if(f.ext==='mp4'&&!desc)throw Error('il codificatore H.264 non ha fornito la configurazione');
   const blob=f.ext==='mp4'?mp4Movie({video:{width:W,height:H,desc,packets},audio}):webmMovie({video:{codec:f.codec==='vp8'?'vp8':'vp9',width:W,height:H,packets},audio});
   const file=extName(name,f.ext);download(blob,file);if(srt&&V.p.subs.length)download(srtText(V.p.subs),extName(name,'srt'),'application/x-subrip');
-  await lumDone(ui.exp);const warn=flashWarnings(ui.exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');const secs=(performance.now()-t0)/1000;
-  toast(`Video esportato: ${file} (${fmtBytes(blob.size)}), in ${sayTime(secs)} per ${sayTime(T)} di montaggio.${warn.length?` Attenzione: possibili lampeggiamenti pericolosi a ${warn.slice(0,3).map(w=>fmtTime(w,0)).join(', ')}. Apri Verifica l’accessibilità.`:''}`)}
+  await lumDone(ui.exp);const events=flashEvents(ui.exp.lum,ui.exp.tiles);V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:events.map(e=>e.t),events};schedulePersist('video');const secs=(performance.now()-t0)/1000;
+  toast(`Video esportato: ${file} (${fmtBytes(blob.size)}), in ${sayTime(secs)} per ${sayTime(T)} di montaggio.${events.length?` Attenzione: possibili lampeggiamenti pericolosi a ${events.slice(0,3).map(e=>fmtTime(e.t,0)).join(', ')}. Apri Verifica l’accessibilità.`:''}`)}
  catch(e){console.error('Esportazione fotogramma per fotogramma non riuscita',e);fastBroken=true;toast('Esportazione non riuscita ('+(e.message||e)+'). Riprova: si userà l’esportazione in tempo reale.')}
  finally{try{if(enc&&enc.state!=='closed')enc.close()}catch(e){}ui.end()}}
 // Analisi dei lampeggiamenti senza esportare, un fotogramma alla volta.
 async function fastFlashes(){vStop();const ui=progressDialog('Analisi dei lampeggiamenti','Si misura la luminosità di ogni fotogramma, senza far scorrere il montaggio.','Annulla','Avanzamento dell’analisi');ui.exp.burn=V.p.burnSubs;ui.exp.word='Analisi';
  try{const ok=await renderFrames({burn:V.p.burnSubs,stop:ui.cancelled,onFrame:(k,t,xc)=>expFrame(t,xc)});if(!ok){toast('Analisi annullata');return null}
-  await lumDone(ui.exp);const warn=flashWarnings(ui.exp.lum.sort((x,y)=>x[0]-y[0]));V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:warn};schedulePersist('video');return warn}
+  await lumDone(ui.exp);const events=flashEvents(ui.exp.lum,ui.exp.tiles);V.p.flash={when:new Date().toISOString(),key:visualKey(),warnings:events.map(e=>e.t),events};schedulePersist('video');return events}
  catch(e){console.error('Analisi fotogramma per fotogramma non riuscita',e);fastBroken=true;toast('Analisi non riuscita: riprova, si userà l’analisi in tempo reale');return null}
  finally{ui.end()}}

@@ -390,7 +390,7 @@ Ce qu’elle couvre
 [dichiarazione.ambito]
     <ul>
       <li>Tassello Ufficio 1.12.1&nbsp;: Testo, Calcolo et Impagina</li>
-      <li>Tassello Media 1.18.0&nbsp;: Audio et Video</li>
+      <li>Tassello Media 1.19.0&nbsp;: Audio et Video</li>
       <li>Tassello Grafica 1.4.8&nbsp;: Immagini et Disegno</li>
       <li>ce site et la page de vérification</li>
     </ul>
@@ -414,6 +414,7 @@ Comment nous l’avons évaluée
       <li>Le 16 novembre 2026, une campagne avec NVDA 2026.2 sous Windows 11 dans Chrome, sur environ 45 surfaces des trois applications : fenêtres, erreurs, curseurs, rapports, listes et tableaux. L’interface était pilotée par des touches envoyées au document et le journal de synthèse a été lu en entier : il dit ce que NVDA prononce, pas si les temps sont confortables.</li>
       <li>Le 16 novembre 2026, avec NVDA 2026.2 sous Windows 11 dans Chrome, nous avons testé les mesures écrites dans Impagina : la valeur calculée, l’avertissement lorsqu’un bloc sort des marges, l’erreur lorsqu’une mesure n’est pas comprise et les commandes de disposition.</li>
       <li>Le même jour, dans Audio, NVDA a lu la fenêtre d’enregistrement avec le son du niveau et l’essai de trois secondes : «Sei 7 dB troppo alto: abbassa di 7 dB».</li>
+      <li>Toujours le 16 novembre, une vidéo d’essai avec un éclair plein écran, un sur la moitié droite et un rouge : NVDA lit trois points avec le temps, la zone et la surface, et les boutons «Vai» et «Mostra dove».</li>
     </ul>
 
 [dichiarazione.offre_titolo]
@@ -433,7 +434,7 @@ Limites connues
 [dichiarazione.limiti]
     <ul>
       <li>NVDA a été essayé automatiquement sous Windows 11 en lisant son journal de synthèse ; JAWS, Narrator, VoiceOver et TalkBack restent à confirmer, surtout pour les annonces réunies en une phrase et pour les zones interactives&nbsp;: la photo, l’histogramme, l’aperçu vidéo, la grille de Calcolo.</li>
-      <li>Certaines tâches visuelles restent difficiles sans la vue&nbsp;: suivre le bord du détourage dans Immagini, explorer un dessin avec un curseur, entendre la lumière et la couleur avant et après dans Video. La vérification des clignotements ne détecte pas encore les éclairs sur une partie de l’écran ni les éclairs rouges.</li>
+      <li>Certaines tâches visuelles restent difficiles sans la vue&nbsp;: suivre le bord du détourage dans Immagini, explorer un dessin avec un curseur, entendre la lumière et la couleur avant et après dans Video.</li>
       <li>Les descriptions mesurent les pixels et le son, sans intelligence artificielle&nbsp;: elles ne reconnaissent ni les personnes ni les objets.</li>
     </ul>
 
