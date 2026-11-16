@@ -216,6 +216,8 @@ Apri Tassello Media: si apre Audio. Metti le cuffie.
 3. Parla per qualche secondo e premi «Tempo e livello»: ti dice se il livello è buono, basso o troppo alto.
 4. Premi Avvia, leggi una frase di due o tre righe, poi premi Ferma e inserisci la registrazione. Se il progetto ha un metronomo, riascolta: gli impulsi devono tacere.
 
+4. Se il guadagno consigliato ti serve, premi «Applica … a questa registrazione»: l'annuncio dice quanto è stato applicato e il pulsante diventa «Togli il guadagno…».
+
 Domande: gli impulsi ti dicono se sei troppo alto o troppo basso senza interrompere la frase? Il misuratore sullo schermo dice la stessa cosa degli impulsi? La prova di tre secondi ti ha dato un guadagno utile? Con il metronomo acceso gli impulsi tacciono, o si confondono con i colpi? Alla fine sapevi com'era venuta la registrazione?
 
 **Compito A2 (principale): ripulire la registrazione.**

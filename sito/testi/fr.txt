@@ -390,7 +390,7 @@ Ce qu’elle couvre
 [dichiarazione.ambito]
     <ul>
       <li>Tassello Ufficio 1.12.1&nbsp;: Testo, Calcolo et Impagina</li>
-      <li>Tassello Media 1.19.0&nbsp;: Audio et Video</li>
+      <li>Tassello Media 1.19.1&nbsp;: Audio et Video</li>
       <li>Tassello Grafica 1.4.8&nbsp;: Immagini et Disegno</li>
       <li>ce site et la page de vérification</li>
     </ul>
@@ -413,7 +413,7 @@ Comment nous l’avons évaluée
       <li>Des essais avec des personnes aveugles, en cours, avec le <a href="https://github.com/svitaTLCO/tassello/blob/main/PROVA-ACCESSIBILITA.md">guide d’essai</a> (en italien).</li>
       <li>Le 16 novembre 2026, une campagne avec NVDA 2026.2 sous Windows 11 dans Chrome, sur environ 45 surfaces des trois applications : fenêtres, erreurs, curseurs, rapports, listes et tableaux. L’interface était pilotée par des touches envoyées au document et le journal de synthèse a été lu en entier : il dit ce que NVDA prononce, pas si les temps sont confortables.</li>
       <li>Le 16 novembre 2026, avec NVDA 2026.2 sous Windows 11 dans Chrome, nous avons testé les mesures écrites dans Impagina : la valeur calculée, l’avertissement lorsqu’un bloc sort des marges, l’erreur lorsqu’une mesure n’est pas comprise et les commandes de disposition.</li>
-      <li>Le même jour, dans Audio, NVDA a lu la fenêtre d’enregistrement avec le son du niveau et l’essai de trois secondes : «Sei 7 dB troppo alto: abbassa di 7 dB».</li>
+      <li>Le même jour, dans Audio, NVDA a lu la fenêtre d’enregistrement avec le son du niveau et l’essai de trois secondes : «Sei 7 dB troppo alto: abbassa di 7 dB». Le gain suggéré s’applique en un clic et l’annonce dit combien a été appliqué.</li>
       <li>Toujours le 16 novembre, une vidéo d’essai avec un éclair plein écran, un sur la moitié droite et un rouge : NVDA lit trois points avec le temps, la zone et la surface, et les boutons «Vai» et «Mostra dove».</li>
     </ul>
 
