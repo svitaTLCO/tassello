@@ -30,6 +30,7 @@ const V_ACTIONS={saveProject:saveProjectZip,exportVideo:exportVideoDialog,export
  undo:()=>vUndo(false),redo:()=>vUndo(true),cut:()=>videoCopy(true),copy:()=>videoCopy(false),paste:videoPaste,playPause:vPlayPause,stop:()=>{const o=VE.origin??0;vStop();seekTo(o,{say:true})},
  toStart:()=>seekTo(0,{say:true}),toEnd:()=>seekTo(totalDur(),{say:true}),zoomIn:()=>zoomTimeline(1.5),zoomOut:()=>zoomTimeline(1/1.5),zoomFit:zoomFitTimeline,readStatus:readVideoStatus};
 const COMMON_ACTIONS={new:()=>isAudio()?newAudio():newVideo(),open:()=>pickFile('open'),filePanel:openFilePanel,palette:openPalette,shortcuts:showShortcuts,help,nextRegion:()=>cycleRegion(1),prevRegion:()=>cycleRegion(-1),
+ midiPanel:()=>midiPanel(),
  switchAudio:()=>setMode('audio'),switchVideo:()=>setMode('video'),layoutMenu,layoutReset,showLibrary:()=>paneToggle('libPane'),showInspector:()=>paneToggle('inspPane'),bigPreview:()=>layoutPreset('tessera'),goTo:goToDialog,follow:()=>{prefs.follow=!prefs.follow;savePrefs()},
  themeDark:()=>{prefs.theme=prefs.theme==='dark'?'light':'dark';applyPrefs();savePrefs()},contrast:()=>{prefs.contrast=!prefs.contrast;applyPrefs();savePrefs()}};
 async function handleAction(id){const f=(isAudio()?A_ACTIONS[id]:V_ACTIONS[id])??COMMON_ACTIONS[id];if(!f){toast('Comando non disponibile');return}await f()}

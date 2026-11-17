@@ -24,6 +24,19 @@ function autoValueAt(points,t){if(!points?.length)return null;if(t<=points[0].t)
 // Riverbero: risposta all'impulso generata (rumore che si spegne in 2,4 secondi), una per contesto audio.
 const IR=new WeakMap();
 function impulse(ctx){let b=IR.get(ctx);if(b)return b;const n=Math.round(ctx.sampleRate*2.4);b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.5)}IR.set(ctx,b);return b}
+// ——— Moduli della catena. Ogni modulo ha un ingresso, un'uscita e i nodi interni: wire() (ri)collega i fili interni,
+// set() aggiorna i parametri sui nodi che esistono già, così un cambio di valore non ricostruisce nulla. La curva
+// della saturazione è in cache per intensità: generarla è caro e i valori sono pochi.
+const DRIVE_CURVES=new Map();
+function driveCurve(k){let c=DRIVE_CURVES.get(k);if(c)return c;const a=new Float32Array(512);for(let i=0;i<512;i++){const x=i/511*2-1;a[i]=(1+k)*x/(1+k*Math.abs(x))}DRIVE_CURVES.set(k,a);return a}
+function chainModule(ctx,m){const gain=()=>ctx.createGain(),set=(a,v,live)=>live?a.setTargetAtTime(v,ctx.currentTime,0.02):a.value=v;
+ switch(m.tipo){
+  case 'comp':{const c=ctx.createDynamicsCompressor(),mk=gain();c.knee.value=6;return{in:c,out:mk,nodes:[c,mk],wire(){c.connect(mk)},set:(v,live)=>{set(c.threshold,v.thr,live);set(c.ratio,v.ratio,live);set(c.attack,v.att/1000,live);set(c.release,v.rel/1000,live);set(mk.gain,fromDb(v.make),live)}}}
+  case 'eq':{const f=[['lo',200],['mid',1000],['hi',4000]].map(()=>ctx.createBiquadFilter());f.forEach(x=>x.type='peaking');return{in:f[0],out:f[2],nodes:f,wire(){f[0].connect(f[1]);f[1].connect(f[2])},set:(v,live)=>{set(f[0].gain,v.lo,live);set(f[1].gain,v.mid,live);set(f[2].gain,v.hi,live);set(f[0].frequency,v.loHz,live);set(f[1].frequency,v.midHz,live);set(f[2].frequency,v.hiHz,live)}}}  case 'delay':{const pre=gain(),d=ctx.createDelay(2),fb=gain(),wet=gain(),out=gain();return{in:pre,out,nodes:[pre,d,fb,wet,out],wire(){pre.connect(d);d.connect(wet);wet.connect(out);pre.connect(out);d.connect(fb);fb.connect(d)},set:(v,live)=>{set(d.delayTime,v.ms/1000,live);set(fb.gain,v.fb/100,live);set(wet.gain,v.mix/100,live)}}}
+  case 'reverb':{const inn=gain(),out=gain(),wet=gain(),c=ctx.createConvolver();c.buffer=impulse(ctx);return{in:inn,out,nodes:[inn,out,wet,c],wire(){inn.connect(out);inn.connect(c);c.connect(wet);wet.connect(out)},set:(v,live)=>set(wet.gain,v.wet/100,live)}}
+  case 'drive':{const c=ctx.createWaveShaper();c.oversample='none';return{in:c,out:c,nodes:[c],wire(){},set:v=>{c.curve=driveCurve(v.drive/100*30)}}}
+  case 'wide':{const up=gain();up.channelCount=2;up.channelCountMode='explicit';const sp=ctx.createChannelSplitter(2),mid=gain(),sa=gain(),sb=gain(),sc=gain(),sd=gain(),out=ctx.createChannelMerger(2);mid.gain.value=0.5;return{in:up,out,nodes:[up,sp,mid,sa,sb,sc,sd,out],wire(){up.connect(sp);sp.connect(mid,0,0);sp.connect(mid,1,0);sp.connect(sa,0);sp.connect(sb,1);sp.connect(sc,0);sp.connect(sd,1);mid.connect(out,0,0);mid.connect(out,0,1);sa.connect(out,0,0);sb.connect(out,0,0);sc.connect(out,0,1);sd.connect(out,0,1)},set:(v,live)=>{const w=1+v.wide/100;set(sa.gain,w/2,live);set(sb.gain,-w/2,live);set(sc.gain,-w/2,live);set(sd.gain,w/2,live)}}}}
+ return null}
 // Percorso di una traccia fino al master: la traccia, il suo bus, il bus del bus e così via.
 const pathOf=t=>{const out=[];let x=t,guard=0;while(x&&guard++<8){out.push(x);x=x.out?trackOf(x.out):null}return out};
 const depthOf=t=>pathOf(t).length-1;
@@ -37,15 +50,19 @@ function newGraph(ctx,dest){const master=ctx.createGain(),lim=ctx.createDynamics
 // in input, che resta sempre lo stesso. Il volume automatico ha un nodo suo; il riverbero è quello del bus di
 // destinazione (o del master), così gruppi diversi non condividono lo stesso spazio.
 function chainTrack(gr,t,delayUnits){const ctx=gr.ctx;let n=gr.tracks.get(t.id);
- if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),auto:ctx.createGain(),meter:ctx.createAnalyser(),send:ctx.createGain(),rev:null,shape:''};n.meter.fftSize=256;n.pan.connect(n.vol);n.vol.connect(n.auto);n.auto.connect(n.meter);n.auto.connect(n.send);gr.tracks.set(t.id,n)}
- const on=k=>hasAuto(t,k)?1:0,shape=`${t.low!==0||on('low')}|${t.high!==0||on('high')}|${t.comp>0||on('comp')}|${t.reverb>0}|${t.out||''}|${delayUnits}`;
+ if(!n){n={input:ctx.createGain(),pan:ctx.createStereoPanner(),vol:ctx.createGain(),auto:ctx.createGain(),meter:ctx.createAnalyser(),send:ctx.createGain(),rev:null,shape:'',mods:new Map()};n.meter.fftSize=256;n.pan.connect(n.vol);n.vol.connect(n.auto);n.auto.connect(n.meter);n.auto.connect(n.send);gr.tracks.set(t.id,n)}
+ const on=k=>hasAuto(t,k)?1:0,shape=`${t.low!==0||on('low')}|${t.high!==0||on('high')}|${t.comp>0||on('comp')}|${t.reverb>0}|${t.out||''}|${delayUnits}|${(t.chain||[]).map(m=>m.id).join(',')}`;
  if(n.shape===shape)return n;
+ // I moduli tolti si smontano; quelli che restano si riusano per id: cambia solo il collegamento, non i nodi.
+ const mods=t.chain||[];
+ for(const [id,mo] of n.mods)if(!mods.some(m=>m.id===id)){for(const x of mo.nodes)x.disconnect();n.mods.delete(id)}
  n.input.disconnect();n.send.disconnect();for(const k of ['low','high','comp','make','delay']){n[k]?.disconnect();n[k]=null}
  let at=n.input;const link=x=>{at.connect(x);at=x;return x};
  if(t.low!==0||on('low')){link(n.low=ctx.createBiquadFilter());n.low.type='lowshelf';n.low.frequency.value=200}
  if(t.high!==0||on('high')){link(n.high=ctx.createBiquadFilter());n.high.type='highshelf';n.high.frequency.value=4000}
  if(t.comp>0||on('comp')){link(n.comp=ctx.createDynamicsCompressor());n.comp.knee.value=6;n.comp.attack.value=0.006;n.comp.release.value=0.18;link(n.make=ctx.createGain())}
  if(delayUnits>0){link(n.delay=ctx.createDelay(0.06));n.delay.delayTime.value=delayUnits*PRE_DELAY}
+ for(const m of mods){let mo=n.mods.get(m.id);if(mo)for(const x of mo.nodes)x.disconnect();else{mo=chainModule(ctx,m);if(!mo)continue;n.mods.set(m.id,mo)}mo.wire();link(mo.in);at=mo.out}
  at.connect(n.pan);
  const holder=t.out?gr.tracks.get(t.out):null,dest=holder?holder.input:gr.master;
  n.meter.disconnect();n.meter.connect(dest);
@@ -56,12 +73,14 @@ function setTrackNodes(t,n,{only=null,ctx=null}={}){const set=(p,v)=>ctx?p.setTa
  if(n.comp&&!hasAuto(t,'comp')){set(n.comp.threshold,-10-26*c);set(n.comp.ratio,1+7*c);set(n.make.gain,fromDb(9*c))}
  if(!hasAuto(t,'pan'))set(n.pan.pan,t.pan);if(!hasAuto(t,'reverb'))set(n.send.gain,t.reverb/100*0.6);
  set(n.vol.gain,hasAuto(t,'vol')?(live?1:0):(live?fromDb(t.vol):0));
+  // I moduli della catena: solo i valori, i nodi sono quelli già collegati.
+  for(const m of t.chain||[]){const mo=n.mods.get(m.id);if(mo)mo.set(chainParams(m),!!ctx)}
  if(!hasAuto(t,'vol'))set(n.auto.gain,1);
 }
 // Allinea il mixer alle tracce: i bus prima delle loro tracce, poi i valori dei cursori. only: una sola traccia (e i
 // suoi bus), per esportarla senza muto né solo.
 function syncGraph(gr,tracks,{only=null,live=false}={}){const ids=new Set(tracks.map(t=>t.id));
- for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.auto,n.meter,n.send])x?.disconnect();n.rev?.disconnect();gr.tracks.delete(id)}
+ for(const [id,n] of gr.tracks)if(!ids.has(id)){for(const x of [n.input,n.low,n.high,n.comp,n.make,n.delay,n.pan,n.vol,n.auto,n.meter,n.send])x?.disconnect();for(const mo of n.mods?.values()||[])for(const x of mo.nodes)x?.disconnect();n.rev?.disconnect();gr.tracks.delete(id)}
  const maxLat=Math.max(0,...tracks.map(pathComp));
  for(const t of [...tracks].sort((a,b)=>depthOf(a)-depthOf(b)))setTrackNodes(t,chainTrack(gr,t,maxLat-pathComp(t)),{only,ctx:live?gr.ctx:null});
  gr.lat=mixLatency(tracks);return gr}
@@ -176,15 +195,29 @@ function playUIProject(on){const b=$('aPlay');b.setAttribute('aria-label',on?'Pa
 function songPlayPause(){if(MIX.playing){mixStop(true);announce('Pausa a '+sayTime(P.t,1));return}if(!P.regions.length&&!P.metro){toast('Il progetto è vuoto: registra o importa un file');return}let from=P.t;if(from>=projDur()-0.01&&!P.metro)from=0;mixPlay(from)}
 function songStop(){const o=MIX.playing?MIX.origin:0;mixStop(false);P.t=o;updateArrangeUI();announce('Fermo, indicatore a '+sayTime(o))}
 // Mixaggio fuori linea: tutto il brano, oppure una sola traccia (only) con la sua sola catena, per esportarla da sola.
-// Si mixano 6 o 12 ms in più e si tolgono all'inizio: è il ritardo di limitatore e compressori.
-async function renderMix({only=null,from=0,to=null,rate=48000,limit=true}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');
+// Si mixano 6 o 12 ms in più e si tolgono all'inizio: è il ritardo di limitatore e compressori. Dopo la fine del
+// brano si lascia la coda dei delay e dei riverberi (tailTime), con una breve dissolvenza che chiude il file.
+// Coda da lasciare dopo la fine del brano: un delay con feedback ripete il suono fino a −60 dB dopo
+// ms·log(0,001)/log(fb) secondi, e un riverbero suona ancora 2,4 s; i moduli di una traccia sono in serie, quindi
+// le loro code si sommano, e si tiene la traccia più lunga. Il tetto è 10 s.
+const tailTime=tracks=>{let s=0;for(const t of tracks){let x=0;
+  for(const m of t.chain||[]){if(m.tipo==='delay'){const p=chainParams(m),fb=p.fb/100;if(fb>0&&fb<1)x+=p.ms/1000*Math.log(0.001)/Math.log(fb)}else if(m.tipo==='reverb')x=Math.max(x,2.4)}
+  if(t.reverb>0||hasAuto(t,'reverb'))x=Math.max(x,2.4);s=Math.max(s,x)}
+ return Math.min(10,s)};
+// tail: la coda dopo la fine del brano. false (predefinito: analisi e prove restano asciutte), true la calcola
+// dalla catena, un numero la fissa — così le tracce separate esportate escono tutte lunghe uguali.
+async function renderMix({only=null,from=0,to=null,rate=48000,limit=true,tail=false}={}){to??=projDur();if(to<=from)throw Error('Il progetto è vuoto');
  const chain=only?(()=>{const set=new Set();let x=trackOf(only);while(x&&!set.has(x.id)){set.add(x.id);x=x.out?trackOf(x.out):null}return P.tracks.filter(t=>set.has(t.id))})():P.tracks,
-  tracks=chain,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate);
- const oc=new OfflineAudioContext(2,n+skip,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});if(!limit){gr.lim.threshold.value=0;gr.lim.ratio.value=1}else scheduleLimiter(oc,gr,from,0,to);scheduleTrackAuto(oc,gr,from,0,to,{only});scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n,numberOfChannels:2,sampleRate:rate});
- for(let c=0;c<2;c++)res.copyToChannel(out.getChannelData(c).subarray(skip,skip+n),c);return res}
+  tracks=chain,n=Math.max(1,Math.ceil((to-from)*rate)),skip=Math.round(mixLatency(tracks)*rate),
+  tailN=Math.round((typeof tail==='number'?Math.min(10,tail):tail?tailTime(tracks):0)*rate);
+ const oc=new OfflineAudioContext(2,n+skip+tailN,rate),gr=syncGraph(newGraph(oc,oc.destination),tracks,{only});if(!limit){gr.lim.threshold.value=0;gr.lim.ratio.value=1}else scheduleLimiter(oc,gr,from,0,to);scheduleTrackAuto(oc,gr,from,0,to,{only});scheduleRegions(oc,gr,from,0,{end:to});const out=await oc.startRendering(),res=new AudioBuffer({length:n+tailN,numberOfChannels:2,sampleRate:rate});
+ for(let c=0;c<2;c++)res.copyToChannel(out.getChannelData(c).subarray(skip,skip+n+tailN),c);
+ // Dissolvenza finale sulla coda: il file non finisce con uno scatto anche se il tetto taglia il riverbero.
+ if(tailN){const fN=Math.min(tailN,Math.round(0.25*rate));for(let c=0;c<2;c++){const d=res.getChannelData(c);for(let i=0;i<fN;i++)d[d.length-fN+i]*=(fN-i)/fN}}
+ return res}
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.
 function songMarkers(rate){const out=[];for(const r of P.regions){const sr=SOURCES.get(r.src)?.sampleRate||rate;for(const m of r.markers||[]){const x=m.pos/sr;if(x<0||x>r.dur)continue;out.push({id:m.id,pos:Math.round((r.start+x)*rate),label:m.label})}}return out.sort((a,b)=>a.pos-b.pos)}
 async function exportStems(){if(!P.regions.length){toast('Il progetto è vuoto');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
  const r=await modal('Esporta le tracce separate',`<p>Un file per ogni traccia, con i suoi effetti e lo stesso inizio, raccolti in un archivio ZIP: servono per continuare il lavoro in un altro programma.</p>`,[{id:'fmt',label:'Formato',type:'select',value:'wav24',options:[['wav16','WAV 16 bit'],['wav24','WAV 24 bit'],['wav32','WAV 32 bit in virgola mobile'],...(aac?[['aac','M4A con AAC']]:[]),...(opus?[['opus','WebM con Opus']]:[])]}],'Esporta');if(!r)return;
- const files=await work('Esportazione delle tracce',async()=>{const out=[];for(const [i,t] of P.tracks.entries()){if(!P.regions.some(x=>x.track===t.id))continue;status(`Mixaggio della traccia ${i+1} di ${P.tracks.length}: ${t.name}`);const buf=await renderMix({only:t.id});out.push({name:extName(`${String(i+1).padStart(2,'0')} ${t.name}`,r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext),data:r.fmt.startsWith('wav')?wavBlob(buf,Number(r.fmt.slice(3))):await compressedBlob(buf,r.fmt,(prefs.kbps||160)*1000)})}return out});
+ const files=await work('Esportazione delle tracce',async()=>{const out=[];for(const [i,t] of P.tracks.entries()){if(!P.regions.some(x=>x.track===t.id))continue;status(`Mixaggio della traccia ${i+1} di ${P.tracks.length}: ${t.name}`);const buf=await renderMix({only:t.id,tail:tailTime(P.tracks)});out.push({name:extName(`${String(i+1).padStart(2,'0')} ${t.name}`,r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext),data:r.fmt.startsWith('wav')?wavBlob(buf,Number(r.fmt.slice(3))):await compressedBlob(buf,r.fmt,(prefs.kbps||160)*1000)})}return out});
  if(!files?.length)return;const zip=await work('Creazione dell’archivio',()=>zipBlob(files));if(zip){download(zip,extName(P.title+' - tracce','zip'));toast(`Esportate ${files.length} tracce in un archivio ZIP`)}}

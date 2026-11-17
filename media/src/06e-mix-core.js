@@ -19,8 +19,19 @@ const fineStep=()=>P.grid==='beats'?beatDur()/4:0.01;
 const selRegion=()=>P.sel?regionOf(P.sel):null;
 const selTrack=()=>trackOf(P.track)||P.tracks[0]||null;
 const audioModified=()=>P.regions.length>0&&P.version!==P.exported;
-function newTrack(name){const n=P.tracks.length;return{id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0,duck:0,voice:false,kind:'audio',out:null,auto:{vol:[],pan:[],reverb:[],low:[],high:[],comp:[]},autoOn:{vol:false,pan:false,reverb:false,low:false,high:false,comp:false}}}
+function newTrack(name){const n=P.tracks.length;return{id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0,duck:0,voice:false,kind:'audio',out:null,input:null,chain:[],auto:{vol:[],pan:[],reverb:[],low:[],high:[],comp:[]},autoOn:{vol:false,pan:false,reverb:false,low:false,high:false,comp:false}}}
 function addSource(buf){const id=uid();SOURCES.set(id,buf);dirtySources.add(id);return id}
+// Moduli della catena: ai controlli fissi della traccia (bassi, alti, compressione) si aggiungono questi componenti,
+// in ordine a scelta. Ogni tipo dichiara i suoi parametri come [minimo, massimo, predefinito]; il motore li costruisce
+// con le primitive del browser e la stessa catena suona in ascolto e nel mix esportato.
+const CHAIN_TYPES={
+ comp:{name:'Compressore',params:{thr:[-60,0,-24],ratio:[1,20,4],att:[1,200,10],rel:[20,1000,250],make:[0,24,0]}},
+ eq:{name:'Equalizzatore parametrico',params:{lo:[-15,15,0],loHz:[40,400,120],mid:[-15,15,0],midHz:[200,6000,1000],hi:[-15,15,0],hiHz:[2000,16000,6000]}},
+ delay:{name:'Delay',params:{ms:[10,2000,300],fb:[0,90,35],mix:[0,100,30]}},
+ reverb:{name:'Riverbero',params:{wet:[0,100,40]}},
+ drive:{name:'Saturazione',params:{drive:[0,100,40]}},
+ wide:{name:'Stereo ampio',params:{wide:[0,100,60]}}};
+const chainParams=m=>{const out={};for(const [k,[lo,hi,def]] of Object.entries(CHAIN_TYPES[m.tipo].params))out[k]=clamp(Number(m.params?.[k]??def),lo,hi);return out};
 function newRegion(track,src,start,name){return{id:uid(),track,src,off:0,dur:SOURCES.get(src).duration,start:Math.max(0,start),gain:0,fadeIn:0,fadeOut:0,name:name||'Regione',gainAuto:[],gainOn:false,markers:[]}}
 // Cronologia del progetto: istantanee di tracce e regioni. L'editor della regione ha la sua cronologia, più fine.
 const pSnap=()=>JSON.stringify({title:P.title,tracks:P.tracks,regions:P.regions,bpm:P.bpm,sig:P.sig,grid:P.grid,cycle:P.cycle});
@@ -62,6 +73,11 @@ function cleanAudioProject(p){const n=(v,d,lo=-Infinity,hi=Infinity)=>Number.isF
  const pts=(v,lo,hi)=>arr(v).filter(x=>Number.isFinite(Number(x?.t))&&Number.isFinite(Number(x?.v))).map(x=>({t:clamp(Number(x.t),0,86400),v:clamp(Number(x.v),lo,hi)})).sort((a,b)=>a.t-b.t).slice(0,500);
  const tracks=arr(p?.tracks).filter(t=>t&&t.id).map((t,i)=>{const a=t.auto&&typeof t.auto==='object'?t.auto:{};
   return{id:s(t.id,40),name:s(t.name||`Traccia ${i+1}`,80),color:col(t.color)||TRACK_COLORS[i%8][0],vol:n(t.vol,0,-60,12),pan:n(t.pan,0,-1,1),mute:!!t.mute,solo:!!t.solo,low:n(t.low,0,-15,15),high:n(t.high,0,-15,15),comp:n(t.comp,0,0,100),reverb:n(t.reverb,0,0,100),duck:n(t.duck,0,0,18),voice:!!t.voice,kind:t.kind==='bus'?'bus':'audio',out:t.out?String(t.out).slice(0,40):null,
+   // L'ingresso della registrazione: id ed etichetta del dispositivo, perché l'id cambia tra origini e macchine e
+   // l'etichetta resta il modo per ritrovarlo. Vecchio formato (sola stringa) → id solo; id vuoto → niente.
+   input:(()=>{if(!t.input)return null;const o=typeof t.input==='object'?t.input:{id:t.input,label:''},id=s(o.id||'',64);return id?{id,label:s(o.label||'',80)}:null})(),
+   // I moduli della catena: solo tipi noti, parametri in gamma, al massimo otto per traccia.
+   chain:arr(t.chain).filter(m=>m&&CHAIN_TYPES[m.tipo]).slice(0,8).map(m=>({id:s(m.id||uid(),10),tipo:m.tipo,params:chainParams(m)})),
    // I punti di volume e bilanciamento delle versioni 1.10-1.15 entrano nel nuovo elenco unico.
    auto:{vol:pts(a.vol??t.volAuto,-60,12),pan:pts(a.pan??t.panAuto,-1,1),reverb:pts(a.reverb,0,100),low:pts(a.low,-15,15),high:pts(a.high,-15,15),comp:pts(a.comp,0,100)},
    autoOn:{vol:!!t.autoOn?.vol,pan:!!t.autoOn?.pan,reverb:!!t.autoOn?.reverb,low:!!t.autoOn?.low,high:!!t.autoOn?.high,comp:!!t.autoOn?.comp}}});

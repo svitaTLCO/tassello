@@ -1,8 +1,13 @@
 {
   "programma": "Tassello Media",
   "file": "tassello-media.html",
-  "ultima": "1.19.1",
+  "ultima": "1.20.0",
   "versioni": [
+    {
+      "versione": "1.20.0",
+      "data": "2026-11-18",
+      "sha256": "ec73b1f382d142778fce377393c0b75cbfbe200ec716193ea104676c26fd143b"
+    },
     {
       "versione": "1.19.1",
       "data": "2026-11-16",

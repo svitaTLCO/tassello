@@ -259,7 +259,7 @@ async function deliveryReportDialog(){const inEditor=!!A.buf;
   let src,content,plan={lufs:null,tp:null,ch:0,rate:0};
   if(inEditor){const [a,b]=sel?[A.selA,A.selB]:[0,alen()];src=makeBuffer(sliceCh(A.buf,a,b),A.rate);
    content=`${sel?'La selezione':'La regione'}${A.region?` «${regionOf(A.region)?.name||''}»`:''}`;plan={...plan,ch:src.numberOfChannels,rate:src.sampleRate}}
-  else{status('Mixaggio del brano…');src=await renderMix();content='Il brano, tutte le tracce mixate';plan={...plan,ch:2,rate:src.sampleRate}}
+  else{status('Mixaggio del brano…');src=await renderMix({tail:true});content='Il brano, tutte le tracce mixate';plan={...plan,ch:2,rate:src.sampleRate}}
   const chs=Array.from({length:src.numberOfChannels},(_,c)=>src.getChannelData(c));
   return{ch:src.numberOfChannels,rate:src.sampleRate,m:analyzeDelivery(chs,src.sampleRate),content,plan}});
  if(!res)return;
@@ -297,7 +297,7 @@ async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.bu
  const bitrate=Number(r.kbps)*1000,progress=p=>status(`Esportazione ${Math.round(p*100)}%`),ext=r.fmt==='mp3'?'mp3':r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext;
  const title=r.name||(r.what==='song'?P.title:A.title||P.title),tags={title:title.trim().slice(0,200),artist:r.artist.trim(),comment:r.comment.trim(),year:String(new Date().getFullYear())};
  const res=await work('Preparazione della consegna',async()=>{let src,content,base=0;
-  if(r.what==='song'){const rr=plan.rate||48000;status('Mixaggio del brano…');src=await renderMix({rate:rr});content=`Il brano, ${P.tracks.length===1?'una traccia':P.tracks.length+' tracce'} mixate`}
+  if(r.what==='song'){const rr=plan.rate||48000;status('Mixaggio del brano…');src=await renderMix({rate:rr,tail:true});content=`Il brano, ${P.tracks.length===1?'una traccia':P.tracks.length+' tracce'} mixate`}
   else{const [a,b]=r.what==='sel'?[A.selA,A.selB]:[0,alen()];src=makeBuffer(sliceCh(A.buf,a,b),A.rate);base=a;content=r.what==='sel'?'La selezione nell’editor':'La regione nell’editor'+(A.region?` «${regionOf(A.region)?.name||''}»`:'')}
   const prep=await prepareDelivery(src,plan,status),out=prep.out,chs=Array.from({length:out.numberOfChannels},(_,c)=>out.getChannelData(c));
   status('Misure di consegna…');const m=analyzeDelivery(chs,out.sampleRate),name=extName(r.name||(r.what==='song'?P.title:A.title||P.title),ext);

@@ -24,7 +24,7 @@ COMMANDS = '04-commands.js'
 ORDER = [
     '01-head.html', '02-body.html', '02b-base.js', '03-store.js', '04-commands.js', '04b-ribbon.js', '04c-tasselli.js',
     '05-codecs.js', '05b-containers.js', '05c-demux.js', '05d-mux.js', '05y-nota-lame.js', '05z-lame.min.js',
-    '06-audio-core.js', '06b-audio-view.js', '06c-audio-effects.js', '06d-record.js', '06e-mix-core.js', '06f-mix-engine.js', '06g-mix-view.js', '06h-audio-analisi.js', '06i-conversione.js',
+    '06-audio-core.js', '06b-audio-view.js', '06c-audio-effects.js', '06d-record.js', '06e-mix-core.js', '06f-mix-engine.js', '06g-mix-view.js', '06h-audio-analisi.js', '06i-conversione.js', '06j-midi.js',
     '07-video-core.js', '07b-video-engine.js', '07c-video-view.js', '07d-video-text.js', '07e-video-export.js', '07f-video-analisi.js',
     '08-actions.js', '09-events.js', '10-start.js',
 ]
@@ -88,12 +88,15 @@ DEST.write_bytes(out.encode('utf-8'))
 data = DEST.read_bytes()
 digest = hashlib.sha256(data).hexdigest()
 
-# Una voce per versione, la più recente in cima. La voce della versione corrente segue il file
-# costruito: cambia solo se cambia l'impronta, così una build ripetuta non modifica nulla.
+# Una voce per versione, la più recente in cima. La voce della versione corrente segue il file costruito solo
+# quando il numero non è mai stato registrato: una versione già in elenco con un'impronta diversa significa che
+# si sta cambiando una versione pubblicata, e la build si ferma finché media/VERSIONE non viene alzata.
 listing = json.loads(VERSIONS.read_text(encoding='utf-8')) if VERSIONS.exists() else {'versioni': []}
 entries = [v for v in listing['versioni'] if v['versione'] != VERSION]
 current = next((v for v in listing['versioni'] if v['versione'] == VERSION), None)
-if not current or current['sha256'] != digest:
+if current and current['sha256'] != digest:
+    sys.exit(f'La versione {VERSION} è già registrata con un\'altra impronta: aggiorna media/VERSIONE prima di costruire')
+if not current:
     current = {'versione': VERSION, 'data': datetime.date.today().isoformat(), 'sha256': digest}
 entries.insert(0, current)
 listing = {'programma': 'Tassello Media', 'file': DEST.name, 'ultima': VERSION, 'versioni': entries}

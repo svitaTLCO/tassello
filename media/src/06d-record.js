@@ -2,17 +2,45 @@
 // registrazione avvisa a voce se il livello è troppo alto (distorsione) o troppo basso. L'audio resta sul dispositivo.
 // Con onStart la registrazione parte insieme a qualcos'altro (l'ascolto delle altre tracce, il conteggio): Avvia
 // la fa partire e Ferma la conclude, senza pause. info.first è l'istante del contesto audio del primo campione.
-async function recordDialog({title='Registra dal microfono',intro='',places=null,onStart=null,onStop=null,onDone}){
+// Vincoli della cattura: nessuna elaborazione del browser e, se scelto, un ingresso preciso. L'ingresso arriva come
+// {id,label} (o vecchio stile, una stringa): se l'id non risponde (scollegato, ZIP aperto su un'altra macchina) si
+// riprova con l'etichetta — due interfacce identiche hanno la stessa, si prende la prima e lo si dice — e in
+//ultima istanza si parte dal predefinito, avvisando; la preferenza si azzera solo se l'id veniva da lì.
+const recConstraints=id=>({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,...(id?{deviceId:{exact:id}}:{})}});
+async function recOpen(dev,{track=null}={}){const id=typeof dev==='object'?dev?.id:dev;
+ if(!id)return navigator.mediaDevices.getUserMedia(recConstraints());
+ try{return await navigator.mediaDevices.getUserMedia(recConstraints(id))}
+ catch(e){
+  const label=(typeof dev==='object'?dev?.label:'')||'';
+  if(label&&navigator.mediaDevices?.enumerateDevices){const ds=await navigator.mediaDevices.enumerateDevices(),same=ds.filter(d=>d.kind==='audioinput'&&d.label===label);
+   for(const d of same){try{return await navigator.mediaDevices.getUserMedia(recConstraints(d.deviceId))}catch(e2){}}
+   if(same.length>1)announce(`L'ingresso «${label}» è presente più di una volta: uso il primo`)}
+  if(track)toast(`L'ingresso della traccia «${track}» non c'è: uso il predefinito`);else toast('Ingresso non disponibile: uso il microfono predefinito');
+  if(id===prefs.recDevice){prefs.recDevice='';savePrefs()}
+  return navigator.mediaDevices.getUserMedia(recConstraints())}}
+// Elenco degli ingressi: le etichette ci sono solo dopo il permesso del microfono; chi non l'ha ancora concesso
+// vede un flusso breve e poi l'elenco vero. Senza l'API (per esempio su alcuni Safari) restano solo le voci anonime.
+async function recInputs(){if(!navigator.mediaDevices?.enumerateDevices)return[];let ds=await navigator.mediaDevices.enumerateDevices();
+ if(!ds.some(d=>d.kind==='audioinput'&&d.label))try{const s=await navigator.mediaDevices.getUserMedia(recConstraints());s.getTracks().forEach(t=>t.stop());ds=await navigator.mediaDevices.enumerateDevices()}catch(e){}
+ return ds.filter(d=>d.kind==='audioinput')}
+const inputOptions=ds=>[['','Predefinito (di sistema)'],...ds.map((d,i)=>[d.deviceId,d.label||`Ingresso ${i+1}`])];
+async function recordDialog({title='Registra dal microfono',intro='',places=null,onStart=null,onStop=null,onDone,device=null,trackName=null,onDevice=null}){
  if(!navigator.mediaDevices?.getUserMedia){toast('Questo browser non permette di usare il microfono');return}
- let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}catch(e){toast(e.name==='NotAllowedError'?'Il permesso per il microfono è stato negato: consentilo nelle impostazioni del sito e riprova':'Microfono non disponibile: '+e.message);return}
- const ctx=actxGet(),track=stream.getAudioTracks()[0],settings=track.getSettings?.()||{},nch=clamp(settings.channelCount||1,1,2),src=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,nch,nch),chunks=Array.from({length:nch},()=>[]);
- let recording=false,starting=false,stopped=false,frames=0,first=null,peak=0,recent=[],lastWarn=0,lowWarned=false,raf=0,holdDb=-60,earconOn=!!prefs.recEarcon,earconTimer=0,testLeft=0,testPeak=0,testGainDb=null,applyGainDb=0;
- proc.onaudioprocess=e=>{const ib=e.inputBuffer;let pk=0;for(let c=0;c<nch;c++){const d=ib.getChannelData(Math.min(c,ib.numberOfChannels-1));for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v}if(recording)chunks[c].push(d.slice())}for(let c=0;c<e.outputBuffer.numberOfChannels;c++)e.outputBuffer.getChannelData(c).fill(0);
-  if(recording){if(first===null)first=ctx.currentTime-ib.length/ctx.sampleRate;frames+=ib.length}peak=Math.max(pk,peak*0.85);recent.push(pk);if(recent.length>Math.ceil(ctx.sampleRate*1.5/4096))recent.shift();
-  if(recording){const now=performance.now();if(pk>=0.99&&now-lastWarn>4000){lastWarn=now;announce('Livello troppo alto: allontanati dal microfono o abbassane il volume')}if(!lowWarned&&frames>ctx.sampleRate*3&&Math.max(...recent)<0.01){lowWarned=true;announce('Livello molto basso: avvicinati al microfono')}}};
- src.connect(proc);proc.connect(ctx.destination);
+ let stream;try{stream=await recOpen(device??prefs.recDevice,{track:trackName})}catch(e){toast(e.name==='NotAllowedError'?'Il permesso per il microfono è stato negato: consentilo nelle impostazioni del sito e riprova':'Microfono non disponibile: '+e.message);return}
+ const ctx=actxGet();
+ // La cattura sta in cap: si ricostruisce quando si cambia ingresso, prima di aver registrato qualcosa.
+ let track=stream.getAudioTracks()[0],settings=track.getSettings?.()||{},recording=false,starting=false,stopped=false,frames=0,first=null,peak=0,recent=[],lastWarn=0,lowWarned=false,raf=0,holdDb=-60,earconOn=!!prefs.recEarcon,earconTimer=0,testLeft=0,testPeak=0,testGainDb=null,applyGainDb=0;
+ const cap={nch:clamp(settings.channelCount||1,1,2),chunks:[],src:null,proc:null};
+ const buildCapture=()=>{cap.src?.disconnect();if(cap.proc){cap.proc.onaudioprocess=null;cap.proc.disconnect()}
+  cap.nch=clamp(settings.channelCount||1,1,2);cap.chunks=Array.from({length:cap.nch},()=>[]);
+  cap.src=ctx.createMediaStreamSource(stream);cap.proc=ctx.createScriptProcessor(4096,cap.nch,cap.nch);
+  cap.proc.onaudioprocess=e=>{const ib=e.inputBuffer;let pk=0;for(let c=0;c<cap.nch;c++){const d=ib.getChannelData(Math.min(c,ib.numberOfChannels-1));for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v}if(recording)cap.chunks[c].push(d.slice())}for(let c=0;c<e.outputBuffer.numberOfChannels;c++)e.outputBuffer.getChannelData(c).fill(0);
+   if(recording){if(first===null)first=ctx.currentTime-ib.length/ctx.sampleRate;frames+=ib.length}peak=Math.max(pk,peak*0.85);recent.push(pk);if(recent.length>Math.ceil(ctx.sampleRate*1.5/4096))recent.shift();
+   if(recording){const now=performance.now();if(pk>=0.99&&now-lastWarn>4000){lastWarn=now;announce('Livello troppo alto: allontanati dal microfono o abbassane il volume')}if(!lowWarned&&frames>ctx.sampleRate*3&&Math.max(...recent)<0.01){lowWarned=true;announce('Livello molto basso: avvicinati al microfono')}}};
+  cap.src.connect(cap.proc);cap.proc.connect(ctx.destination)};
+ buildCapture();
  const stopAll=()=>{if(recording||starting){recording=false;starting=false;stopped=true;onStop?.()}};
- const cleanup=()=>{stopAll();earconStop();cancelAnimationFrame(raf);proc.onaudioprocess=null;try{src.disconnect();proc.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop())};
+ const cleanup=()=>{stopAll();earconStop();cancelAnimationFrame(raf);cap.proc.onaudioprocess=null;try{cap.src.disconnect();cap.proc.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop())};
  const recentDb=()=>toDb(Math.max(0,...recent));
  // Il livello si ascolta: impulsi brevi che salgono con la voce. Tacciono col metronomo, perché due ritmi insieme
  // non si decodificano. La stessa banda è disegnata sul misuratore, così il suono e lo schermo dicono la stessa cosa.
@@ -31,19 +59,30 @@ async function recordDialog({title='Registra dal microfono',intro='',places=null
    if(!(testPeak>5e-4)){testGainDb=null;updateApply();announce('Non sento nulla: avvicinati al microfono o controlla l’ingresso')}
    else{const delta=Math.round(-6-db);testGainDb=Math.abs(delta)>1?delta:null;updateApply();announce(`Livello ${levelWords(db)}, picco ${fmtDb(db)}. ${delta>1?`Il guadagno consigliato è +${delta} dB.`:delta<-1?`Sei ${-delta} dB troppo alto: abbassa di ${-delta} dB.`:'Il livello va bene.'}`)}}},100)};
  const fields=[...(places?[{id:'place',label:'Dove mettere la registrazione',type:'select',value:places[0][0],options:places}]:[]),
+  {id:'dev',label:'Ingresso',type:'select',value:settings.deviceId||'',options:inputOptions(await recInputs()),hint:'Cambia ingresso prima di avviare; a registrazione iniziata resta quello scelto.'},
   {id:'earcon',label:'Suono del livello: impulsi che salgono con la voce',type:'checkbox',value:!!prefs.recEarcon}];
  const clearDlgErr=()=>{const x=$('dlgErr');if(x){x.hidden=true;x.textContent=''}};
  const startStop=async(v,pane)=>{clearDlgErr();const b=pane.querySelector('#dlgBtn0');
   if(onStart){if(stopped||starting)return;if(recording){stopAll();b.disabled=true;b.textContent='Fermata';$('recDot').hidden=true;$('recState').textContent=`Registrazione conclusa: ${sayTime(frames/ctx.sampleRate)}${applyGainDb?`, con guadagno ${applyGainDb>0?'+':''}${applyGainDb} dB`:''}. Premi Inserisci la registrazione.`;announce('Registrazione fermata');pane.querySelector('#okDlg').focus();return}
    starting=true;b.textContent='Ferma';$('recState').textContent='Si parte…';await onStart(v.place);if(!starting)return;starting=false;recording=true;$('recDot').hidden=false;$('recState').textContent='Registrazione in corso.';announce('Registrazione avviata');return}
   recording=!recording;b.textContent=recording?'Pausa':'Riprendi';$('recDot').hidden=!recording;$('recState').textContent=recording?'Registrazione in corso.':'Registrazione in pausa: '+sayTime(frames/ctx.sampleRate)+' registrati.';announce(recording?'Registrazione avviata':'Registrazione in pausa')};
- const res=await modal(title,`${intro?`<p>${esc(intro)}</p>`:''}<p>Microfono: <b>${esc(track.label||'predefinito')}</b>, ${nch===1?'mono':'stereo'}. Prova a parlare: l’indicatore mostra il livello. Con <b>Suono del livello</b> acceso senti degli impulsi che salgono con la voce; con il metronomo acceso tacciono. Premi <b>Avvia</b> per registrare${onStart?' e <b>Ferma</b> per concludere':''}, poi <b>Inserisci la registrazione</b>.</p><div class="rec-time" role="timer" aria-live="off" id="recTime"><span class="rec-dot" id="recDot" hidden></span>0:00,0</div><canvas class="rec-meter" id="recMeter" width="600" height="44" aria-hidden="true"></canvas><p id="recState" role="status">Pronto per registrare.</p><p class="pg-btns"><button type="button" class="btn sm" id="recTest">Prova il livello per tre secondi</button><button type="button" class="btn sm" id="recApply" hidden></button></p>`,fields,'Inserisci la registrazione',{
+ const res=await modal(title,`${intro?`<p>${esc(intro)}</p>`:''}<p>Ingresso: <b id="recDev">${esc(track.label||'predefinito')}</b>, <span id="recNch">${cap.nch===1?'mono':'stereo'}</span>. Prova a parlare: l’indicatore mostra il livello. Con <b>Suono del livello</b> acceso senti degli impulsi che salgono con la voce; con il metronomo acceso tacciono. Premi <b>Avvia</b> per registrare${onStart?' e <b>Ferma</b> per concludere':''}, poi <b>Inserisci la registrazione</b>.</p><div class="rec-time" role="timer" aria-live="off" id="recTime"><span class="rec-dot" id="recDot" hidden></span>0:00,0</div><canvas class="rec-meter" id="recMeter" width="600" height="44" aria-hidden="true"></canvas><p id="recState" role="status">Pronto per registrare.</p><p class="pg-btns"><button type="button" class="btn sm" id="recTest">Prova il livello per tre secondi</button><button type="button" class="btn sm" id="recApply" hidden></button></p>`,fields,'Inserisci la registrazione',{
   buttons:[{label:'Avvia',run:startStop},{label:'Tempo e livello',run:()=>announce(`${recording?'In registrazione':'Fermo'}: ${sayTime(frames/ctx.sampleRate)} registrati. Livello ${levelWords(recentDb())}, picco ${fmtDb(recentDb())}`)}],
   validate:()=>frames>0?null:'Non hai ancora registrato nulla: premi Avvia',onClose:cleanup,
-  onOpen:pane=>{const cv=$('recMeter'),t=$('recTime'),cb=$('dlg_earcon'),tb=$('recTest'),ab=$('recApply');if(cb)cb.addEventListener('change',()=>earconSet(cb.checked));if(tb)tb.onclick=testLevel;if(ab)ab.onclick=toggleApply;earconSet(earconOn);const loop=()=>{holdDb=Math.max(toDb(peak),holdDb-.08);drawMeter(cv,toDb(peak),{hold:holdDb});t.lastChild.textContent=fmtTime(frames/ctx.sampleRate,1);raf=requestAnimationFrame(loop)};loop();pane.querySelector('#dlgBtn0').classList.add('primary')}});
+  onOpen:pane=>{const cv=$('recMeter'),t=$('recTime'),cb=$('dlg_earcon'),tb=$('recTest'),ab=$('recApply');if(cb)cb.addEventListener('change',()=>earconSet(cb.checked));if(tb)tb.onclick=testLevel;if(ab)ab.onclick=toggleApply;earconSet(earconOn);const loop=()=>{holdDb=Math.max(toDb(peak),holdDb-.08);drawMeter(cv,toDb(peak),{hold:holdDb});t.lastChild.textContent=fmtTime(frames/ctx.sampleRate,1);raf=requestAnimationFrame(loop)};loop();pane.querySelector('#dlgBtn0').classList.add('primary');
+    // Cambio ingresso: solo prima di aver registrato qualcosa; si riapre lo stream e si ricostruisce la cattura.
+    const sel=$('dlg_dev'),updateDev=()=>{$('recDev').textContent=track.label||'predefinito';$('recNch').textContent=cap.nch===1?'mono':'stereo';if(sel)sel.value=settings.deviceId||''};
+    if(sel)sel.addEventListener('change',async()=>{const id=sel.value;
+     if(id===(settings.deviceId||''))return;
+     if(recording||starting||frames>0){announce('La registrazione è cominciata: con questo ingresso va avanti; il cambio vale dalla prossima volta');sel.value=settings.deviceId||'';return}
+     try{const ns=await recOpen(id);stream.getTracks().forEach(x=>x.stop());stream=ns;track=ns.getAudioTracks()[0];settings=track.getSettings?.()||{};buildCapture();updateDev();
+      if(onDevice)onDevice(settings.deviceId||'',track.label||'');else{prefs.recDevice=settings.deviceId||'';savePrefs()};announce(`Ingresso: ${track.label||'predefinito'}, ${cap.nch===1?'mono':'stereo'}`)}
+     catch(e){toast('Ingresso non disponibile: '+e.message);sel.value=settings.deviceId||''}})}});
  stopAll();if(!res||!frames)return;
  if(res.earcon!==undefined){prefs.recEarcon=!!res.earcon;savePrefs()}
- const out=chunks.map(list=>{const d=new Float32Array(frames);let at=0;for(const c of list){d.set(c.subarray(0,Math.min(c.length,frames-at)),at);at+=c.length;if(at>=frames)break}return d});
+ // Il cambio di ingresso è già gestito dall'handler del campo: qui non serve ripeterlo, e un res.dev
+ // diverso dal dispositivo aperto significherebbe ricordare un ingresso che non ha risposto.
+ const out=cap.chunks.map(list=>{const d=new Float32Array(frames);let at=0;for(const c of list){d.set(c.subarray(0,Math.min(c.length,frames-at)),at);at+=c.length;if(at>=frames)break}return d});
  let buffer=makeBuffer(out,ctx.sampleRate);
  if(applyGainDb){
   let max=0;for(let c=0;c<buffer.numberOfChannels;c++){const d=buffer.getChannelData(c);for(let i=0;i<d.length;i++)max=Math.max(max,Math.abs(d[i]))}
@@ -60,7 +99,7 @@ async function recordAudio(){if(MIX.playing)mixStop(true);stopPlayback(false);co
  const places=[...(t?[['track',`Nella traccia «${t.name}», da ${fmtTime(from,1)}`]]:[]),...(cover?[['take',`Come nuova take nella regione «${cover.name}»`]]:[]),['newtrack',`In una nuova traccia, da ${fmtTime(from,1)}`],...(inEditor?[...(hasSel()?[['replace','Nell’editor, al posto della selezione della regione']]:[]),['cursor','Nell’editor, al cursore della regione']]:[])];
  let c0=null,glat=0;const hasOthers=P.regions.length>0||P.metro;
  const punchIntro=punchOn?`Punch attivo: entra solo il tratto da ${fmtTime(P.punch.a,1)} a ${fmtTime(P.punch.b,1)}, con ${sayTime(punchPre())} di ascolto prima. Ferma appena dopo il punto A. `:'';
- await recordDialog({title:'Registra',intro:punchIntro+(hasOthers?'Mentre registri senti le altre tracce dall’indicatore in poi: usa le cuffie, così il microfono non le riprende.'+(P.countIn?' Prima di iniziare senti una battuta di conteggio.':''):(P.countIn?'Prima di iniziare senti una battuta di conteggio.':'')),places,
+ await recordDialog({title:'Registra',device:t?.input||null,trackName:t?.name,onDevice:t?(id,label)=>pCommit('Ingresso della traccia',()=>{t.input=id?{id,label:label||''}:null}):null,intro:punchIntro+(hasOthers?'Mentre registri senti le altre tracce dall’indicatore in poi: usa le cuffie, così il microfono non le riprende.'+(P.countIn?' Prima di iniziare senti una battuta di conteggio.':''):(P.countIn?'Prima di iniziare senti una battuta di conteggio.':'')),places,
   onStart:async place=>{if(place==='replace'||place==='cursor')return;if(P.countIn)await countIn();if(hasOthers){mixPlay(playFrom,{recording:true,origin:playFrom});c0=MIX.c0;glat=MIX.lat}},
   onStop:()=>{if(MIX.recording)mixStop(false)},
   onDone:async(buf,place,info)=>{
