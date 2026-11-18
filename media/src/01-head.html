@@ -415,4 +415,18 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 @media (max-width:1500px){.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.app-switch button{padding:0 6px}}
 @media (max-width:1200px){.status .st-btn:not(.lead) span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
 @media (max-width:720px){.bar{gap:6px;padding:6px 6px 0}.brand{display:none}.save-state,.search-tile kbd{display:none}.bar>.doc-tile{flex-basis:140px;min-width:90px}.primary-tile span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.primary-tile{padding:0 16px}.file-side{width:180px}.file-info{padding:22px}.clock{min-width:0}.meter{display:none}.drawer-grid{grid-template-columns:1fr!important}#docInfo{display:none}.zoom input[type=range]{width:80px}}
+
+/* Editor MIDI: tabella delle note (la superficie accessibile) e barra dei comandi. */
+.midi-ed{padding:8px 10px 10px}
+.midi-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.midi-tools .fld{display:flex;gap:6px;align-items:center}
+.midi-roll{height:140px;margin:0 0 8px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:rgba(120,120,120,.06)}
+.midi-roll canvas{display:block;width:100%;height:100%}
+.midi-table-wrap{max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:6px}
+#midiNotes{width:100%;border-collapse:collapse;font-size:13px}
+#midiNotes caption{text-align:left}
+#midiNotes th,#midiNotes td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+#midiNotes thead th{position:sticky;top:0;background:var(--panel);z-index:1}
+#midiNotes tbody tr[aria-selected=true]{background:rgba(36,87,197,.18);outline:2px solid var(--accent,#2457c5);outline-offset:-2px}
+#midiNotes td:focus{outline:2px solid var(--accent,#2457c5);outline-offset:-2px}
 </style></head>

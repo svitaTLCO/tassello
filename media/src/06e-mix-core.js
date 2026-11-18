@@ -65,14 +65,14 @@ function pCommit(label,fn,opts={}){const before=pSnap(),bpm0=P.bpm,r=fn();
  const after=pSnap();if(before===after)return r;lastScope='project';phist.push({label,before,after,sel:P.sel});if(phist.length>150)phist.shift();predo=[];projectChanged(opts);return r}
 function pUndo(redoing){const from=redoing?predo:phist,to=redoing?phist:predo;if(!from.length){toast(redoing?'Niente da ripetere':'Niente da annullare');return}mixStop(true);const e=from.pop();Object.assign(P,JSON.parse(redoing?e.after:e.before));to.push(e);if(!P.sel)P.sel=e.sel;projectChanged();announce((redoing?'Ripetuto: ':'Annullato: ')+e.label)}
 // Dopo ogni modifica: l'editor segue la sua regione, la vista si ridisegna, la riproduzione si aggiorna.
-function projectChanged({live=false}={}){P.version++;if(P.sel&&!regionOf(P.sel))P.sel=null;if(!trackOf(P.track))P.track=P.tracks[0]?.id||null;checkEditorBinding();renderArrange();updateArrangeUI();if(MIX.playing){live?mixLive():mixRestart()}schedulePersist('audio')}
+function projectChanged({live=false}={}){P.version++;if(P.sel&&!regionOf(P.sel))P.sel=null;if(!trackOf(P.track))P.track=P.tracks[0]?.id||null;checkEditorBinding();midiEditorSync();renderArrange();updateArrangeUI();if(MIX.playing){live?mixLive():mixRestart()}schedulePersist('audio')}
 // Editor della regione. Si apre su una copia del tratto della regione; alla prima modifica la regione riceve un suono
 // tutto suo (gli altri usi dello stesso suono, per esempio una regione duplicata, non cambiano).
-function openRegion(r,{focus=true,quiet=false}={}){if(!regionAvailable(r))return false;const src=SOURCES.get(r.src);if(!src){toast('L’audio di questa regione non è disponibile');return false}stopPlayback(false);
+function openRegion(r,{focus=true,quiet=false}={}){if(r?.kind==='midi')return midiEditorOpen(r,{focus,quiet});midiEditorClose();if(!regionAvailable(r))return false;const src=SOURCES.get(r.src);if(!src){toast('L’audio di questa regione non è disponibile');return false}stopPlayback(false);
  const rate=src.sampleRate,a=clamp(Math.round(r.off*rate),0,src.length-1),b=clamp(a+Math.round(r.dur*rate),a+1,src.length);
  A.region=null;setAudioDoc(copyRange(src,a,b),{title:r.name,markers:(r.markers||[]).map(m=>({...m}))});A.region=r.id;A.own=null;A.bound={src:r.src,off:r.off,dur:r.dur};
  showEditor(true);updateEditorBar();if(focus)$('wave').focus();if(!quiet)announce(`Editor: regione «${r.name}» della traccia «${trackOf(r.track)?.name||''}», ${sayTime(r.dur)}`);return true}
-function closeRegionEditor(){A.region=null;A.own=null;A.bound=null;setAudioDoc(null,{title:'',markers:[]});updateEditorBar()}
+function closeRegionEditor(){midiEditorClose();A.region=null;A.own=null;A.bound=null;setAudioDoc(null,{title:'',markers:[]});updateEditorBar()}
 function regionFromEditor(){const r=regionOf(A.region);if(!r)return;
  if(!A.buf){P.regions=P.regions.filter(x=>x!==r);A.region=null;A.bound=null;projectChanged();updateEditorBar();announce('Eliminato tutto l’audio: la regione è rimasta vuota ed è stata tolta dalla traccia');return}
  A.own??=uid();SOURCES.set(A.own,A.buf);dirtySources.add(A.own);Object.assign(r,{src:A.own,off:0,dur:A.buf.duration,markers:A.markers.map(m=>({...m}))});A.bound={src:r.src,off:0,dur:r.dur};projectChanged();updateEditorBar()}
