@@ -273,7 +273,7 @@ function bindDeliveryPreset(pane,opts){const pick=id=>pane.querySelector('#dlg_'
   if(d.bits&&opts.some(o=>o[0]===d.bits))set('fmt',d.bits);
   set('rate',d.rate||'auto');set('ch',d.ch||'auto');set('lufs',d.lufs);set('tp',d.tp);
   const dh=pick('dither');if(dh)dh.checked=!!d.dither;const bh=pick('bwf');if(bh)bh.checked=!!d.bwf;announce(d.label)})}
-async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.buf){toast('Il progetto è vuoto: niente da esportare');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
+async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.buf){toast('Il progetto è vuoto: niente da esportare');return}if(song&&!A.buf)midiExportNote();const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
  const opts=[['wav16','WAV 16 bit (qualità CD, per tutti i programmi)'],['wav24','WAV 24 bit (per altri programmi professionali)'],['wav32','WAV 32 bit in virgola mobile (senza perdite)'],['mp3','MP3 (per playout, telefonini e archivio)'],...(aac?[['aac','M4A con AAC (compresso, per telefoni e messaggi)']]:[]),...(opus?[['opus','WebM con Opus (compresso, molto leggero)']]:[])];
  const what=[...(song?[['song',`Il brano: tutte le tracce mixate (${fmtTime(projDur(),1)})`]]:[]),...(A.buf?[['region','Solo la regione nell’editor'+(A.region?` «${regionOf(A.region)?.name||''}»`:'')]]:[]),...(A.buf&&hasSel()?[['sel','Solo la selezione nell’editor']]:[])];
  const fmt=opts.some(o=>o[0]===prefs.audioFormat)?prefs.audioFormat:'wav16';

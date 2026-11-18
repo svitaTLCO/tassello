@@ -45,9 +45,9 @@ async function readLevels({track=null}={}){if(inEditorArea()&&!track){if(!A.buf)
   [a,b]=sel?[A.selA,A.selB]:aplay.playing?[Math.max(0,pos-2*half),pos]:[Math.max(0,pos-half),Math.min(alen(),pos+half)];if(b-a<A.rate*0.05){toast('Il tratto è troppo corto per misurarlo');return}
   const m=measureCh(sliceCh(A.buf,a,b),A.rate);toast(`Livelli ${sel?`della selezione (${sayTime(sec(b-a))})`:aplay.playing?'degli ultimi secondi ascoltati':`intorno al cursore, da ${sayTime(sec(a))} a ${sayTime(sec(b))}`}: ${levelSentence(m)}.`);return}
  if(!P.regions.length){toast('Il progetto è vuoto: niente da misurare');return}
- const t=MIX.playing?mixPos():P.t,from=Math.max(0,Math.min(t-1.5,projDur()-3)),to=Math.min(projDur(),from+3),here=P.regions.filter(r=>r.start<to&&regionEnd(r)>from);
+ const t=MIX.playing?mixPos():P.t,from=Math.max(0,Math.min(t-1.5,projDur()-3)),to=Math.min(projDur(),from+3),here=P.regions.filter(r=>r.kind!=='midi'&&r.start<to&&regionEnd(r)>from);
  if(!here.length){toast(`Silenzio intorno a ${sayTime(t)}: nessuna regione suona tra ${sayTime(from)} e ${sayTime(to)}`);return}
- const res=await work('Misura dei livelli',async()=>{const solo=P.tracks.some(x=>x.solo),live=P.tracks.filter(x=>here.some(r=>r.track===x.id)&&!x.mute&&(!solo||x.solo)&&(!track||x.id===track));
+ const res=await work('Misura dei livelli',async()=>{const solo=P.tracks.some(x=>x.solo),live=P.tracks.filter(x=>x.kind!=='midi'&&here.some(r=>r.track===x.id)&&!x.mute&&(!solo||x.solo)&&(!track||x.id===track));
   const ms=b=>measureCh([b.getChannelData(0),b.getChannelData(1)],b.sampleRate);if(track){const tr=trackOf(track);return{track:tr,m:tr&&live.length?ms(await renderMix({only:track,from,to})):null}}
   const out=ms(await renderMix({from,to})),raw=ms(await renderMix({from,to,limit:false})),per=[];for(const x of live)per.push({t:x,m:ms(await renderMix({only:x.id,from,to}))});return{out,raw,per}});if(!res)return;
  const where=`intorno a ${sayTime(t)}`;if(track){const tr=res.track,
@@ -63,7 +63,7 @@ async function readLevels({track=null}={}){if(inEditorArea()&&!track){if(!A.buf)
 function trackWords(t){const w=[];if(t.mute)w.push('muta');if(t.solo)w.push('in solo');if(t.vol)w.push('volume '+fmtDb(t.vol));if(Math.abs(t.pan)>=0.005)w.push('bilanciamento '+panWords(t.pan));
  if(t.low)w.push('bassi '+signedDb(t.low));if(t.high)w.push('alti '+signedDb(t.high));if(t.comp)w.push('compressione '+t.comp+'%');if(t.reverb)w.push('riverbero '+t.reverb+'%');if(t.voice)w.push('è la voce');if(t.duck)w.push('si abbassa di '+fmtDb(-t.duck)+' quando parla la voce');if(t.kind==='bus')w.push('bus');else if(t.out)w.push('esce sul bus «'+((trackOf(t.out)||{}).name||'')+'»');for(const [k,nome] of [['vol','volume'],['pan','bilanciamento'],['reverb','riverbero'],['low','bassi'],['high','alti'],['comp','compressione']])if(t.autoOn?.[k]&&t.auto?.[k]?.length)w.push(nome+' automatico con '+(t.auto[k].length===1?'un punto':t.auto[k].length+' punti'));w.push('colore '+colorName(t.color));return w.join(', ')}
 // Tratti di tempo con le tracce che suonano: da un bordo di regione al successivo, unendo i tratti uguali.
-function songSpans(){const pts=arEdges().filter(p=>p<=projDur()+1e-6),out=[];for(let i=0;i+1<pts.length;i++){const a=pts[i],b=pts[i+1];if(b-a<0.02)continue;const m=(a+b)/2,on=P.tracks.filter(t=>P.regions.some(r=>r.track===t.id&&r.start<=m&&regionEnd(r)>m)).map(t=>t.name+(t.mute?' (muta)':''));
+function songSpans(){const pts=arEdges().filter(p=>p<=projDur()+1e-6),out=[];for(let i=0;i+1<pts.length;i++){const a=pts[i],b=pts[i+1];if(b-a<0.02)continue;const m=(a+b)/2,on=P.tracks.filter(t=>t.kind!=='midi'&&P.regions.some(r=>r.track===t.id&&r.kind!=='midi'&&r.start<=m&&regionEnd(r)>m)).map(t=>t.name+(t.mute?' (muta)':''));
   const key=on.join('|');if(out.length&&out.at(-1).key===key)out.at(-1).b=b;else out.push({a,b,key,on})}return out}
 const andList=l=>l.length<2?(l[0]||''):l.slice(0,-1).join(', ')+' e '+l.at(-1);
 function describeSong(){if(!P.tracks.length){toast('Il progetto è vuoto. Ctrl+Alt+R registra, Ctrl+I importa un file audio in una nuova traccia.');return}

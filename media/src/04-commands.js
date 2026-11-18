@@ -12,6 +12,7 @@ def('av','Strumenti',[
  ['midiPanel','Controller MIDI: tastiera o pedale per i comandi…','keyboard','',{short:'MIDI'}]]);
 def('a','File',[
  ['saveAudio','Esporta il brano o la regione (WAV, M4A o WebM)','save','Ctrl+S',{g:1,short:'Esporta'}],
+ ['exportMidi','Esporta la regione o la traccia MIDI come file .mid','export','',{short:'Esporta MIDI'}],
  ['saveAudioProject','Salva il progetto (ZIP con le tracce e i suoni)','backup','Ctrl+Maiusc+S',{g:1,short:'Salva progetto'}],
  ['exportStems','Esporta ogni traccia in un file separato (ZIP)','export','',{short:'Tracce separate'}],
  ['exportParts','Esporta le parti tra i marcatori','export','',{short:'Esporta le parti'}],
@@ -23,6 +24,7 @@ def('a','File',[
  ['limiterToggle','Il limitatore finale segue l’automazione','compress','',{short:'Limitatore auto',toggle:()=>!!P.limiter?.on}]]);
 def('a','Tracce',[
  ['newTrack','Nuova traccia vuota','plus','Alt+Maiusc+N',{short:'Nuova traccia'}],
+ ['newMidiTrack','Nuova traccia MIDI: le note suonano su un sintetizzatore esterno','keyboard','Alt+Maiusc+M',{short:'Traccia MIDI'}],
  ['newBus','Nuovo bus: raccoglie più tracce con un volume e un compressore soli','tracks','',{short:'Nuovo bus'}],
  ['importTrack','Importa file audio, ognuno in una nuova traccia','import','Ctrl+I',{g:1,short:'Importa audio'}],
  ['trackSettings','Suono della traccia: volume, bilanciamento, bassi, alti, compressione e riverbero…','eq','',{short:'Suono della traccia'}],
@@ -34,7 +36,7 @@ def('a','Tracce',[
  ['trackDelete','Elimina la traccia scelta','trash','',{short:'Elimina traccia'}],
  ['trackUp','Sposta la traccia in su','up','',{short:'Su'}],
  ['trackDown','Sposta la traccia in giù','down','',{short:'Giù'}],
- ['regionEdit','Apri la regione nell’editor','wave','',{short:'Modifica regione'}],
+ ['regionEdit','Apri la regione nell’editor','wave','',{audioRegion:1,short:'Modifica regione'}],
  ['regionProps','Proprietà della regione: nome, traccia, inizio, guadagno, dissolvenze…','gear','',{short:'Proprietà'}],
  ['regionGainAuto','Guadagno della regione nel tempo: punti in decibel…','volume','',{short:'Guadagno auto'}],
  ['regionGainPoint','Aggiungi un punto di guadagno all’indicatore, dentro la regione scelta','plus','',{short:'Punto guadagno'}],
@@ -44,20 +46,20 @@ def('a','Tracce',[
  ['regionDuplicate','Duplica la regione subito dopo','duplicate','Ctrl+D',{ctx:'lane',short:'Duplica'}],
  ['regionLoop','Ripeti la regione più volte…','loop','',{short:'Ripeti'}],
  ['regionDelete','Elimina la regione','trash','',{short:'Elimina'}],
- ['regionFadeIn','Dissolvenza in entrata della regione','fadeIn','',{short:'Entrata',toggle:()=>selRegion()?.fadeIn>0}],
- ['regionFadeOut','Dissolvenza in uscita della regione','fadeOut','',{short:'Uscita',toggle:()=>selRegion()?.fadeOut>0}],
- ['regionCrossfade','Incrocia la regione scelta con quella che segue…','transition','',{short:'Incrocia'}],
+ ['regionFadeIn','Dissolvenza in entrata della regione','fadeIn','',{audioRegion:1,short:'Entrata',toggle:()=>selRegion()?.fadeIn>0}],
+ ['regionFadeOut','Dissolvenza in uscita della regione','fadeOut','',{audioRegion:1,short:'Uscita',toggle:()=>selRegion()?.fadeOut>0}],
+ ['regionCrossfade','Incrocia la regione scelta con quella che segue…','transition','',{audioRegion:1,short:'Incrocia'}],
  ['autoEdit','Automazione della traccia: punti di volume e bilanciamento…','stats','',{short:'Automazione'}],
  ['autoAddVol','Aggiungi un punto di volume all’indicatore','plus','',{short:'Punto volume'}],
  ['autoAddPan','Aggiungi un punto di bilanciamento all’indicatore','plus','',{short:'Punto bilanciamento'}],
  ['autoToggleVol','Il volume della traccia segue l’automazione','stats','',{short:'Volume automatico',toggle:()=>!!selTrack()?.autoOn?.vol}],
  ['autoTogglePan','Il bilanciamento della traccia segue l’automazione','stats','',{short:'Bilanciamento automatico',toggle:()=>!!selTrack()?.autoOn?.pan}],
  ['autoClear','Togli tutti i punti di automazione della traccia','trash','',{short:'Togli automazione'}],
- ['takes','Take della regione: scegli quella che si sente, rinomina, annota…','duplicate','',{short:'Take'}],
- ['takeNext','Passa alla take successiva della regione','right','Alt+Maiusc+]',{short:'Take dopo'}],
- ['takePrev','Passa alla take precedente della regione','left','Alt+Maiusc+[',{short:'Take prima'}],
- ['takeDelete','Togli una take della regione…','trash','',{short:'Togli take'}],
- ['compEdit','Comping: scegli da quale take viene ogni sezione della regione…','split','',{short:'Comping'}],
+ ['takes','Take della regione: scegli quella che si sente, rinomina, annota…','duplicate','',{audioRegion:1,short:'Take'}],
+ ['takeNext','Passa alla take successiva della regione','right','Alt+Maiusc+]',{audioRegion:1,short:'Take dopo'}],
+ ['takePrev','Passa alla take precedente della regione','left','Alt+Maiusc+[',{audioRegion:1,short:'Take prima'}],
+ ['takeDelete','Togli una take della regione…','trash','',{audioRegion:1,short:'Togli take'}],
+ ['compEdit','Comping: scegli da quale take viene ogni sezione della regione…','split','',{audioRegion:1,short:'Comping'}],
  ['cycle','Ciclo: ripeti il tratto tra inizio e fine del ciclo','loop','',{short:'Ciclo',toggle:()=>P.cycle.on}],
  ['cycleRegion','Ciclo sulla regione scelta','loop','',{short:'Ciclo sulla regione'}],
  ['punchRange','Punch: registra solo tra due punti…','record','',{short:'Punch…'}],
@@ -237,7 +239,10 @@ function parsedKeys(spec){if(!keyCache.has(spec))keyCache.set(spec,spec?spec.spl
 function keyMatch(e,k){if((e.ctrlKey||e.metaKey)!==k.ctrl||e.altKey!==k.alt)return false;const sym=k.key.length===1&&!/[a-z0-9 ]/.test(k.key);if(!sym&&e.shiftKey!==k.shift)return false;const ek=e.key.toLowerCase();if(ek===k.key)return true;if(/^[a-z0-9]$/.test(k.key)&&(!(e.ctrlKey&&e.altKey)||/\d/.test(k.key)))return e.code===(/\d/.test(k.key)?'Digit':'Key')+k.key.toUpperCase();if(k.key===' '&&e.code==='Space')return true;return false}
 function ariaKeys(spec){const M={Ctrl:'Control',Maiusc:'Shift',Alt:'Alt',Invio:'Enter',Spazio:'Space',Canc:'Delete',PgSu:'PageUp',PgGiù:'PageDown','←':'ArrowLeft','→':'ArrowRight','↑':'ArrowUp','↓':'ArrowDown',Esc:'Escape'};return spec.split(' / ').map(s=>s.split('+').map(p=>M[p]||p).join('+')).join(' ')}
 const kbdHtml=spec=>spec.split(' / ').map(s=>s.split('+').map(p=>`<kbd>${esc(p)}</kbd>`).join('+')).join(' o ');
-const available=c=>c.modes.includes(state.mode[0]);
+// I comandi che hanno bisogno del suono della regione scelta (forma d'onda, dissolvenze, take, comping) non sono
+// disponibili quando la regione è MIDI: barra e palette lo dicono prima, invece di lasciar partire il comando.
+const regionIsMidi=()=>{const r=P.regions.find(x=>x.id===P.sel);return !!r&&r.kind==='midi'};
+const available=c=>c.modes.includes(state.mode[0])&&(!c.audioRegion||!regionIsMidi());
 function focusContext(){const a=document.activeElement;if(!a||a===document.body)return 'other';if(a.id==='wave')return 'wave';if(a.classList.contains('ar-lane'))return 'lane';if(a.id==='arPlayhead')return 'arph';if(a.id==='playhead'||a.id==='viewCanvas'||a.classList.contains('track'))return 'timeline';if(a.classList.contains('lb'))return 'list';if(a.matches('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select'))return 'input';return 'other'}
 function findShortcut(e,ctx){let fallback=null;for(const c of Object.values(C)){const spec=keysOf(c);if(!spec||!available(c))continue;if(c.ctx&&c.ctx!==ctx)continue;if(ctx==='input'&&!c.g)continue;if(parsedKeys(spec).some(k=>keyMatch(e,k))){if(c.ctx===ctx)return c;fallback??=c}}return fallback}
 const safe=fn=>{try{return fn()}catch(e){return false}};

@@ -136,10 +136,10 @@ function deleteRegion(r=selRegion()){if(!r){toast('Scegli prima una regione');re
 function duplicateRegion(r=selRegion()){if(!r){toast('Scegli prima una regione');return}let c;pCommit('Duplica la regione',()=>{c={...structuredClone(r),id:uid(),start:regionEnd(r)};P.regions.push(c);P.sel=c.id});focusLane(r.track);announce(`Copia di «${r.name}» subito dopo, da ${sayTime(c.start)}`)}
 async function loopRegion(r=selRegion()){if(!r){toast('Scegli prima una regione');return}const v=await modal('Ripeti la regione',`<p>Le copie di «${esc(r.name)}» vengono messe una dopo l’altra sulla stessa traccia, come un giro che si ripete.</p>`,[{id:'n',label:'Quante volte ripeterla',type:'number',value:3}],'Ripeti',{validate:v=>num(v.n)>=1&&num(v.n)<=100?null:{msg:'Scegli un numero da 1 a 100',field:'n'}});if(!v)return;const n=Math.round(num(v.n));pCommit('Ripeti la regione',()=>{for(let k=1;k<=n;k++)P.regions.push({...structuredClone(r),id:uid(),start:r.start+k*r.dur})});focusLane(r.track);announce(`«${r.name}» ripetuta ${n} volte: ora arriva a ${sayTime(r.start+(n+1)*r.dur)}`)}
 async function renameRegion(r=selRegion()){if(!r)return;const v=await modal('Rinomina la regione','',[{id:'name',label:'Nome',value:r.name}],'Rinomina');if(!v||!v.name.trim())return;pCommit('Rinomina la regione',()=>{r.name=v.name.trim().slice(0,120)});focusLane(r.track);announce('Regione rinominata «'+r.name+'»')}
-async function regionProps(r=selRegion()){if(!r){toast('Scegli prima una regione');return}const src=SOURCES.get(r.src);
+async function regionProps(r=selRegion()){if(!r){toast('Scegli prima una regione');return}if(!regionAvailable(r))return;const src=SOURCES.get(r.src);
  const v=await modal('Proprietà della regione',`<p>Usa ${esc(fmtTime(r.dur,2))} del suono, da ${esc(fmtTime(r.off,2))}${src?` su ${esc(fmtTime(src.duration,2))}`:''}.${r.gainOn?' Il guadagno segue l’automazione: il campo qui sotto non conta finché resta accesa.':''}</p>`,[{id:'name',label:'Nome',value:r.name},{id:'track',label:'Traccia',type:'select',value:r.track,options:P.tracks.map(t=>[t.id,t.name])},{id:'start',label:'Inizio nel brano',type:'time',value:fmtTime(r.start,3)},{id:'gain',label:'Guadagno',type:'range',min:-24,max:12,step:0.5,value:r.gain,fmt:fmtDb},{id:'fadeIn',label:'Dissolvenza in entrata (secondi)',type:'number',min:0,max:Math.floor(r.dur*100)/100,value:r.fadeIn},{id:'fadeOut',label:'Dissolvenza in uscita (secondi)',type:'number',min:0,max:Math.floor(r.dur*100)/100,value:r.fadeOut}],'Applica',{validate:v=>parseTime(v.start)>=0?null:{msg:'Inizio nel brano: scrivi un tempo, per esempio 12,5 oppure 1:02,5.',field:'start'}});
  if(!v)return;pCommit('Proprietà della regione',()=>{r.name=v.name.trim().slice(0,120)||r.name;r.track=v.track;r.start=parseTime(v.start);r.gain=Number(v.gain);r.fadeIn=clamp(num(v.fadeIn)||0,0,r.dur);r.fadeOut=clamp(num(v.fadeOut)||0,0,r.dur)});P.track=r.track;focusLane(r.track);announce('Regione aggiornata')}
-function fadeRegion(which){const r=selRegion();if(!r){toast('Scegli prima una regione');return}const key=which==='in'?'fadeIn':'fadeOut',on=!(r[key]>0),d=Math.min(0.5,r.dur/3);pCommit(which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita',()=>{r[key]=on?d:0});announce(`${which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita'} ${on?'di '+sayTime(d,1):'tolta'}`)}
+function fadeRegion(which){const r=selRegion();if(!r){toast('Scegli prima una regione');return}if(!regionAvailable(r))return;const key=which==='in'?'fadeIn':'fadeOut',on=!(r[key]>0),d=Math.min(0.5,r.dur/3);pCommit(which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita',()=>{r[key]=on?d:0});announce(`${which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita'} ${on?'di '+sayTime(d,1):'tolta'}`)}
 // Marcatore all'indicatore del brano (anche durante l'ascolto): va nella regione che suona lì, sulla traccia scelta se
 // ce n'è una, e si salva con la regione. Se la regione è aperta nell'editor, il marcatore entra anche lì.
 function songMarker(){const t=MIX.playing?mixPos():P.t,at=x=>t>=x.start&&t<regionEnd(x),ed=A.region&&regionOf(A.region),r=(ed&&at(ed)?ed:null)||regionsOn(P.track).find(at)||P.regions.find(at);
@@ -178,7 +178,22 @@ function wireChain(work,apply){const box=$('chainBox'),list=$('chainList'),rende
  box.addEventListener('input',e=>{const inp=e.target.closest('input');if(!inp?.id.startsWith('ch_'))return;const [,mid,key]=inp.id.split('_'),m=work.find(x=>x.id===mid);if(!m)return;const [lo,hi]=CHAIN_TYPES[m.tipo].params[key];m.params[key]=clamp(num(inp.value),lo,hi);apply()})}
 // Suono della traccia: come i controlli rapidi di uno studio, pochi cursori chiari che si sentono subito. Qui
 // stanno anche l'ingresso di registrazione e la catena dei componenti.
-async function trackSettings(t=selTrack()){if(!t){toast('Crea prima una traccia');return}const orig={...t,chain:t.chain.map(m=>({...m,params:{...m.params}}))},live=(k,v)=>{t[k]=v;mixLive()};
+// Proprietà di una traccia MIDI: nome, colore, uscita (id e nome salvati, così si ritrova la porta anche se l'id
+// cambia), canale e programma. Le proprietà audio (volume, effetti, ingresso) non c'entrano: il suono sta sul synth.
+async function midiTrackSettings(t){await midiStart({quiet:true}).catch(()=>false);const outs=midiOutputs();
+ const cur=outs.find(o=>o.id===t.midiOut?.id)||outs.find(o=>t.midiOut?.name&&o.name===t.midiOut.name)||null;
+ const v=await modal('Traccia MIDI',`<p>Traccia MIDI «${esc(t.name)}»: le note suonano sul sintetizzatore collegato all’uscita scelta e non finiscono nel mix esportato.${outs.length?'':' Nessuna uscita MIDI trovata: collega un sintetizzatore o un’uscita virtuale.'}</p>`,
+  [{id:'name',label:'Nome',value:t.name},{id:'color',label:'Colore',type:'select',value:t.color,options:TRACK_COLORS.map(([c,n])=>[c,n])},
+   {id:'out',label:'Uscita MIDI',type:'select',value:cur?.id||'',options:[['','Prima uscita disponibile'],...outs.map(o=>[o.id,o.name||o.id])],hint:'La porta si ritrova per id e, se l’id cambia, per nome.'},
+   {id:'ch',label:'Canale MIDI (1-16)',type:'number',value:t.midiCh},
+   {id:'prog',label:'Programma del sintetizzatore (0-127; vuoto = nessun cambio)',type:'text',value:t.program==null?'':String(t.program)}],'Applica',
+  {validate:v=>{const ch=num(v.ch),pr=String(v.prog).trim(),n=num(pr);
+   return !(Number.isInteger(ch)&&ch>=1&&ch<=16)?{msg:'Canale: scrivi un numero intero da 1 a 16.',field:'ch'}:
+    pr&&!(n>=0&&n<=127)?{msg:'Programma: vuoto oppure un numero da 0 a 127.',field:'prog'}:null}});
+ if(!v)return;const out=outs.find(o=>o.id===v.out)||null;
+ pCommit('Traccia MIDI',()=>{Object.assign(t,{name:v.name.trim().slice(0,80)||t.name,color:v.color,midiOut:out?{id:out.id,name:out.name||''}:null,midiCh:clamp(Math.round(num(v.ch)),1,16),program:String(v.prog).trim()===''?null:clamp(Math.round(num(v.prog)),0,127)})});
+ renderArrange();focusLane(t.id);announce(`Traccia MIDI «${t.name}»: uscita ${out?out.name||out.id:'prima disponibile'}, canale ${t.midiCh}${t.program!=null?', programma '+t.program:''}`)}
+async function trackSettings(t=selTrack()){if(!t){toast('Crea prima una traccia');return}if(t.kind==='midi')return midiTrackSettings(t);const orig={...t,chain:t.chain.map(m=>({...m,params:{...m.params}}))},live=(k,v)=>{t[k]=v;mixLive()};
  // Elenco degli ingressi per la registrazione: vale solo per le tracce audio, i bus non registrano.
  const inputs=t.kind!=='bus'?inputOptions(await recInputs().catch(()=>[])):null;
  // Copia di lavoro della catena: si applica alla traccia per l'anteprima e al commit entra nel progetto.
@@ -214,7 +229,7 @@ async function fitDurationDialog(){const inEd=!!A.buf&&(inEditorArea()||!selRegi
  pCommit('Adatta la regione alla durata',()=>{const id=addSource(out);r.src=id;r.off=0;r.dur=out.duration;r.markers=(r.markers||[]).map(m=>({...m,pos:Math.round(m.pos/f)})).filter(m=>m.pos<=out.length)});
  announce(`Regione «${r.name}» da ${sayTime(cur)} a ${sayTime(out.duration)}: ritmo al ${fmtNum(100/f,0)} per cento`)}
 // Incrocio: la regione scelta sfuma in uscita mentre quella che segue entra, sovrapposte per la durata scelta.
-async function crossfadeNext(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+async function crossfadeNext(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}if(!regionAvailable(r))return;
  const next=regionsOn(r.track).find(x=>x.id!==r.id&&x.start>=regionEnd(r)-0.02);
  if(!next){toast('Dopo questa regione, sulla stessa traccia, non ce n’è un’altra');return}
  const gap=next.start-regionEnd(r),maxD=Math.min(r.dur,next.dur)/2;
@@ -296,7 +311,7 @@ function previewTake(r,take){const src=SOURCES.get(take?.src);if(!src){toast('Qu
  stopPlayback(false);stopPreview();const ctx=actxGet(),a=Math.round(take.off*src.sampleRate),len=Math.min(Math.round(take.dur*src.sampleRate),Math.round(6*src.sampleRate)),
   buf=makeBuffer(Array.from({length:src.numberOfChannels},(_,c)=>src.getChannelData(c).slice(a,a+len)),src.sampleRate);
  const s=ctx.createBufferSource();s.buffer=buf;s.connect(audioOut());s.start();previewSrc=s;announce(`Ascolto della take «${take.name}»: ${sayTime(buf.duration)}`)}
-async function takesDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+async function takesDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}if(!regionAvailable(r))return;
  const list=r.takes?.length?r.takes:[{id:'tmp',src:r.src,off:r.off,dur:r.dur,name:'Take 1',note:''}],
   active=Math.max(0,list.findIndex(t=>t.src===r.src&&Math.abs(t.off-r.off)<1e-6));
  const rows=list.map((t,i)=>`<tr><th scope="row">${i+1}</th><td>${esc(t.name)}</td><td>${esc(fmtTime(t.dur))}</td><td>${esc(t.note||'—')}</td><td>${i===active?'attiva':''}</td></tr>`).join('');
@@ -323,7 +338,7 @@ async function takeDelete(){const r=selRegion();if(!r){toast('Scegli prima una r
 
 // ——— Comping: la regione suona la take attiva, tranne nelle sezioni che ne scelgono un'altra. Le sezioni non
 // distruggono niente: si tolgono e l'audio torna com'era.
-async function compDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+async function compDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}if(!regionAvailable(r))return;
  if(!r.takes?.length)pCommit('Take della regione',()=>ensureTakes(r));
  const list=r.takes.map(t=>({...t})),end=r.start+r.dur;
  let draft=(r.comp||[]).map(c=>({...c}));
@@ -362,6 +377,8 @@ function punchToggle(){const a=P.punch.a||P.t,b=P.punch.b>P.punch.a?P.punch.b:P.
 function trimRegionTo(r,at){const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);r.dur=Math.max(0.01,at-r.start);r.markers=(r.markers||[]).filter(m=>m.pos<=cut);if(r.gainAuto)r.gainAuto=r.gainAuto.filter(p=>p.t<=r.dur)}
 function splitRegionAt(r,at){const e=regionEnd(r);if(at<=r.start+1e-6||at>=e-1e-6)return null;const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);
  const right={...r,id:uid(),start:at,off:r.off+(at-r.start),dur:e-at,gainAuto:(r.gainAuto||[]).map(p=>({...p,t:p.t-(at-r.start)})).filter(p=>p.t>=0),markers:(r.markers||[]).map(m=>({...m,pos:m.pos-cut})).filter(m=>m.pos>=0)};
+ // Le note sono oggetti: una copia profonda, altrimenti le due metà di una regione MIDI condividerebbero l'elenco.
+ if(r.kind==='midi')right.notes=(r.notes||[]).map(n=>({...n}));
  trimRegionTo(r,at);return right}
 // Il tratto di registrazione che entra col punch: dal punto «Da» al punto «A», scartando l'ascolto prima.
 function punchPart(buf,start,pu){const rate=buf.sampleRate,a0=Math.max(0,Math.round((pu.a-start)*rate)),b0=Math.min(buf.length,Math.round((pu.b-start)*rate));

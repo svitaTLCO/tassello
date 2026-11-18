@@ -146,8 +146,8 @@ function voiceWindowLevels(id,from,to){const n=Math.max(1,Math.ceil((to-from)/DU
    for(const d of chans)for(let j=s0;j<s1;j++){const v=d[j]<0?-d[j]:d[j];if(v>pk)pk=v}
    if(pk>0)lv[w]=Math.max(lv[w],20*Math.log10(pk))}}
  return lv}
-function duckGains(from,to){const out=new Map(),voice=P.tracks.find(t=>t.voice&&audible(t));if(!voice)return out;
- const targets=P.tracks.filter(t=>t.id!==voice.id&&t.duck>0&&audible(t));if(!targets.length)return out;
+function duckGains(from,to){const out=new Map(),voice=P.tracks.find(t=>t.kind==='audio'&&t.voice&&audible(t));if(!voice)return out;
+ const targets=P.tracks.filter(t=>t.kind==='audio'&&t.id!==voice.id&&t.duck>0&&audible(t));if(!targets.length)return out;
  const lv=voiceWindowLevels(voice.id,from,to),n=lv.length,ordered=Array.from(lv).sort((a,b)=>a-b),
   thr=clamp((ordered[Math.min(n-1,Math.floor(n*0.95))]??-120)-30,-55,-30),
   att=1-Math.exp(-DUCK_STEP/0.06),rel=1-Math.exp(-DUCK_STEP/0.35);
@@ -172,28 +172,74 @@ function mixOut(){const ctx=actxGet();if(!MIX.out){MIX.out=ctx.createGain();MIX.
 // del metronomo; l'indicatore si ridisegna a ogni fotogramma.
 const cycleOn=()=>{const c=P.cycle;return c.on&&c.b>c.a+0.05&&!MIX.recording};
 const cycleKey=()=>cycleOn()?P.cycle.a+':'+P.cycle.b:'';
-function addPass(a,b,w){MIX.passes.push({a,b,w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}));scheduleTrackAuto(actx,MIX.graph,a,w,b);scheduleLimiter(actx,MIX.graph,a,w,b)}
+// MIDI: le note si mandano a finestra, non tutte insieme. Lo stesso timer del brano (ogni 25 ms) manda solo le note
+// che cadono nei prossimi 100 ms; al fermo si smette di accodare e il panic spegne quelle rimaste. MIDIOutput.clear()
+// non esiste in Chrome: una nota già accodata suonerebbe anche dopo lo stop.
+const MIDI_AHEAD=0.1;
+// La base per convertire un istante del contesto audio in un timestamp per MIDIOutput. getOutputTimestamp dà già la
+// coppia (contextTime che si sta sentendo, performanceTime in cui lo si sente): la latenza di uscita è dentro, quindi
+// NON si somma (con le cuffie Bluetooth, 150-250 ms, la nota arriverebbe in ritardo di altrettanto). La latenza entra
+// solo nel ripiego con performance.now(), dove il contesto non dice quando l'audio esce davvero.
+function midiStampBase(){const ctx=actx,ts=ctx.getOutputTimestamp?.();
+ if(ts&&ts.performanceTime>0)return ts.performanceTime-ts.contextTime*1000;
+ const lat=ctx.outputLatency||ctx.baseLatency||0;
+ return performance.now()+(lat-ctx.currentTime)*1000}
+// Eventi MIDI di una finestra del brano [from, to): le note che iniziano o finiscono nella finestra. La posizione
+// della regione si legge dallo specchio in secondi; solo i tick delle note si convertono col BPM, così durante un
+// trascinamento (che sta fuori da pCommit) non si suona nella posizione vecchia.
+function midiWindow(from,to){const out=[];if(!(to>from))return out;
+ for(const t of P.tracks){if(t.kind!=='midi')continue;
+  // I note on solo per le tracce udibili (muto e solo); i note off sempre, altrimenti mutando una traccia a metà
+  // nota il suo off non partirebbe più e la nota resterebbe bloccata.
+  const on=audible(t);
+  for(const r of P.regions){if(r.track!==t.id||r.kind!=='midi')continue;
+   const rs=r.start,re=r.start+r.dur;if(re<=from||rs>=to)continue;
+   for(const n of r.notes||[]){if(n.t<r.offT)continue;
+    const s=rs+midiSec(n.t)-r.off;if(s<rs-1e-9||s>=re-1e-4)continue;
+    const e=Math.min(rs+midiSec(n.t+n.d)-r.off,re);if(e<=s+1e-4)continue;
+    if(on&&s>=from&&s<to)out.push({at:s,on:1,t,n});
+    if(e>=from&&e<to)out.push({at:e,on:0,t,n})}}}
+ return out}
+// Program change: una volta per traccia a ogni ascolto, appena l'accesso MIDI c'è (può arrivare dopo il via).
+function midiPrograms(p,pending){const k=MIX.midiK??(MIX.midiK=midiStampBase());
+ for(const t of P.tracks){if(t.kind!=='midi'||!audible(t)||t.program==null||pending.has(t.id))continue;
+  const port=midiOutputFor(t);if(!port)continue;midiProgram(port,clamp((t.midiCh||1)-1,0,15),t.program,k+p.w*1000);pending.add(t.id)}}
+function midiPump(now,horizon){if(!P.tracks.some(t=>t.kind==='midi'&&P.regions.some(r=>r.track===t.id&&r.kind==='midi')))return;
+ // La base per i timestamp si fissa una volta all'inizio dell'ascolto: ricalcolarla a ogni pump legherebbe le note
+ // al jitter di getOutputTimestamp (note a 584 ms invece di 500 nella prova), mentre l'orologio del contesto è stabile.
+ const k=MIX.midiK??(MIX.midiK=midiStampBase());
+ for(const p of MIX.passes){const from=p.a+(Math.max(p.w,p.midiAt??p.w)-p.w),to=Math.min(p.b,p.a+(Math.min(now+MIDI_AHEAD,horizon)-p.w));
+  if(!(to>from))continue;p.midiAt=Math.min(now+MIDI_AHEAD,horizon);
+  midiPrograms(p,MIX.midiProg);
+  for(const ev of midiWindow(from,to)){const port=midiOutputFor(ev.t);if(!port)continue;const ch=clamp((ev.t.midiCh||1)-1,0,15),at=k+(p.w+(ev.at-p.a))*1000;
+   if(ev.on)midiNoteOn(port,ch,ev.n.p,ev.n.v,at,ev.t.id);else midiNoteOff(port,ch,ev.n.p,at)}}}
+function addPass(a,b,w){MIX.passes.push({a,b,w,midiAt:w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}));scheduleTrackAuto(actx,MIX.graph,a,w,b);scheduleLimiter(actx,MIX.graph,a,w,b)}
 function mixPos(){if(!MIX.playing||!actx||!MIX.passes.length)return P.t;const now=actx.currentTime;let p=MIX.passes[0];for(const q of MIX.passes)if(q.w<=now)p=q;return Math.min(p.b,p.a+Math.max(0,now-p.w))}
 // Fermata: le regioni escono in 3 ms, i colpi del metronomo già programmati si staccano.
 function mixKill(){clearInterval(MIX.timer);cancelAnimationFrame(MIX.raf);const now=actx?.currentTime||0;
  for(const x of MIX.srcs){if(x.click){x.g.disconnect();continue}try{x.g.gain.cancelScheduledValues(now);x.g.gain.setValueAtTime(x.g.gain.value,now);x.g.gain.linearRampToValueAtTime(0,now+EDGE_FADE);x.s.stop(now+EDGE_FADE)}catch(e){}}
- MIX.srcs=[];MIX.passes=[];MIX.playing=false;for(const t of P.tracks){const cv=$('tmtr-'+t.id);if(cv)drawLaneMeter(cv,-Infinity)}}
+ midiPanic();MIX.srcs=[];MIX.passes=[];MIX.playing=false;for(const t of P.tracks){const cv=$('tmtr-'+t.id);if(cv)drawLaneMeter(cv,-Infinity)}}
 function mixPlay(from=P.t,{recording=false,origin=from}={}){mixKill();stopPlayback(false);const ctx=actxGet();MIX.recording=recording;liveGraph(false);const when=ctx.currentTime+START_GAP,c=P.cycle;
  const [a,b]=cycleOn()?[from>=c.b-1e-6?c.a:from,c.b]:[from,Infinity];
- Object.assign(MIX,{playing:true,from:a,c0:when,origin,lat:MIX.graph.lat,metroUntil:when-1e-3,cycKey:cycleKey()});P.t=a;addPass(a,b,when);
+ Object.assign(MIX,{playing:true,from:a,c0:when,origin,lat:MIX.graph.lat,metroUntil:when-1e-3,cycKey:cycleKey(),midiProg:new Set(),midiK:null});MIDI.lastAt=0;P.t=a;addPass(a,b,when);
+ // Le tracce MIDI suonano su un sintetizzatore esterno: l'accesso si chiede al primo ascolto che ne ha bisogno, non
+ // all'avvio (un progetto senza MIDI non tocca il MIDI). Senza uscite lo si dice una volta.
+ const hasMidi=P.tracks.some(t=>t.kind==='midi'&&audible(t)&&P.regions.some(r=>r.track===t.id&&r.kind==='midi'));
+ if(hasMidi)midiStart({quiet:true}).then(ok=>{if(ok&&!midiOutputs().length&&!MIDI.warnedOut){MIDI.warnedOut=true;announce('Nessuna uscita MIDI: le tracce MIDI non suonano')}}).catch(()=>{});
  playUIProject(true);mixPump();MIX.timer=setInterval(mixPump,25);MIX.raf=requestAnimationFrame(mixTick)}
 function mixStop(keep=true){if(!MIX.playing)return;const pos=mixPos();mixKill();if(keep)P.t=pos;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI()}
 function mixRestart(){if(!MIX.playing)return;mixPlay(mixPos(),{recording:MIX.recording,origin:MIX.origin})}
 // Cambi di volume, bilanciamento ed effetti durante l'ascolto; una traccia nuova va programmata, quindi si riparte.
 function mixLive(){if(!MIX.playing||!MIX.graph)return;const had=new Set(MIX.graph.tracks.keys());syncGraph(MIX.graph,P.tracks,{live:true});MIX.lat=MIX.graph.lat;if(P.tracks.some(t=>!had.has(t.id)))mixRestart()}
 function mixPump(){if(!MIX.playing)return;const ctx=actx,now=ctx.currentTime,horizon=now+LOOKAHEAD;if(cycleKey()!==MIX.cycKey){mixRestart();return}
+ midiPump(now,horizon);
  for(let last=MIX.passes.at(-1);last.b<Infinity&&last.w+(last.b-last.a)<horizon;last=MIX.passes.at(-1)){const w=last.w+(last.b-last.a);if(cycleOn())addPass(P.cycle.a,P.cycle.b,w);else addPass(last.b,Infinity,w)}
  if(P.metro){const bd=beatDur();for(const p of MIX.passes){if(p.w+(p.b-p.a)<=MIX.metroUntil)continue;for(let k=Math.ceil((p.a+Math.max(0,MIX.metroUntil-p.w))/bd-1e-6);;k++){const tb=k*bd,ct=p.w+(tb-p.a);if(tb>=p.b-1e-6||ct>horizon)break;if(ct>MIX.metroUntil+1e-6)MIX.srcs.push(clickAt(ctx,mixOut(),ct,k%P.sig===0))}}}
  MIX.metroUntil=horizon;MIX.srcs=MIX.srcs.filter(x=>x.until>now-0.1);MIX.passes=MIX.passes.filter((p,i,l)=>i===l.length-1||l[i+1].w>now-1);
  if(!MIX.recording&&!P.metro&&!cycleOn()&&mixPos()>=projDur()+0.05){const o=MIX.origin;mixKill();P.t=o;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI();announce('Fine del brano')}}
 function mixTick(){if(!MIX.playing)return;const pos=mixPos();placeArPlayhead(pos);$('aClock').textContent=fmtTime(pos);if(prefs.follow)followAr(pos);playingValue(arPlayheadEl,pos,arPlayheadText);
  if(MIX.analyser){MIX.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}
- if(MIX.graph)for(const [id,n] of MIX.graph.tracks){const cv=$('tmtr-'+id);if(!cv)continue;n.meter.getFloatTimeDomainData(laneBuf);let pk=0;for(const x of laneBuf)pk=Math.max(pk,Math.abs(x));drawLaneMeter(cv,toDb(pk))}
+ if(MIX.graph)for(const [id,n] of MIX.graph.tracks){const tk=trackOf(id);if(tk?.kind==='midi')continue;const cv=$('tmtr-'+id);if(!cv)continue;n.meter.getFloatTimeDomainData(laneBuf);let pk=0;for(const x of laneBuf)pk=Math.max(pk,Math.abs(x));drawLaneMeter(cv,toDb(pk))}
  MIX.raf=requestAnimationFrame(mixTick)}
 function playUIProject(on){const b=$('aPlay');b.setAttribute('aria-label',on?'Pausa del brano':'Riproduci il brano');b.innerHTML=ICON(on?'pause':'play')}
 function songPlayPause(){if(MIX.playing){mixStop(true);announce('Pausa a '+sayTime(P.t,1));return}if(!P.regions.length&&!P.metro){toast('Il progetto è vuoto: registra o importa un file');return}let from=P.t;if(from>=projDur()-0.01&&!P.metro)from=0;mixPlay(from)}
@@ -221,7 +267,7 @@ async function renderMix({only=null,from=0,to=null,rate=48000,limit=true,tail=fa
  return res}
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.
 function songMarkers(rate){const out=[];for(const r of P.regions){const sr=SOURCES.get(r.src)?.sampleRate||rate;for(const m of r.markers||[]){const x=m.pos/sr;if(x<0||x>r.dur)continue;out.push({id:m.id,pos:Math.round((r.start+x)*rate),label:m.label})}}return out.sort((a,b)=>a.pos-b.pos)}
-async function exportStems(){if(!P.regions.length){toast('Il progetto è vuoto');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
+async function exportStems(){if(!P.regions.length){toast('Il progetto è vuoto');return}midiExportNote();const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
  const r=await modal('Esporta le tracce separate',`<p>Un file per ogni traccia, con i suoi effetti e lo stesso inizio, raccolti in un archivio ZIP: servono per continuare il lavoro in un altro programma.</p>`,[{id:'fmt',label:'Formato',type:'select',value:'wav24',options:[['wav16','WAV 16 bit'],['wav24','WAV 24 bit'],['wav32','WAV 32 bit in virgola mobile'],...(aac?[['aac','M4A con AAC']]:[]),...(opus?[['opus','WebM con Opus']]:[])]}],'Esporta');if(!r)return;
  const files=await work('Esportazione delle tracce',async()=>{const out=[];for(const [i,t] of P.tracks.entries()){if(!P.regions.some(x=>x.track===t.id))continue;status(`Mixaggio della traccia ${i+1} di ${P.tracks.length}: ${t.name}`);const buf=await renderMix({only:t.id,tail:tailTime(P.tracks)});out.push({name:extName(`${String(i+1).padStart(2,'0')} ${t.name}`,r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext),data:r.fmt.startsWith('wav')?wavBlob(buf,Number(r.fmt.slice(3))):await compressedBlob(buf,r.fmt,(prefs.kbps||160)*1000)})}return out});
  if(!files?.length)return;const zip=await work('Creazione dell’archivio',()=>zipBlob(files));if(zip){download(zip,extName(P.title+' - tracce','zip'));toast(`Esportate ${files.length} tracce in un archivio ZIP`)}}

@@ -5,7 +5,7 @@
 // controlli continui (fader, pedali) scattano quando salgono a 64 da sotto e si riarmano sotto 32: sono armati di
 // default, quindi il primo messaggio che supera 64 scatta — per un pedale che parte abbassato è quello giusto — e
 // un fader già sopra non spara comandi a ogni minimo movimento.
-const MIDI={access:null,arm:{},last:{},learn:null};
+const MIDI={access:null,arm:{},last:{},learn:null,lastAt:0,warnedOut:false};
 const midiKey=(k,v)=>k==='cc'?`cc${v}`:`nota${v}`;
 const midiName=k=>k.startsWith('cc')?`Controllo ${k.slice(2)}`:`Nota ${k.slice(3)}`;
 // Comandi mappabili, per applicazione: trasporto, registrazione e traccia scelta.
@@ -54,3 +54,41 @@ async function midiPanel(){if(!await midiStart())return;const map=midiMap(),cmds
    {label:'Togli',run:v=>{let n=0;for(const [k,id] of Object.entries(map))if(id===v.cmd){delete map[k];n++}
     if(!n){toast('Questo comando non ha assegnazioni');return}savePrefs();$('midiList').innerHTML=list();announce('Assegnazione tolta')}}]});
  clearTimeout(timer);MIDI.learn=null;if(!res)return}
+// Uscite MIDI: le tracce MIDI mandano le note a un sintetizzatore esterno. La porta scelta si ritrova per id e, se
+// l'id non c'è più su questa macchina, per nome (gli id cambiano tra origini del browser e computer); senza scelta
+// si usa la prima uscita disponibile.
+const midiOutputs=()=>MIDI.access?[...MIDI.access.outputs.values()]:[];
+function midiOutputFor(t){const outs=midiOutputs();if(!outs.length)return null;const o=t?.midiOut;
+ if(o?.id){const p=outs.find(x=>x.id===o.id);if(p)return p}
+ if(o?.name){const p=outs.find(x=>x.name===o.name);if(p)return p}
+ return outs[0]}
+// Le note aperte: si registra ogni note on mandato e si toglie al note off corrispondente. Al fermo si spengono
+// quelle rimaste, poi si mandano CC123 (tutte le note off) e CC121 (ripristino dei controlli) su ogni canale usato:
+// molti sintetizzatori ignorano o trattano male CC123, e un registro delle note aperte costa poco.
+// Il registro delle note aperte tiene anche l'istante in cui il note on è stato accodato (può essere nel futuro,
+// fino a 100 ms) e la traccia: il note off del panic va dopo quel note on, altrimenti la nota partirebbe dopo
+// l'off e resterebbe bloccata.
+const midiOpen=new Map(),midiUsed=new Set();
+function midiSend(port,data,at){try{port.send(data,at);if(at>MIDI.lastAt)MIDI.lastAt=at}catch(e){}}
+function midiNoteOn(port,ch,p,v,at,tid){if(!port)return;midiSend(port,[0x90|ch,p,v],at);midiOpen.set(port.id+'|'+ch+'|'+p,{port,ch,p,at,tid});midiUsed.add(port.id+'|'+ch)}
+function midiNoteOff(port,ch,p,at){if(!port)return;midiSend(port,[0x80|ch,p,0],at);midiOpen.delete(port.id+'|'+ch+'|'+p)}
+function midiProgram(port,ch,prog,at){if(port&&prog!=null)midiSend(port,[0xC0|ch,prog],at)}
+// Spegne subito una nota aperta (muto, solo, traccia o regione cambiata durante l'ascolto): il taglio è piccolo,
+// una nota bloccata no. Il note off va comunque dopo il note on accodato.
+function midiKillNote(key,now=performance.now()){const n=midiOpen.get(key);if(!n)return;
+ midiSend(n.port,[0x80|n.ch,n.p,0],Math.max(now,(n.at||0)+1));midiOpen.delete(key)}
+function midiKillTrack(tid){const now=performance.now();for(const [k,n] of midiOpen)if(n.tid===tid)midiKillNote(k,now)}
+function midiKillInaudible(){const now=performance.now(),byId=new Map(P.tracks.map(t=>[t.id,t]));
+ for(const [k,n] of midiOpen){const t=byId.get(n.tid);if(!t||!audible(t))midiKillNote(k,now)}}
+function midiPanic(){const now=performance.now();
+ for(const [k,n] of midiOpen)midiKillNote(k,now);
+ // CC123/121 solo sui canali che hanno davvero suonato, e dopo l'ultima nota accodata (lastAt): una traccia muta
+ // non ha aperto nulla e non va disturbata.
+ const ccAt=Math.max(now,(MIDI.lastAt||0)+1);
+ for(const k of midiUsed){const [id,ch]=k.split('|'),port=midiOutputs().find(x=>x.id===id);
+  if(port){midiSend(port,[0xB0|(+ch),123,0],ccAt);midiSend(port,[0xB0|(+ch),121,0],ccAt)}}
+ midiUsed.clear();MIDI.lastAt=0}
+// Le tracce MIDI non finiscono nel mix esportato: il suono arriva dal sintetizzatore, non dal browser. L'esportazione
+// lo dice, così nessuno cerca nel file un suono che non c'è.
+const midiAudible=()=>P.tracks.filter(t=>t.kind==='midi'&&audible(t)&&P.regions.some(r=>r.track===t.id&&r.kind==='midi'));
+function midiExportNote(){const n=midiAudible().length;if(n)announce(`Attenzione: ${n===1?'una traccia MIDI non suona':'le tracce MIDI non suonano'} nel file esportato, il suono arriva dal sintetizzatore esterno`)}
