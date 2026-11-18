@@ -14,8 +14,10 @@ function midiRecFinish(stopSec,reason){
  const rec=MIDI.rec;if(!rec)return;MIDI.rec=null;
  const t=rec.track;
  if(!t||!P.tracks.includes(t)){announce('Registrazione MIDI scartata: la traccia non c’è più');return}
- for(const n of rec.open.values()){n.end=stopSec;rec.notes.push(n)}rec.open.clear();
- for(const n of rec.sustained){n.end=stopSec;rec.notes.push(n)}rec.sustained=[];
+ // Le note tenute fino al fermo si chiudono allo stop, con la stessa compensazione applicata agli ingressi.
+ const stopAdj=stopSec-(Number(prefs.midiComp)||0)/1000;
+ for(const n of rec.open.values()){n.end=stopAdj;rec.notes.push(n)}rec.open.clear();
+ for(const n of rec.sustained){n.end=stopAdj;rec.notes.push(n)}rec.sustained=[];
  const sixteenth=beatDur()/4;
  let start=rec.startProject,list=rec.notes,dropped=0;
  if(rec.punch){start=rec.punch.a;list=list.filter(n=>n.start>=rec.punch.a-sixteenth&&n.start<rec.punch.b)}

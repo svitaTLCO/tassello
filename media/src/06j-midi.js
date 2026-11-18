@@ -5,7 +5,7 @@
 // controlli continui (fader, pedali) scattano quando salgono a 64 da sotto e si riarmano sotto 32: sono armati di
 // default, quindi il primo messaggio che supera 64 scatta — per un pedale che parte abbassato è quello giusto — e
 // un fader già sopra non spara comandi a ogni minimo movimento.
-const MIDI={access:null,arm:{},last:{},learn:null,lastAt:0,warnedOut:false,rec:null};
+const MIDI={access:null,arm:{},last:{},learn:null,lastAt:0,warnedOut:false,rec:null,cal:null};
 const midiKey=(k,v)=>k==='cc'?`cc${v}`:`nota${v}`;
 const midiName=k=>k.startsWith('cc')?`Controllo ${k.slice(2)}`:`Nota ${k.slice(3)}`;
 // Comandi mappabili, per applicazione: trasporto, registrazione e traccia scelta.
@@ -41,7 +41,7 @@ function midiThruBend(track,lsb,msb){const port=midiOutputFor(track);if(!port)re
 // Tempo di un messaggio in secondi del brano: timeStamp → contesto con la base fissata al via, poi il tempo del
 // brano con la passata. La base di getOutputTimestamp mappa già l'istante che si sta sentendo, quindi la latenza di
 // uscita audio è compresa e NON si sottrae: sottrarla sarebbe contarla due volte.
-const midiRecTime=e=>{const r=MIDI.rec;return r.a+((Number(e.timeStamp)-r.k)/1000-r.w)};
+const midiRecTime=e=>{const r=MIDI.rec,comp=(Number(prefs.midiComp)||0)/1000;return r.a+((Number(e.timeStamp)-r.k)/1000-r.w)-comp};
 function midiRecOn(e,p,v){const r=MIDI.rec;if(!r)return;
  // Limite della validazione: a 2000 note la registrazione si ferma e lo dice, invece di perdere note in silenzio.
  if(r.notes.length>=2000){if(!r.full){r.full=true;announce('Limite di 2000 note raggiunto: la registrazione MIDI si ferma');mixStop(true)}return}
@@ -57,6 +57,8 @@ function midiEvent(e){const [st,d1,d2]=e.data||[];if(st===undefined)return;const
  // Per un controllo si fissa l'armatura sul valore ricevuto: se stavi salendo oltre 64, senza questo il
  // comando scatterebbe subito dopo l'assegnazione.
  if(MIDI.learn){if((k===0x90&&d2>0)||k===0xb0){if(k===0xb0)MIDI.arm[d1]=d2<32;MIDI.learn(midiKey(k===0xb0?'cc':'n',d1))}return}
+ // Calibrazione: si prendono solo i note on grezzi (nessuna compensazione: si misura il valore assoluto).
+ if(MIDI.cal){if(k===0x90&&d2>0)MIDI.cal.notes.push((Number(e.timeStamp)-MIDI.cal.k)/1000);return}
  const thru=midiThruTrack(),rec=MIDI.rec;
  if((k===0x90&&d2>0)||k===0x80||(k===0x90&&d2===0)){
   const on=k===0x90&&d2>0;
@@ -136,3 +138,47 @@ function midiPanic(){const now=performance.now();
 // lo dice, così nessuno cerca nel file un suono che non c'è.
 const midiAudible=()=>P.tracks.filter(t=>t.kind==='midi'&&audible(t)&&P.regions.some(r=>r.track===t.id&&r.kind==='midi'));
 function midiExportNote(){const n=midiAudible().length;if(n)announce(`Attenzione: ${n===1?'una traccia MIDI non suona':'le tracce MIDI non suonano'} nel file esportato, il suono arriva dal sintetizzatore esterno`)}
+
+// ——— Orologio MIDI ———
+// Orologio verso un altro strumento: 24 colpi per semiminima, Start da zero, Continue + Song Position Pointer da un
+// punto interno, Stop al fermo e al salto del ciclo. L'impostazione è globale (dipende dal dispositivo).
+async function midiClockDialog(){await midiStart({quiet:true}).catch(()=>false);const outs=midiOutputs(),cur=prefs.midiClockOut;
+ const sel=outs.find(o=>o.id===cur?.id)||outs.find(o=>cur?.name&&o.name===cur.name)||null;
+ const v=await modal('Orologio MIDI',`<p>Manda l’orologio a un altro strumento (drum machine, sequencer, sintetizzatore con arpeggiatore): 24 colpi per semiminima, Start, Continue e Song Position Pointer, Stop al fermo e al salto del ciclo. Serve un’uscita MIDI; le note possono usare la stessa porta o un’altra.</p>${outs.length?'':'<p>Nessuna uscita MIDI trovata.</p>'}`,
+  [{id:'on',label:'Manda l’orologio durante l’ascolto e la registrazione',type:'checkbox',value:!!prefs.midiClock},
+   {id:'out',label:'Uscita dell’orologio',type:'select',value:sel?.id||'',options:[['','Prima uscita disponibile'],...outs.map(o=>[o.id,o.name||o.id])],hint:'Si ritrova per id e, se l’id cambia, per nome.'}],'Salva');
+ if(!v)return;const out=outs.find(o=>o.id===v.out)||null;
+ prefs.midiClock=!!v.on;prefs.midiClockOut=out?{id:out.id,name:out.name||''}:null;savePrefs();
+ announce(`Orologio MIDI ${prefs.midiClock?'attivo':'spento'}${prefs.midiClock&&out?` su ${out.name||out.id}`:''}${MIX.playing?' (vale dal prossimo ascolto)':''}`)}
+// ——— Calibrazione dell'ingresso MIDI ———
+const midiMedian=a=>{const s=[...a].sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2};
+async function midiMeasure(){const ctx=actxGet();try{await ctx.resume()}catch(e){}
+ const beat=60/90,lead=2,n=8,base=midiStampBase(),t0=ctx.currentTime+0.2,total=(lead+n)*beat;
+ MIDI.cal={notes:[],k:base,t0,beat,lead,n};
+ for(let k=0;k<lead+n;k++)clickAt(ctx,mixOut(),t0+k*beat,k%4===0);
+ announce('Calibrazione: due battute di avvio, poi suona otto note a tempo');
+ await new Promise(r=>setTimeout(r,(total+0.25)*1000));
+ const notes=MIDI.cal.notes.slice();MIDI.cal=null;
+ const offs=[];for(const ct of notes){const rel=(ct-t0)/beat,k=Math.round(rel);
+  if(k<lead-0.5||k>lead+n-0.5)continue;if(Math.abs(ct-(t0+k*beat))>beat/2)continue;offs.push((ct-(t0+k*beat))*1000)}
+ if(offs.length<4)return{ok:false,reason:`Solo ${offs.length} note valide su ${notes.length}: servono almeno quattro note a tempo.`,count:offs.length};
+ const med=midiMedian(offs),dev=offs.map(x=>Math.abs(x-med)),mad=midiMedian(dev);
+ if(mad>25)return{ok:false,reason:`Le note sono troppo irregolari per una misura affidabile (scarto ${Math.round(mad)} ms): riprova.`,count:offs.length,mad};
+ const ms=Math.round(clamp(med,-200,200));
+ return{ok:true,ms,raw:Math.round(med),mad:Math.round(mad),count:offs.length,notes:notes.length,audioLatency:Math.round((ctx.outputLatency||ctx.baseLatency||0)*1000)};
+}
+async function midiCalibrateDialog(){if(MIDI.cal){toast('La calibrazione è già in corso');return}
+ const ok=await midiStart({quiet:true}).catch(()=>false);
+ if(!ok||!midiInputs().length){announce('Nessun ingresso MIDI: collega una tastiera e riprova');return}
+ for(;;){const cur=Number(prefs.midiComp)||0,prev=Number(prefs.midiCompPrev)||0;
+  const go=await modal('Calibra l’ingresso MIDI',`<p>Suona otto note a tempo con il metronomo (90 BPM, due battute di avvio). Si misura lo scarto medio tra quando premi e il tempo più vicino; il valore si applica solo alle registrazioni MIDI, anticipandole. La latenza audio dichiarata dal browser è solo un’informazione e non entra nel calcolo.</p><p>Compensazione attuale: ${cur} ms${prev!==cur?` (precedente ${prev} ms)`:''}.</p>`,[],
+   'Misura',{buttons:[{label:'Torna a zero',run:(v,pane,finish)=>{const before=Number(prefs.midiComp)||0;prefs.midiCompPrev=before;prefs.midiComp=0;savePrefs();announce(`Compensazione MIDI tornata a zero (prima ${before} ms)`);finish(null)}},{label:'Annulla',run:(v,pane,finish)=>finish(null)}]});
+  if(!go)return;
+  const res=await midiMeasure();
+  if(!res.ok){const again=await modal('Calibrazione non riuscita',`<p>${esc(res.reason)}</p>`,[],'Chiudi',{buttons:[{label:'Riprova',run:(v,pane,finish)=>finish({retry:true})}]});
+   if(again?.retry)continue;return}
+  const v=await modal('Calibrazione MIDI',`<p>Compensazione proposta: <b>${res.ms} ms</b>. Misura grezza ${res.raw} ms su ${res.count} note (scarto ${res.mad} ms). Latenza audio dichiarata: ${res.audioLatency} ms, solo informazione. Il valore è assoluto: sostituisce quello attuale (${Number(prefs.midiComp)||0} ms).</p>`,[],
+   'Applica',{buttons:[{label:'Riprova',run:(v2,pane,finish)=>finish({retry:true})},{label:'Torna a zero',run:(v2,pane,finish)=>{const before=Number(prefs.midiComp)||0;prefs.midiCompPrev=before;prefs.midiComp=0;savePrefs();announce(`Compensazione MIDI tornata a zero (prima ${before} ms)`);finish(null)}}]});
+  if(v?.retry)continue;
+  if(v){const before=Number(prefs.midiComp)||0;prefs.midiCompPrev=before;prefs.midiComp=res.ms;savePrefs();announce(`Compensazione MIDI: ${res.ms} ms (prima ${before} ms)`)}
+  return}}

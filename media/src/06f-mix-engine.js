@@ -213,15 +213,57 @@ function midiPump(now,horizon){if(!P.tracks.some(t=>t.kind==='midi'&&P.regions.s
   midiPrograms(p,MIX.midiProg);
   for(const ev of midiWindow(from,to)){const port=midiOutputFor(ev.t);if(!port)continue;const ch=clamp((ev.t.midiCh||1)-1,0,15),at=k+(p.w+(ev.at-p.a))*1000;
    if(ev.on)midiNoteOn(port,ch,ev.n.p,ev.n.v,at,ev.t.id);else midiNoteOff(port,ch,ev.n.p,at)}}}
+// ——— Orologio MIDI ———
+// 24 colpi per semiminima (0xF8), Start (0xFA) da zero, Continue (0xFB) + Song Position Pointer (0xF2, in sedicesimi)
+// da un punto interno, Stop (0xFC) al fermo. I colpi si accodano a finestra come le note, con i timestamp dell'ascolto.
+// Al salto del ciclo si manda Stop, SPP del punto A e Continue: senza, la drum machine continuerebbe avanti nel suo
+// pattern mentre Tassello torna indietro.
+const CLK={running:false,lastF8:0,warned:false,armed:false};
+const clkTickSec=()=>60/P.bpm/24,clkSixteenthSec=()=>60/P.bpm/4;
+function clkPort(){const outs=midiOutputs();if(!outs.length)return null;const o=prefs.midiClockOut;
+ if(o?.id){const p=outs.find(x=>x.id===o.id);if(p)return p}
+ if(o?.name){const p=outs.find(x=>x.name===o.name);if(p)return p}
+ return outs[0]||null}
+function clkSend(port,bytes,at){try{port.send(bytes,at);if(bytes[0]===0xF8&&at>CLK.lastF8)CLK.lastF8=at}catch(e){}}
+function clockStop(){if(!CLK.running)return;const port=clkPort();if(port){const now=performance.now();clkSend(port,[0xFC],Math.max(now,CLK.lastF8+1))}CLK.running=false}
+// Prepara la partenza di una passata: da zero Start e primo colpo sul tempo zero; da un punto interno Stop (se
+// stava suonando), SPP al confine di sedicesimo successivo, Continue e primo colpo su quel confine.
+function clockInit(pass){if(!CLK.armed||!prefs.midiClock)return;const port=clkPort();
+ if(!port){if(!CLK.warned){CLK.warned=true;announce('Orologio MIDI: nessuna uscita disponibile')}return}
+ const base=MIX.midiK??(MIX.midiK=midiStampBase()),stamp=ct=>base+ct*1000,now=performance.now(),
+  sec16=clkSixteenthSec(),secTick=clkTickSec();
+ let firstTick;
+ // Start solo alla prima partenza da zero. Un giro del ciclo che torna a zero è comunque una continuazione: la
+ // drum machine era avanti e va fermata, riposizionata e fatta ripartire, non riavviata come se fosse all'inizio.
+ const startFromZero=!!pass.clkFirst&&pass.a<=1e-6;
+ if(startFromZero){clkSend(port,[0xFA],Math.max(now,stamp(pass.w)-0.5));pass.clkCtx=pass.w;firstTick=0}
+ else{const k16=Math.max(0,Math.ceil(pass.a/sec16-1e-9)),bound=k16*sec16,
+   ctxBound=pass.w+(bound-pass.a),spp=k16&0x3fff;
+  const stopAt=CLK.running?Math.max(now,CLK.lastF8+1):0;
+  if(CLK.running)clkSend(port,[0xFC],stopAt);
+  clkSend(port,[0xF2,spp&0x7f,(spp>>7)&0x7f],Math.max(CLK.running?stopAt+1:now,stamp(ctxBound-0.002)));
+  clkSend(port,[0xFB],Math.max(CLK.running?stopAt+2:now,stamp(ctxBound-0.001)));
+  pass.clkCtx=Math.max(ctxBound,(stopAt+3-base)/1000);firstTick=k16*6}
+ pass.clkTick=firstTick;pass.clockInit=true;CLK.running=true;
+ void secTick}
+function clockPump(now,horizon){if(!CLK.armed)return;if(!prefs.midiClock){clockStop();return}const port=clkPort();if(!port)return;
+ const base=MIX.midiK??(MIX.midiK=midiStampBase()),secTick=clkTickSec();
+ for(const p of MIX.passes){if(!p.clockInit){if(p.w<=now+0.05)clockInit(p);else continue}
+  let n=0;
+  while(n++<400){const t=p.clkTick*secTick,ctx=p.w+(t-p.a);
+   if(t>=p.b-1e-9||ctx>Math.min(now+0.05,horizon))break;
+   if(ctx>=p.clkCtx-1e-9)clkSend(port,[0xF8],base+ctx*1000);
+   p.clkTick++}}}
 function addPass(a,b,w){MIX.passes.push({a,b,w,midiAt:w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}));scheduleTrackAuto(actx,MIX.graph,a,w,b);scheduleLimiter(actx,MIX.graph,a,w,b)}
 function mixPos(){if(!MIX.playing||!actx||!MIX.passes.length)return P.t;const now=actx.currentTime;let p=MIX.passes[0];for(const q of MIX.passes)if(q.w<=now)p=q;return Math.min(p.b,p.a+Math.max(0,now-p.w))}
 // Fermata: le regioni escono in 3 ms, i colpi del metronomo già programmati si staccano.
 function mixKill(){clearInterval(MIX.timer);cancelAnimationFrame(MIX.raf);const now=actx?.currentTime||0;
  for(const x of MIX.srcs){if(x.click){x.g.disconnect();continue}try{x.g.gain.cancelScheduledValues(now);x.g.gain.setValueAtTime(x.g.gain.value,now);x.g.gain.linearRampToValueAtTime(0,now+EDGE_FADE);x.s.stop(now+EDGE_FADE)}catch(e){}}
- midiPanic();MIX.srcs=[];MIX.passes=[];MIX.playing=false;for(const t of P.tracks){const cv=$('tmtr-'+t.id);if(cv)drawLaneMeter(cv,-Infinity)}}
+ midiPanic();clockStop();MIX.srcs=[];MIX.passes=[];MIX.playing=false;for(const t of P.tracks){const cv=$('tmtr-'+t.id);if(cv)drawLaneMeter(cv,-Infinity)}}
 function mixPlay(from=P.t,{recording=false,origin=from}={}){mixKill();stopPlayback(false);const ctx=actxGet();MIX.recording=recording;liveGraph(false);const when=ctx.currentTime+START_GAP,c=P.cycle;
  const [a,b]=cycleOn()?[from>=c.b-1e-6?c.a:from,c.b]:[from,Infinity];
  Object.assign(MIX,{playing:true,from:a,c0:when,origin,lat:MIX.graph.lat,metroUntil:when-1e-3,cycKey:cycleKey(),midiProg:new Set(),midiK:null});MIDI.lastAt=0;P.t=a;addPass(a,b,when);
+ CLK.armed=!!prefs.midiClock;MIX.passes[0].clkFirst=true;if(CLK.armed)clockInit(MIX.passes[0]);
  // Le tracce MIDI suonano su un sintetizzatore esterno: l'accesso si chiede al primo ascolto che ne ha bisogno, non
  // all'avvio (un progetto senza MIDI non tocca il MIDI). Senza uscite lo si dice una volta.
  const hasMidi=P.tracks.some(t=>t.kind==='midi'&&audible(t)&&P.regions.some(r=>r.track===t.id&&r.kind==='midi'));
@@ -234,7 +276,7 @@ function mixRestart(){if(!MIX.playing)return;
 // Cambi di volume, bilanciamento ed effetti durante l'ascolto; una traccia nuova va programmata, quindi si riparte.
 function mixLive(){if(!MIX.playing||!MIX.graph)return;const had=new Set(MIX.graph.tracks.keys());syncGraph(MIX.graph,P.tracks,{live:true});MIX.lat=MIX.graph.lat;if(P.tracks.some(t=>!had.has(t.id)))mixRestart()}
 function mixPump(){if(!MIX.playing)return;const ctx=actx,now=ctx.currentTime,horizon=now+LOOKAHEAD;if(cycleKey()!==MIX.cycKey){mixRestart();return}
- midiPump(now,horizon);
+ midiPump(now,horizon);clockPump(now,horizon);
  for(let last=MIX.passes.at(-1);last.b<Infinity&&last.w+(last.b-last.a)<horizon;last=MIX.passes.at(-1)){const w=last.w+(last.b-last.a);if(cycleOn())addPass(P.cycle.a,P.cycle.b,w);else addPass(last.b,Infinity,w)}
  if(P.metro){const bd=beatDur();for(const p of MIX.passes){if(p.w+(p.b-p.a)<=MIX.metroUntil)continue;for(let k=Math.ceil((p.a+Math.max(0,MIX.metroUntil-p.w))/bd-1e-6);;k++){const tb=k*bd,ct=p.w+(tb-p.a);if(tb>=p.b-1e-6||ct>horizon)break;if(ct>MIX.metroUntil+1e-6)MIX.srcs.push(clickAt(ctx,mixOut(),ct,k%P.sig===0))}}}
  MIX.metroUntil=horizon;MIX.srcs=MIX.srcs.filter(x=>x.until>now-0.1);MIX.passes=MIX.passes.filter((p,i,l)=>i===l.length-1||l[i+1].w>now-1);
