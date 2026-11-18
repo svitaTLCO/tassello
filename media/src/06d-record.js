@@ -6,6 +6,69 @@
 // {id,label} (o vecchio stile, una stringa): se l'id non risponde (scollegato, ZIP aperto su un'altra macchina) si
 // riprova con l'etichetta — due interfacce identiche hanno la stessa, si prende la prima e lo si dice — e in
 //ultima istanza si parte dal predefinito, avvisando; la preferenza si azzera solo se l'id veniva da lì.
+// ——— Registrazione MIDI ———
+// Non distruttiva: le note catturate diventano una regione nuova (predefinito) oppure si aggiungono alla regione
+// sotto l'indicatore (sovraincisione), sempre dentro un pCommit, quindi Ctrl+Z le toglie. Le note che cominciano
+// fino a un sedicesimo prima del via (o del punto A del punch) si tengono, portate a zero: il «perdona» all'attacco.
+function midiRecFinish(stopSec,reason){
+ const rec=MIDI.rec;if(!rec)return;MIDI.rec=null;
+ const t=rec.track;
+ if(!t||!P.tracks.includes(t)){announce('Registrazione MIDI scartata: la traccia non c’è più');return}
+ for(const n of rec.open.values()){n.end=stopSec;rec.notes.push(n)}rec.open.clear();
+ for(const n of rec.sustained){n.end=stopSec;rec.notes.push(n)}rec.sustained=[];
+ const sixteenth=beatDur()/4;
+ let start=rec.startProject,list=rec.notes,dropped=0;
+ if(rec.punch){start=rec.punch.a;list=list.filter(n=>n.start>=rec.punch.a-sixteenth&&n.start<rec.punch.b)}
+ else list=list.filter(n=>n.start>=start-sixteenth);
+ dropped=rec.notes.length-list.length;
+ if(!list.length){announce('Registrazione MIDI: nessuna nota dentro '+(rec.punch?'il punch':'il brano')+(dropped?`, ${dropped} fuori`:''));return}
+ const startT=midiTick(start),abs=list.map(n=>{const a=Math.max(startT,midiTick(n.start)),e=Math.max(a+1,midiTick(n.end));return{a,e,p:n.p,v:n.v}});
+ let made=null,added=0,excluded=0;
+ pCommit('Registrazione MIDI',()=>{
+  const r=rec.overdub?P.regions.find(x=>x.track===t.id&&x.kind==='midi'&&x.start<=start+1e-6&&x.start+x.dur>start):null;
+  if(r){
+   const relAll=abs.map(n=>({t:n.a-r.startT+r.offT,d:n.e-n.a,p:n.p,v:n.v})).filter(n=>n.t>=r.offT),
+    room=Math.max(0,2000-r.notes.length),rel=relAll.slice(0,room);
+   added=rel.length;excluded+=relAll.length-rel.length;
+   // Le note che c'erano restano tutte: si aggiungono solo le nuove che stanno nel limite, e si dice quante restano fuori.
+   if(excluded)toast(`${excluded} ${excluded===1?'nota nuova non aggiunta':'note nuove non aggiunte'}: la regione ha già ${r.notes.length} note`);
+   let maxEnd=r.offT+r.durT;
+   for(const n of rel)maxEnd=Math.max(maxEnd,n.t+n.d);
+   r.notes=[...r.notes,...rel].sort((a,b)=>a.t-b.t||a.p-b.p);
+   // La durata si allunga fino all'ultima nota, altrimenti le note nuove restano nascoste e sembrano perse.
+   const durT=Math.max(r.durT,maxEnd-r.offT);r.durT=durT;r.dur=midiSec(durT);
+   made=r;P.sel=r.id;P.track=t.id;
+  }else{
+   const notes=abs.map(n=>({t:n.a-startT,d:n.e-n.a,p:n.p,v:n.v}));
+   if(notes.length>2000)toast('Più di 2000 note: le eccedenti non sono state registrate');
+   const ref=notes.reduce((m,n)=>Math.max(m,n.t+n.d),0),durT=Math.max(MIDIPPQ*P.sig,Math.ceil(ref/MIDIPPQ)*MIDIPPQ);
+   made=newMidiRegion(t.id,startT,'Registrazione MIDI '+(P.regions.filter(x=>x.track===t.id&&x.kind==='midi').length+1));
+   made.notes=notes.slice(0,2000);made.durT=durT;made.dur=midiSec(durT);
+   P.regions.push(made);added=notes.length;P.sel=made.id;P.track=t.id;
+  }
+ },{live:true});
+ P.t=start;updateArrangeUI();focusLane(t.id);
+ const saved=rec.overdub?added:added;
+ announce((reason==='modifica'?`Registrazione MIDI conclusa per una modifica al progetto: ${saved} ${saved===1?'nota salvata':'note salvate'}`:
+  rec.overdub?`Registrazione MIDI: ${added} ${added===1?'nota aggiunta':'note aggiunte'} a «${made?.name||''}»${excluded?`, ${excluded} ${excluded===1?'nuova non aggiunta':'nuove non aggiunte'} perché la regione è piena`:''}`:
+  `Registrazione MIDI: ${added} note in una nuova regione «${made?.name||''}» da ${sayTime(start,2)}`)+(dropped&&reason!=='modifica'?`, ${dropped} fuori`:''));
+ return {saved,excluded,dropped};
+}
+// Avvio: conteggio, ascolto delle altre tracce, cattura. Si ferma con Ferma (mixStop chiude la registrazione).
+async function recordMidi(){
+ const t=selTrack();if(!t||t.kind!=='midi'){toast('Scegli una traccia MIDI per registrare le note');return}
+ if(MIDI.rec){toast('La registrazione MIDI è già in corso: ferma prima');return}
+ const ready=await midiStart({quiet:true}).catch(()=>false);
+ if(!ready||!midiInputs().length){announce('Nessun ingresso MIDI: collega una tastiera e riprova');return}
+ if(MIX.playing)mixStop(true);
+ if(P.countIn)await countIn();
+ const playFrom=P.t,punchOn=!!P.punch?.on,from=punchOn?Math.max(0,P.punch.a-punchPre()):playFrom;
+ mixPlay(from,{recording:true,origin:playFrom});
+ const pass=MIX.passes[0];
+ MIDI.rec={track:t,a:from,w:pass?.w??MIX.c0,k:midiStampBase(),startProject:playFrom,punch:punchOn?{a:P.punch.a,b:P.punch.b}:null,notes:[],open:new Map(),pedal:false,sustained:[],overdub:!!prefs.midiOverdub};
+ MIDI.lastAt=0;
+ announce(`Registrazione MIDI su «${t.name}»${MIDI.rec.overdub?', sovraincidendo':''}.${punchOn?` Punch da ${sayTime(P.punch.a,1)} a ${sayTime(P.punch.b,1)}.`:''} Le note che suoni vanno nella traccia; ferma con Ferma.`);
+}
 const recConstraints=id=>({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,...(id?{deviceId:{exact:id}}:{})}});
 async function recOpen(dev,{track=null}={}){const id=typeof dev==='object'?dev?.id:dev;
  if(!id)return navigator.mediaDevices.getUserMedia(recConstraints());

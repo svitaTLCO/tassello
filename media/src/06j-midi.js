@@ -5,7 +5,7 @@
 // controlli continui (fader, pedali) scattano quando salgono a 64 da sotto e si riarmano sotto 32: sono armati di
 // default, quindi il primo messaggio che supera 64 scatta — per un pedale che parte abbassato è quello giusto — e
 // un fader già sopra non spara comandi a ogni minimo movimento.
-const MIDI={access:null,arm:{},last:{},learn:null,lastAt:0,warnedOut:false};
+const MIDI={access:null,arm:{},last:{},learn:null,lastAt:0,warnedOut:false,rec:null};
 const midiKey=(k,v)=>k==='cc'?`cc${v}`:`nota${v}`;
 const midiName=k=>k.startsWith('cc')?`Controllo ${k.slice(2)}`:`Nota ${k.slice(3)}`;
 // Comandi mappabili, per applicazione: trasporto, registrazione e traccia scelta.
@@ -18,11 +18,55 @@ MIDI.map=prefs.midi=prefs.midi||{a:{},v:{}};
 const midiMap=()=>MIDI.map[isAudio()?'a':'v']||{};
 const midiAny=()=>['a','v'].some(m=>Object.keys(MIDI.map[m]||{}).length);
 function midiRun(key){const id=midiMap()[key];if(!id)return;const now=performance.now();if(now-(MIDI.last[id]||0)<250)return;MIDI.last[id]=now;runCommand(id)}
+// ——— Ascolto (MIDI thru) e registrazione ———
+const midiInputs=()=>MIDI.access?[...MIDI.access.inputs.values()]:[];
+// La traccia che ascolta l'ingresso: quella in registrazione, altrimenti l'unica armata e udibile.
+const midiThruTrack=()=>MIDI.rec?.track||P.tracks.find(t=>t.kind==='midi'&&t.arm&&audible(t))||null;
+// Inoltro immediato (timestamp 0): la nota esce subito sul sintetizzatore della traccia. Il note off va dove è
+// andato il note on (per altezza), così cambiando traccia armata o fermando la registrazione con un tasto premuto
+// la nota si spegne sul synth giusto, non su quello nuovo.
+const midiThruOpen=new Map();
+function midiThru(track,on,p,v){if(on){const port=midiOutputFor(track);if(!port)return;const ch=clamp((track.midiCh||1)-1,0,15);
+  midiNoteOn(port,ch,p,v,0,track.id);midiThruOpen.set(p,{port,ch});return}
+ const o=midiThruOpen.get(p);midiThruOpen.delete(p);
+ if(o){midiNoteOff(o.port,o.ch,p,0);return}
+ const port=midiOutputFor(track);if(port)midiNoteOff(port,clamp((track.midiCh||1)-1,0,15),p,0)}
+// I controlli che una tastiera ha sempre: pedale, modulazione e pitch bend si inoltrano anche loro, altrimenti chi
+// suona col pedale sente note corte mentre nella regione finiscono lunghe. Il canale entra in midiUsed, così panic
+// e CC121 coprono anche un pedale rimasto giù senza note.
+function midiThruCC(track,cc,val){const port=midiOutputFor(track);if(!port)return;const ch=clamp((track.midiCh||1)-1,0,15);
+ midiUsed.add(port.id+'|'+ch);midiSend(port,[0xB0|ch,cc,val],0)}
+function midiThruBend(track,lsb,msb){const port=midiOutputFor(track);if(!port)return;const ch=clamp((track.midiCh||1)-1,0,15);
+ midiUsed.add(port.id+'|'+ch);midiSend(port,[0xE0|ch,lsb,msb],0)}
+// Tempo di un messaggio in secondi del brano: timeStamp → contesto con la base fissata al via, poi il tempo del
+// brano con la passata. La base di getOutputTimestamp mappa già l'istante che si sta sentendo, quindi la latenza di
+// uscita audio è compresa e NON si sottrae: sottrarla sarebbe contarla due volte.
+const midiRecTime=e=>{const r=MIDI.rec;return r.a+((Number(e.timeStamp)-r.k)/1000-r.w)};
+function midiRecOn(e,p,v){const r=MIDI.rec;if(!r)return;
+ // Limite della validazione: a 2000 note la registrazione si ferma e lo dice, invece di perdere note in silenzio.
+ if(r.notes.length>=2000){if(!r.full){r.full=true;announce('Limite di 2000 note raggiunto: la registrazione MIDI si ferma');mixStop(true)}return}
+ const t=midiRecTime(e);if(!Number.isFinite(t))return;
+ const prev=r.open.get(p);if(prev)midiRecOff(r,prev,t);r.open.set(p,{p,v,start:t,end:null})}
+function midiRecOff(r,n,t){if(!r.open.has(n.p))return;r.open.delete(n.p);
+ // Col pedale di risonanza giù la nota non finisce al rilascio: si chiude quando il pedale si alza.
+ if(r.pedal){n.end=null;r.sustained.push(n)}else{n.end=t;r.notes.push(n)}}
+function midiRecPedal(e,down){const r=MIDI.rec;if(!r)return;r.pedal=down;
+ if(!down){const t=midiRecTime(e);for(const n of r.sustained){n.end=t;r.notes.push(n)}r.sustained=[]}}
 function midiEvent(e){const [st,d1,d2]=e.data||[];if(st===undefined)return;const k=st&0xf0;
  // Durante «Impara» ogni nota o controllo diventa la nuova assegnazione, anche con una finestra aperta.
  // Per un controllo si fissa l'armatura sul valore ricevuto: se stavi salendo oltre 64, senza questo il
  // comando scatterebbe subito dopo l'assegnazione.
  if(MIDI.learn){if((k===0x90&&d2>0)||k===0xb0){if(k===0xb0)MIDI.arm[d1]=d2<32;MIDI.learn(midiKey(k===0xb0?'cc':'n',d1))}return}
+ const thru=midiThruTrack(),rec=MIDI.rec;
+ if((k===0x90&&d2>0)||k===0x80||(k===0x90&&d2===0)){
+  const on=k===0x90&&d2>0;
+  if(thru)midiThru(thru,on,d1,on?d2:0);
+  if(rec){if(on)midiRecOn(e,d1,d2);else{const n=rec.open.get(d1);if(n)midiRecOff(rec,n,midiRecTime(e))}}
+  // Con una traccia armata o in registrazione le note suonano e non comandano il programma.
+  if(thru||rec)return}
+ // Pedale di risonanza e modulazione: si catturano (il pedale) e si inoltrano, e non comandano il programma.
+ if(k===0xb0&&(d1===64||d1===1)&&(thru||rec)){if(rec&&d1===64)midiRecPedal(e,d2>=64);if(thru)midiThruCC(thru,d1,d2);return}
+ if(k===0xe0&&thru){midiThruBend(thru,d1,d2);return}
  if(overlayOpen())return;
  if(k===0x90&&d2>0)midiRun(midiKey('n',d1));
  else if(k===0xb0){if(!(d1 in MIDI.arm))MIDI.arm[d1]=true;
@@ -81,7 +125,7 @@ function midiKillTrack(tid){const now=performance.now();for(const [k,n] of midiO
 function midiKillInaudible(){const now=performance.now(),byId=new Map(P.tracks.map(t=>[t.id,t]));
  for(const [k,n] of midiOpen){const t=byId.get(n.tid);if(!t||!audible(t))midiKillNote(k,now)}}
 function midiPanic(){const now=performance.now();
- for(const [k,n] of midiOpen)midiKillNote(k,now);
+ for(const [k,n] of midiOpen)midiKillNote(k,now);midiThruOpen.clear();
  // CC123/121 solo sui canali che hanno davvero suonato, e dopo l'ultima nota accodata (lastAt): una traccia muta
  // non ha aperto nulla e non va disturbata.
  const ccAt=Math.max(now,(MIDI.lastAt||0)+1);

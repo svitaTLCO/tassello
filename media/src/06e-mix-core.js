@@ -36,7 +36,7 @@ const selRegion=()=>P.sel?regionOf(P.sel):null;
 const selTrack=()=>trackOf(P.track)||P.tracks[0]||null;
 const audioModified=()=>P.regions.length>0&&P.version!==P.exported;
 function newTrack(name,kind='audio'){const n=P.tracks.length,t={id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0,duck:0,voice:false,kind:kind==='midi'?'midi':kind==='bus'?'bus':'audio',out:null,input:null,chain:[],auto:{vol:[],pan:[],reverb:[],low:[],high:[],comp:[]},autoOn:{vol:false,pan:false,reverb:false,low:false,high:false,comp:false}};
- if(t.kind==='midi'){t.midiOut=null;t.midiCh=1;t.program=null}
+ if(t.kind==='midi'){t.midiOut=null;t.midiCh=1;t.program=null;t.arm=false}
  return t}
 function addSource(buf){const id=uid();SOURCES.set(id,buf);dirtySources.add(id);return id}
 // Moduli della catena: ai controlli fissi della traccia (bassi, alti, compressione) si aggiungono questi componenti,
@@ -113,7 +113,9 @@ function cleanAudioProject(p){const n=(v,d,lo=-Infinity,hi=Infinity)=>Number.isF
    // ritrova la porta per etichetta, perché l'id MIDI cambia tra origini del browser e macchine.
    tr.midiOut=(()=>{if(!t.midiOut)return null;const o=typeof t.midiOut==='object'?t.midiOut:{id:t.midiOut,name:''},id=s(o.id||'',64);return id?{id,name:s(o.name||'',80)}:null})();
    tr.midiCh=clamp(Math.round(Number(t.midiCh))||1,1,16);
-   const pr=Number(t.program);tr.program=t.program!=null&&t.program!==''&&Number.isFinite(pr)?clamp(Math.round(pr),0,127):null}
+   const pr=Number(t.program);tr.program=t.program!=null&&t.program!==''&&Number.isFinite(pr)?clamp(Math.round(pr),0,127):null;
+   // Armatura: la traccia scelta ascolta l'ingresso MIDI (MIDI thru) senza registrare.
+   tr.arm=!!t.arm}
   return tr});
  // Uscite: solo verso un bus che esiste, mai verso sé stessi e mai un giro chiuso.
  {const byId=new Map(tracks.map(t=>[t.id,t]));for(const t of tracks){if(t.out&&(!byId.has(t.out)||t.out===t.id||byId.get(t.out).kind!=='bus'))t.out=null;

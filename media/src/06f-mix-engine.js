@@ -227,8 +227,10 @@ function mixPlay(from=P.t,{recording=false,origin=from}={}){mixKill();stopPlayba
  const hasMidi=P.tracks.some(t=>t.kind==='midi'&&audible(t)&&P.regions.some(r=>r.track===t.id&&r.kind==='midi'));
  if(hasMidi)midiStart({quiet:true}).then(ok=>{if(ok&&!midiOutputs().length&&!MIDI.warnedOut){MIDI.warnedOut=true;announce('Nessuna uscita MIDI: le tracce MIDI non suonano')}}).catch(()=>{});
  playUIProject(true);mixPump();MIX.timer=setInterval(mixPump,25);MIX.raf=requestAnimationFrame(mixTick)}
-function mixStop(keep=true){if(!MIX.playing)return;const pos=mixPos();mixKill();if(keep)P.t=pos;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI()}
-function mixRestart(){if(!MIX.playing)return;mixPlay(mixPos(),{recording:MIX.recording,origin:MIX.origin})}
+function mixStop(keep=true){if(!MIX.playing)return;const pos=mixPos();mixKill();midiRecFinish(pos);if(keep)P.t=pos;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI()}
+function mixRestart(){if(!MIX.playing)return;
+ if(MIDI.rec){midiRecFinish(mixPos(),'modifica');MIX.recording=false}
+ mixPlay(mixPos(),{recording:MIX.recording,origin:MIX.origin})}
 // Cambi di volume, bilanciamento ed effetti durante l'ascolto; una traccia nuova va programmata, quindi si riparte.
 function mixLive(){if(!MIX.playing||!MIX.graph)return;const had=new Set(MIX.graph.tracks.keys());syncGraph(MIX.graph,P.tracks,{live:true});MIX.lat=MIX.graph.lat;if(P.tracks.some(t=>!had.has(t.id)))mixRestart()}
 function mixPump(){if(!MIX.playing)return;const ctx=actx,now=ctx.currentTime,horizon=now+LOOKAHEAD;if(cycleKey()!==MIX.cycKey){mixRestart();return}

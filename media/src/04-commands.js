@@ -25,6 +25,9 @@ def('a','File',[
 def('a','Tracce',[
  ['newTrack','Nuova traccia vuota','plus','Alt+Maiusc+N',{short:'Nuova traccia'}],
  ['newMidiTrack','Nuova traccia MIDI: le note suonano su un sintetizzatore esterno','keyboard','Alt+Maiusc+M',{short:'Traccia MIDI'}],
+ ['midiArm','Armatura MIDI: ascolta l’ingresso su questa traccia e sospende i comandi a nota','keyboard','',{short:'Arma MIDI',toggle:()=>!!selTrack()?.arm}],
+ ['midiOverdub','Sovraincidi le note registrate nella regione sotto l’indicatore','keyboard','',{short:'Sovraincidi',toggle:()=>!!prefs.midiOverdub}],
+ ['midiQuantize','Quantizza le note MIDI sulla griglia del brano','magnet','',{short:'Quantizza MIDI'}],
  ['newBus','Nuovo bus: raccoglie più tracce con un volume e un compressore soli','tracks','',{short:'Nuovo bus'}],
  ['importTrack','Importa file audio, ognuno in una nuova traccia','import','Ctrl+I',{g:1,short:'Importa audio'}],
  ['trackSettings','Suono della traccia: volume, bilanciamento, bassi, alti, compressione e riverbero…','eq','',{short:'Suono della traccia'}],
