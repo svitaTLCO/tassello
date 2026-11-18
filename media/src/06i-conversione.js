@@ -48,7 +48,7 @@ async function batchConvertDialog(){const files=await pickAudioFiles();if(!files
  const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
  const opts=[['wav16','WAV 16 bit (qualità CD)'],['wav24','WAV 24 bit (per altri programmi professionali)'],['wav32','WAV 32 bit in virgola mobile (senza perdite)'],['mp3','MP3 (playout, telefonini e archivio)'],...(aac?[['aac','M4A con AAC']]:[]),...(opus?[['opus','WebM con Opus']]:[])];
  const total=files.reduce((n,f)=>n+f.size,0),many=files.length>1;
- const r=await modal('Converti più file',
+ const r=await fieldModal('Converti più file',
   `<p>${many?`${files.length} file, ${fmtBytes(total)} in tutto.`:`Un file, ${fmtBytes(total)}.`} Ognuno diventa un file nuovo con lo stesso formato, la stessa frequenza e lo stesso volume: alla fine arrivano in un archivio ZIP${many?'':', come singolo file'}.</p><p>Un file alla volta: i file convertiti restano in memoria fino alla fine.</p>`,
   [{id:'preset',label:'Consegna',type:'select',value:prefs.delivery||'manual',options:Object.entries(DELIVERY).map(([k,v])=>[k,v.label]),hint:'Imposta formato, frequenza, canali e volume; i campi sotto restano modificabili.'},
    {id:'fmt',label:'Formato',type:'select',value:opts.some(o=>o[0]===prefs.audioFormat)?prefs.audioFormat:'wav24',options:opts},

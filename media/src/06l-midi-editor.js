@@ -6,17 +6,25 @@
 const ME={open:false,region:null,regionObj:null,bpm:0,rows:[],byNote:new Map(),order:[],sel:new Set(),focus:0,col:0,anchor:null,
  hiddenNote:false,grid:'16',last:null,lastPitch:60};
 const ME_COLS=5,ME_NAMES=['Do','Do diesis','Re','Re diesis','Mi','Fa','Fa diesis','Sol','Sol diesis','La','La diesis','Si'];
-const ME_DUR={1920:'una semibreve',960:'una minima',480:'una semiminima',240:'una croma',120:'una semicroma',60:'una biscroma',30:'una semibiscroma'};
+// Durate nominate: base, puntate (×3/2) e terzine (×2/3) a PPQ 480. Il riconoscimento accetta ±2 tick perché i
+// file .mid con PPQ insoliti vengono riscalati a 480 con arrotondamento (per esempio una croma di terzina a PPQ 100
+// è 33 tick nel file e diventa 158 qui, due sotto 160). I tick reali si dicono sempre.
+const ME_DUR_BASE={1920:'semibreve',960:'minima',480:'semiminima',240:'croma',120:'semicroma',60:'biscroma',30:'semibiscroma'},
+ ME_DUR={},ME_DUR_TOL=2;
+for(const [d,n] of Object.entries(ME_DUR_BASE)){ME_DUR[d]=n;ME_DUR[Math.round(d*1.5)]=n+' puntata';ME_DUR[Math.round(d*2/3)]=n+' in terzina'}
+const meDurationName=d=>{if(ME_DUR[d])return ME_DUR[d];let best=null,bd=ME_DUR_TOL+1;
+ for(const [k,n] of Object.entries(ME_DUR)){const e=Math.abs(Number(k)-d);if(e<=ME_DUR_TOL&&e<bd){best=n;bd=e}}
+ return best};
 const meGridTicks=()=>MIDIPPQ*4/Number(ME.grid);
 // Convenzione scientifica dichiarata: la nota 60 è Do 4, il Do centrale (Yamaha e parte della didattica dicono Do 3).
 const meNoteName=p=>{const n=Number(p)|0;return ME_NAMES[((n%12)+12)%12]+' '+(Math.floor(n/12)-1)+(n===60?', Do centrale':'')};
 const meVelWords=v=>v<=20?'pianissimo':v<=40?'piano':v<=60?'mezzo piano':v<=80?'mezzo forte':v<=100?'forte':'fortissimo';
 const meTimeWords=(r,n)=>{const abs=r.startT-r.offT+n.t,b=Math.floor(abs/(MIDIPPQ*P.sig)),rest=abs-b*MIDIPPQ*P.sig,beat=Math.floor(rest/MIDIPPQ),tick=rest%MIDIPPQ;
  return `battuta ${b+1}, tempo ${beat+1}${tick?', tick '+tick:''}`};
-const meDurWords=d=>{const s=midiSec(d);return (ME_DUR[d]?ME_DUR[d]+', ':'')+d+' tick, '+fmtNum(s,2)+' s'};
+const meDurWords=d=>{const s=midiSec(d),name=meDurationName(d);return (name?name+', ':'')+d+' tick, '+fmtNum(s,2)+' s'};
 // Per il parlato la virgola decimale si perde («0 25 s»): sotto il secondo si dicono i millisecondi, sopra i
 // secondi e i millisecondi. La cella visibile continua a mostrare «0,25 s».
-const meDurSpoken=d=>{const s=midiSec(d),ms=Math.round(s*1000),head=ME_DUR[d]?ME_DUR[d]+', ':'';
+const meDurSpoken=d=>{const s=midiSec(d),ms=Math.round(s*1000),name=meDurationName(d),head=name?name+', ':'';
  if(ms<1000)return head+d+' tick, '+ms+' millisecondi';
  const sec=Math.floor(ms/1000),rest=ms%1000;return head+d+' tick, '+sec+(sec===1?' secondo':' secondi')+(rest?' e '+rest+' millisecondi':'')};
 const meVisible=n=>{const r=ME.regionObj;return !!r&&n.t>=r.offT&&n.t<r.offT+r.durT};
@@ -143,7 +151,7 @@ function meSetVelocity(delta){const sel=meSelNotes();if(!sel.length)return;const
 function meVelocityDigit(d){const table=[127,13,25,38,51,64,76,89,102,114],v=table[Number(d)%10],sel=meSelNotes();if(!sel.length)return;
  meApply('Intensità',()=>{for(const n of sel)n.v=v},ME.sel.size===1&&ME.col===3?null:`Intensità ${v}`,sel,sel[0])}
 async function meNoteProps(){const n=ME.order[ME.focus];if(!n){toast('Nessuna nota scelta');return}const r=ME.regionObj;
- const v=await modal('Proprietà della nota',`<p>${esc(meNoteName(n.p))}, ${esc(meTimeWords(r,n))}.</p>`,
+ const v=await fieldModal('Proprietà della nota',`<p>${esc(meNoteName(n.p))}, ${esc(meTimeWords(r,n))}.</p>`,
   [{id:'t',label:'Tempo dall’inizio della regione, in tick',type:'number',value:n.t},{id:'p',label:'Altezza (0-127)',type:'number',value:n.p},
    {id:'d',label:'Durata in tick',type:'number',value:n.d},{id:'v',label:'Intensità (1-127)',type:'number',value:n.v}],'Applica',
   {validate:v=>{const t=num(v.t),p=num(v.p),d=num(v.d),vel=num(v.v);
@@ -197,6 +205,59 @@ function mePlayNote(){const n=ME.order[ME.focus],r=ME.regionObj;if(!n||!r)return
  // uso l'accesso si chiede e le anteprime in coda si spegnono comunque l'una con l'altra.
  if(MIDI.access)send();else midiStart({quiet:true}).then(ok=>{if(ok)send()}).catch(()=>{})}
 function meMaybePreview(){if(!meEditorActive()||!$('mePreview')?.checked)return;mePlayNote()}
+// ——— Tocco umano ———
+// Sposta nel tempo e varia l'intensità con un PRNG a seme (mulberry32, lo stesso del riverbero), per un risultato
+// riproducibile. Scorre le note ordinate per (tempo, altezza, indice) e per ogni nota estrae SEMPRE prima il tempo
+// e poi l'intensità, anche se uno dei due massimi è zero: cambiando solo l'intensità, gli spostamenti nel tempo non
+// cambiano. Le note visibili restano nella finestra, non superano la partenza della successiva della stessa altezza
+// (il nostro scheduler manda note off indipendenti: una sovrapposizione taglierebbe la seconda), le note già fuori
+// restano come sono.
+function meHumanizeTarget(){if(ME.open&&ME.sel.size>1){const notes=meSelNotes();return{notes,regions:[ME.regionObj],label:'alla selezione dell’editor'}}
+ const r=selRegion();if(r&&r.kind==='midi')return{notes:null,regions:[r],label:`alla regione «${r.name}»`};
+ const t=selTrack();if(t?.kind==='midi'){const rs=P.regions.filter(x=>x.track===t.id&&x.kind==='midi');if(!rs.length)return null;return{notes:null,regions:rs,label:`alla traccia «${t.name}»`}}
+ return null}
+function meHumanizeApply(target,maxT,maxV,seed){
+ const rng=mulberry32(seed>>>0),ops=[];let total=0,outside=0,skipped=0;
+ for(const reg of target.regions){
+  const winA=reg.offT,winB=reg.offT+reg.durT,all=(reg.notes||[]).map((n,i)=>({n,i})).sort((a,b)=>a.n.t-b.n.t||a.n.p-b.n.p||a.i-b.i);
+  outside+=all.filter(x=>x.n.t<winA||x.n.t>=winB).length;
+  const chosen=all.filter(x=>!target.notes||target.notes.includes(x.n)),vis=chosen.filter(x=>x.n.t>=winA&&x.n.t<winB);
+  for(const x of vis){x.dt=Math.round((rng()*2-1)*maxT);x.dv=Math.round((rng()*2-1)*maxV)}
+  total+=vis.length;
+  const groups=new Map();for(const x of all){if(!groups.has(x.n.p))groups.set(x.n.p,[]);groups.get(x.n.p).push(x)}
+  // Il taglio dipende dalla FINE: la nota non deve finire oltre la partenza della successiva della stessa altezza.
+  // Per le coppie che in origine non si sovrapponevano si tengono entrambi i vincoli (fine dentro la partenza
+  // successiva, inizio dopo la fine precedente); per quelle già sovrapposte resta solo l'ordine delle partenze.
+  for(const g of groups.values()){let prevOrigEnd=-Infinity,prevNewT=winA-1,prevNewEnd=winA-1;
+   for(let i=0;i<g.length;i++){const x=g[i],nextStart=i+1<g.length?g[i+1].n.t:winB,vis=x.dt!==undefined&&x.n.t>=winA&&x.n.t<winB;
+    if(!vis){prevOrigEnd=x.n.t+x.n.d;prevNewT=x.n.t;prevNewEnd=x.n.t+x.n.d;continue}
+    const overlapNext=x.n.t+x.n.d>nextStart,overlapPrev=prevOrigEnd>x.n.t;
+    let t;
+    if(nextStart<=x.n.t){t=x.n.t;skipped++}
+    else{const hi=Math.min(winB-1,overlapNext?nextStart-1:nextStart-x.n.d),lo=Math.max(winA,overlapPrev?prevNewT+1:prevNewEnd);
+     t=clamp(x.n.t+x.dt,lo,hi);if(hi<lo){t=x.n.t;skipped++}}
+    ops.push({n:x.n,nt:t,v:clamp(x.n.v+x.dv,1,127)});prevOrigEnd=x.n.t+x.n.d;prevNewT=t;prevNewEnd=t+x.n.d}}
+ }
+ if(!total){toast('Nessuna nota dentro la regione da umanizzare');return null}
+ const changed=ops.filter(o=>o.nt!==o.n.t||o.v!==o.n.v).length;
+ if(changed)pCommit('Tocco umano',()=>{for(const o of ops){o.n.t=o.nt;o.n.v=o.v}for(const reg of target.regions)(reg.notes||[]).sort((a,b)=>a.t-b.t||a.p-b.p)},{live:true});
+ if(ME.open&&target.regions.includes(ME.regionObj)){const sel=new Set(ME.sel);meRenderAll();ME.sel=new Set(ME.order.filter(n=>sel.has(n)));mePaint();meCounts()}
+ updateEditorBarNeeds();
+ announce(changed?`Tocco umano: ${changed} ${changed===1?'nota':'note'}, tempo ±${maxT} tick, intensità ±${maxV}, seme ${seed}${skipped?`, ${skipped} non spostate per non sovrapporsi`:''}${outside?`; ${outside} fuori dalla regione lasciate come sono`:''}`:'Tocco umano: nessuna nota è cambiata');
+ return{changed,skipped,outside,total}
+}
+async function midiHumanizeDialog(){const target=meHumanizeTarget();if(!target||!target.regions.length){toast('Scegli una regione o una traccia MIDI');return}
+ const seed=1+Math.floor(Math.random()*99999);
+ const v=await fieldModal('Tocco umano',`<p>Sposta le note nel tempo e cambia l’intensità, mantenendole dentro la regione e senza che si accavallino con la nota successiva della stessa altezza. Il seme rende il risultato ripetibile: stesso seme e stesse note danno la stessa variazione. Si applica ${esc(target.label)}.</p>`,
+  [{id:'tick',label:'Spostamento massimo nel tempo (tick, 0–120)',type:'number',value:15,hint:`Si applica ${target.label}.`},
+   {id:'vel',label:'Variazione massima di intensità (punti, 0–63)',type:'number',value:10},
+   {id:'seed',label:'Seme (intero da 1 a 99999)',type:'number',value:seed}],'Applica',
+  {validate:v=>{const t=num(v.tick),vel=num(v.vel),sd=num(v.seed);
+   return !(Number.isFinite(t)&&t>=0&&t<=120)?{msg:'Tempo: un numero da 0 a 120 tick.',field:'tick'}:
+    !(Number.isFinite(vel)&&vel>=0&&vel<=63)?{msg:'Intensità: un numero da 0 a 63 punti.',field:'vel'}:
+    !(Number.isInteger(sd)&&sd>=1&&sd<=99999)?{msg:'Seme: un intero da 1 a 99999.',field:'seed'}:null}});
+ if(!v)return;if(num(v.tick)===0&&num(v.vel)===0){toast('Nessuna variazione: tempo e intensità sono a zero');return}
+ meHumanizeApply(target,Math.round(num(v.tick)),Math.round(num(v.vel)),Math.round(num(v.seed)))}
 // ——— Tastiera della griglia ———
 function meKey(e){if(!meEditorActive())return;meSyncFocus();const k=e.key,ctrl=e.ctrlKey||e.metaKey,alt=e.altKey,shift=e.shiftKey;let done=true;
  if(!ME.order.length&&k!=='Enter'&&k!=='F2'&&!(alt&&k==='Enter'))return;

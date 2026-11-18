@@ -211,7 +211,10 @@ function midiPump(now,horizon){if(!P.tracks.some(t=>t.kind==='midi'&&P.regions.s
  for(const p of MIX.passes){const from=p.a+(Math.max(p.w,p.midiAt??p.w)-p.w),to=Math.min(p.b,p.a+(Math.min(now+MIDI_AHEAD,horizon)-p.w));
   if(!(to>from))continue;p.midiAt=Math.min(now+MIDI_AHEAD,horizon);
   midiPrograms(p,MIX.midiProg);
-  for(const ev of midiWindow(from,to)){const port=midiOutputFor(ev.t);if(!port)continue;const ch=clamp((ev.t.midiCh||1)-1,0,15),at=k+(p.w+(ev.at-p.a))*1000;
+  // A parità di istante i note off vengono prima dei note on: se una nota finisce esattamente dove ne comincia
+  // un'altra sulla stessa altezza, il ri-attacco della seconda non viene spento dal note off della prima.
+  const evs=midiWindow(from,to).sort((a,b)=>a.at-b.at||a.on-b.on);
+  for(const ev of evs){const port=midiOutputFor(ev.t);if(!port)continue;const ch=clamp((ev.t.midiCh||1)-1,0,15),at=k+(p.w+(ev.at-p.a))*1000;
    if(ev.on)midiNoteOn(port,ch,ev.n.p,ev.n.v,at,ev.t.id);else midiNoteOff(port,ch,ev.n.p,at)}}}
 // ——— Orologio MIDI ———
 // 24 colpi per semiminima (0xF8), Start (0xFA) da zero, Continue (0xFB) + Song Position Pointer (0xF2, in sedicesimi)
@@ -312,6 +315,6 @@ async function renderMix({only=null,from=0,to=null,rate=48000,limit=true,tail=fa
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.
 function songMarkers(rate){const out=[];for(const r of P.regions){const sr=SOURCES.get(r.src)?.sampleRate||rate;for(const m of r.markers||[]){const x=m.pos/sr;if(x<0||x>r.dur)continue;out.push({id:m.id,pos:Math.round((r.start+x)*rate),label:m.label})}}return out.sort((a,b)=>a.pos-b.pos)}
 async function exportStems(){if(!P.regions.length){toast('Il progetto è vuoto');return}midiExportNote();const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
- const r=await modal('Esporta le tracce separate',`<p>Un file per ogni traccia, con i suoi effetti e lo stesso inizio, raccolti in un archivio ZIP: servono per continuare il lavoro in un altro programma.</p>`,[{id:'fmt',label:'Formato',type:'select',value:'wav24',options:[['wav16','WAV 16 bit'],['wav24','WAV 24 bit'],['wav32','WAV 32 bit in virgola mobile'],...(aac?[['aac','M4A con AAC']]:[]),...(opus?[['opus','WebM con Opus']]:[])]}],'Esporta');if(!r)return;
+ const r=await fieldModal('Esporta le tracce separate',`<p>Un file per ogni traccia, con i suoi effetti e lo stesso inizio, raccolti in un archivio ZIP: servono per continuare il lavoro in un altro programma.</p>`,[{id:'fmt',label:'Formato',type:'select',value:'wav24',options:[['wav16','WAV 16 bit'],['wav24','WAV 24 bit'],['wav32','WAV 32 bit in virgola mobile'],...(aac?[['aac','M4A con AAC']]:[]),...(opus?[['opus','WebM con Opus']]:[])]}],'Esporta');if(!r)return;
  const files=await work('Esportazione delle tracce',async()=>{const out=[];for(const [i,t] of P.tracks.entries()){if(!P.regions.some(x=>x.track===t.id))continue;status(`Mixaggio della traccia ${i+1} di ${P.tracks.length}: ${t.name}`);const buf=await renderMix({only:t.id,tail:tailTime(P.tracks)});out.push({name:extName(`${String(i+1).padStart(2,'0')} ${t.name}`,r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext),data:r.fmt.startsWith('wav')?wavBlob(buf,Number(r.fmt.slice(3))):await compressedBlob(buf,r.fmt,(prefs.kbps||160)*1000)})}return out});
  if(!files?.length)return;const zip=await work('Creazione dell’archivio',()=>zipBlob(files));if(zip){download(zip,extName(P.title+' - tracce','zip'));toast(`Esportate ${files.length} tracce in un archivio ZIP`)}}

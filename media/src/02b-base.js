@@ -93,7 +93,10 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
   if(anchor){const after=anchor.nextElementSibling;box.hidden=false;(after?.classList.contains('hint')?after:anchor).after(box)}
   else{box.hidden=false;$('dialogForm').querySelector('.modal-actions').before(box)}
   box.textContent='';setTimeout(()=>{box.textContent=err.msg},50)};
- pane.className='modal'+(opts.wide?' wide':'');pane.setAttribute('aria-describedby',opts.describedBy||'dlgBody');
+ pane.className='modal'+(opts.wide?' wide':'');
+ // describe:false = il corpo non si legge all'apertura (dialoghi con campi); le avvertenze essenziali stanno nei
+ // hint dei campi. describe:true (predefinito) = si legge il corpo o l'elemento indicato da describedBy.
+ if(opts.describe===false)pane.removeAttribute('aria-describedby');else pane.setAttribute('aria-describedby',opts.describedBy||'dlgBody');
  const extra=(opts.buttons||[]).map((b,i)=>`<button type="button" class="btn${i?'':' left'}" id="dlgBtn${i}">${esc(b.label)}</button>`).join('');
  pane.innerHTML=`<h2 id="dlgTitle">${esc(title)}</h2><div id="dlgBody" class="dlg-body">${body}</div><form id="dialogForm" novalidate>${fields.map(field).join('')}<p class="dlg-err" id="dlgErr" role="alert" hidden></p><div class="modal-actions">${extra}${opts.noCancel?'':'<button type="button" class="btn" id="cancelDlg">Annulla</button>'}<button class="btn primary" type="submit" id="okDlg">${esc(actionLabel)}</button></div></form>`;
  bg.hidden=false;if(typeof colorHints==='function')colorHints(pane);
@@ -111,6 +114,8 @@ function modal(title,body,fields=[],actionLabel='Conferma',opts={}){return new P
  opts.onOpen?.(pane,finish);
  setTimeout(()=>{const f=fields[0]?$('dlg_'+fields[0].id):(pane.querySelector('[data-autofocus]')||$('okDlg'));f?.focus({preventScroll:!fields[0]});pane.scrollTop=0;if(f?.select&&f.type==='text')f.select()},0);
 });}
+// Dialoghi con campi o controlli: titolo e primo campo, senza leggere tutto il corpo all'apertura.
+const fieldModal=(title,body,fields,action,opts={})=>modal(title,body,fields,action,{...opts,describe:false});
 async function confirmAction(message,label='Continua'){return (await modal('Conferma',esc(message),[],label))!==null}
 const overlayOpen=()=>!$('modalbg').hidden||!$('palettebg').hidden||!$('filepanel').hidden||!$('menu').hidden;
 const tip=$('tip');let tipTimer;

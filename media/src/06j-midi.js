@@ -30,6 +30,8 @@ function midiThru(track,on,p,v){if(on){const port=midiOutputFor(track);if(!port)
   midiNoteOn(port,ch,p,v,0,track.id);midiThruOpen.set(p,{port,ch});return}
  const o=midiThruOpen.get(p);midiThruOpen.delete(p);
  if(o){midiNoteOff(o.port,o.ch,p,0);return}
+ // Senza registro (dopo panic o stop) il conteggio è a zero e midiNoteOff non manda nulla: è voluto, perché
+ // CC123 ha già spento tutto. Non «riparare» questo ramo mandando un off senza conteggio.
  const port=midiOutputFor(track);if(port)midiNoteOff(port,clamp((track.midiCh||1)-1,0,15),p,0)}
 // I controlli che una tastiera ha sempre: pedale, modulazione e pitch bend si inoltrano anche loro, altrimenti chi
 // suona col pedale sente note corte mentre nella regione finiscono lunghe. Il canale entra in midiUsed, così panic
@@ -91,7 +93,7 @@ async function midiStart({quiet=false}={}){if(!navigator.requestMIDIAccess){if(!
 async function midiPanel(){if(!await midiStart())return;const map=midiMap(),cmds=MIDI_CMDS[isAudio()?'a':'v'].map(id=>[id,C[id]?.label||id]);
  const list=()=>{const ms=Object.entries(map).filter(([k,id])=>cmds.some(([cid])=>cid===id));return ms.length?`<ul>${ms.map(([k,id])=>`<li>${esc(C[id]?.label||id)}: ${esc(midiName(k))}</li>`).join('')}</ul>`:'<p>Nessun comando assegnato: scegli un comando e premi Impara.</p>'};
  let timer=0;
- const res=await modal('Controller MIDI','<p>Tasti e pedali dello strumento MIDI comandano il programma. L’assegnazione resta nelle preferenze e vale anche alla prossima apertura.</p><div id="midiList">'+list()+'</div>',[{id:'cmd',label:'Comando',type:'select',value:cmds[0][0],options:cmds}],'Chiudi',{
+ const res=await fieldModal('Controller MIDI','<p>Tasti e pedali dello strumento MIDI comandano il programma. L’assegnazione resta nelle preferenze e vale anche alla prossima apertura.</p><div id="midiList">'+list()+'</div>',[{id:'cmd',label:'Comando',type:'select',value:cmds[0][0],options:cmds}],'Chiudi',{
   buttons:[{label:'Impara',run:v=>{const id=v.cmd;announce('Premi un tasto o muovi un controllo sullo strumento MIDI');clearTimeout(timer);
     let done=false;MIDI.learn=key=>{if(done)return;done=true;MIDI.learn=null;clearTimeout(timer);
      for(const [k,x] of Object.entries(map))if(x===id)delete map[k];map[key]=id;savePrefs();
@@ -114,15 +116,21 @@ function midiOutputFor(t){const outs=midiOutputs();if(!outs.length)return null;c
 // Il registro delle note aperte tiene anche l'istante in cui il note on è stato accodato (può essere nel futuro,
 // fino a 100 ms) e la traccia: il note off del panic va dopo quel note on, altrimenti la nota partirebbe dopo
 // l'off e resterebbe bloccata.
-const midiOpen=new Map(),midiUsed=new Set();
+const midiOpen=new Map(),midiUsed=new Set(),midiActive=new Map();
 function midiSend(port,data,at){try{port.send(data,at);if(at>MIDI.lastAt)MIDI.lastAt=at}catch(e){}}
-function midiNoteOn(port,ch,p,v,at,tid){if(!port)return;midiSend(port,[0x90|ch,p,v],at);midiOpen.set(port.id+'|'+ch+'|'+p,{port,ch,p,at,tid});midiUsed.add(port.id+'|'+ch)}
-function midiNoteOff(port,ch,p,at){if(!port)return;midiSend(port,[0x80|ch,p,0],at);midiOpen.delete(port.id+'|'+ch+'|'+p)}
+// Conteggio delle note attive per (porta, canale, altezza): due note sovrapposte della stessa altezza non devono
+// spegnersi a vicenda. Se un note on arriva mentre l'altezza suona, si manda prima un note off allo stesso istante
+// (ri-attacco, come fanno i sequencer) e poi il note on; un note off esce solo quando il conteggio torna a zero.
+function midiNoteOn(port,ch,p,v,at,tid){if(!port)return;const key=port.id+'|'+ch+'|'+p,n=midiActive.get(key)||0;
+ if(n>0)midiSend(port,[0x80|ch,p,0],at);
+ midiSend(port,[0x90|ch,p,v],at);midiActive.set(key,n+1);midiOpen.set(key,{port,ch,p,at,tid});midiUsed.add(port.id+'|'+ch)}
+function midiNoteOff(port,ch,p,at){if(!port)return;const key=port.id+'|'+ch+'|'+p,n=midiActive.get(key)||0;
+ if(n<=0)return;if(n===1){midiActive.delete(key);midiOpen.delete(key);midiSend(port,[0x80|ch,p,0],at)}else midiActive.set(key,n-1)}
 function midiProgram(port,ch,prog,at){if(port&&prog!=null)midiSend(port,[0xC0|ch,prog],at)}
 // Spegne subito una nota aperta (muto, solo, traccia o regione cambiata durante l'ascolto): il taglio è piccolo,
 // una nota bloccata no. Il note off va comunque dopo il note on accodato.
 function midiKillNote(key,now=performance.now()){const n=midiOpen.get(key);if(!n)return;
- midiSend(n.port,[0x80|n.ch,n.p,0],Math.max(now,(n.at||0)+1));midiOpen.delete(key)}
+ midiSend(n.port,[0x80|n.ch,n.p,0],Math.max(now,(n.at||0)+1));midiOpen.delete(key);midiActive.delete(key)}
 function midiKillTrack(tid){const now=performance.now();for(const [k,n] of midiOpen)if(n.tid===tid)midiKillNote(k,now)}
 function midiKillInaudible(){const now=performance.now(),byId=new Map(P.tracks.map(t=>[t.id,t]));
  for(const [k,n] of midiOpen){const t=byId.get(n.tid);if(!t||!audible(t))midiKillNote(k,now)}}
@@ -133,7 +141,7 @@ function midiPanic(){const now=performance.now();
  const ccAt=Math.max(now,(MIDI.lastAt||0)+1);
  for(const k of midiUsed){const [id,ch]=k.split('|'),port=midiOutputs().find(x=>x.id===id);
   if(port){midiSend(port,[0xB0|(+ch),123,0],ccAt);midiSend(port,[0xB0|(+ch),121,0],ccAt)}}
- midiUsed.clear();MIDI.lastAt=0}
+ midiUsed.clear();midiActive.clear();MIDI.lastAt=0}
 // Le tracce MIDI non finiscono nel mix esportato: il suono arriva dal sintetizzatore, non dal browser. L'esportazione
 // lo dice, così nessuno cerca nel file un suono che non c'è.
 const midiAudible=()=>P.tracks.filter(t=>t.kind==='midi'&&audible(t)&&P.regions.some(r=>r.track===t.id&&r.kind==='midi'));
@@ -144,7 +152,7 @@ function midiExportNote(){const n=midiAudible().length;if(n)announce(`Attenzione
 // punto interno, Stop al fermo e al salto del ciclo. L'impostazione è globale (dipende dal dispositivo).
 async function midiClockDialog(){await midiStart({quiet:true}).catch(()=>false);const outs=midiOutputs(),cur=prefs.midiClockOut;
  const sel=outs.find(o=>o.id===cur?.id)||outs.find(o=>cur?.name&&o.name===cur.name)||null;
- const v=await modal('Orologio MIDI',`<p>Manda l’orologio a un altro strumento (drum machine, sequencer, sintetizzatore con arpeggiatore): 24 colpi per semiminima, Start, Continue e Song Position Pointer, Stop al fermo e al salto del ciclo. Serve un’uscita MIDI; le note possono usare la stessa porta o un’altra.</p>${outs.length?'':'<p>Nessuna uscita MIDI trovata.</p>'}`,
+ const v=await fieldModal('Orologio MIDI',`<p>Manda l’orologio a un altro strumento (drum machine, sequencer, sintetizzatore con arpeggiatore): 24 colpi per semiminima, Start, Continue e Song Position Pointer, Stop al fermo e al salto del ciclo. Serve un’uscita MIDI; le note possono usare la stessa porta o un’altra.</p>${outs.length?'':'<p>Nessuna uscita MIDI trovata.</p>'}`,
   [{id:'on',label:'Manda l’orologio durante l’ascolto e la registrazione',type:'checkbox',value:!!prefs.midiClock},
    {id:'out',label:'Uscita dell’orologio',type:'select',value:sel?.id||'',options:[['','Prima uscita disponibile'],...outs.map(o=>[o.id,o.name||o.id])],hint:'Si ritrova per id e, se l’id cambia, per nome.'}],'Salva');
  if(!v)return;const out=outs.find(o=>o.id===v.out)||null;
