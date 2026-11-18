@@ -415,6 +415,20 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 @media (max-width:1500px){.app-switch .app-name{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.app-switch button{padding:0 6px}}
 @media (max-width:1200px){.status .st-btn:not(.lead) span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}}
 @media (max-width:720px){.bar{gap:6px;padding:6px 6px 0}.brand{display:none}.save-state,.search-tile kbd{display:none}.bar>.doc-tile{flex-basis:140px;min-width:90px}.primary-tile span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.primary-tile{padding:0 16px}.file-side{width:180px}.file-info{padding:22px}.clock{min-width:0}.meter{display:none}.drawer-grid{grid-template-columns:1fr!important}#docInfo{display:none}.zoom input[type=range]{width:80px}}
+
+/* Editor MIDI: tabella delle note (la superficie accessibile) e barra dei comandi. */
+.midi-ed{padding:8px 10px 10px}
+.midi-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.midi-tools .fld{display:flex;gap:6px;align-items:center}
+.midi-roll{height:140px;margin:0 0 8px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:rgba(120,120,120,.06)}
+.midi-roll canvas{display:block;width:100%;height:100%}
+.midi-table-wrap{max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:6px}
+#midiNotes{width:100%;border-collapse:collapse;font-size:13px}
+#midiNotes caption{text-align:left}
+#midiNotes th,#midiNotes td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+#midiNotes thead th{position:sticky;top:0;background:var(--panel);z-index:1}
+#midiNotes tbody tr[aria-selected=true]{background:rgba(36,87,197,.18);outline:2px solid var(--accent,#2457c5);outline-offset:-2px}
+#midiNotes td:focus{outline:2px solid var(--accent,#2457c5);outline-offset:-2px}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -573,6 +587,18 @@ html[data-theme=dark] .msg{background:#f3f3f3;color:#111}
 </section>
 <section class="editor-area tile" id="editorArea" aria-labelledby="edTitle">
 <div class="ed-bar"><h2 id="edTitle">Editor della regione</h2><span class="pane-count" id="edInfo">nessuna regione aperta</span><span class="grow"></span><div class="tp-sel"><label for="aRate">Velocità di ascolto</label><select id="aRate" class="rb-select"><option value="0.5">0,5×</option><option value="0.75">0,75×</option><option value="1" selected>1×</option><option value="1.25">1,25×</option><option value="1.5">1,5×</option><option value="2">2×</option></select></div><button type="button" class="btn sm" data-action="playRegion">Ascolta la regione</button><button type="button" class="btn sm" id="aLoop" data-action="loop" aria-pressed="false">Ciclo sulla selezione</button><button type="button" class="btn icon" data-action="toggleEditor" aria-label="Nascondi l’editor della regione" data-tip="Nascondi l’editor (Ctrl+E)"><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></button></div>
+<div class="midi-ed" id="midiEd" hidden>
+<div class="midi-tools"><div class="fld"><label for="meGrid">Griglia</label><select id="meGrid" class="rb-select"><option value="16">1/16</option><option value="8">1/8</option><option value="4">1/4</option></select></div>
+<label class="check"><input type="checkbox" id="meHidden"> Mostra le note fuori dalla regione</label>
+<label class="check"><input type="checkbox" id="mePreview"> Ascolta le note mentre le scegli</label>
+<span class="pane-count" id="meCount"></span><span class="grow"></span>
+<button type="button" class="btn sm" data-action="midiPlayRegion">Ascolta la regione</button><button type="button" class="btn sm" data-action="midiPlayNote">Ascolta la nota</button><button type="button" class="btn sm" data-action="midiAddNote">Aggiungi nota</button><button type="button" class="btn sm" data-action="midiNoteProps">Proprietà</button></div>
+<div class="midi-roll"><canvas id="meRoll" aria-hidden="true"></canvas></div>
+<div class="midi-table-wrap"><table id="midiNotes" role="grid" aria-labelledby="edTitle" aria-colcount="5"><caption class="sr-only">Note della regione MIDI</caption>
+<thead><tr role="row"><th role="columnheader" scope="col">Tempo</th><th role="columnheader" scope="col">Nota</th><th role="columnheader" scope="col">Durata</th><th role="columnheader" scope="col">Intensità</th><th role="columnheader" scope="col">Regione</th></tr></thead>
+<tbody id="meBody"></tbody></table></div>
+<p class="pane-hint" id="meHint">Frecce su e giù: note; sinistra e destra: colonne; Maiusc+su/giù: selezione; Alt+su/giù: semitono; Alt+Maiusc+su/giù: ottava; Alt+sinistra/destra: sposta nel tempo; Ctrl+sinistra/destra: durata; più e meno: intensità; Invio: aggiunge una nota; Canc: toglie; F2: proprietà. Nota 60 = Do 4, il Do centrale (convenzione scientifica; Yamaha dice Do 3).</p>
+</div>
 <div class="wave-wrap">
 <div class="ruler" aria-hidden="true"><canvas id="aRuler"></canvas></div>
 <div class="wave-box"><div class="wave" id="wave" role="slider" tabindex="0" aria-label="Forma d’onda" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="Nessun audio" aria-describedby="waveHint" data-focus-hint="Frecce: cursore · Maiusc: seleziona · Spazio: ascolta"><canvas id="waveCanvas" aria-hidden="true"></canvas></div>
@@ -856,9 +882,13 @@ def('av','File',[
  ['open','Apri file','open','Ctrl+O',{g:1,short:'Apri'}],
  ['filePanel','Apri il menu File','file','',{}]]);
 def('av','Strumenti',[
- ['midiPanel','Controller MIDI: tastiera o pedale per i comandi…','keyboard','',{short:'MIDI'}]]);
+ ['midiPanel','Controller MIDI: tastiera o pedale per i comandi…','keyboard','',{short:'MIDI'}],
+ ['midiClock','Orologio MIDI: sincronizza un altro strumento…','metronome','',{short:'Orologio MIDI'}],
+ ['midiCalibrate','Calibra l’ingresso MIDI: misura il ritardo delle note…','tone','',{short:'Calibra MIDI'}],
+ ['midiCompReset','Compensazione MIDI: torna a zero','tone','',{short:'Compensazione 0'}]]);
 def('a','File',[
  ['saveAudio','Esporta il brano o la regione (WAV, M4A o WebM)','save','Ctrl+S',{g:1,short:'Esporta'}],
+ ['exportMidi','Esporta la regione o la traccia MIDI come file .mid','export','',{short:'Esporta MIDI'}],
  ['saveAudioProject','Salva il progetto (ZIP con le tracce e i suoni)','backup','Ctrl+Maiusc+S',{g:1,short:'Salva progetto'}],
  ['exportStems','Esporta ogni traccia in un file separato (ZIP)','export','',{short:'Tracce separate'}],
  ['exportParts','Esporta le parti tra i marcatori','export','',{short:'Esporta le parti'}],
@@ -868,8 +898,28 @@ def('a','File',[
  ['batchConvert','Converti più file: stesso formato, frequenza e volume per tutti…','export','Ctrl+Maiusc+K',{g:1,short:'Converti file'}],
  ['limiterAuto','Limitatore finale: il tetto nel tempo…','compress','',{short:'Limitatore finale'}],
  ['limiterToggle','Il limitatore finale segue l’automazione','compress','',{short:'Limitatore auto',toggle:()=>!!P.limiter?.on}]]);
+def('a','MIDI',[
+ ['midiAddNote','Aggiungi una nota all’indicatore o dopo la nota scelta','plus','',{short:'Aggiungi nota',midiEditor:1}],
+ ['midiDeleteNotes','Togli le note scelte','trash','',{short:'Togli note',midiEditor:1}],
+ ['midiSemiUp','Sposta le note scelte su di un semitono','up','',{short:'Semitono su',midiEditor:1}],
+ ['midiSemiDown','Sposta le note scelte giù di un semitono','down','',{short:'Semitono giù',midiEditor:1}],
+ ['midiOctaveUp','Sposta le note scelte su di un’ottava','up','',{short:'Ottava su',midiEditor:1}],
+ ['midiOctaveDown','Sposta le note scelte giù di un’ottava','down','',{short:'Ottava giù',midiEditor:1}],
+ ['midiDurLonger','Allunga le note scelte di una griglia','right','',{short:'Durata più',midiEditor:1}],
+ ['midiDurShorter','Accorcia le note scelte di una griglia','left','',{short:'Durata meno',midiEditor:1}],
+ ['midiVelUp','Alza l’intensità delle note scelte','volume','',{short:'Intensità più',midiEditor:1}],
+ ['midiVelDown','Abbassa l’intensità delle note scelte','volume','',{short:'Intensità meno',midiEditor:1}],
+ ['midiNoteProps','Proprietà della nota scelta: tempo, altezza, durata, intensità','gear','',{short:'Proprietà nota',midiEditor:1}],
+ ['midiReadNote','Leggi per esteso la nota scelta','speak','',{short:'Leggi nota',midiEditor:1}],
+ ['midiShowHidden','Mostra o nascondi le note fuori dalla regione','markers','',{short:'Note fuori',midiEditor:1,toggle:()=>!!ME.hiddenNote}],
+ ['midiPlayRegion','Ascolta la regione MIDI dall’inizio alla fine','play','',{short:'Ascolta regione',midiEditor:1}],
+ ['midiPlayNote','Ascolta la nota scelta','play','',{short:'Ascolta nota',midiEditor:1}]]);
 def('a','Tracce',[
  ['newTrack','Nuova traccia vuota','plus','Alt+Maiusc+N',{short:'Nuova traccia'}],
+ ['newMidiTrack','Nuova traccia MIDI: le note suonano su un sintetizzatore esterno','keyboard','Alt+Maiusc+M',{short:'Traccia MIDI'}],
+ ['midiArm','Armatura MIDI: ascolta l’ingresso su questa traccia e sospende i comandi a nota','keyboard','',{short:'Arma MIDI',toggle:()=>!!selTrack()?.arm}],
+ ['midiOverdub','Sovraincidi le note registrate nella regione sotto l’indicatore','keyboard','',{short:'Sovraincidi',toggle:()=>!!prefs.midiOverdub}],
+ ['midiQuantize','Quantizza le note MIDI sulla griglia del brano','magnet','',{short:'Quantizza MIDI'}],
  ['newBus','Nuovo bus: raccoglie più tracce con un volume e un compressore soli','tracks','',{short:'Nuovo bus'}],
  ['importTrack','Importa file audio, ognuno in una nuova traccia','import','Ctrl+I',{g:1,short:'Importa audio'}],
  ['trackSettings','Suono della traccia: volume, bilanciamento, bassi, alti, compressione e riverbero…','eq','',{short:'Suono della traccia'}],
@@ -891,20 +941,20 @@ def('a','Tracce',[
  ['regionDuplicate','Duplica la regione subito dopo','duplicate','Ctrl+D',{ctx:'lane',short:'Duplica'}],
  ['regionLoop','Ripeti la regione più volte…','loop','',{short:'Ripeti'}],
  ['regionDelete','Elimina la regione','trash','',{short:'Elimina'}],
- ['regionFadeIn','Dissolvenza in entrata della regione','fadeIn','',{short:'Entrata',toggle:()=>selRegion()?.fadeIn>0}],
- ['regionFadeOut','Dissolvenza in uscita della regione','fadeOut','',{short:'Uscita',toggle:()=>selRegion()?.fadeOut>0}],
- ['regionCrossfade','Incrocia la regione scelta con quella che segue…','transition','',{short:'Incrocia'}],
+ ['regionFadeIn','Dissolvenza in entrata della regione','fadeIn','',{audioRegion:1,short:'Entrata',toggle:()=>selRegion()?.fadeIn>0}],
+ ['regionFadeOut','Dissolvenza in uscita della regione','fadeOut','',{audioRegion:1,short:'Uscita',toggle:()=>selRegion()?.fadeOut>0}],
+ ['regionCrossfade','Incrocia la regione scelta con quella che segue…','transition','',{audioRegion:1,short:'Incrocia'}],
  ['autoEdit','Automazione della traccia: punti di volume e bilanciamento…','stats','',{short:'Automazione'}],
  ['autoAddVol','Aggiungi un punto di volume all’indicatore','plus','',{short:'Punto volume'}],
  ['autoAddPan','Aggiungi un punto di bilanciamento all’indicatore','plus','',{short:'Punto bilanciamento'}],
  ['autoToggleVol','Il volume della traccia segue l’automazione','stats','',{short:'Volume automatico',toggle:()=>!!selTrack()?.autoOn?.vol}],
  ['autoTogglePan','Il bilanciamento della traccia segue l’automazione','stats','',{short:'Bilanciamento automatico',toggle:()=>!!selTrack()?.autoOn?.pan}],
  ['autoClear','Togli tutti i punti di automazione della traccia','trash','',{short:'Togli automazione'}],
- ['takes','Take della regione: scegli quella che si sente, rinomina, annota…','duplicate','',{short:'Take'}],
- ['takeNext','Passa alla take successiva della regione','right','Alt+Maiusc+]',{short:'Take dopo'}],
- ['takePrev','Passa alla take precedente della regione','left','Alt+Maiusc+[',{short:'Take prima'}],
- ['takeDelete','Togli una take della regione…','trash','',{short:'Togli take'}],
- ['compEdit','Comping: scegli da quale take viene ogni sezione della regione…','split','',{short:'Comping'}],
+ ['takes','Take della regione: scegli quella che si sente, rinomina, annota…','duplicate','',{audioRegion:1,short:'Take'}],
+ ['takeNext','Passa alla take successiva della regione','right','Alt+Maiusc+]',{audioRegion:1,short:'Take dopo'}],
+ ['takePrev','Passa alla take precedente della regione','left','Alt+Maiusc+[',{audioRegion:1,short:'Take prima'}],
+ ['takeDelete','Togli una take della regione…','trash','',{audioRegion:1,short:'Togli take'}],
+ ['compEdit','Comping: scegli da quale take viene ogni sezione della regione…','split','',{audioRegion:1,short:'Comping'}],
  ['cycle','Ciclo: ripeti il tratto tra inizio e fine del ciclo','loop','',{short:'Ciclo',toggle:()=>P.cycle.on}],
  ['cycleRegion','Ciclo sulla regione scelta','loop','',{short:'Ciclo sulla regione'}],
  ['punchRange','Punch: registra solo tra due punti…','record','',{short:'Punch…'}],
@@ -1084,7 +1134,12 @@ function parsedKeys(spec){if(!keyCache.has(spec))keyCache.set(spec,spec?spec.spl
 function keyMatch(e,k){if((e.ctrlKey||e.metaKey)!==k.ctrl||e.altKey!==k.alt)return false;const sym=k.key.length===1&&!/[a-z0-9 ]/.test(k.key);if(!sym&&e.shiftKey!==k.shift)return false;const ek=e.key.toLowerCase();if(ek===k.key)return true;if(/^[a-z0-9]$/.test(k.key)&&(!(e.ctrlKey&&e.altKey)||/\d/.test(k.key)))return e.code===(/\d/.test(k.key)?'Digit':'Key')+k.key.toUpperCase();if(k.key===' '&&e.code==='Space')return true;return false}
 function ariaKeys(spec){const M={Ctrl:'Control',Maiusc:'Shift',Alt:'Alt',Invio:'Enter',Spazio:'Space',Canc:'Delete',PgSu:'PageUp',PgGiù:'PageDown','←':'ArrowLeft','→':'ArrowRight','↑':'ArrowUp','↓':'ArrowDown',Esc:'Escape'};return spec.split(' / ').map(s=>s.split('+').map(p=>M[p]||p).join('+')).join(' ')}
 const kbdHtml=spec=>spec.split(' / ').map(s=>s.split('+').map(p=>`<kbd>${esc(p)}</kbd>`).join('+')).join(' o ');
-const available=c=>c.modes.includes(state.mode[0]);
+// I comandi che hanno bisogno del suono della regione scelta (forma d'onda, dissolvenze, take, comping) non sono
+// disponibili quando la regione è MIDI: barra e palette lo dicono prima, invece di lasciar partire il comando.
+// I comandi dell'editor MIDI compaiono quando l'editor delle note è aperto.
+const regionIsMidi=()=>{const r=P.regions.find(x=>x.id===P.sel);return !!r&&r.kind==='midi'};
+const midiEditorReady=()=>{try{return meEditorActive()}catch(e){return false}};
+const available=c=>c.modes.includes(state.mode[0])&&(!c.audioRegion||!regionIsMidi())&&(!c.midiEditor||midiEditorReady());
 function focusContext(){const a=document.activeElement;if(!a||a===document.body)return 'other';if(a.id==='wave')return 'wave';if(a.classList.contains('ar-lane'))return 'lane';if(a.id==='arPlayhead')return 'arph';if(a.id==='playhead'||a.id==='viewCanvas'||a.classList.contains('track'))return 'timeline';if(a.classList.contains('lb'))return 'list';if(a.matches('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select'))return 'input';return 'other'}
 function findShortcut(e,ctx){let fallback=null;for(const c of Object.values(C)){const spec=keysOf(c);if(!spec||!available(c))continue;if(c.ctx&&c.ctx!==ctx)continue;if(ctx==='input'&&!c.g)continue;if(parsedKeys(spec).some(k=>keyMatch(e,k))){if(c.ctx===ctx)return c;fallback??=c}}return fallback}
 const safe=fn=>{try{return fn()}catch(e){return false}};
@@ -1117,11 +1172,11 @@ const mi=(id,run)=>{const c=C[id];return{label:c.label,icon:c.icon,keys:keysOf(c
 function menuAnchor(action){const el=document.querySelector(`#drawer [data-action="${action}"],#tools [data-action="${action}"]`)||document.activeElement,r=el?.getBoundingClientRect?.()||{left:200,bottom:200};return{x:r.left,y:r.bottom,el:el?.closest?.('#drawer,#tools')?el:null}}
 // Scorciatoie che dipendono dall'area con il focus: non passano dal registro, ma la guida le elenca.
 const STATIC_KEYS={g:[['Navigazione generale',[['Passa tra le aree','F6 / Maiusc+F6'],['Strumenti e cassetti della barra','← → poi Invio o ↓'],['Chiudi il cassetto','Esc'],['Larghezza di un riquadro, sulla fuga','← → (con Maiusc di più)'],['Riduci il riquadro a tessera, sulla fuga','Invio'],['Chiudi finestre e menu','Esc']]]],
- a:[['Sull’indicatore del brano',[['Un passo della griglia indietro o avanti (un secondo o un tempo)','← →'],['Un passo piccolo','Maiusc+← / Maiusc+→'],['Cinque secondi o una battuta','PgSu / PgGiù'],['Bordo di regione precedente o successivo','↑ / ↓'],['Inizio o fine del brano','Home / Fine'],['Riproduci o pausa il brano','Spazio'],['Inizio o fine del ciclo all’indicatore','I / O'],['Attiva o disattiva il ciclo','C'],['Accorcia l’inizio o la fine della regione all’indicatore','Q / W'],['Registra sulla traccia scelta','R'],['Alle tracce','Invio']]],['Nelle tracce',[['Regione precedente o successiva','← →'],['Traccia sopra o sotto','↑ / ↓'],['Sposta la regione di un passo (con Maiusc di un passo piccolo)','Ctrl+← / Ctrl+→'],['Porta la regione sulla traccia sopra o sotto','Ctrl+↑ / Ctrl+↓'],['Apri la regione nell’editor','Invio'],['Proprietà della regione','Alt+Invio'],['Rinomina la regione','F2'],['Elimina la regione','Canc'],['Muto o solo della traccia','M / S'],['Leggi i livelli della traccia all’indicatore','L'],['Accorcia l’inizio o la fine della regione all’indicatore','Q / W'],['Registra su questa traccia','R'],['Riproduci o pausa il brano','Spazio'],['Menu della regione','Maiusc+F10'],['Zoom avanti, indietro, tutto','+ / − / 0']]],['Nell’editor della regione (forma d’onda)',[['Sposta il cursore del passo scelto','← →'],['Cinque secondi indietro o avanti','PgSu / PgGiù'],['Pausa precedente o successiva nel parlato','Ctrl+← / Ctrl+→'],['Inizio o fine del file','Home / Fine'],['Estendi la selezione','Maiusc con i tasti di spostamento'],['Ascolta o metti in pausa','Spazio'],['Ascolta la selezione','Maiusc+Spazio'],['Ascolta 2 secondi prima o dopo il cursore','P / D'],['Inizio o fine della selezione al cursore (anche durante l’ascolto)','I / O'],['Aggiungi un marcatore (anche durante l’ascolto)','M o Ctrl+M'],['Leggi il livello al cursore','L'],['Elimina la selezione','Canc o Backspace'],['Zoom avanti, indietro, tutto, selezione','+ / − / 0 / Z'],['Ferma l’ascolto o togli la selezione','Esc'],['Menu della forma d’onda','Maiusc+F10']]],['Nel riquadro dei marcatori',[['Scegli un marcatore','↑ ↓'],['Porta il cursore sul marcatore','Invio'],['Seleziona fino al marcatore successivo','Maiusc+Invio'],['Rinomina','F2'],['Elimina','Canc']]],['Nei campi del tempo',[['Conferma il tempo scritto','Invio'],['Torna alla forma d’onda','Esc']]]],
+ a:[['Sull’indicatore del brano',[['Un passo della griglia indietro o avanti (un secondo o un tempo)','← →'],['Un passo piccolo','Maiusc+← / Maiusc+→'],['Cinque secondi o una battuta','PgSu / PgGiù'],['Bordo di regione precedente o successivo','↑ / ↓'],['Inizio o fine del brano','Home / Fine'],['Riproduci o pausa il brano','Spazio'],['Inizio o fine del ciclo all’indicatore','I / O'],['Attiva o disattiva il ciclo','C'],['Accorcia l’inizio o la fine della regione all’indicatore','Q / W'],['Registra sulla traccia scelta','R'],['Alle tracce','Invio']]],['Nelle tracce',[['Regione precedente o successiva','← →'],['Traccia sopra o sotto','↑ / ↓'],['Sposta la regione di un passo (con Maiusc di un passo piccolo)','Ctrl+← / Ctrl+→'],['Porta la regione sulla traccia sopra o sotto','Ctrl+↑ / Ctrl+↓'],['Apri la regione nell’editor','Invio'],['Proprietà della regione','Alt+Invio'],['Rinomina la regione','F2'],['Elimina la regione','Canc'],['Muto o solo della traccia','M / S'],['Leggi i livelli della traccia all’indicatore','L'],['Accorcia l’inizio o la fine della regione all’indicatore','Q / W'],['Registra su questa traccia','R'],['Riproduci o pausa il brano','Spazio'],['Menu della regione','Maiusc+F10'],['Zoom avanti, indietro, tutto','+ / − / 0']]],['Nell’editor della regione (forma d’onda)',[['Sposta il cursore del passo scelto','← →'],['Cinque secondi indietro o avanti','PgSu / PgGiù'],['Pausa precedente o successiva nel parlato','Ctrl+← / Ctrl+→'],['Inizio o fine del file','Home / Fine'],['Estendi la selezione','Maiusc con i tasti di spostamento'],['Ascolta o metti in pausa','Spazio'],['Ascolta la selezione','Maiusc+Spazio'],['Ascolta 2 secondi prima o dopo il cursore','P / D'],['Inizio o fine della selezione al cursore (anche durante l’ascolto)','I / O'],['Aggiungi un marcatore (anche durante l’ascolto)','M o Ctrl+M'],['Leggi il livello al cursore','L'],['Elimina la selezione','Canc o Backspace'],['Zoom avanti, indietro, tutto, selezione','+ / − / 0 / Z'],['Ferma l’ascolto o togli la selezione','Esc'],['Menu della forma d’onda','Maiusc+F10']]],['Nel riquadro dei marcatori',[['Scegli un marcatore','↑ ↓'],['Porta il cursore sul marcatore','Invio'],['Seleziona fino al marcatore successivo','Maiusc+Invio'],['Rinomina','F2'],['Elimina','Canc']]],['Nei campi del tempo',[['Conferma il tempo scritto','Invio'],['Torna alla forma d’onda','Esc']]],['Nell’editor MIDI (tabella delle note)',[['Nota precedente o successiva','↑ / ↓'],['Colonna precedente o successiva','← / →'],['Prima o ultima nota','Home / Fine'],['Estendi la selezione','Maiusc+↑ / Maiusc+↓'],['Seleziona tutte le note','Ctrl (Cmd su Mac)+A'],['Sposta di un semitono','Alt+↑ / Alt+↓'],['Sposta di un’ottava','Alt+Maiusc+↑ / Alt+Maiusc+↓'],['Sposta nel tempo di una griglia','Alt+← / Alt+→'],['Accorcia o allunga di una griglia','Ctrl (Cmd su Mac)+← / Ctrl (Cmd su Mac)+→'],['Intensità su o giù di 5','+ / −'],['Intensità a un valore','0-9'],['Aggiungi una nota','Invio'],['Togli le note scelte','Canc'],['Proprietà esatte della nota','F2 o Alt+Invio'],['Ascolta o ferma la regione','Spazio'],['Ascolta la nota scelta','Maiusc+Spazio']]]],
  v:[['Sull’indicatore di riproduzione',[['Un fotogramma indietro o avanti','← →'],['Un secondo indietro o avanti','Maiusc+← / Maiusc+→'],['Cinque secondi indietro o avanti','PgSu / PgGiù'],['Taglio precedente o successivo','↑ / ↓'],['Pausa precedente o successiva nel parlato','Ctrl+← / Ctrl+→'],['Cambio di scena precedente o successivo','Ctrl+↑ / Ctrl+↓'],['Inizio o fine del montaggio','Home / Fine'],['Riproduci o pausa','Spazio'],['Riproduci solo l’elemento scelto','Maiusc+Spazio'],['Ascolta 2 secondi prima o dopo l’indicatore','P / D'],['Indietro di cinque secondi, pausa, avanti veloce (L di nuovo raddoppia la velocità)','J / K / L'],['Dividi la clip all’indicatore','S'],['Taglia inizio o fine della clip all’indicatore','Q / W'],['Zoom avanti, indietro, tutto','+ / − / 0']]],['Nelle tracce',[['Elemento precedente o successivo','← →'],['Primo o ultimo elemento','Home / Fine'],['Sposta l’elemento di un secondo indietro o avanti: le clip attaccate in quella direzione si spostano insieme','Ctrl+← / Ctrl+→'],['Sposta l’elemento di un fotogramma','Ctrl+Maiusc+← / Ctrl+Maiusc+→'],['Modifica le proprietà','Invio o F2'],['Elimina l’elemento','Canc'],['Menu dell’elemento','Maiusc+F10'],['Riproduci solo l’elemento scelto','Maiusc+Spazio'],['Traccia sopra o sotto','↑ / ↓']]],['Nella raccolta',[['Scegli un file','↑ ↓'],['Aggiungi alla linea temporale (l’audio all’indicatore)','Invio'],['Inserisci all’indicatore','Maiusc+Invio'],['Menu del file','Maiusc+F10'],['Togli dalla raccolta','Canc']]],['Nelle proprietà',[['Applica il valore scritto','Invio'],['Torna alla linea temporale senza applicare','Esc']]]]};
 function shortcutsHtml(){const m=state.mode[0],groups=new Map();for(const c of Object.values(C)){const k=keysOf(c);if(!k||!available(c))continue;if(!groups.has(c.cat))groups.set(c.cat,[]);groups.get(c.cat).push([c.label,k])}const table=(cap,rows,raw)=>`<table><caption>${esc(cap)}</caption><thead><tr><th scope="col">Azione</th><th scope="col">Tasti</th></tr></thead><tbody>${rows.map(([a,k])=>`<tr><th scope="row">${esc(a)}</th><td>${raw?esc(k):kbdHtml(k)}</td></tr>`).join('')}</tbody></table>`;return `<p>Scorciatoie per ${isAudio()?'Audio':'Video'}. Su Mac usa Cmd al posto di Ctrl. Puoi trovare ogni comando anche con <kbd>Alt</kbd>+<kbd>Q</kbd>.</p><div class="kcols">${[...STATIC_KEYS.g,...STATIC_KEYS[m]].map(([cap,rows])=>table(cap,rows,true)).join('')}${[...groups].map(([cap,rows])=>table(cap,rows)).join('')}</div>`}
 async function showShortcuts(){await modal('Scorciatoie da tastiera',shortcutsHtml(),[],'Chiudi',{noCancel:true,wide:true})}
-async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.20.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, Ctrl+/ elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio la registrazione ha il livello che si ascolta come impulsi (si spengono col metronomo), la banda giusta sul misuratore e una prova di tre secondi che dice il guadagno consigliato e lo applica con un clic; ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima e «Ascolta l’originale». Alt+Maiusc+D descrive il brano (tracce, regioni, spazi vuoti, sovrapposizioni e che cosa suona insieme), Alt+Maiusc+L legge i livelli: sulle tracce l’uscita del brano intorno all’indicatore, quanto lavora il limitatore e le tracce a confronto, nell’editor la selezione o il tratto intorno al cursore. Ogni effetto dice che cosa ha cambiato (volume percepito, picco, rumore di fondo), Normalizza dice anche da dove parte, e Alt+Maiusc+O fa sentire lo stesso tratto prima e dopo l’ultimo effetto. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli, lampeggiamenti pericolosi anche su una parte dello schermo e rossi, con tempo, zona e area, sottotitoli vuoti e parlato senza sottotitoli. Alt+Maiusc+I dice che cosa c’è nell’istante, compresi l’audio della traccia audio e le transizioni in corso; Alt+Maiusc+D descrive il fotogramma (luce, contrasto, colori, zone, bande nere, differenza dal fotogramma prima) e Alt+Maiusc+C la clip (scene, luce, colori, movimento e parlato). Sull’indicatore Ctrl+frecce sinistra e destra vanno alle pause del parlato e Ctrl+frecce su e giù ai cambi di scena; un sottotitolo aggiunto con Ctrl+Alt+S comincia alla ripresa del parlato, e i sottotitoli vuoti si possono preparare dal parlato. Nelle Proprietà i colori si dicono a parole, con il contrasto tra testo e sfondo, e ogni clip può avere una descrizione scritta, che si legge con lei.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; ogni traccia registra dall’ingresso che le si assegna (il predefinito di sistema o uno qualsiasi dei microfoni e degli ingressi connessi, scelto anche nel dialogo di registrazione) e porta una catena di componenti in ordine a scelta — compressore, equalizzatore parametrico, delay, riverbero, saturazione, stereo ampio — che vale anche per i bus e si sente nel mix esportato; tastiere, pedali e mixer MIDI comandano il trasporto e la traccia scelta, con l’assegnazione «Impara» nel menu Strumenti; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit con i metadati broadcast BWF, MP3 con i tag e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori; con un preset di consegna porta il brano a −23, −19, −16 o −14 LUFS e tiene il picco vero sotto −1 dBTP, poi dice nel report che cosa ha ottenuto. Converte più file in una volta, tiene take multiple con nota e comping a sezioni, automazione di volume, bilanciamento, riverbero, bassi, alti e compressione, bus, punch fra due punti, de-esser, de-hum, de-click, limitatore e una catena «prepara la voce».</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce sono solo audio (niente strumenti virtuali o MIDI), gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Le descrizioni delle immagini sono misure dei pixel (luce, colori, zone, movimento, tagli tra le scene): non riconoscono persone, oggetti o scritte e non sostituiscono una descrizione fatta da una persona; i cambi di scena graduali (dissolvenze lente) possono sfuggire. Le pause del parlato si riconoscono dal volume, quindi una musica forte sotto la voce le nasconde. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
+async function help(){await modal('Tassello Media',`<p><b>Tassello Media 1.21.0</b> fa parte di <b>Tassello</b>, una famiglia di piccoli strumenti liberi e gratuiti per lavorare sui propri file: un coltellino svizzero, ordinato e leggero. Sta in un solo file HTML che funziona nel browser anche senza rete, senza programmi da installare e senza account. Contiene due app: <b>Audio</b> per registrare, montare su più tracce e modificare suoni, musica e parlato, <b>Video</b> per montare filmati con titoli e sottotitoli. I file restano sul tuo computer.</p><p><b>Copia ufficiale:</b> scarica Tassello solo dal sito <b>svitatlco.github.io/tassello</b> o dalle release su GitHub (<b>github.com/svitaTLCO/tassello</b>). Se questo file ti è arrivato per email, in chat o su una chiavetta, scaricalo di nuovo da lì prima di usarlo; per far conoscere Tassello, condividi il link invece del file. Sul sito puoi controllare un file con la pagina Verifica. Questo programma non si collega a internet e non chiede mai password, account o pagamenti: una copia che lo fa non è quella ufficiale.</p><p><b>Cosa non è:</b> Tassello Media non sostituisce gli studi di registrazione e i programmi di montaggio professionali, e non è un clone delle app famose. Ha un disegno suo, con le funzioni che servono per il lavoro di tutti i giorni (un’intervista da ripulire, un podcast, un video per la scuola o per il lavoro) tutte raggiungibili da tastiera.</p><p><b>Accessibilità:</b> per Tassello non è un di più ma la condizione per distribuire ogni strumento: tutto si usa con uno screen reader e con la sola tastiera. F6 passa tra le aree, Alt+Q cerca qualsiasi comando, Ctrl+/ elenca le scorciatoie, Alt+Maiusc+I legge posizione e stato. In Audio la registrazione ha il livello che si ascolta come impulsi (si spengono col metronomo), la banda giusta sul misuratore e una prova di tre secondi che dice il guadagno consigliato e lo applica con un clic; ogni traccia è un elenco di regioni che si scorre con le frecce, con muto, solo, volume e bilanciamento etichettati; Invio apre la regione nell’editor, dove la forma d’onda è un cursore che si sposta con le frecce e fa ascoltare il punto in cui ti trovi; Ctrl+frecce salta da una pausa all’altra del parlato, P e D ascoltano prima e dopo il cursore, I e O fissano la selezione anche durante l’ascolto, e ogni effetto ha l’anteprima e «Ascolta l’originale». Alt+Maiusc+D descrive il brano (tracce, regioni, spazi vuoti, sovrapposizioni e che cosa suona insieme), Alt+Maiusc+L legge i livelli: sulle tracce l’uscita del brano intorno all’indicatore, quanto lavora il limitatore e le tracce a confronto, nell’editor la selezione o il tratto intorno al cursore. Ogni effetto dice che cosa ha cambiato (volume percepito, picco, rumore di fondo), Normalizza dice anche da dove parte, e Alt+Maiusc+O fa sentire lo stesso tratto prima e dopo l’ultimo effetto. In Video la linea temporale è fatta di tracce che si scorrono con le frecce, gli elementi si spostano di un secondo o di un fotogramma con Ctrl+frecce (una clip spinge con sé quelle attaccate nella stessa direzione e dall’altra parte lascia uno spazio vuoto), Alt+Maiusc+frecce cambia l’ordine delle clip, ogni proprietà si modifica con campi etichettati nel riquadro Proprietà, i sottotitoli si scrivono, importano ed esportano in SRT e VTT, e la verifica dell’accessibilità controlla sottotitoli, tempi di lettura, contrasto dei titoli, lampeggiamenti pericolosi anche su una parte dello schermo e rossi, con tempo, zona e area, sottotitoli vuoti e parlato senza sottotitoli. Alt+Maiusc+I dice che cosa c’è nell’istante, compresi l’audio della traccia audio e le transizioni in corso; Alt+Maiusc+D descrive il fotogramma (luce, contrasto, colori, zone, bande nere, differenza dal fotogramma prima) e Alt+Maiusc+C la clip (scene, luce, colori, movimento e parlato). Sull’indicatore Ctrl+frecce sinistra e destra vanno alle pause del parlato e Ctrl+frecce su e giù ai cambi di scena; un sottotitolo aggiunto con Ctrl+Alt+S comincia alla ripresa del parlato, e i sottotitoli vuoti si possono preparare dal parlato. Nelle Proprietà i colori si dicono a parole, con il contrasto tra testo e sfondo, e ogni clip può avere una descrizione scritta, che si legge con lei.</p><p><b>Audio:</b> progetto a più tracce con volume, bilanciamento, muto, solo, bassi, alti, compressione e riverbero per traccia; ogni traccia registra dall’ingresso che le si assegna (il predefinito di sistema o uno qualsiasi dei microfoni e degli ingressi connessi, scelto anche nel dialogo di registrazione) e porta una catena di componenti in ordine a scelta — compressore, equalizzatore parametrico, delay, riverbero, saturazione, stereo ampio — che vale anche per i bus e si sente nel mix esportato; tastiere, pedali e mixer MIDI comandano il trasporto e la traccia scelta, con l’assegnazione «Impara» nel menu Strumenti; regioni da spostare, accorciare, dividere, duplicare e ripetere; tempo, griglia a battute, metronomo, ciclo e registrazione sulla traccia mentre si ascoltano le altre; esporta il brano mixato, le tracce separate o il progetto in ZIP. L’editor della regione apre WAV, MP3, M4A, AAC, OGG, Opus, FLAC e l’audio dei video; taglia, copia, incolla, incolla mescolando, duplica, ritaglia, silenzia e inserisce silenzio; marcatori con nome che si salvano nel WAV e si esportano come testo; amplifica, normalizza, dissolvenze, al contrario, velocità, ritmo senza cambiare intonazione, equalizzatore con filtri, compressore, riduzione del rumore di fondo, accorcia le pause, eco, rimozione del DC, mono, stereo, scambio dei canali e frequenza di campionamento; statistiche con picco, volume medio e distorsioni; esporta WAV a 16, 24 o 32 bit con i metadati broadcast BWF, MP3 con i tag e, se il browser lo permette, M4A (AAC) o WebM (Opus), anche una parte per ogni tratto tra i marcatori; con un preset di consegna porta il brano a −23, −19, −16 o −14 LUFS e tiene il picco vero sotto −1 dBTP, poi dice nel report che cosa ha ottenuto. Converte più file in una volta, tiene take multiple con nota e comping a sezioni, automazione di volume, bilanciamento, riverbero, bassi, alti e compressione, bus, punch fra due punti, de-esser, de-hum, de-click, limitatore e una catena «prepara la voce».</p><p><b>Video:</b> importa video, audio e immagini; li monta su una traccia principale con divisione, tagli, spostamenti, velocità, volume, dissolvenze, transizioni (dissolvenza incrociata, passaggio al nero, tendina), filtri e regolazioni di luce e colore, rotazione e riflessione; aggiunge cartelli, titoli, una traccia audio per musica e voce fuori campo, sottotitoli; esporta il video in MP4 o WebM con i sottotitoli impressi se vuoi, solo l’audio, un fotogramma o i sottotitoli; salva il progetto in un unico file ZIP con i suoi file.</p><p><b>Privacy:</b> i file e le registrazioni restano nel browser e sul tuo computer. Il microfono si usa solo quando lo chiedi tu e la registrazione non lascia il dispositivo. Questo vale per la copia ufficiale: una copia modificata da altri può comportarsi in modo diverso.</p><p><b>Limiti:</b> Tassello Media copre il lavoro di base, non tutto. In Audio le tracce audio non hanno strumenti virtuali, le tracce MIDI mandano le note a un sintetizzatore esterno (non finiscono nel mix esportato e il file .mid si esporta a parte), hanno un editor delle note a tabella, l’orologio MIDI sincronizza un altro strumento e la calibrazione dell’ingresso compensa il ritardo delle note, gli effetti di traccia sono semplici e i progetti molto lunghi richiedono molta memoria; la registrazione usa una compensazione della latenza stimata, da regolare in Tempo se le parti registrate risultano in ritardo. In Video l’esportazione avviene in tempo reale, quindi dura quanto il montaggio, e va lasciata in primo piano; il formato MP4 dipende dal browser (Chrome ed Edge recenti), altrimenti si ottiene WebM; non ci sono fotogrammi chiave, più tracce video sovrapposte o correzione del colore avanzata; i formati che il browser non sa riprodurre non si possono importare. Le descrizioni delle immagini sono misure dei pixel (luce, colori, zone, movimento, tagli tra le scene): non riconoscono persone, oggetti o scritte e non sostituiscono una descrizione fatta da una persona; i cambi di scena graduali (dissolvenze lente) possono sfuggire. Le pause del parlato si riconoscono dal volume, quindi una musica forte sotto la voce le nasconde. Conserva sempre una copia degli originali.</p>`,[],'Chiudi',{noCancel:true})}
 // Aree raggiungibili con F6 e Maiusc+F6.
 let lastTrack='trk-main';
 function regions(){const l=[$('bar')];if(drawerName)l.push($('drawer'));const side=s=>panesOf(state.mode[0]).filter(id=>paneState(id).side===s).map(id=>{const st=paneState(id).st;return st==='open'?$(id):st==='tessera'?$(id+'Tes'):null});
@@ -1137,7 +1192,7 @@ const RIBBON={
   Effetti:[['Volume','amplify normalize fadeIn fadeOut'],['Tempo','speed tempo fitDuration reverse truncate'],['Voce','voiceChain deEsser deHum deClick'],['Pulizia','noiseGate captureNoise eq compressor limiter removeDC echo'],['Canali','toMono toStereo swapChannels'],['Formato','resample'],['Ripeti','repeatEffect']],
   Inserisci:[['Suoni','insertFile generate recordAudio'],['Marcatori','markerAdd markerPrev markerNext markerRename markerDelete markersClear'],['Automatici','markersFromPauses']],
   Analisi:[['Descrivi','describeSong readLevels compareFx'],['Misura','stats readLevel deliveryReport'],['Pause','prevPause nextPause pauseSettings'],['Distorsioni','findClip']],
-  Esporta:[['Brano','saveAudio exportStems saveAudioProject'],['Regione','exportParts'],['Conversione','batchConvert'],['Consegna','limiterAuto limiterToggle'],['Marcatori','exportLabels importLabels']],
+  Esporta:[['Brano','saveAudio exportStems exportMidi saveAudioProject'],['Regione','exportParts'],['Conversione','batchConvert'],['Consegna','limiterAuto limiterToggle'],['Marcatori','exportLabels importLabels']],
   Vista:[['Zoom','zoomIn zoomOut zoomFit zoomSel'],['Tasselli','toggleEditor markPane layoutMenu layoutReset'],['Mostra','follow snap'],['Tema','themeDark contrast'],['Guida','shortcuts palette help']]},
  v:{Inizio:[['Appunti','paste cut copy'],['File','importMedia addToTimeline'],['Montaggio','split trimStart trimEnd duplicateItem deleteItem'],['Posizione','moveEarlier swapPrev moveLater swapNext snap'],['Riproduzione','playPause stop vPlayItem vPlayBefore vPlayAfter prevEdit nextEdit'],['Cronologia','undo redo']],
   Inserisci:[['Testo','addTitle addSub addCard'],['Audio','recordVoice'],['File','importMedia']],
@@ -2583,7 +2638,7 @@ function bindDeliveryPreset(pane,opts){const pick=id=>pane.querySelector('#dlg_'
   if(d.bits&&opts.some(o=>o[0]===d.bits))set('fmt',d.bits);
   set('rate',d.rate||'auto');set('ch',d.ch||'auto');set('lufs',d.lufs);set('tp',d.tp);
   const dh=pick('dither');if(dh)dh.checked=!!d.dither;const bh=pick('bwf');if(bh)bh.checked=!!d.bwf;announce(d.label)})}
-async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.buf){toast('Il progetto è vuoto: niente da esportare');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
+async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.buf){toast('Il progetto è vuoto: niente da esportare');return}if(song&&!A.buf)midiExportNote();const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
  const opts=[['wav16','WAV 16 bit (qualità CD, per tutti i programmi)'],['wav24','WAV 24 bit (per altri programmi professionali)'],['wav32','WAV 32 bit in virgola mobile (senza perdite)'],['mp3','MP3 (per playout, telefonini e archivio)'],...(aac?[['aac','M4A con AAC (compresso, per telefoni e messaggi)']]:[]),...(opus?[['opus','WebM con Opus (compresso, molto leggero)']]:[])];
  const what=[...(song?[['song',`Il brano: tutte le tracce mixate (${fmtTime(projDur(),1)})`]]:[]),...(A.buf?[['region','Solo la regione nell’editor'+(A.region?` «${regionOf(A.region)?.name||''}»`:'')]]:[]),...(A.buf&&hasSel()?[['sel','Solo la selezione nell’editor']]:[])];
  const fmt=opts.some(o=>o[0]===prefs.audioFormat)?prefs.audioFormat:'wav16';
@@ -2614,7 +2669,7 @@ async function exportAudioDialog(){const song=P.regions.length>0;if(!song&&!A.bu
   const markers=r.fmt.startsWith('wav')?deliveryMarkers(r.what,base,base+src.length,out.sampleRate):[];
   let blob,meta;
   if(r.fmt==='mp3'){status('Codifica MP3…');blob=await mp3Blob(out,bitrate/1000,tags,progress);meta='ID3v2.3 con titolo, autore e descrizione'}
-  else if(r.fmt.startsWith('wav')){const bex=r.bwf?{description:r.comment.trim()||tags.title,originator:r.artist.trim()||'Tassello Media',reference:name,date:new Date(),loudness:{value:m.lufs,range:m.lra,truePeak:m.truePeak},codingHistory:`A=PCM,F=${out.sampleRate},W=${r.fmt.slice(3)},M=${out.numberOfChannels===1?'mono':'stereo'},T=Tassello Media 1.20.0`}:null;
+  else if(r.fmt.startsWith('wav')){const bex=r.bwf?{description:r.comment.trim()||tags.title,originator:r.artist.trim()||'Tassello Media',reference:name,date:new Date(),loudness:{value:m.lufs,range:m.lra,truePeak:m.truePeak},codingHistory:`A=PCM,F=${out.sampleRate},W=${r.fmt.slice(3)},M=${out.numberOfChannels===1?'mono':'stereo'},T=Tassello Media 1.21.0`}:null;
    blob=wavBlob(out,Number(r.fmt.slice(3)),markers,0,out.length,{dither:r.dither&&r.fmt==='wav16',bext:bex});meta=bex?'BWF bext con descrizione, autore e valori di volume':'nessuno'}
   else{blob=await compressedBlob(out,r.fmt,bitrate,progress,tags);meta=r.fmt==='aac'?'titolo, autore e descrizione nei tag del file':'il WebM non porta metadati'}
   return{blob,name,m,limited:prep.limited,content,meta,fmtLabel:deliveryFormatLabel(r.fmt,out.numberOfChannels,out.sampleRate,r.dither,bitrate/1000),plan,compressed:!r.fmt.startsWith('wav')}});
@@ -2635,6 +2690,71 @@ async function exportParts(){if(!A.buf){toast('Apri prima una regione nell’edi
 // {id,label} (o vecchio stile, una stringa): se l'id non risponde (scollegato, ZIP aperto su un'altra macchina) si
 // riprova con l'etichetta — due interfacce identiche hanno la stessa, si prende la prima e lo si dice — e in
 //ultima istanza si parte dal predefinito, avvisando; la preferenza si azzera solo se l'id veniva da lì.
+// ——— Registrazione MIDI ———
+// Non distruttiva: le note catturate diventano una regione nuova (predefinito) oppure si aggiungono alla regione
+// sotto l'indicatore (sovraincisione), sempre dentro un pCommit, quindi Ctrl+Z le toglie. Le note che cominciano
+// fino a un sedicesimo prima del via (o del punto A del punch) si tengono, portate a zero: il «perdona» all'attacco.
+function midiRecFinish(stopSec,reason){
+ const rec=MIDI.rec;if(!rec)return;MIDI.rec=null;
+ const t=rec.track;
+ if(!t||!P.tracks.includes(t)){announce('Registrazione MIDI scartata: la traccia non c’è più');return}
+ // Le note tenute fino al fermo si chiudono allo stop, con la stessa compensazione applicata agli ingressi.
+ const stopAdj=stopSec-(Number(prefs.midiComp)||0)/1000;
+ for(const n of rec.open.values()){n.end=stopAdj;rec.notes.push(n)}rec.open.clear();
+ for(const n of rec.sustained){n.end=stopAdj;rec.notes.push(n)}rec.sustained=[];
+ const sixteenth=beatDur()/4;
+ let start=rec.startProject,list=rec.notes,dropped=0;
+ if(rec.punch){start=rec.punch.a;list=list.filter(n=>n.start>=rec.punch.a-sixteenth&&n.start<rec.punch.b)}
+ else list=list.filter(n=>n.start>=start-sixteenth);
+ dropped=rec.notes.length-list.length;
+ if(!list.length){announce('Registrazione MIDI: nessuna nota dentro '+(rec.punch?'il punch':'il brano')+(dropped?`, ${dropped} fuori`:''));return}
+ const startT=midiTick(start),abs=list.map(n=>{const a=Math.max(startT,midiTick(n.start)),e=Math.max(a+1,midiTick(n.end));return{a,e,p:n.p,v:n.v}});
+ let made=null,added=0,excluded=0;
+ pCommit('Registrazione MIDI',()=>{
+  const r=rec.overdub?P.regions.find(x=>x.track===t.id&&x.kind==='midi'&&x.start<=start+1e-6&&x.start+x.dur>start):null;
+  if(r){
+   const relAll=abs.map(n=>({t:n.a-r.startT+r.offT,d:n.e-n.a,p:n.p,v:n.v})).filter(n=>n.t>=r.offT),
+    room=Math.max(0,2000-r.notes.length),rel=relAll.slice(0,room);
+   added=rel.length;excluded+=relAll.length-rel.length;
+   // Le note che c'erano restano tutte: si aggiungono solo le nuove che stanno nel limite, e si dice quante restano fuori.
+   if(excluded)toast(`${excluded} ${excluded===1?'nota nuova non aggiunta':'note nuove non aggiunte'}: la regione ha già ${r.notes.length} note`);
+   let maxEnd=r.offT+r.durT;
+   for(const n of rel)maxEnd=Math.max(maxEnd,n.t+n.d);
+   r.notes=[...r.notes,...rel].sort((a,b)=>a.t-b.t||a.p-b.p);
+   // La durata si allunga fino all'ultima nota, altrimenti le note nuove restano nascoste e sembrano perse.
+   const durT=Math.max(r.durT,maxEnd-r.offT);r.durT=durT;r.dur=midiSec(durT);
+   made=r;P.sel=r.id;P.track=t.id;
+  }else{
+   const notes=abs.map(n=>({t:n.a-startT,d:n.e-n.a,p:n.p,v:n.v}));
+   if(notes.length>2000)toast('Più di 2000 note: le eccedenti non sono state registrate');
+   const ref=notes.reduce((m,n)=>Math.max(m,n.t+n.d),0),durT=Math.max(MIDIPPQ*P.sig,Math.ceil(ref/MIDIPPQ)*MIDIPPQ);
+   made=newMidiRegion(t.id,startT,'Registrazione MIDI '+(P.regions.filter(x=>x.track===t.id&&x.kind==='midi').length+1));
+   made.notes=notes.slice(0,2000);made.durT=durT;made.dur=midiSec(durT);
+   P.regions.push(made);added=notes.length;P.sel=made.id;P.track=t.id;
+  }
+ },{live:true});
+ P.t=start;updateArrangeUI();focusLane(t.id);
+ const saved=rec.overdub?added:added;
+ announce((reason==='modifica'?`Registrazione MIDI conclusa per una modifica al progetto: ${saved} ${saved===1?'nota salvata':'note salvate'}`:
+  rec.overdub?`Registrazione MIDI: ${added} ${added===1?'nota aggiunta':'note aggiunte'} a «${made?.name||''}»${excluded?`, ${excluded} ${excluded===1?'nuova non aggiunta':'nuove non aggiunte'} perché la regione è piena`:''}`:
+  `Registrazione MIDI: ${added} note in una nuova regione «${made?.name||''}» da ${sayTime(start,2)}`)+(dropped&&reason!=='modifica'?`, ${dropped} fuori`:''));
+ return {saved,excluded,dropped};
+}
+// Avvio: conteggio, ascolto delle altre tracce, cattura. Si ferma con Ferma (mixStop chiude la registrazione).
+async function recordMidi(){
+ const t=selTrack();if(!t||t.kind!=='midi'){toast('Scegli una traccia MIDI per registrare le note');return}
+ if(MIDI.rec){toast('La registrazione MIDI è già in corso: ferma prima');return}
+ const ready=await midiStart({quiet:true}).catch(()=>false);
+ if(!ready||!midiInputs().length){announce('Nessun ingresso MIDI: collega una tastiera e riprova');return}
+ if(MIX.playing)mixStop(true);
+ if(P.countIn)await countIn();
+ const playFrom=P.t,punchOn=!!P.punch?.on,from=punchOn?Math.max(0,P.punch.a-punchPre()):playFrom;
+ mixPlay(from,{recording:true,origin:playFrom});
+ const pass=MIX.passes[0];
+ MIDI.rec={track:t,a:from,w:pass?.w??MIX.c0,k:midiStampBase(),startProject:playFrom,punch:punchOn?{a:P.punch.a,b:P.punch.b}:null,notes:[],open:new Map(),pedal:false,sustained:[],overdub:!!prefs.midiOverdub};
+ MIDI.lastAt=0;
+ announce(`Registrazione MIDI su «${t.name}»${MIDI.rec.overdub?', sovraincidendo':''}.${punchOn?` Punch da ${sayTime(P.punch.a,1)} a ${sayTime(P.punch.b,1)}.`:''} Le note che suoni vanno nella traccia; ferma con Ferma.`);
+}
 const recConstraints=id=>({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,...(id?{deviceId:{exact:id}}:{})}});
 async function recOpen(dev,{track=null}={}){const id=typeof dev==='object'?dev?.id:dev;
  if(!id)return navigator.mediaDevices.getUserMedia(recConstraints());
@@ -2762,12 +2882,30 @@ const regionsOn=tid=>P.regions.filter(r=>r.track===tid).sort((a,b)=>a.start-b.st
 const regionEnd=r=>r.start+r.dur;
 const projDur=()=>P.regions.reduce((t,r)=>Math.max(t,regionEnd(r)),0);
 const beatDur=()=>60/P.bpm,barDur=()=>beatDur()*P.sig;
+// Le note MIDI stanno in tick interi a 480 per semiminima (PPQ): il giro con i file .mid diventa esatto, i
+// confronti sono fra interi e non esiste una «nota libera» da tenere a posto. Le regioni MIDI hanno la verità nei
+// tick (startT, durT, offT) e uno specchio in secondi (start, dur, off), tenuto allineato in pCommit: così tutto il
+// codice di spostamento, taglio, divisione e ciclo continua a lavorare in secondi senza sapere dei tick, e
+// cambiare tempo allunga le note insieme alla griglia invece di staccarle.
+const MIDIPPQ=480,midiSecBpm=(t,bpm)=>t*60/(bpm*MIDIPPQ),midiTickBpm=(s,bpm)=>Math.round(s*MIDIPPQ*bpm/60);
+const midiSec=t=>midiSecBpm(t,P.bpm),midiTick=s=>midiTickBpm(s,P.bpm);
+// Sincronizzazione dello specchio: con toTicks i secondi diventano tick (arrotondati) e poi si ricalcolano i
+// secondi, così una regione spostata o tagliata resta agganciata alla griglia; senza, i tick sono già verità e si
+// ricalcolano solo i secondi (per esempio dopo un cambio di tempo).
+function syncMidiRegions(bpm=P.bpm,toTicks=false){for(const r of P.regions)if(r.kind==='midi'){
+ if(toTicks){r.startT=Math.max(0,Math.round(midiTickBpm(r.start,bpm)));r.durT=Math.max(1,Math.round(midiTickBpm(r.dur,bpm)));r.offT=Math.max(0,Math.round(midiTickBpm(r.off,bpm)))}
+ r.start=midiSecBpm(r.startT,bpm);r.dur=midiSecBpm(r.durT,bpm);r.off=midiSecBpm(r.offT,bpm)}}
+// Una regione MIDI non ha un suono dentro: i comandi che leggono il buffer (forma d'onda, dissolvenze, take,
+// comping) si fermano qui con un messaggio chiaro invece di fallire più avanti o mostrare un editor vuoto.
+function regionAvailable(r){if(r?.kind!=='midi')return true;toast('Non disponibile per una regione MIDI');return false}
 const gridStep=()=>P.grid==='beats'?beatDur():1;
 const fineStep=()=>P.grid==='beats'?beatDur()/4:0.01;
 const selRegion=()=>P.sel?regionOf(P.sel):null;
 const selTrack=()=>trackOf(P.track)||P.tracks[0]||null;
 const audioModified=()=>P.regions.length>0&&P.version!==P.exported;
-function newTrack(name){const n=P.tracks.length;return{id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0,duck:0,voice:false,kind:'audio',out:null,input:null,chain:[],auto:{vol:[],pan:[],reverb:[],low:[],high:[],comp:[]},autoOn:{vol:false,pan:false,reverb:false,low:false,high:false,comp:false}}}
+function newTrack(name,kind='audio'){const n=P.tracks.length,t={id:uid(),name:name||`Traccia ${n+1}`,color:TRACK_COLORS[n%TRACK_COLORS.length][0],vol:0,pan:0,mute:false,solo:false,low:0,high:0,comp:0,reverb:0,duck:0,voice:false,kind:kind==='midi'?'midi':kind==='bus'?'bus':'audio',out:null,input:null,chain:[],auto:{vol:[],pan:[],reverb:[],low:[],high:[],comp:[]},autoOn:{vol:false,pan:false,reverb:false,low:false,high:false,comp:false}};
+ if(t.kind==='midi'){t.midiOut=null;t.midiCh=1;t.program=null;t.arm=false}
+ return t}
 function addSource(buf){const id=uid();SOURCES.set(id,buf);dirtySources.add(id);return id}
 // Moduli della catena: ai controlli fissi della traccia (bassi, alti, compressione) si aggiungono questi componenti,
 // in ordine a scelta. Ogni tipo dichiara i suoi parametri come [minimo, massimo, predefinito]; il motore li costruisce
@@ -2781,19 +2919,28 @@ const CHAIN_TYPES={
  wide:{name:'Stereo ampio',params:{wide:[0,100,60]}}};
 const chainParams=m=>{const out={};for(const [k,[lo,hi,def]] of Object.entries(CHAIN_TYPES[m.tipo].params))out[k]=clamp(Number(m.params?.[k]??def),lo,hi);return out};
 function newRegion(track,src,start,name){return{id:uid(),track,src,off:0,dur:SOURCES.get(src).duration,start:Math.max(0,start),gain:0,fadeIn:0,fadeOut:0,name:name||'Regione',gainAuto:[],gainOn:false,markers:[]}}
+// Regione MIDI: tutto in tick, con una lunghezza di partenza di una battuta. Le note sono relative all'inizio.
+function newMidiRegion(track,startT,name){const s=Math.max(0,Math.round(startT)),d=MIDIPPQ*P.sig;return{id:uid(),track,kind:'midi',startT:s,durT:d,offT:0,start:midiSec(s),dur:midiSec(d),off:0,name:name||'Regione MIDI',notes:[]}}
 // Cronologia del progetto: istantanee di tracce e regioni. L'editor della regione ha la sua cronologia, più fine.
 const pSnap=()=>JSON.stringify({title:P.title,tracks:P.tracks,regions:P.regions,bpm:P.bpm,sig:P.sig,grid:P.grid,cycle:P.cycle});
-function pCommit(label,fn,opts={}){const before=pSnap(),r=fn(),after=pSnap();if(before===after)return r;lastScope='project';phist.push({label,before,after,sel:P.sel});if(phist.length>150)phist.shift();predo=[];projectChanged(opts);return r}
+function pCommit(label,fn,opts={}){const before=pSnap(),bpm0=P.bpm,r=fn();
+ // Le regioni MIDI: se il tempo è cambiato ricalcolo i secondi dai tick, altrimenti aggancio i tick ai secondi
+ // (la modifica è arrivata in secondi) e ricalcolo i secondi. Prima dell'istantanea, così la cronologia è coerente.
+ syncMidiRegions(P.bpm,P.bpm===bpm0);
+ // Se durante l'ascolto una traccia MIDI diventa muta o esce dal solo, le sue note aperte si spengono subito:
+ // il note off programmato non arriverebbe più perché la traccia non è più udibile.
+ if(MIX.playing)midiKillInaudible();
+ const after=pSnap();if(before===after)return r;lastScope='project';phist.push({label,before,after,sel:P.sel});if(phist.length>150)phist.shift();predo=[];projectChanged(opts);return r}
 function pUndo(redoing){const from=redoing?predo:phist,to=redoing?phist:predo;if(!from.length){toast(redoing?'Niente da ripetere':'Niente da annullare');return}mixStop(true);const e=from.pop();Object.assign(P,JSON.parse(redoing?e.after:e.before));to.push(e);if(!P.sel)P.sel=e.sel;projectChanged();announce((redoing?'Ripetuto: ':'Annullato: ')+e.label)}
 // Dopo ogni modifica: l'editor segue la sua regione, la vista si ridisegna, la riproduzione si aggiorna.
-function projectChanged({live=false}={}){P.version++;if(P.sel&&!regionOf(P.sel))P.sel=null;if(!trackOf(P.track))P.track=P.tracks[0]?.id||null;checkEditorBinding();renderArrange();updateArrangeUI();if(MIX.playing){live?mixLive():mixRestart()}schedulePersist('audio')}
+function projectChanged({live=false}={}){P.version++;if(P.sel&&!regionOf(P.sel))P.sel=null;if(!trackOf(P.track))P.track=P.tracks[0]?.id||null;checkEditorBinding();midiEditorSync();renderArrange();updateArrangeUI();if(MIX.playing){live?mixLive():mixRestart()}schedulePersist('audio')}
 // Editor della regione. Si apre su una copia del tratto della regione; alla prima modifica la regione riceve un suono
 // tutto suo (gli altri usi dello stesso suono, per esempio una regione duplicata, non cambiano).
-function openRegion(r,{focus=true,quiet=false}={}){const src=SOURCES.get(r.src);if(!src){toast('L’audio di questa regione non è disponibile');return false}stopPlayback(false);
+function openRegion(r,{focus=true,quiet=false}={}){if(r?.kind==='midi')return midiEditorOpen(r,{focus,quiet});midiEditorClose();if(!regionAvailable(r))return false;const src=SOURCES.get(r.src);if(!src){toast('L’audio di questa regione non è disponibile');return false}stopPlayback(false);
  const rate=src.sampleRate,a=clamp(Math.round(r.off*rate),0,src.length-1),b=clamp(a+Math.round(r.dur*rate),a+1,src.length);
  A.region=null;setAudioDoc(copyRange(src,a,b),{title:r.name,markers:(r.markers||[]).map(m=>({...m}))});A.region=r.id;A.own=null;A.bound={src:r.src,off:r.off,dur:r.dur};
  showEditor(true);updateEditorBar();if(focus)$('wave').focus();if(!quiet)announce(`Editor: regione «${r.name}» della traccia «${trackOf(r.track)?.name||''}», ${sayTime(r.dur)}`);return true}
-function closeRegionEditor(){A.region=null;A.own=null;A.bound=null;setAudioDoc(null,{title:'',markers:[]});updateEditorBar()}
+function closeRegionEditor(){midiEditorClose();A.region=null;A.own=null;A.bound=null;setAudioDoc(null,{title:'',markers:[]});updateEditorBar()}
 function regionFromEditor(){const r=regionOf(A.region);if(!r)return;
  if(!A.buf){P.regions=P.regions.filter(x=>x!==r);A.region=null;A.bound=null;projectChanged();updateEditorBar();announce('Eliminato tutto l’audio: la regione è rimasta vuota ed è stata tolta dalla traccia');return}
  A.own??=uid();SOURCES.set(A.own,A.buf);dirtySources.add(A.own);Object.assign(r,{src:A.own,off:0,dur:A.buf.duration,markers:A.markers.map(m=>({...m}))});A.bound={src:r.src,off:0,dur:r.dur};projectChanged();updateEditorBar()}
@@ -2818,24 +2965,44 @@ async function newAudioProject(){if(audioModified()&&!(await confirmAction('Il p
  mixStop(false);closeRegionEditor();SOURCES.clear();dirtySources.clear();phist=[];predo=[];Object.assign(P,{title:'Audio1',tracks:[],regions:[],sel:null,track:null,t:0,cycle:{on:false,a:0,b:0}});P.exported=P.version+1;projectChanged();$('docTitle').value=P.title;updateTitle();announce('Nuovo progetto audio vuoto: registra o importa un file')}
 // Pulizia di bozze e progetti aperti da file: ogni valore viene controllato prima di entrare nel progetto.
 function cleanAudioProject(p){const n=(v,d,lo=-Infinity,hi=Infinity)=>Number.isFinite(Number(v))?clamp(Number(v),lo,hi):d,s=(v,l=200)=>String(v??'').slice(0,l),col=v=>/^#[0-9a-f]{6}$/i.test(v)?v:null,arr=v=>Array.isArray(v)?v.slice(0,2000):[];
- const pts=(v,lo,hi)=>arr(v).filter(x=>Number.isFinite(Number(x?.t))&&Number.isFinite(Number(x?.v))).map(x=>({t:clamp(Number(x.t),0,86400),v:clamp(Number(x.v),lo,hi)})).sort((a,b)=>a.t-b.t).slice(0,500);
- const tracks=arr(p?.tracks).filter(t=>t&&t.id).map((t,i)=>{const a=t.auto&&typeof t.auto==='object'?t.auto:{};
-  return{id:s(t.id,40),name:s(t.name||`Traccia ${i+1}`,80),color:col(t.color)||TRACK_COLORS[i%8][0],vol:n(t.vol,0,-60,12),pan:n(t.pan,0,-1,1),mute:!!t.mute,solo:!!t.solo,low:n(t.low,0,-15,15),high:n(t.high,0,-15,15),comp:n(t.comp,0,0,100),reverb:n(t.reverb,0,0,100),duck:n(t.duck,0,0,18),voice:!!t.voice,kind:t.kind==='bus'?'bus':'audio',out:t.out?String(t.out).slice(0,40):null,
+ const pts=(v,lo,hi)=>arr(v).filter(x=>Number.isFinite(Number(x?.t))&&Number.isFinite(Number(x?.v))).map(x=>({t:clamp(Number(x.t),0,86400),v:clamp(Number(x.v),lo,hi)})).sort((a,b)=>a.t-b.t).slice(0,500),bpm=n(p?.bpm,120,30,300);
+ const tracks=arr(p?.tracks).filter(t=>t&&t.id).map((t,i)=>{const a=t.auto&&typeof t.auto==='object'?t.auto:{},kind=t.kind==='midi'?'midi':t.kind==='bus'?'bus':'audio';
+  const tr={id:s(t.id,40),name:s(t.name||`Traccia ${i+1}`,80),color:col(t.color)||TRACK_COLORS[i%8][0],vol:n(t.vol,0,-60,12),pan:n(t.pan,0,-1,1),mute:!!t.mute,solo:!!t.solo,low:n(t.low,0,-15,15),high:n(t.high,0,-15,15),comp:n(t.comp,0,0,100),reverb:n(t.reverb,0,0,100),duck:n(t.duck,0,0,18),voice:!!t.voice,kind,out:t.out?String(t.out).slice(0,40):null,
    // L'ingresso della registrazione: id ed etichetta del dispositivo, perché l'id cambia tra origini e macchine e
    // l'etichetta resta il modo per ritrovarlo. Vecchio formato (sola stringa) → id solo; id vuoto → niente.
    input:(()=>{if(!t.input)return null;const o=typeof t.input==='object'?t.input:{id:t.input,label:''},id=s(o.id||'',64);return id?{id,label:s(o.label||'',80)}:null})(),
-   // I moduli della catena: solo tipi noti, parametri in gamma, al massimo otto per traccia.
-   chain:arr(t.chain).filter(m=>m&&CHAIN_TYPES[m.tipo]).slice(0,8).map(m=>({id:s(m.id||uid(),10),tipo:m.tipo,params:chainParams(m)})),
+   // I moduli della catena: solo tipi noti, parametri in gamma, al massimo otto per traccia. Su una traccia MIDI i componenti audio non c'entrano: il suono sta sul synth a valle, quindi la catena resta vuota.
+   chain:kind==='midi'?[]:arr(t.chain).filter(m=>m&&CHAIN_TYPES[m.tipo]).slice(0,8).map(m=>({id:s(m.id||uid(),10),tipo:m.tipo,params:chainParams(m)})),
    // I punti di volume e bilanciamento delle versioni 1.10-1.15 entrano nel nuovo elenco unico.
    auto:{vol:pts(a.vol??t.volAuto,-60,12),pan:pts(a.pan??t.panAuto,-1,1),reverb:pts(a.reverb,0,100),low:pts(a.low,-15,15),high:pts(a.high,-15,15),comp:pts(a.comp,0,100)},
-   autoOn:{vol:!!t.autoOn?.vol,pan:!!t.autoOn?.pan,reverb:!!t.autoOn?.reverb,low:!!t.autoOn?.low,high:!!t.autoOn?.high,comp:!!t.autoOn?.comp}}});
+   autoOn:{vol:!!t.autoOn?.vol,pan:!!t.autoOn?.pan,reverb:!!t.autoOn?.reverb,low:!!t.autoOn?.low,high:!!t.autoOn?.high,comp:!!t.autoOn?.comp}};
+  if(kind==='midi'){tr.input=null;
+   // Porta di uscita: id ed etichetta, come per l'ingresso audio; se l'id non c'è più su questa macchina si
+   // ritrova la porta per etichetta, perché l'id MIDI cambia tra origini del browser e macchine.
+   tr.midiOut=(()=>{if(!t.midiOut)return null;const o=typeof t.midiOut==='object'?t.midiOut:{id:t.midiOut,name:''},id=s(o.id||'',64);return id?{id,name:s(o.name||'',80)}:null})();
+   tr.midiCh=clamp(Math.round(Number(t.midiCh))||1,1,16);
+   const pr=Number(t.program);tr.program=t.program!=null&&t.program!==''&&Number.isFinite(pr)?clamp(Math.round(pr),0,127):null;
+   // Armatura: la traccia scelta ascolta l'ingresso MIDI (MIDI thru) senza registrare.
+   tr.arm=!!t.arm}
+  return tr});
  // Uscite: solo verso un bus che esiste, mai verso sé stessi e mai un giro chiuso.
  {const byId=new Map(tracks.map(t=>[t.id,t]));for(const t of tracks){if(t.out&&(!byId.has(t.out)||t.out===t.id||byId.get(t.out).kind!=='bus'))t.out=null;
   const seen=new Set([t.id]);let x=t,d=0;while(x?.out){if(seen.has(x.out)){t.out=null;break}seen.add(x.out);if(++d>6){t.out=null;break}x=byId.get(x.out)}}}
  const ids=new Set(tracks.map(t=>t.id));
- const regions=arr(p?.regions).filter(r=>r&&ids.has(r.track)&&r.src).map(r=>({id:s(r.id||uid(),40),track:s(r.track,40),src:s(r.src,40),off:n(r.off,0,0),dur:n(r.dur,0,0),start:n(r.start,0,0),gain:n(r.gain,0,-60,24),fadeIn:n(r.fadeIn,0,0,600),fadeOut:n(r.fadeOut,0,0,600),gainAuto:pts(r.gainAuto,-60,24).map(p=>({t:clamp(p.t,0,Math.max(0.01,n(r.dur,0,0))),v:p.v})),gainOn:!!r.gainOn,name:s(r.name||'Regione',120),takes:arr(r.takes).filter(t=>t&&t.src).map(t=>({id:s(t.id||uid(),40),src:s(t.src,40),off:n(t.off,0,0),dur:n(t.dur,0,0),name:s(t.name||'Take',120),note:s(t.note||'',200)})).slice(0,20),comp:arr(r.comp).filter(c=>c&&c.take&&Number.isFinite(Number(c.from))&&Number.isFinite(Number(c.to))).map(c=>({from:clamp(Number(c.from),0,86400),to:clamp(Number(c.to),0,86400),take:s(c.take,40)})).filter(c=>c.to>c.from).sort((a,b)=>a.from-b.from).slice(0,200),markers:arr(r.markers).filter(m=>Number.isFinite(m?.pos)).map(m=>({id:s(m.id||uid(),40),pos:Math.max(0,Math.round(m.pos)),label:s(m.label)}))})).filter(r=>r.dur>0);
+ const regions=arr(p?.regions).filter(r=>r&&ids.has(r.track)).flatMap(r=>{
+  // Regioni MIDI: griglia in tick, note intere e ordinate per inizio; la durata è in tick e il taglio iniziale
+  // (offT) resta dentro la regione. Le note fuori dai limiti del .mid o della regione si scartano.
+  if(r.kind==='midi'){const durT=Math.round(Number(r.durT));if(!(durT>0))return[];
+   // Le note oltre la fine della regione si tengono: accorciare la regione non distrugge il contenuto, come per
+   // l'audio, e riallungandola le note tornano. La riproduzione suona solo la finestra [offT, offT+durT).
+   const startT=Math.max(0,Math.round(Number(r.startT))||0),offT=clamp(Math.round(Number(r.offT))||0,0,1e7),
+    notes=arr(r.notes).filter(x=>x&&[x.t,x.d,x.p,x.v].every(v=>Number.isFinite(Number(v)))).map(x=>({t:Math.round(Number(x.t)),d:Math.round(Number(x.d)),p:Math.round(Number(x.p)),v:Math.round(Number(x.v))})).filter(x=>x.t>=0&&x.d>0&&x.p>=0&&x.p<=127&&x.v>=1&&x.v<=127).sort((a,b)=>a.t-b.t||a.p-b.p).slice(0,2000);
+   // Lo specchio in secondi si ricava dai tick con il tempo del progetto che si sta aprendo.
+   return[{id:s(r.id||uid(),40),track:s(r.track,40),kind:'midi',startT,durT,offT,start:midiSecBpm(startT,bpm),dur:midiSecBpm(durT,bpm),off:midiSecBpm(offT,bpm),name:s(r.name||'Regione MIDI',120),notes}]}
+  if(!r.src)return[];
+  return[{id:s(r.id||uid(),40),track:s(r.track,40),src:s(r.src,40),off:n(r.off,0,0),dur:n(r.dur,0,0),start:n(r.start,0,0),gain:n(r.gain,0,-60,24),fadeIn:n(r.fadeIn,0,0,600),fadeOut:n(r.fadeOut,0,0,600),gainAuto:pts(r.gainAuto,-60,24).map(p=>({t:clamp(p.t,0,Math.max(0.01,n(r.dur,0,0))),v:p.v})),gainOn:!!r.gainOn,name:s(r.name||'Regione',120),takes:arr(r.takes).filter(t=>t&&t.src).map(t=>({id:s(t.id||uid(),40),src:s(t.src,40),off:n(t.off,0,0),dur:n(t.dur,0,0),name:s(t.name||'Take',120),note:s(t.note||'',200)})).slice(0,20),comp:arr(r.comp).filter(c=>c&&c.take&&Number.isFinite(Number(c.from))&&Number.isFinite(Number(c.to))).map(c=>({from:clamp(Number(c.from),0,86400),to:clamp(Number(c.to),0,86400),take:s(c.take,40)})).filter(c=>c.to>c.from).sort((a,b)=>a.from-b.from).slice(0,200),markers:arr(r.markers).filter(m=>Number.isFinite(m?.pos)).map(m=>({id:s(m.id||uid(),40),pos:Math.max(0,Math.round(m.pos)),label:s(m.label)}))}];}).filter(r=>r.kind==='midi'||r.dur>0);
  for(const r of regions)r.comp=(r.comp||[]).filter(c=>r.takes.some(t=>t.id===c.take));
- return{title:s(p?.title||'Audio1',120),bpm:n(p?.bpm,120,30,300),sig:[2,3,4,5,6,7].includes(Number(p?.sig))?Number(p.sig):4,grid:p?.grid==='beats'?'beats':'time',metro:!!p?.metro,countIn:!!p?.countIn,cycle:{on:!!p?.cycle?.on,a:n(p?.cycle?.a,0,0),b:n(p?.cycle?.b,0,0)},punch:{on:!!p?.punch?.on,a:n(p?.punch?.a,0,0),b:n(p?.punch?.b,0,0),pre:p?.punch?.pre==='bar'?'bar':n(p?.punch?.pre,2,0,5)},limiter:{on:!!p?.limiter?.on,ceil:pts(p?.limiter?.ceil,-20,0)},latency:p?.latency==='auto'||p?.latency==null?'auto':n(p.latency,0,0,1000),tracks,regions,sel:null,track:tracks[0]?.id||null,t:n(p?.t,0,0),pxs:n(p?.pxs,40,1,2000)}}
+ return{title:s(p?.title||'Audio1',120),bpm,sig:[2,3,4,5,6,7].includes(Number(p?.sig))?Number(p.sig):4,grid:p?.grid==='beats'?'beats':'time',metro:!!p?.metro,countIn:!!p?.countIn,cycle:{on:!!p?.cycle?.on,a:n(p?.cycle?.a,0,0),b:n(p?.cycle?.b,0,0)},punch:{on:!!p?.punch?.on,a:n(p?.punch?.a,0,0),b:n(p?.punch?.b,0,0),pre:p?.punch?.pre==='bar'?'bar':n(p?.punch?.pre,2,0,5)},limiter:{on:!!p?.limiter?.on,ceil:pts(p?.limiter?.ceil,-20,0)},latency:p?.latency==='auto'||p?.latency==null?'auto':n(p.latency,0,0,1000),tracks,regions,sel:null,track:tracks[0]?.id||null,t:n(p?.t,0,0),pxs:n(p?.pxs,40,1,2000)}}
 const projectData=()=>({title:P.title,bpm:P.bpm,sig:P.sig,grid:P.grid,metro:P.metro,countIn:P.countIn,cycle:P.cycle,punch:P.punch,limiter:P.limiter,latency:P.latency,tracks:P.tracks,regions:P.regions,t:P.t,pxs:P.pxs});
 // Bozza: progetto e stato dell'editor a ogni modifica; i suoni solo quando sono nuovi o cambiati.
 // Un suono entra nella bozza come un unico Blob con i canali uno dopo l'altro: il browser lo scrive senza bloccare
@@ -2858,7 +3025,7 @@ async function restoreAudio(){let meta=await dbGet('audio-project');
 async function gcSources(){try{const used=new Set(P.regions.flatMap(r=>regionSources(r).map(id=>'asrc:'+id)));for(const k of await dbKeys())if(String(k).startsWith('asrc:')&&!used.has(k))await dbDel(k)}catch(e){}}
 // Progetto in un file: ZIP con progetto-audio.json e un WAV per ogni suono (32 bit in virgola mobile, senza perdite).
 async function saveAudioProjectZip(){if(!P.tracks.length){toast('Il progetto è vuoto');return}const used=[...new Set(P.regions.flatMap(regionSources))].filter(id=>SOURCES.has(id));
- const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.20.0',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
+ const files=[{name:'progetto-audio.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.21.0',progetto:projectData()},null,1)},...used.map(id=>({name:`audio/${id}.wav`,data:wavBlob(SOURCES.get(id),32)}))];
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(P.title+' (progetto audio)','zip'));P.exported=P.version;schedulePersist('audio');toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Audio`)}
 async function openAudioProjectZip(entries){let data;try{data=JSON.parse(await entries['progetto-audio.json'].text())}catch(e){toast('Il file progetto-audio.json è danneggiato');return}
  if(audioModified()&&!(await confirmAction('Aprendo il progetto sostituisci quello attuale. Continuare?','Apri')))return;const p=cleanAudioProject(data.progetto||data),bufs=new Map();
@@ -2890,7 +3057,11 @@ function autoValueAt(points,t){if(!points?.length)return null;if(t<=points[0].t)
  const a=points[lo],b=points[hi],k=(t-a.t)/((b.t-a.t)||1);return a.v+(b.v-a.v)*k}
 // Riverbero: risposta all'impulso generata (rumore che si spegne in 2,4 secondi), una per contesto audio.
 const IR=new WeakMap();
-function impulse(ctx){let b=IR.get(ctx);if(b)return b;const n=Math.round(ctx.sampleRate*2.4);b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.5)}IR.set(ctx,b);return b}
+// Il riverbero di fondo: risposta all'impulso a decadimento rapido, in cache per contesto. Il rumore non viene
+// da Math.random ma da un generatore con seme fisso (mulberry32): così il mix esportato è riproducibile, due
+// render dello stesso progetto danno lo stesso file, e la verifica di regressioni sui confronta gli sha.
+function mulberry32(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function impulse(ctx){let b=IR.get(ctx);if(b)return b;const n=Math.round(ctx.sampleRate*2.4),r=mulberry32(20260501);b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(r()*2-1)*Math.pow(1-i/n,3.5)}IR.set(ctx,b);return b}
 // ——— Moduli della catena. Ogni modulo ha un ingresso, un'uscita e i nodi interni: wire() (ri)collega i fili interni,
 // set() aggiorna i parametri sui nodi che esistono già, così un cambio di valore non ricostruisce nulla. La curva
 // della saturazione è in cache per intensità: generarla è caro e i valori sono pochi.
@@ -3009,8 +3180,8 @@ function voiceWindowLevels(id,from,to){const n=Math.max(1,Math.ceil((to-from)/DU
    for(const d of chans)for(let j=s0;j<s1;j++){const v=d[j]<0?-d[j]:d[j];if(v>pk)pk=v}
    if(pk>0)lv[w]=Math.max(lv[w],20*Math.log10(pk))}}
  return lv}
-function duckGains(from,to){const out=new Map(),voice=P.tracks.find(t=>t.voice&&audible(t));if(!voice)return out;
- const targets=P.tracks.filter(t=>t.id!==voice.id&&t.duck>0&&audible(t));if(!targets.length)return out;
+function duckGains(from,to){const out=new Map(),voice=P.tracks.find(t=>t.kind==='audio'&&t.voice&&audible(t));if(!voice)return out;
+ const targets=P.tracks.filter(t=>t.kind==='audio'&&t.id!==voice.id&&t.duck>0&&audible(t));if(!targets.length)return out;
  const lv=voiceWindowLevels(voice.id,from,to),n=lv.length,ordered=Array.from(lv).sort((a,b)=>a-b),
   thr=clamp((ordered[Math.min(n-1,Math.floor(n*0.95))]??-120)-30,-55,-30),
   att=1-Math.exp(-DUCK_STEP/0.06),rel=1-Math.exp(-DUCK_STEP/0.35);
@@ -3035,28 +3206,118 @@ function mixOut(){const ctx=actxGet();if(!MIX.out){MIX.out=ctx.createGain();MIX.
 // del metronomo; l'indicatore si ridisegna a ogni fotogramma.
 const cycleOn=()=>{const c=P.cycle;return c.on&&c.b>c.a+0.05&&!MIX.recording};
 const cycleKey=()=>cycleOn()?P.cycle.a+':'+P.cycle.b:'';
-function addPass(a,b,w){MIX.passes.push({a,b,w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}));scheduleTrackAuto(actx,MIX.graph,a,w,b);scheduleLimiter(actx,MIX.graph,a,w,b)}
+// MIDI: le note si mandano a finestra, non tutte insieme. Lo stesso timer del brano (ogni 25 ms) manda solo le note
+// che cadono nei prossimi 100 ms; al fermo si smette di accodare e il panic spegne quelle rimaste. MIDIOutput.clear()
+// non esiste in Chrome: una nota già accodata suonerebbe anche dopo lo stop.
+const MIDI_AHEAD=0.1;
+// La base per convertire un istante del contesto audio in un timestamp per MIDIOutput. getOutputTimestamp dà già la
+// coppia (contextTime che si sta sentendo, performanceTime in cui lo si sente): la latenza di uscita è dentro, quindi
+// NON si somma (con le cuffie Bluetooth, 150-250 ms, la nota arriverebbe in ritardo di altrettanto). La latenza entra
+// solo nel ripiego con performance.now(), dove il contesto non dice quando l'audio esce davvero.
+function midiStampBase(){const ctx=actx,ts=ctx.getOutputTimestamp?.();
+ if(ts&&ts.performanceTime>0)return ts.performanceTime-ts.contextTime*1000;
+ const lat=ctx.outputLatency||ctx.baseLatency||0;
+ return performance.now()+(lat-ctx.currentTime)*1000}
+// Eventi MIDI di una finestra del brano [from, to): le note che iniziano o finiscono nella finestra. La posizione
+// della regione si legge dallo specchio in secondi; solo i tick delle note si convertono col BPM, così durante un
+// trascinamento (che sta fuori da pCommit) non si suona nella posizione vecchia.
+function midiWindow(from,to){const out=[];if(!(to>from))return out;
+ for(const t of P.tracks){if(t.kind!=='midi')continue;
+  // I note on solo per le tracce udibili (muto e solo); i note off sempre, altrimenti mutando una traccia a metà
+  // nota il suo off non partirebbe più e la nota resterebbe bloccata.
+  const on=audible(t);
+  for(const r of P.regions){if(r.track!==t.id||r.kind!=='midi')continue;
+   const rs=r.start,re=r.start+r.dur;if(re<=from||rs>=to)continue;
+   for(const n of r.notes||[]){if(n.t<r.offT)continue;
+    const s=rs+midiSec(n.t)-r.off;if(s<rs-1e-9||s>=re-1e-4)continue;
+    const e=Math.min(rs+midiSec(n.t+n.d)-r.off,re);if(e<=s+1e-4)continue;
+    if(on&&s>=from&&s<to)out.push({at:s,on:1,t,n});
+    if(e>=from&&e<to)out.push({at:e,on:0,t,n})}}}
+ return out}
+// Program change: una volta per traccia a ogni ascolto, appena l'accesso MIDI c'è (può arrivare dopo il via).
+function midiPrograms(p,pending){const k=MIX.midiK??(MIX.midiK=midiStampBase());
+ for(const t of P.tracks){if(t.kind!=='midi'||!audible(t)||t.program==null||pending.has(t.id))continue;
+  const port=midiOutputFor(t);if(!port)continue;midiProgram(port,clamp((t.midiCh||1)-1,0,15),t.program,k+p.w*1000);pending.add(t.id)}}
+function midiPump(now,horizon){if(!P.tracks.some(t=>t.kind==='midi'&&P.regions.some(r=>r.track===t.id&&r.kind==='midi')))return;
+ // La base per i timestamp si fissa una volta all'inizio dell'ascolto: ricalcolarla a ogni pump legherebbe le note
+ // al jitter di getOutputTimestamp (note a 584 ms invece di 500 nella prova), mentre l'orologio del contesto è stabile.
+ const k=MIX.midiK??(MIX.midiK=midiStampBase());
+ for(const p of MIX.passes){const from=p.a+(Math.max(p.w,p.midiAt??p.w)-p.w),to=Math.min(p.b,p.a+(Math.min(now+MIDI_AHEAD,horizon)-p.w));
+  if(!(to>from))continue;p.midiAt=Math.min(now+MIDI_AHEAD,horizon);
+  midiPrograms(p,MIX.midiProg);
+  for(const ev of midiWindow(from,to)){const port=midiOutputFor(ev.t);if(!port)continue;const ch=clamp((ev.t.midiCh||1)-1,0,15),at=k+(p.w+(ev.at-p.a))*1000;
+   if(ev.on)midiNoteOn(port,ch,ev.n.p,ev.n.v,at,ev.t.id);else midiNoteOff(port,ch,ev.n.p,at)}}}
+// ——— Orologio MIDI ———
+// 24 colpi per semiminima (0xF8), Start (0xFA) da zero, Continue (0xFB) + Song Position Pointer (0xF2, in sedicesimi)
+// da un punto interno, Stop (0xFC) al fermo. I colpi si accodano a finestra come le note, con i timestamp dell'ascolto.
+// Al salto del ciclo si manda Stop, SPP del punto A e Continue: senza, la drum machine continuerebbe avanti nel suo
+// pattern mentre Tassello torna indietro.
+const CLK={running:false,lastF8:0,warned:false,armed:false};
+const clkTickSec=()=>60/P.bpm/24,clkSixteenthSec=()=>60/P.bpm/4;
+function clkPort(){const outs=midiOutputs();if(!outs.length)return null;const o=prefs.midiClockOut;
+ if(o?.id){const p=outs.find(x=>x.id===o.id);if(p)return p}
+ if(o?.name){const p=outs.find(x=>x.name===o.name);if(p)return p}
+ return outs[0]||null}
+function clkSend(port,bytes,at){try{port.send(bytes,at);if(bytes[0]===0xF8&&at>CLK.lastF8)CLK.lastF8=at}catch(e){}}
+function clockStop(){if(!CLK.running)return;const port=clkPort();if(port){const now=performance.now();clkSend(port,[0xFC],Math.max(now,CLK.lastF8+1))}CLK.running=false}
+// Prepara la partenza di una passata: da zero Start e primo colpo sul tempo zero; da un punto interno Stop (se
+// stava suonando), SPP al confine di sedicesimo successivo, Continue e primo colpo su quel confine.
+function clockInit(pass){if(!CLK.armed||!prefs.midiClock)return;const port=clkPort();
+ if(!port){if(!CLK.warned){CLK.warned=true;announce('Orologio MIDI: nessuna uscita disponibile')}return}
+ const base=MIX.midiK??(MIX.midiK=midiStampBase()),stamp=ct=>base+ct*1000,now=performance.now(),
+  sec16=clkSixteenthSec(),secTick=clkTickSec();
+ let firstTick;
+ // Start solo alla prima partenza da zero. Un giro del ciclo che torna a zero è comunque una continuazione: la
+ // drum machine era avanti e va fermata, riposizionata e fatta ripartire, non riavviata come se fosse all'inizio.
+ const startFromZero=!!pass.clkFirst&&pass.a<=1e-6;
+ if(startFromZero){clkSend(port,[0xFA],Math.max(now,stamp(pass.w)-0.5));pass.clkCtx=pass.w;firstTick=0}
+ else{const k16=Math.max(0,Math.ceil(pass.a/sec16-1e-9)),bound=k16*sec16,
+   ctxBound=pass.w+(bound-pass.a),spp=k16&0x3fff;
+  const stopAt=CLK.running?Math.max(now,CLK.lastF8+1):0;
+  if(CLK.running)clkSend(port,[0xFC],stopAt);
+  clkSend(port,[0xF2,spp&0x7f,(spp>>7)&0x7f],Math.max(CLK.running?stopAt+1:now,stamp(ctxBound-0.002)));
+  clkSend(port,[0xFB],Math.max(CLK.running?stopAt+2:now,stamp(ctxBound-0.001)));
+  pass.clkCtx=Math.max(ctxBound,(stopAt+3-base)/1000);firstTick=k16*6}
+ pass.clkTick=firstTick;pass.clockInit=true;CLK.running=true;
+ void secTick}
+function clockPump(now,horizon){if(!CLK.armed)return;if(!prefs.midiClock){clockStop();return}const port=clkPort();if(!port)return;
+ const base=MIX.midiK??(MIX.midiK=midiStampBase()),secTick=clkTickSec();
+ for(const p of MIX.passes){if(!p.clockInit){if(p.w<=now+0.05)clockInit(p);else continue}
+  let n=0;
+  while(n++<400){const t=p.clkTick*secTick,ctx=p.w+(t-p.a);
+   if(t>=p.b-1e-9||ctx>Math.min(now+0.05,horizon))break;
+   if(ctx>=p.clkCtx-1e-9)clkSend(port,[0xF8],base+ctx*1000);
+   p.clkTick++}}}
+function addPass(a,b,w){MIX.passes.push({a,b,w,midiAt:w});MIX.srcs.push(...scheduleRegions(actx,MIX.graph,a,w,{end:b}));scheduleTrackAuto(actx,MIX.graph,a,w,b);scheduleLimiter(actx,MIX.graph,a,w,b)}
 function mixPos(){if(!MIX.playing||!actx||!MIX.passes.length)return P.t;const now=actx.currentTime;let p=MIX.passes[0];for(const q of MIX.passes)if(q.w<=now)p=q;return Math.min(p.b,p.a+Math.max(0,now-p.w))}
 // Fermata: le regioni escono in 3 ms, i colpi del metronomo già programmati si staccano.
 function mixKill(){clearInterval(MIX.timer);cancelAnimationFrame(MIX.raf);const now=actx?.currentTime||0;
  for(const x of MIX.srcs){if(x.click){x.g.disconnect();continue}try{x.g.gain.cancelScheduledValues(now);x.g.gain.setValueAtTime(x.g.gain.value,now);x.g.gain.linearRampToValueAtTime(0,now+EDGE_FADE);x.s.stop(now+EDGE_FADE)}catch(e){}}
- MIX.srcs=[];MIX.passes=[];MIX.playing=false;for(const t of P.tracks){const cv=$('tmtr-'+t.id);if(cv)drawLaneMeter(cv,-Infinity)}}
+ midiPanic();clockStop();MIX.srcs=[];MIX.passes=[];MIX.playing=false;for(const t of P.tracks){const cv=$('tmtr-'+t.id);if(cv)drawLaneMeter(cv,-Infinity)}}
 function mixPlay(from=P.t,{recording=false,origin=from}={}){mixKill();stopPlayback(false);const ctx=actxGet();MIX.recording=recording;liveGraph(false);const when=ctx.currentTime+START_GAP,c=P.cycle;
  const [a,b]=cycleOn()?[from>=c.b-1e-6?c.a:from,c.b]:[from,Infinity];
- Object.assign(MIX,{playing:true,from:a,c0:when,origin,lat:MIX.graph.lat,metroUntil:when-1e-3,cycKey:cycleKey()});P.t=a;addPass(a,b,when);
+ Object.assign(MIX,{playing:true,from:a,c0:when,origin,lat:MIX.graph.lat,metroUntil:when-1e-3,cycKey:cycleKey(),midiProg:new Set(),midiK:null});MIDI.lastAt=0;P.t=a;addPass(a,b,when);
+ CLK.armed=!!prefs.midiClock;MIX.passes[0].clkFirst=true;if(CLK.armed)clockInit(MIX.passes[0]);
+ // Le tracce MIDI suonano su un sintetizzatore esterno: l'accesso si chiede al primo ascolto che ne ha bisogno, non
+ // all'avvio (un progetto senza MIDI non tocca il MIDI). Senza uscite lo si dice una volta.
+ const hasMidi=P.tracks.some(t=>t.kind==='midi'&&audible(t)&&P.regions.some(r=>r.track===t.id&&r.kind==='midi'));
+ if(hasMidi)midiStart({quiet:true}).then(ok=>{if(ok&&!midiOutputs().length&&!MIDI.warnedOut){MIDI.warnedOut=true;announce('Nessuna uscita MIDI: le tracce MIDI non suonano')}}).catch(()=>{});
  playUIProject(true);mixPump();MIX.timer=setInterval(mixPump,25);MIX.raf=requestAnimationFrame(mixTick)}
-function mixStop(keep=true){if(!MIX.playing)return;const pos=mixPos();mixKill();if(keep)P.t=pos;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI()}
-function mixRestart(){if(!MIX.playing)return;mixPlay(mixPos(),{recording:MIX.recording,origin:MIX.origin})}
+function mixStop(keep=true){if(!MIX.playing)return;const pos=mixPos();mixKill();midiRecFinish(pos);if(keep)P.t=pos;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI()}
+function mixRestart(){if(!MIX.playing)return;
+ if(MIDI.rec){midiRecFinish(mixPos(),'modifica');MIX.recording=false}
+ mixPlay(mixPos(),{recording:MIX.recording,origin:MIX.origin})}
 // Cambi di volume, bilanciamento ed effetti durante l'ascolto; una traccia nuova va programmata, quindi si riparte.
 function mixLive(){if(!MIX.playing||!MIX.graph)return;const had=new Set(MIX.graph.tracks.keys());syncGraph(MIX.graph,P.tracks,{live:true});MIX.lat=MIX.graph.lat;if(P.tracks.some(t=>!had.has(t.id)))mixRestart()}
 function mixPump(){if(!MIX.playing)return;const ctx=actx,now=ctx.currentTime,horizon=now+LOOKAHEAD;if(cycleKey()!==MIX.cycKey){mixRestart();return}
+ midiPump(now,horizon);clockPump(now,horizon);
  for(let last=MIX.passes.at(-1);last.b<Infinity&&last.w+(last.b-last.a)<horizon;last=MIX.passes.at(-1)){const w=last.w+(last.b-last.a);if(cycleOn())addPass(P.cycle.a,P.cycle.b,w);else addPass(last.b,Infinity,w)}
  if(P.metro){const bd=beatDur();for(const p of MIX.passes){if(p.w+(p.b-p.a)<=MIX.metroUntil)continue;for(let k=Math.ceil((p.a+Math.max(0,MIX.metroUntil-p.w))/bd-1e-6);;k++){const tb=k*bd,ct=p.w+(tb-p.a);if(tb>=p.b-1e-6||ct>horizon)break;if(ct>MIX.metroUntil+1e-6)MIX.srcs.push(clickAt(ctx,mixOut(),ct,k%P.sig===0))}}}
  MIX.metroUntil=horizon;MIX.srcs=MIX.srcs.filter(x=>x.until>now-0.1);MIX.passes=MIX.passes.filter((p,i,l)=>i===l.length-1||l[i+1].w>now-1);
  if(!MIX.recording&&!P.metro&&!cycleOn()&&mixPos()>=projDur()+0.05){const o=MIX.origin;mixKill();P.t=o;playUIProject(false);drawMeter($('aMeter'),-Infinity);updateArrangeUI();announce('Fine del brano')}}
 function mixTick(){if(!MIX.playing)return;const pos=mixPos();placeArPlayhead(pos);$('aClock').textContent=fmtTime(pos);if(prefs.follow)followAr(pos);playingValue(arPlayheadEl,pos,arPlayheadText);
  if(MIX.analyser){MIX.analyser.getFloatTimeDomainData(meterBuf);let pk=0;for(const x of meterBuf)pk=Math.max(pk,Math.abs(x));drawMeter($('aMeter'),toDb(pk))}
- if(MIX.graph)for(const [id,n] of MIX.graph.tracks){const cv=$('tmtr-'+id);if(!cv)continue;n.meter.getFloatTimeDomainData(laneBuf);let pk=0;for(const x of laneBuf)pk=Math.max(pk,Math.abs(x));drawLaneMeter(cv,toDb(pk))}
+ if(MIX.graph)for(const [id,n] of MIX.graph.tracks){const tk=trackOf(id);if(tk?.kind==='midi')continue;const cv=$('tmtr-'+id);if(!cv)continue;n.meter.getFloatTimeDomainData(laneBuf);let pk=0;for(const x of laneBuf)pk=Math.max(pk,Math.abs(x));drawLaneMeter(cv,toDb(pk))}
  MIX.raf=requestAnimationFrame(mixTick)}
 function playUIProject(on){const b=$('aPlay');b.setAttribute('aria-label',on?'Pausa del brano':'Riproduci il brano');b.innerHTML=ICON(on?'pause':'play')}
 function songPlayPause(){if(MIX.playing){mixStop(true);announce('Pausa a '+sayTime(P.t,1));return}if(!P.regions.length&&!P.metro){toast('Il progetto è vuoto: registra o importa un file');return}let from=P.t;if(from>=projDur()-0.01&&!P.metro)from=0;mixPlay(from)}
@@ -3084,7 +3345,7 @@ async function renderMix({only=null,from=0,to=null,rate=48000,limit=true,tail=fa
  return res}
 // I marcatori delle regioni diventano marcatori del brano, nella posizione in cui suonano.
 function songMarkers(rate){const out=[];for(const r of P.regions){const sr=SOURCES.get(r.src)?.sampleRate||rate;for(const m of r.markers||[]){const x=m.pos/sr;if(x<0||x>r.dur)continue;out.push({id:m.id,pos:Math.round((r.start+x)*rate),label:m.label})}}return out.sort((a,b)=>a.pos-b.pos)}
-async function exportStems(){if(!P.regions.length){toast('Il progetto è vuoto');return}const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
+async function exportStems(){if(!P.regions.length){toast('Il progetto è vuoto');return}midiExportNote();const [aac,opus]=await Promise.all([codecSupported('aac'),codecSupported('opus')]);
  const r=await modal('Esporta le tracce separate',`<p>Un file per ogni traccia, con i suoi effetti e lo stesso inizio, raccolti in un archivio ZIP: servono per continuare il lavoro in un altro programma.</p>`,[{id:'fmt',label:'Formato',type:'select',value:'wav24',options:[['wav16','WAV 16 bit'],['wav24','WAV 24 bit'],['wav32','WAV 32 bit in virgola mobile'],...(aac?[['aac','M4A con AAC']]:[]),...(opus?[['opus','WebM con Opus']]:[])]}],'Esporta');if(!r)return;
  const files=await work('Esportazione delle tracce',async()=>{const out=[];for(const [i,t] of P.tracks.entries()){if(!P.regions.some(x=>x.track===t.id))continue;status(`Mixaggio della traccia ${i+1} di ${P.tracks.length}: ${t.name}`);const buf=await renderMix({only:t.id,tail:tailTime(P.tracks)});out.push({name:extName(`${String(i+1).padStart(2,'0')} ${t.name}`,r.fmt.startsWith('wav')?'wav':CODECS[r.fmt].ext),data:r.fmt.startsWith('wav')?wavBlob(buf,Number(r.fmt.slice(3))):await compressedBlob(buf,r.fmt,(prefs.kbps||160)*1000)})}return out});
  if(!files?.length)return;const zip=await work('Creazione dell’archivio',()=>zipBlob(files));if(zip){download(zip,extName(P.title+' - tracce','zip'));toast(`Esportate ${files.length} tracce in un archivio ZIP`)}}
@@ -3226,10 +3487,10 @@ function deleteRegion(r=selRegion()){if(!r){toast('Scegli prima una regione');re
 function duplicateRegion(r=selRegion()){if(!r){toast('Scegli prima una regione');return}let c;pCommit('Duplica la regione',()=>{c={...structuredClone(r),id:uid(),start:regionEnd(r)};P.regions.push(c);P.sel=c.id});focusLane(r.track);announce(`Copia di «${r.name}» subito dopo, da ${sayTime(c.start)}`)}
 async function loopRegion(r=selRegion()){if(!r){toast('Scegli prima una regione');return}const v=await modal('Ripeti la regione',`<p>Le copie di «${esc(r.name)}» vengono messe una dopo l’altra sulla stessa traccia, come un giro che si ripete.</p>`,[{id:'n',label:'Quante volte ripeterla',type:'number',value:3}],'Ripeti',{validate:v=>num(v.n)>=1&&num(v.n)<=100?null:{msg:'Scegli un numero da 1 a 100',field:'n'}});if(!v)return;const n=Math.round(num(v.n));pCommit('Ripeti la regione',()=>{for(let k=1;k<=n;k++)P.regions.push({...structuredClone(r),id:uid(),start:r.start+k*r.dur})});focusLane(r.track);announce(`«${r.name}» ripetuta ${n} volte: ora arriva a ${sayTime(r.start+(n+1)*r.dur)}`)}
 async function renameRegion(r=selRegion()){if(!r)return;const v=await modal('Rinomina la regione','',[{id:'name',label:'Nome',value:r.name}],'Rinomina');if(!v||!v.name.trim())return;pCommit('Rinomina la regione',()=>{r.name=v.name.trim().slice(0,120)});focusLane(r.track);announce('Regione rinominata «'+r.name+'»')}
-async function regionProps(r=selRegion()){if(!r){toast('Scegli prima una regione');return}const src=SOURCES.get(r.src);
+async function regionProps(r=selRegion()){if(!r){toast('Scegli prima una regione');return}if(!regionAvailable(r))return;const src=SOURCES.get(r.src);
  const v=await modal('Proprietà della regione',`<p>Usa ${esc(fmtTime(r.dur,2))} del suono, da ${esc(fmtTime(r.off,2))}${src?` su ${esc(fmtTime(src.duration,2))}`:''}.${r.gainOn?' Il guadagno segue l’automazione: il campo qui sotto non conta finché resta accesa.':''}</p>`,[{id:'name',label:'Nome',value:r.name},{id:'track',label:'Traccia',type:'select',value:r.track,options:P.tracks.map(t=>[t.id,t.name])},{id:'start',label:'Inizio nel brano',type:'time',value:fmtTime(r.start,3)},{id:'gain',label:'Guadagno',type:'range',min:-24,max:12,step:0.5,value:r.gain,fmt:fmtDb},{id:'fadeIn',label:'Dissolvenza in entrata (secondi)',type:'number',min:0,max:Math.floor(r.dur*100)/100,value:r.fadeIn},{id:'fadeOut',label:'Dissolvenza in uscita (secondi)',type:'number',min:0,max:Math.floor(r.dur*100)/100,value:r.fadeOut}],'Applica',{validate:v=>parseTime(v.start)>=0?null:{msg:'Inizio nel brano: scrivi un tempo, per esempio 12,5 oppure 1:02,5.',field:'start'}});
  if(!v)return;pCommit('Proprietà della regione',()=>{r.name=v.name.trim().slice(0,120)||r.name;r.track=v.track;r.start=parseTime(v.start);r.gain=Number(v.gain);r.fadeIn=clamp(num(v.fadeIn)||0,0,r.dur);r.fadeOut=clamp(num(v.fadeOut)||0,0,r.dur)});P.track=r.track;focusLane(r.track);announce('Regione aggiornata')}
-function fadeRegion(which){const r=selRegion();if(!r){toast('Scegli prima una regione');return}const key=which==='in'?'fadeIn':'fadeOut',on=!(r[key]>0),d=Math.min(0.5,r.dur/3);pCommit(which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita',()=>{r[key]=on?d:0});announce(`${which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita'} ${on?'di '+sayTime(d,1):'tolta'}`)}
+function fadeRegion(which){const r=selRegion();if(!r){toast('Scegli prima una regione');return}if(!regionAvailable(r))return;const key=which==='in'?'fadeIn':'fadeOut',on=!(r[key]>0),d=Math.min(0.5,r.dur/3);pCommit(which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita',()=>{r[key]=on?d:0});announce(`${which==='in'?'Dissolvenza in entrata':'Dissolvenza in uscita'} ${on?'di '+sayTime(d,1):'tolta'}`)}
 // Marcatore all'indicatore del brano (anche durante l'ascolto): va nella regione che suona lì, sulla traccia scelta se
 // ce n'è una, e si salva con la regione. Se la regione è aperta nell'editor, il marcatore entra anche lì.
 function songMarker(){const t=MIX.playing?mixPos():P.t,at=x=>t>=x.start&&t<regionEnd(x),ed=A.region&&regionOf(A.region),r=(ed&&at(ed)?ed:null)||regionsOn(P.track).find(at)||P.regions.find(at);
@@ -3268,7 +3529,22 @@ function wireChain(work,apply){const box=$('chainBox'),list=$('chainList'),rende
  box.addEventListener('input',e=>{const inp=e.target.closest('input');if(!inp?.id.startsWith('ch_'))return;const [,mid,key]=inp.id.split('_'),m=work.find(x=>x.id===mid);if(!m)return;const [lo,hi]=CHAIN_TYPES[m.tipo].params[key];m.params[key]=clamp(num(inp.value),lo,hi);apply()})}
 // Suono della traccia: come i controlli rapidi di uno studio, pochi cursori chiari che si sentono subito. Qui
 // stanno anche l'ingresso di registrazione e la catena dei componenti.
-async function trackSettings(t=selTrack()){if(!t){toast('Crea prima una traccia');return}const orig={...t,chain:t.chain.map(m=>({...m,params:{...m.params}}))},live=(k,v)=>{t[k]=v;mixLive()};
+// Proprietà di una traccia MIDI: nome, colore, uscita (id e nome salvati, così si ritrova la porta anche se l'id
+// cambia), canale e programma. Le proprietà audio (volume, effetti, ingresso) non c'entrano: il suono sta sul synth.
+async function midiTrackSettings(t){await midiStart({quiet:true}).catch(()=>false);const outs=midiOutputs();
+ const cur=outs.find(o=>o.id===t.midiOut?.id)||outs.find(o=>t.midiOut?.name&&o.name===t.midiOut.name)||null;
+ const v=await modal('Traccia MIDI',`<p>Traccia MIDI «${esc(t.name)}»: le note suonano sul sintetizzatore collegato all’uscita scelta e non finiscono nel mix esportato.${outs.length?'':' Nessuna uscita MIDI trovata: collega un sintetizzatore o un’uscita virtuale.'}</p>`,
+  [{id:'name',label:'Nome',value:t.name},{id:'color',label:'Colore',type:'select',value:t.color,options:TRACK_COLORS.map(([c,n])=>[c,n])},
+   {id:'out',label:'Uscita MIDI',type:'select',value:cur?.id||'',options:[['','Prima uscita disponibile'],...outs.map(o=>[o.id,o.name||o.id])],hint:'La porta si ritrova per id e, se l’id cambia, per nome.'},
+   {id:'ch',label:'Canale MIDI (1-16)',type:'number',value:t.midiCh},
+   {id:'prog',label:'Programma del sintetizzatore (0-127; vuoto = nessun cambio)',type:'text',value:t.program==null?'':String(t.program)}],'Applica',
+  {validate:v=>{const ch=num(v.ch),pr=String(v.prog).trim(),n=num(pr);
+   return !(Number.isInteger(ch)&&ch>=1&&ch<=16)?{msg:'Canale: scrivi un numero intero da 1 a 16.',field:'ch'}:
+    pr&&!(n>=0&&n<=127)?{msg:'Programma: vuoto oppure un numero da 0 a 127.',field:'prog'}:null}});
+ if(!v)return;const out=outs.find(o=>o.id===v.out)||null;
+ pCommit('Traccia MIDI',()=>{Object.assign(t,{name:v.name.trim().slice(0,80)||t.name,color:v.color,midiOut:out?{id:out.id,name:out.name||''}:null,midiCh:clamp(Math.round(num(v.ch)),1,16),program:String(v.prog).trim()===''?null:clamp(Math.round(num(v.prog)),0,127)})});
+ renderArrange();focusLane(t.id);announce(`Traccia MIDI «${t.name}»: uscita ${out?out.name||out.id:'prima disponibile'}, canale ${t.midiCh}${t.program!=null?', programma '+t.program:''}`)}
+async function trackSettings(t=selTrack()){if(!t){toast('Crea prima una traccia');return}if(t.kind==='midi')return midiTrackSettings(t);const orig={...t,chain:t.chain.map(m=>({...m,params:{...m.params}}))},live=(k,v)=>{t[k]=v;mixLive()};
  // Elenco degli ingressi per la registrazione: vale solo per le tracce audio, i bus non registrano.
  const inputs=t.kind!=='bus'?inputOptions(await recInputs().catch(()=>[])):null;
  // Copia di lavoro della catena: si applica alla traccia per l'anteprima e al commit entra nel progetto.
@@ -3304,7 +3580,7 @@ async function fitDurationDialog(){const inEd=!!A.buf&&(inEditorArea()||!selRegi
  pCommit('Adatta la regione alla durata',()=>{const id=addSource(out);r.src=id;r.off=0;r.dur=out.duration;r.markers=(r.markers||[]).map(m=>({...m,pos:Math.round(m.pos/f)})).filter(m=>m.pos<=out.length)});
  announce(`Regione «${r.name}» da ${sayTime(cur)} a ${sayTime(out.duration)}: ritmo al ${fmtNum(100/f,0)} per cento`)}
 // Incrocio: la regione scelta sfuma in uscita mentre quella che segue entra, sovrapposte per la durata scelta.
-async function crossfadeNext(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+async function crossfadeNext(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}if(!regionAvailable(r))return;
  const next=regionsOn(r.track).find(x=>x.id!==r.id&&x.start>=regionEnd(r)-0.02);
  if(!next){toast('Dopo questa regione, sulla stessa traccia, non ce n’è un’altra');return}
  const gap=next.start-regionEnd(r),maxD=Math.min(r.dur,next.dur)/2;
@@ -3386,7 +3662,7 @@ function previewTake(r,take){const src=SOURCES.get(take?.src);if(!src){toast('Qu
  stopPlayback(false);stopPreview();const ctx=actxGet(),a=Math.round(take.off*src.sampleRate),len=Math.min(Math.round(take.dur*src.sampleRate),Math.round(6*src.sampleRate)),
   buf=makeBuffer(Array.from({length:src.numberOfChannels},(_,c)=>src.getChannelData(c).slice(a,a+len)),src.sampleRate);
  const s=ctx.createBufferSource();s.buffer=buf;s.connect(audioOut());s.start();previewSrc=s;announce(`Ascolto della take «${take.name}»: ${sayTime(buf.duration)}`)}
-async function takesDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+async function takesDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}if(!regionAvailable(r))return;
  const list=r.takes?.length?r.takes:[{id:'tmp',src:r.src,off:r.off,dur:r.dur,name:'Take 1',note:''}],
   active=Math.max(0,list.findIndex(t=>t.src===r.src&&Math.abs(t.off-r.off)<1e-6));
  const rows=list.map((t,i)=>`<tr><th scope="row">${i+1}</th><td>${esc(t.name)}</td><td>${esc(fmtTime(t.dur))}</td><td>${esc(t.note||'—')}</td><td>${i===active?'attiva':''}</td></tr>`).join('');
@@ -3413,7 +3689,7 @@ async function takeDelete(){const r=selRegion();if(!r){toast('Scegli prima una r
 
 // ——— Comping: la regione suona la take attiva, tranne nelle sezioni che ne scelgono un'altra. Le sezioni non
 // distruggono niente: si tolgono e l'audio torna com'era.
-async function compDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}
+async function compDialog(){const r=selRegion();if(!r){toast('Scegli prima una regione nelle tracce');return}if(!regionAvailable(r))return;
  if(!r.takes?.length)pCommit('Take della regione',()=>ensureTakes(r));
  const list=r.takes.map(t=>({...t})),end=r.start+r.dur;
  let draft=(r.comp||[]).map(c=>({...c}));
@@ -3452,6 +3728,8 @@ function punchToggle(){const a=P.punch.a||P.t,b=P.punch.b>P.punch.a?P.punch.b:P.
 function trimRegionTo(r,at){const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);r.dur=Math.max(0.01,at-r.start);r.markers=(r.markers||[]).filter(m=>m.pos<=cut);if(r.gainAuto)r.gainAuto=r.gainAuto.filter(p=>p.t<=r.dur)}
 function splitRegionAt(r,at){const e=regionEnd(r);if(at<=r.start+1e-6||at>=e-1e-6)return null;const rate=SOURCES.get(r.src)?.sampleRate||48000,cut=Math.round((at-r.start)*rate);
  const right={...r,id:uid(),start:at,off:r.off+(at-r.start),dur:e-at,gainAuto:(r.gainAuto||[]).map(p=>({...p,t:p.t-(at-r.start)})).filter(p=>p.t>=0),markers:(r.markers||[]).map(m=>({...m,pos:m.pos-cut})).filter(m=>m.pos>=0)};
+ // Le note sono oggetti: una copia profonda, altrimenti le due metà di una regione MIDI condividerebbero l'elenco.
+ if(r.kind==='midi')right.notes=(r.notes||[]).map(n=>({...n}));
  trimRegionTo(r,at);return right}
 // Il tratto di registrazione che entra col punch: dal punto «Da» al punto «A», scartando l'ascolto prima.
 function punchPart(buf,start,pu){const rate=buf.sampleRate,a0=Math.max(0,Math.round((pu.a-start)*rate)),b0=Math.min(buf.length,Math.round((pu.b-start)*rate));
@@ -3555,9 +3833,9 @@ async function readLevels({track=null}={}){if(inEditorArea()&&!track){if(!A.buf)
   [a,b]=sel?[A.selA,A.selB]:aplay.playing?[Math.max(0,pos-2*half),pos]:[Math.max(0,pos-half),Math.min(alen(),pos+half)];if(b-a<A.rate*0.05){toast('Il tratto è troppo corto per misurarlo');return}
   const m=measureCh(sliceCh(A.buf,a,b),A.rate);toast(`Livelli ${sel?`della selezione (${sayTime(sec(b-a))})`:aplay.playing?'degli ultimi secondi ascoltati':`intorno al cursore, da ${sayTime(sec(a))} a ${sayTime(sec(b))}`}: ${levelSentence(m)}.`);return}
  if(!P.regions.length){toast('Il progetto è vuoto: niente da misurare');return}
- const t=MIX.playing?mixPos():P.t,from=Math.max(0,Math.min(t-1.5,projDur()-3)),to=Math.min(projDur(),from+3),here=P.regions.filter(r=>r.start<to&&regionEnd(r)>from);
+ const t=MIX.playing?mixPos():P.t,from=Math.max(0,Math.min(t-1.5,projDur()-3)),to=Math.min(projDur(),from+3),here=P.regions.filter(r=>r.kind!=='midi'&&r.start<to&&regionEnd(r)>from);
  if(!here.length){toast(`Silenzio intorno a ${sayTime(t)}: nessuna regione suona tra ${sayTime(from)} e ${sayTime(to)}`);return}
- const res=await work('Misura dei livelli',async()=>{const solo=P.tracks.some(x=>x.solo),live=P.tracks.filter(x=>here.some(r=>r.track===x.id)&&!x.mute&&(!solo||x.solo)&&(!track||x.id===track));
+ const res=await work('Misura dei livelli',async()=>{const solo=P.tracks.some(x=>x.solo),live=P.tracks.filter(x=>x.kind!=='midi'&&here.some(r=>r.track===x.id)&&!x.mute&&(!solo||x.solo)&&(!track||x.id===track));
   const ms=b=>measureCh([b.getChannelData(0),b.getChannelData(1)],b.sampleRate);if(track){const tr=trackOf(track);return{track:tr,m:tr&&live.length?ms(await renderMix({only:track,from,to})):null}}
   const out=ms(await renderMix({from,to})),raw=ms(await renderMix({from,to,limit:false})),per=[];for(const x of live)per.push({t:x,m:ms(await renderMix({only:x.id,from,to}))});return{out,raw,per}});if(!res)return;
  const where=`intorno a ${sayTime(t)}`;if(track){const tr=res.track,
@@ -3573,7 +3851,7 @@ async function readLevels({track=null}={}){if(inEditorArea()&&!track){if(!A.buf)
 function trackWords(t){const w=[];if(t.mute)w.push('muta');if(t.solo)w.push('in solo');if(t.vol)w.push('volume '+fmtDb(t.vol));if(Math.abs(t.pan)>=0.005)w.push('bilanciamento '+panWords(t.pan));
  if(t.low)w.push('bassi '+signedDb(t.low));if(t.high)w.push('alti '+signedDb(t.high));if(t.comp)w.push('compressione '+t.comp+'%');if(t.reverb)w.push('riverbero '+t.reverb+'%');if(t.voice)w.push('è la voce');if(t.duck)w.push('si abbassa di '+fmtDb(-t.duck)+' quando parla la voce');if(t.kind==='bus')w.push('bus');else if(t.out)w.push('esce sul bus «'+((trackOf(t.out)||{}).name||'')+'»');for(const [k,nome] of [['vol','volume'],['pan','bilanciamento'],['reverb','riverbero'],['low','bassi'],['high','alti'],['comp','compressione']])if(t.autoOn?.[k]&&t.auto?.[k]?.length)w.push(nome+' automatico con '+(t.auto[k].length===1?'un punto':t.auto[k].length+' punti'));w.push('colore '+colorName(t.color));return w.join(', ')}
 // Tratti di tempo con le tracce che suonano: da un bordo di regione al successivo, unendo i tratti uguali.
-function songSpans(){const pts=arEdges().filter(p=>p<=projDur()+1e-6),out=[];for(let i=0;i+1<pts.length;i++){const a=pts[i],b=pts[i+1];if(b-a<0.02)continue;const m=(a+b)/2,on=P.tracks.filter(t=>P.regions.some(r=>r.track===t.id&&r.start<=m&&regionEnd(r)>m)).map(t=>t.name+(t.mute?' (muta)':''));
+function songSpans(){const pts=arEdges().filter(p=>p<=projDur()+1e-6),out=[];for(let i=0;i+1<pts.length;i++){const a=pts[i],b=pts[i+1];if(b-a<0.02)continue;const m=(a+b)/2,on=P.tracks.filter(t=>t.kind!=='midi'&&P.regions.some(r=>r.track===t.id&&r.kind!=='midi'&&r.start<=m&&regionEnd(r)>m)).map(t=>t.name+(t.mute?' (muta)':''));
   const key=on.join('|');if(out.length&&out.at(-1).key===key)out.at(-1).b=b;else out.push({a,b,key,on})}return out}
 const andList=l=>l.length<2?(l[0]||''):l.slice(0,-1).join(', ')+' e '+l.at(-1);
 function describeSong(){if(!P.tracks.length){toast('Il progetto è vuoto. Ctrl+Alt+R registra, Ctrl+I importa un file audio in una nuova traccia.');return}
@@ -3651,7 +3929,7 @@ async function batchConvertFiles(files,opt,progress=status){const used=new Set()
    let blob;
    if(opt.fmt==='mp3')blob=await mp3Blob(src,opt.kbps,tags);
    else if(opt.fmt.startsWith('wav')){const bex=opt.bwf?{description:opt.comment||base,originator:opt.artist||'Tassello Media',reference:name,date:new Date(),
-     loudness:{value:m.lufs,range:m.lra,truePeak:m.truePeak},codingHistory:`A=PCM,F=${src.sampleRate},W=${opt.fmt.slice(3)},M=${src.numberOfChannels===1?'mono':'stereo'},T=Tassello Media 1.20.0`}:null;
+     loudness:{value:m.lufs,range:m.lra,truePeak:m.truePeak},codingHistory:`A=PCM,F=${src.sampleRate},W=${opt.fmt.slice(3)},M=${src.numberOfChannels===1?'mono':'stereo'},T=Tassello Media 1.21.0`}:null;
     blob=wavBlob(src,Number(opt.fmt.slice(3)),[],0,src.length,{dither:opt.dither&&opt.fmt==='wav16',bext:bex})}
    else blob=await compressedBlob(src,opt.fmt,opt.kbps*1000,()=>{},tags);
    out.push({name,data:blob});rows.push({file:f.name,name,ok:true,dur:m.dur,lufs:m.lufs,tp:m.truePeak,size:blob.size,limited:prep.limited})}
@@ -3711,7 +3989,7 @@ async function batchConvertDialog(){const files=await pickAudioFiles();if(!files
 // controlli continui (fader, pedali) scattano quando salgono a 64 da sotto e si riarmano sotto 32: sono armati di
 // default, quindi il primo messaggio che supera 64 scatta — per un pedale che parte abbassato è quello giusto — e
 // un fader già sopra non spara comandi a ogni minimo movimento.
-const MIDI={access:null,arm:{},last:{},learn:null};
+const MIDI={access:null,arm:{},last:{},learn:null,lastAt:0,warnedOut:false,rec:null,cal:null};
 const midiKey=(k,v)=>k==='cc'?`cc${v}`:`nota${v}`;
 const midiName=k=>k.startsWith('cc')?`Controllo ${k.slice(2)}`:`Nota ${k.slice(3)}`;
 // Comandi mappabili, per applicazione: trasporto, registrazione e traccia scelta.
@@ -3724,11 +4002,57 @@ MIDI.map=prefs.midi=prefs.midi||{a:{},v:{}};
 const midiMap=()=>MIDI.map[isAudio()?'a':'v']||{};
 const midiAny=()=>['a','v'].some(m=>Object.keys(MIDI.map[m]||{}).length);
 function midiRun(key){const id=midiMap()[key];if(!id)return;const now=performance.now();if(now-(MIDI.last[id]||0)<250)return;MIDI.last[id]=now;runCommand(id)}
+// ——— Ascolto (MIDI thru) e registrazione ———
+const midiInputs=()=>MIDI.access?[...MIDI.access.inputs.values()]:[];
+// La traccia che ascolta l'ingresso: quella in registrazione, altrimenti l'unica armata e udibile.
+const midiThruTrack=()=>MIDI.rec?.track||P.tracks.find(t=>t.kind==='midi'&&t.arm&&audible(t))||null;
+// Inoltro immediato (timestamp 0): la nota esce subito sul sintetizzatore della traccia. Il note off va dove è
+// andato il note on (per altezza), così cambiando traccia armata o fermando la registrazione con un tasto premuto
+// la nota si spegne sul synth giusto, non su quello nuovo.
+const midiThruOpen=new Map();
+function midiThru(track,on,p,v){if(on){const port=midiOutputFor(track);if(!port)return;const ch=clamp((track.midiCh||1)-1,0,15);
+  midiNoteOn(port,ch,p,v,0,track.id);midiThruOpen.set(p,{port,ch});return}
+ const o=midiThruOpen.get(p);midiThruOpen.delete(p);
+ if(o){midiNoteOff(o.port,o.ch,p,0);return}
+ const port=midiOutputFor(track);if(port)midiNoteOff(port,clamp((track.midiCh||1)-1,0,15),p,0)}
+// I controlli che una tastiera ha sempre: pedale, modulazione e pitch bend si inoltrano anche loro, altrimenti chi
+// suona col pedale sente note corte mentre nella regione finiscono lunghe. Il canale entra in midiUsed, così panic
+// e CC121 coprono anche un pedale rimasto giù senza note.
+function midiThruCC(track,cc,val){const port=midiOutputFor(track);if(!port)return;const ch=clamp((track.midiCh||1)-1,0,15);
+ midiUsed.add(port.id+'|'+ch);midiSend(port,[0xB0|ch,cc,val],0)}
+function midiThruBend(track,lsb,msb){const port=midiOutputFor(track);if(!port)return;const ch=clamp((track.midiCh||1)-1,0,15);
+ midiUsed.add(port.id+'|'+ch);midiSend(port,[0xE0|ch,lsb,msb],0)}
+// Tempo di un messaggio in secondi del brano: timeStamp → contesto con la base fissata al via, poi il tempo del
+// brano con la passata. La base di getOutputTimestamp mappa già l'istante che si sta sentendo, quindi la latenza di
+// uscita audio è compresa e NON si sottrae: sottrarla sarebbe contarla due volte.
+const midiRecTime=e=>{const r=MIDI.rec,comp=(Number(prefs.midiComp)||0)/1000;return r.a+((Number(e.timeStamp)-r.k)/1000-r.w)-comp};
+function midiRecOn(e,p,v){const r=MIDI.rec;if(!r)return;
+ // Limite della validazione: a 2000 note la registrazione si ferma e lo dice, invece di perdere note in silenzio.
+ if(r.notes.length>=2000){if(!r.full){r.full=true;announce('Limite di 2000 note raggiunto: la registrazione MIDI si ferma');mixStop(true)}return}
+ const t=midiRecTime(e);if(!Number.isFinite(t))return;
+ const prev=r.open.get(p);if(prev)midiRecOff(r,prev,t);r.open.set(p,{p,v,start:t,end:null})}
+function midiRecOff(r,n,t){if(!r.open.has(n.p))return;r.open.delete(n.p);
+ // Col pedale di risonanza giù la nota non finisce al rilascio: si chiude quando il pedale si alza.
+ if(r.pedal){n.end=null;r.sustained.push(n)}else{n.end=t;r.notes.push(n)}}
+function midiRecPedal(e,down){const r=MIDI.rec;if(!r)return;r.pedal=down;
+ if(!down){const t=midiRecTime(e);for(const n of r.sustained){n.end=t;r.notes.push(n)}r.sustained=[]}}
 function midiEvent(e){const [st,d1,d2]=e.data||[];if(st===undefined)return;const k=st&0xf0;
  // Durante «Impara» ogni nota o controllo diventa la nuova assegnazione, anche con una finestra aperta.
  // Per un controllo si fissa l'armatura sul valore ricevuto: se stavi salendo oltre 64, senza questo il
  // comando scatterebbe subito dopo l'assegnazione.
  if(MIDI.learn){if((k===0x90&&d2>0)||k===0xb0){if(k===0xb0)MIDI.arm[d1]=d2<32;MIDI.learn(midiKey(k===0xb0?'cc':'n',d1))}return}
+ // Calibrazione: si prendono solo i note on grezzi (nessuna compensazione: si misura il valore assoluto).
+ if(MIDI.cal){if(k===0x90&&d2>0)MIDI.cal.notes.push((Number(e.timeStamp)-MIDI.cal.k)/1000);return}
+ const thru=midiThruTrack(),rec=MIDI.rec;
+ if((k===0x90&&d2>0)||k===0x80||(k===0x90&&d2===0)){
+  const on=k===0x90&&d2>0;
+  if(thru)midiThru(thru,on,d1,on?d2:0);
+  if(rec){if(on)midiRecOn(e,d1,d2);else{const n=rec.open.get(d1);if(n)midiRecOff(rec,n,midiRecTime(e))}}
+  // Con una traccia armata o in registrazione le note suonano e non comandano il programma.
+  if(thru||rec)return}
+ // Pedale di risonanza e modulazione: si catturano (il pedale) e si inoltrano, e non comandano il programma.
+ if(k===0xb0&&(d1===64||d1===1)&&(thru||rec)){if(rec&&d1===64)midiRecPedal(e,d2>=64);if(thru)midiThruCC(thru,d1,d2);return}
+ if(k===0xe0&&thru){midiThruBend(thru,d1,d2);return}
  if(overlayOpen())return;
  if(k===0x90&&d2>0)midiRun(midiKey('n',d1));
  else if(k===0xb0){if(!(d1 in MIDI.arm))MIDI.arm[d1]=true;
@@ -3760,6 +4084,428 @@ async function midiPanel(){if(!await midiStart())return;const map=midiMap(),cmds
    {label:'Togli',run:v=>{let n=0;for(const [k,id] of Object.entries(map))if(id===v.cmd){delete map[k];n++}
     if(!n){toast('Questo comando non ha assegnazioni');return}savePrefs();$('midiList').innerHTML=list();announce('Assegnazione tolta')}}]});
  clearTimeout(timer);MIDI.learn=null;if(!res)return}
+// Uscite MIDI: le tracce MIDI mandano le note a un sintetizzatore esterno. La porta scelta si ritrova per id e, se
+// l'id non c'è più su questa macchina, per nome (gli id cambiano tra origini del browser e computer); senza scelta
+// si usa la prima uscita disponibile.
+const midiOutputs=()=>MIDI.access?[...MIDI.access.outputs.values()]:[];
+function midiOutputFor(t){const outs=midiOutputs();if(!outs.length)return null;const o=t?.midiOut;
+ if(o?.id){const p=outs.find(x=>x.id===o.id);if(p)return p}
+ if(o?.name){const p=outs.find(x=>x.name===o.name);if(p)return p}
+ return outs[0]}
+// Le note aperte: si registra ogni note on mandato e si toglie al note off corrispondente. Al fermo si spengono
+// quelle rimaste, poi si mandano CC123 (tutte le note off) e CC121 (ripristino dei controlli) su ogni canale usato:
+// molti sintetizzatori ignorano o trattano male CC123, e un registro delle note aperte costa poco.
+// Il registro delle note aperte tiene anche l'istante in cui il note on è stato accodato (può essere nel futuro,
+// fino a 100 ms) e la traccia: il note off del panic va dopo quel note on, altrimenti la nota partirebbe dopo
+// l'off e resterebbe bloccata.
+const midiOpen=new Map(),midiUsed=new Set();
+function midiSend(port,data,at){try{port.send(data,at);if(at>MIDI.lastAt)MIDI.lastAt=at}catch(e){}}
+function midiNoteOn(port,ch,p,v,at,tid){if(!port)return;midiSend(port,[0x90|ch,p,v],at);midiOpen.set(port.id+'|'+ch+'|'+p,{port,ch,p,at,tid});midiUsed.add(port.id+'|'+ch)}
+function midiNoteOff(port,ch,p,at){if(!port)return;midiSend(port,[0x80|ch,p,0],at);midiOpen.delete(port.id+'|'+ch+'|'+p)}
+function midiProgram(port,ch,prog,at){if(port&&prog!=null)midiSend(port,[0xC0|ch,prog],at)}
+// Spegne subito una nota aperta (muto, solo, traccia o regione cambiata durante l'ascolto): il taglio è piccolo,
+// una nota bloccata no. Il note off va comunque dopo il note on accodato.
+function midiKillNote(key,now=performance.now()){const n=midiOpen.get(key);if(!n)return;
+ midiSend(n.port,[0x80|n.ch,n.p,0],Math.max(now,(n.at||0)+1));midiOpen.delete(key)}
+function midiKillTrack(tid){const now=performance.now();for(const [k,n] of midiOpen)if(n.tid===tid)midiKillNote(k,now)}
+function midiKillInaudible(){const now=performance.now(),byId=new Map(P.tracks.map(t=>[t.id,t]));
+ for(const [k,n] of midiOpen){const t=byId.get(n.tid);if(!t||!audible(t))midiKillNote(k,now)}}
+function midiPanic(){const now=performance.now();
+ for(const [k,n] of midiOpen)midiKillNote(k,now);midiThruOpen.clear();
+ // CC123/121 solo sui canali che hanno davvero suonato, e dopo l'ultima nota accodata (lastAt): una traccia muta
+ // non ha aperto nulla e non va disturbata.
+ const ccAt=Math.max(now,(MIDI.lastAt||0)+1);
+ for(const k of midiUsed){const [id,ch]=k.split('|'),port=midiOutputs().find(x=>x.id===id);
+  if(port){midiSend(port,[0xB0|(+ch),123,0],ccAt);midiSend(port,[0xB0|(+ch),121,0],ccAt)}}
+ midiUsed.clear();MIDI.lastAt=0}
+// Le tracce MIDI non finiscono nel mix esportato: il suono arriva dal sintetizzatore, non dal browser. L'esportazione
+// lo dice, così nessuno cerca nel file un suono che non c'è.
+const midiAudible=()=>P.tracks.filter(t=>t.kind==='midi'&&audible(t)&&P.regions.some(r=>r.track===t.id&&r.kind==='midi'));
+function midiExportNote(){const n=midiAudible().length;if(n)announce(`Attenzione: ${n===1?'una traccia MIDI non suona':'le tracce MIDI non suonano'} nel file esportato, il suono arriva dal sintetizzatore esterno`)}
+
+// ——— Orologio MIDI ———
+// Orologio verso un altro strumento: 24 colpi per semiminima, Start da zero, Continue + Song Position Pointer da un
+// punto interno, Stop al fermo e al salto del ciclo. L'impostazione è globale (dipende dal dispositivo).
+async function midiClockDialog(){await midiStart({quiet:true}).catch(()=>false);const outs=midiOutputs(),cur=prefs.midiClockOut;
+ const sel=outs.find(o=>o.id===cur?.id)||outs.find(o=>cur?.name&&o.name===cur.name)||null;
+ const v=await modal('Orologio MIDI',`<p>Manda l’orologio a un altro strumento (drum machine, sequencer, sintetizzatore con arpeggiatore): 24 colpi per semiminima, Start, Continue e Song Position Pointer, Stop al fermo e al salto del ciclo. Serve un’uscita MIDI; le note possono usare la stessa porta o un’altra.</p>${outs.length?'':'<p>Nessuna uscita MIDI trovata.</p>'}`,
+  [{id:'on',label:'Manda l’orologio durante l’ascolto e la registrazione',type:'checkbox',value:!!prefs.midiClock},
+   {id:'out',label:'Uscita dell’orologio',type:'select',value:sel?.id||'',options:[['','Prima uscita disponibile'],...outs.map(o=>[o.id,o.name||o.id])],hint:'Si ritrova per id e, se l’id cambia, per nome.'}],'Salva');
+ if(!v)return;const out=outs.find(o=>o.id===v.out)||null;
+ prefs.midiClock=!!v.on;prefs.midiClockOut=out?{id:out.id,name:out.name||''}:null;savePrefs();
+ announce(`Orologio MIDI ${prefs.midiClock?'attivo':'spento'}${prefs.midiClock&&out?` su ${out.name||out.id}`:''}${MIX.playing?' (vale dal prossimo ascolto)':''}`)}
+// ——— Calibrazione dell'ingresso MIDI ———
+const midiMedian=a=>{const s=[...a].sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2};
+async function midiMeasure(){const ctx=actxGet();try{await ctx.resume()}catch(e){}
+ const beat=60/90,lead=2,n=8,base=midiStampBase(),t0=ctx.currentTime+0.2,total=(lead+n)*beat;
+ MIDI.cal={notes:[],k:base,t0,beat,lead,n};
+ for(let k=0;k<lead+n;k++)clickAt(ctx,mixOut(),t0+k*beat,k%4===0);
+ announce('Calibrazione: due battute di avvio, poi suona otto note a tempo');
+ await new Promise(r=>setTimeout(r,(total+0.25)*1000));
+ const notes=MIDI.cal.notes.slice();MIDI.cal=null;
+ const offs=[];for(const ct of notes){const rel=(ct-t0)/beat,k=Math.round(rel);
+  if(k<lead-0.5||k>lead+n-0.5)continue;if(Math.abs(ct-(t0+k*beat))>beat/2)continue;offs.push((ct-(t0+k*beat))*1000)}
+ if(offs.length<4)return{ok:false,reason:`Solo ${offs.length} note valide su ${notes.length}: servono almeno quattro note a tempo.`,count:offs.length};
+ const med=midiMedian(offs),dev=offs.map(x=>Math.abs(x-med)),mad=midiMedian(dev);
+ if(mad>25)return{ok:false,reason:`Le note sono troppo irregolari per una misura affidabile (scarto ${Math.round(mad)} ms): riprova.`,count:offs.length,mad};
+ const ms=Math.round(clamp(med,-200,200));
+ return{ok:true,ms,raw:Math.round(med),mad:Math.round(mad),count:offs.length,notes:notes.length,audioLatency:Math.round((ctx.outputLatency||ctx.baseLatency||0)*1000)};
+}
+async function midiCalibrateDialog(){if(MIDI.cal){toast('La calibrazione è già in corso');return}
+ const ok=await midiStart({quiet:true}).catch(()=>false);
+ if(!ok||!midiInputs().length){announce('Nessun ingresso MIDI: collega una tastiera e riprova');return}
+ for(;;){const cur=Number(prefs.midiComp)||0,prev=Number(prefs.midiCompPrev)||0;
+  const go=await modal('Calibra l’ingresso MIDI',`<p>Suona otto note a tempo con il metronomo (90 BPM, due battute di avvio). Si misura lo scarto medio tra quando premi e il tempo più vicino; il valore si applica solo alle registrazioni MIDI, anticipandole. La latenza audio dichiarata dal browser è solo un’informazione e non entra nel calcolo.</p><p>Compensazione attuale: ${cur} ms${prev!==cur?` (precedente ${prev} ms)`:''}.</p>`,[],
+   'Misura',{buttons:[{label:'Torna a zero',run:(v,pane,finish)=>{const before=Number(prefs.midiComp)||0;prefs.midiCompPrev=before;prefs.midiComp=0;savePrefs();announce(`Compensazione MIDI tornata a zero (prima ${before} ms)`);finish(null)}},{label:'Annulla',run:(v,pane,finish)=>finish(null)}]});
+  if(!go)return;
+  const res=await midiMeasure();
+  if(!res.ok){const again=await modal('Calibrazione non riuscita',`<p>${esc(res.reason)}</p>`,[],'Chiudi',{buttons:[{label:'Riprova',run:(v,pane,finish)=>finish({retry:true})}]});
+   if(again?.retry)continue;return}
+  const v=await modal('Calibrazione MIDI',`<p>Compensazione proposta: <b>${res.ms} ms</b>. Misura grezza ${res.raw} ms su ${res.count} note (scarto ${res.mad} ms). Latenza audio dichiarata: ${res.audioLatency} ms, solo informazione. Il valore è assoluto: sostituisce quello attuale (${Number(prefs.midiComp)||0} ms).</p>`,[],
+   'Applica',{buttons:[{label:'Riprova',run:(v2,pane,finish)=>finish({retry:true})},{label:'Torna a zero',run:(v2,pane,finish)=>{const before=Number(prefs.midiComp)||0;prefs.midiCompPrev=before;prefs.midiComp=0;savePrefs();announce(`Compensazione MIDI tornata a zero (prima ${before} ms)`);finish(null)}}]});
+  if(v?.retry)continue;
+  if(v){const before=Number(prefs.midiComp)||0;prefs.midiCompPrev=before;prefs.midiComp=res.ms;savePrefs();announce(`Compensazione MIDI: ${res.ms} ms (prima ${before} ms)`)}
+  return}}
+// File MIDI standard (SMF, Standard MIDI File): lettura dei tipi 0 e 1 e scrittura del tipo 0.
+// Il parser lavora in tick del file e non converte in secondi: importando in un progetto a tempo fisso le note
+// restano sulla griglia musicale (stessa battuta, stesso movimento), che è ciò che ci si aspetta da una DAW.
+// La divisione SMPTE (tempo in fotogrammi, non in tick per semiminima) si rifiuta con un messaggio chiaro.
+const SMF_PPQ=480;
+// Numero a lunghezza variabile (7 bit per byte, il primo bit alto segna la continuazione).
+function smfVar(n){n=Math.max(0,Math.round(n));const out=[n&0x7f];n=Math.floor(n/128);while(n){out.unshift((n&0x7f)|0x80);n=Math.floor(n/128)}return out}
+function smfBytes(n){return[0,1,2,3].map(i=>(n>>(24-8*i))&255)}
+function smfText(body){try{return new TextDecoder('utf-8',{fatal:true}).decode(body).replace(/\0[\s\S]*$/,'').trim()}
+ catch(e){let s='';for(const b of body){if(!b)break;s+=String.fromCharCode(b)}return s.trim()}}
+// Una traccia SMF: eventi con running status, meta eventi, note on/off appaiate per canale e altezza in ordine
+// FIFO (due note sulla stessa altezza che si sovrappongono si chiudono nella stessa sequenza in cui si aprono).
+function smfReadTrack(d,at,end){
+ // run è l'ultimo status di canale: non si azzera con meta e sysex, perché in giro ci sono file (sequencer
+ // vecchi, export di notazione) che riusano lo status di canale dopo un meta evento. Per la specifica non
+ // dovrebbero, ma essere tolleranti costa niente.
+ let tick=0,status=0,run=0,name='',notes=[],channels=new Set(),programs={},tempo=[];
+ const open=new Map(),readVar=()=>{let v=0,k=0,b;do{if(at>=end)throw Error('Traccia MIDI troncata');b=d[at++];v=(v<<7)|(b&0x7f);if(++k>4)throw Error('Numero variabile MIDI troppo lungo')}while(b&0x80);return v};
+ const key=(ch,p)=>ch*128+p,close=(ch,p,t)=>{const q=open.get(key(ch,p));if(!q||!q.length)return;const n=q.shift();if(!q.length)open.delete(key(ch,p));notes.push({t:n.t,d:Math.max(1,t-n.t),p,v:n.v,ch})};
+ while(at<end){
+  const dt=readVar();tick+=dt;
+  if(at>=end)throw Error('Traccia MIDI troncata');
+  const b=d[at];
+  if(b&0x80){at++;status=b;if(status<0xF0)run=status}
+  else{if(!run)throw Error('Running status senza un evento prima: file MIDI danneggiato');status=run}
+  if(status===0xFF){if(at>=end)throw Error('Traccia MIDI troncata');const type=d[at++],len=readVar();
+   if(at+len>end)throw Error('Traccia MIDI troncata');const body=d.subarray(at,at+len);at+=len;
+   if(type===0x03)name=smfText(body);
+   else if(type===0x51&&len===3)tempo.push({t:tick,us:(body[0]<<16)|(body[1]<<8)|body[2]});
+   if(type===0x2F)break;
+   continue}
+  if(status===0xF0||status===0xF7){const len=readVar();if(at+len>end)throw Error('Traccia MIDI troncata');at+=len;continue}
+  const hi=status&0xF0,ch=status&15;
+  if(hi===0xC0){programs[ch]=d[at++];channels.add(ch);continue}
+  if(hi===0xD0){at++;continue}
+  const two=hi===0x80||hi===0x90||hi===0xA0||hi===0xB0||hi===0xE0;
+  if(at+(two?2:1)>end)throw Error('Traccia MIDI troncata');
+  const d1=d[at++],d2=two?d[at++]:0;
+  if(hi===0x90&&d2>0){channels.add(ch);const k=key(ch,d1);if(!open.has(k))open.set(k,[]);open.get(k).push({t:tick,p:d1,v:d2})}
+  else if(hi===0x80||(hi===0x90&&d2===0))close(ch,d1,tick);
+ }
+ // Una nota senza il suo note off si chiude alla fine della traccia: meglio suonarla che perdere il contenuto.
+ for(const q of open.values())for(const n of q)notes.push({t:n.t,d:Math.max(1,tick-n.t),p:n.p,v:n.v,ch:n.ch});
+ notes.sort((a,b)=>a.t-b.t||a.p-b.p);
+ return{name,notes,channels:[...channels].sort((a,b)=>a-b),programs,tempo,endTick:tick};
+}
+// Lettura: restituisce formato, divisione e tracce con note in tick del file (con il canale di ogni nota).
+function smfRead(buf){
+ const d=buf instanceof Uint8Array?buf:new Uint8Array(buf);
+ if(d.length<14||String.fromCharCode(d[0],d[1],d[2],d[3])!=='MThd')throw Error('Non è un file MIDI: manca l’intestazione MThd');
+ const hlen=(d[4]<<24|d[5]<<16|d[6]<<8|d[7])>>>0;
+ if(hlen<6||8+hlen>d.length)throw Error('Intestazione MIDI danneggiata');
+ const format=(d[8]<<8|d[9])>>>0,ntr=(d[10]<<8|d[11])>>>0,div=(d[12]<<8|d[13])>>>0;
+ if(div&0x8000)throw Error('I file MIDI con divisione SMPTE (tempo in fotogrammi) non sono supportati');
+ if(!(div>0))throw Error('Divisione MIDI non valida');
+ if(format>1)throw Error('Formato MIDI '+format+' non supportato: si leggono i file di tipo 0 e 1');
+ const tracks=[];let at=8+hlen;
+ while(at+8<=d.length){
+  const id=String.fromCharCode(d[at],d[at+1],d[at+2],d[at+3]),len=(d[at+4]<<24|d[at+5]<<16|d[at+6]<<8|d[at+7])>>>0,end=at+8+len;
+  if(end>d.length)throw Error('Traccia MIDI troncata');
+  if(id==='MTrk')tracks.push(smfReadTrack(d,at+8,end));
+  at=end;
+ }
+ if(!tracks.length)throw Error('Il file MIDI non contiene tracce');
+ return{format,ppq:div,tracks};
+}
+// Il primo tempo dichiarato dal file: serve all'importazione per dire a che velocità è il .mid, e ad adottarlo se
+// il progetto è vuoto. changes dice quanti cambi di tempo ci sono: l'importazione tiene solo il primo.
+function smfTempoInfo(parsed){const all=[];for(const t of parsed.tracks)for(const x of t.tempo||[])all.push(x);
+ if(!all.length)return{bpm:null,changes:0};all.sort((a,b)=>a.t-b.t);const us=all[0].us;
+ return{bpm:us>0?Math.round(60000000/us*100)/100:null,changes:all.length}}
+// Una traccia SMF può contenere più canali: per l'importazione si separa per canale, così ogni parte diventa una
+// traccia di Tassello con il suo midiCh (canale SMF 0-15 → midiCh 1-16). Le tracce senza note (per esempio quella
+// del tempo nei file di tipo 1) si scartano.
+function smfSplitChannels(parsed){
+ const out=[],base=parsed.ppq||SMF_PPQ;
+ for(const [ti,tr] of parsed.tracks.entries()){
+  const byCh=new Map();
+  for(const n of tr.notes){if(!byCh.has(n.ch))byCh.set(n.ch,[]);byCh.get(n.ch).push({t:Math.round(n.t*SMF_PPQ/base),d:Math.max(1,Math.round(n.d*SMF_PPQ/base)),p:n.p,v:n.v})}
+  for(const [ch,notes] of [...byCh].sort((a,b)=>a[0]-b[0])){
+   out.push({name:(tr.name||'Traccia '+(ti+1))+(byCh.size>1?' · canale '+(ch+1):''),ch:ch+1,program:tr.programs?.[ch]??null,notes})
+  }
+ }
+ return out;
+}
+// Scrittura di un file di tipo 0 a 480 tick per semiminima, con il tempo dal BPM: tutte le parti finiscono in una
+// sola traccia e ogni nota porta il proprio canale. I note off vengono prima dei note on sullo stesso tick, così
+// una nota che finisce dove ne comincia un'altra sulla stessa altezza non si spegne per sbaglio.
+function smfWrite({bpm=120,tracks=[],name='Tassello Media'}={}){
+ const ppq=SMF_PPQ,events=[];
+ for(const tr of tracks){const ch=Math.max(0,Math.min(15,(Number(tr.ch)||1)-1));
+  if(tr.program!=null)events.push({tick:0,prio:1,data:[0xC0|ch,Math.max(0,Math.min(127,tr.program|0))]});
+  for(const n of tr.notes||[]){const p=Math.max(0,Math.min(127,n.p|0)),v=Math.max(1,Math.min(127,n.v|0)),t=Math.max(0,Math.round(n.t)),e=t+Math.max(1,Math.round(n.d));
+   events.push({tick:t,prio:3,data:[0x90|ch,p,v]});events.push({tick:e,prio:2,data:[0x80|ch,p,0]})}}
+ events.sort((a,b)=>a.tick-b.tick||a.prio-b.prio);
+ const tempo=Math.max(1,Math.round(60000000/Math.max(1,Number(bpm)||120))),body=[];
+ const push=(...b)=>body.push(...b),varLen=n=>push(...smfVar(n)),nameBytes=[...new TextEncoder().encode(String(name))];
+ // Meta eventi: nome della traccia e tempo iniziale (un file di tipo 0 ha tutto in una traccia).
+ push(0x00,0xFF,0x03);varLen(nameBytes.length);push(...nameBytes);
+ push(0x00,0xFF,0x51,0x03,(tempo>>16)&255,(tempo>>8)&255,tempo&255);
+ // Ogni evento porta il suo delta dall'evento precedente; i delta sono a lunghezza variabile.
+ let last=0;
+ for(const e of events){varLen(e.tick-last);last=e.tick;push(...e.data)}
+ push(0x00,0xFF,0x2F,0x00);
+ const head=[0x4D,0x54,0x68,0x64,...smfBytes(6),0,0,0,1,(ppq>>8)&255,ppq&255],
+  trk=[0x4D,0x54,0x72,0x6B,...smfBytes(body.length),...body];
+ return new Uint8Array([...head,...trk]);
+}
+// Editor delle note di una regione MIDI. La tabella è la superficie principale: chi usa uno screen reader naviga
+// righe e colonne come in una griglia, e ogni modifica è annunciata da sola (la navigazione no: la legge il focus).
+// Il piano roll (canvas) resta solo visivo e non è mai l'unico modo per fare qualcosa. Le note restano in tick
+// relativi alla regione; ogni operazione è un passo di cronologia (Ctrl+Z), fusa con la precedente se è lo stesso
+// comando sulla stessa selezione entro 700 ms (frecce tenute).
+const ME={open:false,region:null,regionObj:null,bpm:0,rows:[],byNote:new Map(),order:[],sel:new Set(),focus:0,col:0,anchor:null,
+ hiddenNote:false,grid:'16',last:null,lastPitch:60};
+const ME_COLS=5,ME_NAMES=['Do','Do diesis','Re','Re diesis','Mi','Fa','Fa diesis','Sol','Sol diesis','La','La diesis','Si'];
+const ME_DUR={1920:'una semibreve',960:'una minima',480:'una semiminima',240:'una croma',120:'una semicroma',60:'una biscroma',30:'una semibiscroma'};
+const meGridTicks=()=>MIDIPPQ*4/Number(ME.grid);
+// Convenzione scientifica dichiarata: la nota 60 è Do 4, il Do centrale (Yamaha e parte della didattica dicono Do 3).
+const meNoteName=p=>{const n=Number(p)|0;return ME_NAMES[((n%12)+12)%12]+' '+(Math.floor(n/12)-1)+(n===60?', Do centrale':'')};
+const meVelWords=v=>v<=20?'pianissimo':v<=40?'piano':v<=60?'mezzo piano':v<=80?'mezzo forte':v<=100?'forte':'fortissimo';
+const meTimeWords=(r,n)=>{const abs=r.startT-r.offT+n.t,b=Math.floor(abs/(MIDIPPQ*P.sig)),rest=abs-b*MIDIPPQ*P.sig,beat=Math.floor(rest/MIDIPPQ),tick=rest%MIDIPPQ;
+ return `battuta ${b+1}, tempo ${beat+1}${tick?', tick '+tick:''}`};
+const meDurWords=d=>{const s=midiSec(d);return (ME_DUR[d]?ME_DUR[d]+', ':'')+d+' tick, '+fmtNum(s,2)+' s'};
+// Per il parlato la virgola decimale si perde («0 25 s»): sotto il secondo si dicono i millisecondi, sopra i
+// secondi e i millisecondi. La cella visibile continua a mostrare «0,25 s».
+const meDurSpoken=d=>{const s=midiSec(d),ms=Math.round(s*1000),head=ME_DUR[d]?ME_DUR[d]+', ':'';
+ if(ms<1000)return head+d+' tick, '+ms+' millisecondi';
+ const sec=Math.floor(ms/1000),rest=ms%1000;return head+d+' tick, '+sec+(sec===1?' secondo':' secondi')+(rest?' e '+rest+' millisecondi':'')};
+const meVisible=n=>{const r=ME.regionObj;return !!r&&n.t>=r.offT&&n.t<r.offT+r.durT};
+const meEditorActive=()=>!!(ME.open&&ME.regionObj&&regionOf(ME.region)===ME.regionObj);
+const meSelNotes=()=>ME.order.filter(n=>ME.sel.has(n));
+function meNoteList(){const r=ME.regionObj;if(!r)return[];
+ return (r.notes||[]).filter(n=>ME.hiddenNote||meVisible(n)).sort((a,b)=>a.t-b.t||a.p-b.p)}
+function meCounts(){if(!ME.regionObj)return;const hidden=(ME.regionObj.notes||[]).length-ME.order.length,sel=ME.sel.size;
+ $('meCount').textContent=`${ME.order.length} ${ME.order.length===1?'nota':'note'}${hidden>0?`, ${hidden} fuori dalla regione`:''}${sel>1?`, ${sel} scelte`:''}`;
+ $('midiNotes').setAttribute('aria-rowcount',String(ME.order.length+1))}
+// Costruzione incrementale: le righe si creano all'apertura e si aggiornano; un cambio di intensità o altezza non
+// ricostruisce la tabella, così una freccia tenuta su 2000 note resta immediata.
+function meRow(n){const tr=document.createElement('tr');tr.setAttribute('role','row');const cells=[];
+ for(let c=0;c<ME_COLS;c++){const td=document.createElement('td');td.setAttribute('role','gridcell');td.tabIndex=-1;td.dataset.c=String(c);tr.appendChild(td);cells.push(td)}
+ const row={n,tr,cells};ME.byNote.set(n,row);meFill(row);return row}
+function meFill(row){const r=ME.regionObj,n=row.n,c=row.cells;
+ // Ogni cella ha un nome accessibile: NVDA annuncia il cambio della cella che ha il focus anche quando il testo
+ // visibile è breve o ha una virgola decimale.
+ c[0].textContent=meTimeWords(r,n);c[0].setAttribute('aria-label',meTimeWords(r,n));
+ c[1].textContent=meNoteName(n.p);c[1].setAttribute('aria-label',`${meNoteName(n.p)}, ${meTimeWords(r,n)}`);
+ c[2].textContent=meDurWords(n.d);c[2].setAttribute('aria-label',meDurSpoken(n.d));
+ c[3].textContent=`${n.v} (${meVelWords(n.v)})`;c[3].setAttribute('aria-label',`Intensità ${n.v}, ${meVelWords(n.v)}`);
+ c[4].textContent=meVisible(n)?'nella regione':'fuori dalla regione';c[4].setAttribute('aria-label',meVisible(n)?'Nella regione':'Fuori dalla regione: non si sente');
+ if(ME.sel.size>1&&ME.sel.has(n))row.tr.setAttribute('aria-selected','true');else row.tr.removeAttribute('aria-selected')}
+function meRenderAll(){const body=$('meBody');body.textContent='';ME.byNote=new Map();ME.order=meNoteList();
+ const frag=document.createDocumentFragment();ME.rows=[];
+ for(const n of ME.order){const row=meRow(n);ME.rows.push(row);frag.appendChild(row.tr)}
+ body.appendChild(frag);mePaint();meCounts();meDrawRoll()}
+function mePaint(){for(const row of ME.rows){if(ME.sel.size>1&&ME.sel.has(row.n))row.tr.setAttribute('aria-selected','true');else row.tr.removeAttribute('aria-selected');for(const td of row.cells)td.tabIndex=-1}
+ const active=ME.rows[ME.focus];if(active)active.cells[ME.col].tabIndex=0}
+function meFocus(idx,col,doFocus=true){if(!ME.order.length)return;
+ ME.focus=clamp(idx,0,ME.order.length-1);ME.col=clamp(col,0,ME_COLS-1);mePaint();
+ const row=ME.rows[ME.focus];if(row&&doFocus)row.cells[ME.col].focus({preventScroll:true})}
+function meSelectOne(idx){if(!ME.order.length)return;ME.anchor=null;ME.focus=clamp(idx,0,ME.order.length-1);ME.sel=new Set([ME.order[ME.focus]]);mePaint();meCounts()}
+function meSelectRange(to){if(!ME.order.length)return;if(ME.anchor===null)ME.anchor=ME.focus;
+ const a=Math.min(ME.anchor,clamp(to,0,ME.order.length-1)),b=Math.max(ME.anchor,clamp(to,0,ME.order.length-1));
+ ME.focus=clamp(to,0,ME.order.length-1);ME.sel=new Set(ME.order.slice(a,b+1));mePaint();meCounts()}
+// ——— Apertura, chiusura, sincronizzazione con il progetto ———
+function midiEditorShowUI(){$('midiEd').hidden=false;$('wave').closest('.wave-wrap').hidden=true;$('selbar').hidden=true;$('aOverviewBox').hidden=true}
+function midiEditorHideUI(){$('midiEd').hidden=true;$('wave').closest('.wave-wrap').hidden=false;$('selbar').hidden=false;$('aOverviewBox').hidden=false}
+function midiEditorOpen(r,{focus=true,quiet=false}={}){
+ midiEditorShowUI();ME.open=true;ME.region=r.id;ME.regionObj=r;ME.bpm=P.bpm;ME.last=null;ME.anchor=null;
+ const list=meNoteList();ME.sel=new Set(list.length?[list[0]]:[]);ME.focus=0;ME.col=1;
+ $('edTitle').textContent='Editor della regione MIDI';$('edInfo').textContent=`«${r.name}» · traccia «${trackOf(r.track)?.name||''}» · ${r.notes?.length||0} note`;
+ $('meGrid').value=ME.grid;$('meHidden').checked=ME.hiddenNote;
+ meRenderAll();if(focus&&list.length)meFocus(0,1,true);else if(focus)$('midiNotes').focus();
+ if(!quiet)announce(`Editor MIDI, ${list.length} ${list.length===1?'nota':'note'}${(r.notes?.length||0)>list.length?`, ${r.notes.length-list.length} fuori dalla regione`:''}`);
+ return true}
+function midiEditorClose(){if(!ME.open)return;meStopPreview();ME.open=false;ME.region=null;ME.regionObj=null;ME.rows=[];ME.byNote=new Map();ME.order=[];ME.sel.clear();
+ midiEditorHideUI();$('edTitle').textContent='Editor della regione';updateEditorBar()}
+function midiEditorSync(){if(!ME.open)return;const r=ME.region&&regionOf(ME.region);
+ if(!r||r.kind!=='midi'){midiEditorClose();return}
+ if(r!==ME.regionObj||P.bpm!==ME.bpm){
+  // Dopo annulla/ripeti pSnap ricrea gli oggetti delle note: si ritrovano per (tempo, altezza), non per identità.
+  const hadFocus=$('midiNotes').contains(document.activeElement),col=ME.col,idx=ME.focus,
+   focusKey=ME.order[ME.focus]?ME.order[ME.focus].t+'|'+ME.order[ME.focus].p:null,
+   keys=[...ME.sel].map(n=>n.t+'|'+n.p),prevObj=ME.regionObj;
+  ME.regionObj=r;ME.bpm=P.bpm;ME.last=null;meRenderAll();
+  const byKey=new Map(ME.order.map(n=>[n.t+'|'+n.p,n]));
+  ME.sel=new Set(keys.map(k=>byKey.get(k)).filter(Boolean));
+  const fi=focusKey&&byKey.has(focusKey)?ME.order.indexOf(byKey.get(focusKey)):clamp(idx,0,Math.max(0,ME.order.length-1));
+  ME.focus=fi;
+  if(!ME.sel.size&&ME.order.length)ME.sel=new Set([ME.order[clamp(fi,0,ME.order.length-1)]]);
+  mePaint();meCounts();
+  if(hadFocus&&ME.order.length)meFocus(clamp(fi,0,ME.order.length-1),col,true);
+  void prevObj}
+ $('edTitle').textContent='Editor della regione MIDI';
+ $('edInfo').textContent=`«${r.name}» · traccia «${trackOf(r.track)?.name||''}» · ${r.notes?.length||0} note`}
+// ——— Modifiche ———
+function meApply(label,fn,say,changed,focusNote){
+ const r=ME.regionObj,hlen=phist.length,key=label+'|'+r.id+'|'+ME.focus+'|'+ME.order.length+'|'+ME.sel.size,now=performance.now(),
+  merge=ME.last&&ME.last.key===key&&now-ME.last.t<700&&phist.length>0&&phist.at(-1)===ME.last.entry;
+ if(merge){fn();ME.last.t=now;const e=ME.last.entry;e.after=pSnap();projectChanged({live:true})}
+ else{pCommit(label,fn,{live:true});ME.last=phist.length>hlen?{key,t:now,entry:phist.at(-1)}:null}
+ meRefresh(changed,focusNote);updateEditorBarNeeds();
+ if(say)announce(say);return true}
+function updateEditorBarNeeds(){if(!ME.regionObj)return;$('edTitle').textContent='Editor della regione MIDI';
+ $('edInfo').textContent=`«${ME.regionObj.name}» · traccia «${trackOf(ME.regionObj.track)?.name||''}» · ${ME.regionObj.notes?.length||0} note`}
+function meRefresh(changed,focusNote){const r=ME.regionObj,prev=new Set(ME.sel);
+ for(const n of changed||[]){const row=ME.byNote.get(n);if(row)meFill(row)}
+ const list=meNoteList(),sameOrder=ME.order.length===list.length&&list.every((n,i)=>ME.order[i]===n);
+ if(sameOrder){ME.order=list;if(focusNote){const i=ME.order.indexOf(focusNote);if(i>=0){ME.focus=i;ME.sel=new Set([focusNote]);meFocus(i,ME.col,true)}}
+  mePaint();meCounts();return}
+ const set=new Set(list),sameNotes=set.size===ME.order.length&&ME.order.every(n=>set.has(n));
+ if(!sameNotes){meRenderAll();ME.sel=new Set(ME.order.filter(n=>prev.has(n)));
+  if(focusNote){const i=ME.order.indexOf(focusNote);if(i>=0){ME.focus=i;ME.sel=new Set([focusNote]);meFocus(i,ME.col,true)}}
+  mePaint();meCounts();meDrawRoll();return}
+ ME.order=list;const frag=document.createDocumentFragment();for(const n of list)frag.appendChild(ME.byNote.get(n).tr);$('meBody').appendChild(frag);
+ if(focusNote){const i=ME.order.indexOf(focusNote);if(i>=0){ME.focus=i;ME.sel=new Set([focusNote]);meFocus(i,ME.col,true)}}
+ else if(ME.order.length)ME.focus=Math.min(ME.focus,ME.order.length-1);
+ mePaint();meCounts();meDrawRoll()}
+// ——— Operazioni ———
+function meAddNote(){const r=ME.regionObj;if(!r)return;if((r.notes||[]).length>=2000){toast('La regione ha già 2000 note: non se ne possono aggiungere altre');return}
+ const cur=ME.order[ME.focus];let t;
+ if(P.t>=r.start&&P.t<r.start+r.dur)t=Math.max(0,midiTick(P.t)-(r.startT-r.offT));
+ else if(cur)t=Math.max(0,cur.t+meGridTicks());else t=0;
+ const n={t,d:meGridTicks(),p:ME.lastPitch,v:100};
+ meApply('Aggiungi nota',()=>{r.notes.push(n);r.notes.sort((a,b)=>a.t-b.t||a.p-b.p)},`Nota aggiunta: ${meNoteName(n.p)}, ${meTimeWords(r,n)}, ${meDurWords(n.d)}`,[n],n)}
+async function meDeleteNotes(){const sel=meSelNotes();if(!sel.length){toast('Nessuna nota scelta');return}
+ if(sel.length>10&&!(await confirmAction(`Togliere ${sel.length} note?`,'Togli')))return;
+ const r=ME.regionObj,idx=ME.order.indexOf(sel[0]);
+ meApply('Elimina note',()=>{r.notes=(r.notes||[]).filter(n=>!ME.sel.has(n))},`${sel.length===1?'Nota tolta':'Note tolte: '+sel.length}`,null,null);
+ if(!ME.order.length){$('midiNotes').focus();return}
+ const i=Math.min(idx,ME.order.length-1);ME.focus=i;meSelectOne(i);meFocus(i,ME.col,true)}
+function meTranspose(delta,label){const sel=meSelNotes();if(!sel.length){toast('Nessuna nota scelta');return}
+ const notes=sel.filter(n=>n.p+delta>=0&&n.p+delta<=127),skipped=sel.length-notes.length;
+ if(!notes.length){toast('Altezza fuori dai limiti MIDI (0-127)');return}
+ // L'annuncio deve dire la nota NUOVA: va calcolata prima della modifica, non letta dopo (il valore vecchio è
+ // quello che ancora c'è quando si prepara la frase).
+ const np=notes[0].p+delta;
+ meApply(label,()=>{for(const n of notes)n.p+=delta},ME.sel.size===1&&ME.col===1?null:(notes.length===1?meNoteName(np):`${notes.length} note spostate${skipped?`, ${skipped} fuori dai limiti`:''}`),notes,notes[0]);
+ ME.lastPitch=clamp(np,0,127)}
+function meMoveTime(dir){const sel=meSelNotes();if(!sel.length)return;const step=meGridTicks()*dir,notes=sel;
+ // La cella Tempo aggiorna il suo nome: se il focus è lì e la nota resta visibile, parla da sé e la live region
+ // tace. Se la nota esce dalla finestra (la riga può sparire) o il focus è altrove, l'annuncio ci vuole.
+ meApply('Sposta nel tempo',()=>{for(const n of notes)n.t=Math.max(0,n.t+step)},null,notes,notes[0]);
+ const hidden=notes.filter(n=>!meVisible(n)).length;
+ if(!(ME.sel.size===1&&ME.col===0&&notes.every(meVisible)))
+  announce(`${notes.length===1?`Spostata a ${meTimeWords(ME.regionObj,notes[0])}`:`${notes.length} note spostate di ${Math.abs(step)} tick`}${hidden?', fuori dalla regione: non si sente':''}`)}
+function meSetDuration(dir){const sel=meSelNotes();if(!sel.length)return;const step=meGridTicks()*dir,max=8*MIDIPPQ*P.sig,notes=sel,nd=clamp(notes[0].d+step,1,max);
+ meApply('Durata',()=>{for(const n of notes)n.d=clamp(n.d+step,1,max)},ME.sel.size===1&&ME.col===2?null:(notes.length===1?`Durata: ${meDurSpoken(nd)}`:`Durate cambiate per ${notes.length} note`),notes,notes[0])}
+function meSetVelocity(delta){const sel=meSelNotes();if(!sel.length)return;const nv=clamp(sel[0].v+delta,1,127);
+ meApply('Intensità',()=>{for(const n of sel)n.v=clamp(n.v+delta,1,127)},ME.sel.size===1&&ME.col===3?null:(sel.length===1?`Intensità ${nv}`:`Intensità cambiata per ${sel.length} note`),sel,sel[0])}
+function meVelocityDigit(d){const table=[127,13,25,38,51,64,76,89,102,114],v=table[Number(d)%10],sel=meSelNotes();if(!sel.length)return;
+ meApply('Intensità',()=>{for(const n of sel)n.v=v},ME.sel.size===1&&ME.col===3?null:`Intensità ${v}`,sel,sel[0])}
+async function meNoteProps(){const n=ME.order[ME.focus];if(!n){toast('Nessuna nota scelta');return}const r=ME.regionObj;
+ const v=await modal('Proprietà della nota',`<p>${esc(meNoteName(n.p))}, ${esc(meTimeWords(r,n))}.</p>`,
+  [{id:'t',label:'Tempo dall’inizio della regione, in tick',type:'number',value:n.t},{id:'p',label:'Altezza (0-127)',type:'number',value:n.p},
+   {id:'d',label:'Durata in tick',type:'number',value:n.d},{id:'v',label:'Intensità (1-127)',type:'number',value:n.v}],'Applica',
+  {validate:v=>{const t=num(v.t),p=num(v.p),d=num(v.d),vel=num(v.v);
+   return !(t>=0)?{msg:'Tempo: un numero di tick da zero in su.',field:'t'}:!(Number.isInteger(p)&&p>=0&&p<=127)?{msg:'Altezza: un numero intero da 0 a 127.',field:'p'}:!(d>=1)?{msg:'Durata: almeno un tick.',field:'d'}:!(vel>=1&&vel<=127)?{msg:'Intensità: un numero da 1 a 127.',field:'v'}:null}});
+ if(!v)return;const t=Math.round(num(v.t)),p=Math.round(num(v.p)),d=Math.round(num(v.d)),vel=Math.round(num(v.v));
+ meApply('Proprietà della nota',()=>{n.t=t;n.p=p;n.d=d;n.v=vel},`${meNoteName(p)}, ${meTimeWords(r,n)}, ${meDurWords(d)}, intensità ${vel}`,[n],n);ME.lastPitch=p}
+function meReadNote(){const n=ME.order[ME.focus];if(!n){toast('Nessuna nota nella regione');return}const r=ME.regionObj,sel=ME.sel.size;
+ announce(`Nota ${ME.focus+1} di ${ME.order.length}${sel>1?`, ${sel} scelte`:''}: ${meNoteName(n.p)}, ${meTimeWords(r,n)}, durata ${meDurSpoken(n.d)}, intensità ${n.v} ${meVelWords(n.v)}${meVisible(n)?'':' , fuori dalla regione: non si sente'}`)}
+function meToggleHidden(on=!ME.hiddenNote){ME.hiddenNote=on;const before=new Set(ME.sel);$('meHidden').checked=on;meRenderAll();
+ ME.sel=new Set(ME.order.filter(n=>before.has(n)));mePaint();meCounts();
+ if(ME.open)meDrawRoll();
+ announce(on?'Note fuori dalla regione mostrate':`Note fuori dalla regione nascoste${ME.regionObj.notes.length-ME.order.length>0?': '+ (ME.regionObj.notes.length-ME.order.length):''}`)}
+function meEnsure(){if(meEditorActive())return true;const r=selRegion();if(r&&r.kind==='midi'){openRegion(r);return true}toast('Scegli una regione MIDI');return false}
+// ——— Piano roll (solo visivo) ———
+function meDrawRoll(){const cv=$('meRoll');if(!cv||cv.offsetParent===null)return;const r=ME.regionObj;if(!r)return;
+ const dpr=window.devicePixelRatio||1,w=cv.clientWidth||600,h=cv.clientHeight||140;if(!w||!h)return;
+ if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+ const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+ const all=r.notes||[],notes=all.length?all:[{p:60}];let lo=Math.min(...notes.map(n=>n.p),60)-1,hi=Math.max(...notes.map(n=>n.p),60)+1;
+ if(hi-lo<12){const c=(lo+hi)/2;lo=Math.round(c-6);hi=Math.round(c+6)}
+ const x=t=>(t-r.offT)/Math.max(1,r.durT)*w,y=p=>h-((p-lo)/Math.max(1,hi-lo))*h,rh=Math.max(2,h/Math.max(1,hi-lo)-1);
+ g.strokeStyle='rgba(120,120,120,.25)';g.lineWidth=1;
+ for(let p=Math.ceil(lo/12)*12;p<=hi;p+=12){const yy=y(p);g.beginPath();g.moveTo(0,yy);g.lineTo(w,yy);g.stroke()}
+ const bar=MIDIPPQ*P.sig;g.strokeStyle='rgba(120,120,120,.45)';
+ for(let t=r.offT;t<=r.offT+r.durT;t+=bar){const xx=x(t);g.beginPath();g.moveTo(xx,0);g.lineTo(xx,h);g.stroke()}
+ for(const n of all){const hidden=!meVisible(n);if(hidden&&!ME.hiddenNote)continue;
+  const xx=x(n.t);if(xx>w||xx+2<0)continue;
+  g.fillStyle=ME.sel.has(n)?'#2457c5':hidden?'rgba(120,120,120,.35)':'#4a7fd4';
+  g.fillRect(xx,y(n.p)-(rh+1)/2,Math.max(2,x(n.t+n.d)-xx),rh)}
+ if(MIX.playing){const px=((mixPos()-r.start)/Math.max(1e-6,r.dur))*w;if(px>=0&&px<=w){g.strokeStyle='#b0306a';g.lineWidth=2;g.beginPath();g.moveTo(px,0);g.lineTo(px,h);g.stroke()}}}
+// ——— Ascolto ———
+// Spazio suona la regione dall'inizio con il trasporto normale e si ferma alla fine della regione (senza toccare il
+// ciclo del progetto, che finirebbe nella cronologia e nel salvataggio); Maiusc+Spazio suona la nota scelta.
+const meAud={on:false,timer:0,roll:0,end:0};
+ME.preview=null;
+function meStopAudition(){clearInterval(meAud.timer);clearInterval(meAud.roll);meAud.on=false;meAud.timer=meAud.roll=0}
+function mePlayRegion(){if(meAud.on){mixStop(true);meStopAudition();announce('Regione ferma');meDrawRoll();return}
+ const r=ME.regionObj;if(!r)return;meStopPreview();
+ mixPlay(r.start,{origin:r.start});meAud.on=true;meAud.end=r.start+r.dur;
+ meAud.timer=setInterval(()=>{if(!MIX.playing){meStopAudition();meDrawRoll();return}if(mixPos()>=meAud.end-0.005){mixStop(true);meStopAudition();announce('Fine della regione');meDrawRoll()}},25);
+ meAud.roll=setInterval(meDrawRoll,80);announce('Ascolto della regione')}
+// L'anteprima è una sola alla volta: con le frecce tenute (circa 30 passi al secondo) le note si accavallerebbero in
+// un grappolo, quindi quando ne parte una nuova la precedente si spegne subito.
+function meStopPreview(){const x=ME.preview;if(!x)return;clearTimeout(x.timer);midiNoteOff(x.port,x.ch,x.p,0);ME.preview=null}
+function mePlayNote(){const n=ME.order[ME.focus],r=ME.regionObj;if(!n||!r)return;const tr=trackOf(r.track);if(!tr)return;
+ const send=()=>{if(ME.preview)meStopPreview();const port=midiOutputFor(tr);if(!port){announce('Nessuna uscita MIDI: la nota non si sente');return}
+  const ch=clamp((tr.midiCh||1)-1,0,15);midiNoteOn(port,ch,n.p,n.v,0,tr.id);
+  const timer=setTimeout(()=>{if(ME.preview&&ME.preview.timer===timer)ME.preview=null;midiNoteOff(port,ch,n.p,0)},Math.max(120,Math.min(2000,midiSec(n.d)*1000)));
+  ME.preview={port,ch,p:n.p,timer};announce(meNoteName(n.p))};
+ // Con l'accesso già concesso la nota parte subito, così le frecce tenute spengono la precedente in ordine; al primo
+ // uso l'accesso si chiede e le anteprime in coda si spegnono comunque l'una con l'altra.
+ if(MIDI.access)send();else midiStart({quiet:true}).then(ok=>{if(ok)send()}).catch(()=>{})}
+function meMaybePreview(){if(!meEditorActive()||!$('mePreview')?.checked)return;mePlayNote()}
+// ——— Tastiera della griglia ———
+function meKey(e){if(!meEditorActive())return;meSyncFocus();const k=e.key,ctrl=e.ctrlKey||e.metaKey,alt=e.altKey,shift=e.shiftKey;let done=true;
+ if(!ME.order.length&&k!=='Enter'&&k!=='F2'&&!(alt&&k==='Enter'))return;
+ if(ctrl&&/^a$/i.test(k)){ME.anchor=0;ME.sel=new Set(ME.order);mePaint();meCounts();announce(`Selezionate ${ME.sel.size} note`)}
+ else if(alt&&!ctrl&&(k==='ArrowUp'||k==='ArrowDown'))meTranspose((k==='ArrowDown'?-1:1)*(shift?12:1),shift?'Ottava':'Semitono');
+ else if(alt&&!ctrl&&(k==='ArrowLeft'||k==='ArrowRight'))meMoveTime(k==='ArrowRight'?1:-1);
+ else if(ctrl&&!alt&&(k==='ArrowLeft'||k==='ArrowRight'))meSetDuration(k==='ArrowRight'?1:-1);
+ else if(k==='ArrowUp'||k==='ArrowDown'){const to=clamp(ME.focus+(k==='ArrowDown'?1:-1),0,ME.order.length-1);if(shift)meSelectRange(to);else meSelectOne(to);meFocus(to,ME.col,true)}
+ else if(k==='ArrowLeft')meFocus(ME.focus,ME.col-1,true);
+ else if(k==='ArrowRight')meFocus(ME.focus,ME.col+1,true);
+ else if(k==='Home'){meSelectOne(0);meFocus(0,ME.col,true)}
+ else if(k==='End'){meSelectOne(ME.order.length-1);meFocus(ME.order.length-1,ME.col,true)}
+ else if(k==='+'||k==='=')meSetVelocity(5);
+ else if(k==='-'||k==='_')meSetVelocity(-5);
+ else if(/^[0-9]$/.test(k)&&!ctrl&&!alt)meVelocityDigit(k);
+ else if(k==='Enter'&&!alt)meAddNote();
+ else if(k==='Delete'||k==='Backspace')meDeleteNotes();
+ else if(k==='F2'||(alt&&k==='Enter'))meNoteProps();
+ else if(k===' '&&shift)mePlayNote();
+ else if(k===' ')mePlayRegion();
+ else done=false;
+ if(done){e.preventDefault();e.stopPropagation();
+  if(!alt&&!ctrl&&(k.startsWith('Arrow')||k==='Home'||k==='End'))meMaybePreview()}}
+// La posizione interna della griglia si riallinea alla cella che ha davvero il focus al primo tasto: così mouse, F6,
+// programmi di prova o NVDA che spostano il focus non lasciano la freccia successiva ripartire dalla riga 1.
+function meSyncFocus(){const td=document.activeElement;if(!td||td.tagName!=='TD'||!$('midiNotes').contains(td))return;
+ const tr=td.closest('tr'),i=tr?[...$('meBody').children].indexOf(tr):-1;if(i<0)return;
+ ME.focus=i;ME.col=clamp(Number(td.dataset.c)||0,0,ME_COLS-1);
+ if(!ME.sel.has(ME.order[i]))meSelectOne(i)}
+$('midiNotes').addEventListener('keydown',meKey);
+$('meGrid').addEventListener('change',e=>{ME.grid=e.target.value;announce('Griglia '+ (ME.grid==='16'?'un sedicesimo':ME.grid==='8'?'un ottavo':'un quarto'))});
+$('meHidden').addEventListener('change',e=>meToggleHidden(e.target.checked));
+addEventListener('resize',()=>{if(ME.open)meDrawRoll()});
 // Progetto video: una traccia principale di clip una dopo l'altra, ognuna con uno spazio vuoto facoltativo prima di sé
 // (gap, in secondi), più tre tracce libere per titoli,
 // audio (musica e voce fuori campo) e sottotitoli. I file restano originali: il montaggio indica solo quali parti
@@ -3848,7 +4594,7 @@ async function gcMedia(){try{const keys=await dbKeys(),used=new Set(V.p.media.ma
 // Progetto in un file: ZIP con progetto.json e la cartella media, senza compressione.
 async function saveProjectZip(){if(!V.p.media.length&&!V.p.main.length&&!V.p.titles.length&&!V.p.subs.length){toast('Il progetto è vuoto');return}const files=[],p=structuredClone(V.p);
  for(const m of p.media){const rt=MEDIA.get(m.id);if(!rt)continue;m.file=`media/${m.id}-${safeFileName(m.name)}`;files.push({name:m.file,data:rt.blob})}
- files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.20.0',progetto:p},null,1)});
+ files.unshift({name:'progetto.json',data:JSON.stringify({programma:'Tassello Media',versione:'1.21.0',progetto:p},null,1)});
  const zip=await work('Salvataggio del progetto',()=>zipBlob(files,f=>status(`Salvataggio del progetto ${Math.round(f*100)}%`)));if(!zip)return;download(zip,extName(V.p.title+' (progetto video)','zip'));toast(`Progetto salvato (${fmtBytes(zip.size)}): riaprilo con Apri in Video`)}
 async function openProjectZip(file){const entries=await work('Apertura del progetto',()=>unzipBlob(file));if(!entries)return false;const json=entries['progetto.json'];if(!json)return false;let data;try{data=JSON.parse(await json.text())}catch(e){toast('Il file progetto.json è danneggiato');return true}
  const p=data.progetto||data,blobs={};for(const m of p.media||[]){const b=entries[m.file];if(b)blobs[m.id]=new File([b],m.name||'file',{type:b.type})}
@@ -4557,15 +5303,90 @@ const POS_NAME={top:'in alto',center:'al centro',lower:'terzo inferiore',bottom:
 const toggleMarkPane=()=>paneSet('markPane',paneState('markPane').st==='open'?'off':'open',{focus:true,say:false});
 // In Audio alcuni comandi valgono per l'editor della regione o per le tracce secondo dove si sta lavorando.
 const songOrEditor=(song,editor)=>()=>inEditorArea()?editor():song();
-const undoScope=()=>document.activeElement?.closest?.('#editorArea,#markPane')?'editor':document.activeElement?.closest?.('#arrange')?'project':lastScope;
-const A_ACTIONS={newBus,saveAudio:exportAudioDialog,saveAudioProject:saveAudioProjectZip,exportStems,newTrack:addTrack,importTrack:()=>$('mediaInput').click(),trackSettings:()=>trackSettings(),trackMute:()=>{const t=selTrack();if(t)toggleTrack(t.id,'mute');else toast('Crea prima una traccia')},trackSolo:()=>{const t=selTrack();if(t)toggleTrack(t.id,'solo');else toast('Crea prima una traccia')},trackVoice:()=>{const t=selTrack();if(!t){toast('Crea prima una traccia');return}const on=!t.voice;pCommit('Traccia della voce',()=>{for(const x of P.tracks){x.voice=x.id===t.id&&on;if(x.voice)x.duck=0}});announce(on?`«${t.name}» è la traccia della voce: le tracce con l’abbassamento si abbasseranno quando parla`:'La traccia della voce è stata tolta');refreshToggles()},trackRename:()=>renameTrack(),trackDuplicate:()=>duplicateTrack(),trackDelete:()=>deleteTrack(),trackUp:()=>moveTrack(-1),trackDown:()=>moveTrack(1),
+// L'editor MIDI è dentro #editorArea ma le sue modifiche stanno nella cronologia del progetto: Ctrl+Z lì deve
+// annullare la nota, non l'editor audio. Quindi #midiEd viene controllato per primo.
+const undoScope=()=>document.activeElement?.closest?.('#midiEd')?'project':document.activeElement?.closest?.('#editorArea,#markPane')?'editor':document.activeElement?.closest?.('#arrange')?'project':lastScope;
+// --- Tracce MIDI ---------------------------------------------------------
+// Le note di una regione che finiscono nel file .mid: solo la finestra [offT, offT+durT), relative all'inizio della
+// regione, con le durate tagliate alla fine. Le note nascoste dal trim restano nel progetto ma non si esportano,
+// come nell'esportazione audio della regione.
+function midiRegionNotes(r){const a=r.offT,b=r.offT+r.durT;
+ return (r.notes||[]).filter(n=>n.t>=a&&n.t<b).map(n=>({t:n.t-a,d:Math.min(n.d,b-n.t),p:n.p,v:n.v}))}
+// Tutta la traccia: le regioni in sequenza, ognuna nella sua finestra, alle posizioni assolute del brano.
+function midiTrackNotes(tr){const out=[];for(const r of P.regions.filter(x=>x.track===tr.id&&x.kind==='midi'))
+ for(const n of midiRegionNotes(r))out.push({t:r.startT+n.t,d:n.d,p:n.p,v:n.v});return out}
+function newMidiTrack(){let t,r;pCommit('Nuova traccia MIDI',()=>{
+ t=newTrack('MIDI '+(P.tracks.filter(x=>x.kind==='midi').length+1),'midi');P.tracks.push(t);
+ r=newMidiRegion(t.id,midiTick(Math.max(0,P.t)),'Regione MIDI');P.regions.push(r);P.track=t.id;P.sel=r.id});
+ focusLane(t.id);announce(`Nuova traccia MIDI «${t.name}»: le note suonano sul sintetizzatore esterno e non finiscono nel mix esportato`)}
+// Una regione MIDI scelta si esporta da sola; senza regione si esporta la traccia MIDI scelta per intero.
+function exportMidi(){const r=selRegion(),tr=r?trackOf(r.track):selTrack();
+ if(!r&&tr?.kind!=='midi'){toast('Scegli una regione o una traccia MIDI');return}
+ if(r&&r.kind==='midi'){const notes=midiRegionNotes(r);if(!notes.length){toast('La regione non ha note da esportare');return}
+  download(new Blob([smfWrite({bpm:P.bpm,name:r.name,tracks:[{ch:tr.midiCh,program:tr.program,notes}]})],{type:'audio/midi'}),extName(r.name,'mid'),'audio/midi');
+  announce(`Regione «${r.name}» esportata come file MIDI: ${notes.length} note`);return}
+ if(tr?.kind==='midi'){const notes=midiTrackNotes(tr);if(!notes.length){toast('La traccia non ha note da esportare');return}
+  download(new Blob([smfWrite({bpm:P.bpm,name:tr.name,tracks:[{ch:tr.midiCh,program:tr.program,notes}]})],{type:'audio/midi'}),extName(tr.name,'mid'),'audio/midi');
+  announce(`Traccia «${tr.name}» esportata come file MIDI: ${notes.length} note`);return}
+ toast('Scegli una regione o una traccia MIDI')}
+// Importazione di file .mid: una traccia per ogni parte (traccia SMF e canale), ognuna con il suo midiCh. Se il
+// progetto è vuoto si adotta il primo tempo del file; altrimenti restano le note sulla griglia del progetto e si
+// dice a che velocità era il file.
+async function importMidiFiles(files){let tracce=0,note=0;const said=[];
+ for(const f of files){let parsed;try{parsed=smfRead(await f.arrayBuffer())}catch(e){toast(`«${f.name}»: ${e.message}`);continue}
+  const parts=smfSplitChannels(parsed);if(!parts.length){toast(`«${f.name}» non contiene note`);continue}
+  const info=smfTempoInfo(parsed),empty=!P.regions.length;
+  pCommit('Importa '+f.name,()=>{if(empty&&info.bpm&&Math.abs(info.bpm-P.bpm)>0.01)P.bpm=info.bpm;
+   const startT=empty?0:midiTick(Math.max(0,P.t));
+   for(const part of parts){const t=newTrack(part.name,'midi');t.midiCh=part.ch;t.program=part.program;P.tracks.push(t);
+    const r=newMidiRegion(t.id,startT,part.name);r.notes=part.notes;P.regions.push(r);P.track=t.id;P.sel=r.id;tracce++;note+=part.notes.length}});
+  if(info.bpm){if(empty)said.push(`Tempo del file «${f.name}»: ${fmtNum(info.bpm,0)} BPM, adottato nel progetto`);
+   else if(Math.abs(info.bpm-P.bpm)>0.01)said.push(`Il file «${f.name}» è a ${fmtNum(info.bpm,0)} BPM, il progetto a ${fmtNum(P.bpm,0)}: le note restano sulla griglia del progetto`);
+   if(info.changes>1)said.push(`Il file ha ${info.changes} cambi di tempo: si è tenuto il primo`)}}
+ if(!tracce){announce('Nessuna traccia MIDI importata');return}
+ announce(`Importate ${tracce} tracce MIDI (${note} note)${said.length?'. '+said.join('. '):''}`)}
+// Armatura: una sola traccia MIDI alla volta ascolta l'ingresso (note in uscita, comandi a nota sospesi).
+function toggleMidiArm(t=selTrack()){if(!t||t.kind!=='midi'){toast('Scegli una traccia MIDI');return}
+ const on=!t.arm;pCommit('Armatura MIDI',()=>{for(const x of P.tracks)x.arm=!!(x.id===t.id&&on)});
+ if(on)midiStart({quiet:true}).then(ok=>{if(ok&&!midiOutputs().length)announce('Nessuna uscita MIDI disponibile: le note non si sentono')}).catch(()=>{});
+ const port=on?midiOutputFor(t):null;
+ announce(on?`Traccia MIDI «${t.name}» armata: le note suonano su ${port?.name||'la prima uscita'} e non comandano il programma`:'Armatura MIDI tolta')}
+// Quantizzazione sulla griglia ASSOLUTA del brano: tickAssoluto = startT − offT + t, aggancio, riconversione.
+// Una regione spostata o tagliata fuori battuta non finisce così su una griglia sfasata. Durate intatte; pCommit.
+async function quantizeMidi(){const sel=selRegion(),tr=selTrack();
+ let regions=sel?.kind==='midi'?[sel]:tr?.kind==='midi'?P.regions.filter(r=>r.track===tr.id&&r.kind==='midi'):[];
+ if(!regions.length){toast('Scegli una regione o una traccia MIDI');return}
+ const v=await modal('Quantizza la regione MIDI',`<p>Gli inizi delle note si agganciano alla griglia del brano; le durate non cambiano. Si annulla con Ctrl+Z.</p>`,
+  [{id:'grid',label:'Griglia',type:'select',value:'16',options:[['4','1/4 (un tempo)'],['8','1/8'],['16','1/16']]}],'Quantizza');
+ if(!v)return;const step=MIDIPPQ*4/Number(v.grid);let moved=0,maxShift=0,total=0;
+ pCommit('Quantizza MIDI',()=>{for(const r of regions)for(const n of r.notes||[]){
+  const origin=r.startT-r.offT,abs=origin+n.t;let q=Math.round(abs/step)*step;
+  // Una nota visibile non deve finire prima dell'inizio visibile (t<offT): diventerebbe muta e sembrerebbe
+  // cancellata. In quel caso si aggancia alla linea di griglia successiva, restando dentro la regione e sulla
+  // griglia. Per le note già nascoste resta il comportamento di prima.
+  if(n.t>=r.offT&&q-origin<r.offT)q+=step;
+  if(q!==abs){moved++;maxShift=Math.max(maxShift,Math.abs(q-abs))}
+  n.t=Math.max(0,q-origin);total++}
+  for(const r of regions)r.notes=(r.notes||[]).sort((a,b)=>a.t-b.t||a.p-b.p)});
+ announce(`Quantizzate ${total} note su griglia 1/${v.grid}: ${moved} spostate${moved?`, al massimo di ${maxShift} tick (${sayTime(midiSec(maxShift),2)})`:''}`)}
+const meAct=fn=>()=>{if(meEnsure())fn()};
+// Ritorno esplicito della compensazione: le preferenze non passano da Ctrl+Z, quindi il valore precedente si salva e
+// il comando lo dice. Zero significa «nessuna compensazione».
+async function midiCompZero(){const before=Number(prefs.midiComp)||0;
+ if(!(await confirmAction(`La compensazione MIDI è ${before} ms. Tornare a zero, cioè senza compensazione?`,'Torna a zero')))return;
+ prefs.midiCompPrev=before;prefs.midiComp=0;savePrefs();announce(`Compensazione MIDI tornata a zero (prima ${before} ms)`)}
+const A_ACTIONS={newBus,newMidiTrack,exportMidi,midiArm:()=>toggleMidiArm(),midiQuantize:quantizeMidi,
+midiAddNote:meAct(meAddNote),midiDeleteNotes:meAct(meDeleteNotes),midiSemiUp:meAct(()=>meTranspose(1,'Semitono')),midiSemiDown:meAct(()=>meTranspose(-1,'Semitono')),
+midiOctaveUp:meAct(()=>meTranspose(12,'Ottava')),midiOctaveDown:meAct(()=>meTranspose(-12,'Ottava')),midiDurLonger:meAct(()=>meSetDuration(1)),midiDurShorter:meAct(()=>meSetDuration(-1)),
+midiVelUp:meAct(()=>meSetVelocity(5)),midiVelDown:meAct(()=>meSetVelocity(-5)),midiNoteProps:meAct(meNoteProps),midiReadNote:meAct(meReadNote),midiShowHidden:meAct(()=>meToggleHidden()),midiPlayRegion:meAct(mePlayRegion),midiPlayNote:meAct(mePlayNote),midiClock:midiClockDialog,midiCalibrate:midiCalibrateDialog,midiCompReset:midiCompZero,
+midiOverdub:()=>{prefs.midiOverdub=!prefs.midiOverdub;savePrefs();announce(prefs.midiOverdub?'Registrazione MIDI: sovraincisione nella regione sotto attiva':'Registrazione MIDI: regione nuova (sovraincisione spenta)')},saveAudio:exportAudioDialog,saveAudioProject:saveAudioProjectZip,exportStems,newTrack:addTrack,importTrack:()=>$('mediaInput').click(),trackSettings:()=>trackSettings(),trackMute:()=>{const t=selTrack();if(t)toggleTrack(t.id,'mute');else toast('Crea prima una traccia')},trackSolo:()=>{const t=selTrack();if(t)toggleTrack(t.id,'solo');else toast('Crea prima una traccia')},trackVoice:()=>{const t=selTrack();if(!t){toast('Crea prima una traccia');return}const on=!t.voice;pCommit('Traccia della voce',()=>{for(const x of P.tracks){x.voice=x.id===t.id&&on;if(x.voice)x.duck=0}});announce(on?`«${t.name}» è la traccia della voce: le tracce con l’abbassamento si abbasseranno quando parla`:'La traccia della voce è stata tolta');refreshToggles()},trackRename:()=>renameTrack(),trackDuplicate:()=>duplicateTrack(),trackDelete:()=>deleteTrack(),trackUp:()=>moveTrack(-1),trackDown:()=>moveTrack(1),
  regionEdit:()=>{const r=selRegion();if(r)openRegion(r);else toast('Scegli prima una regione nelle tracce')},regionProps:()=>regionProps(),regionSplit:splitRegion,regionTrimStart:()=>trimRegion(false),regionTrimEnd:()=>trimRegion(true),regionDuplicate:()=>duplicateRegion(),regionLoop:()=>loopRegion(),regionDelete:()=>deleteRegion(),regionFadeIn:()=>fadeRegion('in'),regionFadeOut:()=>fadeRegion('out'),regionCrossfade:crossfadeNext,autoEdit:autoEditDialog,takes:takesDialog,takeNext:()=>takeStep(1),takePrev:()=>takeStep(-1),takeDelete,compEdit:compDialog,regionGainAuto:regionGainDialog,regionGainPoint,limiterAuto:limiterDialog,limiterToggle,punchRange:punchDialog,punchToggle,autoAddVol:()=>autoAddPoint('vol'),autoAddPan:()=>autoAddPoint('pan'),autoToggleVol:()=>autoToggle('vol'),autoTogglePan:()=>autoToggle('pan'),autoClear,
  cycle:()=>{const c=P.cycle;if(!(c.b>c.a)){const r=selRegion();if(r){c.a=r.start;c.b=regionEnd(r)}else{c.a=P.t;c.b=P.t+barDur()*2}}c.on=!c.on;drawArRuler();schedulePersist('audio');announce(c.on?`Ciclo attivato, da ${sayTime(c.a)} a ${sayTime(c.b)}`:'Ciclo disattivato')},cycleRegion:()=>{const r=selRegion();if(!r){toast('Scegli prima una regione');return}P.cycle={on:true,a:r.start,b:regionEnd(r)};drawArRuler();refreshToggles();schedulePersist('audio');announce(`Ciclo sulla regione «${r.name}», da ${sayTime(r.start)} a ${sayTime(regionEnd(r))}`)},
- metronome:()=>{P.metro=!P.metro;schedulePersist('audio')},countInToggle:()=>{P.countIn=!P.countIn;schedulePersist('audio')},tempoSettings,toggleEditor:()=>{const open=$('editorArea').classList.contains('closed');showEditor(open);(open&&A.buf?$('wave'):$('lane-'+P.track)||arPlayheadEl)?.focus()},playRegion:()=>{if(!A.buf){toast('Nessuna regione nell’editor: scegli una regione e premi Invio');return}if(aplay.playing){stopPlayback(true);return}playRange(0,alen(),{origin:A.cursor})},focusTracks:()=>focusLane(P.track),
+ metronome:()=>{P.metro=!P.metro;schedulePersist('audio')},countInToggle:()=>{P.countIn=!P.countIn;schedulePersist('audio')},tempoSettings,toggleEditor:()=>{const open=$('editorArea').classList.contains('closed');showEditor(open);const target=open?(A.buf?$('wave'):meEditorActive()?$('midiNotes'):null):null;(target||$('lane-'+P.track)||arPlayheadEl)?.focus()},playRegion:()=>{if(!A.buf){toast('Nessuna regione nell’editor: scegli una regione e premi Invio');return}if(aplay.playing){stopPlayback(true);return}playRange(0,alen(),{origin:A.cursor})},focusTracks:()=>focusLane(P.track),
 exportParts,batchConvert:batchConvertDialog,exportLabels:()=>{if(!A.markers.length){toast('Nessun marcatore da esportare');return}download(labelsText(A.markers,A.rate),extName(A.title+' - marcatori','txt'),'text/plain');toast('Marcatori esportati come testo')},importLabels:()=>pickText('labels'),insertFile:()=>pickFile('insert'),
  selectAll:()=>{if(A.buf)setSelection(0,alen())},selectNone:()=>{A.selA=A.selB=0;audioMetaChanged();announce('Selezione tolta')},selectRange:selectRangeDialog,selToStart:()=>{if(A.buf)setSelection(0,A.cursor)},selToEnd:()=>{if(A.buf)setSelection(A.cursor,alen())},selMarkers:selBetweenMarkers,zoomSel:zoomToSel,
  deleteSel:deleteSelection,trim:trimToSelection,silence:silenceSel,duplicate:duplicateSel,pasteMix:audioPasteMix,insertSilence:insertSilenceDialog,
- playSel:playSelection,loop:()=>{aplay.loop=!aplay.loop;$('aLoop').setAttribute('aria-pressed',aplay.loop)},playBefore:()=>playAround(true),playAfter:()=>playAround(false),scrub:()=>{prefs.scrub=!prefs.scrub;savePrefs()},recordAudio,
+ playSel:playSelection,loop:()=>{aplay.loop=!aplay.loop;$('aLoop').setAttribute('aria-pressed',aplay.loop)},playBefore:()=>playAround(true),playAfter:()=>playAround(false),scrub:()=>{prefs.scrub=!prefs.scrub;savePrefs()},recordAudio:()=>selTrack()?.kind==='midi'?recordMidi():recordAudio(),
  amplify:()=>effectDialog('amplify'),normalize:()=>effectDialog('normalize'),fadeIn:()=>applyEffect('fadeIn'),fadeOut:()=>applyEffect('fadeOut'),reverse:()=>applyEffect('reverse'),speed:()=>effectDialog('speed'),tempo:()=>effectDialog('tempo'),fitDuration:fitDurationDialog,eq:()=>effectDialog('eq'),compressor:()=>effectDialog('compressor'),voiceChain:()=>effectDialog('voiceChain'),deEsser:()=>effectDialog('deEsser'),deHum:()=>effectDialog('deHum'),deClick:()=>effectDialog('deClick'),limiter:()=>effectDialog('limiter'),noiseGate:()=>effectDialog('noiseGate'),captureNoise,truncate:()=>effectDialog('truncate'),echo:()=>effectDialog('echo'),removeDC:()=>applyEffect('removeDC'),
  toMono,toStereo,swapChannels,resample:resampleDialog,repeatEffect,generate:generateDialog,
  markerAdd:()=>{if(MIX.playing||!inEditorArea()){songMarker();return}if(!A.buf){toast('Nessun audio aperto');return}markerAt(aplay.playing?playPos():A.cursor)},markerNext:()=>markerStep(1),markerPrev:()=>markerStep(-1),markerRename:()=>markerRename(),markerDelete:()=>markerDelete(),markersClear:async()=>{if(!A.markers.length)return;if(await confirmAction(`Eliminare tutti i ${A.markers.length} marcatori?`,'Elimina')){metaEdit('Elimina i marcatori',()=>{A.markers=[]});announce('Marcatori eliminati')}},markersFromPauses,markPane:toggleMarkPane,
@@ -4600,9 +5421,9 @@ function updateTitle(){document.title=($('docTitle').value.trim()||'Senza titolo
 let pickMode='open';
 function pickFile(mode){pickMode=mode;const inp=$('fileInput');inp.accept=isAudio()?'audio/*,video/*,.wav,.mp3,.m4a,.aac,.ogg,.oga,.opus,.flac,.webm,.mp4,.mov,.mkv':'video/*,audio/*,image/*,.zip,.srt,.vtt,.mkv,.mov,.m4a,.flac,.opus';inp.multiple=!isAudio();inp.click()}
 function pickText(kind){pickMode=kind;$('textInput').click()}
-async function openFiles(files){files=[...files];if(!files.length)return;const zip=files.find(f=>/\.zip$/i.test(f.name)),subs=files.filter(f=>/\.(srt|vtt)$/i.test(f.name)),labels=files.find(f=>/\.txt$/i.test(f.name));
+async function openFiles(files){files=[...files];if(!files.length)return;const zip=files.find(f=>/\.zip$/i.test(f.name)),subs=files.filter(f=>/\.(srt|vtt)$/i.test(f.name)),labels=files.find(f=>/\.txt$/i.test(f.name)),mids=files.filter(f=>/\.(mid|midi)$/i.test(f.name));
  if(zip){const entries=await work('Lettura dell’archivio',()=>unzipBlob(zip));if(!entries)return;if(entries['progetto-audio.json']){if(!isAudio())setMode('audio',{focus:false});await openAudioProjectZip(entries);return}if(isAudio())setMode('video',{focus:false});if(!(await openProjectZip(zip)))toast('L’archivio non contiene un progetto di Tassello Media');return}
- if(isAudio()){if(labels&&files.length===1){importLabelsFile(labels);return}const fs=files.filter(x=>kindOf(x)!=='image');if(!fs.length){toast('Scegli un file audio o video');return}if(pickMode==='insert'){pickMode='open';if(!A.buf){toast('Apri prima una regione nell’editor');return}await insertAudioFile(fs[0])}else await importAudioTracks(fs);return}
+ if(isAudio()){if(mids.length&&!zip){await importMidiFiles(mids);if(mids.length===files.length)return}if(labels&&files.length===1){importLabelsFile(labels);return}const fs=files.filter(x=>kindOf(x)!=='image'&&!/\.(mid|midi)$/i.test(x.name));if(!fs.length){toast('Scegli un file audio o video');return}if(pickMode==='insert'){pickMode='open';if(!A.buf){toast('Apri prima una regione nell’editor');return}await insertAudioFile(fs[0])}else await importAudioTracks(fs);return}
  for(const s of subs)importSubsFile(s);const media=files.filter(f=>kindOf(f));if(media.length)await importMedia(media);else if(!subs.length)toast('Formato non riconosciuto')}
 function importLabelsFile(file){file.text().then(text=>{if(!A.buf){toast('Apri prima l’audio a cui appartengono i marcatori');return}const ms=parseLabels(text,A.rate).filter(m=>m.pos<=alen());if(!ms.length){toast('Nessun marcatore trovato nel file');return}metaEdit('Importa marcatori',()=>{A.markers.push(...ms);A.markers.sort((a,b)=>a.pos-b.pos)});$('markPane').hidden=false;refreshToggles();announce(`Importati ${ms.length} marcatori`)})}
 const newAudio=()=>newAudioProject();
@@ -4616,7 +5437,7 @@ function readVideoStatus(){const T=totalDur(),t=VE.playing?nowT():V.t,x=selected
  for(const y of V.p.titles)if(t>=y.start&&t<y.start+y.dur)parts.push(`Titolo ${itemName('titles',y)}, ${POS_NAME[y.pos]}.`);for(const y of V.p.subs)if(t>=y.start&&t<y.end)parts.push('Sottotitolo '+itemName('subs',y)+'.');
  parts.push(x?'Elemento scelto: '+itemName(V.sel.kind,x)+'.':'Nessun elemento scelto.',`Progetto ${V.p.w} per ${V.p.h}, ${V.p.fps} fotogrammi al secondo.`);toast(parts.filter(Boolean).join(' '))}
 // Pannello File a schermo intero, gestito come finestra di dialogo.
-const FILE_MENU={a:[['new','new','Nuovo progetto'],['open','open','Apri file audio o un progetto'],['saveAudioProject','backup','Salva il progetto (ZIP)'],['saveAudio','save','Esporta il brano (WAV, M4A, WebM)'],['exportStems','export','Esporta le tracce separate'],['exportParts','export','Esporta le parti della regione'],['exportLabels','export','Esporta i marcatori come testo'],['importLabels','import','Importa marcatori'],['insertFile','import','Inserisci un file al cursore'],['batchConvert','export','Converti più file'],['shortcuts','keyboard','Scorciatoie da tastiera'],['help','info','Informazioni e limiti']],
+const FILE_MENU={a:[['new','new','Nuovo progetto'],['open','open','Apri file audio o un progetto'],['saveAudioProject','backup','Salva il progetto (ZIP)'],['saveAudio','save','Esporta il brano (WAV, M4A, WebM)'],['exportStems','export','Esporta le tracce separate'],['exportMidi','export','Esporta la regione o la traccia MIDI (.mid)'],['exportParts','export','Esporta le parti della regione'],['exportLabels','export','Esporta i marcatori come testo'],['importLabels','import','Importa marcatori'],['insertFile','import','Inserisci un file al cursore'],['batchConvert','export','Converti più file'],['shortcuts','keyboard','Scorciatoie da tastiera'],['help','info','Informazioni e limiti']],
  v:[['new','new','Nuovo progetto'],['open','open','Apri un progetto o dei file'],['importMedia','import','Importa file multimediali'],['saveProject','save','Salva il progetto (ZIP)'],['exportVideo','film','Esporta il video'],['exportMix','music','Esporta solo l’audio'],['exportFrame','camera','Esporta il fotogramma'],['subExport','subs','Esporta i sottotitoli'],['shortcuts','keyboard','Scorciatoie da tastiera'],['help','info','Informazioni e limiti']]};
 const FILE_TILES={a:[['open','open','Apri','File audio (ognuno in una traccia) o un progetto ZIP'],['saveAudio','save','Esporta il brano','Tutte le tracce mixate: WAV, M4A o WebM'],['recordAudio','mic','Registra','Sulla traccia scelta, ascoltando le altre'],['saveAudioProject','backup','Salva il progetto','Un file ZIP con tracce, regioni e suoni']],
  v:[['importMedia','import','Importa','Video, audio e immagini nella raccolta'],['saveProject','save','Salva il progetto','Un file ZIP con il montaggio e i suoi file'],['exportVideo','film','Esporta il video','MP4 o WebM, con i sottotitoli se vuoi'],['open','open','Apri','Un progetto ZIP, file multimediali o sottotitoli']]};
@@ -4676,7 +5497,7 @@ tlScroll.addEventListener('scroll',()=>updateTimelineZoomUI());
 view.addEventListener('keydown',e=>{if(timelineKeys(e,null))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();frameStep(e.key==='ArrowRight'?1:-1);announce(playheadText(V.t))}});
 view.addEventListener('click',()=>vPlayPause());
 // Prima di chiudere: avviso se un'esportazione è in corso o se l'audio non è entrato nella bozza.
-addEventListener('beforeunload',e=>{const big=[...new Set(P.regions.flatMap(regionSources))].reduce((n,id)=>{const b=SOURCES.get(id);return n+(b?b.length*b.numberOfChannels*4:0)},0)>DRAFT_LIMIT;if(VE.exp||MIX.recording||(big&&audioModified())){e.preventDefault();e.returnValue=''}});
+addEventListener('beforeunload',e=>{midiPanic();const big=[...new Set(P.regions.flatMap(regionSources))].reduce((n,id)=>{const b=SOURCES.get(id);return n+(b?b.length*b.numberOfChannels*4:0)},0)>DRAFT_LIMIT;if(VE.exp||MIX.recording||(big&&audioModified())){e.preventDefault();e.returnValue=''}});
 // Avvio: preferenze, archivio delle bozze, ultimo audio e ultimo progetto, poi il disegno dell'interfaccia.
 redrawAll=()=>{if(isAudio()){drawAudio();renderArrange()}else{drawTimeline();requestFrame()}};
 async function start(){applyPrefs();$('stepSel').value=String(prefs.step);if(!$('stepSel').value){prefs.step=0.1;$('stepSel').value='0.1'}$('vSubs').setAttribute('aria-pressed',prefs.showSubs);
