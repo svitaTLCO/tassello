@@ -14,6 +14,11 @@ const meVelWords=v=>v<=20?'pianissimo':v<=40?'piano':v<=60?'mezzo piano':v<=80?'
 const meTimeWords=(r,n)=>{const abs=r.startT-r.offT+n.t,b=Math.floor(abs/(MIDIPPQ*P.sig)),rest=abs-b*MIDIPPQ*P.sig,beat=Math.floor(rest/MIDIPPQ),tick=rest%MIDIPPQ;
  return `battuta ${b+1}, tempo ${beat+1}${tick?', tick '+tick:''}`};
 const meDurWords=d=>{const s=midiSec(d);return (ME_DUR[d]?ME_DUR[d]+', ':'')+d+' tick, '+fmtNum(s,2)+' s'};
+// Per il parlato la virgola decimale si perde («0 25 s»): sotto il secondo si dicono i millisecondi, sopra i
+// secondi e i millisecondi. La cella visibile continua a mostrare «0,25 s».
+const meDurSpoken=d=>{const s=midiSec(d),ms=Math.round(s*1000),head=ME_DUR[d]?ME_DUR[d]+', ':'';
+ if(ms<1000)return head+d+' tick, '+ms+' millisecondi';
+ const sec=Math.floor(ms/1000),rest=ms%1000;return head+d+' tick, '+sec+(sec===1?' secondo':' secondi')+(rest?' e '+rest+' millisecondi':'')};
 const meVisible=n=>{const r=ME.regionObj;return !!r&&n.t>=r.offT&&n.t<r.offT+r.durT};
 const meEditorActive=()=>!!(ME.open&&ME.regionObj&&regionOf(ME.region)===ME.regionObj);
 const meSelNotes=()=>ME.order.filter(n=>ME.sel.has(n));
@@ -28,17 +33,19 @@ function meRow(n){const tr=document.createElement('tr');tr.setAttribute('role','
  for(let c=0;c<ME_COLS;c++){const td=document.createElement('td');td.setAttribute('role','gridcell');td.tabIndex=-1;td.dataset.c=String(c);tr.appendChild(td);cells.push(td)}
  const row={n,tr,cells};ME.byNote.set(n,row);meFill(row);return row}
 function meFill(row){const r=ME.regionObj,n=row.n,c=row.cells;
- c[0].textContent=meTimeWords(r,n);
+ // Ogni cella ha un nome accessibile: NVDA annuncia il cambio della cella che ha il focus anche quando il testo
+ // visibile è breve o ha una virgola decimale.
+ c[0].textContent=meTimeWords(r,n);c[0].setAttribute('aria-label',meTimeWords(r,n));
  c[1].textContent=meNoteName(n.p);c[1].setAttribute('aria-label',`${meNoteName(n.p)}, ${meTimeWords(r,n)}`);
- c[2].textContent=meDurWords(n.d);
- c[3].textContent=`${n.v} (${meVelWords(n.v)})`;
- c[4].textContent=meVisible(n)?'nella regione':'fuori dalla regione';
- row.tr.setAttribute('aria-selected',String(ME.sel.has(n)))}
+ c[2].textContent=meDurWords(n.d);c[2].setAttribute('aria-label',meDurSpoken(n.d));
+ c[3].textContent=`${n.v} (${meVelWords(n.v)})`;c[3].setAttribute('aria-label',`Intensità ${n.v}, ${meVelWords(n.v)}`);
+ c[4].textContent=meVisible(n)?'nella regione':'fuori dalla regione';c[4].setAttribute('aria-label',meVisible(n)?'Nella regione':'Fuori dalla regione: non si sente');
+ if(ME.sel.size>1&&ME.sel.has(n))row.tr.setAttribute('aria-selected','true');else row.tr.removeAttribute('aria-selected')}
 function meRenderAll(){const body=$('meBody');body.textContent='';ME.byNote=new Map();ME.order=meNoteList();
  const frag=document.createDocumentFragment();ME.rows=[];
  for(const n of ME.order){const row=meRow(n);ME.rows.push(row);frag.appendChild(row.tr)}
  body.appendChild(frag);mePaint();meCounts();meDrawRoll()}
-function mePaint(){for(const row of ME.rows){row.tr.setAttribute('aria-selected',String(ME.sel.has(row.n)));for(const td of row.cells)td.tabIndex=-1}
+function mePaint(){for(const row of ME.rows){if(ME.sel.size>1&&ME.sel.has(row.n))row.tr.setAttribute('aria-selected','true');else row.tr.removeAttribute('aria-selected');for(const td of row.cells)td.tabIndex=-1}
  const active=ME.rows[ME.focus];if(active)active.cells[ME.col].tabIndex=0}
 function meFocus(idx,col,doFocus=true){if(!ME.order.length)return;
  ME.focus=clamp(idx,0,ME.order.length-1);ME.col=clamp(col,0,ME_COLS-1);mePaint();
@@ -117,18 +124,24 @@ async function meDeleteNotes(){const sel=meSelNotes();if(!sel.length){toast('Nes
 function meTranspose(delta,label){const sel=meSelNotes();if(!sel.length){toast('Nessuna nota scelta');return}
  const notes=sel.filter(n=>n.p+delta>=0&&n.p+delta<=127),skipped=sel.length-notes.length;
  if(!notes.length){toast('Altezza fuori dai limiti MIDI (0-127)');return}
- meApply(label,()=>{for(const n of notes)n.p+=delta},notes.length===1?meNoteName(notes[0].p):`${notes.length} note spostate${skipped?`, ${skipped} fuori dai limiti`:''}`,notes,notes[0]);
- ME.lastPitch=notes[0].p}
+ // L'annuncio deve dire la nota NUOVA: va calcolata prima della modifica, non letta dopo (il valore vecchio è
+ // quello che ancora c'è quando si prepara la frase).
+ const np=notes[0].p+delta;
+ meApply(label,()=>{for(const n of notes)n.p+=delta},ME.sel.size===1&&ME.col===1?null:(notes.length===1?meNoteName(np):`${notes.length} note spostate${skipped?`, ${skipped} fuori dai limiti`:''}`),notes,notes[0]);
+ ME.lastPitch=clamp(np,0,127)}
 function meMoveTime(dir){const sel=meSelNotes();if(!sel.length)return;const step=meGridTicks()*dir,notes=sel;
+ // La cella Tempo aggiorna il suo nome: se il focus è lì e la nota resta visibile, parla da sé e la live region
+ // tace. Se la nota esce dalla finestra (la riga può sparire) o il focus è altrove, l'annuncio ci vuole.
  meApply('Sposta nel tempo',()=>{for(const n of notes)n.t=Math.max(0,n.t+step)},null,notes,notes[0]);
  const hidden=notes.filter(n=>!meVisible(n)).length;
- announce(`${notes.length===1?`Spostata a ${meTimeWords(ME.regionObj,notes[0])}`:`${notes.length} note spostate di ${Math.abs(step)} tick`}${hidden?', fuori dalla regione: non si sente':''}`)}
-function meSetDuration(dir){const sel=meSelNotes();if(!sel.length)return;const step=meGridTicks()*dir,max=8*MIDIPPQ*P.sig,notes=sel;
- meApply('Durata',()=>{for(const n of notes)n.d=clamp(n.d+step,1,max)},notes.length===1?`Durata: ${meDurWords(notes[0].d)}`:`Durate cambiate per ${notes.length} note`,notes,notes[0])}
-function meSetVelocity(delta){const sel=meSelNotes();if(!sel.length)return;
- meApply('Intensità',()=>{for(const n of sel)n.v=clamp(n.v+delta,1,127)},sel.length===1?`Intensità ${sel[0].v}`:`Intensità cambiata per ${sel.length} note`,sel,sel[0])}
+ if(!(ME.sel.size===1&&ME.col===0&&notes.every(meVisible)))
+  announce(`${notes.length===1?`Spostata a ${meTimeWords(ME.regionObj,notes[0])}`:`${notes.length} note spostate di ${Math.abs(step)} tick`}${hidden?', fuori dalla regione: non si sente':''}`)}
+function meSetDuration(dir){const sel=meSelNotes();if(!sel.length)return;const step=meGridTicks()*dir,max=8*MIDIPPQ*P.sig,notes=sel,nd=clamp(notes[0].d+step,1,max);
+ meApply('Durata',()=>{for(const n of notes)n.d=clamp(n.d+step,1,max)},ME.sel.size===1&&ME.col===2?null:(notes.length===1?`Durata: ${meDurSpoken(nd)}`:`Durate cambiate per ${notes.length} note`),notes,notes[0])}
+function meSetVelocity(delta){const sel=meSelNotes();if(!sel.length)return;const nv=clamp(sel[0].v+delta,1,127);
+ meApply('Intensità',()=>{for(const n of sel)n.v=clamp(n.v+delta,1,127)},ME.sel.size===1&&ME.col===3?null:(sel.length===1?`Intensità ${nv}`:`Intensità cambiata per ${sel.length} note`),sel,sel[0])}
 function meVelocityDigit(d){const table=[127,13,25,38,51,64,76,89,102,114],v=table[Number(d)%10],sel=meSelNotes();if(!sel.length)return;
- meApply('Intensità',()=>{for(const n of sel)n.v=v},`Intensità ${v}`,sel,sel[0])}
+ meApply('Intensità',()=>{for(const n of sel)n.v=v},ME.sel.size===1&&ME.col===3?null:`Intensità ${v}`,sel,sel[0])}
 async function meNoteProps(){const n=ME.order[ME.focus];if(!n){toast('Nessuna nota scelta');return}const r=ME.regionObj;
  const v=await modal('Proprietà della nota',`<p>${esc(meNoteName(n.p))}, ${esc(meTimeWords(r,n))}.</p>`,
   [{id:'t',label:'Tempo dall’inizio della regione, in tick',type:'number',value:n.t},{id:'p',label:'Altezza (0-127)',type:'number',value:n.p},
@@ -138,7 +151,7 @@ async function meNoteProps(){const n=ME.order[ME.focus];if(!n){toast('Nessuna no
  if(!v)return;const t=Math.round(num(v.t)),p=Math.round(num(v.p)),d=Math.round(num(v.d)),vel=Math.round(num(v.v));
  meApply('Proprietà della nota',()=>{n.t=t;n.p=p;n.d=d;n.v=vel},`${meNoteName(p)}, ${meTimeWords(r,n)}, ${meDurWords(d)}, intensità ${vel}`,[n],n);ME.lastPitch=p}
 function meReadNote(){const n=ME.order[ME.focus];if(!n){toast('Nessuna nota nella regione');return}const r=ME.regionObj,sel=ME.sel.size;
- announce(`Nota ${ME.focus+1} di ${ME.order.length}${sel>1?`, ${sel} scelte`:''}: ${meNoteName(n.p)}, ${meTimeWords(r,n)}, durata ${meDurWords(n.d)}, intensità ${n.v} ${meVelWords(n.v)}${meVisible(n)?'':' , fuori dalla regione: non si sente'}`)}
+ announce(`Nota ${ME.focus+1} di ${ME.order.length}${sel>1?`, ${sel} scelte`:''}: ${meNoteName(n.p)}, ${meTimeWords(r,n)}, durata ${meDurSpoken(n.d)}, intensità ${n.v} ${meVelWords(n.v)}${meVisible(n)?'':' , fuori dalla regione: non si sente'}`)}
 function meToggleHidden(on=!ME.hiddenNote){ME.hiddenNote=on;const before=new Set(ME.sel);$('meHidden').checked=on;meRenderAll();
  ME.sel=new Set(ME.order.filter(n=>before.has(n)));mePaint();meCounts();
  if(ME.open)meDrawRoll();
@@ -185,7 +198,7 @@ function mePlayNote(){const n=ME.order[ME.focus],r=ME.regionObj;if(!n||!r)return
  if(MIDI.access)send();else midiStart({quiet:true}).then(ok=>{if(ok)send()}).catch(()=>{})}
 function meMaybePreview(){if(!meEditorActive()||!$('mePreview')?.checked)return;mePlayNote()}
 // ——— Tastiera della griglia ———
-function meKey(e){if(!meEditorActive())return;const k=e.key,ctrl=e.ctrlKey||e.metaKey,alt=e.altKey,shift=e.shiftKey;let done=true;
+function meKey(e){if(!meEditorActive())return;meSyncFocus();const k=e.key,ctrl=e.ctrlKey||e.metaKey,alt=e.altKey,shift=e.shiftKey;let done=true;
  if(!ME.order.length&&k!=='Enter'&&k!=='F2'&&!(alt&&k==='Enter'))return;
  if(ctrl&&/^a$/i.test(k)){ME.anchor=0;ME.sel=new Set(ME.order);mePaint();meCounts();announce(`Selezionate ${ME.sel.size} note`)}
  else if(alt&&!ctrl&&(k==='ArrowUp'||k==='ArrowDown'))meTranspose((k==='ArrowDown'?-1:1)*(shift?12:1),shift?'Ottava':'Semitono');
@@ -207,6 +220,12 @@ function meKey(e){if(!meEditorActive())return;const k=e.key,ctrl=e.ctrlKey||e.me
  else done=false;
  if(done){e.preventDefault();e.stopPropagation();
   if(!alt&&!ctrl&&(k.startsWith('Arrow')||k==='Home'||k==='End'))meMaybePreview()}}
+// La posizione interna della griglia si riallinea alla cella che ha davvero il focus al primo tasto: così mouse, F6,
+// programmi di prova o NVDA che spostano il focus non lasciano la freccia successiva ripartire dalla riga 1.
+function meSyncFocus(){const td=document.activeElement;if(!td||td.tagName!=='TD'||!$('midiNotes').contains(td))return;
+ const tr=td.closest('tr'),i=tr?[...$('meBody').children].indexOf(tr):-1;if(i<0)return;
+ ME.focus=i;ME.col=clamp(Number(td.dataset.c)||0,0,ME_COLS-1);
+ if(!ME.sel.has(ME.order[i]))meSelectOne(i)}
 $('midiNotes').addEventListener('keydown',meKey);
 $('meGrid').addEventListener('change',e=>{ME.grid=e.target.value;announce('Griglia '+ (ME.grid==='16'?'un sedicesimo':ME.grid==='8'?'un ottavo':'un quarto'))});
 $('meHidden').addEventListener('change',e=>meToggleHidden(e.target.checked));

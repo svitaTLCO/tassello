@@ -2,7 +2,9 @@
 const toggleMarkPane=()=>paneSet('markPane',paneState('markPane').st==='open'?'off':'open',{focus:true,say:false});
 // In Audio alcuni comandi valgono per l'editor della regione o per le tracce secondo dove si sta lavorando.
 const songOrEditor=(song,editor)=>()=>inEditorArea()?editor():song();
-const undoScope=()=>document.activeElement?.closest?.('#editorArea,#markPane')?'editor':document.activeElement?.closest?.('#arrange')?'project':lastScope;
+// L'editor MIDI è dentro #editorArea ma le sue modifiche stanno nella cronologia del progetto: Ctrl+Z lì deve
+// annullare la nota, non l'editor audio. Quindi #midiEd viene controllato per primo.
+const undoScope=()=>document.activeElement?.closest?.('#midiEd')?'project':document.activeElement?.closest?.('#editorArea,#markPane')?'editor':document.activeElement?.closest?.('#arrange')?'project':lastScope;
 // --- Tracce MIDI ---------------------------------------------------------
 // Le note di una regione che finiscono nel file .mid: solo la finestra [offT, offT+durT), relative all'inizio della
 // regione, con le durate tagliate alla fine. Le note nascoste dal trim restano nel progetto ma non si esportano,
